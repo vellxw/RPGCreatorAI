@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "town",
+  "name": "Town",
+  "width": 10,
+  "height": 10,
+  "tileSize": 32,
+  "layers": [
+    {
+      "name": "ground",
+      "type": "visual",
+      "tiles": [
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1
+      ]
+    },
+    {
+      "name": "collision",
+      "type": "collision",
+      "tiles": [
+        9,9,9,9,9,9,9,9,9,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,0,9,9,0,0,0,0,0,9,
+        9,0,9,9,0,0,0,0,0,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,0,0,0,0,0,0,0,0,9,
+        9,9,9,9,9,9,9,9,9,9
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "old_man",
+      "type": "npc",
+      "x": 6,
+      "y": 4,
+      "solid": true,
+      "sprite": "npc_placeholder",
+      "trigger": "interact",
+      "commands": [
+        {
+          "type": "ifFlag",
+          "flag": "talked_to_old_man",
+          "equals": true,
+          "then": [
+            {
+              "type": "showText",
+              "speaker": "Anciano",
+              "text": "Ya te di mi consejo."
+            }
+          ],
+          "else": [
+            {
+              "type": "showText",
+              "speaker": "Anciano",
+              "text": "No cruces el puente de noche."
+            },
+            {
+              "type": "setFlag",
+              "flag": "talked_to_old_man",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "door_to_house",
+      "type": "transfer",
+      "x": 3,
+      "y": 3,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        {
+          "type": "transferMap",
+          "mapId": "house",
+          "x": 3,
+          "y": 4,
+          "direction": "up"
+        }
+      ]
+    }
+  ]
+}

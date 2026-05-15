@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "title": "Demo RPG",
+  "startMapId": "town",
+  "startPosition": {
+    "x": 4,
+    "y": 4,
+    "direction": "down"
+  },
+  "maps": [
+    {
+      "id": "town",
+      "path": "data/maps/town.json"
+    },
+    {
+      "id": "house",
+      "path": "data/maps/house.json"
+    }
+  ],
+  "database": {
+    "items": "data/database/items.json"
+  }
+}

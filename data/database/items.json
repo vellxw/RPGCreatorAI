@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "id": "potion",
+      "name": "Pocion",
+      "description": "Restaura vida.",
+      "type": "consumable"
+    }
+  ]
+}

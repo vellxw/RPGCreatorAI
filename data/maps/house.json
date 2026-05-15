@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "house",
+  "name": "House",
+  "width": 7,
+  "height": 6,
+  "tileSize": 32,
+  "layers": [
+    {
+      "name": "ground",
+      "type": "visual",
+      "tiles": [
+        1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1
+      ]
+    },
+    {
+      "name": "collision",
+      "type": "collision",
+      "tiles": [
+        9,9,9,9,9,9,9,
+        9,0,0,0,0,0,9,
+        9,0,0,0,0,0,9,
+        9,0,0,0,0,0,9,
+        9,0,0,0,0,0,9,
+        9,9,9,0,9,9,9
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "door_to_town",
+      "type": "transfer",
+      "x": 3,
+      "y": 5,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        {
+          "type": "transferMap",
+          "mapId": "town",
+          "x": 3,
+          "y": 4,
+          "direction": "down"
+        }
+      ]
+    },
+    {
+      "id": "chest_001",
+      "type": "chest",
+      "x": 4,
+      "y": 1,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [
+        {
+          "type": "ifFlag",
+          "flag": "chest_001_opened",
+          "equals": false,
+          "then": [
+            {
+              "type": "showText",
+              "text": "Encontraste una pocion."
+            },
+            {
+              "type": "addItem",
+              "itemId": "potion",
+              "amount": 1
+            },
+            {
+              "type": "playSound",
+              "soundId": "chest_open"
+            },
+            {
+              "type": "setFlag",
+              "flag": "chest_001_opened",
+              "value": true
+            }
+          ],
+          "else": [
+            {
+              "type": "showText",
+              "text": "El cofre esta vacio."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
