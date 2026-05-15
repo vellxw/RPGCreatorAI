@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
 project(RPGCreatorRuntime VERSION 0.1 LANGUAGES CXX)
 
+# Force CMake policy compatibility floor for older FetchContent dependencies
+# (e.g. SDL2 release-2.28.5, doctest 2.4.11) under CMake 4.x.
+# This is set at the build-tool level via CMakePresets.json or scripts; we
+# also set it inline as a defensive default if not already provided.
+if(NOT DEFINED CACHE{CMAKE_POLICY_VERSION_MINIMUM})
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Default policy compat for old deps")
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)

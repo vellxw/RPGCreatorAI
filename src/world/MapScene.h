@@ -9,6 +9,7 @@ public:
     const MapData& getData() const { return currentData; }
     int getWidth() const { return currentData.width; }
     int getHeight() const { return currentData.height; }
+    int getTileSize() const { return currentData.tileSize; }
     
     int getTileAt(const std::string& layerName, int x, int y) const;
     bool isSolidAt(int x, int y) const;

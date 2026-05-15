@@ -59,6 +59,11 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
         MapData map;
         
         map.schemaVersion = j.at("schemaVersion").get<int>();
+        if (map.schemaVersion != 1) {
+            Logger::error("Unsupported map schemaVersion in " + path +
+                          ": expected 1, received " + std::to_string(map.schemaVersion));
+            return std::nullopt;
+        }
         map.id = j.at("id").get<std::string>();
         map.name = j.at("name").get<std::string>();
         map.width = j.at("width").get<int>();
@@ -71,6 +76,13 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             ml.type = layer.at("type").get<std::string>();
             for (int tileId : layer.at("tiles")) {
                 ml.tiles.push_back(tileId);
+            }
+            const int expected = map.width * map.height;
+            if (static_cast<int>(ml.tiles.size()) != expected) {
+                Logger::error("Layer '" + ml.name + "' tile count mismatch in " + path +
+                              ": expected " + std::to_string(expected) +
+                              " (width*height), got " + std::to_string(ml.tiles.size()));
+                return std::nullopt;
             }
             map.layers.push_back(ml);
         }
