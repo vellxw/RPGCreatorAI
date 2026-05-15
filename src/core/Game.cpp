@@ -218,3 +218,33 @@ void Game::render(IRenderer& renderer) {
     renderer.renderEntities(currentScene, state, camera);
     renderer.renderDialogue(dialogue);
 }
+
+// ---- Public verbs ---------------------------------------------------------
+
+void Game::stepMove(int dx, int dy, Direction dir) {
+    if (dialogue.isActive() || (eventRunner && eventRunner->isRunning())) return;
+    tryMove(dx, dy, dir);
+    updateCamera();
+}
+
+void Game::stepInteract() {
+    if (dialogue.isActive() || (eventRunner && eventRunner->isRunning())) return;
+    interact();
+}
+
+void Game::stepDismissDialogue() {
+    if (dialogue.isActive()) dialogue.close();
+}
+
+void Game::stepSave() { saveGame(); }
+void Game::stepLoad() { loadGameFromDisk(); }
+
+void Game::pumpEvents(float dt) {
+    if (!eventRunner) return;
+    eventRunner->update(dt);
+    applyTransferIfPending();
+}
+
+bool Game::isEventRunnerRunning() const {
+    return eventRunner && eventRunner->isRunning();
+}

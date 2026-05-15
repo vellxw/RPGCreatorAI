@@ -20,6 +20,19 @@ public:
     void update(const InputManager& input, float dt);
     void render(IRenderer& renderer);
 
+    // ---- Public verbs (used by both the input-driven path and the
+    // visual verification harness). These exercise the same underlying
+    // logic as keyboard input, so rendered behavior matches a real
+    // session.
+    void stepMove(int dx, int dy, Direction dir);
+    void stepInteract();
+    void stepDismissDialogue();
+    void stepSave();
+    void stepLoad();
+    void pumpEvents(float dt);                  // drains EventRunner + applies transfers
+    bool isDialogueActive() const { return dialogue.isActive(); }
+    bool isEventRunnerRunning() const;
+
     // Test/inspection helpers
     const GameState& getGameState() const { return state; }
     const MapScene& getCurrentScene() const { return currentScene; }
@@ -35,8 +48,6 @@ private:
     void saveGame();
     void loadGameFromDisk();
 
-    // Returns the path declared in ProjectData::maps for the given mapId.
-    // Empty string if not found.
     std::string getMapPath(const std::string& mapId) const;
 
     ProjectData project;
@@ -47,10 +58,8 @@ private:
     Camera2D camera;
     ItemDatabase itemDatabase;
 
-    // Window dimensions (cached at init for camera centering).
     int viewportW = 800;
     int viewportH = 600;
 
-    // Save slot label is a technical default per AGENTS.md.
     static constexpr const char* kDefaultSaveSlot = "slot_1";
 };

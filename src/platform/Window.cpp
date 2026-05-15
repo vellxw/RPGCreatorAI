@@ -55,3 +55,30 @@ void Window::processEvents(bool& quitOut) {
 const unsigned char* Window::getKeyboardState() const {
     return SDL_GetKeyboardState(nullptr);
 }
+
+bool Window::saveScreenshot(const char* path) const {
+    if (!renderer || !path) return false;
+    int w = 0, h = 0;
+    if (SDL_GetRendererOutputSize(renderer, &w, &h) != 0) {
+        Logger::error(std::string("SDL_GetRendererOutputSize: ") + SDL_GetError());
+        return false;
+    }
+    SDL_Surface* surf = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_ARGB8888);
+    if (!surf) {
+        Logger::error(std::string("SDL_CreateRGBSurfaceWithFormat: ") + SDL_GetError());
+        return false;
+    }
+    int rc = SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_ARGB8888, surf->pixels, surf->pitch);
+    if (rc != 0) {
+        Logger::error(std::string("SDL_RenderReadPixels: ") + SDL_GetError());
+        SDL_FreeSurface(surf);
+        return false;
+    }
+    rc = SDL_SaveBMP(surf, path);
+    SDL_FreeSurface(surf);
+    if (rc != 0) {
+        Logger::error(std::string("SDL_SaveBMP: ") + SDL_GetError());
+        return false;
+    }
+    return true;
+}

@@ -21,3 +21,7 @@ Desktop.ini
 
 # CMake temp files outside build/
 CMakeUserPresets.json
+
+# Runtime save artifacts (per-developer, not source)
+saves/*.json
+!saves/.gitkeep

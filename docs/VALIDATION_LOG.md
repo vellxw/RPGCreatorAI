@@ -41,3 +41,38 @@ Append-only log of major validation runs. Newest entries on top.
 - Result: ALL PASSED
 - ctest: `1/1 Test #1: RPGTests ......... Passed 0.17 sec`
 - Final: PASS (Phase 1 commit `41273a8`).
+
+
+---
+
+## Phase 2 Visual Verification
+
+### Run — `--smoke-shots` deterministic harness
+
+- Command: `build\rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-2`
+- Result: PASS — exit 0, 9 screenshots written, full event trace captured.
+- Trace (relevant log lines):
+  - `[INFO] Map loaded: town`
+  - `[INFO] Dialogue [Anciano]: No cruces el puente de noche.`
+  - `[INFO] Map loaded: house`
+  - `[INFO] Dialogue: Encontraste una pocion.`
+  - `[INFO] playSound: chest_open`
+  - `[INFO] Dialogue: El cofre esta vacio.`
+  - `[INFO] Game saved to saves/slot_1.json`
+  - `[INFO] Map loaded: town` (transfer back)
+  - `[INFO] Game loaded from saves/slot_1.json`
+  - `[INFO] Map loaded: house` (load restored map)
+  - `[INFO] Dialogue: Partida cargada.`
+- Pixel verification (see `docs/PHASE_2_VISUAL_VERIFICATION.md`):
+  dialogue-edge pixel ratio jumps from 0.04% (idle) to ≥0.58% (dialogue
+  frames); ground/wall ratios swap between town and house palettes;
+  NPC red appears only on town frames; chest orange only on house
+  frames.
+- Final: PASS.
+
+### Run — full validation after harness changes
+
+- Command: `build_bootstrap.bat`
+- Build: 317/317 link OK.
+- Tests: `1/1 Test #1: RPGTests ......... Passed 0.15 sec — 100% tests passed`.
+- Final: PASS.
