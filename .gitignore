@@ -6,3 +6,18 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# IDE / editor
+.vs/
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+.idea/
+
+# OS temp
+Thumbs.db
+Desktop.ini
+
+# CMake temp files outside build/
+CMakeUserPresets.json
