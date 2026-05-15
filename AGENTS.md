@@ -1,5 +1,7 @@
 # AGENTS.md — Permanent Operational Rules for RPGCreatorAI
 
+## Current Phase: Phase 3 — Visual Editor MVP
+
 This file is the source of truth for all autonomous agents working on
 RPGCreatorAI. It distills the permanent operational rules from the phase
 protocols (see `docs/agent_prompts/`).
