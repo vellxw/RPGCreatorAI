@@ -1,42 +1,44 @@
 # Goal Stack — RPGCreatorAI
 
 ## Current Goal
-Phase 3: Visual Editor MVP
+Phase 4: Editor Persistence & Runtime Bridge — COMPLETE (pending commit)
 
 ## Active Phase
-Phase 3
+Phase 4
 
 ## Subgoals
-1. ✅ Create spec documents (requirements, design, tasks)
-2. ✅ Create visual analysis of reference images
-3. ⬜ Implement design system (tokens, components)
-4. ⬜ Implement app shell and navigation
-5. ⬜ Implement Main Editor Dashboard screen
-6. ⬜ Implement Event Editor screen
-7. ⬜ Implement AI Tools screen
-8. ⬜ Implement Playtest screen
-9. ⬜ Wire up data stores with real project data
-10. ⬜ Implement validation engine
-11. ⬜ Build passes, lint passes
-12. ⬜ Capture screenshots
-13. ⬜ Commit and push
+1. ✅ Adapter interfaces (`src/adapters/types.ts`)
+2. ✅ BrowserMemoryAdapter
+3. ✅ JsonImportExportAdapter
+4. ✅ FileSystemAdapter seam
+5. ✅ RuntimeLaunchAdapter (Browser + Desktop seam)
+6. ✅ adapterFactory with feature detection
+7. ✅ projectStore refactor (reducer, dirty tracking, validation)
+8. ✅ Inspector wired to real mutations
+9. ✅ Event Editor wired to UPDATE_EVENT / UPDATE_COMMAND / ADD_COMMAND / REMOVE_COMMAND
+10. ✅ Save flow with pre-save validation
+11. ✅ Import / Export JSON bundle
+12. ✅ Dirty state indicator + beforeunload warning
+13. ✅ Runtime bridge panel + honest "Editor Preview (simulated)" labeling
+14. ✅ Extended validation (cross-map, items, unique ids, transfer targets)
+15. ✅ Vitest test suite (32 tests passing)
+16. ✅ TypeScript / Vite build green
 
 ## Success Criteria
-- App launches with `npm run dev`
-- 4 screens navigable
-- UI matches reference images at high fidelity
-- Inspector updates on selection
-- Validation messages from real data
-- Event editor shows real events
-- Build passes (`npm run build`)
-- TypeScript passes (`npm run lint`)
-- Committed and pushed
+- Edit event in inspector → data model updates ✅
+- Add command → persists in store ✅
+- Save validates and blocks on errors ✅
+- Export downloads valid JSON bundle ✅
+- Import restores project state ✅
+- Dirty indicator works ✅
+- Runtime bridge reports honest status ✅
+- All frontend validation passes ✅
 
 ## Current Status
-Starting implementation
+Implementation complete. About to commit and push.
 
 ## Blockers
-None
+- C++ runtime build blocked by pre-existing OneDrive file-lock issue (FetchContent rename). No Phase 4 changes touched the runtime; documented in PHASE_4_VALIDATION_REPORT.md.
 
 ## Next Action
-Implement the full editor UI
+Commit, push, return final report.

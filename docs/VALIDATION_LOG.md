@@ -76,3 +76,26 @@ Append-only log of major validation runs. Newest entries on top.
 - Build: 317/317 link OK.
 - Tests: `1/1 Test #1: RPGTests ......... Passed 0.15 sec — 100% tests passed`.
 - Final: PASS.
+
+
+---
+
+## Phase 4 — Editor Persistence & Runtime Bridge
+
+**Date**: 2026-05-15
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx tsc --noEmit` | PASS | 0 errors |
+| `npx vite build` | PASS | 290 KB JS bundle, 18.29s |
+| `npx vitest run` | PASS | 32 / 32 tests |
+| `cmd /c build_bootstrap.bat` | BLOCKED | Pre-existing OneDrive file-lock during FetchContent rename. No C++ files were modified in Phase 4. |
+
+### Fix applied
+- The C++ build failure is environmental (OneDrive holds locks on `build/_deps/` during cmake's directory rename). Documented in `docs/PHASE_4_VALIDATION_REPORT.md` with workaround suggestions. No code changes required for Phase 4.
+
+### Final pass/fail
+- Frontend: PASS
+- C++ runtime: unmodified, build blocked by OneDrive sync (not a Phase 4 regression)

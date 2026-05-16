@@ -1,16 +1,26 @@
 import { useState } from 'react';
-import { useProject, getEventsByMap } from '../stores/projectStore';
+import { useProjectStore, getEventsByMap, flattenCommands } from '../stores/projectStore';
 import { useEditor } from '../stores/editorStore';
-import { ChevronDown, ChevronRight, Plus, Search, MoreVertical, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Search,
+  MoreVertical,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+} from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Input, Select } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { CommandEditor } from '../components/events/CommandEditor';
 import { validateEvent } from '../validation/validateMap';
-import type { GameEvent, EventCommand, MapData } from '../types/project';
+import type { EventCommand, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
 
 function EventList() {
-  const project = useProject();
-  const { state, dispatch } = useEditor();
+  const { state: project } = useProjectStore();
+  const { state: editor, dispatch } = useEditor();
   const eventsByMap = getEventsByMap(project);
   const [expandedMaps, setExpandedMaps] = useState<Record<string, boolean>>({ town: true, house: true });
 
@@ -44,25 +54,26 @@ function EventList() {
               {expandedMaps[mapId] ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               <span className="text-[13px] font-medium text-gray-700">{mapName}</span>
             </button>
-            {expandedMaps[mapId] && events.map(event => (
-              <button
-                key={event.id}
-                onClick={() => dispatch({ type: 'SELECT_EVENT', event, mapId })}
-                className={`w-full flex items-center gap-2 pl-7 pr-3 py-1.5 text-left cursor-pointer ${
-                  state.selectedEvent?.id === event.id
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'hover:bg-gray-50 text-gray-600'
-                }`}
-              >
-                <span className="text-[12px]">
-                  {event.type === 'npc' ? '👤' : event.type === 'chest' ? '📦' : '🚪'}
-                </span>
-                <span className="text-[13px] truncate">{event.id}</span>
-                {state.selectedEvent?.id === event.id && (
-                  <MoreVertical size={12} className="ml-auto text-gray-400" />
-                )}
-              </button>
-            ))}
+            {expandedMaps[mapId] &&
+              events.map(event => (
+                <button
+                  key={event.id}
+                  onClick={() => dispatch({ type: 'SELECT_EVENT', event, mapId })}
+                  className={`w-full flex items-center gap-2 pl-7 pr-3 py-1.5 text-left cursor-pointer ${
+                    editor.selectedEvent?.id === event.id
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'hover:bg-gray-50 text-gray-600'
+                  }`}
+                >
+                  <span className="text-[12px]">
+                    {event.type === 'npc' ? '👤' : event.type === 'chest' ? '📦' : '🚪'}
+                  </span>
+                  <span className="text-[13px] truncate">{event.id}</span>
+                  {editor.selectedEvent?.id === event.id && (
+                    <MoreVertical size={12} className="ml-auto text-gray-400" />
+                  )}
+                </button>
+              ))}
           </div>
         ))}
       </div>
@@ -76,7 +87,15 @@ function EventList() {
   );
 }
 
-function CommandCard({ index, command }: { index: number; command: EventCommand }) {
+interface CommandCardProps {
+  index: number;
+  command: EventCommand;
+  selected: boolean;
+  onSelect: () => void;
+  depth: number;
+}
+
+function CommandCard({ index, command, selected, onSelect, depth }: CommandCardProps) {
   const icons: Record<string, { icon: string; color: string; bg: string }> = {
     showText: { icon: '💬', color: 'text-blue-600', bg: 'bg-blue-50' },
     ifFlag: { icon: '🔀', color: 'text-red-600', bg: 'bg-red-50' },
@@ -85,86 +104,139 @@ function CommandCard({ index, command }: { index: number; command: EventCommand 
     transferMap: { icon: '🌐', color: 'text-cyan-600', bg: 'bg-cyan-50' },
     playSound: { icon: '🔊', color: 'text-amber-600', bg: 'bg-amber-50' },
   };
-
   const info = icons[command.type] || { icon: '⬜', color: 'text-gray-600', bg: 'bg-gray-50' };
 
-  const getTitle = (cmd: EventCommand): string => {
-    switch (cmd.type) {
-      case 'showText': return 'Show Text';
-      case 'ifFlag': return 'If Flag';
-      case 'addItem': return 'Add Item';
-      case 'setFlag': return 'Set Flag';
-      case 'transferMap': return 'Transfer Map';
-      case 'playSound': return 'Play Sound';
-    }
+  const titles: Record<string, string> = {
+    showText: 'Show Text',
+    ifFlag: 'If Flag',
+    addItem: 'Add Item',
+    setFlag: 'Set Flag',
+    transferMap: 'Transfer Map',
+    playSound: 'Play Sound',
   };
 
   const getDescription = (cmd: EventCommand): string => {
     switch (cmd.type) {
-      case 'showText': return cmd.text;
-      case 'ifFlag': return `${cmd.flag} is ${cmd.equals ? 'ON' : 'OFF'}`;
-      case 'addItem': return `Item: ${cmd.itemId} × ${cmd.amount}`;
-      case 'setFlag': return `${cmd.flag} → ${cmd.value ? 'ON' : 'OFF'}`;
-      case 'transferMap': return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
-      case 'playSound': return cmd.soundId;
-      default: return '';
+      case 'showText':
+        return cmd.text;
+      case 'ifFlag':
+        return `${cmd.flag} is ${cmd.equals ? 'ON' : 'OFF'}`;
+      case 'addItem':
+        return `Item: ${cmd.itemId} × ${cmd.amount}`;
+      case 'setFlag':
+        return `${cmd.flag} → ${cmd.value ? 'ON' : 'OFF'}`;
+      case 'transferMap':
+        return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
+      case 'playSound':
+        return cmd.soundId;
     }
   };
 
-  const getExtra = (cmd: EventCommand): string | null => {
-    if (cmd.type === 'ifFlag') return 'Branch';
-    if (cmd.type === 'addItem') return 'Else Branch';
-    if (cmd.type === 'transferMap') return `Fade: On`;
-    return null;
-  };
-
   return (
-    <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+    <button
+      type="button"
+      onClick={onSelect}
+      style={{ marginLeft: depth * 16 }}
+      className={`w-full flex items-start gap-3 p-3 border rounded-lg transition-shadow text-left cursor-pointer ${
+        selected
+          ? 'bg-indigo-50 border-indigo-300 shadow-sm'
+          : 'bg-white border-gray-200 hover:shadow-sm'
+      }`}
+    >
       <span className="text-[12px] text-gray-400 font-mono mt-1 w-4">{index}</span>
       <div className={`w-9 h-9 rounded-lg ${info.bg} flex items-center justify-center text-lg flex-shrink-0`}>
         {info.icon}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-semibold text-gray-800">{getTitle(command)}</span>
-          {getExtra(command) && (
-            <Badge variant="info">{getExtra(command)}</Badge>
-          )}
+          <span className="text-[13px] font-semibold text-gray-800">{titles[command.type] || command.type}</span>
+          {command.type === 'ifFlag' && <Badge variant="info">Branch</Badge>}
         </div>
         <p className="text-[12px] text-gray-500 mt-0.5 truncate">{getDescription(command)}</p>
       </div>
-      <MoreVertical size={14} className="text-gray-300 cursor-pointer hover:text-gray-500 mt-1" />
-    </div>
+    </button>
   );
 }
 
-function CommandStack({ event }: { event: GameEvent }) {
-  // Flatten commands for display (show top-level + nested)
-  const flatCommands: EventCommand[] = [];
-  function walk(cmds: EventCommand[]) {
-    for (const cmd of cmds) {
-      flatCommands.push(cmd);
-      if (cmd.type === 'ifFlag') {
-        walk(cmd.then);
-        walk(cmd.else);
-      }
+function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
+  const { state: project, dispatch: projectDispatch } = useProjectStore();
+  const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
+
+  const flat = flattenCommands(event.commands);
+  const mapIds = Object.keys(project.maps);
+  const itemIds = project.items.items.map(i => i.id);
+
+  const findCommandAtPath = (path: number[]): EventCommand | null => {
+    let cmds: EventCommand[] = event.commands;
+    for (let i = 0; i < path.length; i++) {
+      const idx = path[i];
+      if (i === path.length - 1) return cmds[idx] ?? null;
+      const branchIdx = path[i + 1];
+      const cmd = cmds[idx];
+      if (cmd?.type !== 'ifFlag') return null;
+      cmds = branchIdx === 0 ? cmd.then : cmd.else;
+      i += 1; // skip the branch index slot
     }
-  }
-  walk(event.commands);
+    return null;
+  };
+
+  const samePath = (a: number[] | null, b: number[]) => {
+    if (!a || a.length !== b.length) return false;
+    return a.every((v, i) => v === b[i]);
+  };
+
+  const selectedCommand = selectedPath ? findCommandAtPath(selectedPath) : null;
+
+  const updateSelected = (next: EventCommand) => {
+    if (!selectedPath) return;
+    projectDispatch({ type: 'UPDATE_COMMAND', mapId, eventId: event.id, path: selectedPath, command: next });
+  };
+
+  const removeSelected = () => {
+    if (!selectedPath) return;
+    projectDispatch({ type: 'REMOVE_COMMAND', mapId, eventId: event.id, path: selectedPath });
+    setSelectedPath(null);
+  };
+
+  const addCommand = () => {
+    const placeholder: EventCommand = { type: 'showText', text: 'New dialogue' };
+    projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
+  };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
         <div>
           <span className="text-[13px] font-semibold text-gray-700">Event Commands</span>
           <p className="text-[11px] text-gray-400">Executed top to bottom.</p>
         </div>
-        <Button size="sm" icon={<Plus size={12} />}>Add Command</Button>
+        <Button size="sm" icon={<Plus size={12} />} onClick={addCommand}>
+          Add Command
+        </Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {flatCommands.map((cmd, i) => (
-          <CommandCard key={i} index={i + 1} command={cmd} />
+        {flat.map(({ command, depth, path }, i) => (
+          <CommandCard
+            key={`${path.join('-')}-${i}`}
+            index={i + 1}
+            command={command}
+            depth={depth}
+            selected={samePath(selectedPath, path)}
+            onSelect={() => setSelectedPath(path)}
+          />
         ))}
+        {selectedCommand && selectedPath && (
+          <div className="mt-3">
+            <p className="text-[11px] text-gray-500 mb-1">Editing selected command</p>
+            <CommandEditor
+              command={selectedCommand}
+              mapIds={mapIds}
+              itemIds={itemIds}
+              onChange={updateSelected}
+              onRemove={removeSelected}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -186,19 +258,44 @@ function MapPreview({ event, map }: { event: GameEvent; map: MapData }) {
             const x = (i % map.width) * TILE;
             const y = Math.floor(i / map.width) * TILE;
             return (
-              <rect key={i} x={x} y={y} width={TILE} height={TILE}
-                fill={tile === 9 ? '#5a8a3a' : '#7ab85a'} stroke="#6aa04a" strokeWidth="0.3" />
+              <rect
+                key={i}
+                x={x}
+                y={y}
+                width={TILE}
+                height={TILE}
+                fill={tile === 9 ? '#5a8a3a' : '#7ab85a'}
+                stroke="#6aa04a"
+                strokeWidth="0.3"
+              />
             );
           })}
-          {/* Highlight selected event */}
           <rect
-            x={event.x * TILE} y={event.y * TILE}
-            width={TILE} height={TILE}
-            fill="#6366f1" opacity="0.7" rx="2"
+            x={event.x * TILE}
+            y={event.y * TILE}
+            width={TILE}
+            height={TILE}
+            fill="#6366f1"
+            opacity="0.7"
+            rx="2"
           />
-          {/* Label */}
-          <rect x={event.x * TILE - 20} y={event.y * TILE - 18} width={60} height={16} fill="#1f2937" rx="3" opacity="0.9" />
-          <text x={event.x * TILE + 10} y={event.y * TILE - 6} fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">
+          <rect
+            x={event.x * TILE - 20}
+            y={event.y * TILE - 18}
+            width={60}
+            height={16}
+            fill="#1f2937"
+            rx="3"
+            opacity="0.9"
+          />
+          <text
+            x={event.x * TILE + 10}
+            y={event.y * TILE - 6}
+            fontSize="8"
+            fill="white"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
             {event.id}
           </text>
         </svg>
@@ -207,14 +304,29 @@ function MapPreview({ event, map }: { event: GameEvent; map: MapData }) {
   );
 }
 
-function EventProperties({ event }: { event: GameEvent }) {
+function EventProperties({ event, mapId }: { event: GameEvent; mapId: string }) {
+  const { dispatch } = useProjectStore();
+
+  const update = (changes: Partial<Omit<GameEvent, 'commands'>>) => {
+    dispatch({ type: 'UPDATE_EVENT', mapId, eventId: event.id, changes });
+  };
+
   return (
     <div className="w-[260px] flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto">
       <div className="px-4 py-3 border-b border-gray-200">
         <span className="text-[13px] font-semibold text-gray-700">Event Properties</span>
       </div>
       <div className="p-4 space-y-4">
-        <Input label="Name" defaultValue={event.id} />
+        <Input
+          label="Name"
+          value={event.id}
+          onChange={e => {
+            const newId = e.target.value;
+            if (newId.trim() && newId !== event.id) {
+              dispatch({ type: 'RENAME_EVENT', mapId, oldId: event.id, newId });
+            }
+          }}
+        />
         <Select
           label="Type"
           value={event.type}
@@ -225,10 +337,21 @@ function EventProperties({ event }: { event: GameEvent }) {
             { value: 'object', label: 'Object' },
             { value: 'trigger', label: 'Trigger' },
           ]}
+          onChange={v => update({ type: v as EventType })}
         />
         <div className="grid grid-cols-2 gap-2">
-          <Input label="Position X" type="number" defaultValue={String(event.x)} />
-          <Input label="Position Y" type="number" defaultValue={String(event.y)} />
+          <Input
+            label="Position X"
+            type="number"
+            value={event.x}
+            onChange={e => update({ x: Number(e.target.value) })}
+          />
+          <Input
+            label="Position Y"
+            type="number"
+            value={event.y}
+            onChange={e => update({ y: Number(e.target.value) })}
+          />
         </div>
         <Select
           label="Trigger"
@@ -239,84 +362,53 @@ function EventProperties({ event }: { event: GameEvent }) {
             { value: 'autorun', label: 'Autorun' },
             { value: 'parallel', label: 'Parallel' },
           ]}
+          onChange={v => update({ trigger: v as TriggerType })}
         />
         <Select
           label="Solid"
           value={event.solid ? 'yes' : 'no'}
-          options={[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]}
+          options={[
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ]}
+          onChange={v => update({ solid: v === 'yes' })}
         />
         <Select
-          label="Direction"
-          value="down"
+          label="Sprite"
+          value={event.sprite ?? ''}
           options={[
-            { value: 'up', label: 'Up' },
-            { value: 'down', label: 'Down' },
-            { value: 'left', label: 'Left' },
-            { value: 'right', label: 'Right' },
+            { value: '', label: '(none)' },
+            { value: 'npc_placeholder', label: 'Placeholder NPC' },
           ]}
+          onChange={v => update({ sprite: v || undefined })}
         />
-
-        {/* Appearance */}
-        <div>
-          <label className="text-[12px] font-medium text-gray-500 mb-1 block">Appearance</label>
-          <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-md">
-            <div className="w-8 h-8 rounded bg-indigo-100 flex items-center justify-center text-sm">
-              {event.type === 'npc' ? '👤' : event.type === 'chest' ? '📦' : '🚪'}
-            </div>
-            <span className="text-[12px] text-gray-600">Placeholder {event.type.toUpperCase()}</span>
-          </div>
-        </div>
-
-        {/* Dialogue */}
-        {event.type === 'npc' && (
-          <div>
-            <label className="text-[12px] font-medium text-gray-500 mb-1 block">Dialogue</label>
-            <textarea
-              className="w-full px-2.5 py-2 text-[12px] border border-gray-200 rounded-md resize-none h-16 focus:outline-none focus:ring-1 focus:ring-indigo-300"
-              defaultValue={
-                event.commands.find(c => c.type === 'showText' || (c.type === 'ifFlag'))
-                  ? 'No cruces el puente de noche.'
-                  : ''
-              }
-            />
-          </div>
-        )}
-
-        {/* AI Actions */}
-        <div>
-          <label className="text-[12px] font-medium text-gray-500 mb-2 block">✨ AI Actions</label>
-          <div className="space-y-1.5">
-            {['Rewrite dialogue', 'Generate 3 variants', 'Make it funnier'].map(action => (
-              <button key={action} className="w-full text-left px-3 py-2 text-[12px] text-gray-600 bg-gray-50 rounded-md hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors">
-                ✏️ {action}
-              </button>
-            ))}
-          </div>
-          <p className="text-[10px] text-gray-400 mt-2 italic">AI actions replace the dialogue above.</p>
-        </div>
       </div>
     </div>
   );
 }
 
-function ValidationPanel({ event, map }: { event: GameEvent; map: MapData }) {
-  const allMapIds = ['town', 'house'];
-  const messages = validateEvent(event, map, allMapIds);
+function ValidationPanel({ event, map, mapIds }: { event: GameEvent; map: MapData; mapIds: string[] }) {
+  const { dispatch } = useProjectStore();
+  const messages = validateEvent(event, map, mapIds);
   const errors = messages.filter(m => m.level === 'error');
   const warnings = messages.filter(m => m.level === 'warning');
 
   return (
     <div className="border-t border-gray-200 bg-white">
       <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
-        <button className="text-[13px] font-medium text-indigo-600 border-b-2 border-indigo-500 pb-1 cursor-pointer">Validation</button>
+        <button className="text-[13px] font-medium text-indigo-600 border-b-2 border-indigo-500 pb-1 cursor-pointer">
+          Validation
+        </button>
         <button className="text-[13px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Event Preview</button>
         <button className="text-[13px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Notes</button>
         <div className="ml-auto">
-          <Button size="sm" icon={<RefreshCw size={12} />}>Re-validate</Button>
+          <Button size="sm" icon={<RefreshCw size={12} />} onClick={() => dispatch({ type: 'VALIDATE' })}>
+            Re-validate
+          </Button>
         </div>
       </div>
       <div className="p-4 space-y-2">
-        {errors.length === 0 && (
+        {errors.length === 0 && warnings.length === 0 && (
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="text-green-500" />
             <div>
@@ -334,10 +426,7 @@ function ValidationPanel({ event, map }: { event: GameEvent; map: MapData }) {
         {warnings.map((msg, i) => (
           <div key={i} className="flex items-center gap-2">
             <AlertTriangle size={16} className="text-amber-500" />
-            <div>
-              <p className="text-[13px] font-medium text-gray-800">1 warning</p>
-              <p className="text-[11px] text-gray-500">{msg.message}</p>
-            </div>
+            <p className="text-[13px] text-gray-700">{msg.message}</p>
           </div>
         ))}
       </div>
@@ -346,17 +435,20 @@ function ValidationPanel({ event, map }: { event: GameEvent; map: MapData }) {
 }
 
 export function EventEditorScreen() {
-  const { state } = useEditor();
-  const project = useProject();
-  const event = state.selectedEvent;
-  const mapId = state.selectedEventMapId || state.selectedMapId;
-  const map = project.maps[mapId];
+  const { state: editor } = useEditor();
+  const { state: project } = useProjectStore();
 
   // Default to first event if none selected
-  const displayEvent = event || project.maps.town?.events[0];
-  const displayMap = map || project.maps.town;
+  const selected = editor.selectedEvent;
+  const selectedMapId = editor.selectedEventMapId ?? editor.selectedMapId;
 
-  if (!displayEvent || !displayMap) {
+  const map = project.maps[selectedMapId] ?? project.maps.town;
+  // Always read fresh event from store
+  const event = selected
+    ? map?.events.find(e => e.id === selected.id) ?? map?.events[0]
+    : map?.events[0];
+
+  if (!event || !map) {
     return <div className="flex-1 flex items-center justify-center text-gray-400">No events found</div>;
   }
 
@@ -366,12 +458,12 @@ export function EventEditorScreen() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden">
-            <MapPreview event={displayEvent} map={displayMap} />
-            <CommandStack event={displayEvent} />
+            <MapPreview event={event} map={map} />
+            <CommandStack event={event} mapId={map.id} />
           </div>
-          <EventProperties event={displayEvent} />
+          <EventProperties event={event} mapId={map.id} />
         </div>
-        <ValidationPanel event={displayEvent} map={displayMap} />
+        <ValidationPanel event={event} map={map} mapIds={Object.keys(project.maps)} />
       </div>
     </div>
   );

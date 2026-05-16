@@ -25,3 +25,9 @@ CMakeUserPresets.json
 # Runtime save artifacts (per-developer, not source)
 saves/*.json
 !saves/.gitkeep
+
+# Editor backups (FileSystemAdapter)
+.backups/
+
+# Editor exports (intentional user files, not source)
+*.rpgcreator.json
