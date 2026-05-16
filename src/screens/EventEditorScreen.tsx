@@ -129,6 +129,8 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
         return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
       case 'playSound':
         return cmd.soundId;
+      default:
+        return cmd.type;
     }
   };
 

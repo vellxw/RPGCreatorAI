@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "enemies": [
+    {
+      "id": "slime",
+      "name": "Slime",
+      "stats": {
+        "maxHp": 10,
+        "maxMp": 0,
+        "attack": 4,
+        "defense": 2,
+        "magicAttack": 0,
+        "magicDefense": 1,
+        "agility": 3,
+        "luck": 2
+      },
+      "exp": 4,
+      "gold": 8,
+      "drops": [
+        { "itemId": "potion", "rate": 0.25 }
+      ]
+    }
+  ]
+}

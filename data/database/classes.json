@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "classes": [
+    {
+      "id": "hero",
+      "name": "Hero",
+      "growth": {
+        "maxHp": 4,
+        "maxMp": 1,
+        "attack": 2,
+        "defense": 1,
+        "magicAttack": 1,
+        "magicDefense": 1,
+        "agility": 1,
+        "luck": 1
+      },
+      "usableEquipment": ["weapon", "armor", "accessory"],
+      "learnedSkills": [
+        { "level": 1, "skillId": "slash" },
+        { "level": 3, "skillId": "guard" }
+      ]
+    }
+  ]
+}

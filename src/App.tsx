@@ -3,6 +3,7 @@ import { TopToolbar } from './components/layout/TopToolbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
+import { DatabaseScreen } from './screens/DatabaseScreen';
 import { AIToolsScreen } from './screens/AIToolsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
 import {
@@ -53,9 +54,10 @@ export default function App() {
     );
   }
 
-  const screens = {
+  const screens: Record<typeof editorState.activeScreen, React.ReactNode> = {
     editor: <MainEditorScreen />,
     events: <EventEditorScreen />,
+    database: <DatabaseScreen />,
     'ai-tools': <AIToolsScreen />,
     playtest: <PlaytestScreen />,
   };

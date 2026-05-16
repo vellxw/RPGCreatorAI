@@ -1,5 +1,11 @@
 // Adapter interfaces for editor persistence and runtime launch
-import type { ProjectData, MapData, ItemDatabase, ValidationMessage } from '../types/project';
+import type {
+  DatabaseEntries,
+  ItemDatabase,
+  MapData,
+  ProjectData,
+  ValidationMessage,
+} from '../types/project';
 
 export interface AdapterCapabilities {
   canReadFiles: boolean;
@@ -18,6 +24,7 @@ export interface FullProjectState {
   project: ProjectData;
   maps: Record<string, MapData>;
   items: ItemDatabase;
+  databases: DatabaseEntries;
 }
 
 export interface ExportBundle {
@@ -26,6 +33,7 @@ export interface ExportBundle {
   project: ProjectData;
   maps: Record<string, MapData>;
   items: ItemDatabase;
+  databases: DatabaseEntries;
 }
 
 export interface ProjectDataAdapter {

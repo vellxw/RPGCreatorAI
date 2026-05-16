@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "id": "slash",
+      "name": "Slash",
+      "description": "A swift sword strike.",
+      "mpCost": 0,
+      "power": 100,
+      "target": "singleEnemy"
+    },
+    {
+      "id": "guard",
+      "name": "Guard",
+      "description": "Reduces damage taken this turn.",
+      "mpCost": 2,
+      "power": 0,
+      "target": "self"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "variables": [
+    { "id": "lost_chest_progress", "name": "Lost chest progress", "initial": 0 }
+  ]
+}

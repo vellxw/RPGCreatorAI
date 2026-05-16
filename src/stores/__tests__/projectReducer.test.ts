@@ -7,6 +7,7 @@ import {
 } from '../projectStore';
 import type { FullProjectState } from '../../adapters/types';
 import type { GameEvent, MapData } from '../../types/project';
+import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function loadedState(): ProjectStoreState {
   const event: GameEvent = {
@@ -50,6 +51,7 @@ function loadedState(): ProjectStoreState {
     },
     maps: { town: map },
     items: { items: [{ id: 'potion', name: 'Potion', description: '', type: 'consumable' }] },
+    databases: mergeDatabases(undefined),
   };
   return projectReducer(initialProjectStoreState, { type: 'LOAD_PROJECT', payload });
 }

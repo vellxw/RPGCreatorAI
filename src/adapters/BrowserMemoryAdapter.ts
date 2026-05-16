@@ -8,16 +8,53 @@ import type {
   ProjectDataAdapter,
   SaveResult,
 } from './types';
-import type { ItemDatabase, MapData, ProjectData } from '../types/project';
+import type {
+  ActorData,
+  ClassData,
+  CommonEventData,
+  EnemyData,
+  ItemDatabase,
+  MapData,
+  ProjectData,
+  QuestData,
+  ShopData,
+  SkillData,
+  SwitchData,
+  SystemData,
+  TroopData,
+  VariableData,
+} from '../types/project';
 import { buildExportBundle, parseImportBundle, safeStringify } from './jsonUtils';
+import { mergeDatabases } from './defaultDatabases';
 
 import projectJson from '../../data/project.json';
 import townJson from '../../data/maps/town.json';
 import houseJson from '../../data/maps/house.json';
 import itemsJson from '../../data/database/items.json';
+import actorsJson from '../../data/database/actors.json';
+import classesJson from '../../data/database/classes.json';
+import skillsJson from '../../data/database/skills.json';
+import enemiesJson from '../../data/database/enemies.json';
+import troopsJson from '../../data/database/troops.json';
+import questsJson from '../../data/database/quests.json';
+import shopsJson from '../../data/database/shops.json';
+import systemJson from '../../data/database/system.json';
+import switchesJson from '../../data/database/switches.json';
+import variablesJson from '../../data/database/variables.json';
+import commonEventsJson from '../../data/database/commonEvents.json';
 
 function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
+}
+
+interface SchemaWrapper<T> {
+  schemaVersion?: number;
+  [key: string]: unknown | T[];
+}
+
+function unwrapList<T>(json: SchemaWrapper<T>, key: string): T[] {
+  const value = (json as Record<string, unknown>)[key];
+  return Array.isArray(value) ? (value as T[]) : [];
 }
 
 function seedFromBundle(): FullProjectState {
@@ -27,7 +64,42 @@ function seedFromBundle(): FullProjectState {
       town: deepClone(townJson) as unknown as MapData,
       house: deepClone(houseJson) as unknown as MapData,
     },
-    items: deepClone(itemsJson) as ItemDatabase,
+    items: {
+      items: unwrapList<ItemDatabase['items'][number]>(
+        deepClone(itemsJson) as SchemaWrapper<ItemDatabase['items'][number]>,
+        'items',
+      ),
+    },
+    databases: mergeDatabases({
+      actors: unwrapList<ActorData>(deepClone(actorsJson) as SchemaWrapper<ActorData>, 'actors'),
+      classes: unwrapList<ClassData>(deepClone(classesJson) as SchemaWrapper<ClassData>, 'classes'),
+      skills: unwrapList<SkillData>(deepClone(skillsJson) as SchemaWrapper<SkillData>, 'skills'),
+      enemies: unwrapList<EnemyData>(deepClone(enemiesJson) as SchemaWrapper<EnemyData>, 'enemies'),
+      troops: unwrapList<TroopData>(deepClone(troopsJson) as SchemaWrapper<TroopData>, 'troops'),
+      quests: unwrapList<QuestData>(deepClone(questsJson) as SchemaWrapper<QuestData>, 'quests'),
+      shops: unwrapList<ShopData>(deepClone(shopsJson) as SchemaWrapper<ShopData>, 'shops'),
+      switches: unwrapList<SwitchData>(deepClone(switchesJson) as SchemaWrapper<SwitchData>, 'switches'),
+      variables: unwrapList<VariableData>(
+        deepClone(variablesJson) as SchemaWrapper<VariableData>,
+        'variables',
+      ),
+      commonEvents: unwrapList<CommonEventData>(
+        deepClone(commonEventsJson) as SchemaWrapper<CommonEventData>,
+        'commonEvents',
+      ),
+      system: extractSystem(deepClone(systemJson) as Record<string, unknown>),
+    }),
+  };
+}
+
+function extractSystem(json: Record<string, unknown>): SystemData {
+  return {
+    startingParty: Array.isArray(json.startingParty) ? (json.startingParty as string[]) : [],
+    startingGold: typeof json.startingGold === 'number' ? (json.startingGold as number) : 0,
+    defaultBgm: typeof json.defaultBgm === 'string' ? (json.defaultBgm as string) : undefined,
+    windowTint: typeof json.windowTint === 'string' ? (json.windowTint as string) : undefined,
+    battleBackground:
+      typeof json.battleBackground === 'string' ? (json.battleBackground as string) : undefined,
   };
 }
 
@@ -87,6 +159,7 @@ export class BrowserMemoryAdapter implements ProjectDataAdapter {
       safeStringify(state.project);
       for (const [, m] of Object.entries(state.maps)) safeStringify(m);
       safeStringify(state.items);
+      safeStringify(state.databases);
 
       this.snapshot = deepClone(state);
       return { success: true };

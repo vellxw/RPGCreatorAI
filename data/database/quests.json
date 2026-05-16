@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "quests": [
+    {
+      "id": "lost_chest",
+      "title": "The Lost Chest",
+      "summary": "An old man asks you to find a chest hidden in his house.",
+      "objectives": [
+        { "id": "open_chest", "description": "Open the chest in the house" },
+        { "id": "talk_back", "description": "Return to the old man" }
+      ],
+      "rewards": {
+        "gold": 30,
+        "exp": 10,
+        "items": [
+          { "itemId": "potion", "amount": 1 }
+        ]
+      }
+    }
+  ]
+}

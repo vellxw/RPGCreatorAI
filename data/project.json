@@ -18,6 +18,17 @@
     }
   ],
   "database": {
-    "items": "data/database/items.json"
+    "items": "data/database/items.json",
+    "actors": "data/database/actors.json",
+    "classes": "data/database/classes.json",
+    "skills": "data/database/skills.json",
+    "enemies": "data/database/enemies.json",
+    "troops": "data/database/troops.json",
+    "quests": "data/database/quests.json",
+    "shops": "data/database/shops.json",
+    "system": "data/database/system.json",
+    "switches": "data/database/switches.json",
+    "variables": "data/database/variables.json",
+    "commonEvents": "data/database/commonEvents.json"
   }
 }

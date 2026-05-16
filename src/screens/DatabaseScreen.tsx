@@ -1,0 +1,815 @@
+// Phase 6 — Database editor screen.
+// One tab per database; minimal CRUD with dirty tracking through the
+// existing project reducer + top toolbar Save button.
+
+import { useMemo, useState } from 'react';
+import { Plus, Copy, Trash2 } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input, Select } from '../components/ui/Input';
+import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
+import { DATABASE_LIST_KEYS } from '../adapters/defaultDatabases';
+import type {
+  ActorData,
+  ClassData,
+  CommonEventData,
+  DatabaseListKey,
+  EnemyData,
+  QuestData,
+  ShopData,
+  SkillData,
+  Stats,
+  SwitchData,
+  SystemData,
+  TroopData,
+  VariableData,
+} from '../types/project';
+
+const TAB_ORDER: Array<{ key: DatabaseListKey | 'system'; label: string }> = [
+  { key: 'actors', label: 'Actors' },
+  { key: 'classes', label: 'Classes' },
+  { key: 'skills', label: 'Skills' },
+  { key: 'enemies', label: 'Enemies' },
+  { key: 'troops', label: 'Troops' },
+  { key: 'quests', label: 'Quests' },
+  { key: 'shops', label: 'Shops' },
+  { key: 'switches', label: 'Switches' },
+  { key: 'variables', label: 'Variables' },
+  { key: 'commonEvents', label: 'Common Events' },
+  { key: 'system', label: 'System' },
+];
+
+function emptyStats(): Stats {
+  return {
+    maxHp: 1,
+    maxMp: 0,
+    attack: 1,
+    defense: 1,
+    magicAttack: 1,
+    magicDefense: 1,
+    agility: 1,
+    luck: 1,
+  };
+}
+
+function makePlaceholder(table: DatabaseListKey, id: string): DatabaseRecord {
+  switch (table) {
+    case 'actors':
+      return {
+        id,
+        name: id,
+        classId: '',
+        level: 1,
+        hp: 10,
+        mp: 0,
+        baseStats: emptyStats(),
+        equipment: { weapon: null, armor: null, accessory: null },
+        skills: [],
+      } as unknown as DatabaseRecord;
+    case 'classes':
+      return {
+        id,
+        name: id,
+        growth: emptyStats(),
+        usableEquipment: ['weapon', 'armor', 'accessory'],
+        learnedSkills: [],
+      } as unknown as DatabaseRecord;
+    case 'skills':
+      return {
+        id,
+        name: id,
+        description: '',
+        mpCost: 0,
+        power: 100,
+        target: 'singleEnemy',
+      } as unknown as DatabaseRecord;
+    case 'enemies':
+      return {
+        id,
+        name: id,
+        stats: emptyStats(),
+        exp: 1,
+        gold: 1,
+        drops: [],
+      } as unknown as DatabaseRecord;
+    case 'troops':
+      return { id, name: id, members: [] } as unknown as DatabaseRecord;
+    case 'quests':
+      return {
+        id,
+        title: id,
+        summary: '',
+        objectives: [],
+        rewards: { gold: 0, exp: 0, items: [] },
+      } as unknown as DatabaseRecord;
+    case 'shops':
+      return { id, name: id, listings: [] } as unknown as DatabaseRecord;
+    case 'switches':
+      return { id, name: id, initial: false } as unknown as DatabaseRecord;
+    case 'variables':
+      return { id, name: id, initial: 0 } as unknown as DatabaseRecord;
+    case 'commonEvents':
+      return { id, name: id, trigger: 'manual', commands: [] } as unknown as DatabaseRecord;
+  }
+}
+
+function uniqueId(existing: Set<string>, base: string): string {
+  let id = base;
+  let i = 1;
+  while (existing.has(id)) {
+    i += 1;
+    id = `${base}_${i}`;
+  }
+  return id;
+}
+
+interface ListSidebarProps {
+  table: DatabaseListKey;
+  entries: DatabaseRecord[];
+  selectedId: string | null;
+  onSelect(id: string): void;
+}
+
+function ListSidebar({ table, entries, selectedId, onSelect }: ListSidebarProps) {
+  const { dispatch } = useProjectStore();
+  const ids = useMemo(() => new Set(entries.map(e => e.id)), [entries]);
+
+  const addEntry = () => {
+    const baseId = `${table.replace(/s$/, '')}_${entries.length + 1}`;
+    const id = uniqueId(ids, baseId);
+    const entry = makePlaceholder(table, id);
+    dispatch({ type: 'ADD_DATABASE_ENTRY', table, entry });
+    onSelect(id);
+  };
+
+  const duplicateEntry = (sourceId: string) => {
+    const src = entries.find(e => e.id === sourceId);
+    if (!src) return;
+    const newId = uniqueId(ids, `${sourceId}_copy`);
+    const next: DatabaseRecord = JSON.parse(JSON.stringify(src));
+    next.id = newId;
+    dispatch({ type: 'ADD_DATABASE_ENTRY', table, entry: next });
+    onSelect(newId);
+  };
+
+  const removeEntry = (id: string) => {
+    if (!confirm(`Delete ${table.slice(0, -1)} "${id}"?`)) return;
+    dispatch({ type: 'REMOVE_DATABASE_ENTRY', table, id });
+    if (selectedId === id) {
+      const next = entries.find(e => e.id !== id);
+      onSelect(next ? next.id : '');
+    }
+  };
+
+  return (
+    <div className="w-[220px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
+      <div className="p-3 border-b border-gray-200">
+        <Button size="sm" icon={<Plus size={12} />} onClick={addEntry}>
+          New {table.slice(0, -1)}
+        </Button>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {entries.length === 0 ? (
+          <p className="p-3 text-[12px] text-gray-400">No entries yet.</p>
+        ) : (
+          entries.map(entry => (
+            <div
+              key={entry.id}
+              className={`flex items-center gap-1 px-3 py-1.5 cursor-pointer hover:bg-gray-50 ${
+                selectedId === entry.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700'
+              }`}
+              onClick={() => onSelect(entry.id)}
+            >
+              <span className="truncate text-[13px] flex-1" title={entry.id}>
+                {(entry as { name?: string; title?: string }).name ??
+                  (entry as { title?: string }).title ??
+                  entry.id}
+              </span>
+              <button
+                title="Duplicate"
+                className="text-gray-400 hover:text-indigo-600 cursor-pointer"
+                onClick={e => {
+                  e.stopPropagation();
+                  duplicateEntry(entry.id);
+                }}
+              >
+                <Copy size={12} />
+              </button>
+              <button
+                title="Delete"
+                className="text-gray-400 hover:text-red-500 cursor-pointer"
+                onClick={e => {
+                  e.stopPropagation();
+                  removeEntry(entry.id);
+                }}
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface DetailProps {
+  table: DatabaseListKey;
+  entry: DatabaseRecord;
+}
+
+function Detail({ table, entry }: DetailProps) {
+  const { dispatch } = useProjectStore();
+
+  const update = (changes: Partial<DatabaseRecord>) => {
+    dispatch({ type: 'UPDATE_DATABASE_ENTRY', table, id: entry.id, changes });
+  };
+
+  const renameId = (newId: string) => {
+    if (!newId.trim() || newId === entry.id) return;
+    dispatch({ type: 'RENAME_DATABASE_ENTRY', table, oldId: entry.id, newId });
+  };
+
+  const idField = (
+    <Input
+      label="ID"
+      value={entry.id}
+      onChange={e => renameId(e.target.value)}
+    />
+  );
+
+  switch (table) {
+    case 'actors':
+      return <ActorDetail entry={entry as unknown as ActorData} update={update} idField={idField} />;
+    case 'classes':
+      return <ClassDetail entry={entry as unknown as ClassData} update={update} idField={idField} />;
+    case 'skills':
+      return <SkillDetail entry={entry as unknown as SkillData} update={update} idField={idField} />;
+    case 'enemies':
+      return <EnemyDetail entry={entry as unknown as EnemyData} update={update} idField={idField} />;
+    case 'troops':
+      return <TroopDetail entry={entry as unknown as TroopData} update={update} idField={idField} />;
+    case 'quests':
+      return <QuestDetail entry={entry as unknown as QuestData} update={update} idField={idField} />;
+    case 'shops':
+      return <ShopDetail entry={entry as unknown as ShopData} update={update} idField={idField} />;
+    case 'switches':
+      return <SwitchDetail entry={entry as unknown as SwitchData} update={update} idField={idField} />;
+    case 'variables':
+      return <VariableDetail entry={entry as unknown as VariableData} update={update} idField={idField} />;
+    case 'commonEvents':
+      return <CommonEventDetail entry={entry as unknown as CommonEventData} update={update} idField={idField} />;
+  }
+}
+
+type UpdateFn = (changes: Partial<DatabaseRecord>) => void;
+
+function ActorDetail({ entry, update, idField }: { entry: ActorData; update: UpdateFn; idField: React.ReactNode }) {
+  const { state } = useProjectStore();
+  const classOptions = state.databases.classes.map(c => ({ value: c.id, label: c.name }));
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Select
+        label="Class"
+        value={entry.classId}
+        options={classOptions.length > 0 ? classOptions : [{ value: '', label: '(no classes)' }]}
+        onChange={v => update({ classId: v })}
+      />
+      <Input
+        label="Level"
+        type="number"
+        value={entry.level}
+        onChange={e => update({ level: Number(e.target.value) })}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="HP"
+          type="number"
+          value={entry.hp}
+          onChange={e => update({ hp: Number(e.target.value) })}
+        />
+        <Input
+          label="MP"
+          type="number"
+          value={entry.mp}
+          onChange={e => update({ mp: Number(e.target.value) })}
+        />
+      </div>
+      <StatsEditor stats={entry.baseStats} onChange={s => update({ baseStats: s })} />
+    </div>
+  );
+}
+
+function ClassDetail({ entry, update, idField }: { entry: ClassData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <p className="text-[12px] font-medium text-gray-500">Stat growth per level</p>
+      <StatsEditor stats={entry.growth} onChange={s => update({ growth: s })} />
+    </div>
+  );
+}
+
+function SkillDetail({ entry, update, idField }: { entry: SkillData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Input
+        label="Description"
+        value={entry.description}
+        onChange={e => update({ description: e.target.value })}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="MP cost"
+          type="number"
+          value={entry.mpCost}
+          onChange={e => update({ mpCost: Number(e.target.value) })}
+        />
+        <Input
+          label="Power %"
+          type="number"
+          value={entry.power}
+          onChange={e => update({ power: Number(e.target.value) })}
+        />
+      </div>
+      <Select
+        label="Target"
+        value={entry.target}
+        options={[
+          { value: 'singleEnemy', label: 'Single Enemy' },
+          { value: 'allEnemies', label: 'All Enemies' },
+          { value: 'singleAlly', label: 'Single Ally' },
+          { value: 'allAllies', label: 'All Allies' },
+          { value: 'self', label: 'Self' },
+        ]}
+        onChange={v => update({ target: v as SkillData['target'] })}
+      />
+    </div>
+  );
+}
+
+function EnemyDetail({ entry, update, idField }: { entry: EnemyData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="Exp reward"
+          type="number"
+          value={entry.exp}
+          onChange={e => update({ exp: Number(e.target.value) })}
+        />
+        <Input
+          label="Gold reward"
+          type="number"
+          value={entry.gold}
+          onChange={e => update({ gold: Number(e.target.value) })}
+        />
+      </div>
+      <StatsEditor stats={entry.stats} onChange={s => update({ stats: s })} />
+    </div>
+  );
+}
+
+function TroopDetail({ entry, update, idField }: { entry: TroopData; update: UpdateFn; idField: React.ReactNode }) {
+  const { state } = useProjectStore();
+  const enemies = state.databases.enemies;
+  const setMembers = (members: string[]) => update({ members });
+
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <div>
+        <label className="text-[12px] font-medium text-gray-500">Members</label>
+        <div className="space-y-1 mt-1">
+          {entry.members.map((memberId, i) => (
+            <div key={i} className="flex gap-1">
+              <select
+                className="flex-1 px-2 py-1 text-[12px] border border-gray-200 rounded"
+                value={memberId}
+                onChange={e => {
+                  const next = [...entry.members];
+                  next[i] = e.target.value;
+                  setMembers(next);
+                }}
+              >
+                {enemies.length === 0 && <option value="">(no enemies)</option>}
+                {enemies.map(en => (
+                  <option key={en.id} value={en.id}>
+                    {en.name}
+                  </option>
+                ))}
+                {!enemies.find(en => en.id === memberId) && memberId && (
+                  <option value={memberId}>{memberId} (unknown)</option>
+                )}
+              </select>
+              <Button
+                size="sm"
+                onClick={() => setMembers(entry.members.filter((_, j) => j !== i))}
+              >
+                ✕
+              </Button>
+            </div>
+          ))}
+        </div>
+        <Button
+          size="sm"
+          icon={<Plus size={12} />}
+          onClick={() => setMembers([...entry.members, enemies[0]?.id ?? ''])}
+        >
+          Add member
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function QuestDetail({ entry, update, idField }: { entry: QuestData; update: UpdateFn; idField: React.ReactNode }) {
+  const updateObjective = (i: number, description: string) => {
+    const next = entry.objectives.slice();
+    next[i] = { ...next[i], description };
+    update({ objectives: next });
+  };
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Title" value={entry.title} onChange={e => update({ title: e.target.value })} />
+      <Input
+        label="Summary"
+        value={entry.summary}
+        onChange={e => update({ summary: e.target.value })}
+      />
+      <div>
+        <label className="text-[12px] font-medium text-gray-500">Objectives</label>
+        <div className="space-y-1 mt-1">
+          {entry.objectives.map((obj, i) => (
+            <div key={obj.id} className="flex gap-1 items-center">
+              <span className="text-[11px] font-mono text-gray-400 w-16">{obj.id}</span>
+              <input
+                className="flex-1 px-2 py-1 text-[12px] border border-gray-200 rounded"
+                value={obj.description}
+                onChange={e => updateObjective(i, e.target.value)}
+              />
+            </div>
+          ))}
+          <Button
+            size="sm"
+            icon={<Plus size={12} />}
+            onClick={() =>
+              update({
+                objectives: [
+                  ...entry.objectives,
+                  { id: `obj_${entry.objectives.length + 1}`, description: '' },
+                ],
+              })
+            }
+          >
+            Add objective
+          </Button>
+        </div>
+      </div>
+      <p className="text-[12px] font-medium text-gray-500">Rewards</p>
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="Gold"
+          type="number"
+          value={entry.rewards.gold}
+          onChange={e => update({ rewards: { ...entry.rewards, gold: Number(e.target.value) } })}
+        />
+        <Input
+          label="Exp"
+          type="number"
+          value={entry.rewards.exp}
+          onChange={e => update({ rewards: { ...entry.rewards, exp: Number(e.target.value) } })}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ShopDetail({ entry, update, idField }: { entry: ShopData; update: UpdateFn; idField: React.ReactNode }) {
+  const { state } = useProjectStore();
+  const items = state.items.items;
+
+  const setListings = (listings: ShopData['listings']) => update({ listings });
+
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <div>
+        <label className="text-[12px] font-medium text-gray-500">Listings</label>
+        <div className="space-y-1 mt-1">
+          {entry.listings.map((listing, i) => (
+            <div key={i} className="flex gap-1 items-center">
+              <select
+                className="flex-1 px-2 py-1 text-[12px] border border-gray-200 rounded"
+                value={listing.itemId}
+                onChange={e => {
+                  const next = entry.listings.slice();
+                  next[i] = { ...next[i], itemId: e.target.value };
+                  setListings(next);
+                }}
+              >
+                {items.length === 0 && <option value="">(no items)</option>}
+                {items.map(it => (
+                  <option key={it.id} value={it.id}>
+                    {it.name}
+                  </option>
+                ))}
+                {!items.find(it => it.id === listing.itemId) && listing.itemId && (
+                  <option value={listing.itemId}>{listing.itemId} (unknown)</option>
+                )}
+              </select>
+              <input
+                className="w-24 px-2 py-1 text-[12px] border border-gray-200 rounded"
+                type="number"
+                value={listing.price}
+                onChange={e => {
+                  const next = entry.listings.slice();
+                  next[i] = { ...next[i], price: Number(e.target.value) };
+                  setListings(next);
+                }}
+              />
+              <Button size="sm" onClick={() => setListings(entry.listings.filter((_, j) => j !== i))}>
+                ✕
+              </Button>
+            </div>
+          ))}
+        </div>
+        <Button
+          size="sm"
+          icon={<Plus size={12} />}
+          onClick={() =>
+            setListings([
+              ...entry.listings,
+              { itemId: items[0]?.id ?? '', price: items[0]?.price ?? 1 },
+            ])
+          }
+        >
+          Add listing
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SwitchDetail({ entry, update, idField }: { entry: SwitchData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Select
+        label="Initial value"
+        value={entry.initial ? 'true' : 'false'}
+        options={[
+          { value: 'false', label: 'OFF' },
+          { value: 'true', label: 'ON' },
+        ]}
+        onChange={v => update({ initial: v === 'true' })}
+      />
+    </div>
+  );
+}
+
+function VariableDetail({
+  entry,
+  update,
+  idField,
+}: {
+  entry: VariableData;
+  update: UpdateFn;
+  idField: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Input
+        label="Initial value"
+        type="number"
+        value={entry.initial}
+        onChange={e => update({ initial: Number(e.target.value) })}
+      />
+    </div>
+  );
+}
+
+function CommonEventDetail({
+  entry,
+  update,
+  idField,
+}: {
+  entry: CommonEventData;
+  update: UpdateFn;
+  idField: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Select
+        label="Trigger"
+        value={entry.trigger}
+        options={[
+          { value: 'manual', label: 'Manual (callCommonEvent)' },
+          { value: 'autorun', label: 'Autorun (Phase 7)' },
+          { value: 'parallel', label: 'Parallel (Phase 7)' },
+        ]}
+        onChange={v => update({ trigger: v as CommonEventData['trigger'] })}
+      />
+      <p className="text-[11px] text-gray-500">
+        Command list editing for common events arrives in a later slice. The runtime
+        already accepts the schema; for now use this tab to declare the trigger and
+        name.
+      </p>
+      <p className="text-[11px] text-gray-500">Commands ({entry.commands.length})</p>
+    </div>
+  );
+}
+
+function StatsEditor({ stats, onChange }: { stats: Stats; onChange(s: Stats): void }) {
+  const fields: Array<keyof Stats> = [
+    'maxHp',
+    'maxMp',
+    'attack',
+    'defense',
+    'magicAttack',
+    'magicDefense',
+    'agility',
+    'luck',
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {fields.map(field => (
+        <Input
+          key={field}
+          label={field}
+          type="number"
+          value={stats[field]}
+          onChange={e => onChange({ ...stats, [field]: Number(e.target.value) })}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SystemPanel({ system }: { system: SystemData }) {
+  const { state, dispatch } = useProjectStore();
+  const update = (changes: Partial<SystemData>) =>
+    dispatch({ type: 'UPDATE_SYSTEM_DATA', changes });
+
+  const actors = state.databases.actors;
+
+  const setStartingParty = (party: string[]) => update({ startingParty: party });
+
+  return (
+    <div className="space-y-3 max-w-md">
+      <Input
+        label="Starting gold"
+        type="number"
+        value={system.startingGold}
+        onChange={e => update({ startingGold: Number(e.target.value) })}
+      />
+      <Input
+        label="Default BGM"
+        value={system.defaultBgm ?? ''}
+        onChange={e => update({ defaultBgm: e.target.value || undefined })}
+      />
+      <Input
+        label="Window tint"
+        value={system.windowTint ?? ''}
+        onChange={e => update({ windowTint: e.target.value || undefined })}
+      />
+      <Input
+        label="Battle background"
+        value={system.battleBackground ?? ''}
+        onChange={e => update({ battleBackground: e.target.value || undefined })}
+      />
+      <div>
+        <label className="text-[12px] font-medium text-gray-500">Starting party (actor ids)</label>
+        <div className="space-y-1 mt-1">
+          {system.startingParty.map((actorId, i) => (
+            <div key={i} className="flex gap-1">
+              <select
+                className="flex-1 px-2 py-1 text-[12px] border border-gray-200 rounded"
+                value={actorId}
+                onChange={e => {
+                  const next = system.startingParty.slice();
+                  next[i] = e.target.value;
+                  setStartingParty(next);
+                }}
+              >
+                {actors.length === 0 && <option value="">(no actors)</option>}
+                {actors.map(a => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+                {!actors.find(a => a.id === actorId) && actorId && (
+                  <option value={actorId}>{actorId} (unknown)</option>
+                )}
+              </select>
+              <Button
+                size="sm"
+                onClick={() => setStartingParty(system.startingParty.filter((_, j) => j !== i))}
+              >
+                ✕
+              </Button>
+            </div>
+          ))}
+          <Button
+            size="sm"
+            icon={<Plus size={12} />}
+            onClick={() => setStartingParty([...system.startingParty, actors[0]?.id ?? ''])}
+          >
+            Add actor
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DatabaseScreen() {
+  const { state } = useProjectStore();
+  const [tab, setTab] = useState<DatabaseListKey | 'system'>('actors');
+  const [selectedId, setSelectedId] = useState<string>('');
+
+  const databases = state.databases;
+  const entries =
+    tab === 'system'
+      ? []
+      : ((databases[tab] as unknown) as DatabaseRecord[]);
+
+  const selectedEntry = entries.find(e => e.id === selectedId) ?? entries[0];
+
+  // keep selection consistent when switching tabs
+  const ensureSelection = (key: DatabaseListKey | 'system') => {
+    setTab(key);
+    if (key === 'system') {
+      setSelectedId('');
+      return;
+    }
+    const list = (databases[key] as unknown) as DatabaseRecord[];
+    setSelectedId(list[0]?.id ?? '');
+  };
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex items-center border-b border-gray-200 px-4 gap-1 bg-white">
+        {TAB_ORDER.map(t => (
+          <button
+            key={t.key}
+            onClick={() => ensureSelection(t.key)}
+            className={`px-3 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
+              tab === t.key
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {t.label}
+            {t.key !== 'system' && (
+              <span className="ml-1.5 text-[11px] text-gray-400">
+                {((databases[t.key as DatabaseListKey] as unknown) as DatabaseRecord[]).length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 flex overflow-hidden">
+        {tab === 'system' ? (
+          <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <h2 className="text-[14px] font-semibold mb-3 text-gray-800">System</h2>
+            <SystemPanel system={databases.system} />
+          </div>
+        ) : (
+          <>
+            <ListSidebar
+              table={tab as DatabaseListKey}
+              entries={entries}
+              selectedId={selectedEntry?.id ?? null}
+              onSelect={setSelectedId}
+            />
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              {selectedEntry ? (
+                <Detail table={tab as DatabaseListKey} entry={selectedEntry} />
+              ) : (
+                <p className="text-[13px] text-gray-400">No entries — add one to begin.</p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      {/* hint that DATABASE_LIST_KEYS stays referenced */}
+      <span className="hidden">{DATABASE_LIST_KEYS.length}</span>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { FileSystemAdapter } from '../FileSystemAdapter';
 import type { FullProjectState, RpgBridge } from '../types';
+import { mergeDatabases } from '../defaultDatabases';
 
 declare global {
   interface Window {
@@ -58,6 +59,7 @@ const sampleState: FullProjectState = {
     },
   },
   items: { items: [] },
+  databases: mergeDatabases(undefined),
 };
 
 describe('FileSystemAdapter (Phase 5 IPC wiring)', () => {

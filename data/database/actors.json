@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "actors": [
+    {
+      "id": "arc",
+      "name": "Arc",
+      "classId": "hero",
+      "level": 1,
+      "hp": 18,
+      "mp": 6,
+      "baseStats": {
+        "maxHp": 18,
+        "maxMp": 6,
+        "attack": 6,
+        "defense": 4,
+        "magicAttack": 3,
+        "magicDefense": 3,
+        "agility": 5,
+        "luck": 4
+      },
+      "equipment": {
+        "weapon": "iron_sword",
+        "armor": null,
+        "accessory": null
+      },
+      "skills": ["slash"]
+    }
+  ]
+}

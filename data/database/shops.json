@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "shops": [
+    {
+      "id": "town_shop",
+      "name": "Town Shop",
+      "listings": [
+        { "itemId": "potion", "price": 25 }
+      ]
+    }
+  ]
+}

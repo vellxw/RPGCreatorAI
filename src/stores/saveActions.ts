@@ -24,7 +24,12 @@ export async function performSave(
   options: { exportAfterSave?: boolean } = {},
 ): Promise<SaveOutcome> {
   const adapter = getProjectDataAdapter();
-  const fullState = { project: state.project, maps: state.maps, items: state.items };
+  const fullState = {
+    project: state.project,
+    maps: state.maps,
+    items: state.items,
+    databases: state.databases,
+  };
 
   const report = validateProject(fullState);
   dispatch({ type: 'VALIDATE' });
@@ -69,7 +74,12 @@ export async function performSave(
 }
 
 export async function performExport(state: ProjectStoreState): Promise<void> {
-  const fullState = { project: state.project, maps: state.maps, items: state.items };
+  const fullState = {
+    project: state.project,
+    maps: state.maps,
+    items: state.items,
+    databases: state.databases,
+  };
   exportToFile(fullState);
 }
 

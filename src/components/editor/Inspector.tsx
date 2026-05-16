@@ -28,6 +28,8 @@ function CommandRow({ index, command }: { index: number; command: EventCommand }
         return `${cmd.mapId} (${cmd.x}, ${cmd.y})`;
       case 'playSound':
         return cmd.soundId;
+      default:
+        return cmd.type;
     }
   };
 

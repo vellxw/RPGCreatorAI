@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "startingParty": ["arc"],
+  "startingGold": 50,
+  "defaultBgm": "town_theme",
+  "windowTint": "indigo",
+  "battleBackground": "grass_field"
+}

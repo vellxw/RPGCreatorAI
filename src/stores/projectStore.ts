@@ -1,14 +1,19 @@
 import { createContext, useContext } from 'react';
 import type { Dispatch } from 'react';
 import type {
+  CommonEventData,
+  DatabaseEntries,
+  DatabaseListKey,
   EventCommand,
   GameEvent,
   ItemDatabase,
   MapData,
   ProjectData,
+  SystemData,
   ValidationMessage,
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
+import { mergeDatabases } from '../adapters/defaultDatabases';
 import { validateProject } from '../validation/validateProject';
 
 // ---------------------------------------------------------------------------
@@ -19,6 +24,7 @@ export interface ProjectStoreState {
   project: ProjectData;
   maps: Record<string, MapData>;
   items: ItemDatabase;
+  databases: DatabaseEntries;
   dirty: boolean;
   lastSavedAt: string | null;
   errors: ValidationMessage[];
@@ -63,8 +69,42 @@ export type ProjectAction =
       eventId: string;
       path: number[];
     }
+  // ---- new database actions ------------------------------------------------
+  | {
+      type: 'ADD_DATABASE_ENTRY';
+      table: DatabaseListKey;
+      entry: DatabaseRecord;
+    }
+  | {
+      type: 'UPDATE_DATABASE_ENTRY';
+      table: DatabaseListKey;
+      id: string;
+      changes: Partial<DatabaseRecord>;
+    }
+  | {
+      type: 'REMOVE_DATABASE_ENTRY';
+      table: DatabaseListKey;
+      id: string;
+    }
+  | {
+      type: 'RENAME_DATABASE_ENTRY';
+      table: DatabaseListKey;
+      oldId: string;
+      newId: string;
+    }
+  | {
+      type: 'UPDATE_SYSTEM_DATA';
+      changes: Partial<SystemData>;
+    }
+  | {
+      type: 'UPDATE_COMMON_EVENT_COMMANDS';
+      commonEventId: string;
+      commands: CommonEventData['commands'];
+    }
   | { type: 'MARK_SAVED'; at?: string }
   | { type: 'VALIDATE' };
+
+export type DatabaseRecord = { id: string } & Record<string, unknown>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -86,6 +126,16 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
   };
 }
 
+function withDatabases(
+  state: ProjectStoreState,
+  mut: (db: DatabaseEntries) => boolean,
+): ProjectStoreState {
+  const cloned = deepClone(state.databases);
+  const changed = mut(cloned);
+  if (!changed) return state;
+  return { ...state, dirty: true, databases: cloned };
+}
+
 function applyEventChanges(
   event: GameEvent,
   changes: Partial<Omit<GameEvent, 'commands'>>,
@@ -102,7 +152,9 @@ function setCommandAtPath(commands: EventCommand[], path: number[], replacement:
     return result;
   }
   const target = result[head];
-  if (target.type !== 'ifFlag') return commands; // path invalid
+  if (target.type !== 'ifFlag' && target.type !== 'ifSwitch' && target.type !== 'ifVariable') {
+    return commands; // path invalid
+  }
   const branchIdx = rest[0];
   const branchPath = rest.slice(1);
   const branch = branchIdx === 0 ? target.then : target.else;
@@ -124,7 +176,9 @@ function removeCommandAtPath(commands: EventCommand[], path: number[]): EventCom
   }
   const result = commands.slice();
   const target = result[head];
-  if (target.type !== 'ifFlag') return commands;
+  if (target.type !== 'ifFlag' && target.type !== 'ifSwitch' && target.type !== 'ifVariable') {
+    return commands;
+  }
   const branchIdx = rest[0];
   const branchPath = rest.slice(1);
   const branch = branchIdx === 0 ? target.then : target.else;
@@ -141,9 +195,17 @@ function removeCommandAtPath(commands: EventCommand[], path: number[]): EventCom
 // ---------------------------------------------------------------------------
 
 export const initialProjectStoreState: ProjectStoreState = {
-  project: { schemaVersion: 1, title: '', startMapId: '', startPosition: { x: 0, y: 0, direction: 'down' }, maps: [], database: { items: '' } },
+  project: {
+    schemaVersion: 1,
+    title: '',
+    startMapId: '',
+    startPosition: { x: 0, y: 0, direction: 'down' },
+    maps: [],
+    database: { items: '' },
+  },
   maps: {},
   items: { items: [] },
+  databases: mergeDatabases(undefined),
   dirty: false,
   lastSavedAt: null,
   errors: [],
@@ -153,14 +215,22 @@ export const initialProjectStoreState: ProjectStoreState = {
 export function projectReducer(state: ProjectStoreState, action: ProjectAction): ProjectStoreState {
   switch (action.type) {
     case 'LOAD_PROJECT': {
+      const payload = action.payload;
       const next: ProjectStoreState = {
         ...state,
-        project: deepClone(action.payload.project),
-        maps: deepClone(action.payload.maps),
-        items: deepClone(action.payload.items),
+        project: deepClone(payload.project),
+        maps: deepClone(payload.maps),
+        items: deepClone(payload.items),
+        databases: mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
         dirty: false,
       };
-      const report = validateProject(action.payload);
+      const fullState: FullProjectState = {
+        project: next.project,
+        maps: next.maps,
+        items: next.items,
+        databases: next.databases,
+      };
+      const report = validateProject(fullState);
       next.errors = report.errors;
       next.warnings = report.warnings;
       return next;
@@ -181,7 +251,6 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
       });
 
     case 'RENAME_EVENT': {
-      // Block rename if target id collides with another event in the same map.
       const map = state.maps[action.mapId];
       if (!map) return state;
       if (map.events.some(e => e.id === action.newId && e.id !== action.oldId)) {
@@ -215,6 +284,57 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
         event.commands = removeCommandAtPath(event.commands, action.path);
       });
 
+    case 'ADD_DATABASE_ENTRY':
+      return withDatabases(state, db => {
+        const list = db[action.table] as unknown as DatabaseRecord[];
+        if (list.some(e => e.id === action.entry.id)) return false;
+        list.push(deepClone(action.entry));
+        return true;
+      });
+
+    case 'UPDATE_DATABASE_ENTRY':
+      return withDatabases(state, db => {
+        const list = db[action.table] as unknown as DatabaseRecord[];
+        const idx = list.findIndex(e => e.id === action.id);
+        if (idx === -1) return false;
+        list[idx] = { ...list[idx], ...action.changes, id: list[idx].id };
+        return true;
+      });
+
+    case 'REMOVE_DATABASE_ENTRY':
+      return withDatabases(state, db => {
+        const list = db[action.table] as unknown as DatabaseRecord[];
+        const idx = list.findIndex(e => e.id === action.id);
+        if (idx === -1) return false;
+        list.splice(idx, 1);
+        return true;
+      });
+
+    case 'RENAME_DATABASE_ENTRY':
+      return withDatabases(state, db => {
+        if (action.oldId === action.newId) return false;
+        const list = db[action.table] as unknown as DatabaseRecord[];
+        if (list.some(e => e.id === action.newId)) return false;
+        const target = list.find(e => e.id === action.oldId);
+        if (!target) return false;
+        target.id = action.newId;
+        return true;
+      });
+
+    case 'UPDATE_SYSTEM_DATA':
+      return withDatabases(state, db => {
+        db.system = { ...db.system, ...action.changes };
+        return true;
+      });
+
+    case 'UPDATE_COMMON_EVENT_COMMANDS':
+      return withDatabases(state, db => {
+        const target = db.commonEvents.find(e => e.id === action.commonEventId);
+        if (!target) return false;
+        target.commands = deepClone(action.commands);
+        return true;
+      });
+
     case 'MARK_SAVED':
       return {
         ...state,
@@ -227,6 +347,7 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
         project: state.project,
         maps: state.maps,
         items: state.items,
+        databases: state.databases,
       });
       return { ...state, errors: report.errors, warnings: report.warnings };
     }
@@ -258,9 +379,16 @@ export function flattenCommands(
     cmds.forEach((cmd, i) => {
       const path = [...prefix, i];
       result.push({ command: cmd, depth, path });
-      if (cmd.type === 'ifFlag') {
+      if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
         walk(cmd.then, depth + 1, [...path, 0]);
         walk(cmd.else, depth + 1, [...path, 1]);
+      } else if (cmd.type === 'showChoices') {
+        cmd.choices.forEach((choice, j) => {
+          walk(choice.commands, depth + 1, [...path, j]);
+        });
+      } else if (cmd.type === 'startBattle') {
+        if (cmd.victoryBranch) walk(cmd.victoryBranch, depth + 1, [...path, 0]);
+        if (cmd.defeatBranch) walk(cmd.defeatBranch, depth + 1, [...path, 1]);
       }
     });
   }

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "troops": [
+    {
+      "id": "slime_pair",
+      "name": "Slime x2",
+      "members": ["slime", "slime"]
+    }
+  ]
+}

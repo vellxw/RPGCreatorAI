@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "commonEvents": [
+    {
+      "id": "save_reminder",
+      "name": "Save Reminder",
+      "trigger": "manual",
+      "commands": [
+        { "type": "showText", "text": "Press F5 to save your game." }
+      ]
+    }
+  ]
+}

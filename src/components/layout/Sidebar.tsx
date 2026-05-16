@@ -13,7 +13,7 @@ const navItems: NavItem[] = [
   { id: 'project', label: 'Project', icon: <FolderOpen size={18} />, screen: 'editor' },
   { id: 'maps', label: 'Maps', icon: <Map size={18} />, screen: 'editor' },
   { id: 'events', label: 'Events', icon: <Calendar size={18} />, screen: 'events' },
-  { id: 'database', label: 'Database', icon: <Database size={18} />, screen: 'editor' },
+  { id: 'database', label: 'Database', icon: <Database size={18} />, screen: 'database' },
   { id: 'dialogue', label: 'Dialogue', icon: <MessageSquare size={18} />, screen: 'editor' },
   { id: 'assets', label: 'Assets', icon: <Image size={18} />, screen: 'editor' },
   { id: 'ai-tools', label: 'AI Tools', icon: <Sparkles size={18} />, screen: 'ai-tools' },
@@ -27,6 +27,7 @@ export function Sidebar() {
     if (item.screen === state.activeScreen) {
       if (item.id === 'maps' && state.activeScreen === 'editor') return true;
       if (item.id === 'events' && state.activeScreen === 'events') return true;
+      if (item.id === 'database' && state.activeScreen === 'database') return true;
       if (item.id === 'ai-tools' && state.activeScreen === 'ai-tools') return true;
     }
     return false;

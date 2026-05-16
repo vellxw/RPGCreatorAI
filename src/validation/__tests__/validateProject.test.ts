@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { validateProject, validateUniqueEventIds } from '../validateProject';
 import type { FullProjectState } from '../../adapters/types';
 import type { GameEvent, MapData } from '../../types/project';
+import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function makeMap(overrides: Partial<MapData> = {}): MapData {
   const width = overrides.width ?? 4;
@@ -34,6 +35,7 @@ function makeProject(maps: Record<string, MapData>): FullProjectState {
     },
     maps,
     items: { items: [{ id: 'potion', name: 'Potion', description: '', type: 'consumable' }] },
+    databases: mergeDatabases(undefined),
   };
 }
 

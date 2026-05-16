@@ -43,6 +43,28 @@ pub struct MapReference {
 #[serde(rename_all = "camelCase")]
 pub struct DatabaseRefs {
     pub items: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actors: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub classes: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skills: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enemies: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub troops: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quests: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shops: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub switches: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variables: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "commonEvents")]
+    pub common_events: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -62,6 +84,12 @@ pub struct FullProjectState {
     pub project: ProjectData,
     pub maps: HashMap<String, serde_json::Value>,
     pub items: serde_json::Value,
+    /// Phase 6 — additional database shards keyed by name (actors, classes,
+    /// skills, enemies, troops, quests, shops, switches, variables,
+    /// commonEvents) plus a `system` object. The renderer remains the
+    /// authoritative validator; the shell just round-trips JSON values.
+    #[serde(default)]
+    pub databases: serde_json::Value,
 }
 
 #[derive(Serialize, Default)]
@@ -159,6 +187,48 @@ pub fn fs_write_project(
     )
     .map_err(|e| e.to_string())?;
 
+    // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
+    // so old runtime/editor pipelines keep parsing them.
+    if let serde_json::Value::Object(map) = &project_state.databases {
+        let pairs: [(&str, Option<&String>); 11] = [
+            ("actors", project_state.project.database.actors.as_ref()),
+            ("classes", project_state.project.database.classes.as_ref()),
+            ("skills", project_state.project.database.skills.as_ref()),
+            ("enemies", project_state.project.database.enemies.as_ref()),
+            ("troops", project_state.project.database.troops.as_ref()),
+            ("quests", project_state.project.database.quests.as_ref()),
+            ("shops", project_state.project.database.shops.as_ref()),
+            ("system", project_state.project.database.system.as_ref()),
+            ("switches", project_state.project.database.switches.as_ref()),
+            ("variables", project_state.project.database.variables.as_ref()),
+            (
+                "commonEvents",
+                project_state.project.database.common_events.as_ref(),
+            ),
+        ];
+        for (key, maybe_rel) in pairs {
+            let Some(rel) = maybe_rel else { continue };
+            let Some(payload) = map.get(key) else { continue };
+            let wrapped = if key == "system" {
+                let mut m = serde_json::Map::new();
+                m.insert("schemaVersion".into(), serde_json::Value::from(1));
+                if let serde_json::Value::Object(sys) = payload {
+                    for (k, v) in sys {
+                        if k == "schemaVersion" {
+                            continue;
+                        }
+                        m.insert(k.clone(), v.clone());
+                    }
+                }
+                serde_json::Value::Object(m)
+            } else {
+                serde_json::json!({ "schemaVersion": 1, key: payload })
+            };
+            write_with_backup(&canonical, rel, &wrapped, &mut warnings)
+                .map_err(|e| e.to_string())?;
+        }
+    }
+
     // 4. prune backups + ensure .gitignore mentions .backups
     let _ = prune_backups(&canonical, MAX_BACKUPS_PER_FILE);
     if let Err(e) = ensure_gitignore_mentions_backups(&canonical) {
@@ -227,11 +297,59 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     let items: serde_json::Value =
         read_json(&items_path).map_err(|e| format!("items.json: {e}"))?;
 
+    // Phase 6 — read every additional database shard if its path is declared
+    // and the file exists on disk. Missing files are tolerated and surface as
+    // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
+    let mut databases = serde_json::Map::new();
+    let pairs: [(&str, Option<&String>); 11] = [
+        ("actors", project.database.actors.as_ref()),
+        ("classes", project.database.classes.as_ref()),
+        ("skills", project.database.skills.as_ref()),
+        ("enemies", project.database.enemies.as_ref()),
+        ("troops", project.database.troops.as_ref()),
+        ("quests", project.database.quests.as_ref()),
+        ("shops", project.database.shops.as_ref()),
+        ("system", project.database.system.as_ref()),
+        ("switches", project.database.switches.as_ref()),
+        ("variables", project.database.variables.as_ref()),
+        ("commonEvents", project.database.common_events.as_ref()),
+    ];
+    for (key, maybe_rel) in pairs {
+        if let Some(rel) = maybe_rel {
+            let path = join_inside(root, rel).map_err(|e| e.to_string())?;
+            if path.exists() {
+                let value: serde_json::Value =
+                    read_json(&path).map_err(|e| format!("{key}.json: {e}"))?;
+                let inner = extract_database_payload(key, value);
+                databases.insert(key.to_string(), inner);
+            }
+        }
+    }
+
     Ok(FullProjectState {
         project,
         maps,
         items,
+        databases: serde_json::Value::Object(databases),
     })
+}
+
+/// Most database shards on disk wrap their payload in `{ "schemaVersion": 1, "<key>": [...] }`.
+/// The renderer's in-memory shape is the unwrapped list (or system object).
+/// Round-trip safely by extracting the inner field when it exists; otherwise
+/// pass the raw value through.
+fn extract_database_payload(key: &str, value: serde_json::Value) -> serde_json::Value {
+    if let serde_json::Value::Object(mut map) = value {
+        if key == "system" {
+            map.remove("schemaVersion");
+            return serde_json::Value::Object(map);
+        }
+        if let Some(inner) = map.remove(key) {
+            return inner;
+        }
+        return serde_json::Value::Object(map);
+    }
+    value
 }
 
 fn must_contain_project_json(root: &Path) -> Result<(), String> {
@@ -515,5 +633,158 @@ mod tests {
         ensure_gitignore_mentions_backups(&root).unwrap();
         let body2 = fs::read_to_string(root.join(".gitignore")).unwrap();
         assert_eq!(body, body2);
+    }
+
+    fn make_project_with_databases(root: &Path) {
+        fs::create_dir_all(root.join("data/maps")).unwrap();
+        fs::create_dir_all(root.join("data/database")).unwrap();
+        let project = serde_json::json!({
+            "schemaVersion": 1,
+            "title": "T",
+            "startMapId": "town",
+            "startPosition": { "x": 0, "y": 0, "direction": "down" },
+            "maps": [{ "id": "town", "path": "data/maps/town.json" }],
+            "database": {
+                "items": "data/database/items.json",
+                "actors": "data/database/actors.json",
+                "system": "data/database/system.json",
+                "switches": "data/database/switches.json"
+            }
+        });
+        fs::write(
+            root.join("data/project.json"),
+            serde_json::to_string_pretty(&project).unwrap(),
+        )
+        .unwrap();
+        let map = serde_json::json!({
+            "schemaVersion": 1, "id": "town", "name": "Town",
+            "width": 1, "height": 1, "tileSize": 32,
+            "layers": [
+                { "name": "g", "type": "visual", "tiles": [1] },
+                { "name": "c", "type": "collision", "tiles": [0] }
+            ],
+            "events": []
+        });
+        fs::write(
+            root.join("data/maps/town.json"),
+            serde_json::to_string_pretty(&map).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/items.json"),
+            r#"{"schemaVersion":1,"items":[]}"#,
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/actors.json"),
+            r#"{"schemaVersion":1,"actors":[{"id":"arc","name":"Arc"}]}"#,
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/system.json"),
+            r#"{"schemaVersion":1,"startingParty":["arc"],"startingGold":50}"#,
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/switches.json"),
+            r#"{"schemaVersion":1,"switches":[{"id":"s1","name":"S1","initial":false}]}"#,
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn read_project_extracts_database_shards() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path().canonicalize().unwrap();
+        make_project_with_databases(&root);
+
+        let result = read_project_at(&root).unwrap();
+        let dbs = result.databases.as_object().unwrap();
+        assert!(dbs.contains_key("actors"));
+        assert!(dbs.contains_key("system"));
+        assert!(dbs.contains_key("switches"));
+        // actors should be unwrapped to the list, not the wrapping object
+        let actors = dbs.get("actors").unwrap().as_array().unwrap();
+        assert_eq!(actors.len(), 1);
+        assert_eq!(actors[0].get("id").unwrap(), "arc");
+        // system should be unwrapped to the bare object
+        let system = dbs.get("system").unwrap().as_object().unwrap();
+        assert_eq!(system.get("startingGold").unwrap(), 50);
+    }
+
+    #[test]
+    fn write_then_read_round_trips_databases() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path().canonicalize().unwrap();
+        make_project_with_databases(&root);
+
+        // Read original.
+        let original = read_project_at(&root).unwrap();
+
+        // Mutate one switch and one actor name.
+        let mut state = original;
+        if let serde_json::Value::Object(ref mut dbs) = state.databases {
+            if let Some(actors) = dbs.get_mut("actors") {
+                if let Some(arr) = actors.as_array_mut() {
+                    if let Some(first) = arr.get_mut(0) {
+                        if let Some(obj) = first.as_object_mut() {
+                            obj.insert("name".into(), serde_json::Value::from("Renamed"));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Write back via the same code paths the IPC uses.
+        let mut warnings = Vec::new();
+        // Re-implement what fs_write_project does for databases inline so we
+        // don't need a State<AppState>.
+        if let serde_json::Value::Object(map) = &state.databases {
+            let pairs: [(&str, Option<&String>); 11] = [
+                ("actors", state.project.database.actors.as_ref()),
+                ("classes", state.project.database.classes.as_ref()),
+                ("skills", state.project.database.skills.as_ref()),
+                ("enemies", state.project.database.enemies.as_ref()),
+                ("troops", state.project.database.troops.as_ref()),
+                ("quests", state.project.database.quests.as_ref()),
+                ("shops", state.project.database.shops.as_ref()),
+                ("system", state.project.database.system.as_ref()),
+                ("switches", state.project.database.switches.as_ref()),
+                ("variables", state.project.database.variables.as_ref()),
+                ("commonEvents", state.project.database.common_events.as_ref()),
+            ];
+            for (key, maybe_rel) in pairs {
+                let Some(rel) = maybe_rel else { continue };
+                let Some(payload) = map.get(key) else { continue };
+                let wrapped = if key == "system" {
+                    let mut m = serde_json::Map::new();
+                    m.insert("schemaVersion".into(), serde_json::Value::from(1));
+                    if let serde_json::Value::Object(sys) = payload {
+                        for (k, v) in sys {
+                            if k == "schemaVersion" {
+                                continue;
+                            }
+                            m.insert(k.clone(), v.clone());
+                        }
+                    }
+                    serde_json::Value::Object(m)
+                } else {
+                    serde_json::json!({ "schemaVersion": 1, key: payload })
+                };
+                write_with_backup(&root, rel, &wrapped, &mut warnings).unwrap();
+            }
+        }
+
+        // Reload to confirm the new value persisted.
+        let reloaded = read_project_at(&root).unwrap();
+        let actors = reloaded
+            .databases
+            .as_object()
+            .unwrap()
+            .get("actors")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(actors[0].get("name").unwrap(), "Renamed");
     }
 }

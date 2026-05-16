@@ -1,10 +1,31 @@
 {
+  "schemaVersion": 1,
   "items": [
     {
       "id": "potion",
-      "name": "Pocion",
-      "description": "Restaura vida.",
-      "type": "consumable"
+      "name": "Potion",
+      "description": "Restores 20 HP when used.",
+      "type": "consumable",
+      "price": 25,
+      "effect": { "hp": 20 }
+    },
+    {
+      "id": "iron_sword",
+      "name": "Iron Sword",
+      "description": "A sturdy sword. +3 attack.",
+      "type": "weapon",
+      "price": 80,
+      "slot": "weapon",
+      "modifiers": { "attack": 3 }
+    },
+    {
+      "id": "leather_armor",
+      "name": "Leather Armor",
+      "description": "Light protection. +2 defense.",
+      "type": "armor",
+      "price": 60,
+      "slot": "armor",
+      "modifiers": { "defense": 2 }
     }
   ]
 }

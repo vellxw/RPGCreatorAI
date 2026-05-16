@@ -231,9 +231,33 @@ export function TopToolbar() {
     </>
   );
 
+  const renderDatabaseToolbar = () => (
+    <>
+      <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
+        <span>Project</span>
+        <span>/</span>
+        <span className="text-gray-800 font-medium">Database</span>
+      </div>
+      <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
+      <div className="flex items-center gap-2">
+        <Button icon={<Save size={14} />} onClick={handleSave}>
+          Save
+        </Button>
+        <Button
+          variant="primary"
+          icon={<CheckCircle2 size={14} />}
+          onClick={() => projectDispatch({ type: 'VALIDATE' })}
+        >
+          Validate
+        </Button>
+      </div>
+    </>
+  );
+
   const toolbarContent: Record<Screen, () => React.ReactNode> = {
     editor: renderEditorToolbar,
     events: renderEventToolbar,
+    database: renderDatabaseToolbar,
     'ai-tools': renderAIToolbar,
     playtest: renderPlaytestToolbar,
   };
