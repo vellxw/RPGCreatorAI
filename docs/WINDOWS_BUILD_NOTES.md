@@ -1,0 +1,85 @@
+# Windows Build Notes
+
+## TL;DR
+On Windows, build the C++ runtime **outside** the OneDrive-synced repo path. The provided scripts already do this by default.
+
+```cmd
+:: One-click build + test (out-of-OneDrive)
+scripts\dev\verify-runtime.bat
+
+:: Same, plus a 3-second runtime smoke check
+powershell -ExecutionPolicy Bypass -File scripts\dev\verify.ps1
+```
+
+Both scripts default the build directory to `%LOCALAPPDATA%\RPGCreatorAI\build`.
+
+## Why
+The repository on this machine lives under `C:\Users\<user>\OneDrive\Escritorio\RPGCreatorAI`. OneDrive's filter driver intermittently locks files inside `build/_deps/` while CMake's `FetchContent` is performing rename steps (e.g. `json-populate1234/json` -> `json-src`). The symptom is:
+
+```
+file RENAME failed to rename
+    .../build/_deps/ex-json-populate1234/json
+to
+    .../build/_deps/json-src
+because: Acceso denegado.
+```
+
+The fix is to put the build tree somewhere OneDrive does not sync. `%LOCALAPPDATA%` (`C:\Users\<user>\AppData\Local`) is excluded from OneDrive sync by default, so it is the safest target.
+
+## Overriding the build directory
+
+### `verify-runtime.bat`
+```cmd
+set BUILD_DIR=D:\rpg-build
+scripts\dev\verify-runtime.bat
+```
+
+### `verify.ps1`
+```powershell
+.\scripts\dev\verify.ps1 -BuildDir D:\rpg-build
+.\scripts\dev\verify.ps1 -Clean -SkipSmoke    # clean reconfigure, no smoke
+```
+
+### `build_bootstrap.bat`
+```cmd
+set BUILD_DIR=D:\rpg-build & build_bootstrap.bat
+```
+
+If you really want an in-repo build (not recommended on OneDrive systems), point `BUILD_DIR` at a folder inside the repo:
+```cmd
+set BUILD_DIR=%CD%\build & build_bootstrap.bat
+```
+
+## Cleaning up
+
+The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:
+```cmd
+rmdir /s /q "%LOCALAPPDATA%\RPGCreatorAI\build"
+```
+
+## PowerShell compatibility
+
+`scripts\dev\verify.ps1` no longer uses `New-TemporaryFile`; some older Windows PowerShell versions ship without it. The script now uses `[System.IO.Path]::GetTempFileName()`, which is available in Windows PowerShell 5.1, PowerShell 7+, and any host with .NET available.
+
+## Required tools
+
+- Visual Studio 2022 Build Tools (or VS 2022 Community/Pro/Enterprise) with the C++ workload
+- CMake (any modern 3.x or 4.x — we already pin `CMAKE_POLICY_VERSION_MINIMUM=3.5` for FetchContent)
+- Ninja (the scripts auto-detect winget-installed Ninja)
+
+The scripts auto-discover all three.
+
+## Frontend
+
+The frontend is unaffected by the OneDrive issue because `node_modules/` and `dist/` do not contain rename-heavy CMake metadata. Standard:
+
+```cmd
+npm install
+npm run typecheck
+npm run build
+npm test
+```
+
+## Runtime smoke
+
+`scripts\dev\smoke-runtime.ps1` accepts `-BuildDir` and now defaults to the same `%LOCALAPPDATA%\RPGCreatorAI\build` location. It launches the runtime from the repo root so `data/` paths resolve correctly, captures stdout/stderr, and fails on any `[ERROR]` lines.

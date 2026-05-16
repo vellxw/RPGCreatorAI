@@ -99,3 +99,32 @@ Append-only log of major validation runs. Newest entries on top.
 ### Final pass/fail
 - Frontend: PASS
 - C++ runtime: unmodified, build blocked by OneDrive sync (not a Phase 4 regression)
+
+
+---
+
+## Phase 4.1 — Validation Hardening & Desktop Bridge Preparation
+
+**Date**: 2026-05-15
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx tsc --noEmit` | PASS | exit 0 |
+| `npx vite build` | PASS | 290 KB JS, 16s |
+| `npx vitest run` | PASS | 32/32 tests |
+| `scripts\dev\verify-runtime.bat` | PASS | configure + build + ctest, build dir `%LOCALAPPDATA%\RPGCreatorAI\build` |
+| `scripts\dev\verify.ps1` (full incl. smoke) | PASS | runtime stays alive 3s, [INFO] Project loaded, [INFO] Map loaded |
+
+### Fixes applied
+- Replaced `New-TemporaryFile` in `scripts/dev/verify.ps1` with `[System.IO.Path]::GetTempFileName()` to remove a Windows PowerShell version dependency.
+- Defaulted CMake binary dir to `%LOCALAPPDATA%\RPGCreatorAI\build` across `verify.ps1`, `verify-runtime.bat`, and `build_bootstrap.bat` so FetchContent rename steps no longer collide with OneDrive's filter driver.
+- Added new `scripts/dev/verify-runtime.bat` for a pure-cmd path (no PowerShell required).
+- Updated `smoke-runtime.ps1` to accept `-BuildDir`, run from repo root for `data/` lookups, and use ASCII-only status output.
+
+### Final pass/fail
+- Frontend: PASS
+- C++ runtime: PASS
+- Smoke: PASS
+- OneDrive lock issue: RESOLVED via out-of-OneDrive build directory

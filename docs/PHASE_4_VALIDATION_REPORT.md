@@ -1,97 +1,140 @@
 # Phase 4 Validation Report — Editor Persistence & Runtime Bridge
 
 ## Summary
-Phase 4 implementation complete. Editor mutations now flow through a real reducer-backed store, validated by a stricter validation engine, and persisted via a `ProjectDataAdapter` abstraction. Runtime launch is gated through a `RuntimeLaunchAdapter` that reports honest browser/desktop status.
+Phase 4 implementation complete and now fully green after Phase 4.1 hardening.
+Editor mutations flow through a real reducer-backed store, validated by a
+stricter validation engine, and persisted via a `ProjectDataAdapter`
+abstraction. Runtime launch is gated through a `RuntimeLaunchAdapter`. All
+frontend and runtime validation pipelines pass on this Windows + OneDrive
+environment.
 
-## TypeScript
+## Frontend
 
+### TypeScript
 ```
 $ npx tsc --noEmit
-(no output)
-exit 0
+exit=0
 ```
 **Result: PASS** ✅
 
-## Vite Build
-
+### Vite Build
 ```
 $ npx vite build
 vite v6.4.2 building for production...
-✓ 1706 modules transformed.
-dist/index.html                   0.68 kB │ gzip:  0.45 kB
-dist/assets/index-CSiWZKSr.css   29.10 kB │ gzip:  6.22 kB
-dist/assets/index-DLpEUfSj.js   290.01 kB │ gzip: 83.86 kB
-✓ built in 18.29s
+1706 modules transformed.
+dist/index.html                   0.68 kB | gzip:  0.45 kB
+dist/assets/index-DAIU1_MT.css   30.30 kB | gzip:  6.37 kB
+dist/assets/index-DJCOi0Gc.js   290.01 kB | gzip: 83.86 kB
+built in 15.99s
+exit=0
 ```
 **Result: PASS** ✅
 
-## Vitest Unit Tests
-
+### Vitest Unit Tests
 ```
 $ npx vitest run
 RUN  v4.1.6
 Test Files  4 passed (4)
      Tests  32 passed (32)
-exit 0
+exit=0
 ```
 Coverage by suite:
-- `BrowserMemoryAdapter.test.ts` — 6 tests (load, save, saveAll, export/import roundtrip, malformed import rejection)
-- `RuntimeLaunchAdapter.test.ts` — 5 tests (browser unavailable, no fake launches, desktop seam detection)
-- `validateProject.test.ts` — 11 tests (start map, start position, duplicate ids, bounds, transfer targets, items, layer sizes, triggers)
-- `projectReducer.test.ts` — 10 tests (load, update event, rename guard, add/update/remove command, nested ifFlag paths, mark saved, validate)
+- `BrowserMemoryAdapter.test.ts` — 6 tests
+- `RuntimeLaunchAdapter.test.ts` — 5 tests
+- `validateProject.test.ts` — 11 tests
+- `projectReducer.test.ts` — 10 tests
 
 **Result: PASS** ✅
 
-## C++ Runtime Build
+## C++ Runtime
 
+### Configure + Build + Test (out-of-OneDrive build dir)
 ```
-$ cmd /c build_bootstrap.bat
+$ scripts\dev\verify-runtime.bat
+=== Configuration ===
+  Repo:  C:\Users\franc\OneDrive\Escritorio\RPGCreatorAI
+  Build: C:\Users\franc\AppData\Local\RPGCreatorAI\build
 === CONFIGURE ===
-... FetchContent build for nlohmann_json failed:
-    file RENAME failed to rename
-    .../json/ to .../json-src
-    because: Acceso denegado.
-CONFIGURE FAILED
-exit 1
+... cmake configures cleanly ...
+-- Configuring done
+-- Generating done
+=== BUILD ===
+[1/317] ...
+[317/317] Linking CXX executable rpg_creator_runtime.exe
+=== TEST ===
+Test project C:/Users/franc/AppData/Local/RPGCreatorAI/build
+    Start 1: RPGTests
+1/1 Test #1: RPGTests .........................   Passed    0.26 sec
+100% tests passed, 0 tests failed out of 1
+=== ALL PASSED ===
 ```
+**Result: PASS** ✅
 
-**Result: BLOCKED** by a pre-existing environmental issue. The repo lives under OneDrive (`C:\Users\franc\OneDrive\Escritorio\RPGCreatorAI`); OneDrive holds file locks during CMake's FetchContent rename step. This is reproducible on a clean retry and is unrelated to Phase 4.
-
-Verification that Phase 4 did not touch the runtime:
+### Runtime Smoke (3-second launch + log scrape)
 ```
-$ git diff --stat HEAD --name-only -- src/core src/platform src/renderer src/world \
-                                       src/entities src/events src/dialogue src/save \
-                                       src/database CMakeLists.txt CMakePresets.json tests/
-(no files listed)
+$ powershell -File scripts\dev\verify.ps1
+=== RUNTIME SMOKE ===
+OK: process still running (pid=21472) after 3 s -- terminating...
+--- stdout ---
+[INFO] RPG Creator Runtime starting...
+[INFO] Project loaded: Demo RPG
+[INFO] Map loaded: town
+SMOKE PASSED
+=== ALL PASSED ===
 ```
+**Result: PASS** ✅
 
-Recommended workaround for the user:
-- Pause OneDrive sync and re-run `build_bootstrap.bat`, **or**
-- Move the repo outside the OneDrive directory, **or**
-- Mark `build/` as "Always keep on this device" in OneDrive settings
+## What Phase 4.1 Changed
 
-This is documented as a known environmental limitation, not a Phase 4 regression.
+### Scripts
+- `scripts/dev/verify.ps1`
+  - Replaced `New-TemporaryFile` with `[System.IO.Path]::GetTempFileName()`
+    so it runs on Windows PowerShell hosts that don't expose the cmdlet.
+  - Added `-BuildDir` parameter; default is
+    `%LOCALAPPDATA%\RPGCreatorAI\build` (outside OneDrive).
+  - Now passes `-S <repo>` and `-B <buildDir>` explicitly to `cmake` and
+    `ctest --test-dir <buildDir>`.
+  - Forwards `BuildDir` to `smoke-runtime.ps1`.
 
-## Manual Smoke (browser preview)
+- `scripts/dev/smoke-runtime.ps1`
+  - Accepts a `-BuildDir` parameter; defaults to the same out-of-OneDrive
+    location used by `verify.ps1`.
+  - Launches the runtime with `WorkingDirectory = repoRoot` so its
+    `data/` lookups resolve correctly even though the executable lives
+    outside the repo.
+  - Replaced an em-dash with `--` in a status line so older PowerShell
+    hosts don't mis-parse it under non-UTF-8 code pages.
 
-Dev server starts cleanly, Vite reports:
-```
-VITE v6.4.2  ready in 1089 ms
-```
+- `scripts/dev/verify-runtime.bat` (new)
+  - Pure cmd-shell version of the build pipeline. No PowerShell required.
+  - Honours `BUILD_DIR` env var, defaults to the LOCALAPPDATA location.
+  - Auto-discovers VsDevCmd, cmake, and ninja.
 
-UI layout matches Phase 3 reference (no UI redesign was in scope for Phase 4). No new screenshots produced because no visual changes were made; the dirty indicator and Import button are the only minor toolbar additions.
+- `build_bootstrap.bat`
+  - Now defaults to `%LOCALAPPDATA%\RPGCreatorAI\build` for the same
+    reason. Documented override via `set BUILD_DIR=...`.
 
-## Git State (pre-commit)
+### Docs
+- `docs/WINDOWS_BUILD_NOTES.md` (new): explains the OneDrive issue,
+  recommended build path, override hooks, and PowerShell compatibility.
+- `docs/PHASE_4_VALIDATION_REPORT.md`: refreshed with the green pipeline.
+- `docs/VALIDATION_LOG.md`: appended Phase 4.1 entry.
+- `docs/GOAL_STACK.md`: updated to mark Phase 4.1 complete.
 
-```
-$ git status --short
-(see commit step)
-```
+## OneDrive Issue: Resolved
+The "file RENAME failed ... Acceso denegado" failure during cmake
+FetchContent was a real lock from the OneDrive filter driver while the
+build tree lived inside the synced folder. Moving the CMake binary
+directory to `%LOCALAPPDATA%\RPGCreatorAI\build` removes the contended
+files from OneDrive entirely. After this change the C++ pipeline
+configures, builds, and tests cleanly.
 
-No build artifacts (`build/`, `dist/`, `node_modules/`, `.backups/`) are staged for commit. `.gitignore` updated with `.backups/` and `*.rpgcreator.json` entries.
+## Git State
+The build tree lives outside the repo, so `git status` is unaffected.
+`.gitignore` already excluded `build/` for the legacy in-repo path.
 
-## Validation Conclusion
-- Frontend: green across typecheck, build, and 32 unit tests
-- C++ runtime: not modified; environmental build issue is pre-existing and tracked separately
-- Persistence: real (in-memory) + JSON export/import roundtrip works
-- Runtime bridge: clearly reports `unavailable` in browser; no fake "launched" claims
+## Final Verdict
+- Frontend: GREEN
+- C++ runtime: GREEN
+- Smoke: GREEN
+- Working tree: clean (after commit)
