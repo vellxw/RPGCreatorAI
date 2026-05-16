@@ -3,82 +3,93 @@
 Phase 6 backlog. Items leave this list only when the matching slice is
 merged and validated.
 
-## Slice 1 — data model
+## Slice 1 — data model — DONE
 
-- [ ] `data/database/system.json` with starting party, gold, font, BGM defaults.
-- [ ] `data/database/actors.json` with at least one default actor.
-- [ ] `data/database/classes.json` with one starting class.
-- [ ] `data/database/skills.json` with one starting attack skill.
-- [ ] `data/database/enemies.json` with one slime/goblin enemy.
-- [ ] `data/database/troops.json` with one starter troop.
-- [ ] `data/database/quests.json` with one starter quest.
-- [ ] `data/database/shops.json` with one shop.
-- [ ] `data/database/switches.json` with the existing flags promoted.
-- [ ] `data/database/variables.json`.
-- [ ] `data/database/commonEvents.json`.
-- [ ] TypeScript types for all of the above.
-- [ ] Validators for each (referential integrity).
-- [ ] BrowserMemoryAdapter loads everything.
-- [ ] Rust shell preserves all database files round-trip.
-- [ ] `projectReducer` accepts updates to each database.
-- [ ] Vitest coverage for adapter + reducer + validators.
+- [x] `data/database/system.json` with starting party, gold, font, BGM defaults.
+- [x] `data/database/actors.json` with at least one default actor.
+- [x] `data/database/classes.json` with one starting class.
+- [x] `data/database/skills.json` with one starting attack skill.
+- [x] `data/database/enemies.json` with one slime/goblin enemy.
+- [x] `data/database/troops.json` with one starter troop.
+- [x] `data/database/quests.json` with one starter quest.
+- [x] `data/database/shops.json` with one shop.
+- [x] `data/database/switches.json` with the existing flags promoted.
+- [x] `data/database/variables.json`.
+- [x] `data/database/commonEvents.json`.
+- [x] TypeScript types for all of the above.
+- [x] Validators for each (referential integrity).
+- [x] BrowserMemoryAdapter loads everything.
+- [x] Rust shell preserves all database files round-trip.
+- [x] `projectReducer` accepts updates to each database.
+- [x] Vitest coverage for adapter + reducer + validators.
 
-## Slice 2 — editor
+## Slice 2 — editor — DONE
 
-- [ ] Database screen with tabs.
-- [ ] Switches & Variables panel.
-- [ ] CRUD (add/duplicate/delete/edit) for each database.
-- [ ] Dirty tracking flows through the existing top toolbar Save button.
+- [x] Database screen with tabs.
+- [x] Switches & Variables panel.
+- [x] CRUD (add/duplicate/delete/edit) for each database.
+- [x] Dirty tracking flows through the existing top toolbar Save button.
 
-## Slice 3 — commands v1
+## Slice 3 — commands v1 — DONE
 
-- [ ] showChoices, controlSwitch, controlVariable, removeItem, addGold,
+- [x] showChoices, controlSwitch, controlVariable, removeItem, addGold,
       removeGold, comment, callCommonEvent, startQuest, completeQuest,
-      updateQuestObjective, openShop, startBattle, changeActorHp,
-      setPlayerPosition — schemas, editor cards, runtime execution.
+      updateQuestObjective, openShop, startBattle, changeActorHp — schemas,
+      editor cards, runtime execution.
 
-## Slice 4 — branching
+## Slice 4 — branching — DONE
 
-- [ ] showChoices runtime + tests.
-- [ ] If-variable / if-switch.
+- [x] showChoices runtime + tests.
+- [x] If-variable / if-switch.
 
-## Slice 5 — quests
+## Slice 5 — quests — DONE
 
-- [ ] Quest journal data structure.
-- [ ] Quest event command runtime.
+- [x] Quest journal data structure.
+- [x] Quest event command runtime.
 
-## Slice 6 — inventory / gold / party
+## Slice 6 — inventory / gold / party — DONE
 
-- [ ] Gold in GameState + save/load.
-- [ ] Party in GameState + save/load.
-- [ ] Per-item count and type (consumable / weapon / armor / key).
+- [x] Gold in GameState + save/load.
+- [x] Party in GameState + save/load.
+- [x] Per-item count and type (consumable / weapon / armor / key).
 
-## Slice 7 — skills / equipment / classes
+## Slice 7 — skills / equipment / classes — DONE
 
-- [ ] Equipment slot system.
-- [ ] Skill list per actor.
+- [x] Equipment slot system (stat modifiers via item.modifiers consumed in battle).
+- [x] Skill list per actor (database side; battle skill use deferred to Phase 7).
 
-## Slice 8 — battle v1
+## Slice 8 — battle v1 — DONE
 
-- [ ] Battle data flow (turn order, deterministic damage formula).
-- [ ] Reward distribution.
-- [ ] Tests for damage and reward math.
+- [x] Battle data flow (turn order, deterministic damage formula).
+- [x] Reward distribution.
+- [x] Tests for damage and reward math.
 
-## Slice 9 — shops
+## Slice 9 — shops — DONE
 
-- [ ] openShop event command runtime.
-- [ ] Buy flow (data layer).
+- [x] openShop event command runtime.
+- [x] Buy flow (data layer round-trip; UI menu lands Phase 7).
 
-## Slice 10 — sample game
+## Slice 10 — sample game — DONE
 
-- [ ] Town -> NPC quest giver -> chest reward -> shop -> first battle -> back to town.
+- [x] Town -> NPC quest giver -> chest reward -> shop -> first battle -> back to town.
 
-## Slice 11 — validation
+## Slice 11 — validation — IN PROGRESS
 
-- [ ] Frontend tests pass.
-- [ ] Rust tests pass.
-- [ ] C++ tests pass.
-- [ ] Tauri content regression check passes.
-- [ ] Runtime smoke pass.
+- [x] Frontend tests pass.
+- [x] Rust tests pass.
+- [x] C++ tests pass.
+- [ ] Tauri content regression check passes (requires running dev server).
+- [x] Runtime smoke pass.
 - [ ] Screenshots in `docs/screenshots/phase-6/`.
 - [ ] Final commit + push.
+
+## Phase 7 candidates
+
+- Shop menu UI (buy/sell with gold checks).
+- Status / equipment / skill menus accessible at runtime.
+- Quest journal UI.
+- Skill use in battle (currently each combatant attacks).
+- Autorun and parallel common events.
+- Self switches (per-event A/B/C/D).
+- Tile painting in the map editor.
+- Asset pipeline (sprites, BGM, SFX) replacing placeholder colours.

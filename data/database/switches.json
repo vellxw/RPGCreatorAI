@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "switches": [
     { "id": "talked_to_old_man", "name": "Talked to old man", "initial": false },
-    { "id": "chest_001_opened", "name": "Lost chest opened", "initial": false }
+    { "id": "chest_001_opened", "name": "Lost chest opened", "initial": false },
+    { "id": "first_battle_done", "name": "First battle complete", "initial": false }
   ]
 }

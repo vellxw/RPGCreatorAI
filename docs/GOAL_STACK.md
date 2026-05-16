@@ -2,26 +2,38 @@
 
 ## Current Goal
 
-Phase 6 — Complete RPG Creation System Foundation.
+Phase 6 — Complete RPG Creation System Foundation. **Slices 1-10 done.**
 
 ## Active Phase
 
-Phase 6.
+Phase 6 — Slice 11 (final validation + reporting).
 
 ## Open subgoals (top of stack first)
 
-1. Slice 1 — expand data model: schemas, TS types, JSON files, validator,
-   adapter, Rust shell, reducer, tests.
-2. Slice 2 — Database editor screen with all DB tabs + Switches/Variables.
-3. Slice 3 — event command system v1 (new command types in editor + runtime).
-4. Slice 4 — switches, variables, choices, branching.
-5. Slice 5 — quest system.
-6. Slice 6 — inventory, gold, party state, save/load roundtrip.
-7. Slice 7 — skills, equipment, classes.
-8. Slice 8 — battle v1.
-9. Slice 9 — shops.
-10. Slice 10 — sample game flow.
-11. Slice 11 — end-to-end validation, screenshots, commit/push.
+1. Slice 11 — full validation pass (typecheck + vitest + cargo + runtime
+   smoke) and final report.
+2. Phase 7 — runtime UI polish: shop menu, status menu, quest journal UI,
+   skill use in battle, autorun/parallel common events, self switches,
+   tile painting.
+
+## Closed subgoals
+
+- Slice 1 — data model expansion (schemas, types, JSON files, validators,
+  Rust shell round-trip, vitest + cargo coverage). Commit `7936b8f`.
+- Slice 2 — Database editor screen with tabs, CRUD, dirty tracking.
+  Commit `7936b8f`.
+- Slice 3 — runtime event command system v1 (24 commands). Commit `46d2726`.
+- Slice 4 — typed switches/variables, ifSwitch/ifVariable, showChoices.
+  Commit `46d2726`.
+- Slice 5 — quest system runtime + save/load + idempotency. Commit `46d2726`.
+- Slice 6 — gold + party + actor HP + inventory remove. Commit `46d2726`.
+- Slice 7 — runtime DB loader, equipment stat modifiers in battle.
+  Commit `d4fec32`.
+- Slice 8 — battle system v1 (deterministic, formula tested, rewards).
+  Commit `d4fec32`.
+- Slice 9 — shops (data round-trip + dialogue-stub runtime). Commit `d4fec32`.
+- Slice 10 — sample town/house exercising every v1 command, validated
+  end-to-end (this commit).
 
 ## Closed subgoals from previous phases
 

@@ -50,27 +50,95 @@
       "trigger": "interact",
       "commands": [
         {
-          "type": "ifFlag",
-          "flag": "talked_to_old_man",
-          "equals": true,
+          "type": "ifSwitch",
+          "switchId": "talked_to_old_man",
+          "equals": false,
           "then": [
+            { "type": "showText", "speaker": "Anciano", "text": "Hola viajero. He perdido un cofre en mi casa." },
             {
-              "type": "showText",
-              "speaker": "Anciano",
-              "text": "Ya te di mi consejo."
+              "type": "showChoices",
+              "prompt": "¿Le ayudas?",
+              "choices": [
+                {
+                  "label": "Sí, te ayudaré",
+                  "commands": [
+                    { "type": "showText", "speaker": "Anciano", "text": "Mil gracias. Toma esta moneda como pago inicial." },
+                    { "type": "addGold", "amount": 10 },
+                    { "type": "startQuest", "questId": "lost_chest" },
+                    { "type": "controlSwitch", "switchId": "talked_to_old_man", "value": true }
+                  ]
+                },
+                {
+                  "label": "Mejor no",
+                  "commands": [
+                    { "type": "showText", "speaker": "Anciano", "text": "Está bien. Vuelve si cambias de idea." }
+                  ]
+                }
+              ]
             }
           ],
           "else": [
             {
-              "type": "showText",
-              "speaker": "Anciano",
-              "text": "No cruces el puente de noche."
-            },
-            {
-              "type": "setFlag",
-              "flag": "talked_to_old_man",
-              "value": true
+              "type": "ifSwitch",
+              "switchId": "chest_001_opened",
+              "equals": true,
+              "then": [
+                { "type": "showText", "speaker": "Anciano", "text": "¡Encontraste el cofre! Toma esta recompensa." },
+                { "type": "addGold", "amount": 30 },
+                { "type": "addItem", "itemId": "potion", "amount": 1 },
+                { "type": "completeQuest", "questId": "lost_chest" }
+              ],
+              "else": [
+                { "type": "showText", "speaker": "Anciano", "text": "Mi cofre está dentro de la casa, sobre la repisa." }
+              ]
             }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shop_keeper",
+      "type": "npc",
+      "x": 7,
+      "y": 7,
+      "solid": true,
+      "sprite": "npc_placeholder",
+      "trigger": "interact",
+      "commands": [
+        { "type": "showText", "speaker": "Tendera", "text": "Echa un vistazo a mis pociones." },
+        { "type": "openShop", "shopId": "town_shop" }
+      ]
+    },
+    {
+      "id": "wild_slime",
+      "type": "object",
+      "x": 1,
+      "y": 7,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        {
+          "type": "ifSwitch",
+          "switchId": "first_battle_done",
+          "equals": false,
+          "then": [
+            { "type": "showText", "text": "¡Un par de slimes te ataca!" },
+            {
+              "type": "startBattle",
+              "troopId": "slime_pair",
+              "canEscape": false,
+              "victoryBranch": [
+                { "type": "showText", "text": "¡Victoria! Ganaste experiencia y oro." },
+                { "type": "controlSwitch", "switchId": "first_battle_done", "value": true },
+                { "type": "controlVariable", "variableId": "lost_chest_progress", "op": "add", "value": 1 }
+              ],
+              "defeatBranch": [
+                { "type": "showText", "text": "Has caído... Despiertas en el pueblo." }
+              ]
+            }
+          ],
+          "else": [
+            { "type": "showText", "text": "Solo queda un rastro de baba." }
           ]
         }
       ]

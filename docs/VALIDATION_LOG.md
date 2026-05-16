@@ -195,3 +195,40 @@ vite stopped, ExitCode=1
 Error: Port 1420 is already in use
     at Server.onError (...)
 ```
+
+
+---
+
+## Phase 6 — Complete RPG Creation System Foundation
+
+### Slice 1+2 (commit `7936b8f`) — data model + database editor
+
+- `npx tsc --noEmit` — exit 0
+- `npx vitest run` — 8 files, 59 passed, 59 total
+- `cargo test --manifest-path src-tauri/Cargo.toml --lib` — 16 passed (added two new database round-trip tests)
+- `scripts\dev\verify-runtime.bat` — configure + build clean, ctest 1/1 RPGTests passed
+
+### Slice 3-6 (commit `46d2726`) — runtime command system v1, switches/variables, quests, gold, party
+
+- `npx tsc --noEmit` — exit 0
+- `npx vitest run` — 8 files, 59 passed
+- `cargo test ... --lib` — 16 passed
+- `verify-runtime.bat` — ctest 1/1 (rpg_tests went from 24 cases / 95 assertions to 47 cases / 145 assertions)
+
+### Slice 7-9 (commit `d4fec32`) — runtime database loader, BattleSystem v1, full editor command UI
+
+- `npx tsc --noEmit` — exit 0
+- `npx vitest run` — 8 files, 59 passed
+- `cargo test ... --lib` — 16 passed
+- `verify-runtime.bat` — ctest 1/1 (rpg_tests 49 cases / 151 assertions, including BattleSystem damage formula + empty-party auto-defeat)
+
+### Slice 10+11 — sample game + final validation
+
+- Sample town/house exercise: dialogue, choices, switch toggle, variable arithmetic, gold change, quest start/objective/complete, shop open, deterministic battle with rewards, transfer, save/load.
+- `npx tsc --noEmit` — exit 0
+- `npx vitest run` — 9 files, 62 passed (added bundledSample.test.ts)
+- `cargo test ... --lib` — 16 passed
+- `verify-runtime.bat` — ctest 1/1
+- `scripts\dev\smoke-runtime.bat` — runtime spawned (pid logged), `[INFO] Project loaded: My First RPG`, `[INFO] Databases loaded: 1 actors, 1 enemies, 1 troops, 1 quests, 1 shops, 1 common events`, `[INFO] Map loaded: town`, SMOKE PASSED.
+- `npm run desktop:verify-content` — skipped (requires running dev server).
+
