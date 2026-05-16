@@ -1,37 +1,47 @@
 # Goal Stack — RPGCreatorAI
 
 ## Current Goal
-Phase 4.1: Validation Hardening & Desktop Bridge Preparation — COMPLETE
+Phase 5: Desktop Shell + Real FileSystem + Runtime Bridge — SPEC COMPLETE (awaiting approval to implement)
 
 ## Active Phase
-Phase 4.1
+Phase 5 (planning only)
 
-## Subgoals
-1. ✅ Fix `verify.ps1` — drop unsupported `New-TemporaryFile`
-2. ✅ Route CMake binary dir outside OneDrive (`%LOCALAPPDATA%\RPGCreatorAI\build`)
-3. ✅ Add `scripts/dev/verify-runtime.bat` (pure cmd path)
-4. ✅ Update `build_bootstrap.bat` to honour `BUILD_DIR` env var
-5. ✅ Run actual validation: tsc, vite build, vitest, cmake configure, cmake build, ctest, runtime smoke
-6. ✅ Document workaround in `docs/WINDOWS_BUILD_NOTES.md`
-7. ✅ Refresh `docs/PHASE_4_VALIDATION_REPORT.md`
-8. ✅ Append `docs/VALIDATION_LOG.md`
-9. ⬜ Commit and push
+## Spec Artifacts Created
+- `.kiro/specs/phase5-desktop-shell-runtime-bridge/requirements.md`
+- `.kiro/specs/phase5-desktop-shell-runtime-bridge/design.md`
+- `.kiro/specs/phase5-desktop-shell-runtime-bridge/tasks.md`
+- `docs/PHASE_5_SCOPE.md`
+- `docs/DESKTOP_SHELL_ARCHITECTURE.md`
+- `docs/FILESYSTEM_ADAPTER.md`
+- `docs/RUNTIME_LAUNCH_BRIDGE.md`
 
-## Success Criteria
-- Frontend typecheck/build/tests green ✅
-- C++ runtime configures/builds/tests green ✅
-- Runtime smoke passes ✅
-- OneDrive lock issue resolved ✅
-- No new screens, no UI redesign, no AI calls ✅
+## Subgoals (Implementation, not yet started)
+1. ⬜ Add Tauri toolchain (Rust, @tauri-apps/cli)
+2. ⬜ Generate Tauri scaffold under `src-tauri/`
+3. ⬜ Define typed IPC surface (`window.rpgBridge`)
+4. ⬜ Implement Rust commands: fs.* and runtime.* and config.*
+5. ⬜ Path sandbox + atomic write + backup + prune
+6. ⬜ Real `FileSystemAdapter` and `DesktopRuntimeAdapter` wiring
+7. ⬜ Toolbar Open/Recent actions (gated on shell presence)
+8. ⬜ Renderer + Rust unit tests
+9. ⬜ Desktop dev build pipeline
+10. ⬜ Validation green: tsc, vite, vitest, cargo test, desktop build, runtime smoke
+11. ⬜ Commit + push
+
+## Success Criteria (mirror PHASE_5_SCOPE)
+- `npm run desktop:dev` opens the editor in a desktop window
+- Open Project loads from disk via the shell
+- Save writes atomically with backups
+- Open in Runtime spawns the C++ runtime
+- Browser mode keeps Phase 4.1 behaviour intact
+- All pipelines green; working tree clean
 
 ## Current Status
-All validation green. About to commit Phase 4.1.
+Spec complete. Waiting for user approval before implementation begins.
 
 ## Blockers
-None.
+None for the spec.
+For implementation: requires the Rust toolchain on this machine. Documented in DESKTOP_SHELL_ARCHITECTURE.md.
 
 ## Next Action
-Commit `Phase 4.1: harden validation and Windows runtime build` and push.
-After that, the project is ready for Phase 5 (desktop shell + real
-FileSystemAdapter / RuntimeLaunchAdapter integration) when the user
-approves.
+Wait for explicit approval, then start at task T1 (tooling).
