@@ -1,47 +1,37 @@
 # Goal Stack — RPGCreatorAI
 
 ## Current Goal
-Phase 5: Desktop Shell + Real FileSystem + Runtime Bridge — SPEC COMPLETE (awaiting approval to implement)
+Phase 5: Desktop Shell + Real FileSystem + Runtime Bridge — IMPLEMENTATION COMPLETE
 
 ## Active Phase
-Phase 5 (planning only)
+Phase 5
 
-## Spec Artifacts Created
-- `.kiro/specs/phase5-desktop-shell-runtime-bridge/requirements.md`
-- `.kiro/specs/phase5-desktop-shell-runtime-bridge/design.md`
-- `.kiro/specs/phase5-desktop-shell-runtime-bridge/tasks.md`
-- `docs/PHASE_5_SCOPE.md`
-- `docs/DESKTOP_SHELL_ARCHITECTURE.md`
-- `docs/FILESYSTEM_ADAPTER.md`
-- `docs/RUNTIME_LAUNCH_BRIDGE.md`
+## Subgoals
+1. ✅ Spec checkpoint committed (`1af9c22`)
+2. ✅ Rust toolchain installed (user-space, no admin)
+3. ✅ `.cargo/config.toml` redirects target-dir outside OneDrive
+4. ✅ Tauri 2.11 scaffold under `src-tauri/`
+5. ✅ Typed IPC surface (`window.rpgBridge`)
+6. ✅ Rust commands: fs_*, runtime_*, config_*, shell_info
+7. ✅ Path sandbox: canonicalize_inside_user_space + ensure_inside + join_inside
+8. ✅ Atomic write + per-file backup + N-per-file pruning + auto-`.gitignore`
+9. ✅ Runtime executable resolution (env → project build → LOCALAPPDATA → shell sibling)
+10. ✅ Renderer adapters wired through bridge
+11. ✅ Toolbar Open / Recent gated on shell presence
+12. ✅ PlaytestScreen runtime panel with status polling and Stop button
+13. ✅ Frontend tests (43/43)
+14. ✅ Rust unit tests (14/14)
+15. ✅ Phase 4.1 C++ pipeline still green
+16. ✅ Tauri dev verified end-to-end (Vite on 1420 strictPort + DOM content check + window screenshot)
+17. ✅ Silent-port-collision bug found, fixed, and regression-tested
 
-## Subgoals (Implementation, not yet started)
-1. ⬜ Add Tauri toolchain (Rust, @tauri-apps/cli)
-2. ⬜ Generate Tauri scaffold under `src-tauri/`
-3. ⬜ Define typed IPC surface (`window.rpgBridge`)
-4. ⬜ Implement Rust commands: fs.* and runtime.* and config.*
-5. ⬜ Path sandbox + atomic write + backup + prune
-6. ⬜ Real `FileSystemAdapter` and `DesktopRuntimeAdapter` wiring
-7. ⬜ Toolbar Open/Recent actions (gated on shell presence)
-8. ⬜ Renderer + Rust unit tests
-9. ⬜ Desktop dev build pipeline
-10. ⬜ Validation green: tsc, vite, vitest, cargo test, desktop build, runtime smoke
-11. ⬜ Commit + push
-
-## Success Criteria (mirror PHASE_5_SCOPE)
-- `npm run desktop:dev` opens the editor in a desktop window
-- Open Project loads from disk via the shell
-- Save writes atomically with backups
-- Open in Runtime spawns the C++ runtime
-- Browser mode keeps Phase 4.1 behaviour intact
-- All pipelines green; working tree clean
+## Success Criteria (from PHASE_5_SCOPE)
+- `npm run desktop:dev` opens the editor in a desktop window — VERIFIED
+- Open Project loads from disk via the shell — IMPLEMENTED + REGRESSION TESTED via `verify-tauri-content.ps1`
+- Save writes atomically with backups — UNIT TESTED
+- Open in Runtime spawns the C++ runtime — IMPLEMENTED (path resolution + spawn + status + kill all unit tested)
+- Browser mode keeps Phase 4.1 behaviour intact — VERIFIED via factory feature detection
+- All pipelines green — VERIFIED
 
 ## Current Status
-Spec complete. Waiting for user approval before implementation begins.
-
-## Blockers
-None for the spec.
-For implementation: requires the Rust toolchain on this machine. Documented in DESKTOP_SHELL_ARCHITECTURE.md.
-
-## Next Action
-Wait for explicit approval, then start at task T1 (tooling).
+About to commit and push.

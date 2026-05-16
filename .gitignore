@@ -31,3 +31,10 @@ saves/*.json
 
 # Editor exports (intentional user files, not source)
 *.rpgcreator.json
+
+# Tauri / Cargo (Phase 5)
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Playwright MCP scratch
+.playwright-mcp/

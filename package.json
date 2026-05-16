@@ -5,15 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev:tauri": "vite --port=1420 --strictPort --host=127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "tauri": "tauri",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build --debug --no-bundle",
+    "desktop:verify-content": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-tauri-content.ps1"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "@tauri-apps/api": "^2.11.0",
     "@vitejs/plugin-react": "^5.0.4",
     "lucide-react": "^0.546.0",
     "react": "^19.0.1",
@@ -21,6 +27,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.11.1",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

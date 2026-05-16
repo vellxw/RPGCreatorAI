@@ -128,3 +128,70 @@ Append-only log of major validation runs. Newest entries on top.
 - C++ runtime: PASS
 - Smoke: PASS
 - OneDrive lock issue: RESOLVED via out-of-OneDrive build directory
+
+
+---
+
+## Phase 5 — Desktop Shell + Real FileSystem + Runtime Bridge (in progress)
+
+**Date**: 2026-05-16
+
+### Bug uncovered: silent Vite port collision in Tauri dev mode
+
+Tauri 2's `beforeDevCommand` originally invoked `npm run dev`, whose Vite
+config used port 3000 and was happy to silently fall back to a different
+port when 3000 was already taken by another local project. Tauri then
+opened a webview for whatever was on that fallback port, which could be
+an unrelated app. This is a class-of-bug we never want to ship: the
+shell process being alive does not prove the right page loaded.
+
+### Fix
+
+* New `npm run dev:tauri` script: `vite --port=1420 --strictPort --host=127.0.0.1`. `--strictPort` makes Vite **fail** instead of silently moving when 1420 is taken.
+* `src-tauri/tauri.conf.json` `beforeDevCommand` now points at `dev:tauri`, `devUrl` is `http://localhost:1420`.
+* CSP is narrowed to allow only `http://localhost:1420` and its websocket.
+* `npm run dev` (the existing Phase 4.1 browser script on port 3000) is unchanged for users who want pure browser mode.
+
+### Regression check
+
+`scripts/dev/verify-tauri-content.ps1` now hits `http://127.0.0.1:1420/`
+and asserts the response body contains `<title>RPGCreatorAI` and the
+editor entry `/src/main.tsx`. Exits non-zero otherwise. This catches the
+silent-port-collision class of bug for future Phase 5 work.
+
+### Tauri dev verification (this run)
+
+| Check | Result |
+|-------|--------|
+| Vite bound to `127.0.0.1:1420` with `--strictPort` | PASS |
+| `verify-tauri-content.ps1` | PASS (`OK: serving the RPGCreatorAI editor`) |
+| Page `<title>` is `RPGCreatorAI — Visual Editor` | PASS |
+| DOM includes `RPGCreatorAI`, `My First RPG`, `Maps`, `Events`, `AI Tools` | PASS (no missing strings) |
+| Tauri window screenshot | `docs/screenshots/phase-5/02-tauri-window.png` (1456×939) |
+| Renderer DOM screenshot | `docs/screenshots/phase-5/01-tauri-dev-content.png` |
+| `data/project.json` title aligned to `My First RPG` | PASS |
+
+### Other Phase 5 validation so far
+
+| Check | Result |
+|-------|--------|
+| `rustup` user-space install | PASS (Rust 1.95.0, Cargo 1.95.0) |
+| `npx tsc --noEmit` | PASS |
+| `npx vite build` | PASS (295 KB JS, 19s) |
+| `npx vitest run` | PASS (43/43 tests) |
+| `cargo test --manifest-path src-tauri/Cargo.toml --lib` | PASS (14/14 Rust tests) |
+| `cargo build --manifest-path src-tauri/Cargo.toml` | PASS (4m45s first build, target dir under `%LOCALAPPDATA%`) |
+| `scripts/dev/verify-runtime.bat` | PASS (C++ runtime still green) |
+
+
+### `--strictPort` fail-loud verification
+
+Manually held port 1420 with a TcpListener and ran `npx vite --port=1420 --strictPort --host=127.0.0.1`. Vite exited with code 1 and the message `Error: Port 1420 is already in use`. The silent-fallback class of bug cannot recur.
+
+```
+Held 1420 with PID 17796
+vite running: False, exit=1
+vite stopped, ExitCode=1
+Error: Port 1420 is already in use
+    at Server.onError (...)
+```

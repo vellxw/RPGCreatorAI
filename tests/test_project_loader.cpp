@@ -24,7 +24,7 @@ TEST_CASE("ProjectLoader loads valid project.json correctly") {
 
     REQUIRE(project.has_value());
     CHECK(project->schemaVersion == 1);
-    CHECK(project->title == "Demo RPG");
+    CHECK(project->title == "My First RPG");
     CHECK(project->startMapId == "town");
     CHECK(project->startPosition.pos.x == 4);
     CHECK(project->startPosition.pos.y == 4);

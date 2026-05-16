@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
 import { useProject } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
 import { ChevronRight, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { getRuntimeLaunchAdapter } from '../adapters/adapterFactory';
+import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
 
 function PlaytestControls({
   onMove,
@@ -254,10 +254,43 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
 function RuntimeBridgePanel() {
   const adapter = getRuntimeLaunchAdapter();
   const [status, setStatus] = useState<string | null>(null);
+  const [runtimeStatus, setRuntimeStatus] = useState(adapter.getStatus());
+
+  // Poll status every second while the bridge is available so the UI reflects
+  // the runtime exiting on its own.
+  useEffect(() => {
+    if (!adapter.canLaunch()) return;
+    let cancelled = false;
+    const tick = async () => {
+      const s = await (
+        adapter as unknown as { getStatusAsync?: () => Promise<typeof runtimeStatus> }
+      ).getStatusAsync?.();
+      if (!cancelled && s) setRuntimeStatus(s);
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [adapter]);
 
   const handleLaunch = async () => {
-    const result = await adapter.launch('data/project.json');
+    const fsAdapter = getFileSystemAdapter();
+    const projectRoot = fsAdapter?.getProjectRoot();
+    if (!projectRoot) {
+      setStatus('Open a project folder first (Project > Open).');
+      return;
+    }
+    const result = await adapter.launch(projectRoot);
     setStatus(result.success ? `Runtime launched (pid ${result.pid})` : `Launch failed: ${result.error}`);
+    setRuntimeStatus(adapter.getStatus());
+  };
+
+  const handleKill = async () => {
+    await adapter.kill();
+    setStatus('Runtime stopped');
+    setRuntimeStatus(adapter.getStatus());
   };
 
   const available = adapter.canLaunch();
@@ -272,23 +305,33 @@ function RuntimeBridgePanel() {
             <AlertTriangle size={14} className="text-amber-500" />
           )}
           <span className="text-[12px] text-gray-700">
-            Runtime bridge: <span className="font-mono">{adapter.getStatus()}</span>
+            Runtime bridge: <span className="font-mono">{runtimeStatus}</span>
           </span>
           {!available && adapter.getUnavailableReason() && (
             <span className="text-[11px] text-gray-500 italic">— {adapter.getUnavailableReason()}</span>
           )}
         </div>
-        <button
-          onClick={handleLaunch}
-          disabled={!available}
-          className={`px-3 py-1.5 text-[12px] rounded-md cursor-pointer ${
-            available
-              ? 'bg-indigo-500 text-white hover:bg-indigo-600'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          Open in Runtime
-        </button>
+        <div className="flex items-center gap-2">
+          {runtimeStatus === 'running' && available && (
+            <button
+              onClick={handleKill}
+              className="px-3 py-1.5 text-[12px] rounded-md cursor-pointer bg-red-500 text-white hover:bg-red-600"
+            >
+              Stop Runtime
+            </button>
+          )}
+          <button
+            onClick={handleLaunch}
+            disabled={!available || runtimeStatus === 'running'}
+            className={`px-3 py-1.5 text-[12px] rounded-md cursor-pointer ${
+              available && runtimeStatus !== 'running'
+                ? 'bg-indigo-500 text-white hover:bg-indigo-600'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Open in Runtime
+          </button>
+        </div>
       </div>
       {status && <p className="text-[11px] text-gray-600 mt-2">{status}</p>}
     </div>

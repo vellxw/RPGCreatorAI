@@ -45,6 +45,7 @@ export interface RuntimeLaunchResult {
   success: boolean;
   error?: string;
   pid?: number;
+  executablePath?: string;
 }
 
 export interface RuntimeLaunchAdapter {
@@ -61,3 +62,6 @@ export interface ValidationGate {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
 }
+
+// Re-export the RpgBridge interface for adapter consumers and tests.
+export type { RpgBridge, OpenDialogResult, ShellInfo } from '../types/rpgBridge';

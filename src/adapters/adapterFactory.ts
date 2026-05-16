@@ -1,5 +1,6 @@
 // Selects the active adapters based on the runtime environment.
-// We never assume desktop capability — we feature-detect.
+// Tauri presence is feature-detected via __TAURI_INTERNALS__ at startup
+// time; the bridge is installed once and adapters are selected to match.
 
 import { BrowserMemoryAdapter } from './BrowserMemoryAdapter';
 import { FileSystemAdapter } from './FileSystemAdapter';
@@ -10,33 +11,28 @@ let dataAdapter: ProjectDataAdapter | null = null;
 let runtimeAdapter: RuntimeLaunchAdapter | null = null;
 
 function detectDesktopShell(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!(window as unknown as { runtimeBridge?: unknown }).runtimeBridge;
+  return typeof window !== 'undefined' && !!window.rpgBridge;
 }
 
 export function getProjectDataAdapter(): ProjectDataAdapter {
   if (dataAdapter) return dataAdapter;
-
-  if (detectDesktopShell()) {
-    // FileSystemAdapter is a seam — it currently delegates to BrowserMemoryAdapter
-    // until a desktop shell wires real fs writes. We still surface it so the
-    // factory choice is explicit.
-    dataAdapter = new FileSystemAdapter();
-  } else {
-    dataAdapter = new BrowserMemoryAdapter();
-  }
-
+  dataAdapter = detectDesktopShell() ? new FileSystemAdapter() : new BrowserMemoryAdapter();
   return dataAdapter;
+}
+
+export function getFileSystemAdapter(): FileSystemAdapter | null {
+  const a = getProjectDataAdapter();
+  return a instanceof FileSystemAdapter ? a : null;
 }
 
 export function getRuntimeLaunchAdapter(): RuntimeLaunchAdapter {
   if (runtimeAdapter) return runtimeAdapter;
-
-  runtimeAdapter = detectDesktopShell()
-    ? new DesktopRuntimeAdapter()
-    : new BrowserRuntimeAdapter();
-
+  runtimeAdapter = detectDesktopShell() ? new DesktopRuntimeAdapter() : new BrowserRuntimeAdapter();
   return runtimeAdapter;
+}
+
+export function isDesktopShell(): boolean {
+  return detectDesktopShell();
 }
 
 // Test/utility hook so unit tests can inject a fresh adapter.

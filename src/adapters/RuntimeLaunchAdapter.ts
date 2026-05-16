@@ -1,6 +1,5 @@
-// RuntimeLaunchAdapter — abstracts how the editor "launches the runtime".
-// Browser mode honestly reports unavailable. The desktop seam documents
-// where Electron/Tauri/Node child_process would plug in.
+// RuntimeLaunchAdapter — Phase 5 wires DesktopRuntimeAdapter through the
+// Tauri shell IPC. Browser mode keeps reporting unavailable honestly.
 
 import type {
   RuntimeLaunchAdapter,
@@ -21,7 +20,7 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
     return {
       success: false,
       error:
-        'Native runtime cannot be launched from the browser. Build with build_bootstrap.bat and run build/rpg_creator_runtime manually.',
+        'Native runtime cannot be launched from the browser. Build with build_bootstrap.bat (or scripts/dev/verify-runtime.bat) and run rpg_creator_runtime.exe manually, or use the desktop shell (npm run desktop:dev).',
     };
   }
 
@@ -34,53 +33,64 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
   }
 
   getUnavailableReason(): string | null {
-    return 'Browser mode: process spawning is not exposed by Vite. A desktop shell (Electron/Tauri) is required to launch the native runtime.';
+    return 'Browser mode: process spawning is not exposed by Vite. Run the editor inside the Tauri desktop shell to launch the native runtime.';
   }
 }
 
 export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
-  // Seam only: the actual spawn happens in the desktop shell that exposes
-  // a window.runtimeBridge or a Tauri command. We feature-detect that here
-  // so the editor never lies about its capabilities.
-
-  private status: RuntimeStatus = 'unavailable';
+  private cachedStatus: RuntimeStatus = 'unavailable';
+  private cachedExePath: string | null = null;
 
   canLaunch(): boolean {
-    // Re-evaluate every time so a late-injected bridge (Electron preload
-    // script) is picked up.
-    return typeof window !== 'undefined' && !!(window as unknown as { runtimeBridge?: unknown }).runtimeBridge;
+    return typeof window !== 'undefined' && !!window.rpgBridge?.runtime;
   }
 
   getExecutablePath(): string | null {
-    return this.canLaunch() ? 'build/rpg_creator_runtime' : null;
+    return this.cachedExePath;
   }
 
-  async launch(projectPath: string): Promise<RuntimeLaunchResult> {
+  async launch(projectRoot: string): Promise<RuntimeLaunchResult> {
     if (!this.canLaunch()) {
       return {
         success: false,
-        error: 'Desktop runtime bridge not detected. Run inside an Electron/Tauri shell that exposes window.runtimeBridge.',
+        error: 'Desktop runtime bridge not detected. Run inside the Tauri shell.',
       };
     }
-    this.status = 'running';
+    try {
+      const result = await window.rpgBridge!.runtime.launch(projectRoot);
+      if (result.success) {
+        this.cachedStatus = 'running';
+        if (result.executablePath) this.cachedExePath = result.executablePath;
+      }
+      return result;
+    } catch (e) {
+      return { success: false, error: (e as Error).message };
+    }
+  }
 
-    // Documentation seam: a real shell would do something like
-    //   const result = await window.runtimeBridge.launch(projectPath);
-    // We don't fabricate a fake success here.
-    return {
-      success: false,
-      error: 'DesktopRuntimeAdapter is a seam in Phase 4. Implement window.runtimeBridge.launch() in the desktop shell.',
-      // pid intentionally omitted; we never return a fake PID.
-      pid: undefined,
-    };
+  async getStatusAsync(): Promise<RuntimeStatus> {
+    if (!this.canLaunch()) return 'unavailable';
+    try {
+      const status = await window.rpgBridge!.runtime.status();
+      this.cachedStatus = status;
+      return status;
+    } catch {
+      return 'unavailable';
+    }
   }
 
   getStatus(): RuntimeStatus {
-    return this.canLaunch() ? this.status : 'unavailable';
+    return this.canLaunch() ? this.cachedStatus : 'unavailable';
   }
 
   async kill(): Promise<void> {
-    this.status = this.canLaunch() ? 'ready' : 'unavailable';
+    if (!this.canLaunch()) return;
+    try {
+      await window.rpgBridge!.runtime.kill();
+      this.cachedStatus = 'ready';
+    } catch {
+      // swallow; status poll will reconcile
+    }
   }
 
   getUnavailableReason(): string | null {

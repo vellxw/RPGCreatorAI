@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Save,
   Play,
@@ -12,11 +12,20 @@ import {
   Upload,
   ExternalLink,
   Settings,
+  FolderOpen,
+  Clock,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
-import { performSave, performExport, performImport } from '../../stores/saveActions';
+import {
+  performSave,
+  performExport,
+  performImport,
+  performOpenProject,
+  performOpenRecent,
+} from '../../stores/saveActions';
+import { isDesktopShell } from '../../adapters/adapterFactory';
 import { SaveIndicator } from './SaveIndicator';
 import type { Screen } from '../../types/project';
 
@@ -25,10 +34,41 @@ export function TopToolbar() {
   const { state: projectState, dispatch: projectDispatch } = useProjectStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [recents, setRecents] = useState<string[]>([]);
+  const [recentsOpen, setRecentsOpen] = useState(false);
+  const desktop = isDesktopShell();
+
+  useEffect(() => {
+    if (!desktop || !window.rpgBridge) return;
+    window.rpgBridge.config.getRecents().then(setRecents).catch(() => undefined);
+  }, [desktop]);
 
   const showStatus = (text: string) => {
     setStatusMessage(text);
     setTimeout(() => setStatusMessage(null), 3500);
+  };
+
+  const handleOpen = async () => {
+    const outcome = await performOpenProject(projectDispatch);
+    if (outcome.cancelled) return;
+    if (!outcome.success) {
+      showStatus(`Open failed: ${outcome.error ?? 'unknown error'}`);
+      return;
+    }
+    showStatus(`Opened ${outcome.root}`);
+    if (window.rpgBridge) {
+      window.rpgBridge.config.getRecents().then(setRecents).catch(() => undefined);
+    }
+  };
+
+  const handleOpenRecent = async (root: string) => {
+    setRecentsOpen(false);
+    const outcome = await performOpenRecent(root, projectDispatch);
+    if (!outcome.success) {
+      showStatus(`Open failed: ${outcome.error ?? 'unknown error'}`);
+      return;
+    }
+    showStatus(`Opened ${root}`);
   };
 
   const handleSave = async () => {
@@ -71,6 +111,40 @@ export function TopToolbar() {
       </div>
       <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
       <div className="flex items-center gap-2">
+        {desktop && (
+          <>
+            <Button icon={<FolderOpen size={14} />} onClick={handleOpen}>
+              Open
+            </Button>
+            <div className="relative">
+              <Button
+                icon={<Clock size={14} />}
+                onClick={() => setRecentsOpen(o => !o)}
+              >
+                Recent
+              </Button>
+              {recentsOpen && recents.length > 0 && (
+                <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                  {recents.map(r => (
+                    <button
+                      key={r}
+                      onClick={() => handleOpenRecent(r)}
+                      className="w-full text-left px-3 py-2 text-[12px] text-gray-700 hover:bg-gray-50 truncate cursor-pointer"
+                      title={r}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {recentsOpen && recents.length === 0 && (
+                <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-200 rounded-md shadow-lg z-50 px-3 py-2 text-[12px] text-gray-500">
+                  No recent projects.
+                </div>
+              )}
+            </div>
+          </>
+        )}
         <Button icon={<Save size={14} />} onClick={handleSave}>
           Save
         </Button>

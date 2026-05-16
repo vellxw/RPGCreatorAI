@@ -1,0 +1,9 @@
+# Phase 5: keep Rust build artifacts OUT of OneDrive's filter zone, the
+# same way Phase 4.1 did for cmake. Tauri's Rust compile is rename-heavy
+# during dependency hydration; placing target/ under %LOCALAPPDATA% (which
+# OneDrive does not sync) prevents intermittent "Acceso denegado" errors.
+#
+# Override locally with: cargo build --target-dir D:\some\path
+
+[build]
+target-dir = "C:/Users/franc/AppData/Local/RPGCreatorAI/tauri-target"

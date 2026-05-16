@@ -1,11 +1,13 @@
-// Save flow: validate, then call adapter to persist, then mark saved.
-// All side effects (export download, error toast) live here so screen
-// components stay simple.
+// Save / open / export flows. Validates first, then calls the active adapter.
 
 import type { Dispatch } from 'react';
 import type { ProjectAction, ProjectStoreState } from './projectStore';
 import { validateProject } from '../validation/validateProject';
-import { getProjectDataAdapter } from '../adapters/adapterFactory';
+import {
+  getProjectDataAdapter,
+  getFileSystemAdapter,
+  isDesktopShell,
+} from '../adapters/adapterFactory';
 import { exportToFile, importFromFile } from '../adapters/JsonImportExportAdapter';
 
 export interface SaveOutcome {
@@ -50,9 +52,9 @@ export async function performSave(
 
   dispatch({ type: 'MARK_SAVED' });
 
+  // In browser mode the save is in-memory only; offer a download as a backstop.
   let exported = false;
   if (options.exportAfterSave && !adapter.getCapabilities().canWriteFiles) {
-    // Browser mode: also offer a download so the save isn't lost on refresh.
     exportToFile(fullState);
     exported = true;
   }
@@ -81,5 +83,64 @@ export async function performImport(
     return { success: true };
   } catch (e) {
     return { success: false, error: (e as Error).message };
+  }
+}
+
+// ----------------------------- Desktop-only flows -----------------------------
+
+export interface OpenProjectOutcome {
+  success: boolean;
+  cancelled: boolean;
+  root?: string;
+  error?: string;
+}
+
+export async function performOpenProject(
+  dispatch: Dispatch<ProjectAction>,
+): Promise<OpenProjectOutcome> {
+  if (!isDesktopShell() || !window.rpgBridge) {
+    return {
+      success: false,
+      cancelled: false,
+      error: 'Open Project is only available in the desktop shell.',
+    };
+  }
+
+  try {
+    const dlg = await window.rpgBridge.fs.openProjectDialog();
+    if (dlg.cancelled || !dlg.root || !dlg.state) {
+      return { success: false, cancelled: true };
+    }
+
+    // Update the FileSystemAdapter's idea of the active root so subsequent
+    // saveAll() calls write to the right place.
+    const fsAdapter = getFileSystemAdapter();
+    fsAdapter?.setProjectRoot(dlg.root);
+
+    dispatch({ type: 'LOAD_PROJECT', payload: dlg.state });
+    await window.rpgBridge.config.addRecent(dlg.root);
+
+    return { success: true, cancelled: false, root: dlg.root };
+  } catch (e) {
+    return { success: false, cancelled: false, error: (e as Error).message };
+  }
+}
+
+export async function performOpenRecent(
+  root: string,
+  dispatch: Dispatch<ProjectAction>,
+): Promise<OpenProjectOutcome> {
+  if (!isDesktopShell() || !window.rpgBridge) {
+    return { success: false, cancelled: false, error: 'Desktop shell not available' };
+  }
+  try {
+    const data = await window.rpgBridge.fs.readProject(root);
+    const fsAdapter = getFileSystemAdapter();
+    fsAdapter?.setProjectRoot(root);
+    dispatch({ type: 'LOAD_PROJECT', payload: data });
+    await window.rpgBridge.config.addRecent(root);
+    return { success: true, cancelled: false, root };
+  } catch (e) {
+    return { success: false, cancelled: false, error: (e as Error).message };
   }
 }

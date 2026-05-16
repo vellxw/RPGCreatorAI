@@ -1,0 +1,9 @@
+{
+  "identifier": "default",
+  "description": "Capability allowlist for the RPGCreatorAI desktop shell. Phase 5 keeps the surface deliberately small: only our own commands plus the dialog plugin.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:default"
+  ]
+}
