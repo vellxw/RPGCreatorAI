@@ -18,6 +18,59 @@ import { CommandEditor } from '../components/events/CommandEditor';
 import { validateEvent } from '../validation/validateMap';
 import type { EventCommand, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
 
+function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
+  switch (type) {
+    case 'showText':
+      return { type: 'showText', text: 'New dialogue' };
+    case 'showChoices':
+      return { type: 'showChoices', prompt: 'Choose:', choices: [{ label: 'Yes', commands: [] }, { label: 'No', commands: [] }] };
+    case 'setFlag':
+      return { type: 'setFlag', flag: 'flag_name', value: true };
+    case 'ifFlag':
+      return { type: 'ifFlag', flag: 'flag_name', equals: true, then: [], else: [] };
+    case 'ifSwitch':
+      return { type: 'ifSwitch', switchId: '', equals: true, then: [], else: [] };
+    case 'ifVariable':
+      return { type: 'ifVariable', variableId: '', op: 'eq', value: 0, then: [], else: [] };
+    case 'controlSwitch':
+      return { type: 'controlSwitch', switchId: '', value: true };
+    case 'controlVariable':
+      return { type: 'controlVariable', variableId: '', op: 'set', value: 0 };
+    case 'addItem':
+      return { type: 'addItem', itemId: '', amount: 1 };
+    case 'removeItem':
+      return { type: 'removeItem', itemId: '', amount: 1 };
+    case 'addGold':
+      return { type: 'addGold', amount: 10 };
+    case 'removeGold':
+      return { type: 'removeGold', amount: 10 };
+    case 'transferMap':
+      return { type: 'transferMap', mapId: '', x: 0, y: 0, direction: 'down' };
+    case 'setPlayerPosition':
+      return { type: 'setPlayerPosition', mapId: '', x: 0, y: 0, direction: 'down' };
+    case 'wait':
+      return { type: 'wait', ms: 250 };
+    case 'playSound':
+      return { type: 'playSound', soundId: '' };
+    case 'comment':
+      return { type: 'comment', text: '' };
+    case 'callCommonEvent':
+      return { type: 'callCommonEvent', commonEventId: '' };
+    case 'startQuest':
+      return { type: 'startQuest', questId: '' };
+    case 'updateQuestObjective':
+      return { type: 'updateQuestObjective', questId: '', objectiveId: '', state: 'done' };
+    case 'completeQuest':
+      return { type: 'completeQuest', questId: '' };
+    case 'openShop':
+      return { type: 'openShop', shopId: '' };
+    case 'startBattle':
+      return { type: 'startBattle', troopId: '', canEscape: false };
+    case 'changeActorHp':
+      return { type: 'changeActorHp', actorId: '', delta: -1 };
+  }
+}
+
 function EventList() {
   const { state: project } = useProjectStore();
   const { state: editor, dispatch } = useEditor();
@@ -98,39 +151,86 @@ interface CommandCardProps {
 function CommandCard({ index, command, selected, onSelect, depth }: CommandCardProps) {
   const icons: Record<string, { icon: string; color: string; bg: string }> = {
     showText: { icon: '💬', color: 'text-blue-600', bg: 'bg-blue-50' },
-    ifFlag: { icon: '🔀', color: 'text-red-600', bg: 'bg-red-50' },
+    showChoices: { icon: '🔀', color: 'text-blue-600', bg: 'bg-blue-50' },
+    ifFlag: { icon: '🚩', color: 'text-red-600', bg: 'bg-red-50' },
+    ifSwitch: { icon: '🔀', color: 'text-red-600', bg: 'bg-red-50' },
+    ifVariable: { icon: '🔢', color: 'text-red-600', bg: 'bg-red-50' },
     addItem: { icon: '🎒', color: 'text-green-600', bg: 'bg-green-50' },
+    removeItem: { icon: '🎒', color: 'text-green-600', bg: 'bg-green-50' },
+    addGold: { icon: '💰', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    removeGold: { icon: '💰', color: 'text-yellow-600', bg: 'bg-yellow-50' },
     setFlag: { icon: '🚩', color: 'text-purple-600', bg: 'bg-purple-50' },
+    controlSwitch: { icon: '🎚️', color: 'text-purple-600', bg: 'bg-purple-50' },
+    controlVariable: { icon: '🔢', color: 'text-purple-600', bg: 'bg-purple-50' },
     transferMap: { icon: '🌐', color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    setPlayerPosition: { icon: '📍', color: 'text-cyan-600', bg: 'bg-cyan-50' },
     playSound: { icon: '🔊', color: 'text-amber-600', bg: 'bg-amber-50' },
+    wait: { icon: '⏱️', color: 'text-gray-600', bg: 'bg-gray-50' },
+    comment: { icon: '📝', color: 'text-gray-500', bg: 'bg-gray-50' },
+    callCommonEvent: { icon: '🔁', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    startQuest: { icon: '🗺️', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    updateQuestObjective: { icon: '✅', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    completeQuest: { icon: '🏆', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    openShop: { icon: '🏪', color: 'text-pink-600', bg: 'bg-pink-50' },
+    startBattle: { icon: '⚔️', color: 'text-rose-600', bg: 'bg-rose-50' },
+    changeActorHp: { icon: '❤️', color: 'text-rose-600', bg: 'bg-rose-50' },
   };
   const info = icons[command.type] || { icon: '⬜', color: 'text-gray-600', bg: 'bg-gray-50' };
 
   const titles: Record<string, string> = {
     showText: 'Show Text',
+    showChoices: 'Show Choices',
     ifFlag: 'If Flag',
+    ifSwitch: 'If Switch',
+    ifVariable: 'If Variable',
     addItem: 'Add Item',
+    removeItem: 'Remove Item',
+    addGold: 'Add Gold',
+    removeGold: 'Remove Gold',
     setFlag: 'Set Flag',
+    controlSwitch: 'Control Switch',
+    controlVariable: 'Control Variable',
     transferMap: 'Transfer Map',
+    setPlayerPosition: 'Set Player Position',
     playSound: 'Play Sound',
+    wait: 'Wait',
+    comment: 'Comment',
+    callCommonEvent: 'Call Common Event',
+    startQuest: 'Start Quest',
+    updateQuestObjective: 'Update Quest Objective',
+    completeQuest: 'Complete Quest',
+    openShop: 'Open Shop',
+    startBattle: 'Start Battle',
+    changeActorHp: 'Change Actor HP',
   };
 
   const getDescription = (cmd: EventCommand): string => {
     switch (cmd.type) {
-      case 'showText':
-        return cmd.text;
-      case 'ifFlag':
-        return `${cmd.flag} is ${cmd.equals ? 'ON' : 'OFF'}`;
+      case 'showText': return cmd.text;
+      case 'showChoices': return `${cmd.prompt} (${cmd.choices.length} choices)`;
+      case 'ifFlag': return `${cmd.flag} is ${cmd.equals ? 'ON' : 'OFF'}`;
+      case 'ifSwitch': return `${cmd.switchId} is ${cmd.equals ? 'ON' : 'OFF'}`;
+      case 'ifVariable': return `${cmd.variableId} ${cmd.op} ${cmd.value}`;
       case 'addItem':
-        return `Item: ${cmd.itemId} × ${cmd.amount}`;
-      case 'setFlag':
-        return `${cmd.flag} → ${cmd.value ? 'ON' : 'OFF'}`;
+      case 'removeItem': return `Item: ${cmd.itemId} × ${cmd.amount}`;
+      case 'addGold':
+      case 'removeGold': return `${cmd.amount} gold`;
+      case 'setFlag': return `${cmd.flag} → ${cmd.value ? 'ON' : 'OFF'}`;
+      case 'controlSwitch': return `${cmd.switchId} → ${cmd.value ? 'ON' : 'OFF'}`;
+      case 'controlVariable': return `${cmd.variableId} ${cmd.op} ${cmd.value}`;
       case 'transferMap':
-        return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
-      case 'playSound':
-        return cmd.soundId;
-      default:
-        return cmd.type;
+      case 'setPlayerPosition': return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
+      case 'playSound': return cmd.soundId;
+      case 'wait': return `${cmd.ms} ms`;
+      case 'comment': return cmd.text;
+      case 'callCommonEvent': return cmd.commonEventId;
+      case 'startQuest':
+      case 'completeQuest': return cmd.questId;
+      case 'updateQuestObjective': return `${cmd.questId}/${cmd.objectiveId} → ${cmd.state}`;
+      case 'openShop': return cmd.shopId;
+      case 'startBattle': return `Troop: ${cmd.troopId}${cmd.canEscape ? ' (escapable)' : ''}`;
+      case 'changeActorHp': return `${cmd.actorId} ${cmd.delta >= 0 ? '+' : ''}${cmd.delta}`;
+      default: return (cmd as { type: string }).type;
     }
   };
 
@@ -152,7 +252,9 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-semibold text-gray-800">{titles[command.type] || command.type}</span>
-          {command.type === 'ifFlag' && <Badge variant="info">Branch</Badge>}
+          {(command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifVariable' || command.type === 'showChoices' || command.type === 'startBattle') && (
+            <Badge variant="info">Branch</Badge>
+          )}
         </div>
         <p className="text-[12px] text-gray-500 mt-0.5 truncate">{getDescription(command)}</p>
       </div>
@@ -200,8 +302,8 @@ function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
     setSelectedPath(null);
   };
 
-  const addCommand = () => {
-    const placeholder: EventCommand = { type: 'showText', text: 'New dialogue' };
+  const addCommand = (type: EventCommand['type'] = 'showText') => {
+    const placeholder = makePlaceholderCommand(type);
     projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
   };
 
@@ -212,9 +314,44 @@ function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
           <span className="text-[13px] font-semibold text-gray-700">Event Commands</span>
           <p className="text-[11px] text-gray-400">Executed top to bottom.</p>
         </div>
-        <Button size="sm" icon={<Plus size={12} />} onClick={addCommand}>
-          Add Command
-        </Button>
+        <div className="flex items-center gap-1">
+          <select
+            className="px-2 py-1 text-[12px] border border-gray-200 rounded"
+            onChange={e => {
+              if (e.target.value) {
+                addCommand(e.target.value as EventCommand['type']);
+                e.target.value = '';
+              }
+            }}
+            defaultValue=""
+          >
+            <option value="">Add command…</option>
+            <option value="showText">Show Text</option>
+            <option value="showChoices">Show Choices</option>
+            <option value="setFlag">Set Flag (legacy)</option>
+            <option value="ifFlag">If Flag (legacy)</option>
+            <option value="controlSwitch">Control Switch</option>
+            <option value="ifSwitch">If Switch</option>
+            <option value="controlVariable">Control Variable</option>
+            <option value="ifVariable">If Variable</option>
+            <option value="addItem">Add Item</option>
+            <option value="removeItem">Remove Item</option>
+            <option value="addGold">Add Gold</option>
+            <option value="removeGold">Remove Gold</option>
+            <option value="transferMap">Transfer Map</option>
+            <option value="setPlayerPosition">Set Player Position</option>
+            <option value="wait">Wait</option>
+            <option value="playSound">Play Sound</option>
+            <option value="comment">Comment</option>
+            <option value="callCommonEvent">Call Common Event</option>
+            <option value="startQuest">Start Quest</option>
+            <option value="updateQuestObjective">Update Quest Objective</option>
+            <option value="completeQuest">Complete Quest</option>
+            <option value="openShop">Open Shop</option>
+            <option value="startBattle">Start Battle</option>
+            <option value="changeActorHp">Change Actor HP</option>
+          </select>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {flat.map(({ command, depth, path }, i) => (

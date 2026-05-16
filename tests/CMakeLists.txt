@@ -9,6 +9,7 @@ set(PHASE2_TEST_SOURCES
     test_event_runner.cpp
     test_game_state.cpp
     test_save_manager.cpp
+    test_battle_system.cpp
 )
 
 add_executable(rpg_tests ${PHASE2_TEST_SOURCES})

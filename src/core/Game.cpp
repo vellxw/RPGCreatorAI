@@ -33,6 +33,22 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
         }
     }
 
+    // Phase 6 — load every database shard. Missing files are tolerated; the
+    // resulting empty defaults keep the runtime alive so we never crash on
+    // a partially-authored project.
+    databases.loadAll(project);
+
+    // Seed runtime state from the system database when a save isn't loaded.
+    if (state.getParty().empty()) {
+        state.setParty(databases.system().startingParty);
+    }
+    if (state.getGold() == 0 && databases.system().startingGold > 0) {
+        state.setGold(databases.system().startingGold);
+    }
+
+    battleSystem = std::make_unique<rpg::BattleSystem>(databases, state);
+    hookEventRunnerResolvers();
+
     // Load the start map.
     if (!loadMap(project.startMapId)) {
         Logger::error("Failed to load start map: " + project.startMapId);
@@ -83,6 +99,20 @@ void Game::update(const InputManager& input, float dt) {
 
     // Apply any transfer requested by an event command.
     applyTransferIfPending();
+
+    // Consume any shop request: phase 6 has no shop UI yet, so we surface
+    // the open via dialogue and log the listings. The shop "stays open" only
+    // long enough to acknowledge — the real menu lands in Phase 7.
+    if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
+        const auto* shop = databases.findShop(shopReq.shopId);
+        if (shop) {
+            Logger::info("Shop opened: " + shop->name + " with " +
+                         std::to_string(shop->listings.size()) + " listings");
+            dialogue.showText("Tienda", "Bienvenido a " + shop->name);
+        } else {
+            Logger::warning("openShop: unknown shop '" + shopReq.shopId + "'");
+        }
+    }
 
     // If a dialogue is active, only the dismiss/advance keys are handled.
     if (dialogue.isActive()) {
@@ -181,6 +211,26 @@ void Game::applyTransferIfPending() {
     updateCamera();
 }
 
+void Game::hookEventRunnerResolvers() {
+    if (!eventRunner) return;
+    eventRunner->setCommonEventResolver(
+        [this](const std::string& id) -> std::vector<std::shared_ptr<EventCommand>> {
+            const auto* ce = databases.findCommonEvent(id);
+            return ce ? ce->commands : std::vector<std::shared_ptr<EventCommand>>{};
+        });
+    eventRunner->setQuestObjectiveResolver(
+        [this](const std::string& qid) -> std::vector<std::string> {
+            const auto* q = databases.findQuest(qid);
+            std::vector<std::string> out;
+            if (q) for (const auto& obj : q->objectives) out.push_back(obj.id);
+            return out;
+        });
+    eventRunner->setBattleRunner([this](const std::string& troopId) {
+        if (!battleSystem) return BattleResult{};
+        return battleSystem->run(troopId);
+    });
+}
+
 void Game::updateCamera() {
     int tileSize = currentScene.getTileSize();
     if (tileSize <= 0) tileSize = 32;
@@ -243,6 +293,12 @@ void Game::pumpEvents(float dt) {
     if (!eventRunner) return;
     eventRunner->update(dt);
     applyTransferIfPending();
+    if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
+        const auto* shop = databases.findShop(shopReq.shopId);
+        if (shop) {
+            Logger::info("Shop opened (pump): " + shop->name);
+        }
+    }
 }
 
 bool Game::isEventRunnerRunning() const {

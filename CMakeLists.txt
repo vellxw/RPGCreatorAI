@@ -73,6 +73,7 @@ file(GLOB_RECURSE SRC_EVENTS "src/events/*.cpp")
 file(GLOB_RECURSE SRC_DIALOGUE "src/dialogue/*.cpp")
 file(GLOB_RECURSE SRC_SAVE "src/save/*.cpp")
 file(GLOB_RECURSE SRC_DATABASE "src/database/*.cpp")
+file(GLOB_RECURSE SRC_RUNTIME "src/runtime/*.cpp")
 
 set(ALL_SOURCES
     ${SRC_CORE}
@@ -84,6 +85,7 @@ set(ALL_SOURCES
     ${SRC_DIALOGUE}
     ${SRC_SAVE}
     ${SRC_DATABASE}
+    ${SRC_RUNTIME}
 )
 
 add_library(RuntimeLib STATIC ${ALL_SOURCES})

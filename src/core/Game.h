@@ -7,6 +7,8 @@
 #include "events/EventRunner.h"
 #include "dialogue/DialogueSystem.h"
 #include "database/ItemDatabase.h"
+#include "database/RpgDatabases.h"
+#include "runtime/BattleSystem.h"
 #include "types/ProjectTypes.h"
 #include <memory>
 #include <string>
@@ -21,9 +23,7 @@ public:
     void render(IRenderer& renderer);
 
     // ---- Public verbs (used by both the input-driven path and the
-    // visual verification harness). These exercise the same underlying
-    // logic as keyboard input, so rendered behavior matches a real
-    // session.
+    // visual verification harness).
     void stepMove(int dx, int dy, Direction dir);
     void stepInteract();
     void stepDismissDialogue();
@@ -36,6 +36,7 @@ public:
     // Test/inspection helpers
     const GameState& getGameState() const { return state; }
     const MapScene& getCurrentScene() const { return currentScene; }
+    const rpg::RpgDatabases& getDatabases() const { return databases; }
 
 private:
     bool loadMap(const std::string& mapId);
@@ -47,6 +48,7 @@ private:
     void updateCamera();
     void saveGame();
     void loadGameFromDisk();
+    void hookEventRunnerResolvers();
 
     std::string getMapPath(const std::string& mapId) const;
 
@@ -57,6 +59,8 @@ private:
     std::unique_ptr<EventRunner> eventRunner;
     Camera2D camera;
     ItemDatabase itemDatabase;
+    rpg::RpgDatabases databases;
+    std::unique_ptr<rpg::BattleSystem> battleSystem;
 
     int viewportW = 800;
     int viewportH = 600;

@@ -132,6 +132,23 @@ std::optional<ProjectData> ProjectLoader::load(const std::string& path) {
 
         project.database.itemsPath = database["items"].get<std::string>();
 
+        auto pickPath = [&](const char* key, std::string& out) {
+            if (database.contains(key) && database[key].is_string()) {
+                out = database[key].get<std::string>();
+            }
+        };
+        pickPath("actors", project.database.actorsPath);
+        pickPath("classes", project.database.classesPath);
+        pickPath("skills", project.database.skillsPath);
+        pickPath("enemies", project.database.enemiesPath);
+        pickPath("troops", project.database.troopsPath);
+        pickPath("quests", project.database.questsPath);
+        pickPath("shops", project.database.shopsPath);
+        pickPath("system", project.database.systemPath);
+        pickPath("switches", project.database.switchesPath);
+        pickPath("variables", project.database.variablesPath);
+        pickPath("commonEvents", project.database.commonEventsPath);
+
         return project;
 
     } catch (const json::exception& e) {
