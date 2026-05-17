@@ -46,7 +46,7 @@
       "x": 6,
       "y": 4,
       "solid": true,
-      "sprite": "npc_placeholder",
+      "sprite": "npc_old_man",
       "trigger": "interact",
       "commands": [
         {
@@ -102,7 +102,7 @@
       "x": 7,
       "y": 7,
       "solid": true,
-      "sprite": "npc_placeholder",
+      "sprite": "npc_shopkeeper",
       "trigger": "interact",
       "commands": [
         { "type": "showText", "speaker": "Tendera", "text": "Echa un vistazo a mis pociones." },
@@ -115,6 +115,7 @@
       "x": 1,
       "y": 7,
       "solid": false,
+      "sprite": "enemy_slime",
       "trigger": "touch",
       "commands": [
         {
@@ -149,6 +150,7 @@
       "x": 3,
       "y": 3,
       "solid": false,
+      "sprite": "transfer_door",
       "trigger": "touch",
       "commands": [
         {

@@ -9,6 +9,7 @@
 #include "database/ItemDatabase.h"
 #include "database/RpgDatabases.h"
 #include "runtime/BattleSystem.h"
+#include "runtime/MenuSystem.h"
 #include "types/ProjectTypes.h"
 #include <memory>
 #include <string>
@@ -46,8 +47,8 @@ private:
     void runEventCommands(const EventData& event);
     void applyTransferIfPending();
     void updateCamera();
-    void saveGame();
-    void loadGameFromDisk();
+    bool saveGame(int slotIndex = 1, bool showDialogueFeedback = true);
+    bool loadGameFromDisk(int slotIndex = 1, bool showDialogueFeedback = true);
     void hookEventRunnerResolvers();
 
     std::string getMapPath(const std::string& mapId) const;
@@ -61,9 +62,10 @@ private:
     ItemDatabase itemDatabase;
     rpg::RpgDatabases databases;
     std::unique_ptr<rpg::BattleSystem> battleSystem;
+    rpg::MenuSystem menuSystem;
 
     int viewportW = 800;
     int viewportH = 600;
 
-    static constexpr const char* kDefaultSaveSlot = "slot_1";
+    static std::string slotIdFor(int slotIndex);
 };

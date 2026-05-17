@@ -4,6 +4,40 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 7 — Slice 0 Original Asset Foundation
+
+**Date**: 2026-05-17
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx vitest run src/assets/generated/__tests__/assetCatalog.test.ts` | PASS | 3/3 tests |
+| `cmd /c scripts\dev\verify-runtime.bat` | PASS | Added `SpriteCatalog` + `MenuSystem` coverage; `RPGTests` passed |
+| `npx tsc --noEmit` | PASS | 0 errors |
+| `npx vite build` | PASS | Generated asset PNGs included in production bundle |
+| `npx vitest run` | PASS | 10 files, 65 tests |
+| `cmd /c scripts\dev\smoke-runtime.bat` | PASS | Runtime spawned, loaded project/databases/map |
+| `%LOCALAPPDATA%\RPGCreatorAI\build\rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-7-assets-smoke` | PASS | 9 screenshots written with committed sprite rendering |
+
+### Fixes applied
+
+- Replaced production emoji placeholders with generated assets or vector
+  icons across the editor / playtest UI.
+- Added original generated asset atlases plus derived transparent PNG and
+  runtime BMP assets.
+- Added runtime sprite lookup / texture loading and updated sample event
+  sprite ids.
+- Wired the pause-menu shell into the runtime and added keyboard
+  navigation coverage for the new menu state machine.
+
+### Final pass/fail
+
+- Frontend: PASS
+- C++ runtime: PASS
+- Runtime smoke: PASS
+- Visual smoke shots: PASS
+
 ## Phase 2 — Visible Playable RPG Runtime MVP
 
 ### Run 1 — initial Phase 2 validation

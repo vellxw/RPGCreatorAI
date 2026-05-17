@@ -1,6 +1,7 @@
-import { Map, Calendar, Database, MessageSquare, Image, Sparkles, Settings, FolderOpen } from 'lucide-react';
+import { Sparkles, FolderOpen } from 'lucide-react';
 import { useEditor } from '../../stores/editorStore';
 import type { Screen } from '../../types/project';
+import { editorAssets } from '../../assets/generated/assetCatalog';
 
 interface NavItem {
   id: Screen | string;
@@ -11,13 +12,13 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'project', label: 'Project', icon: <FolderOpen size={18} />, screen: 'editor' },
-  { id: 'maps', label: 'Maps', icon: <Map size={18} />, screen: 'editor' },
-  { id: 'events', label: 'Events', icon: <Calendar size={18} />, screen: 'events' },
-  { id: 'database', label: 'Database', icon: <Database size={18} />, screen: 'database' },
-  { id: 'dialogue', label: 'Dialogue', icon: <MessageSquare size={18} />, screen: 'editor' },
-  { id: 'assets', label: 'Assets', icon: <Image size={18} />, screen: 'editor' },
+  { id: 'maps', label: 'Maps', icon: <img src={editorAssets.map} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
+  { id: 'events', label: 'Events', icon: <img src={editorAssets.event} alt="" className="w-[18px] h-[18px]" />, screen: 'events' },
+  { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
+  { id: 'dialogue', label: 'Dialogue', icon: <img src={editorAssets.dialogue} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
+  { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
   { id: 'ai-tools', label: 'AI Tools', icon: <Sparkles size={18} />, screen: 'ai-tools' },
-  { id: 'settings', label: 'Settings', icon: <Settings size={18} />, screen: 'ai-tools' },
+  { id: 'settings', label: 'Settings', icon: <img src={editorAssets.settings} alt="" className="w-[18px] h-[18px]" />, screen: 'ai-tools' },
 ];
 
 export function Sidebar() {

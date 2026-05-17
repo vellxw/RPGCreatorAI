@@ -1,23 +1,38 @@
 # Phase 7 — Tasks
 
-Phase 7 ships in 10 vertical slices. Every slice is built, tested,
+Phase 7 ships in 11 vertical slices. Every slice is built, tested,
 committed, and pushed before the next starts. Nothing in this phase is
 half-wired.
 
+## Slice 0 — Original asset foundation
+
+- [x] 0.1 Generate and commit original asset atlases plus derived editor
+      PNGs / runtime BMPs under `src/assets/generated/` and
+      `assets/generated/`.
+- [x] 0.2 Replace production emoji placeholders in editor / playtest UI
+      with generated assets or proper vector icons.
+- [x] 0.3 Add runtime sprite lookup + BMP texture loading so maps and
+      entities render committed sprites instead of only color blocks.
+- [x] 0.4 Update the bundled sample maps to reference concrete sprite ids.
+- [x] 0.5 Add tests for the asset catalog and sprite catalog.
+- [x] 0.6 Validate frontend build/tests, runtime build/tests, smoke, and
+      visual smoke screenshots.
+- [ ] 0.7 Commit + push.
+
 ## Slice 1 — Runtime pause / main menu skeleton
 
-- [ ] 1.1 Add `src/runtime/MenuSystem.{h,cpp}` with `MenuScreen` enum,
+- [x] 1.1 Add `src/runtime/MenuSystem.{h,cpp}` with `MenuScreen` enum,
       `open/close/isOpen/current`, root selection state, and
       `handleInput` for arrow keys + Enter + Escape.
-- [ ] 1.2 Wire `MenuSystem` into `Game`: open on `Escape`, short-circuit
+- [x] 1.2 Wire `MenuSystem` into `Game`: open on `Escape`, short-circuit
       player movement, EventRunner advancement, and battle ticking
       while open.
-- [ ] 1.3 Extend `Renderer2D` with a shared `drawTextPanel` primitive
+- [x] 1.3 Extend `Renderer2D` with a shared `drawTextPanel` primitive
       and a `renderMenuPanel(const MenuSystem::ViewModel&)` that draws
       the root list using `BitmapFont`.
-- [ ] 1.4 Add `tests/test_menu_system.cpp` covering open/close, key
+- [x] 1.4 Add `tests/test_menu_system.cpp` covering open/close, key
       navigation, and root selection cycling.
-- [ ] 1.5 Build (`scripts\dev\verify-runtime.bat`), confirm RPGTests
+- [x] 1.5 Build (`scripts\dev\verify-runtime.bat`), confirm RPGTests
       pass, smoke runtime once.
 - [ ] 1.6 Commit + push.
 

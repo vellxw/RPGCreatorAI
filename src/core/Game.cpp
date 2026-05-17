@@ -94,6 +94,39 @@ void Game::update(const InputManager& input, float dt) {
         loadGameFromDisk();
     }
 
+    // Menu takes exclusive ownership of gameplay input while open.
+    if (menuSystem.isOpen()) {
+        menuSystem.handleInput(input);
+        const auto menuAction = menuSystem.pendingAction();
+        const int menuSlot = menuSystem.pendingActionSlot();
+        menuSystem.consumeAction();
+        switch (menuAction) {
+            case rpg::MenuSystem::Action::Save: {
+                bool ok = saveGame(menuSlot, false);
+                menuSystem.notifySaveResult(ok, menuSlot);
+                break;
+            }
+            case rpg::MenuSystem::Action::Load: {
+                bool ok = loadGameFromDisk(menuSlot, false);
+                menuSystem.notifyLoadResult(ok, menuSlot);
+                break;
+            }
+            case rpg::MenuSystem::Action::Close:
+            case rpg::MenuSystem::Action::None:
+                break;
+        }
+        return;
+    }
+
+    // Escape / Tab open the pause menu only when gameplay is otherwise idle.
+    if (!dialogue.isActive() &&
+        (!eventRunner || !eventRunner->isRunning()) &&
+        (input.isJustPressed(KeyButton::Cancel) ||
+         input.isJustPressed(KeyButton::Menu))) {
+        menuSystem.open();
+        return;
+    }
+
     // Drive the event runner; it self-pauses while dialogue is active.
     eventRunner->update(dt);
 
@@ -239,34 +272,41 @@ void Game::updateCamera() {
     camera.setPosition(px - viewportW / 2, py - viewportH / 2);
 }
 
-void Game::saveGame() {
-    if (SaveManager::save(kDefaultSaveSlot, state)) {
-        dialogue.showText("", "Partida guardada.");
-    } else {
-        dialogue.showText("", "Error al guardar.");
-    }
+std::string Game::slotIdFor(int slotIndex) {
+    return "slot_" + std::to_string(slotIndex);
 }
 
-void Game::loadGameFromDisk() {
-    auto loaded = SaveManager::load(kDefaultSaveSlot);
+bool Game::saveGame(int slotIndex, bool showDialogueFeedback) {
+    bool ok = SaveManager::save(slotIdFor(slotIndex), state);
+    if (showDialogueFeedback) {
+        dialogue.showText("", ok ? "Partida guardada." : "Error al guardar.");
+    }
+    return ok;
+}
+
+bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback) {
+    auto loaded = SaveManager::load(slotIdFor(slotIndex));
     if (!loaded) {
-        dialogue.showText("", "No hay partida guardada.");
-        return;
+        if (showDialogueFeedback) dialogue.showText("", "No hay partida guardada.");
+        return false;
     }
     state = *loaded;
     if (!loadMap(state.getCurrentMapId())) {
         Logger::error("Loaded save references unknown map: " + state.getCurrentMapId());
-        dialogue.showText("", "Error al cargar mapa.");
-        return;
+        if (showDialogueFeedback) dialogue.showText("", "Error al cargar mapa.");
+        return false;
     }
     updateCamera();
-    dialogue.showText("", "Partida cargada.");
+    if (showDialogueFeedback) dialogue.showText("", "Partida cargada.");
+    return true;
 }
 
 void Game::render(IRenderer& renderer) {
     renderer.renderMap(currentScene, camera);
     renderer.renderEntities(currentScene, state, camera);
+    renderer.renderHUD(state);
     renderer.renderDialogue(dialogue);
+    renderer.renderMenu(menuSystem.snapshot(state, databases));
 }
 
 // ---- Public verbs ---------------------------------------------------------

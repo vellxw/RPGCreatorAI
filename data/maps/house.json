@@ -38,6 +38,7 @@
       "x": 3,
       "y": 5,
       "solid": false,
+      "sprite": "transfer_door",
       "trigger": "touch",
       "commands": [
         {
@@ -55,6 +56,7 @@
       "x": 4,
       "y": 1,
       "solid": true,
+      "sprite": "chest_closed",
       "trigger": "interact",
       "commands": [
         {

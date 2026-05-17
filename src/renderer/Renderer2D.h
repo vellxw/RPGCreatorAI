@@ -1,6 +1,10 @@
 #pragma once
 #include "renderer/IRenderer.h"
 struct SDL_Renderer;
+struct SDL_Texture;
+
+#include <string>
+#include <unordered_map>
 
 class Renderer2D : public IRenderer {
 public:
@@ -9,11 +13,17 @@ public:
     void renderMap(const MapScene& scene, const Camera2D& camera) override;
     void renderEntities(const MapScene& scene, const GameState& state, const Camera2D& camera) override;
     void renderDialogue(const DialogueSystem& dialogue) override;
+    void renderHUD(const GameState& state) override;
+    void renderMenu(const rpg::MenuSystem::ViewModel& vm) override;
     void endFrame() override;
     void shutdown() override;
 
 private:
+    SDL_Texture* textureFor(const std::string& assetKey);
+    void renderSprite(const std::string& assetKey, int x, int y, int w, int h);
+
     SDL_Renderer* sdlRenderer = nullptr;
     int screenWidth = 800;
     int screenHeight = 600;
+    std::unordered_map<std::string, SDL_Texture*> textures;
 };

@@ -2,9 +2,14 @@
 
 ## Overview
 
-Phase 7 splits cleanly into two tracks that share validation
+Phase 7 splits cleanly into three tracks that share validation
 infrastructure but otherwise touch different code:
 
+- **Asset foundation track** — lives in `assets/generated`,
+  `src/assets/generated`, and `src/renderer`. Adds committed original
+  generated imagery for tiles, sprites, editor icons, inventory / quest
+  / status / battle / shop visuals, and wires the runtime to load those
+  sprites from disk.
 - **Runtime UX track** — lives in C++ under `src/core`, `src/runtime`,
   `src/dialogue`, and `src/renderer`. Adds in-game menus, inventory,
   party/status, quest journal, shop UI, battle UI, and a save-slot
@@ -497,6 +502,9 @@ filesystem helpers (if a helper is added; otherwise C++ owns it).
 
 ## Migration path
 
+0. **Slice 0 — original asset foundation.** Commit generated atlases,
+   derived editor/runtime assets, replace production emoji placeholders,
+   and teach the renderer to load committed sprites.
 1. **Slice 1 — runtime menu skeleton.** `MenuSystem` skeleton, pause
    integration, root menu, Close. Renderer draws the panel. No content
    yet.

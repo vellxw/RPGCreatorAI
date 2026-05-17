@@ -12,7 +12,10 @@ cannot easily move or duplicate events, and has no undo/redo.
 Phase 7 closes that gap. It does **not** add new RPG systems. It does not
 introduce AI. It does not expand schemas. It makes every existing system
 visible and usable end-to-end, from authoring a map in the editor to
-playing it through the runtime.
+playing it through the runtime. The user has additionally promoted
+original production assets into the first slice of the phase so the
+creator loop is polished rather than still relying on emojis and flat
+placeholder blocks.
 
 The phase is defined by two parallel tracks:
 
@@ -30,14 +33,34 @@ reproducible E2E QA pass.
 - New RPG systems (no self-switches runtime, no autorun/parallel common
   events runtime, no new commands).
 - AI providers, prompt UIs, generation tooling.
-- Asset pipeline (sprites, audio, tilesets stay at colored-rectangle
-  level).
+- AI-backed asset generation providers, asset marketplaces, or remote
+  asset libraries.
 - HD-2D renderer, WebGPU, scripting language, modding API.
 - Online publishing, marketplaces, cloud sync, multiplayer.
 - Editor-side battle previewer or troop simulator.
 - Animated tile transitions, lighting, weather.
 
 ## Requirements
+
+### R0 — Original production assets
+
+**User story:** As a creator and player, I want the shipped UI and sample
+game to use coherent original visuals, so the product feels intentional
+instead of placeholder-driven.
+
+#### Acceptance Criteria
+
+1. Production React UI SHALL NOT rely on random emoji glyphs for its
+   main iconography.
+2. The repo SHALL contain committed original generated assets under both
+   `src/assets/generated/` and `assets/generated/`.
+3. The editor SHALL use generated icons, tile previews, and event
+   thumbnails in place of emoji placeholders.
+4. The runtime SHALL render committed tile/entity sprites from disk
+   instead of only flat colored rectangles.
+5. Sample project data SHALL reference concrete sprite ids where
+   appropriate (`npc_old_man`, `npc_shopkeeper`, `chest_closed`,
+   `transfer_door`, `enemy_slime`).
 
 ### R1 — Pause / main menu
 

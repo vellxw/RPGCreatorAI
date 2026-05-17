@@ -2,29 +2,15 @@ import { useEditor } from '../../stores/editorStore';
 import { useProject } from '../../stores/projectStore';
 import type { GameEvent } from '../../types/project';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 
 const TILE_SIZE = 32;
 
-const tileColors: Record<number, string> = {
-  0: '#90c96e', // walkable grass
-  1: '#7ab85a', // grass variant
-  9: '#5a8a3a', // collision/wall
-};
-
-const eventColors: Record<string, string> = {
-  npc: '#8b5cf6',
-  transfer: '#06b6d4',
-  chest: '#f59e0b',
-  object: '#6b7280',
-  trigger: '#ec4899',
-};
-
-const eventIcons: Record<string, string> = {
-  npc: '👤',
-  transfer: '🚪',
-  chest: '📦',
-  object: '⬜',
-  trigger: '⚡',
+const groundAssets: Record<number, string> = {
+  0: gameAssets.grass,
+  1: gameAssets.grass,
+  2: gameAssets.path,
+  3: gameAssets.water,
 };
 
 export function MapCanvas() {
@@ -34,6 +20,7 @@ export function MapCanvas() {
 
   if (!map) return <div className="flex-1 flex items-center justify-center text-gray-400">No map selected</div>;
 
+  const groundLayer = map.layers.find(l => l.name === 'ground');
   const collisionLayer = map.layers.find(l => l.type === 'collision');
   const canvasWidth = map.width * TILE_SIZE;
   const canvasHeight = map.height * TILE_SIZE;
@@ -58,19 +45,32 @@ export function MapCanvas() {
             className="w-full h-full"
           >
             {/* Tiles */}
-            {collisionLayer && collisionLayer.tiles.map((tile, i) => {
+            {groundLayer && groundLayer.tiles.map((tile, i) => {
               const x = (i % map.width) * TILE_SIZE;
               const y = Math.floor(i / map.width) * TILE_SIZE;
               return (
-                <rect
+                <image
                   key={i}
                   x={x}
                   y={y}
                   width={TILE_SIZE}
                   height={TILE_SIZE}
-                  fill={tileColors[tile] || '#7ab85a'}
-                  stroke="#6aa04a"
-                  strokeWidth="0.5"
+                  href={groundAssets[tile] ?? gameAssets.grass}
+                />
+              );
+            })}
+            {collisionLayer && collisionLayer.tiles.map((tile, i) => {
+              if (tile !== 9) return null;
+              const x = (i % map.width) * TILE_SIZE;
+              const y = Math.floor(i / map.width) * TILE_SIZE;
+              return (
+                <image
+                  key={`wall-${i}`}
+                  x={x}
+                  y={y}
+                  width={TILE_SIZE}
+                  height={TILE_SIZE}
+                  href={gameAssets.wall}
                 />
               );
             })}
@@ -146,23 +146,13 @@ export function MapCanvas() {
                       rx="3"
                     />
                   )}
-                  <rect
-                    x={event.x * TILE_SIZE + 3}
-                    y={event.y * TILE_SIZE + 3}
-                    width={TILE_SIZE - 6}
-                    height={TILE_SIZE - 6}
-                    fill={eventColors[event.type] || '#6b7280'}
-                    rx="3"
-                    opacity="0.85"
+                  <image
+                    x={event.x * TILE_SIZE + 2}
+                    y={event.y * TILE_SIZE + 2}
+                    width={TILE_SIZE - 4}
+                    height={TILE_SIZE - 4}
+                    href={eventAssets[event.type]}
                   />
-                  <text
-                    x={event.x * TILE_SIZE + TILE_SIZE / 2}
-                    y={event.y * TILE_SIZE + TILE_SIZE / 2 + 5}
-                    textAnchor="middle"
-                    fontSize="14"
-                  >
-                    {eventIcons[event.type] || '⬜'}
-                  </text>
                 </g>
               );
             })}

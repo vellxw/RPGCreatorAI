@@ -13,7 +13,7 @@ Legend:
 | System | Status | Schema | Editor | Runtime | Validation | Tests | Notes |
 |--------|--------|--------|--------|---------|------------|-------|-------|
 | Project metadata | val | yes | yes | yes | yes | yes | Phase 1 |
-| Maps + tilesets (placeholder) | impl | yes | yes | yes | yes | yes | Tile painting deferred |
+| Maps + tilesets / sprites | impl | yes | yes | yes | yes | yes | Original committed assets landed in Phase 7 Slice 0; tile painting still deferred |
 | Events (id, position, trigger, solid, sprite) | val | yes | yes | yes | yes | yes | Phase 3 |
 | Event commands v0 (showText, setFlag, ifFlag, addItem, transferMap, playSound) | val | yes | yes | yes | yes | yes | Phase 1/2 |
 | Event commands v1 (choices, vars, gold, quest, shop, battle, common events) | val | yes | yes | yes | yes | yes | Slice 3 (24 commands total) |

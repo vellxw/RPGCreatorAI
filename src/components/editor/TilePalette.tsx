@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, X, Pencil, Eraser, Square, Circle, Move, Pipette } from 'lucide-react';
+import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 
 interface TileCategory {
   id: string;
@@ -13,29 +14,26 @@ const categories: TileCategory[] = [
     id: 'terrain',
     name: 'Terrain',
     color: '#22c55e',
-    tiles: ['grass-1', 'grass-2', 'grass-3', 'grass-4', 'dirt-1', 'dirt-2', 'dirt-3', 'dirt-4', 'sand-1', 'sand-2', 'sand-3', 'sand-4'],
+    tiles: ['grass', 'path', 'water'],
   },
-  { id: 'paths', name: 'Paths', color: '#f59e0b', tiles: ['path-1', 'path-2', 'path-3', 'path-4'] },
-  { id: 'walls', name: 'Walls', color: '#6b7280', tiles: ['wall-1', 'wall-2', 'wall-3', 'wall-4'] },
-  { id: 'water', name: 'Water', color: '#3b82f6', tiles: ['water-1', 'water-2', 'water-3', 'water-4'] },
-  { id: 'objects', name: 'Objects', color: '#8b5cf6', tiles: ['tree-1', 'rock-1', 'bush-1', 'flower-1'] },
+  { id: 'walls', name: 'Walls', color: '#6b7280', tiles: ['wall'] },
   { id: 'events', name: 'Events', color: '#ec4899', tiles: ['npc', 'chest', 'door', 'trigger'] },
 ];
 
-const tileColors: Record<string, string> = {
-  'grass-1': '#4ade80', 'grass-2': '#22c55e', 'grass-3': '#16a34a', 'grass-4': '#15803d',
-  'dirt-1': '#d4a574', 'dirt-2': '#c49a6c', 'dirt-3': '#b8860b', 'dirt-4': '#a0522d',
-  'sand-1': '#f5deb3', 'sand-2': '#deb887', 'sand-3': '#d2b48c', 'sand-4': '#c8a882',
-  'path-1': '#d4a574', 'path-2': '#c49a6c', 'path-3': '#b8860b', 'path-4': '#a0522d',
-  'wall-1': '#6b7280', 'wall-2': '#4b5563', 'wall-3': '#374151', 'wall-4': '#1f2937',
-  'water-1': '#60a5fa', 'water-2': '#3b82f6', 'water-3': '#2563eb', 'water-4': '#1d4ed8',
-  'tree-1': '#166534', 'rock-1': '#78716c', 'bush-1': '#15803d', 'flower-1': '#f472b6',
-  'npc': '#8b5cf6', 'chest': '#f59e0b', 'door': '#06b6d4', 'trigger': '#ec4899',
+const tilePreviewAssets: Record<string, string> = {
+  grass: gameAssets.grass,
+  path: gameAssets.path,
+  water: gameAssets.water,
+  wall: gameAssets.wall,
+  npc: eventAssets.npc,
+  chest: eventAssets.chest,
+  door: eventAssets.transfer,
+  trigger: eventAssets.trigger,
 };
 
 export function TilePalette() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ terrain: true });
-  const [selectedTile, setSelectedTile] = useState<string | null>('grass-1');
+  const [selectedTile, setSelectedTile] = useState<string | null>('grass');
   const [search, setSearch] = useState('');
 
   const toggleCategory = (id: string) => {
@@ -99,9 +97,10 @@ export function TilePalette() {
                         ? 'border-indigo-500 shadow-md scale-105'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    style={{ backgroundColor: tileColors[tile] || '#e5e7eb' }}
                     title={tile}
-                  />
+                  >
+                    <img src={tilePreviewAssets[tile]} alt="" className="w-full h-full object-contain" />
+                  </button>
                 ))}
               </div>
             )}

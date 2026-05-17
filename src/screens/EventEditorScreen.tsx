@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useProjectStore, getEventsByMap, flattenCommands } from '../stores/projectStore';
 import { useEditor } from '../stores/editorStore';
 import {
@@ -10,6 +10,23 @@ import {
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
+  MessageSquare,
+  GitBranch,
+  Backpack,
+  Coins,
+  Flag,
+  ToggleLeft,
+  Binary,
+  MapPinned,
+  Volume2,
+  Timer,
+  NotebookPen,
+  Repeat,
+  ScrollText,
+  CheckCheck,
+  Store,
+  Swords,
+  HeartPulse,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Input, Select } from '../components/ui/Input';
@@ -17,6 +34,7 @@ import { Button } from '../components/ui/Button';
 import { CommandEditor } from '../components/events/CommandEditor';
 import { validateEvent } from '../validation/validateMap';
 import type { EventCommand, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
+import { eventAssets } from '../assets/generated/assetCatalog';
 
 function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
   switch (type) {
@@ -118,9 +136,7 @@ function EventList() {
                       : 'hover:bg-gray-50 text-gray-600'
                   }`}
                 >
-                  <span className="text-[12px]">
-                    {event.type === 'npc' ? '👤' : event.type === 'chest' ? '📦' : '🚪'}
-                  </span>
+                  <img src={eventAssets[event.type]} alt="" className="w-4 h-4" />
                   <span className="text-[13px] truncate">{event.id}</span>
                   {editor.selectedEvent?.id === event.id && (
                     <MoreVertical size={12} className="ml-auto text-gray-400" />
@@ -149,33 +165,33 @@ interface CommandCardProps {
 }
 
 function CommandCard({ index, command, selected, onSelect, depth }: CommandCardProps) {
-  const icons: Record<string, { icon: string; color: string; bg: string }> = {
-    showText: { icon: '💬', color: 'text-blue-600', bg: 'bg-blue-50' },
-    showChoices: { icon: '🔀', color: 'text-blue-600', bg: 'bg-blue-50' },
-    ifFlag: { icon: '🚩', color: 'text-red-600', bg: 'bg-red-50' },
-    ifSwitch: { icon: '🔀', color: 'text-red-600', bg: 'bg-red-50' },
-    ifVariable: { icon: '🔢', color: 'text-red-600', bg: 'bg-red-50' },
-    addItem: { icon: '🎒', color: 'text-green-600', bg: 'bg-green-50' },
-    removeItem: { icon: '🎒', color: 'text-green-600', bg: 'bg-green-50' },
-    addGold: { icon: '💰', color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    removeGold: { icon: '💰', color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    setFlag: { icon: '🚩', color: 'text-purple-600', bg: 'bg-purple-50' },
-    controlSwitch: { icon: '🎚️', color: 'text-purple-600', bg: 'bg-purple-50' },
-    controlVariable: { icon: '🔢', color: 'text-purple-600', bg: 'bg-purple-50' },
-    transferMap: { icon: '🌐', color: 'text-cyan-600', bg: 'bg-cyan-50' },
-    setPlayerPosition: { icon: '📍', color: 'text-cyan-600', bg: 'bg-cyan-50' },
-    playSound: { icon: '🔊', color: 'text-amber-600', bg: 'bg-amber-50' },
-    wait: { icon: '⏱️', color: 'text-gray-600', bg: 'bg-gray-50' },
-    comment: { icon: '📝', color: 'text-gray-500', bg: 'bg-gray-50' },
-    callCommonEvent: { icon: '🔁', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    startQuest: { icon: '🗺️', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    updateQuestObjective: { icon: '✅', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    completeQuest: { icon: '🏆', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    openShop: { icon: '🏪', color: 'text-pink-600', bg: 'bg-pink-50' },
-    startBattle: { icon: '⚔️', color: 'text-rose-600', bg: 'bg-rose-50' },
-    changeActorHp: { icon: '❤️', color: 'text-rose-600', bg: 'bg-rose-50' },
+  const icons: Record<string, { icon: ReactNode; color: string; bg: string }> = {
+    showText: { icon: <MessageSquare size={18} />, color: 'text-blue-600', bg: 'bg-blue-50' },
+    showChoices: { icon: <GitBranch size={18} />, color: 'text-blue-600', bg: 'bg-blue-50' },
+    ifFlag: { icon: <Flag size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
+    ifSwitch: { icon: <GitBranch size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
+    ifVariable: { icon: <Binary size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
+    addItem: { icon: <Backpack size={18} />, color: 'text-green-600', bg: 'bg-green-50' },
+    removeItem: { icon: <Backpack size={18} />, color: 'text-green-600', bg: 'bg-green-50' },
+    addGold: { icon: <Coins size={18} />, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    removeGold: { icon: <Coins size={18} />, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    setFlag: { icon: <Flag size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    controlSwitch: { icon: <ToggleLeft size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    controlVariable: { icon: <Binary size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    transferMap: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    setPlayerPosition: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    playSound: { icon: <Volume2 size={18} />, color: 'text-amber-600', bg: 'bg-amber-50' },
+    wait: { icon: <Timer size={18} />, color: 'text-gray-600', bg: 'bg-gray-50' },
+    comment: { icon: <NotebookPen size={18} />, color: 'text-gray-500', bg: 'bg-gray-50' },
+    callCommonEvent: { icon: <Repeat size={18} />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    startQuest: { icon: <ScrollText size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    updateQuestObjective: { icon: <CheckCheck size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    completeQuest: { icon: <CheckCheck size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    openShop: { icon: <Store size={18} />, color: 'text-pink-600', bg: 'bg-pink-50' },
+    startBattle: { icon: <Swords size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
+    changeActorHp: { icon: <HeartPulse size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
   };
-  const info = icons[command.type] || { icon: '⬜', color: 'text-gray-600', bg: 'bg-gray-50' };
+  const info = icons[command.type] || { icon: <NotebookPen size={18} />, color: 'text-gray-600', bg: 'bg-gray-50' };
 
   const titles: Record<string, string> = {
     showText: 'Show Text',
@@ -246,7 +262,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       }`}
     >
       <span className="text-[12px] text-gray-400 font-mono mt-1 w-4">{index}</span>
-      <div className={`w-9 h-9 rounded-lg ${info.bg} flex items-center justify-center text-lg flex-shrink-0`}>
+      <div className={`w-9 h-9 rounded-lg ${info.bg} ${info.color} flex items-center justify-center text-lg flex-shrink-0`}>
         {info.icon}
       </div>
       <div className="flex-1 min-w-0">

@@ -28,6 +28,7 @@ import {
 import { isDesktopShell } from '../../adapters/adapterFactory';
 import { SaveIndicator } from './SaveIndicator';
 import type { Screen } from '../../types/project';
+import { uiAssets } from '../../assets/generated/assetCatalog';
 
 export function TopToolbar() {
   const { state, dispatch } = useEditor();
@@ -267,7 +268,7 @@ export function TopToolbar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
-            <span className="text-white text-[12px] font-bold">⚔</span>
+            <img src={uiAssets.battle} alt="" className="w-5 h-5" />
           </div>
           <span className="font-semibold text-[14px] text-gray-800">RPGCreatorAI</span>
         </div>

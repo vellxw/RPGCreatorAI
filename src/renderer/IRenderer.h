@@ -4,6 +4,7 @@
 #include "renderer/Camera2D.h"
 #include "dialogue/DialogueSystem.h"
 #include "events/GameState.h"
+#include "runtime/MenuSystem.h"
 
 class IRenderer {
 public:
@@ -13,6 +14,8 @@ public:
     virtual void renderMap(const MapScene& scene, const Camera2D& camera) = 0;
     virtual void renderEntities(const MapScene& scene, const GameState& state, const Camera2D& camera) = 0;
     virtual void renderDialogue(const DialogueSystem& dialogue) = 0;
+    virtual void renderHUD(const GameState& state) = 0;
+    virtual void renderMenu(const rpg::MenuSystem::ViewModel& vm) = 0;
     virtual void endFrame() = 0;
     virtual void shutdown() = 0;
 };

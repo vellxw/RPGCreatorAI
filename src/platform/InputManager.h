@@ -6,20 +6,22 @@ enum class KeyButton {
     Left,
     Right,
     Confirm, // E, Enter, Space
-    Cancel,  // Escape
+    Cancel,  // Escape (closes dialogue / cancels menu choice)
     Save,    // F5
     Load,    // F9
+    Menu,    // Tab (opens runtime pause menu when no dialogue/battle is active)
     None
 };
 
 class InputManager {
 public:
     void update(const unsigned char* keyboardState);
-    
+
     bool isPressed(KeyButton key) const;
     bool isJustPressed(KeyButton key) const;
 
 private:
-    bool currentState[8] = {false};
-    bool previousState[8] = {false};
+    static constexpr int kKeyCount = 9;
+    bool currentState[kKeyCount] = {false};
+    bool previousState[kKeyCount] = {false};
 };

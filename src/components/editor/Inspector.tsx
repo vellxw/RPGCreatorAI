@@ -3,6 +3,7 @@ import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
 import { MoreVertical, Plus } from 'lucide-react';
 import type { EventCommand, GameEvent, ShowTextCommand, TriggerType } from '../../types/project';
+import { eventAssets } from '../../assets/generated/assetCatalog';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -76,7 +77,7 @@ export function Inspector() {
     return (
       <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-          <span className="text-gray-400 text-lg">🎯</span>
+          <img src={eventAssets.object} alt="" className="w-8 h-8 opacity-70" />
         </div>
         <p className="text-[13px] text-gray-500">Select an object on the map to inspect its properties</p>
       </div>
@@ -128,7 +129,7 @@ export function Inspector() {
       <div className="px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-lg">
-            {event.type === 'npc' ? '👤' : event.type === 'chest' ? '📦' : event.type === 'transfer' ? '🚪' : '⬜'}
+            <img src={eventAssets[event.type]} alt="" className="w-8 h-8" />
           </div>
           <div>
             <div className="text-[14px] font-semibold text-gray-800">{event.id}</div>

@@ -2,22 +2,32 @@
 
 ## Current Goal
 
-Phase 6 — Complete RPG Creation System Foundation. **Slices 1-10 done.**
+Phase 7 — Polished creator-to-player loop.
 
 ## Active Phase
 
-Phase 6 — Slice 11 (final validation + reporting).
+Phase 7 — Slice 2 (runtime inventory / party / quest views) next.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 11 — full validation pass (typecheck + vitest + cargo + runtime
-   smoke) and final report.
-2. Phase 7 — runtime UI polish: shop menu, status menu, quest journal UI,
-   skill use in battle, autorun/parallel common events, self switches,
-   tile painting.
+1. Slice 2 — inventory, party/status, and quest journal views.
+2. Slice 3 — save/load slot picker.
+3. Slice 4 — shop UI.
+4. Slice 5 — battle UI polish + visible reward summary.
+5. Slice 6 — editor undo / redo.
+6. Slice 7 — map tile painting + collision painting.
+7. Slice 8 — event placement, drag/move, duplicate, delete.
+8. Slice 9 — editor → save → runtime round-trip QA + screenshots.
+9. Slice 10 — full validation, docs, final report, push.
 
 ## Closed subgoals
 
+- Phase 6 — Complete RPG Creation System Foundation — DONE (`a12efa8`).
+- Slice 0 — original asset foundation (generated atlases, editor assets,
+  runtime sprites, emoji replacement). Pending commit in current worktree.
+- Slice 1 — runtime pause / main menu skeleton (menu state machine wired
+  into `Game`, HUD/menu rendering, keyboard navigation tests). Pending
+  commit in current worktree.
 - Slice 1 — data model expansion (schemas, types, JSON files, validators,
   Rust shell round-trip, vitest + cargo coverage). Commit `7936b8f`.
 - Slice 2 — Database editor screen with tabs, CRUD, dirty tracking.
@@ -32,8 +42,8 @@ Phase 6 — Slice 11 (final validation + reporting).
 - Slice 8 — battle system v1 (deterministic, formula tested, rewards).
   Commit `d4fec32`.
 - Slice 9 — shops (data round-trip + dialogue-stub runtime). Commit `d4fec32`.
-- Slice 10 — sample town/house exercising every v1 command, validated
-  end-to-end (this commit).
+- Slice 10 — sample town/house exercising every v1 command. Commit `6c27308`.
+- Slice 11 — Phase 6 final validation + reporting. Commit `a12efa8`.
 
 ## Closed subgoals from previous phases
 

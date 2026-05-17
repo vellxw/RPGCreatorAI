@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Input, Select } from '../components/ui/Input';
 import { useProviderStore } from '../stores/providerStore';
-import { Play, RefreshCw, HelpCircle, ChevronRight, ExternalLink } from 'lucide-react';
+import {
+  Play,
+  RefreshCw,
+  HelpCircle,
+  ChevronRight,
+  ExternalLink,
+  Wrench,
+  Laptop,
+  Clock3,
+  ShieldAlert,
+  LockKeyhole,
+  Sparkles,
+} from 'lucide-react';
 import type { ProviderConfig } from '../types/project';
 
 function ProviderCard({ provider, onTest }: { provider: ProviderConfig; onTest: () => void }) {
@@ -14,13 +26,13 @@ function ProviderCard({ provider, onTest }: { provider: ProviderConfig; onTest: 
     'not-tested': <Badge variant="warning" dot>Not tested</Badge>,
   };
 
-  const logos: Record<string, string> = {
-    openai: '🟢',
-    claude: '🟣',
-    gemini: '⭐',
-    nvidia: '🟩',
-    custom: '🔧',
-    local: '💻',
+  const logos: Record<string, ReactNode> = {
+    openai: <span className="w-4 h-4 rounded-full bg-emerald-500" />,
+    claude: <span className="w-4 h-4 rounded-full bg-violet-500" />,
+    gemini: <Sparkles size={18} className="text-amber-500" />,
+    nvidia: <span className="w-4 h-4 rounded-sm bg-green-500" />,
+    custom: <Wrench size={18} className="text-slate-600" />,
+    local: <Laptop size={18} className="text-slate-600" />,
   };
 
   const capColors: Record<string, string> = {
@@ -37,7 +49,7 @@ function ProviderCard({ provider, onTest }: { provider: ProviderConfig; onTest: 
     <div className={`bg-white border rounded-xl p-5 ${provider.status === 'coming-later' ? 'opacity-60' : 'border-gray-200 hover:shadow-md transition-shadow'}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">{logos[provider.id] || '⬜'}</span>
+          <span className="text-xl">{logos[provider.id] || <span className="w-4 h-4 rounded bg-gray-300" />}</span>
           <span className="text-[14px] font-semibold text-gray-800">{provider.name}</span>
         </div>
         {statusBadge[provider.status]}
@@ -100,7 +112,10 @@ function ProviderCard({ provider, onTest }: { provider: ProviderConfig; onTest: 
       {provider.status === 'coming-later' && (
         <div className="mt-2">
           <div className="flex items-center gap-1.5 text-amber-600 mb-2">
-            <span className="text-[12px] font-medium">⏳ Coming soon</span>
+            <span className="text-[12px] font-medium inline-flex items-center gap-1">
+              <Clock3 size={12} />
+              Coming soon
+            </span>
           </div>
           <p className="text-[11px] text-gray-500">
             Local model management, quantization and runtime settings are on the roadmap. Stay tuned!
@@ -206,7 +221,10 @@ function UsageSafety() {
         </div>
 
         <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-[11px] text-amber-700 font-medium">⚠️ Per-task cost warning</p>
+          <p className="text-[11px] text-amber-700 font-medium inline-flex items-center gap-1">
+            <ShieldAlert size={12} />
+            Per-task cost warning
+          </p>
           <p className="text-[10px] text-amber-600">Tasks may exceed $0.50 depending on model and size.</p>
         </div>
 
@@ -228,7 +246,7 @@ function UsageSafety() {
 
         <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
           <p className="text-[10px] text-gray-500 flex items-start gap-1.5">
-            <span className="text-gray-400">🔒</span>
+            <LockKeyhole size={12} className="text-gray-400 mt-0.5" />
             API keys are stored locally and are never included in exported games.
           </p>
         </div>

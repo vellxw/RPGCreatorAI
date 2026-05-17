@@ -17,7 +17,18 @@ can build, run, and feel a small RPG".
 
 ## What Phase 7 delivers
 
-Two parallel tracks plus a closing E2E proof.
+Three tracks plus a closing E2E proof.
+
+### Original asset foundation
+
+- **Generated production asset set** — committed original tiles, NPCs,
+  chest, transfer door, item / equipment / skill / enemy placeholders,
+  and polished editor / runtime UI icons.
+- **Editor visual cleanup** — production emoji placeholders are removed
+  from the live UI in favor of generated assets or proper vector icons.
+- **Runtime sprite rendering** — the C++ renderer loads committed BMP
+  sprites from disk so the sample RPG is visibly authored, not only
+  rectangles.
 
 ### Runtime UX track
 
@@ -64,8 +75,8 @@ Two parallel tracks plus a closing E2E proof.
 - New RPG systems (no self-switches runtime, no autorun/parallel common
   events runtime, no new event commands).
 - AI providers, prompt UIs, generation tooling.
-- Asset pipeline (sprites, audio, tilesets stay at colored-rectangle
-  level).
+- AI-backed asset providers, remote asset libraries, marketplaces, or
+  cloud generation workflows.
 - HD-2D renderer, WebGPU, scripting language, modding API.
 - Online publishing, marketplaces, cloud sync, multiplayer.
 - Editor-side battle previewer or troop simulator.
@@ -115,6 +126,7 @@ The architecture rules from `AGENTS.md` continue to apply unchanged:
 The phase is delivered as 10 vertical slices (see
 `.kiro/specs/phase7-runtime-ux-map-workflow/tasks.md`):
 
+0. Original asset foundation.
 1. Pause / main menu skeleton.
 2. Inventory + Party + Quests views.
 3. Save / load slot picker.

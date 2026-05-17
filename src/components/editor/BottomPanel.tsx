@@ -1,6 +1,7 @@
 import { Tabs } from '../ui/Tabs';
 import { CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useProject } from '../../stores/projectStore';
+import { editorAssets, uiAssets } from '../../assets/generated/assetCatalog';
 
 function ValidationContent() {
   const project = useProject();
@@ -45,9 +46,9 @@ function ValidationContent() {
 
 function AISuggestionsContent() {
   const suggestions = [
-    { icon: '💬', title: 'Generate NPC dialogue', desc: 'Create contextual conversations', color: 'bg-blue-50 text-blue-600' },
-    { icon: '🗺️', title: 'Improve town layout', desc: 'AI will suggest layout improvements', color: 'bg-purple-50 text-purple-600' },
-    { icon: '⚔️', title: 'Create side quest', desc: 'Generate a new side quest idea', color: 'bg-amber-50 text-amber-600' },
+    { icon: editorAssets.dialogue, title: 'Generate NPC dialogue', desc: 'Create contextual conversations', color: 'bg-blue-50 text-blue-600' },
+    { icon: editorAssets.map, title: 'Improve town layout', desc: 'AI will suggest layout improvements', color: 'bg-purple-50 text-purple-600' },
+    { icon: uiAssets.questJournal, title: 'Create side quest', desc: 'Generate a new side quest idea', color: 'bg-amber-50 text-amber-600' },
   ];
 
   return (
@@ -55,7 +56,9 @@ function AISuggestionsContent() {
       <h4 className="text-[12px] font-semibold text-gray-700 mb-3">AI Suggestions</h4>
       {suggestions.map((s, i) => (
         <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors group">
-          <div className={`w-8 h-8 rounded-lg ${s.color} flex items-center justify-center text-sm`}>{s.icon}</div>
+          <div className={`w-8 h-8 rounded-lg ${s.color} flex items-center justify-center text-sm`}>
+            <img src={s.icon} alt="" className="w-6 h-6" />
+          </div>
           <div className="flex-1">
             <p className="text-[13px] font-medium text-gray-800">{s.title}</p>
             <p className="text-[11px] text-gray-500">{s.desc}</p>

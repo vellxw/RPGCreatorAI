@@ -1,5 +1,6 @@
 #include "renderer/Renderer2D.h"
 #include "renderer/BitmapFont.h"
+#include "renderer/SpriteCatalog.h"
 #include <SDL.h>
 #include <algorithm>
 
@@ -38,13 +39,6 @@ void drawRect(SDL_Renderer* r, int x, int y, int w, int h, Color c) {
     SDL_RenderDrawRect(r, &rect);
 }
 
-Color colorForEvent(const EventData& e) {
-    if (e.type == "npc")      return kColorNPC;
-    if (e.type == "chest")    return kColorChest;
-    if (e.type == "transfer") return kColorTransfer;
-    return kColorEvent;
-}
-
 } // namespace
 
 bool Renderer2D::initialize(Window& window) {
@@ -81,15 +75,13 @@ void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera) {
             int screenX = x * tileSize - cam.x;
             int screenY = y * tileSize - cam.y;
 
-            // Ground first
             int groundTile = scene.getTileAt("ground", x, y);
-            Color groundColor = (groundTile == 0) ? kColorUnknown : kColorGround;
-            fillRect(sdlRenderer, screenX, screenY, tileSize, tileSize, groundColor);
-
-            // Wall overlay (collision tile == 9 means wall)
             int collisionTile = scene.getTileAt("collision", x, y);
-            if (collisionTile == 9) {
-                fillRect(sdlRenderer, screenX, screenY, tileSize, tileSize, kColorWall);
+            if (groundTile == 0 && collisionTile != 9) {
+                fillRect(sdlRenderer, screenX, screenY, tileSize, tileSize, kColorUnknown);
+            } else {
+                renderSprite(SpriteCatalog::tileAssetFor(groundTile, collisionTile),
+                             screenX, screenY, tileSize, tileSize);
             }
         }
     }
@@ -105,18 +97,16 @@ void Renderer2D::renderEntities(const MapScene& scene, const GameState& state, c
     for (const auto& ev : scene.getData().events) {
         int sx = ev.x * tileSize - cam.x;
         int sy = ev.y * tileSize - cam.y;
-        Color c = colorForEvent(ev);
-        // Inset a bit so the underlying tile shows around the event sprite.
         int pad = std::max(2, tileSize / 8);
-        fillRect(sdlRenderer, sx + pad, sy + pad, tileSize - 2 * pad, tileSize - 2 * pad, c);
-        drawRect(sdlRenderer, sx + pad, sy + pad, tileSize - 2 * pad, tileSize - 2 * pad, kColorDlgEdge);
+        renderSprite(SpriteCatalog::eventAssetFor(ev), sx + pad, sy + pad,
+                     tileSize - 2 * pad, tileSize - 2 * pad);
     }
 
     // Player
     int psx = state.getPlayerX() * tileSize - cam.x;
     int psy = state.getPlayerY() * tileSize - cam.y;
     int pad = std::max(2, tileSize / 8);
-    fillRect(sdlRenderer, psx + pad, psy + pad, tileSize - 2 * pad, tileSize - 2 * pad, kColorPlayer);
+    renderSprite("player_adventurer", psx + pad, psy + pad, tileSize - 2 * pad, tileSize - 2 * pad);
 
     // Direction indicator (small dot on the facing edge)
     int dotSize = std::max(3, tileSize / 6);
@@ -197,5 +187,297 @@ void Renderer2D::endFrame() {
 }
 
 void Renderer2D::shutdown() {
+    for (auto& [_, texture] : textures) {
+        if (texture) SDL_DestroyTexture(texture);
+    }
+    textures.clear();
     sdlRenderer = nullptr;
+}
+
+SDL_Texture* Renderer2D::textureFor(const std::string& assetKey) {
+    auto it = textures.find(assetKey);
+    if (it != textures.end()) return it->second;
+
+    SDL_Surface* surface = SDL_LoadBMP(SpriteCatalog::runtimePathFor(assetKey).c_str());
+    if (!surface) {
+        textures[assetKey] = nullptr;
+        return nullptr;
+    }
+    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 255, 0, 255));
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
+    SDL_FreeSurface(surface);
+    textures[assetKey] = texture;
+    return texture;
+}
+
+void Renderer2D::renderSprite(const std::string& assetKey, int x, int y, int w, int h) {
+    if (SDL_Texture* texture = textureFor(assetKey)) {
+        SDL_Rect dst{x, y, w, h};
+        SDL_RenderCopy(sdlRenderer, texture, nullptr, &dst);
+        return;
+    }
+
+    fillRect(sdlRenderer, x, y, w, h, kColorEvent);
+    drawRect(sdlRenderer, x, y, w, h, kColorDlgEdge);
+}
+
+
+// ---------------------------------------------------------------------------
+// Phase 7 — runtime UI overlays (HUD, menu, shop, battle)
+// ---------------------------------------------------------------------------
+
+namespace {
+
+constexpr Color kPanelFill   {  10,  12,  18, 230 };
+constexpr Color kPanelBorder { 230, 230, 230, 255 };
+constexpr Color kPanelHeader { 240, 220,  60, 255 };
+constexpr Color kPanelText   { 240, 240, 240, 255 };
+constexpr Color kPanelDim    { 160, 160, 160, 255 };
+constexpr Color kPanelOK     {  90, 200, 120, 255 };
+constexpr Color kPanelBad    { 220,  90,  90, 255 };
+
+void drawTextLine(SDL_Renderer* r, int x, int y, const std::string& text,
+                  int scale, Color c) {
+    BitmapFont::drawText(r, x, y, text, scale, c.r, c.g, c.b, c.a);
+}
+
+struct PanelLayout {
+    int x;
+    int y;
+    int w;
+    int h;
+    int textX;
+    int titleY;
+    int rowsY;
+    int rowHeight;
+    int rowsPerPanel;
+};
+
+PanelLayout computePanelLayout(int screenW, int screenH) {
+    constexpr int margin = 32;
+    constexpr int padding = 14;
+    PanelLayout p;
+    p.x = margin;
+    p.y = margin;
+    p.w = screenW - margin * 2;
+    p.h = screenH - margin * 2;
+    p.textX = p.x + padding + 4;
+    p.titleY = p.y + padding;
+    p.rowsY = p.titleY + (BitmapFont::GlyphHeight * 2) + 14;
+    p.rowHeight = (BitmapFont::GlyphHeight * 2) + 6;
+    int usableH = p.h - (p.rowsY - p.y) - padding - p.rowHeight;
+    p.rowsPerPanel = std::max(1, usableH / p.rowHeight);
+    return p;
+}
+
+void drawPanel(SDL_Renderer* r, const PanelLayout& p, const std::string& title) {
+    fillRect(r, p.x, p.y, p.w, p.h, kPanelFill);
+    drawRect(r, p.x, p.y, p.w, p.h, kPanelBorder);
+    drawTextLine(r, p.textX, p.titleY, title, 2, kPanelHeader);
+}
+
+void drawHint(SDL_Renderer* r, const PanelLayout& p, const std::string& hint) {
+    int hintY = p.y + p.h - BitmapFont::GlyphHeight - 12;
+    drawTextLine(r, p.textX, hintY, hint, 1, kPanelDim);
+}
+
+} // namespace
+
+void Renderer2D::renderHUD(const GameState& state) {
+    if (!sdlRenderer) return;
+    // A small top-left HUD strip showing gold while playing.
+    std::string text = "Gold: " + std::to_string(state.getGold()) + "g";
+    int padX = 8, padY = 6;
+    int textW = BitmapFont::measureWidth(text, 2);
+    int textH = BitmapFont::GlyphHeight * 2;
+    int boxW = textW + padX * 2;
+    int boxH = textH + padY * 2;
+    int boxX = 12, boxY = 12;
+    fillRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelFill);
+    drawRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelBorder);
+    drawTextLine(sdlRenderer, boxX + padX, boxY + padY, text, 2, kPanelHeader);
+}
+
+void Renderer2D::renderMenu(const rpg::MenuSystem::ViewModel& vm) {
+    if (!sdlRenderer) return;
+    if (vm.screen == rpg::MenuSystem::Screen::Closed) return;
+
+    PanelLayout p = computePanelLayout(screenWidth, screenHeight);
+
+    auto drawList = [&](const std::string& title,
+                        const std::vector<std::string>& rows,
+                        const std::vector<bool>& enabled,
+                        const std::string& hint) {
+        drawPanel(sdlRenderer, p, title);
+        int total = static_cast<int>(rows.size());
+        int sel = vm.selectionIndex;
+        if (sel < 0) sel = 0;
+        if (sel >= total) sel = std::max(0, total - 1);
+
+        int firstRow = 0;
+        if (total > p.rowsPerPanel) {
+            int half = p.rowsPerPanel / 2;
+            firstRow = std::max(0, sel - half);
+            if (firstRow + p.rowsPerPanel > total) {
+                firstRow = std::max(0, total - p.rowsPerPanel);
+            }
+        }
+        int rowsToDraw = std::min(p.rowsPerPanel, total - firstRow);
+
+        for (int i = 0; i < rowsToDraw; ++i) {
+            int idx = firstRow + i;
+            int y = p.rowsY + i * p.rowHeight;
+            bool selected = (idx == sel);
+            Color color = enabled.empty() || enabled[idx]
+                              ? (selected ? kPanelHeader : kPanelText)
+                              : kPanelDim;
+            std::string prefix = selected ? "> " : "  ";
+            drawTextLine(sdlRenderer, p.textX, y, prefix + rows[idx], 2, color);
+        }
+        drawHint(sdlRenderer, p, hint);
+    };
+
+    auto drawMessage = [&]() {
+        if (!vm.message.has_value()) return;
+        int msgY = p.y + p.h - BitmapFont::GlyphHeight * 2 - 14 - 12;
+        drawTextLine(sdlRenderer, p.textX, msgY, *vm.message, 2, kPanelOK);
+    };
+
+    auto drawOverwriteConfirm = [&]() {
+        if (!vm.overwriteConfirmActive) return;
+        int boxW = 280;
+        int boxH = 110;
+        int bx = (screenWidth - boxW) / 2;
+        int by = (screenHeight - boxH) / 2;
+        fillRect(sdlRenderer, bx, by, boxW, boxH, kPanelFill);
+        drawRect(sdlRenderer, bx, by, boxW, boxH, kPanelBorder);
+        std::string title = "Overwrite Slot " +
+                            std::to_string(vm.overwriteConfirmSlotIndex) + " ?";
+        drawTextLine(sdlRenderer, bx + 16, by + 14, title, 2, kPanelHeader);
+        drawTextLine(sdlRenderer, bx + 16, by + 60, "[Enter] yes   [Esc] no", 1,
+                     kPanelText);
+    };
+
+    switch (vm.screen) {
+        case rpg::MenuSystem::Screen::Closed:
+            return;
+
+        case rpg::MenuSystem::Screen::Root: {
+            std::vector<bool> enabled(vm.rootItems.size(), true);
+            drawList("MENU", vm.rootItems, enabled,
+                     "[Up/Down] navigate   [Enter] select   [Esc/Tab] close");
+            std::string gold = "Gold: " + std::to_string(vm.playerGold) + "g";
+            int gx = p.x + p.w - BitmapFont::measureWidth(gold, 2) - 16;
+            drawTextLine(sdlRenderer, gx, p.titleY, gold, 2, kPanelOK);
+            drawMessage();
+            return;
+        }
+
+        case rpg::MenuSystem::Screen::Inventory: {
+            std::vector<std::string> rows;
+            for (const auto& it : vm.inventory) {
+                std::string line = it.name;
+                line.append(40 - std::min<int>(40, (int)line.size()), ' ');
+                line += "x" + std::to_string(it.amount);
+                if (it.unknown) line += "  (unknown item)";
+                rows.push_back(line);
+            }
+            if (rows.empty()) rows.push_back("(empty)");
+            drawList("INVENTORY", rows, {}, "[Esc] back");
+            // Selected description below
+            if (!vm.inventory.empty()) {
+                int sel = vm.selectionIndex;
+                if (sel < 0) sel = 0;
+                if (sel >= (int)vm.inventory.size()) sel = (int)vm.inventory.size() - 1;
+                const auto& row = vm.inventory[sel];
+                if (!row.description.empty()) {
+                    int descY = p.y + p.h - BitmapFont::GlyphHeight * 2 - 14 - 12;
+                    drawTextLine(sdlRenderer, p.textX, descY,
+                                 row.description, 1, kPanelDim);
+                }
+            }
+            return;
+        }
+
+        case rpg::MenuSystem::Screen::Party: {
+            std::vector<std::string> rows;
+            if (vm.party.empty()) {
+                rows.push_back("No party members");
+            } else {
+                for (const auto& a : vm.party) {
+                    std::string line = a.name + "  " + a.className +
+                                       "  Lv " + std::to_string(a.level);
+                    rows.push_back(line);
+                    rows.push_back("    HP " + std::to_string(a.hp) + "/" +
+                                   std::to_string(a.maxHp) + "   MP " +
+                                   std::to_string(a.mp) + "/" +
+                                   std::to_string(a.maxMp));
+                    rows.push_back("    ATK " + std::to_string(a.attack) +
+                                   "  DEF " + std::to_string(a.defense) +
+                                   "  AGI " + std::to_string(a.agility) +
+                                   "  LUK " + std::to_string(a.luck));
+                    rows.push_back("    Wpn " +
+                                   (a.weapon.empty() ? std::string{"-"} : a.weapon) +
+                                   "  Arm " +
+                                   (a.armor.empty() ? std::string{"-"} : a.armor) +
+                                   "  Acc " +
+                                   (a.accessory.empty() ? std::string{"-"} : a.accessory));
+                    rows.push_back("");
+                }
+            }
+            drawList("PARTY", rows, {}, "[Esc] back");
+            return;
+        }
+
+        case rpg::MenuSystem::Screen::Quests: {
+            std::vector<std::string> rows;
+            std::string lastGroup;
+            auto labelFor = [](const std::string& s) {
+                if (s == "active")    return std::string{"ACTIVE"};
+                if (s == "completed") return std::string{"COMPLETED"};
+                if (s == "failed")    return std::string{"FAILED"};
+                return s;
+            };
+            for (const auto& q : vm.quests) {
+                std::string group = labelFor(q.state);
+                if (group != lastGroup) {
+                    if (!lastGroup.empty()) rows.push_back("");
+                    rows.push_back(group);
+                    lastGroup = group;
+                }
+                rows.push_back("  " + q.title +
+                               (q.unknown ? "  (unknown quest)" : ""));
+                if (!q.summary.empty()) rows.push_back("    " + q.summary);
+                for (const auto& obj : q.objectives) {
+                    rows.push_back(std::string{"    "} +
+                                   (obj.done ? "[x] " : "[ ] ") +
+                                   obj.description);
+                }
+            }
+            if (rows.empty()) rows.push_back("No quests yet.");
+            drawList("QUEST JOURNAL", rows, {}, "[Esc] back");
+            return;
+        }
+
+        case rpg::MenuSystem::Screen::Save:
+        case rpg::MenuSystem::Screen::Load: {
+            std::vector<std::string> rows;
+            std::vector<bool> enabled;
+            bool isLoad = (vm.screen == rpg::MenuSystem::Screen::Load);
+            for (const auto& s : vm.slots) {
+                rows.push_back(s.summary);
+                enabled.push_back(isLoad ? s.exists : true);
+            }
+            if (rows.empty()) {
+                rows.push_back("(no slots configured)");
+                enabled.push_back(false);
+            }
+            std::string title = isLoad ? "LOAD" : "SAVE";
+            drawList(title, rows, enabled,
+                     "[Up/Down] navigate   [Enter] confirm   [Esc] back");
+            drawMessage();
+            drawOverwriteConfirm();
+            return;
+        }
+    }
 }

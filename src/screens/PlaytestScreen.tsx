@@ -2,8 +2,22 @@ import { useEffect, useState } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
 import { useProject } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
-import { ChevronRight, CheckCircle2, AlertTriangle } from 'lucide-react';
+import {
+  ChevronRight,
+  CheckCircle2,
+  AlertTriangle,
+  Gamepad2,
+  RotateCcw,
+  House,
+  Lightbulb,
+  Zap,
+  ClipboardList,
+  Bot,
+  Link2,
+  MessageSquare,
+} from 'lucide-react';
 import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
+import { editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
 
 function PlaytestControls({
   onMove,
@@ -15,7 +29,7 @@ function PlaytestControls({
   return (
     <div className="w-[180px] flex-shrink-0 bg-white border-r border-gray-200 p-4 flex flex-col gap-4 overflow-y-auto">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-[12px]">🎮</span>
+        <Gamepad2 size={14} className="text-indigo-600" />
         <span className="text-[13px] font-semibold text-gray-700">Playtest Controls</span>
       </div>
 
@@ -74,16 +88,20 @@ function PlaytestControls({
           onClick={onRestart}
           className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
         >
-          <span>🔄</span> Restart Test
+          <RotateCcw size={14} /> Restart Test
         </button>
         <button className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer">
-          <span>🏠</span> Spawn at Start
+          <House size={14} /> Spawn at Start
         </button>
       </div>
 
       <div className="mt-auto p-3 bg-blue-50 border border-blue-100 rounded-lg">
         <p className="text-[11px] text-blue-700">
-          <span className="font-medium">💡 Tip:</span> The preview below is a simulated editor preview, not the
+          <span className="font-medium inline-flex items-center gap-1">
+            <Lightbulb size={12} />
+            Tip:
+          </span>{' '}
+          The preview below is a simulated editor preview, not the
           native runtime. Use &quot;Open in Runtime&quot; to launch the C++ executable.
         </p>
       </div>
@@ -123,33 +141,35 @@ function GamePreview({
 
       <div className="relative">
         <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="rounded shadow-2xl">
-          {map.layers.find(l => l.type === 'collision')?.tiles.map((tile, i) => {
+          {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
             const x = (i % map.width) * TILE;
             const y = Math.floor(i / map.width) * TILE;
             return (
-              <rect
+              <image
                 key={i}
                 x={x}
                 y={y}
                 width={TILE}
                 height={TILE}
-                fill={tile === 9 ? '#3d6b2e' : '#5a9a42'}
-                stroke="#4a8a35"
-                strokeWidth="0.3"
+                href={tile === 2 ? gameAssets.path : tile === 3 ? gameAssets.water : gameAssets.grass}
               />
             );
+          })}
+          {map.layers.find(l => l.type === 'collision')?.tiles.map((tile, i) => {
+            if (tile !== 9) return null;
+            const x = (i % map.width) * TILE;
+            const y = Math.floor(i / map.width) * TILE;
+            return <image key={`wall-${i}`} x={x} y={y} width={TILE} height={TILE} href={gameAssets.wall} />;
           })}
 
           {map.events.map(event => (
             <g key={event.id}>
-              <rect
-                x={event.x * TILE + 3}
-                y={event.y * TILE + 3}
-                width={TILE - 6}
-                height={TILE - 6}
-                fill={event.type === 'npc' ? '#8b5cf6' : event.type === 'chest' ? '#f59e0b' : '#06b6d4'}
-                rx="3"
-                opacity="0.8"
+              <image
+                x={event.x * TILE + 1}
+                y={event.y * TILE + 1}
+                width={TILE - 2}
+                height={TILE - 2}
+                href={eventAssets[event.type]}
               />
               {event.type === 'npc' && (
                 <>
@@ -177,13 +197,12 @@ function GamePreview({
             </g>
           ))}
 
-          <rect
+          <image
             x={playerX * TILE + 2}
             y={playerY * TILE + 2}
             width={TILE - 4}
             height={TILE - 4}
-            fill="#3b82f6"
-            rx="4"
+            href={gameAssets.player}
           />
         </svg>
       </div>
@@ -195,7 +214,7 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
   return (
     <div className="w-[240px] flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto p-4">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-[12px]">⚡</span>
+        <Zap size={14} className="text-amber-500" />
         <span className="text-[13px] font-semibold text-gray-700">Runtime State Inspector</span>
       </div>
 
@@ -224,7 +243,7 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
             {state.inventory.map(item => (
               <div key={item.itemId} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px]">🧪</span>
+                  <img src={gameAssets.potion} alt="" className="w-4 h-4" />
                   <span className="text-[12px] text-gray-700">{item.name}</span>
                 </div>
                 <span className="text-[11px] text-gray-500">x{item.amount}</span>
@@ -359,13 +378,16 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
       <div className="flex-1 flex flex-col">
         <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
           <button className="text-[12px] font-medium text-indigo-600 border-b-2 border-indigo-500 pb-1 cursor-pointer">
-            📋 Logs
+            <span className="inline-flex items-center gap-1">
+              <ClipboardList size={12} />
+              Logs
+            </span>
           </button>
           <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">
             ✓ Validation <span className="text-[10px] bg-green-100 text-green-700 px-1 rounded">0</span>
           </button>
-          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">📊 Event Trace</button>
-          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">🤖 AI Debug</button>
+          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Event Trace</button>
+          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">AI Debug</button>
           <div className="ml-auto flex items-center gap-1.5">
             <CheckCircle2 size={12} className="text-green-500" />
             <span className="text-[11px] text-green-600 font-medium">Editor preview running</span>
@@ -386,15 +408,15 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
 
       <div className="w-[280px] border-l border-gray-200 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[12px]">🤖</span>
+          <Bot size={14} className="text-indigo-500" />
           <span className="text-[13px] font-semibold text-gray-700">AI Debug Assist</span>
           <Badge variant="info">Beta</Badge>
         </div>
         <div className="space-y-2">
           {[
-            { icon: '⚡', text: 'Explain why the player cannot move here' },
-            { icon: '🔗', text: 'Find broken transfer events' },
-            { icon: '💬', text: 'Generate missing dialogue' },
+            { icon: <Zap size={14} />, text: 'Explain why the player cannot move here' },
+            { icon: <Link2 size={14} />, text: 'Find broken transfer events' },
+            { icon: <MessageSquare size={14} />, text: 'Generate missing dialogue' },
           ].map((item, i) => (
             <button
               key={i}
