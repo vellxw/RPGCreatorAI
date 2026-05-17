@@ -2,15 +2,17 @@
 
 ## Current Goal
 
-Phase 7 — Polished creator-to-player loop.
+Phase 7 — Polished creator-to-player loop — DONE.
 
 ## Active Phase
 
-Phase 7 — Slice 10 (final validation, docs, final report, push) next.
+No active implementation phase. Phase 7 is complete.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 10 — full validation, docs, final report, push.
+1. Phase 8 candidate — advanced authoring depth and audiovisual polish
+   (self-switches, autorun/parallel events, active battle skills, real
+   audio playback) if the project continues.
 
 ## Closed subgoals
 
@@ -29,13 +31,15 @@ Phase 7 — Slice 10 (final validation, docs, final report, push) next.
 - Slice 5 — battle result UI (summary handoff, paused event continuation,
   reward screen). Commit `0681487`.
 - Slice 6 — undo / redo history (toolbar buttons + keyboard shortcuts,
-  paint / drag stroke coalescing). Commit `332a73f` plus current follow-up.
+  paint / drag stroke coalescing). Commits `332a73f`, `98a31a8`.
 - Slice 7 — map tile and collision painting (palette-driven brush workflow).
   Commit `332a73f`.
 - Slice 8 — event placement, drag/move, duplicate, delete, `Ctrl+D`,
-  and confirmation prompts. Commit `332a73f` plus current follow-up.
+  and confirmation prompts. Commits `332a73f`, `98a31a8`.
 - Slice 9 — editor → save → runtime round-trip QA, native screenshots,
-  and live browser verification. Pending commit in current worktree.
+  and live browser verification. Commit `98a31a8`.
+- Slice 10 — final validation, docs, phase report, and clean handoff.
+  Closed by the phase-completion commit.
 - Slice 1 — data model expansion (schemas, types, JSON files, validators,
   Rust shell round-trip, vitest + cargo coverage). Commit `7936b8f`.
 - Slice 2 — Database editor screen with tabs, CRUD, dirty tracking.

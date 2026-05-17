@@ -348,3 +348,21 @@ Error: Port 1420 is already in use
 - Screenshot captured:
   `docs/screenshots/phase-7/18-editor-shortcuts-after-delete.png`.
 
+### Slice 10 — final validation + closeout
+
+- `npx tsc --noEmit` — PASS.
+- `npx vite build` — PASS.
+- `npx vitest run` — PASS (12 files, 75 tests).
+- `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (17/17 Rust tests).
+- `cargo build --manifest-path src-tauri/Cargo.toml` — PASS.
+- `scripts\dev\verify-runtime.bat` — PASS.
+- `powershell -File scripts/dev/verify.ps1` — PASS; runtime smoke observed
+  `Project loaded: My First RPG`, `Map loaded: town`, and `SMOKE PASSED`.
+- `powershell -File scripts/dev/verify-editor-runtime-roundtrip.ps1` —
+  PASS; baseline / edited frame hashes differed.
+- `npm run desktop:verify-content` — PASS with a temporary strict-port Vite
+  dev server on `127.0.0.1:1420`.
+- `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-7` —
+  PASS (17 native runtime screenshots refreshed).
+

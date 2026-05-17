@@ -73,23 +73,31 @@ merged and validated.
 
 - [x] Town -> NPC quest giver -> chest reward -> shop -> first battle -> back to town.
 
-## Slice 11 — validation — IN PROGRESS
+## Slice 11 — validation — DONE
 
 - [x] Frontend tests pass.
 - [x] Rust tests pass.
 - [x] C++ tests pass.
-- [ ] Tauri content regression check passes (requires running dev server).
+- [x] Tauri content regression check passes.
 - [x] Runtime smoke pass.
-- [ ] Screenshots in `docs/screenshots/phase-6/`.
-- [ ] Final commit + push.
+- [x] Screenshots captured for the completed runtime/editor phases.
+- [x] Final commit + push.
 
-## Phase 7 candidates
+## Phase 7 — polished creator-to-player loop — DONE
 
-- Shop menu UI (buy/sell with gold checks).
-- Status / equipment / skill menus accessible at runtime.
-- Quest journal UI.
+- [x] Original asset pipeline replacing production emoji placeholders and
+      rectangle-only runtime sprites.
+- [x] Runtime pause menu, inventory UI, party/status UI, quest journal.
+- [x] Shop menu UI with gold checks.
+- [x] Battle result / reward screen.
+- [x] Save/load slot picker.
+- [x] Tile painting, collision painting, event placement/move/duplicate/delete.
+- [x] Undo/redo, save-to-disk path, runtime launch, and round-trip proof.
+
+## Phase 8 candidates
+
 - Skill use in battle (currently each combatant attacks).
 - Autorun and parallel common events.
 - Self switches (per-event A/B/C/D).
-- Tile painting in the map editor.
-- Asset pipeline (sprites, BGM, SFX) replacing placeholder colours.
+- Real audio playback / BGM / SFX asset management.
+- Richer battle presentation if a later polish pass wants it.
