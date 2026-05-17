@@ -303,3 +303,21 @@ Error: Port 1420 is already in use
   renderer panel.
 - `scripts\dev\verify-runtime.bat` — PASS after battle summary integration.
 
+### Slice 6-8 (pending commit) — undo / redo + map and event authoring
+
+- `npx vitest run src/stores/__tests__/projectReducer.test.ts` — initially
+  FAILED on the new undo/redo, tile painting, and event CRUD expectations;
+  fix applied: introduced project history snapshots plus map/event reducer
+  actions.
+- `npx vitest run src/stores/__tests__/projectReducer.test.ts` — PASS
+  (15/15).
+- `npx tsc --noEmit` — PASS.
+- `npx vitest run` — PASS (10 files, 69 tests).
+- `npx vite build` — PASS.
+- Live browser verification against `http://127.0.0.1:3000/` — PASS:
+  path brush changed a map tile to `tile_path.png`, event placement grew the
+  canvas event count, duplicate increased the count again, and Undo restored
+  the previous count.
+- Screenshot captured:
+  `docs/screenshots/phase-7-editor/01-editor-workflow.png`.
+

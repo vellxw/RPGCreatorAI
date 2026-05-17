@@ -79,6 +79,41 @@ describe('projectReducer', () => {
     expect(s1.maps.town.events[0].x).toBe(5);
   });
 
+  it('UNDO and REDO restore prior project snapshots', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'old_man',
+      changes: { x: 7 },
+    });
+    const s3 = projectReducer(s2, { type: 'UNDO' });
+    expect(s3.maps.town.events[0].x).toBe(5);
+    expect(s3.canRedo).toBe(true);
+
+    const s4 = projectReducer(s3, { type: 'REDO' });
+    expect(s4.maps.town.events[0].x).toBe(7);
+    expect(s4.canUndo).toBe(true);
+  });
+
+  it('new edits clear the redo stack after undo', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'old_man',
+      changes: { x: 7 },
+    });
+    const s3 = projectReducer(s2, { type: 'UNDO' });
+    const s4 = projectReducer(s3, {
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'old_man',
+      changes: { x: 9 },
+    });
+    expect(s4.canRedo).toBe(false);
+  });
+
   it('RENAME_EVENT renames when target id is free', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {
@@ -170,6 +205,56 @@ describe('projectReducer', () => {
     const s2 = projectReducer(s1, { type: 'MARK_SAVED' });
     expect(s2.dirty).toBe(false);
     expect(s2.lastSavedAt).toBeTruthy();
+  });
+
+  it('PAINT_TILE updates map layers immutably', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 2,
+      y: 3,
+      tile: 2,
+    });
+    expect(s2.maps.town.layers[0].tiles[32]).toBe(2);
+    expect(s1.maps.town.layers[0].tiles[32]).toBe(1);
+  });
+
+  it('ADD_EVENT, DUPLICATE_EVENT, and REMOVE_EVENT manage event CRUD', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'ADD_EVENT',
+      mapId: 'town',
+      event: {
+        id: 'chest_1',
+        type: 'chest',
+        x: 2,
+        y: 2,
+        solid: true,
+        trigger: 'interact',
+        commands: [],
+      },
+    });
+    expect(s2.maps.town.events.map(e => e.id)).toContain('chest_1');
+
+    const s3 = projectReducer(s2, {
+      type: 'DUPLICATE_EVENT',
+      mapId: 'town',
+      eventId: 'chest_1',
+      newId: 'chest_2',
+      x: 3,
+      y: 2,
+    });
+    expect(s3.maps.town.events.map(e => e.id)).toContain('chest_2');
+    expect(s3.maps.town.events.find(e => e.id === 'chest_2')?.x).toBe(3);
+
+    const s4 = projectReducer(s3, {
+      type: 'REMOVE_EVENT',
+      mapId: 'town',
+      eventId: 'chest_1',
+    });
+    expect(s4.maps.town.events.map(e => e.id)).not.toContain('chest_1');
   });
 
   it('VALIDATE refreshes errors/warnings', () => {

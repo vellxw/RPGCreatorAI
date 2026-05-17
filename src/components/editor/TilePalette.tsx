@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, X, Pencil, Eraser, Square, Circle, Move, Pipette } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
+import { useEditor, type BrushSelection } from '../../stores/editorStore';
 
 interface TileCategory {
   id: string;
@@ -32,13 +33,29 @@ const tilePreviewAssets: Record<string, string> = {
 };
 
 export function TilePalette() {
+  const { state: editor, dispatch } = useEditor();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ terrain: true });
-  const [selectedTile, setSelectedTile] = useState<string | null>('grass');
   const [search, setSearch] = useState('');
 
   const toggleCategory = (id: string) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };
+
+  const brushes: Record<string, BrushSelection> = {
+    grass: { kind: 'tile', tileId: 1, label: 'grass' },
+    path: { kind: 'tile', tileId: 2, label: 'path' },
+    water: { kind: 'tile', tileId: 3, label: 'water' },
+    wall: { kind: 'collision', tileId: 9, label: 'wall' },
+    npc: { kind: 'event', eventType: 'npc', label: 'npc' },
+    chest: { kind: 'event', eventType: 'chest', label: 'chest' },
+    door: { kind: 'event', eventType: 'transfer', label: 'transfer' },
+    trigger: { kind: 'event', eventType: 'trigger', label: 'trigger' },
+  };
+
+  const selectedTile =
+    editor.brush.kind === 'event' && editor.brush.label === 'transfer'
+      ? 'door'
+      : editor.brush.label;
 
   return (
     <div className="w-[220px] flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
@@ -53,7 +70,20 @@ export function TilePalette() {
         {[Pencil, Eraser, Square, Circle, Move, Pipette].map((Icon, i) => (
           <button
             key={i}
-            className={`p-1.5 rounded cursor-pointer ${i === 0 ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
+            onClick={() => {
+              if (i === 0) dispatch({ type: 'SET_BRUSH', brush: brushes.grass });
+              if (i === 1) dispatch({ type: 'SET_BRUSH', brush: { kind: 'collision', tileId: 0, label: 'erase' } });
+              if (i === 2) dispatch({ type: 'SET_BRUSH', brush: brushes.wall });
+              if (i === 4) dispatch({ type: 'SET_INTERACTION_MODE', mode: 'select' });
+            }}
+            className={`p-1.5 rounded cursor-pointer ${
+              (i === 4 && editor.interactionMode === 'select') ||
+              (i === 0 && editor.interactionMode === 'paint' && editor.brush.kind === 'tile') ||
+              (i === 1 && editor.brush.kind === 'collision' && editor.brush.tileId === 0) ||
+              (i === 2 && editor.brush.kind === 'collision' && editor.brush.tileId === 9)
+                ? 'bg-indigo-50 text-indigo-600'
+                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+            }`}
           >
             <Icon size={14} />
           </button>
@@ -88,10 +118,12 @@ export function TilePalette() {
             </button>
             {expanded[cat.id] && (
               <div className="grid grid-cols-4 gap-1 px-3 pb-2">
-                {cat.tiles.map(tile => (
+                {cat.tiles
+                  .filter(tile => tile.toLowerCase().includes(search.toLowerCase()))
+                  .map(tile => (
                   <button
                     key={tile}
-                    onClick={() => setSelectedTile(tile)}
+                    onClick={() => dispatch({ type: 'SET_BRUSH', brush: brushes[tile] })}
                     className={`w-10 h-10 rounded border-2 cursor-pointer transition-all ${
                       selectedTile === tile
                         ? 'border-indigo-500 shadow-md scale-105'

@@ -46,6 +46,25 @@ export default function App() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [projectState.dirty]);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const modifier = e.ctrlKey || e.metaKey;
+      if (!modifier) return;
+      if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        projectDispatch({ type: 'UNDO' });
+      } else if (
+        e.key.toLowerCase() === 'y' ||
+        (e.key.toLowerCase() === 'z' && e.shiftKey)
+      ) {
+        e.preventDefault();
+        projectDispatch({ type: 'REDO' });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   if (!loaded) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-500 text-sm">

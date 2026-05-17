@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
-import { useProject } from '../stores/projectStore';
+import { useProject, useProjectStore } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
 import {
   ChevronRight,
@@ -17,6 +17,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
+import { performSave } from '../stores/saveActions';
 import { editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
 
 function PlaytestControls({
@@ -272,6 +273,7 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
 
 function RuntimeBridgePanel() {
   const adapter = getRuntimeLaunchAdapter();
+  const { state: projectState, dispatch: projectDispatch } = useProjectStore();
   const [status, setStatus] = useState<string | null>(null);
   const [runtimeStatus, setRuntimeStatus] = useState(adapter.getStatus());
 
@@ -300,6 +302,13 @@ function RuntimeBridgePanel() {
     if (!projectRoot) {
       setStatus('Open a project folder first (Project > Open).');
       return;
+    }
+    if (projectState.dirty) {
+      const save = await performSave(projectState, projectDispatch);
+      if (!save.success) {
+        setStatus(`Launch blocked: ${save.errors[0] ?? 'save failed'}`);
+        return;
+      }
     }
     const result = await adapter.launch(projectRoot);
     setStatus(result.success ? `Runtime launched (pid ${result.pid})` : `Launch failed: ${result.error}`);

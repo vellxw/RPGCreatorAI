@@ -107,8 +107,32 @@ export function TopToolbar() {
   const renderEditorToolbar = () => (
     <>
       <div className="flex items-center gap-2">
-        <Undo2 size={16} className="text-gray-400 cursor-not-allowed" />
-        <Redo2 size={16} className="text-gray-400 cursor-not-allowed" />
+        <button
+          type="button"
+          onClick={() => projectDispatch({ type: 'UNDO' })}
+          disabled={!projectState.canUndo}
+          title="Undo"
+          className={`p-1 rounded ${
+            projectState.canUndo
+              ? 'text-gray-600 hover:bg-gray-100 cursor-pointer'
+              : 'text-gray-300 cursor-not-allowed'
+          }`}
+        >
+          <Undo2 size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => projectDispatch({ type: 'REDO' })}
+          disabled={!projectState.canRedo}
+          title="Redo"
+          className={`p-1 rounded ${
+            projectState.canRedo
+              ? 'text-gray-600 hover:bg-gray-100 cursor-pointer'
+              : 'text-gray-300 cursor-not-allowed'
+          }`}
+        >
+          <Redo2 size={16} />
+        </button>
       </div>
       <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
       <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useEditor } from '../../stores/editorStore';
-import { useProject } from '../../stores/projectStore';
-import type { GameEvent } from '../../types/project';
+import { useProject, useProjectStore } from '../../stores/projectStore';
+import type { EventType, GameEvent } from '../../types/project';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 
@@ -16,17 +17,137 @@ const groundAssets: Record<number, string> = {
 export function MapCanvas() {
   const { state, dispatch } = useEditor();
   const project = useProject();
+  const { dispatch: projectDispatch } = useProjectStore();
   const map = project.maps[state.selectedMapId];
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const [painting, setPainting] = useState(false);
+  const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
 
   if (!map) return <div className="flex-1 flex items-center justify-center text-gray-400">No map selected</div>;
 
   const groundLayer = map.layers.find(l => l.name === 'ground');
   const collisionLayer = map.layers.find(l => l.type === 'collision');
+  const freshSelectedEvent = state.selectedEvent
+    ? map.events.find(event => event.id === state.selectedEvent?.id) ?? null
+    : null;
   const canvasWidth = map.width * TILE_SIZE;
   const canvasHeight = map.height * TILE_SIZE;
 
   const handleEventClick = (event: GameEvent) => {
     dispatch({ type: 'SELECT_EVENT', event, mapId: map.id });
+  };
+
+  const eventIds = useMemo(() => new Set(map.events.map(event => event.id)), [map.events]);
+
+  const cellFromPointer = (e: ReactPointerEvent<SVGSVGElement | SVGGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const x = Math.floor(((e.clientX - rect.left) / rect.width) * map.width);
+    const y = Math.floor(((e.clientY - rect.top) / rect.height) * map.height);
+    if (x < 0 || x >= map.width || y < 0 || y >= map.height) return null;
+    return { x, y };
+  };
+
+  const paintAt = (x: number, y: number) => {
+    if (state.brush.kind === 'tile') {
+      projectDispatch({
+        type: 'PAINT_TILE',
+        mapId: map.id,
+        layerName: 'ground',
+        x,
+        y,
+        tile: state.brush.tileId,
+      });
+    } else if (state.brush.kind === 'collision') {
+      projectDispatch({
+        type: 'PAINT_TILE',
+        mapId: map.id,
+        layerName: 'collision',
+        x,
+        y,
+        tile: state.brush.tileId,
+      });
+    }
+  };
+
+  const nextEventId = (type: EventType) => {
+    const base = type === 'transfer' ? 'transfer' : type;
+    let n = 1;
+    while (eventIds.has(`${base}_${n}`)) n += 1;
+    return `${base}_${n}`;
+  };
+
+  const createEventAt = (type: EventType, x: number, y: number) => {
+    const event: GameEvent = {
+      id: nextEventId(type),
+      type,
+      x,
+      y,
+      solid: type === 'npc' || type === 'chest',
+      sprite:
+        type === 'npc'
+          ? 'npc_old_man'
+          : type === 'chest'
+            ? 'chest_closed'
+            : type === 'transfer'
+              ? 'transfer_door'
+              : undefined,
+      trigger: type === 'transfer' || type === 'trigger' ? 'touch' : 'interact',
+      commands: [],
+    };
+    projectDispatch({ type: 'ADD_EVENT', mapId: map.id, event });
+    dispatch({ type: 'SELECT_EVENT', event, mapId: map.id });
+  };
+
+  const handleCanvasPointerDown = (e: ReactPointerEvent<SVGSVGElement>) => {
+    const cell = cellFromPointer(e);
+    if (!cell) return;
+
+    if (state.interactionMode === 'select') {
+      dispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
+      return;
+    }
+
+    if (state.brush.kind === 'event') {
+      createEventAt(state.brush.eventType, cell.x, cell.y);
+      return;
+    }
+
+    setPainting(true);
+    paintAt(cell.x, cell.y);
+  };
+
+  const handleCanvasPointerMove = (e: ReactPointerEvent<SVGSVGElement>) => {
+    const cell = cellFromPointer(e);
+    if (!cell) return;
+
+    if (draggingEventId) {
+      projectDispatch({
+        type: 'UPDATE_EVENT',
+        mapId: map.id,
+        eventId: draggingEventId,
+        changes: { x: cell.x, y: cell.y },
+      });
+      return;
+    }
+
+    if (painting) {
+      paintAt(cell.x, cell.y);
+    }
+  };
+
+  const stopPointerInteractions = () => {
+    setPainting(false);
+    setDraggingEventId(null);
+  };
+
+  const startEventDrag = (event: GameEvent, e: ReactPointerEvent<SVGGElement>) => {
+    e.stopPropagation();
+    handleEventClick(event);
+    if (state.interactionMode === 'select') {
+      setDraggingEventId(event.id);
+    }
   };
 
   return (
@@ -39,10 +160,15 @@ export function MapCanvas() {
         >
           {/* Grid */}
           <svg
+            ref={svgRef}
             width={canvasWidth}
             height={canvasHeight}
             viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
             className="w-full h-full"
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handleCanvasPointerMove}
+            onPointerUp={stopPointerInteractions}
+            onPointerLeave={stopPointerInteractions}
           >
             {/* Tiles */}
             {groundLayer && groundLayer.tiles.map((tile, i) => {
@@ -131,6 +257,7 @@ export function MapCanvas() {
                 <g
                   key={event.id}
                   onClick={() => handleEventClick(event)}
+                  onPointerDown={e => startEventDrag(event, e)}
                   className="cursor-pointer"
                 >
                   {isSelected && (
@@ -163,7 +290,19 @@ export function MapCanvas() {
       {/* Bottom bar */}
       <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-md px-3 py-1.5 shadow-sm">
         <span className="text-[12px] text-gray-600 font-mono">
-          X: {state.selectedEvent?.x ?? '-'} Y: {state.selectedEvent?.y ?? '-'}
+          X: {freshSelectedEvent?.x ?? '-'} Y: {freshSelectedEvent?.y ?? '-'}
+        </span>
+        <span className="text-[11px] text-gray-400">·</span>
+        <span className="text-[12px] text-gray-600">
+          {state.interactionMode === 'select'
+            ? 'Move events'
+            : state.brush.kind === 'event'
+              ? `Place ${state.brush.label}`
+              : state.brush.kind === 'collision'
+                ? state.brush.tileId === 9
+                  ? 'Paint collision'
+                  : 'Erase collision'
+                : `Paint ${state.brush.label}`}
         </span>
       </div>
 

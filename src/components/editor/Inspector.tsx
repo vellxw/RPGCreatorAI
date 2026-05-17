@@ -1,7 +1,7 @@
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
-import { MoreVertical, Plus } from 'lucide-react';
+import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import type { EventCommand, GameEvent, ShowTextCommand, TriggerType } from '../../types/project';
 import { eventAssets } from '../../assets/generated/assetCatalog';
 
@@ -119,6 +119,35 @@ export function Inspector() {
     projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
   };
 
+  const duplicateEvent = () => {
+    const siblingIds = new Set(projectState.maps[mapId].events.map(e => e.id));
+    let n = 2;
+    let nextId = `${event.id}_copy`;
+    while (siblingIds.has(nextId)) {
+      nextId = `${event.id}_copy${n}`;
+      n += 1;
+    }
+    const nextX = Math.min(projectState.maps[mapId].width - 1, event.x + 1);
+    projectDispatch({
+      type: 'DUPLICATE_EVENT',
+      mapId,
+      eventId: event.id,
+      newId: nextId,
+      x: nextX,
+      y: event.y,
+    });
+    editorDispatch({
+      type: 'SELECT_EVENT',
+      event: { ...event, id: nextId, x: nextX },
+      mapId,
+    });
+  };
+
+  const deleteEvent = () => {
+    projectDispatch({ type: 'REMOVE_EVENT', mapId, eventId: event.id });
+    editorDispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
+  };
+
   return (
     <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
@@ -214,6 +243,20 @@ export function Inspector() {
       <div className="px-4 py-3 border-t border-gray-200 flex items-center gap-2">
         <button className="flex-1 px-3 py-1.5 text-[12px] font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 cursor-pointer">
           Edit Event Page
+        </button>
+        <button
+          onClick={duplicateEvent}
+          title="Duplicate event"
+          className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md cursor-pointer"
+        >
+          <Copy size={14} />
+        </button>
+        <button
+          onClick={deleteEvent}
+          title="Delete event"
+          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
+        >
+          <Trash2 size={14} />
         </button>
       </div>
     </div>

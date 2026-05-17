@@ -29,6 +29,10 @@ export interface ProjectStoreState {
   lastSavedAt: string | null;
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+  history: ProjectSnapshot[];
+  future: ProjectSnapshot[];
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,7 +41,35 @@ export interface ProjectStoreState {
 
 export type ProjectAction =
   | { type: 'LOAD_PROJECT'; payload: FullProjectState }
+  | { type: 'UNDO' }
+  | { type: 'REDO' }
   | { type: 'UPDATE_PROJECT_META'; changes: Partial<ProjectData> }
+  | {
+      type: 'PAINT_TILE';
+      mapId: string;
+      layerName: string;
+      x: number;
+      y: number;
+      tile: number;
+    }
+  | {
+      type: 'ADD_EVENT';
+      mapId: string;
+      event: GameEvent;
+    }
+  | {
+      type: 'DUPLICATE_EVENT';
+      mapId: string;
+      eventId: string;
+      newId: string;
+      x: number;
+      y: number;
+    }
+  | {
+      type: 'REMOVE_EVENT';
+      mapId: string;
+      eventId: string;
+    }
   | {
       type: 'UPDATE_EVENT';
       mapId: string;
@@ -105,6 +137,12 @@ export type ProjectAction =
   | { type: 'VALIDATE' };
 
 export type DatabaseRecord = { id: string } & Record<string, unknown>;
+export interface ProjectSnapshot {
+  project: ProjectData;
+  maps: Record<string, MapData>;
+  items: ItemDatabase;
+  databases: DatabaseEntries;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -124,6 +162,57 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
     dirty: true,
     maps: { ...state.maps, [mapId]: cloned },
   };
+}
+
+function snapshotOf(state: ProjectStoreState): ProjectSnapshot {
+  return {
+    project: deepClone(state.project),
+    maps: deepClone(state.maps),
+    items: deepClone(state.items),
+    databases: deepClone(state.databases),
+  };
+}
+
+function withValidation(state: ProjectStoreState): ProjectStoreState {
+  const report = validateProject({
+    project: state.project,
+    maps: state.maps,
+    items: state.items,
+    databases: state.databases,
+  });
+  return { ...state, errors: report.errors, warnings: report.warnings };
+}
+
+function withHistory(state: ProjectStoreState, next: ProjectStoreState): ProjectStoreState {
+  if (next === state) return state;
+  const history = [...state.history, snapshotOf(state)].slice(-100);
+  return {
+    ...next,
+    history,
+    future: [],
+    canUndo: history.length > 0,
+    canRedo: false,
+  };
+}
+
+function restoreSnapshot(
+  state: ProjectStoreState,
+  snapshot: ProjectSnapshot,
+  history: ProjectSnapshot[],
+  future: ProjectSnapshot[],
+): ProjectStoreState {
+  return withValidation({
+    ...state,
+    project: deepClone(snapshot.project),
+    maps: deepClone(snapshot.maps),
+    items: deepClone(snapshot.items),
+    databases: deepClone(snapshot.databases),
+    dirty: true,
+    history,
+    future,
+    canUndo: history.length > 0,
+    canRedo: future.length > 0,
+  });
 }
 
 function withDatabases(
@@ -210,9 +299,34 @@ export const initialProjectStoreState: ProjectStoreState = {
   lastSavedAt: null,
   errors: [],
   warnings: [],
+  history: [],
+  future: [],
+  canUndo: false,
+  canRedo: false,
 };
 
 export function projectReducer(state: ProjectStoreState, action: ProjectAction): ProjectStoreState {
+  if (action.type === 'UNDO') {
+    if (state.history.length === 0) return state;
+    const previous = state.history[state.history.length - 1];
+    const history = state.history.slice(0, -1);
+    const future = [snapshotOf(state), ...state.future];
+    return restoreSnapshot(state, previous, history, future);
+  }
+
+  if (action.type === 'REDO') {
+    if (state.future.length === 0) return state;
+    const [nextSnapshot, ...future] = state.future;
+    const history = [...state.history, snapshotOf(state)];
+    return restoreSnapshot(state, nextSnapshot, history, future);
+  }
+
+  const shouldTrackHistory = !['LOAD_PROJECT', 'MARK_SAVED', 'VALIDATE'].includes(action.type);
+  const next = reduceProjectState(state, action);
+  return shouldTrackHistory ? withHistory(state, next) : next;
+}
+
+function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAction, { type: 'UNDO' } | { type: 'REDO' }>): ProjectStoreState {
   switch (action.type) {
     case 'LOAD_PROJECT': {
       const payload = action.payload;
@@ -223,6 +337,10 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
         items: deepClone(payload.items),
         databases: mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
         dirty: false,
+        history: [],
+        future: [],
+        canUndo: false,
+        canRedo: false,
       };
       const fullState: FullProjectState = {
         project: next.project,
@@ -242,6 +360,38 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
         project: { ...state.project, ...action.changes },
         dirty: true,
       };
+
+    case 'PAINT_TILE':
+      return withMap(state, action.mapId, map => {
+        if (action.x < 0 || action.x >= map.width || action.y < 0 || action.y >= map.height) {
+          return;
+        }
+        const layer = map.layers.find(l => l.name === action.layerName);
+        if (!layer) return;
+        const index = action.y * map.width + action.x;
+        layer.tiles[index] = action.tile;
+      });
+
+    case 'ADD_EVENT':
+      return withMap(state, action.mapId, map => {
+        if (map.events.some(e => e.id === action.event.id)) return;
+        map.events.push(deepClone(action.event));
+      });
+
+    case 'DUPLICATE_EVENT':
+      return withMap(state, action.mapId, map => {
+        if (map.events.some(e => e.id === action.newId)) return;
+        const source = map.events.find(e => e.id === action.eventId);
+        if (!source) return;
+        map.events.push({ ...deepClone(source), id: action.newId, x: action.x, y: action.y });
+      });
+
+    case 'REMOVE_EVENT':
+      return withMap(state, action.mapId, map => {
+        const idx = map.events.findIndex(e => e.id === action.eventId);
+        if (idx === -1) return;
+        map.events.splice(idx, 1);
+      });
 
     case 'UPDATE_EVENT':
       return withMap(state, action.mapId, map => {

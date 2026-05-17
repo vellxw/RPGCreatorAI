@@ -1,5 +1,10 @@
 import { createContext, useContext, useReducer, type Dispatch } from 'react';
-import type { Screen, GameEvent } from '../types/project';
+import type { Screen, GameEvent, EventType } from '../types/project';
+
+export type BrushSelection =
+  | { kind: 'tile'; tileId: number; label: 'grass' | 'path' | 'water' }
+  | { kind: 'collision'; tileId: 0 | 9; label: 'erase' | 'wall' }
+  | { kind: 'event'; eventType: EventType; label: 'npc' | 'chest' | 'transfer' | 'trigger' };
 
 export interface EditorState {
   activeScreen: Screen;
@@ -8,6 +13,8 @@ export interface EditorState {
   selectedEventMapId: string | null;
   zoom: number;
   saved: boolean;
+  brush: BrushSelection;
+  interactionMode: 'paint' | 'select';
 }
 
 export type EditorAction =
@@ -15,6 +22,8 @@ export type EditorAction =
   | { type: 'SELECT_MAP'; mapId: string }
   | { type: 'SELECT_EVENT'; event: GameEvent | null; mapId: string | null }
   | { type: 'SET_ZOOM'; zoom: number }
+  | { type: 'SET_BRUSH'; brush: BrushSelection }
+  | { type: 'SET_INTERACTION_MODE'; mode: 'paint' | 'select' }
   | { type: 'MARK_SAVED' }
   | { type: 'MARK_DIRTY' };
 
@@ -25,6 +34,8 @@ export const initialEditorState: EditorState = {
   selectedEventMapId: null,
   zoom: 100,
   saved: true,
+  brush: { kind: 'tile', tileId: 1, label: 'grass' },
+  interactionMode: 'paint',
 };
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
@@ -37,6 +48,10 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, selectedEvent: action.event, selectedEventMapId: action.mapId };
     case 'SET_ZOOM':
       return { ...state, zoom: action.zoom };
+    case 'SET_BRUSH':
+      return { ...state, brush: action.brush, interactionMode: 'paint' };
+    case 'SET_INTERACTION_MODE':
+      return { ...state, interactionMode: action.mode };
     case 'MARK_SAVED':
       return { ...state, saved: true };
     case 'MARK_DIRTY':
