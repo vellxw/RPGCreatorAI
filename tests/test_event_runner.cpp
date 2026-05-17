@@ -442,6 +442,42 @@ TEST_CASE("EventRunner startBattle runs battleRunner and applies rewards") {
     CHECK(state.getFlag("battle_won") == true);
 }
 
+TEST_CASE("EventRunner startBattle emits a summary request before continuing branches") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    runner.setBattleRunner([](const std::string&) {
+        BattleResult r;
+        r.outcome = BattleResult::Outcome::Victory;
+        r.goldAwarded = 16;
+        return r;
+    });
+
+    auto victoryEffect = std::make_shared<EventCommand>();
+    victoryEffect->type = "setFlag";
+    victoryEffect->flag = "battle_won";
+    victoryEffect->boolValue = true;
+
+    auto cmd = makeCmd("startBattle");
+    cmd->troopId = "slime_pair";
+    cmd->victoryBranch = { victoryEffect };
+
+    runner.runCommandList({cmd});
+    runner.update(0.016f);
+
+    CHECK(runner.isRunning());
+    CHECK_FALSE(state.getFlag("battle_won"));
+
+    const auto summary = runner.consumeBattleSummaryRequest();
+    CHECK(summary.active);
+    CHECK(summary.troopId == "slime_pair");
+    CHECK(summary.result.goldAwarded == 16);
+
+    runner.update(0.016f);
+    CHECK(state.getFlag("battle_won"));
+}
+
 TEST_CASE("EventRunner startBattle defeat runs defeatBranch") {
     GameState state;
     DialogueSystem dialogue;

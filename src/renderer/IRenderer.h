@@ -5,6 +5,8 @@
 #include "dialogue/DialogueSystem.h"
 #include "events/GameState.h"
 #include "runtime/MenuSystem.h"
+#include "runtime/ShopSystem.h"
+#include "runtime/BattleSummarySystem.h"
 
 class IRenderer {
 public:
@@ -16,6 +18,8 @@ public:
     virtual void renderDialogue(const DialogueSystem& dialogue) = 0;
     virtual void renderHUD(const GameState& state) = 0;
     virtual void renderMenu(const rpg::MenuSystem::ViewModel& vm) = 0;
+    virtual void renderShop(const rpg::ShopSystem::ViewModel& vm) = 0;
+    virtual void renderBattleSummary(const rpg::BattleSummarySystem::ViewModel& vm) = 0;
     virtual void endFrame() = 0;
     virtual void shutdown() = 0;
 };

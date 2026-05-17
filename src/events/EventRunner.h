@@ -27,6 +27,12 @@ struct BattleResult {
     std::vector<std::pair<std::string, int>> itemsAwarded; // itemId, amount
 };
 
+struct BattleSummaryRequest {
+    bool active = false;
+    std::string troopId;
+    BattleResult result;
+};
+
 class EventRunner {
 public:
     EventRunner(class GameState& state, class DialogueSystem& dialogueSystem);
@@ -57,6 +63,7 @@ public:
 
     MapTransferRequest consumeTransferRequest();
     ShopOpenRequest consumeShopRequest();
+    BattleSummaryRequest consumeBattleSummaryRequest();
 
 private:
     void executeNext();
@@ -72,6 +79,7 @@ private:
 
     MapTransferRequest transferRequest;
     ShopOpenRequest shopRequest;
+    BattleSummaryRequest battleSummaryRequest;
 
     CommonEventResolver commonEventResolver;
     QuestObjectiveResolver questObjectiveResolver;

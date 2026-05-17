@@ -481,3 +481,109 @@ void Renderer2D::renderMenu(const rpg::MenuSystem::ViewModel& vm) {
         }
     }
 }
+
+void Renderer2D::renderShop(const rpg::ShopSystem::ViewModel& vm) {
+    if (!sdlRenderer || !vm.active) return;
+
+    PanelLayout p = computePanelLayout(screenWidth, screenHeight);
+    drawPanel(sdlRenderer, p, vm.shopName.empty() ? "SHOP" : vm.shopName);
+
+    std::string gold = "Gold: " + std::to_string(vm.gold) + "g";
+    int gx = p.x + p.w - BitmapFont::measureWidth(gold, 2) - 16;
+    drawTextLine(sdlRenderer, gx, p.titleY, gold, 2, kPanelOK);
+
+    if (vm.listings.empty()) {
+        drawTextLine(sdlRenderer, p.textX, p.rowsY, "No items for sale.", 2, kPanelDim);
+    } else {
+        int rowsToDraw = std::min(p.rowsPerPanel, static_cast<int>(vm.listings.size()));
+        for (int i = 0; i < rowsToDraw; ++i) {
+            const auto& row = vm.listings[i];
+            bool selected = (i == vm.selectionIndex);
+            Color color = selected ? kPanelHeader :
+                          (row.affordable ? kPanelText : kPanelDim);
+            std::string line = selected ? "> " : "  ";
+            line += row.name;
+            line.append(std::max(1, 26 - static_cast<int>(row.name.size())), ' ');
+            line += std::to_string(row.price) + "g";
+            line += "   owned " + std::to_string(row.owned);
+            if (row.unknown) line += "  (unknown item)";
+            drawTextLine(sdlRenderer, p.textX, p.rowsY + i * p.rowHeight, line, 2, color);
+        }
+
+        const auto& selected = vm.listings[vm.selectionIndex];
+        if (!selected.description.empty()) {
+            int descY = p.y + p.h - BitmapFont::GlyphHeight * 2 - 14 - 12;
+            drawTextLine(sdlRenderer, p.textX, descY, selected.description, 1, kPanelDim);
+        }
+    }
+
+    if (vm.message.has_value()) {
+        int msgY = p.y + p.h - BitmapFont::GlyphHeight * 3 - 22;
+        const bool bad = (*vm.message == "Not enough gold");
+        drawTextLine(sdlRenderer, p.textX, msgY, *vm.message, 2,
+                     bad ? kPanelBad : kPanelOK);
+    }
+
+    drawHint(sdlRenderer, p, "[Up/Down] navigate   [Enter] buy   [Esc] leave");
+}
+
+void Renderer2D::renderBattleSummary(const rpg::BattleSummarySystem::ViewModel& vm) {
+    if (!sdlRenderer || !vm.active) return;
+
+    PanelLayout p = computePanelLayout(screenWidth, screenHeight);
+    drawPanel(sdlRenderer, p, vm.title.empty() ? "BATTLE" : vm.title);
+
+    Color outcomeColor = vm.outcomeLabel == "VICTORY" ? kPanelOK :
+                         vm.outcomeLabel == "DEFEAT" ? kPanelBad : kPanelHeader;
+    std::string outcome = vm.outcomeLabel.empty() ? "RESULT" : vm.outcomeLabel;
+    int ox = p.x + p.w - BitmapFont::measureWidth(outcome, 2) - 16;
+    drawTextLine(sdlRenderer, ox, p.titleY, outcome, 2, outcomeColor);
+
+    int y = p.rowsY;
+    drawTextLine(sdlRenderer, p.textX, y, "Enemies", 2, kPanelHeader);
+    y += p.rowHeight;
+    if (vm.enemies.empty()) {
+        drawTextLine(sdlRenderer, p.textX + 18, y, "(unknown troop)", 2, kPanelDim);
+        y += p.rowHeight;
+    } else {
+        for (const auto& enemy : vm.enemies) {
+            std::string line = enemy.name + " x" + std::to_string(enemy.count);
+            drawTextLine(sdlRenderer, p.textX + 18, y, line, 2, kPanelText);
+            y += p.rowHeight;
+        }
+    }
+
+    drawTextLine(sdlRenderer, p.textX, y, "Party", 2, kPanelHeader);
+    y += p.rowHeight;
+    if (vm.party.empty()) {
+        drawTextLine(sdlRenderer, p.textX + 18, y, "No party members", 2, kPanelDim);
+        y += p.rowHeight;
+    } else {
+        for (const auto& member : vm.party) {
+            std::string line = member.name + "   HP " + std::to_string(member.hp) +
+                               "/" + std::to_string(member.maxHp);
+            drawTextLine(sdlRenderer, p.textX + 18, y, line, 2, kPanelText);
+            y += p.rowHeight;
+        }
+    }
+
+    drawTextLine(sdlRenderer, p.textX, y, "Rewards", 2, kPanelHeader);
+    y += p.rowHeight;
+    drawTextLine(sdlRenderer, p.textX + 18, y,
+                 "Gold " + std::to_string(vm.goldAwarded) + "g   EXP " +
+                     std::to_string(vm.expAwarded),
+                 2, kPanelText);
+    y += p.rowHeight;
+    if (vm.rewards.empty()) {
+        drawTextLine(sdlRenderer, p.textX + 18, y, "No item drops", 2, kPanelDim);
+    } else {
+        for (const auto& reward : vm.rewards) {
+            drawTextLine(sdlRenderer, p.textX + 18, y,
+                         reward.name + " x" + std::to_string(reward.amount),
+                         2, kPanelText);
+            y += p.rowHeight;
+        }
+    }
+
+    drawHint(sdlRenderer, p, "[Enter/Esc] continue");
+}

@@ -28,9 +28,9 @@ Legend:
 | Equipment (stat modifiers) | impl | yes | partial | yes | yes | partial | Slice 7 (battle integration done) |
 | Enemies | val | yes | yes | yes | yes | yes | Slice 1/8 |
 | Troops | val | yes | yes | yes | yes | yes | Slice 1/8 |
-| Battle system v1 | val | yes | yes | yes | yes | yes | Slice 8 (deterministic, tested) |
+| Battle system v1 | val | yes | yes | yes | yes | yes | Slice 8 deterministic core; Phase 7 adds visible result / reward presentation |
 | Quests | val | yes | yes | yes | yes | yes | Slice 1/5 |
-| Shops | impl | yes | yes | yes | yes | yes | Slice 9 (UI is dialogue-stub; menu lands Phase 7) |
+| Shops | val | yes | yes | yes | yes | yes | Slice 9 data flow; Phase 7 adds real modal buy UI with gold checks |
 | Inventory + gold | val | yes | yes | yes | yes | yes | Slice 6 |
 | System settings | val | yes | yes | yes | yes | yes | Slice 1/2 |
 | Save/load (Phase 6 v2) | val | yes | n/a | yes | yes | yes | Migrates Phase 2 saves |

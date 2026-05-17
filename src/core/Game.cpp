@@ -94,7 +94,17 @@ void Game::update(const InputManager& input, float dt) {
         loadGameFromDisk();
     }
 
-    // Menu takes exclusive ownership of gameplay input while open.
+    // Modal systems take exclusive ownership of gameplay input while open.
+    if (battleSummarySystem.isOpen()) {
+        battleSummarySystem.handleInput(input);
+        return;
+    }
+
+    if (shopSystem.isOpen()) {
+        shopSystem.handleInput(input, state, databases);
+        return;
+    }
+
     if (menuSystem.isOpen()) {
         menuSystem.handleInput(input);
         const auto menuAction = menuSystem.pendingAction();
@@ -133,15 +143,20 @@ void Game::update(const InputManager& input, float dt) {
     // Apply any transfer requested by an event command.
     applyTransferIfPending();
 
-    // Consume any shop request: phase 6 has no shop UI yet, so we surface
-    // the open via dialogue and log the listings. The shop "stays open" only
-    // long enough to acknowledge — the real menu lands in Phase 7.
+    if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
+        battleSummary.active) {
+        battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
+                                 databases, state);
+        return;
+    }
+
+    // Open requested shops as a real modal UI.
     if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
         const auto* shop = databases.findShop(shopReq.shopId);
         if (shop) {
             Logger::info("Shop opened: " + shop->name + " with " +
                          std::to_string(shop->listings.size()) + " listings");
-            dialogue.showText("Tienda", "Bienvenido a " + shop->name);
+            shopSystem.open(shopReq.shopId, databases);
         } else {
             Logger::warning("openShop: unknown shop '" + shopReq.shopId + "'");
         }
@@ -307,6 +322,8 @@ void Game::render(IRenderer& renderer) {
     renderer.renderHUD(state);
     renderer.renderDialogue(dialogue);
     renderer.renderMenu(menuSystem.snapshot(state, databases));
+    renderer.renderShop(shopSystem.snapshot(state, databases));
+    renderer.renderBattleSummary(battleSummarySystem.snapshot());
 }
 
 // ---- Public verbs ---------------------------------------------------------
@@ -333,10 +350,16 @@ void Game::pumpEvents(float dt) {
     if (!eventRunner) return;
     eventRunner->update(dt);
     applyTransferIfPending();
+    if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
+        battleSummary.active) {
+        battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
+                                 databases, state);
+    }
     if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
         const auto* shop = databases.findShop(shopReq.shopId);
         if (shop) {
             Logger::info("Shop opened (pump): " + shop->name);
+            shopSystem.open(shopReq.shopId, databases);
         }
     }
 }

@@ -289,3 +289,17 @@ Error: Port 1420 is already in use
 - `scripts\dev\verify-runtime.bat` — PASS after fix (1/1 ctest target;
   includes new menu snapshot and save-slot metadata coverage).
 
+### Slice 4+5 (pending commit) — shop modal + battle reward summary
+
+- `scripts\dev\verify-runtime.bat` — initially FAILED while compiling
+  `tests/test_shop_system.cpp` because `runtime/ShopSystem.h` did not yet
+  exist; fix applied: introduced `ShopSystem`, runtime integration, and shop
+  renderer panel.
+- `scripts\dev\verify-runtime.bat` — PASS after shop implementation.
+- `scripts\dev\verify-runtime.bat` — initially FAILED while compiling
+  `tests/test_battle_summary_system.cpp` and the new EventRunner regression
+  because `BattleSummarySystem` and `consumeBattleSummaryRequest()` did not
+  yet exist; fix applied: introduced explicit battle-summary handoff and
+  renderer panel.
+- `scripts\dev\verify-runtime.bat` — PASS after battle summary integration.
+

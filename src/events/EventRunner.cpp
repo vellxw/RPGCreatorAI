@@ -39,7 +39,8 @@ void EventRunner::update(float dt) {
         auto cmd = commandStack.back();
         commandStack.pop_back();
         processCommand(cmd);
-        if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active || shopRequest.active) {
+        if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active ||
+            shopRequest.active || battleSummaryRequest.active) {
             return;
         }
     }
@@ -212,6 +213,9 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         } else if (result.outcome == BattleResult::Outcome::Defeat) {
             pushFront(cmd->defeatBranch);
         }
+        battleSummaryRequest.active = true;
+        battleSummaryRequest.troopId = cmd->troopId;
+        battleSummaryRequest.result = result;
         return;
     }
     if (type == "changeActorHp") {
@@ -241,5 +245,11 @@ ShopOpenRequest EventRunner::consumeShopRequest() {
     ShopOpenRequest req = shopRequest;
     shopRequest.active = false;
     shopRequest.shopId.clear();
+    return req;
+}
+
+BattleSummaryRequest EventRunner::consumeBattleSummaryRequest() {
+    BattleSummaryRequest req = battleSummaryRequest;
+    battleSummaryRequest = {};
     return req;
 }

@@ -9,7 +9,9 @@
 #include "database/ItemDatabase.h"
 #include "database/RpgDatabases.h"
 #include "runtime/BattleSystem.h"
+#include "runtime/BattleSummarySystem.h"
 #include "runtime/MenuSystem.h"
+#include "runtime/ShopSystem.h"
 #include "types/ProjectTypes.h"
 #include <memory>
 #include <string>
@@ -62,7 +64,9 @@ private:
     ItemDatabase itemDatabase;
     rpg::RpgDatabases databases;
     std::unique_ptr<rpg::BattleSystem> battleSystem;
+    rpg::BattleSummarySystem battleSummarySystem;
     rpg::MenuSystem menuSystem;
+    rpg::ShopSystem shopSystem;
 
     int viewportW = 800;
     int viewportH = 600;
