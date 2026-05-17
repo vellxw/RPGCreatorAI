@@ -3,11 +3,29 @@
 #include "events/GameState.h"
 #include <cstdio>
 #include <fstream>
+#include <optional>
+#include <string>
 
 namespace {
 
 constexpr const char* kSlot = "test_phase6_slot";
 constexpr const char* kLegacySlot = "test_phase2_legacy_slot";
+
+std::optional<std::string> readExisting(const std::string& path) {
+    std::ifstream in(path);
+    if (!in) return std::nullopt;
+    return std::string((std::istreambuf_iterator<char>(in)),
+                       std::istreambuf_iterator<char>());
+}
+
+void restoreFile(const std::string& path, const std::optional<std::string>& previous) {
+    if (previous) {
+        std::ofstream out(path);
+        out << *previous;
+    } else {
+        std::remove(path.c_str());
+    }
+}
 
 } // namespace
 
@@ -76,4 +94,35 @@ TEST_CASE("SaveManager loads legacy v1 saves with sane defaults") {
 TEST_CASE("SaveManager::load returns nullopt for missing slot") {
     auto loaded = SaveManager::load("definitely_does_not_exist_slot");
     CHECK_FALSE(loaded.has_value());
+}
+
+TEST_CASE("SaveManager::listSlots reports empty and populated slot metadata") {
+    const std::string slot1Path = "saves/slot_1.json";
+    const std::string slot2Path = "saves/slot_2.json";
+    const auto slot1Before = readExisting(slot1Path);
+    const auto slot2Before = readExisting(slot2Path);
+
+    restoreFile(slot1Path, std::nullopt);
+    restoreFile(slot2Path, std::nullopt);
+
+    GameState state;
+    state.setCurrentMap("house");
+    state.setGold(77);
+    state.setParty({"arc"});
+    REQUIRE(SaveManager::save("slot_2", state));
+
+    const auto slots = SaveManager::listSlots(3);
+    REQUIRE(slots.size() == 3);
+    CHECK(slots[0].index == 1);
+    CHECK_FALSE(slots[0].exists);
+    CHECK(slots[1].index == 2);
+    CHECK(slots[1].exists);
+    CHECK(slots[1].mapId == "house");
+    CHECK(slots[1].gold == 77);
+    REQUIRE(slots[1].party.size() == 1);
+    CHECK(slots[1].party[0] == "arc");
+    CHECK(slots[1].mtimeUnix > 0);
+
+    restoreFile(slot1Path, slot1Before);
+    restoreFile(slot2Path, slot2Before);
 }

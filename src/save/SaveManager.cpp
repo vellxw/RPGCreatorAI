@@ -2,6 +2,8 @@
 #include "platform/FileSystem.h"
 #include "core/Logger.h"
 #include <nlohmann/json.hpp>
+#include <chrono>
+#include <filesystem>
 
 using json = nlohmann::json;
 
@@ -116,4 +118,54 @@ std::optional<GameState> SaveManager::load(const std::string& slotId) {
 
 bool SaveManager::hasSave(const std::string& slotId) {
     return FileSystem::exists(getSavePath(slotId));
+}
+
+std::vector<SaveManager::SlotMetadata> SaveManager::listSlots(int maxSlots) {
+    std::vector<SlotMetadata> slots;
+    if (maxSlots <= 0) {
+        return slots;
+    }
+
+    slots.reserve(static_cast<size_t>(maxSlots));
+
+    for (int index = 1; index <= maxSlots; ++index) {
+        SlotMetadata metadata;
+        metadata.index = index;
+
+        const std::string slotId = "slot_" + std::to_string(index);
+        const std::string path = getSavePath(slotId);
+        auto content = FileSystem::readFile(path);
+        if (!content) {
+            slots.push_back(std::move(metadata));
+            continue;
+        }
+
+        try {
+            const json j = json::parse(*content);
+            metadata.exists = true;
+            metadata.mapId = j.value("currentMapId", std::string{});
+            metadata.gold = j.value("gold", 0);
+            if (j.contains("party") && j.at("party").is_array()) {
+                metadata.party = j.at("party").get<std::vector<std::string>>();
+            }
+        } catch (const json::exception&) {
+            slots.push_back(std::move(metadata));
+            continue;
+        }
+
+        try {
+            const auto ftime = std::filesystem::last_write_time(path);
+            const auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+                ftime - std::filesystem::file_time_type::clock::now() +
+                std::chrono::system_clock::now());
+            metadata.mtimeUnix =
+                std::chrono::duration_cast<std::chrono::seconds>(sctp.time_since_epoch()).count();
+        } catch (const std::filesystem::filesystem_error&) {
+            metadata.mtimeUnix = 0;
+        }
+
+        slots.push_back(std::move(metadata));
+    }
+
+    return slots;
 }

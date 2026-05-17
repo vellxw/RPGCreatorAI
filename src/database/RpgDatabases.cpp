@@ -49,6 +49,7 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
             ItemRecord ir;
             ir.id = it.value("id", "");
             ir.name = it.value("name", "");
+            ir.description = it.value("description", "");
             ir.type = it.value("type", "");
             ir.price = it.value("price", 0);
             if (it.contains("modifiers")) ir.modifiers = parseStats(it.at("modifiers"));

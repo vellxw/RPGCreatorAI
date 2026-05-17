@@ -4,11 +4,8 @@
 #include "database/RpgDatabases.h"
 #include "save/SaveManager.h"
 #include "platform/FileSystem.h"
-#include "core/Logger.h"
-#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <ctime>
-#include <filesystem>
 #include <sstream>
 
 namespace rpg {
@@ -49,55 +46,23 @@ std::string joinParty(const std::vector<std::string>& party) {
     return out;
 }
 
-MenuSystem::SlotRow readSlotMetadata(int slotIndex) {
+MenuSystem::SlotRow makeSlotRow(const SaveManager::SlotMetadata& metadata) {
     MenuSystem::SlotRow row;
-    row.index = slotIndex;
-    const std::string slotId = "slot_" + std::to_string(slotIndex);
-    const std::string path = "saves/" + slotId + ".json";
-    if (!FileSystem::exists(path)) {
-        row.exists = false;
-        row.summary = "Slot " + std::to_string(slotIndex) + "   Empty";
-        return row;
-    }
+    row.index = metadata.index;
+    row.exists = metadata.exists;
+    row.mapId = metadata.mapId;
+    row.gold = metadata.gold;
+    row.party = metadata.party;
+    row.mtimeUnix = metadata.mtimeUnix;
 
-    auto content = FileSystem::readFile(path);
-    if (!content) {
+    if (!row.exists) {
         row.exists = false;
-        row.summary = "Slot " + std::to_string(slotIndex) + "   Empty";
+        row.summary = "Slot " + std::to_string(row.index) + "   Empty";
         return row;
-    }
-
-    try {
-        auto j = nlohmann::json::parse(*content);
-        row.exists = true;
-        row.mapId = j.value("currentMapId", std::string{"?"});
-        row.gold = j.value("gold", 0);
-        if (j.contains("party") && j.at("party").is_array()) {
-            for (const auto& p : j.at("party")) {
-                row.party.push_back(p.get<std::string>());
-            }
-        }
-    } catch (const nlohmann::json::exception&) {
-        row.exists = false;
-        row.summary = "Slot " + std::to_string(slotIndex) + "   (corrupt)";
-        return row;
-    }
-
-    // mtime via std::filesystem
-    try {
-        auto ftime = std::filesystem::last_write_time(path);
-        auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-            ftime - std::filesystem::file_time_type::clock::now() +
-            std::chrono::system_clock::now());
-        row.mtimeUnix = std::chrono::duration_cast<std::chrono::seconds>(
-                             sctp.time_since_epoch())
-                             .count();
-    } catch (const std::filesystem::filesystem_error&) {
-        row.mtimeUnix = 0;
     }
 
     std::ostringstream oss;
-    oss << "Slot " << slotIndex << "   "
+    oss << "Slot " << row.index << "   "
         << (row.mapId.empty() ? "?" : row.mapId)
         << "   " << row.gold << "g";
     if (!row.party.empty()) oss << "   " << joinParty(row.party);
@@ -341,7 +306,7 @@ MenuSystem::ViewModel MenuSystem::snapshot(const GameState& state, const RpgData
             const ItemRecord* item = dbs.findItem(id);
             if (item) {
                 row.name = item->name.empty() ? id : item->name;
-                row.description.clear();
+                row.description = item->description;
             } else {
                 row.name = id;
                 row.unknown = true;
@@ -437,8 +402,8 @@ MenuSystem::ViewModel MenuSystem::snapshot(const GameState& state, const RpgData
     if (useSlotsOverride_) {
         vm.slots = slotsOverride_;
     } else {
-        for (int i = 1; i <= kMaxSaveSlots; ++i) {
-            vm.slots.push_back(readSlotMetadata(i));
+        for (const auto& metadata : SaveManager::listSlots(kMaxSaveSlots)) {
+            vm.slots.push_back(makeSlotRow(metadata));
         }
     }
 

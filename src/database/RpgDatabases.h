@@ -105,6 +105,7 @@ struct SystemRecord {
 struct ItemRecord {
     std::string id;
     std::string name;
+    std::string description;
     std::string type;
     int price = 0;
     StatsCpp modifiers;     // 0 fields when absent

@@ -6,28 +6,32 @@ Phase 7 — Polished creator-to-player loop.
 
 ## Active Phase
 
-Phase 7 — Slice 2 (runtime inventory / party / quest views) next.
+Phase 7 — Slice 4 (shop UI) next.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 2 — inventory, party/status, and quest journal views.
-2. Slice 3 — save/load slot picker.
-3. Slice 4 — shop UI.
-4. Slice 5 — battle UI polish + visible reward summary.
-5. Slice 6 — editor undo / redo.
-6. Slice 7 — map tile painting + collision painting.
-7. Slice 8 — event placement, drag/move, duplicate, delete.
-8. Slice 9 — editor → save → runtime round-trip QA + screenshots.
-9. Slice 10 — full validation, docs, final report, push.
+1. Slice 4 — shop UI.
+2. Slice 5 — battle UI polish + visible reward summary.
+3. Slice 6 — editor undo / redo.
+4. Slice 7 — map tile painting + collision painting.
+5. Slice 8 — event placement, drag/move, duplicate, delete.
+6. Slice 9 — editor → save → runtime round-trip QA + screenshots.
+7. Slice 10 — full validation, docs, final report, push.
 
 ## Closed subgoals
 
 - Phase 6 — Complete RPG Creation System Foundation — DONE (`a12efa8`).
 - Slice 0 — original asset foundation (generated atlases, editor assets,
-  runtime sprites, emoji replacement). Pending commit in current worktree.
+  runtime sprites, emoji replacement). Commit `0012eca`.
 - Slice 1 — runtime pause / main menu skeleton (menu state machine wired
-  into `Game`, HUD/menu rendering, keyboard navigation tests). Pending
-  commit in current worktree.
+  into `Game`, HUD/menu rendering, keyboard navigation tests). Commit
+  `0012eca`.
+- Slice 2 — runtime inventory / party / quest views (real item
+  descriptions plus render-ready menu snapshots). Pending commit in current
+  worktree.
+- Slice 3 — save/load slot picker metadata (centralized `SaveManager`
+  slot listing consumed by the runtime menu). Pending commit in current
+  worktree.
 - Slice 1 — data model expansion (schemas, types, JSON files, validators,
   Rust shell round-trip, vitest + cargo coverage). Commit `7936b8f`.
 - Slice 2 — Database editor screen with tabs, CRUD, dirty tracking.

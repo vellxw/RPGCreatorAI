@@ -266,3 +266,26 @@ Error: Port 1420 is already in use
 - `scripts\dev\smoke-runtime.bat` — runtime spawned (pid logged), `[INFO] Project loaded: My First RPG`, `[INFO] Databases loaded: 1 actors, 1 enemies, 1 troops, 1 quests, 1 shops, 1 common events`, `[INFO] Map loaded: town`, SMOKE PASSED.
 - `npm run desktop:verify-content` — skipped (requires running dev server).
 
+---
+
+## Phase 7 — Polished creator-to-player loop
+
+### Slice 0+1 (commit `0012eca`) — generated asset foundation + runtime menu shell
+
+- `npx vitest run src/assets/generated/__tests__/assetCatalog.test.ts` — PASS (3 tests)
+- `scripts\dev\verify-runtime.bat` — PASS
+- `npx tsc --noEmit` — PASS
+- `npx vite build` — PASS
+- `npx vitest run` — PASS (10 files, 65 tests)
+- `scripts\dev\smoke-runtime.bat` — PASS
+- `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-7-assets-smoke` — PASS (9 screenshots)
+
+### Slice 2+3 (pending commit) — runtime menu data + save/load slot metadata
+
+- `scripts\dev\verify-runtime.bat` — initially FAILED while compiling
+  `tests/test_save_manager.cpp` because `SaveManager::listSlots` did not yet
+  exist; fix applied: introduced centralized slot metadata in
+  `SaveManager`, then routed `MenuSystem` through it.
+- `scripts\dev\verify-runtime.bat` — PASS after fix (1/1 ctest target;
+  includes new menu snapshot and save-slot metadata coverage).
+
