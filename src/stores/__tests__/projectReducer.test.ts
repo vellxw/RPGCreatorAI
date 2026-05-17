@@ -96,6 +96,52 @@ describe('projectReducer', () => {
     expect(s4.canUndo).toBe(true);
   });
 
+  it('coalesces a paint stroke into one undo step', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, { type: 'BEGIN_STROKE' });
+    const s3 = projectReducer(s2, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 2,
+    });
+    const s4 = projectReducer(s3, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 1,
+      y: 0,
+      tile: 2,
+    });
+    const s5 = projectReducer(s4, { type: 'END_STROKE' });
+    const s6 = projectReducer(s5, { type: 'UNDO' });
+    expect(s6.maps.town.layers[0].tiles[0]).toBe(1);
+    expect(s6.maps.town.layers[0].tiles[1]).toBe(1);
+  });
+
+  it('coalesces a drag stroke into one undo step', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, { type: 'BEGIN_STROKE' });
+    const s3 = projectReducer(s2, {
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'old_man',
+      changes: { x: 6, y: 5 },
+    });
+    const s4 = projectReducer(s3, {
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'old_man',
+      changes: { x: 7, y: 5 },
+    });
+    const s5 = projectReducer(s4, { type: 'END_STROKE' });
+    const s6 = projectReducer(s5, { type: 'UNDO' });
+
+    expect(s6.maps.town.events[0]).toMatchObject({ x: 5, y: 5 });
+  });
+
   it('new edits clear the redo stack after undo', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

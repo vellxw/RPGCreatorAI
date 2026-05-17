@@ -4,6 +4,7 @@ import { Input, Select } from '../ui/Input';
 import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import type { EventCommand, GameEvent, ShowTextCommand, TriggerType } from '../../types/project';
 import { eventAssets } from '../../assets/generated/assetCatalog';
+import { findDuplicatePlacement } from '../../utils/eventEditing';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -120,30 +121,24 @@ export function Inspector() {
   };
 
   const duplicateEvent = () => {
-    const siblingIds = new Set(projectState.maps[mapId].events.map(e => e.id));
-    let n = 2;
-    let nextId = `${event.id}_copy`;
-    while (siblingIds.has(nextId)) {
-      nextId = `${event.id}_copy${n}`;
-      n += 1;
-    }
-    const nextX = Math.min(projectState.maps[mapId].width - 1, event.x + 1);
+    const { newId, x, y } = findDuplicatePlacement(projectState.maps[mapId], event);
     projectDispatch({
       type: 'DUPLICATE_EVENT',
       mapId,
       eventId: event.id,
-      newId: nextId,
-      x: nextX,
-      y: event.y,
+      newId,
+      x,
+      y,
     });
     editorDispatch({
       type: 'SELECT_EVENT',
-      event: { ...event, id: nextId, x: nextX },
+      event: { ...event, id: newId, x, y },
       mapId,
     });
   };
 
   const deleteEvent = () => {
+    if (!window.confirm(`Delete event "${event.id}"?`)) return;
     projectDispatch({ type: 'REMOVE_EVENT', mapId, eventId: event.id });
     editorDispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
   };

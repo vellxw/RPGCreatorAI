@@ -114,6 +114,7 @@ export function MapCanvas() {
       return;
     }
 
+    projectDispatch({ type: 'BEGIN_STROKE' });
     setPainting(true);
     paintAt(cell.x, cell.y);
   };
@@ -138,6 +139,9 @@ export function MapCanvas() {
   };
 
   const stopPointerInteractions = () => {
+    if (painting || draggingEventId) {
+      projectDispatch({ type: 'END_STROKE' });
+    }
     setPainting(false);
     setDraggingEventId(null);
   };
@@ -146,6 +150,7 @@ export function MapCanvas() {
     e.stopPropagation();
     handleEventClick(event);
     if (state.interactionMode === 'select') {
+      projectDispatch({ type: 'BEGIN_STROKE' });
       setDraggingEventId(event.id);
     }
   };

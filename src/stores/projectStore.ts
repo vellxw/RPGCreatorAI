@@ -33,6 +33,7 @@ export interface ProjectStoreState {
   future: ProjectSnapshot[];
   canUndo: boolean;
   canRedo: boolean;
+  strokeSnapshot: ProjectSnapshot | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,6 +44,8 @@ export type ProjectAction =
   | { type: 'LOAD_PROJECT'; payload: FullProjectState }
   | { type: 'UNDO' }
   | { type: 'REDO' }
+  | { type: 'BEGIN_STROKE' }
+  | { type: 'END_STROKE' }
   | { type: 'UPDATE_PROJECT_META'; changes: Partial<ProjectData> }
   | {
       type: 'PAINT_TILE';
@@ -212,6 +215,7 @@ function restoreSnapshot(
     future,
     canUndo: history.length > 0,
     canRedo: future.length > 0,
+    strokeSnapshot: null,
   });
 }
 
@@ -303,6 +307,7 @@ export const initialProjectStoreState: ProjectStoreState = {
   future: [],
   canUndo: false,
   canRedo: false,
+  strokeSnapshot: null,
 };
 
 export function projectReducer(state: ProjectStoreState, action: ProjectAction): ProjectStoreState {
@@ -321,7 +326,32 @@ export function projectReducer(state: ProjectStoreState, action: ProjectAction):
     return restoreSnapshot(state, nextSnapshot, history, future);
   }
 
-  const shouldTrackHistory = !['LOAD_PROJECT', 'MARK_SAVED', 'VALIDATE'].includes(action.type);
+  if (action.type === 'BEGIN_STROKE') {
+    if (state.strokeSnapshot) return state;
+    return { ...state, strokeSnapshot: snapshotOf(state) };
+  }
+
+  if (action.type === 'END_STROKE') {
+    if (!state.strokeSnapshot) return state;
+    const strokeSnapshot = state.strokeSnapshot;
+    const strokeChanged = JSON.stringify(strokeSnapshot.maps) !== JSON.stringify(state.maps);
+    if (!strokeChanged) {
+      return { ...state, strokeSnapshot: null };
+    }
+    const history = [...state.history, strokeSnapshot].slice(-100);
+    return {
+      ...state,
+      strokeSnapshot: null,
+      history,
+      future: [],
+      canUndo: history.length > 0,
+      canRedo: false,
+    };
+  }
+
+  const shouldTrackHistory =
+    !state.strokeSnapshot &&
+    !['LOAD_PROJECT', 'MARK_SAVED', 'VALIDATE'].includes(action.type);
   const next = reduceProjectState(state, action);
   return shouldTrackHistory ? withHistory(state, next) : next;
 }
@@ -341,6 +371,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         future: [],
         canUndo: false,
         canRedo: false,
+        strokeSnapshot: null,
       };
       const fullState: FullProjectState = {
         project: next.project,

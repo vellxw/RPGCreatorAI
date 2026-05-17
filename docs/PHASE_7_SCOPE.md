@@ -43,9 +43,9 @@ Three tracks plus a closing E2E proof.
 - **Shop UI** — replaces the Phase 6 dialogue stub. Real listings, real
   buy flow with insufficient-gold handling, atomic gold + inventory
   updates, resumes the EventRunner cleanly.
-- **Battle UI improvements** — combatants with HP bars, turn log,
-  outcome banner, rewards summary. Driven by a deterministic resolver
-  that pre-computes turns from the existing math.
+- **Battle result UI** — visible troop summary, party HP, outcome banner,
+  and rewards summary driven by the deterministic battle result already
+  produced by the runtime.
 - **Save / load slot picker** — at least 3 slots, human-readable
   metadata (`map · gold · party · timestamp`), overwrite confirm,
   empty-slot disable on Load.
@@ -54,21 +54,24 @@ Three tracks plus a closing E2E proof.
 
 - **Tile painting** — palette entries bind to integer tile ids; click
   and drag paints; eraser clears.
-- **Collision painting** — separate edit mode that toggles the
-  `collision` layer between `0` and `9`.
+- **Collision painting** — explicit wall / erase brushes for the
+  `collision` layer (`9` / `0`).
 - **Event placement / move / duplicate / delete** — full lifecycle on
   the canvas, with `Ctrl+D` and `Delete` shortcuts and a confirm prompt
   for delete.
 - **Editor undo / redo** — `Ctrl+Z` and `Ctrl+Y` / `Ctrl+Shift+Z`,
-  bounded to 100 entries, with stroke coalescing for paint drags.
+  bounded to 100 entries, with stroke coalescing for paint and event
+  drags.
 
 ### E2E proof
 
 - A documented, reproducible flow: edit map in the editor → save → launch
   runtime → see the change.
-- A scripted vitest harness that exercises the round-trip in memory.
-- Manual screenshots from a real session under `docs/screenshots/phase-7/`,
-  with any environment limitations documented honestly.
+- A scripted Vitest harness that exercises the editor save path.
+- A desktop-shell map round-trip test and a runtime screenshot-hash proof
+  showing the C++ app reads edited project data from disk.
+- Screenshots from live editor interaction plus the native SDL screenshot
+  harness under `docs/screenshots/phase-7/`.
 
 ## Out of scope
 
@@ -102,7 +105,7 @@ Three tracks plus a closing E2E proof.
 - [ ] The pause menu opens, navigates through every sub-screen, and
       saves/loads via the slot picker.
 - [ ] The shop UI replaces the Phase 6 dialogue stub.
-- [ ] A real creator can paint terrain, toggle collisions, place / move
+- [ ] A real creator can paint terrain, edit collisions, place / move
       / duplicate / delete events, and undo / redo their work.
 - [ ] `docs/EDITOR_RUNTIME_E2E_QA.md` documents the round-trip and the
       vitest harness reproduces the data round-trip in CI.
@@ -131,7 +134,7 @@ The phase is delivered as 10 vertical slices (see
 2. Inventory + Party + Quests views.
 3. Save / load slot picker.
 4. Shop UI.
-5. Battle UI.
+5. Battle result UI.
 6. Editor undo / redo + history middleware.
 7. Tile painting + collision painting.
 8. Event place / move / duplicate / delete.

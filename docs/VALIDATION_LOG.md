@@ -321,3 +321,30 @@ Error: Port 1420 is already in use
 - Screenshot captured:
   `docs/screenshots/phase-7-editor/01-editor-workflow.png`.
 
+### Slice 6-9 follow-up (pending commit) — editor polish + end-to-end proof
+
+- `npx vitest run src/utils/__tests__/eventEditing.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — initially FAILED because `src/utils/eventEditing.ts` did not exist;
+  fix applied: added shared duplicate-placement / editable-target helpers,
+  then wired `Ctrl+D`, delete confirmation, and drag coalescing through the
+  live editor.
+- `npx vitest run src/utils/__tests__/eventEditing.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — PASS after the fix (21/21).
+- `npx tsc --noEmit` — PASS.
+- `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (17/17, including new map-edit round-trip coverage).
+- `scripts\dev\verify-runtime.bat` — PASS after extending the native smoke
+  harness to capture menu, shop, and battle-result screens.
+- `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-7` — PASS
+  (17 native runtime screenshots).
+- `powershell -File scripts/dev/verify-editor-runtime-roundtrip.ps1` —
+  initially FAILED because the temp project copy lacked a `saves/`
+  directory; fix applied: create the directory before launch.
+- `powershell -File scripts/dev/verify-editor-runtime-roundtrip.ps1` —
+  PASS after the fix (baseline and edited frame hashes differed).
+- Live browser verification against `http://127.0.0.1:3000/` — PASS:
+  event placement worked, `Ctrl+D` duplicated to the next free tile, delete
+  opened a confirm dialog, and `Delete` removed the event after acceptance.
+- Screenshot captured:
+  `docs/screenshots/phase-7/18-editor-shortcuts-after-delete.png`.
+

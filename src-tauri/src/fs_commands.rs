@@ -787,4 +787,65 @@ mod tests {
             .unwrap();
         assert_eq!(actors[0].get("name").unwrap(), "Renamed");
     }
+
+    #[test]
+    fn write_then_read_round_trips_map_edits() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path().canonicalize().unwrap();
+        make_project(&root);
+
+        let mut state = read_project_at(&root).unwrap();
+        let town = state.maps.get_mut("town").unwrap();
+        let town_obj = town.as_object_mut().unwrap();
+        let layers = town_obj
+            .get_mut("layers")
+            .unwrap()
+            .as_array_mut()
+            .unwrap();
+        layers[0]
+            .get_mut("tiles")
+            .unwrap()
+            .as_array_mut()
+            .unwrap()[0] = serde_json::Value::from(3);
+        town_obj
+            .get_mut("events")
+            .unwrap()
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "id": "roundtrip_event",
+                "type": "trigger",
+                "x": 0,
+                "y": 0,
+                "solid": false,
+                "trigger": "touch",
+                "commands": []
+            }));
+
+        let mut warnings = Vec::new();
+        write_with_backup(
+            &root,
+            "data/maps/town.json",
+            state.maps.get("town").unwrap(),
+            &mut warnings,
+        )
+        .unwrap();
+
+        let reloaded = read_project_at(&root).unwrap();
+        let map = reloaded.maps.get("town").unwrap().as_object().unwrap();
+        let layers = map.get("layers").unwrap().as_array().unwrap();
+        let first_tile = layers[0]
+            .get("tiles")
+            .unwrap()
+            .as_array()
+            .unwrap()[0]
+            .as_i64()
+            .unwrap();
+        let events = map.get("events").unwrap().as_array().unwrap();
+
+        assert_eq!(first_tile, 3);
+        assert!(events
+            .iter()
+            .any(|event| event.get("id").and_then(|id| id.as_str()) == Some("roundtrip_event")));
+    }
 }

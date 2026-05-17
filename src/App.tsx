@@ -13,6 +13,7 @@ import {
 } from './stores/projectStore';
 import { EditorContext, editorReducer, initialEditorState } from './stores/editorStore';
 import { getProjectDataAdapter } from './adapters/adapterFactory';
+import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
 
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
@@ -48,22 +49,57 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (editorState.activeScreen !== 'editor' || isEditableTarget(e.target)) return;
       const modifier = e.ctrlKey || e.metaKey;
-      if (!modifier) return;
       if (e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        if (!modifier) return;
         e.preventDefault();
         projectDispatch({ type: 'UNDO' });
       } else if (
         e.key.toLowerCase() === 'y' ||
         (e.key.toLowerCase() === 'z' && e.shiftKey)
       ) {
+        if (!modifier) return;
         e.preventDefault();
         projectDispatch({ type: 'REDO' });
+      } else if (modifier && e.key.toLowerCase() === 'd') {
+        const selected = editorState.selectedEvent;
+        const mapId = editorState.selectedEventMapId;
+        const map = mapId ? projectState.maps[mapId] : null;
+        const freshEvent =
+          selected && map ? map.events.find(event => event.id === selected.id) ?? null : null;
+        if (!freshEvent || !map || !mapId) return;
+        e.preventDefault();
+        const { newId, x, y } = findDuplicatePlacement(map, freshEvent);
+        projectDispatch({
+          type: 'DUPLICATE_EVENT',
+          mapId,
+          eventId: freshEvent.id,
+          newId,
+          x,
+          y,
+        });
+        editorDispatch({
+          type: 'SELECT_EVENT',
+          event: { ...freshEvent, id: newId, x, y },
+          mapId,
+        });
+      } else if (e.key === 'Delete') {
+        const selected = editorState.selectedEvent;
+        const mapId = editorState.selectedEventMapId;
+        const map = mapId ? projectState.maps[mapId] : null;
+        const freshEvent =
+          selected && map ? map.events.find(event => event.id === selected.id) ?? null : null;
+        if (!freshEvent || !mapId) return;
+        if (!window.confirm(`Delete event "${freshEvent.id}"?`)) return;
+        e.preventDefault();
+        projectDispatch({ type: 'REMOVE_EVENT', mapId, eventId: freshEvent.id });
+        editorDispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [editorState, projectState.maps]);
 
   if (!loaded) {
     return (

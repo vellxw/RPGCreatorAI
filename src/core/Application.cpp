@@ -2,6 +2,7 @@
 #include "world/ProjectLoader.h"
 #include "core/Logger.h"
 #include <SDL.h>
+#include <array>
 #include <filesystem>
 #include <string>
 
@@ -101,6 +102,26 @@ bool Application::runSmokeShots(const std::string& outputDir) {
         return false;
     }
     const float dt = 1.0f / 60.0f;
+    std::array<unsigned char, SDL_NUM_SCANCODES> keys{};
+    auto tap = [&](SDL_Scancode code) {
+        keys.fill(0);
+        inputManager.update(keys.data());
+        keys[code] = 1;
+        inputManager.update(keys.data());
+        game->update(inputManager, dt);
+        keys.fill(0);
+        inputManager.update(keys.data());
+    };
+    auto drainDialogueAndEvents = [&]() {
+        for (int guard = 0;
+             guard < 20 && (game->isDialogueActive() || game->isEventRunnerRunning());
+             ++guard) {
+            if (game->isDialogueActive()) {
+                game->stepDismissDialogue();
+            }
+            game->pumpEvents(dt);
+        }
+    };
 
     // 01 — Town initial
     game->pumpEvents(dt);
@@ -115,8 +136,10 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     game->pumpEvents(dt);
     if (!snapshot(outputDir, "02-npc-dialogue")) return false;
 
-    game->stepDismissDialogue();
-    game->pumpEvents(dt);
+    // The bundled NPC now includes a deterministic first-choice branch with
+    // multiple follow-up commands. Drain it fully before continuing the path
+    // so the smoke harness proves the transfer route honestly.
+    drainDialogueAndEvents();
 
     // 03 — Walk back left x2 then up to door (3,3) → transfer to house at (3,4)
     game->stepMove(-1, 0, Direction::Left);   // (5,4) -> (4,4)
@@ -167,6 +190,68 @@ bool Application::runSmokeShots(const std::string& outputDir) {
 
     // 09 — Final after-load state
     if (!snapshot(outputDir, "09-after-load")) return false;
+
+    // 10-15 — Runtime menu surfaces.
+    tap(SDL_SCANCODE_ESCAPE);
+    if (!snapshot(outputDir, "10-menu-root")) return false;
+
+    tap(SDL_SCANCODE_RETURN); // Inventory
+    if (!snapshot(outputDir, "11-menu-inventory")) return false;
+
+    tap(SDL_SCANCODE_ESCAPE);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_RETURN); // Party
+    if (!snapshot(outputDir, "12-menu-party")) return false;
+
+    tap(SDL_SCANCODE_ESCAPE);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_RETURN); // Quests
+    if (!snapshot(outputDir, "13-menu-quests")) return false;
+
+    tap(SDL_SCANCODE_ESCAPE);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_DOWN);
+    tap(SDL_SCANCODE_RETURN); // Save
+    if (!snapshot(outputDir, "14-menu-save")) return false;
+
+    tap(SDL_SCANCODE_ESCAPE);
+    tap(SDL_SCANCODE_DOWN);   // Load (Save returns with Save selected)
+    tap(SDL_SCANCODE_RETURN);
+    if (!snapshot(outputDir, "15-menu-load")) return false;
+
+    tap(SDL_SCANCODE_ESCAPE); // root
+    tap(SDL_SCANCODE_ESCAPE); // close
+
+    // 16 — Shop UI. Return to town from the loaded house state, then speak
+    // to the shop keeper.
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->pumpEvents(dt); // apply transfer back to town
+    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
+    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
+    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt); // face shop keeper
+    game->stepInteract(); game->pumpEvents(dt); // dialogue
+    game->stepDismissDialogue(); game->pumpEvents(dt); // open shop
+    if (!snapshot(outputDir, "16-shop")) return false;
+    tap(SDL_SCANCODE_ESCAPE); // close shop
+    game->pumpEvents(dt);     // let the paused event list finish
+
+    // 17 — Battle reward presentation after the visible wild-slime trigger.
+    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
+    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
+    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
+    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
+    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt); // touch slime
+    game->stepDismissDialogue(); game->pumpEvents(dt); // resolve startBattle
+    if (!snapshot(outputDir, "17-battle-summary")) return false;
 
     Logger::info("Smoke shots complete.");
     return true;
