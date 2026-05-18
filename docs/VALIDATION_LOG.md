@@ -85,6 +85,36 @@ Append-only log of major validation runs. Newest entries on top.
 - Production build: PASS
 - Browser verification: PASS
 
+## Phase 8 — Slice 4 No-Gap Validation + Void Visibility
+
+**Date**: 2026-05-18
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx vitest run src/validation/__tests__/validateProject.test.ts` | FAIL → PASS | Initial RED: no warnings for void cells and no errors for unsupported tile ids. Final: 13/13 tests passed. |
+| `cmd /c scripts\dev\verify-runtime.bat` | PASS | Runtime build/tests remained green after sprite-catalog updates. |
+| `npx tsc --noEmit` | PASS | 0 errors. |
+
+### Fixes applied
+
+- Added explicit supported tile-id catalogs for visual and collision
+  layers.
+- Added warnings for void tiles and errors for unsupported visual /
+  collision ids.
+- Made editor voids visually unmistakable instead of silently falling
+  back to grass.
+- Forced nearest-neighbor runtime rendering and routed unknown runtime
+  tiles to the future `tile_void_warning` asset key instead of silently
+  appearing valid.
+
+### Final pass/fail
+
+- Frontend validation tests: PASS
+- C++ runtime focused validation: PASS
+- TypeScript compile: PASS
+
 ## Phase 7 — Slice 0 Original Asset Foundation
 
 **Date**: 2026-05-17

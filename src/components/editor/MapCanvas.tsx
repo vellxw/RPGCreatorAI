@@ -10,9 +10,9 @@ import {
   computeFitScale,
   computePreviewSceneBounds,
 } from '../../visual/viewport';
+import { isSupportedVisualTile, isVoidVisualTile } from '../../visual/tileCatalog';
 
 const groundAssets: Record<number, string> = {
-  0: gameAssets.grass,
   1: gameAssets.grass,
   2: gameAssets.path,
   3: gameAssets.water,
@@ -225,12 +225,50 @@ export function MapCanvas() {
             onPointerLeave={stopPointerInteractions}
           >
             <rect width={stageWidth} height={stageHeight} fill="#0f172a" />
+            <defs>
+              <pattern id="void-checker" width="16" height="16" patternUnits="userSpaceOnUse">
+                <rect width="16" height="16" fill="#3b0d31" />
+                <rect width="8" height="8" fill="#7c2d65" />
+                <rect x="8" y="8" width="8" height="8" fill="#7c2d65" />
+              </pattern>
+            </defs>
 
             <g transform={`translate(${stageOffsetX} ${stageOffsetY})`}>
               {/* Tiles */}
               {groundLayer && groundLayer.tiles.map((tile, i) => {
                 const x = (i % map.width) * tileSize;
                 const y = Math.floor(i / map.width) * tileSize;
+                if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
+                  return (
+                    <g key={i}>
+                      <rect x={x} y={y} width={tileSize} height={tileSize} fill="#2a1026" />
+                      <rect
+                        x={x}
+                        y={y}
+                        width={tileSize}
+                        height={tileSize}
+                        fill="url(#void-checker)"
+                        opacity="0.75"
+                      />
+                      <line
+                        x1={x + 4}
+                        y1={y + 4}
+                        x2={x + tileSize - 4}
+                        y2={y + tileSize - 4}
+                        stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
+                        strokeWidth="3"
+                      />
+                      <line
+                        x1={x + tileSize - 4}
+                        y1={y + 4}
+                        x2={x + 4}
+                        y2={y + tileSize - 4}
+                        stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
+                        strokeWidth="3"
+                      />
+                    </g>
+                  );
+                }
                 return (
                   <image
                     key={i}
@@ -239,6 +277,7 @@ export function MapCanvas() {
                     width={tileSize}
                     height={tileSize}
                     href={groundAssets[tile] ?? gameAssets.grass}
+                    style={{ imageRendering: 'pixelated' }}
                   />
                 );
               })}
@@ -254,6 +293,7 @@ export function MapCanvas() {
                     width={tileSize}
                     height={tileSize}
                     href={gameAssets.wall}
+                    style={{ imageRendering: 'pixelated' }}
                   />
                 );
               })}
@@ -336,6 +376,7 @@ export function MapCanvas() {
                       width={tileSize - 4}
                       height={tileSize - 4}
                       href={eventAssets[event.type]}
+                      style={{ imageRendering: 'pixelated' }}
                     />
                   </g>
                 );

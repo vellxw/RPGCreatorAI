@@ -4,13 +4,16 @@
 std::string SpriteCatalog::tileAssetFor(int groundTile, int collisionTile) {
     if (collisionTile == 9) return "tile_wall";
     switch (groundTile) {
+        case 0:
+            return "tile_void_warning";
         case 2:
             return "tile_path";
         case 3:
             return "tile_water";
         case 1:
-        default:
             return "tile_grass";
+        default:
+            return "tile_void_warning";
     }
 }
 

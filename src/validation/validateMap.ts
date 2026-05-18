@@ -1,4 +1,9 @@
 import type { MapData, ValidationMessage, GameEvent, EventCommand } from '../types/project';
+import {
+  isSupportedCollisionTile,
+  isSupportedVisualTile,
+  isVoidVisualTile,
+} from '../visual/tileCatalog';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 
@@ -41,6 +46,37 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
         message: `Layer "${layer.name}" has ${layer.tiles.length} tiles, expected ${expectedTiles}`,
         source: `${map.id}/${layer.name}`,
       });
+    }
+
+    if (layer.type === 'visual') {
+      const voidCount = layer.tiles.filter(isVoidVisualTile).length;
+      if (voidCount > 0) {
+        messages.push({
+          level: 'warning',
+          message: `Layer "${layer.name}" contains ${voidCount} void tile${voidCount === 1 ? '' : 's'}`,
+          source: `${map.id}/${layer.name}`,
+        });
+      }
+
+      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedVisualTile(tile)))];
+      for (const tileId of unsupported) {
+        messages.push({
+          level: 'error',
+          message: `Layer "${layer.name}" uses unsupported visual tile id "${tileId}"`,
+          source: `${map.id}/${layer.name}`,
+        });
+      }
+    }
+
+    if (layer.type === 'collision') {
+      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedCollisionTile(tile)))];
+      for (const tileId of unsupported) {
+        messages.push({
+          level: 'error',
+          message: `Layer "${layer.name}" uses unsupported collision tile id "${tileId}"`,
+          source: `${map.id}/${layer.name}`,
+        });
+      }
     }
   }
 

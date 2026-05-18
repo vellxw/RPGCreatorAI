@@ -131,6 +131,24 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('tiles'))).toBe(true);
   });
 
+  it('warns when a visual layer contains explicit void cells', () => {
+    const map = makeMap();
+    map.layers[0].tiles[0] = 0;
+    const project = makeProject({ town: map });
+    const report = validateProject(project);
+    expect(report.warnings.some(w => w.message.includes('void tile'))).toBe(true);
+  });
+
+  it('flags unsupported visual and collision tile ids', () => {
+    const map = makeMap();
+    map.layers[0].tiles[0] = 99;
+    map.layers[1].tiles[1] = 7;
+    const project = makeProject({ town: map });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('unsupported visual tile id "99"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unsupported collision tile id "7"'))).toBe(true);
+  });
+
   it('flags invalid trigger', () => {
     const event: GameEvent = {
       id: 'bad',

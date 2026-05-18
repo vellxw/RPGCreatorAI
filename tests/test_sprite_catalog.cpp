@@ -7,6 +7,8 @@ TEST_CASE("SpriteCatalog resolves generated tile assets") {
     CHECK(SpriteCatalog::tileAssetFor(2, 0) == "tile_path");
     CHECK(SpriteCatalog::tileAssetFor(3, 0) == "tile_water");
     CHECK(SpriteCatalog::tileAssetFor(1, 9) == "tile_wall");
+    CHECK(SpriteCatalog::tileAssetFor(0, 0) == "tile_void_warning");
+    CHECK(SpriteCatalog::tileAssetFor(99, 0) == "tile_void_warning");
 }
 
 TEST_CASE("SpriteCatalog prefers explicit event sprites and falls back by type") {

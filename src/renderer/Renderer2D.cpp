@@ -44,6 +44,7 @@ void drawRect(SDL_Renderer* r, int x, int y, int w, int h, Color c) {
 bool Renderer2D::initialize(Window& window) {
     sdlRenderer = window.getSDLRenderer();
     if (sdlRenderer) {
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         SDL_GetWindowSize(window.getSDLWindow(), &screenWidth, &screenHeight);
         SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BLENDMODE_BLEND);
     }
