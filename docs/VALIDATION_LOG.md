@@ -582,3 +582,47 @@ Error: Port 1420 is already in use
   inventory, party/status, quest journal, save slots, load slots, shop, and
   battle reward summary.
 
+### Slice 11 — visual QA closeout and final evidence
+
+- `2026-05-18 01:13 -03:00` — `python -m unittest tests.test_visual_assets`
+  — initially FAILED because the original `tile_grass`, `tile_path`,
+  `tile_water`, and `tile_wall` assets still had transparent outer edges;
+  fix applied: regenerated those tiles as full-bleed original assets.
+- `2026-05-18 01:14 -03:00` — `python scripts/dev/generate_visual_assets.py`
+  — PASS; refreshed full-bleed generated web/runtime terrain tiles.
+- `2026-05-18 01:14 -03:00` — `python -m unittest tests.test_visual_assets`
+  — PASS; every production visual tile is opaque on all outer edges.
+- `2026-05-18 01:18 -03:00` —
+  `powershell -File scripts/dev/visual-verify.ps1 -OutputDir output\\visual-closeout\\runtime-wide-new`
+  — PASS after fixing the script to prefer the same active out-of-OneDrive
+  runtime build directory used by the main verification pipeline instead of
+  an obsolete in-repo executable.
+- `2026-05-18 01:19 -03:00` — editor/runtime evidence capture — PASS;
+  committed screenshot set populated under
+  `docs/screenshots/game-visual-design/`:
+  `01-editor-16x9-map.png`, `02-runtime-16x9-map.png`,
+  `03-editor-square-map.png`, `04-runtime-square-map.png`,
+  `05-map-validation-no-gaps.png`, `06-scene-template-town.png`,
+  `07-scene-template-forest.png`, and
+  `08-scene-template-interior.png`.
+- `2026-05-18 01:22 -03:00` — `npx tsc --noEmit` — PASS.
+- `2026-05-18 01:22 -03:00` — `npx vite build` — PASS.
+- `2026-05-18 01:23 -03:00` — `npx vitest run` — PASS
+  (17 files, 97 tests).
+- `2026-05-18 01:23 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (17/17 Rust tests).
+- `2026-05-18 01:24 -03:00` —
+  `cargo build --manifest-path src-tauri/Cargo.toml` — PASS.
+- `2026-05-18 01:25 -03:00` — `scripts\\dev\\verify-runtime.bat`
+  — PASS.
+- `2026-05-18 01:25 -03:00` —
+  `powershell -File scripts/dev/verify.ps1` — PASS; runtime smoke observed
+  `Project loaded: My First RPG`, `Map loaded: town`, and `SMOKE PASSED`.
+- `2026-05-18 01:27 -03:00` — `npm run desktop:verify-content`
+  — PASS with a strict-port Vite server on `127.0.0.1:1420`.
+- `2026-05-18 01:27 -03:00` — screenshot dimension audit — PASS;
+  runtime evidence captured at `1280x720` and `768x768`, while editor
+  evidence remained full-page `1600x900` captures with the authored frame
+  visible inside the UI.
+

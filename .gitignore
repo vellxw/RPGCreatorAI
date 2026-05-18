@@ -18,6 +18,8 @@ coverage/
 # OS temp
 Thumbs.db
 Desktop.ini
+__pycache__/
+*.pyc
 
 # CMake temp files outside build/
 CMakeUserPresets.json

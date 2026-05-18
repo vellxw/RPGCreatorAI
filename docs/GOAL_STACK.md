@@ -2,8 +2,7 @@
 
 ## Current Goal
 
-Phase 8 — Game visual foundation and creator workflow hardening — IN
-PROGRESS.
+Phase 8 — Game visual foundation and creator workflow hardening — DONE.
 
 ## Active Phase
 
@@ -12,11 +11,13 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 11 — end-to-end sample-game validation, visual QA, and phase
-    closeout
+- None.
 
 ## Closed subgoals
 
+- Slice 11 — end-to-end visual QA closeout with committed editor/runtime
+  evidence, full-bleed visual tile regression coverage, corrected runtime
+  screenshot tooling, final validation, and phase documentation.
 - Slice 10 — runtime UX regression pass under the widescreen visual
   standard; existing inventory, party, quest, save/load, shop, and battle
   reward surfaces verified intact on the upgraded sample.

@@ -29,6 +29,11 @@ Store the final evidence under `docs/screenshots/game-visual-design/`:
 7. `07-scene-template-forest.png`
 8. `08-scene-template-interior.png`
 
+For before/after comparison, the old Phase 3 editor baseline remains in
+`docs/screenshots/phase-3/01-main-editor.png`; compare it with
+`01-editor-16x9-map.png` to see the shift from a tiny centered square
+board to a full authored widescreen scene.
+
 ## Review notes
 
 - Scores must be based on committed screenshots, not memory.
@@ -36,3 +41,23 @@ Store the final evidence under `docs/screenshots/game-visual-design/`:
 - The references supplied by the user are quality-direction references
   only; do not reward imitation of copyrighted art.
 
+## Final Phase 8 scorecard
+
+Scored from the committed evidence set under
+`docs/screenshots/game-visual-design/`.
+
+| Category | Score | Evidence |
+| --- | ---: | --- |
+| Viewport framing | 9 | widescreen and square editor/runtime captures show intentional screen bounds |
+| Tile seam / gap correctness | 9 | full-bleed generated tiles plus the validation capture show no accidental tile seams |
+| Map fill / completeness | 9 | editor validation and authored templates show explicit filled layers |
+| Scene composition | 8 | town, forest, and interior templates present clear routes and focal staging |
+| Character / object scale | 8 | actors, chests, and interactables remain readable in both editor and runtime |
+| Editor / runtime consistency | 9 | matching 16:9 and square captures preserve the same framing model |
+| Map-creation usability | 9 | templates, layers, brush sizes, fill, rectangle, resize, and viewport controls are visible in the editor |
+
+**Average:** `8.7 / 10`  
+**Minimum category:** `8 / 10`
+
+Phase 8 satisfies the required visual QA threshold: average is at least
+`8.0` and no category is below `7.0`.

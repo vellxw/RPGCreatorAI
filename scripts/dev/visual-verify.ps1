@@ -6,14 +6,29 @@
 
 [CmdletBinding()]
 param(
-    [string]$OutputDir = 'docs\screenshots\phase-2'
+    [string]$OutputDir = 'docs\screenshots\phase-2',
+    [string]$BuildDir
 )
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location $repoRoot
 
-$exe = Join-Path $repoRoot 'build\rpg_creator_runtime.exe'
+# Prefer the same out-of-OneDrive build location used by verify.ps1 and
+# smoke-runtime.ps1 so visual verification never captures an obsolete
+# in-repo executable when the active build lives elsewhere.
+if (-not $BuildDir) {
+    $localBase = $env:LOCALAPPDATA
+    if (-not $localBase) { $localBase = [Environment]::GetFolderPath('LocalApplicationData') }
+    $candidate = if ($localBase) { Join-Path $localBase 'RPGCreatorAI\build' } else { '' }
+    if ($candidate -and (Test-Path (Join-Path $candidate 'rpg_creator_runtime.exe'))) {
+        $BuildDir = $candidate
+    } else {
+        $BuildDir = Join-Path $repoRoot 'build'
+    }
+}
+
+$exe = Join-Path $BuildDir 'rpg_creator_runtime.exe'
 if (-not (Test-Path $exe)) { throw "Runtime not built: $exe" }
 
 $absOut = Join-Path $repoRoot $OutputDir

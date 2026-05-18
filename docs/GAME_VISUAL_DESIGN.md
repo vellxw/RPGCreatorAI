@@ -35,9 +35,9 @@ Every project visual profile must support:
 
 | Preset | Ratio | Intended use |
 | --- | --- | --- |
-| `widescreen` | `16:9` | default modern story-RPG presentation |
-| `classic` | `4:3` | retro/classic RPG composition |
-| `square` | `1:1` | compact rooms, portrait-social scenes, puzzle layouts |
+| `16:9` | `16:9` | default modern story-RPG presentation |
+| `4:3` | `4:3` | retro/classic RPG composition |
+| `1:1` | `1:1` | compact rooms, portrait-social scenes, puzzle layouts |
 | `custom` | author-defined | unusual presentation targets with explicit width/height |
 
 Presets are convenience helpers. The saved project stores concrete width
@@ -312,4 +312,3 @@ Minimum acceptance bar:
 - assets are original and production surfaces do not use random emoji
 - runtime and editor preserve gameplay correctness while following this
   visual standard
-

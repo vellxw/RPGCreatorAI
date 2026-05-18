@@ -12,8 +12,8 @@ Legend:
 
 | System | Status | Schema | Editor | Runtime | Validation | Tests | Notes |
 |--------|--------|--------|--------|---------|------------|-------|-------|
-| Project metadata | val | yes | yes | yes | yes | yes | Phase 1 |
-| Maps + tilesets / sprites | val | yes | yes | yes | yes | yes | Phase 7 adds real tile and collision painting over original assets |
+| Project metadata | val | yes | yes | yes | yes | yes | Phase 8 adds backward-compatible visual profiles for aspect ratio, resolution, camera mode, tile size, and zoom |
+| Maps + tilesets / sprites | val | yes | yes | yes | yes | yes | Phase 8 adds full-bleed generated tiles, no-gap validation, scene templates, and widescreen visual QA |
 | Events (id, position, trigger, solid, sprite) | val | yes | yes | yes | yes | yes | Phase 7 adds place / drag / duplicate / delete editor workflow |
 | Event commands v0 (showText, setFlag, ifFlag, addItem, transferMap, playSound) | val | yes | yes | yes | yes | yes | Phase 1/2 |
 | Event commands v1 (choices, vars, gold, quest, shop, battle, common events) | val | yes | yes | yes | yes | yes | Slice 3 (24 commands total) |
@@ -32,7 +32,7 @@ Legend:
 | Quests | val | yes | yes | yes | yes | yes | Slice 1/5; Phase 7 adds visible quest journal UI |
 | Shops | val | yes | yes | yes | yes | yes | Slice 9 data flow; Phase 7 adds real modal buy UI with gold checks |
 | Inventory + gold | val | yes | yes | yes | yes | yes | Slice 6; Phase 7 adds visible inventory UI |
-| System settings | val | yes | yes | yes | yes | yes | Slice 1/2 |
+| System settings | val | yes | yes | yes | yes | yes | Slice 1/2; Phase 8 adds shared editor/runtime visual interpretation |
 | Save/load (Phase 6 v2) | val | yes | n/a | yes | yes | yes | Migrates Phase 2 saves |
 | Audio (BGM/SFX) | partial | playSound | partial | logged stub | partial | partial | Future audiovisual polish phase |
 

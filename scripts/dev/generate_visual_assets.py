@@ -34,6 +34,57 @@ def save_asset(name: str, draw_fn: Callable[[ImageDraw.ImageDraw], None], *, fil
     bmp.save(RUNTIME_OUT / f"{name}.bmp")
 
 
+def draw_grass(d: ImageDraw.ImageDraw) -> None:
+    d.rectangle((0, 0, 31, 31), fill=(79, 139, 72, 255))
+    for x, y in (
+        (3, 7),
+        (7, 18),
+        (12, 10),
+        (18, 24),
+        (23, 8),
+        (27, 18),
+        (15, 28),
+    ):
+        d.line((x, y + 3, x + 1, y), fill=(113, 170, 80, 255), width=2)
+    for x, y in ((5, 25), (11, 4), (20, 14), (28, 28)):
+        d.rectangle((x, y, x + 1, y + 1), fill=(55, 111, 59, 255))
+
+
+def draw_path(d: ImageDraw.ImageDraw) -> None:
+    d.rectangle((0, 0, 31, 31), fill=(176, 136, 94, 255))
+    for x, y, w in (
+        (2, 5, 8),
+        (14, 8, 5),
+        (23, 4, 6),
+        (5, 18, 7),
+        (19, 20, 9),
+        (10, 27, 5),
+    ):
+        d.rectangle((x, y, x + w, y + 1), fill=(199, 158, 110, 255))
+    for x, y in ((7, 11), (15, 16), (25, 13), (29, 27), (2, 27)):
+        d.point((x, y), fill=(137, 99, 69, 255))
+
+
+def draw_water(d: ImageDraw.ImageDraw) -> None:
+    d.rectangle((0, 0, 31, 31), fill=(39, 88, 173, 255))
+    for y in (5, 13, 21, 28):
+        d.line((0, y, 31, y), fill=(28, 70, 155, 255), width=2)
+    for x, y, width in ((3, 8, 9), (16, 10, 11), (7, 18, 10), (20, 24, 8)):
+        d.line((x, y, x + width, y), fill=(101, 162, 232, 255), width=2)
+
+
+def draw_wall(d: ImageDraw.ImageDraw) -> None:
+    d.rectangle((0, 0, 31, 31), fill=(69, 64, 72, 255))
+    for y in (0, 8, 16, 24):
+        d.line((0, y, 31, y), fill=(48, 44, 53, 255), width=2)
+    for row, offset in enumerate((0, 8, 0, 8)):
+        y = row * 8
+        for x in range(offset, 32, 16):
+            d.line((x, y, x, min(31, y + 7)), fill=(48, 44, 53, 255), width=2)
+    d.rectangle((3, 3, 13, 4), fill=(92, 84, 96, 255))
+    d.rectangle((18, 19, 28, 20), fill=(92, 84, 96, 255))
+
+
 def draw_snow(d: ImageDraw.ImageDraw) -> None:
     d.rectangle((0, 0, 31, 31), fill=(214, 236, 243, 255))
     d.rectangle((0, 23, 31, 31), fill=(194, 224, 236, 255))
@@ -114,6 +165,10 @@ def draw_battle_marker(d: ImageDraw.ImageDraw) -> None:
 
 
 def main() -> None:
+    save_asset("tile_grass", draw_grass)
+    save_asset("tile_path", draw_path)
+    save_asset("tile_water", draw_water)
+    save_asset("tile_wall", draw_wall)
     save_asset("tile_snow", draw_snow)
     save_asset("tile_tree", draw_tree)
     save_asset("tile_interior_floor", draw_interior_floor)
