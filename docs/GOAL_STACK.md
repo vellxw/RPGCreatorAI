@@ -2,20 +2,33 @@
 
 ## Current Goal
 
-Phase 7 — Polished creator-to-player loop — DONE.
+Phase 8 — Game visual foundation and creator workflow hardening — IN
+PROGRESS.
 
 ## Active Phase
 
-No active implementation phase. Phase 7 is complete.
+Phase 8 is governed by `docs/GAME_VISUAL_DESIGN.md`, the source of truth
+for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Phase 8 candidate — advanced authoring depth and audiovisual polish
-   (self-switches, autorun/parallel events, active battle skills, real
-   audio playback) if the project continues.
+1. Slice 1 — game visual design source of truth + project visual profile
+2. Slice 2 — shared viewport / aspect-ratio / camera model
+3. Slice 3 — editor canvas scaling, fit controls, and screen overlays
+4. Slice 4 — no-gap rendering, tile completeness validation, and void
+   detection
+5. Slice 5 — original visual asset expansion for scene authoring
+6. Slice 6 — complete starter scene templates
+7. Slice 7 — runtime visual-profile support and camera framing
+8. Slice 8 — editor/runtime preview consistency and screenshot checks
+9. Slice 9 — map authoring workflow hardening
+10. Slice 10 — runtime UX/playability polish under the new visual standard
+11. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+    closeout
 
 ## Closed subgoals
 
+- Phase 7 — Polished creator-to-player loop — DONE (`f951dd6`).
 - Phase 6 — Complete RPG Creation System Foundation — DONE (`a12efa8`).
 - Slice 0 — original asset foundation (generated atlases, editor assets,
   runtime sprites, emoji replacement). Commit `0012eca`.
@@ -44,17 +57,21 @@ No active implementation phase. Phase 7 is complete.
   Rust shell round-trip, vitest + cargo coverage). Commit `7936b8f`.
 - Slice 2 — Database editor screen with tabs, CRUD, dirty tracking.
   Commit `7936b8f`.
-- Slice 3 — runtime event command system v1 (24 commands). Commit `46d2726`.
+- Slice 3 — runtime event command system v1 (24 commands). Commit
+  `46d2726`.
 - Slice 4 — typed switches/variables, ifSwitch/ifVariable, showChoices.
   Commit `46d2726`.
-- Slice 5 — quest system runtime + save/load + idempotency. Commit `46d2726`.
+- Slice 5 — quest system runtime + save/load + idempotency. Commit
+  `46d2726`.
 - Slice 6 — gold + party + actor HP + inventory remove. Commit `46d2726`.
 - Slice 7 — runtime DB loader, equipment stat modifiers in battle.
   Commit `d4fec32`.
 - Slice 8 — battle system v1 (deterministic, formula tested, rewards).
   Commit `d4fec32`.
-- Slice 9 — shops (data round-trip + dialogue-stub runtime). Commit `d4fec32`.
-- Slice 10 — sample town/house exercising every v1 command. Commit `6c27308`.
+- Slice 9 — shops (data round-trip + dialogue-stub runtime). Commit
+  `d4fec32`.
+- Slice 10 — sample town/house exercising every v1 command. Commit
+  `6c27308`.
 - Slice 11 — Phase 6 final validation + reporting. Commit `a12efa8`.
 
 ## Closed subgoals from previous phases

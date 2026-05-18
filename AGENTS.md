@@ -1,10 +1,18 @@
 # AGENTS.md — Permanent Operational Rules for RPGCreatorAI
 
-## Current Phase: Phase 3 — Visual Editor MVP
+## Current Phase: Phase 8 — Game Visual Foundation & Creator Workflow Hardening
 
 This file is the source of truth for all autonomous agents working on
 RPGCreatorAI. It distills the permanent operational rules from the phase
 protocols (see `docs/agent_prompts/`).
+
+## Visual Source of Truth
+
+`docs/GAME_VISUAL_DESIGN.md` is the binding source of truth for authored
+game visuals: viewport behavior, aspect ratios, camera framing, tile
+alignment, scene composition, preview rules, and runtime presentation.
+When visual implementation details conflict with older screenshots or
+phase notes, follow `docs/GAME_VISUAL_DESIGN.md`.
 
 ## Project
 
@@ -205,6 +213,6 @@ hash, push result, known limitations, recommended next phase.
 ## Phase Protocols
 
 Detailed per-phase protocols live under `docs/agent_prompts/` and remain
-binding for that phase. The current phase protocol is:
-
-- `docs/agent_prompts/PHASE_2_AUTONOMOUS_IMPLEMENTATION.md`
+binding for that phase. The current active implementation direction is
+tracked in `docs/GOAL_STACK.md` and visually governed by
+`docs/GAME_VISUAL_DESIGN.md`.
