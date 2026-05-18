@@ -1,10 +1,13 @@
+import { useEffect, useState } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
 import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react';
-import type { EventCommand, GameEvent, ShowTextCommand, TriggerType } from '../../types/project';
+import type { EventCommand, GameEvent, MapData, ShowTextCommand, TriggerType } from '../../types/project';
 import { eventAssets } from '../../assets/generated/assetCatalog';
 import { findDuplicatePlacement } from '../../utils/eventEditing';
+import { normalizeVisualProfile } from '../../visual/visualProfile';
+import { getVisibleTileSpan } from '../../visual/viewport';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -73,16 +76,10 @@ export function Inspector() {
     selected && mapId
       ? projectState.maps[mapId]?.events.find(e => e.id === selected.id) ?? null
       : null;
+  const selectedMap = projectState.maps[editorState.selectedMapId];
 
   if (!event || !mapId) {
-    return (
-      <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-          <img src={eventAssets.object} alt="" className="w-8 h-8 opacity-70" />
-        </div>
-        <p className="text-[13px] text-gray-500">Select an object on the map to inspect its properties</p>
-      </div>
-    );
+    return <MapSettingsPanel map={selectedMap} />;
   }
 
   const updateEvent = (changes: Partial<Omit<GameEvent, 'commands'>>) => {
@@ -253,6 +250,127 @@ export function Inspector() {
         >
           <Trash2 size={14} />
         </button>
+      </div>
+    </div>
+  );
+}
+
+function MapSettingsPanel({ map }: { map: MapData | undefined }) {
+  const { state: projectState, dispatch } = useProjectStore();
+  const [width, setWidth] = useState(map?.width ?? 1);
+  const [height, setHeight] = useState(map?.height ?? 1);
+
+  useEffect(() => {
+    setWidth(map?.width ?? 1);
+    setHeight(map?.height ?? 1);
+  }, [map?.width, map?.height]);
+
+  if (!map) {
+    return (
+      <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex items-center justify-center p-6 text-center">
+        <p className="text-[13px] text-gray-500">Select a map to edit its scene settings.</p>
+      </div>
+    );
+  }
+
+  const profile = normalizeVisualProfile(projectState.project.visualProfile);
+  const visibleSpan = getVisibleTileSpan(profile.baseResolution, map.tileSize || profile.tileSize);
+  const applyResize = () => {
+    dispatch({
+      type: 'RESIZE_MAP',
+      mapId: map.id,
+      width,
+      height,
+      visualFillTile: 1,
+    });
+  };
+  const fitToViewport = () => {
+    setWidth(visibleSpan.columns);
+    setHeight(visibleSpan.rows);
+    dispatch({
+      type: 'RESIZE_MAP',
+      mapId: map.id,
+      width: visibleSpan.columns,
+      height: visibleSpan.rows,
+      visualFillTile: 1,
+    });
+  };
+  const applyAspectPreset = (aspectRatio: '16:9' | '4:3' | '1:1') => {
+    const baseResolution =
+      aspectRatio === '16:9'
+        ? { width: 1280, height: 720 }
+        : aspectRatio === '4:3'
+          ? { width: 1024, height: 768 }
+          : { width: 768, height: 768 };
+    dispatch({
+      type: 'UPDATE_PROJECT_META',
+      changes: {
+        visualProfile: {
+          ...profile,
+          aspectRatio,
+          baseResolution,
+        },
+      },
+    });
+  };
+
+  return (
+    <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-200">
+        <div className="text-[14px] font-semibold text-gray-800">Map Settings</div>
+        <div className="text-[12px] text-gray-500">{map.name}</div>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">Map Size</div>
+          <div className="grid grid-cols-2 gap-2">
+            <Input label="Width" type="number" value={width} onChange={e => setWidth(Number(e.target.value))} />
+            <Input label="Height" type="number" value={height} onChange={e => setHeight(Number(e.target.value))} />
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={applyResize}
+              className="flex-1 px-3 py-1.5 text-[12px] rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+            >
+              Apply resize
+            </button>
+            <button
+              onClick={fitToViewport}
+              className="flex-1 px-3 py-1.5 text-[12px] rounded-md bg-gray-50 text-gray-700 hover:bg-gray-100"
+            >
+              Fit viewport
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">Viewport Preset</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(['16:9', '4:3', '1:1'] as const).map(aspectRatio => (
+              <button
+                key={aspectRatio}
+                onClick={() => applyAspectPreset(aspectRatio)}
+                className={`px-2 py-2 text-[12px] rounded-md border ${
+                  profile.aspectRatio === aspectRatio
+                    ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {aspectRatio}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-500 mt-2">
+            Current frame: {profile.baseResolution.width}×{profile.baseResolution.height}
+          </p>
+        </div>
+
+        <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+          <div className="text-[12px] font-semibold text-slate-700">No event selected</div>
+          <p className="text-[12px] text-slate-500 mt-1">
+            Select an object to edit event details, or use these controls to shape the scene itself.
+          </p>
+        </div>
       </div>
     </div>
   );

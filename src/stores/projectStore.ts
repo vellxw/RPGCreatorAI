@@ -57,6 +57,31 @@ export type ProjectAction =
       tile: number;
     }
   | {
+      type: 'PAINT_RECT';
+      mapId: string;
+      layerName: string;
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      tile: number;
+    }
+  | {
+      type: 'FLOOD_FILL';
+      mapId: string;
+      layerName: string;
+      x: number;
+      y: number;
+      tile: number;
+    }
+  | {
+      type: 'RESIZE_MAP';
+      mapId: string;
+      width: number;
+      height: number;
+      visualFillTile: number;
+    }
+  | {
       type: 'REPLACE_MAP';
       mapId: string;
       map: MapData;
@@ -408,6 +433,67 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         if (!layer) return;
         const index = action.y * map.width + action.x;
         layer.tiles[index] = action.tile;
+      });
+
+    case 'PAINT_RECT':
+      return withMap(state, action.mapId, map => {
+        const layer = map.layers.find(l => l.name === action.layerName);
+        if (!layer) return;
+        const minX = Math.max(0, Math.min(action.x1, action.x2));
+        const maxX = Math.min(map.width - 1, Math.max(action.x1, action.x2));
+        const minY = Math.max(0, Math.min(action.y1, action.y2));
+        const maxY = Math.min(map.height - 1, Math.max(action.y1, action.y2));
+        for (let y = minY; y <= maxY; y += 1) {
+          for (let x = minX; x <= maxX; x += 1) {
+            layer.tiles[y * map.width + x] = action.tile;
+          }
+        }
+      });
+
+    case 'FLOOD_FILL':
+      return withMap(state, action.mapId, map => {
+        const layer = map.layers.find(l => l.name === action.layerName);
+        if (!layer) return;
+        if (action.x < 0 || action.x >= map.width || action.y < 0 || action.y >= map.height) return;
+        const startIndex = action.y * map.width + action.x;
+        const target = layer.tiles[startIndex];
+        if (target === action.tile) return;
+        const stack: Array<{ x: number; y: number }> = [{ x: action.x, y: action.y }];
+        while (stack.length > 0) {
+          const cell = stack.pop();
+          if (!cell) continue;
+          if (cell.x < 0 || cell.x >= map.width || cell.y < 0 || cell.y >= map.height) continue;
+          const index = cell.y * map.width + cell.x;
+          if (layer.tiles[index] !== target) continue;
+          layer.tiles[index] = action.tile;
+          stack.push(
+            { x: cell.x + 1, y: cell.y },
+            { x: cell.x - 1, y: cell.y },
+            { x: cell.x, y: cell.y + 1 },
+            { x: cell.x, y: cell.y - 1 },
+          );
+        }
+      });
+
+    case 'RESIZE_MAP':
+      return withMap(state, action.mapId, map => {
+        const width = Math.max(1, Math.floor(action.width));
+        const height = Math.max(1, Math.floor(action.height));
+        for (const layer of map.layers) {
+          const fill = layer.type === 'visual' ? action.visualFillTile : 0;
+          const nextTiles = new Array(width * height).fill(fill);
+          const copyWidth = Math.min(map.width, width);
+          const copyHeight = Math.min(map.height, height);
+          for (let y = 0; y < copyHeight; y += 1) {
+            for (let x = 0; x < copyWidth; x += 1) {
+              nextTiles[y * width + x] = layer.tiles[y * map.width + x];
+            }
+          }
+          layer.tiles = nextTiles;
+        }
+        map.width = width;
+        map.height = height;
+        map.events = map.events.filter(event => event.x < width && event.y < height);
       });
 
     case 'REPLACE_MAP':

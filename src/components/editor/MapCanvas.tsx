@@ -31,6 +31,7 @@ export function MapCanvas() {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [painting, setPainting] = useState(false);
   const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
+  const [rectangleStart, setRectangleStart] = useState<{ x: number; y: number } | null>(null);
   const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
 
   if (!map) return <div className="flex-1 flex items-center justify-center text-gray-400">No map selected</div>;
@@ -103,25 +104,32 @@ export function MapCanvas() {
     return { x, y };
   };
 
-  const paintAt = (x: number, y: number) => {
-    if (state.brush.kind === 'tile') {
-      projectDispatch({
-        type: 'PAINT_TILE',
-        mapId: map.id,
-        layerName: 'ground',
-        x,
-        y,
-        tile: state.brush.tileId,
-      });
-    } else if (state.brush.kind === 'collision') {
-      projectDispatch({
-        type: 'PAINT_TILE',
-        mapId: map.id,
-        layerName: 'collision',
-        x,
-        y,
-        tile: state.brush.tileId,
-      });
+  const currentLayerName = state.activeLayer === 'collision' ? 'collision' : 'ground';
+  const currentPaintTile =
+    state.tool === 'erase'
+      ? 0
+      : state.activeLayer === 'visual'
+        ? state.brush.kind === 'tile'
+          ? state.brush.tileId
+          : 1
+        : state.brush.kind === 'collision'
+          ? state.brush.tileId
+          : 9;
+
+  const paintBrushAt = (x: number, y: number) => {
+    if (state.activeLayer === 'event') return;
+    const radius = Math.floor(state.brushSize / 2);
+    for (let yy = y - radius; yy <= y + radius; yy += 1) {
+      for (let xx = x - radius; xx <= x + radius; xx += 1) {
+        projectDispatch({
+          type: 'PAINT_TILE',
+          mapId: map.id,
+          layerName: currentLayerName,
+          x: xx,
+          y: yy,
+          tile: currentPaintTile,
+        });
+      }
     }
   };
 
@@ -158,19 +166,37 @@ export function MapCanvas() {
     const cell = cellFromPointer(e);
     if (!cell) return;
 
-    if (state.interactionMode === 'select') {
+    if (state.tool === 'select' || state.interactionMode === 'select') {
       dispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
       return;
     }
 
-    if (state.brush.kind === 'event') {
-      createEventAt(state.brush.eventType, cell.x, cell.y);
+    if (state.activeLayer === 'event') {
+      if (state.tool === 'brush' && state.brush.kind === 'event') {
+        createEventAt(state.brush.eventType, cell.x, cell.y);
+      }
+      return;
+    }
+
+    if (state.tool === 'fill') {
+      projectDispatch({
+        type: 'FLOOD_FILL',
+        mapId: map.id,
+        layerName: currentLayerName,
+        x: cell.x,
+        y: cell.y,
+        tile: currentPaintTile,
+      });
       return;
     }
 
     projectDispatch({ type: 'BEGIN_STROKE' });
     setPainting(true);
-    paintAt(cell.x, cell.y);
+    if (state.tool === 'rectangle') {
+      setRectangleStart(cell);
+      return;
+    }
+    paintBrushAt(cell.x, cell.y);
   };
 
   const handleCanvasPointerMove = (e: ReactPointerEvent<SVGSVGElement>) => {
@@ -187,17 +213,33 @@ export function MapCanvas() {
       return;
     }
 
-    if (painting) {
-      paintAt(cell.x, cell.y);
+    if (painting && state.tool !== 'rectangle') {
+      paintBrushAt(cell.x, cell.y);
     }
   };
 
-  const stopPointerInteractions = () => {
+  const stopPointerInteractions = (e?: ReactPointerEvent<SVGSVGElement>) => {
+    if (rectangleStart && e) {
+      const endCell = cellFromPointer(e);
+      if (endCell) {
+        projectDispatch({
+          type: 'PAINT_RECT',
+          mapId: map.id,
+          layerName: currentLayerName,
+          x1: rectangleStart.x,
+          y1: rectangleStart.y,
+          x2: endCell.x,
+          y2: endCell.y,
+          tile: currentPaintTile,
+        });
+      }
+    }
     if (painting || draggingEventId) {
       projectDispatch({ type: 'END_STROKE' });
     }
     setPainting(false);
     setDraggingEventId(null);
+    setRectangleStart(null);
   };
 
   const startEventDrag = (event: GameEvent, e: ReactPointerEvent<SVGGElement>) => {
@@ -285,7 +327,7 @@ export function MapCanvas() {
                   />
                 );
               })}
-              {collisionLayer && collisionLayer.tiles.map((tile, i) => {
+              {state.activeLayer === 'collision' && collisionLayer && collisionLayer.tiles.map((tile, i) => {
                 if (tile !== 9) return null;
                 const x = (i % map.width) * tileSize;
                 const y = Math.floor(i / map.width) * tileSize;
@@ -440,13 +482,9 @@ export function MapCanvas() {
         <span className="text-[12px] text-gray-600">
           {state.interactionMode === 'select'
             ? 'Move events'
-            : state.brush.kind === 'event'
+            : state.activeLayer === 'event' && state.brush.kind === 'event'
               ? `Place ${state.brush.label}`
-              : state.brush.kind === 'collision'
-                ? state.brush.tileId === 9
-                  ? 'Paint collision'
-                  : 'Erase collision'
-                : `Paint ${state.brush.label}`}
+              : `${state.tool[0].toUpperCase()}${state.tool.slice(1)} ${state.activeLayer}`}
         </span>
         <span className="text-[11px] text-gray-400">·</span>
         <span className="text-[12px] text-gray-600">

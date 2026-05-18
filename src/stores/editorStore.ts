@@ -19,6 +19,9 @@ export interface EditorState {
   zoomMode: 'fit' | 'manual';
   saved: boolean;
   brush: BrushSelection;
+  activeLayer: 'visual' | 'collision' | 'event';
+  tool: 'brush' | 'fill' | 'rectangle' | 'erase' | 'select';
+  brushSize: 1 | 2 | 3 | 5;
   interactionMode: 'paint' | 'select';
 }
 
@@ -30,6 +33,9 @@ export type EditorAction =
   | { type: 'FIT_TO_VIEW' }
   | { type: 'SET_ACTUAL_SIZE' }
   | { type: 'SET_BRUSH'; brush: BrushSelection }
+  | { type: 'SET_ACTIVE_LAYER'; layer: EditorState['activeLayer'] }
+  | { type: 'SET_TOOL'; tool: EditorState['tool'] }
+  | { type: 'SET_BRUSH_SIZE'; brushSize: EditorState['brushSize'] }
   | { type: 'SET_INTERACTION_MODE'; mode: 'paint' | 'select' }
   | { type: 'MARK_SAVED' }
   | { type: 'MARK_DIRTY' };
@@ -43,6 +49,9 @@ export const initialEditorState: EditorState = {
   zoomMode: 'fit',
   saved: true,
   brush: { kind: 'tile', tileId: 1, label: 'grass' },
+  activeLayer: 'visual',
+  tool: 'brush',
+  brushSize: 1,
   interactionMode: 'paint',
 };
 
@@ -61,9 +70,46 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'SET_ACTUAL_SIZE':
       return { ...state, zoom: 100, zoomMode: 'manual' };
     case 'SET_BRUSH':
-      return { ...state, brush: action.brush, interactionMode: 'paint' };
+      return {
+        ...state,
+        brush: action.brush,
+        activeLayer:
+          action.brush.kind === 'tile'
+            ? 'visual'
+            : action.brush.kind === 'collision'
+              ? 'collision'
+              : 'event',
+        tool: state.tool === 'select' ? 'brush' : state.tool,
+        interactionMode: 'paint',
+      };
+    case 'SET_ACTIVE_LAYER':
+      return {
+        ...state,
+        activeLayer: action.layer,
+        brush:
+          action.layer === 'visual'
+            ? state.brush.kind === 'tile'
+              ? state.brush
+              : { kind: 'tile', tileId: 1, label: 'grass' }
+            : action.layer === 'collision'
+              ? state.brush.kind === 'collision'
+                ? state.brush
+                : { kind: 'collision', tileId: 9, label: 'wall' }
+              : state.brush.kind === 'event'
+                ? state.brush
+                : { kind: 'event', eventType: 'npc', label: 'npc' },
+        interactionMode: action.layer === 'event' && state.tool === 'select' ? 'select' : 'paint',
+      };
+    case 'SET_TOOL':
+      return {
+        ...state,
+        tool: action.tool,
+        interactionMode: action.tool === 'select' ? 'select' : 'paint',
+      };
+    case 'SET_BRUSH_SIZE':
+      return { ...state, brushSize: action.brushSize };
     case 'SET_INTERACTION_MODE':
-      return { ...state, interactionMode: action.mode };
+      return { ...state, interactionMode: action.mode, tool: action.mode === 'select' ? 'select' : state.tool };
     case 'MARK_SAVED':
       return { ...state, saved: true };
     case 'MARK_DIRTY':

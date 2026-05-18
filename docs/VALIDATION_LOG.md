@@ -548,3 +548,22 @@ Error: Port 1420 is already in use
   editor collision cells render as an overlay rather than erasing authored
   scene art.
 
+### Slice 9 — map-authoring workflow hardening
+
+- `2026-05-18 00:52 -03:00` —
+  `npx vitest run src/stores/__tests__/editorStore.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — initially FAILED because layer/tool state, rectangle painting, flood
+  fill, and map resizing were not implemented yet; fix applied: added
+  explicit editor authoring modes plus reducer actions for those operations.
+- `2026-05-18 00:55 -03:00` —
+  `npx vitest run src/stores/__tests__/editorStore.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — PASS (24 tests).
+- `2026-05-18 00:55 -03:00` — `npx tsc --noEmit` — PASS.
+- `2026-05-18 00:58 -03:00` —
+  `npx vitest run src/stores/__tests__/editorStore.test.ts src/stores/__tests__/projectReducer.test.ts src/e2e/__tests__/editorRoundtrip.test.ts`
+  — PASS (25 tests).
+- `2026-05-18 00:58 -03:00` — `npx vite build` — PASS.
+- Browser screenshot verification against `http://127.0.0.1:3000/` — PASS:
+  map settings, layer tabs, selected-tile preview, brush-size buttons, and
+  the clean visual-layer scene presentation all rendered correctly.
+

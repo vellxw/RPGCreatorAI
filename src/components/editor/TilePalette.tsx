@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronRight, X, Pencil, Eraser, Square, Circle, Move, Pipette } from 'lucide-react';
+import {
+  Search,
+  ChevronDown,
+  ChevronRight,
+  X,
+  Pencil,
+  Eraser,
+  Square,
+  Move,
+  Pipette,
+  PaintBucket,
+} from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 import { useEditor, type BrushSelection } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
@@ -70,6 +81,14 @@ export function TilePalette() {
     editor.brush.kind === 'event' && editor.brush.label === 'transfer'
       ? 'door'
       : editor.brush.label;
+  const selectedPreview =
+    editor.brush.kind === 'tile'
+      ? tilePreviewAssets[editor.brush.label]
+      : editor.brush.kind === 'collision'
+        ? editor.brush.tileId === 9
+          ? gameAssets.collisionOverlay
+          : gameAssets.voidWarning
+        : tilePreviewAssets[editor.brush.label === 'transfer' ? 'door' : editor.brush.label];
 
   const applyTemplate = (templateId: (typeof SCENE_TEMPLATES)[number]['id']) => {
     if (!selectedMap) return;
@@ -95,22 +114,53 @@ export function TilePalette() {
         <X size={14} className="text-gray-400 cursor-pointer hover:text-gray-600" />
       </div>
 
+      <div className="px-3 py-2 border-b border-gray-100 space-y-2">
+        <div className="grid grid-cols-3 gap-1">
+          {([
+            ['visual', 'Visual'],
+            ['collision', 'Collision'],
+            ['event', 'Events'],
+          ] as const).map(([layer, label]) => (
+            <button
+              key={layer}
+              onClick={() => dispatch({ type: 'SET_ACTIVE_LAYER', layer })}
+              className={`px-2 py-1.5 text-[11px] rounded-md border ${
+                editor.activeLayer === layer
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 p-2 rounded-md bg-gray-50 border border-gray-100">
+          <img src={selectedPreview} alt="" className="w-8 h-8 object-contain" />
+          <div>
+            <div className="text-[11px] text-gray-500">Selected</div>
+            <div className="text-[12px] font-medium text-gray-700">{editor.brush.label}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Tools */}
       <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100">
-        {[Pencil, Eraser, Square, Circle, Move, Pipette].map((Icon, i) => (
+        {[
+          { icon: Pencil, tool: 'brush' as const, title: 'Brush' },
+          { icon: PaintBucket, tool: 'fill' as const, title: 'Fill' },
+          { icon: Square, tool: 'rectangle' as const, title: 'Rectangle' },
+          { icon: Eraser, tool: 'erase' as const, title: 'Erase' },
+          { icon: Move, tool: 'select' as const, title: 'Select / move events' },
+          { icon: Pipette, tool: 'brush' as const, title: 'Brush' },
+        ].map(({ icon: Icon, tool, title }, i) => (
           <button
             key={i}
             onClick={() => {
-              if (i === 0) dispatch({ type: 'SET_BRUSH', brush: brushes.grass });
-              if (i === 1) dispatch({ type: 'SET_BRUSH', brush: { kind: 'collision', tileId: 0, label: 'erase' } });
-              if (i === 2) dispatch({ type: 'SET_BRUSH', brush: brushes.wall });
-              if (i === 4) dispatch({ type: 'SET_INTERACTION_MODE', mode: 'select' });
+              dispatch({ type: 'SET_TOOL', tool });
             }}
+            title={title}
             className={`p-1.5 rounded cursor-pointer ${
-              (i === 4 && editor.interactionMode === 'select') ||
-              (i === 0 && editor.interactionMode === 'paint' && editor.brush.kind === 'tile') ||
-              (i === 1 && editor.brush.kind === 'collision' && editor.brush.tileId === 0) ||
-              (i === 2 && editor.brush.kind === 'collision' && editor.brush.tileId === 9)
+              editor.tool === tool
                 ? 'bg-indigo-50 text-indigo-600'
                 : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
             }`}
@@ -118,6 +168,25 @@ export function TilePalette() {
             <Icon size={14} />
           </button>
         ))}
+      </div>
+
+      <div className="px-3 py-2 border-b border-gray-100">
+        <div className="text-[11px] font-medium text-gray-500 mb-1.5">Brush size</div>
+        <div className="flex gap-1">
+          {([1, 2, 3, 5] as const).map(size => (
+            <button
+              key={size}
+              onClick={() => dispatch({ type: 'SET_BRUSH_SIZE', brushSize: size })}
+              className={`flex-1 px-2 py-1 text-[11px] rounded border ${
+                editor.brushSize === size
+                  ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {size}×{size}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Search */}

@@ -267,6 +267,55 @@ describe('projectReducer', () => {
     expect(s1.maps.town.layers[0].tiles[32]).toBe(1);
   });
 
+  it('PAINT_RECT fills a rectangular region on the requested layer', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'PAINT_RECT',
+      mapId: 'town',
+      layerName: 'ground',
+      x1: 1,
+      y1: 1,
+      x2: 2,
+      y2: 2,
+      tile: 2,
+    });
+    expect(s2.maps.town.layers[0].tiles[11]).toBe(2);
+    expect(s2.maps.town.layers[0].tiles[12]).toBe(2);
+    expect(s2.maps.town.layers[0].tiles[21]).toBe(2);
+    expect(s2.maps.town.layers[0].tiles[22]).toBe(2);
+  });
+
+  it('FLOOD_FILL replaces a contiguous region only', () => {
+    const s1 = loadedState();
+    s1.maps.town.layers[0].tiles[1] = 2;
+    const s2 = projectReducer(s1, {
+      type: 'FLOOD_FILL',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 3,
+    });
+    expect(s2.maps.town.layers[0].tiles[0]).toBe(3);
+    expect(s2.maps.town.layers[0].tiles[1]).toBe(2);
+  });
+
+  it('RESIZE_MAP preserves existing cells and fills newly created cells explicitly', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'RESIZE_MAP',
+      mapId: 'town',
+      width: 12,
+      height: 11,
+      visualFillTile: 1,
+    });
+    expect(s2.maps.town.width).toBe(12);
+    expect(s2.maps.town.height).toBe(11);
+    expect(s2.maps.town.layers[0].tiles).toHaveLength(132);
+    expect(s2.maps.town.layers[0].tiles[131]).toBe(1);
+    expect(s2.maps.town.layers[1].tiles[131]).toBe(0);
+  });
+
   it('ADD_EVENT, DUPLICATE_EVENT, and REMOVE_EVENT manage event CRUD', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

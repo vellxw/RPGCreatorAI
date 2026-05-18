@@ -18,4 +18,15 @@ describe('editorStore viewport controls', () => {
     expect(actual.zoomMode).toBe('manual');
     expect(actual.zoom).toBe(100);
   });
+
+  it('tracks authoring layer, tool, and brush size explicitly', () => {
+    const visualLayer = editorReducer(initialEditorState, { type: 'SET_ACTIVE_LAYER', layer: 'visual' });
+    expect(visualLayer.activeLayer).toBe('visual');
+
+    const fillTool = editorReducer(visualLayer, { type: 'SET_TOOL', tool: 'fill' });
+    expect(fillTool.tool).toBe('fill');
+
+    const largerBrush = editorReducer(fillTool, { type: 'SET_BRUSH_SIZE', brushSize: 3 });
+    expect(largerBrush.brushSize).toBe(3);
+  });
 });
