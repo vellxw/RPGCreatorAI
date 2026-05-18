@@ -31,6 +31,33 @@ Append-only log of major validation runs. Newest entries on top.
 - C++ runtime focused validation: PASS
 - TypeScript compile: PASS
 
+## Phase 8 — Slice 2 Shared Viewport / Camera Model
+
+**Date**: 2026-05-18
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx vitest run src/visual/__tests__/viewport.test.ts` | FAIL → PASS | Initial RED: missing `viewport.ts`. Final: 3/3 tests passed. |
+| `cmd /c scripts\dev\verify-runtime.bat` | FAIL → PASS | Initial RED: `Camera2D` lacked `setViewport`, `follow`, and `centerRoom`. Final: runtime build succeeded and `RPGTests` passed with new camera coverage. |
+| `npx tsc --noEmit` | PASS | 0 errors after viewport helpers landed. |
+
+### Fixes applied
+
+- Added shared editor-side viewport math for visible tile span and
+  fit-to-view scaling.
+- Added runtime camera viewport awareness, clamp-to-bounds follow
+  behavior, and fixed-room centering.
+- Switched runtime window creation from hardcoded `800x600` to the saved
+  project visual profile resolution.
+
+### Final pass/fail
+
+- Frontend focused tests: PASS
+- C++ runtime focused validation: PASS
+- TypeScript compile: PASS
+
 ## Phase 7 — Slice 0 Original Asset Foundation
 
 **Date**: 2026-05-17

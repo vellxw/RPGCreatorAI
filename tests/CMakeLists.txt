@@ -5,6 +5,7 @@ set(PHASE2_TEST_SOURCES
     main_test.cpp
     test_project_loader.cpp
     test_map_loader.cpp
+    test_camera.cpp
     test_collision.cpp
     test_event_runner.cpp
     test_game_state.cpp

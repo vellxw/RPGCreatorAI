@@ -18,7 +18,9 @@ bool Application::initialize() {
 
     Logger::info("Project loaded: " + projectData->title);
 
-    if (!window.initialize(800, 600, projectData->title.c_str())) {
+    if (!window.initialize(projectData->visualProfile.baseResolution.width,
+                           projectData->visualProfile.baseResolution.height,
+                           projectData->title.c_str())) {
         return false;
     }
 

@@ -16,6 +16,7 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
     if (window.getSDLWindow()) {
         SDL_GetWindowSize(window.getSDLWindow(), &viewportW, &viewportH);
     }
+    camera.setViewport(viewportW, viewportH);
 
     state.setCurrentMap(project.startMapId);
     state.setPlayerPosition(
@@ -282,9 +283,17 @@ void Game::hookEventRunnerResolvers() {
 void Game::updateCamera() {
     int tileSize = currentScene.getTileSize();
     if (tileSize <= 0) tileSize = 32;
+    const int mapPixelWidth = currentScene.getWidth() * tileSize;
+    const int mapPixelHeight = currentScene.getHeight() * tileSize;
+
+    if (project.visualProfile.cameraMode == "fixed-room") {
+        camera.centerRoom(mapPixelWidth, mapPixelHeight);
+        return;
+    }
+
     int px = state.getPlayerX() * tileSize + tileSize / 2;
     int py = state.getPlayerY() * tileSize + tileSize / 2;
-    camera.setPosition(px - viewportW / 2, py - viewportH / 2);
+    camera.follow(px, py, mapPixelWidth, mapPixelHeight);
 }
 
 std::string Game::slotIdFor(int slotIndex) {
