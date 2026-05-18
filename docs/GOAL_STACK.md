@@ -12,12 +12,14 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 10 — runtime UX/playability polish under the new visual standard
-2. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+1. Slice 11 — end-to-end sample-game validation, visual QA, and phase
     closeout
 
 ## Closed subgoals
 
+- Slice 10 — runtime UX regression pass under the widescreen visual
+  standard; existing inventory, party, quest, save/load, shop, and battle
+  reward surfaces verified intact on the upgraded sample.
 - Slice 9 — layer-aware map authoring with brush sizing, fill, rectangle,
   eraser, selected-tile preview, map resizing, and viewport preset controls.
 - Slice 8 — runtime-like playtest framing, project-seeded preview state,

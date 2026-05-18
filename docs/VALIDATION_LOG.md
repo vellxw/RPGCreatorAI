@@ -567,3 +567,18 @@ Error: Port 1420 is already in use
   map settings, layer tabs, selected-tile preview, brush-size buttons, and
   the clean visual-layer scene presentation all rendered correctly.
 
+### Slice 10 — runtime UX/playability regression pass
+
+- `2026-05-18 01:00 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — PASS.
+- `2026-05-18 01:00 -03:00` — `cmd /c scripts\dev\smoke-runtime.bat`
+  — PASS.
+- `2026-05-18 01:00 -03:00` —
+  `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-8-ux-smoke`
+  — PASS (17 screenshots captured during verification, then cleaned from
+  the repo working tree because final evidence belongs under the dedicated
+  game-visual-design screenshot set).
+- Verified runtime surfaces under the widened scene profile: pause menu,
+  inventory, party/status, quest journal, save slots, load slots, shop, and
+  battle reward summary.
+
