@@ -11,6 +11,7 @@ export interface ProjectData {
   };
   maps: MapReference[];
   database: DatabasePaths;
+  visualProfile?: import('../visual/visualProfile').VisualProfileInput;
 }
 
 export interface DatabasePaths {

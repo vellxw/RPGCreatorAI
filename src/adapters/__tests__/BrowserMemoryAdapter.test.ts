@@ -15,6 +15,10 @@ describe('BrowserMemoryAdapter', () => {
     const a = new BrowserMemoryAdapter();
     const state = await a.loadProject();
     expect(state.project.title).toBe('My First RPG');
+    expect(state.project.visualProfile).toMatchObject({
+      aspectRatio: '16:9',
+      baseResolution: { width: 1280, height: 720 },
+    });
     expect(state.maps.town).toBeDefined();
     expect(state.maps.house).toBeDefined();
     expect(state.items.items.length).toBeGreaterThan(0);

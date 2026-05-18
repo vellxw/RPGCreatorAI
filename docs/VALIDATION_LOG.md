@@ -4,6 +4,33 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 8 — Slice 1 Game Visual Source of Truth + Visual Profile
+
+**Date**: 2026-05-17
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx vitest run src/visual/__tests__/visualProfile.test.ts src/adapters/__tests__/BrowserMemoryAdapter.test.ts` | FAIL → PASS | Initial RED: missing `visualProfile` module and no seeded profile. Final: 9/9 tests passed after implementation. |
+| `cmd /c scripts\dev\verify-runtime.bat` | FAIL → PASS | Initial RED: `ProjectData` had no `visualProfile`. Final: C++ build succeeded and `RPGTests` passed. |
+| `npx tsc --noEmit` | PASS | 0 errors after the profile implementation. |
+
+### Fixes applied
+
+- Added `docs/GAME_VISUAL_DESIGN.md` as the binding visual standard and
+  `docs/GAME_VISUAL_QA.md` as the scorecard.
+- Reset governing docs to Phase 8 and declared the visual design document
+  as the source of truth.
+- Added a backward-compatible project `visualProfile` with safe editor
+  normalization and safe runtime defaults for legacy JSON.
+
+### Final pass/fail
+
+- Frontend focused tests: PASS
+- C++ runtime focused validation: PASS
+- TypeScript compile: PASS
+
 ## Phase 7 — Slice 0 Original Asset Foundation
 
 **Date**: 2026-05-17

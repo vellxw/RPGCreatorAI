@@ -149,6 +149,29 @@ std::optional<ProjectData> ProjectLoader::load(const std::string& path) {
         pickPath("variables", project.database.variablesPath);
         pickPath("commonEvents", project.database.commonEventsPath);
 
+        if (j.contains("visualProfile") && j["visualProfile"].is_object()) {
+            const auto& visual = j["visualProfile"];
+            project.visualProfile.aspectRatio =
+                visual.value("aspectRatio", project.visualProfile.aspectRatio);
+            if (visual.contains("baseResolution") && visual["baseResolution"].is_object()) {
+                const auto& baseResolution = visual["baseResolution"];
+                project.visualProfile.baseResolution.width =
+                    baseResolution.value("width", project.visualProfile.baseResolution.width);
+                project.visualProfile.baseResolution.height =
+                    baseResolution.value("height", project.visualProfile.baseResolution.height);
+            }
+            project.visualProfile.tileSize =
+                visual.value("tileSize", project.visualProfile.tileSize);
+            project.visualProfile.cameraMode =
+                visual.value("cameraMode", project.visualProfile.cameraMode);
+            project.visualProfile.mapPresentation =
+                visual.value("mapPresentation", project.visualProfile.mapPresentation);
+            project.visualProfile.zoom =
+                visual.value("zoom", project.visualProfile.zoom);
+            project.visualProfile.integerScale =
+                visual.value("integerScale", project.visualProfile.integerScale);
+        }
+
         return project;
 
     } catch (const json::exception& e) {

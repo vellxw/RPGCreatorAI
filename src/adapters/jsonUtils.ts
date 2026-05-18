@@ -2,6 +2,7 @@
 import type { FullProjectState, ExportBundle } from './types';
 import type { DatabaseEntries, ItemDatabase, MapData, ProjectData } from '../types/project';
 import { mergeDatabases } from './defaultDatabases';
+import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 export function safeStringify(value: unknown): string {
   // JSON.stringify never produces malformed JSON for plain values, but we round-trip
@@ -48,5 +49,5 @@ function validateBundleShape(obj: Record<string, unknown>): FullProjectState {
     throw new Error('Imported bundle is missing valid items database');
   }
 
-  return { project, maps, items, databases: mergeDatabases(databases) };
+  return { project: withNormalizedVisualProfile(project), maps, items, databases: mergeDatabases(databases) };
 }

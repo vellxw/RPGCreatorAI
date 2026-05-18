@@ -15,6 +15,7 @@ import type {
 } from './types';
 import type { ItemDatabase, MapData, ProjectData } from '../types/project';
 import { BrowserMemoryAdapter } from './BrowserMemoryAdapter';
+import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 export class FileSystemAdapter implements ProjectDataAdapter {
   // Falls back for loadProject/export/import when the renderer hasn't yet
@@ -45,7 +46,8 @@ export class FileSystemAdapter implements ProjectDataAdapter {
 
   async loadProject(): Promise<FullProjectState> {
     if (this.projectRoot && window.rpgBridge) {
-      return window.rpgBridge.fs.readProject(this.projectRoot);
+      const state = await window.rpgBridge.fs.readProject(this.projectRoot);
+      return { ...state, project: withNormalizedVisualProfile(state.project) };
     }
     return this.fallback.loadProject();
   }

@@ -30,6 +30,39 @@ TEST_CASE("ProjectLoader loads valid project.json correctly") {
     CHECK(project->startPosition.pos.y == 4);
     CHECK(project->startPosition.direction == Direction::Down);
     CHECK(project->maps.size() == 2);
+    CHECK(project->visualProfile.aspectRatio == "16:9");
+    CHECK(project->visualProfile.baseResolution.width == 1280);
+    CHECK(project->visualProfile.baseResolution.height == 720);
+    CHECK(project->visualProfile.tileSize == 32);
+    CHECK(project->visualProfile.cameraMode == "follow-player");
+    CHECK(project->visualProfile.mapPresentation == "full-scene");
+    CHECK(project->visualProfile.zoom == doctest::Approx(1.0f));
+    CHECK(project->visualProfile.integerScale);
+}
+
+TEST_CASE("ProjectLoader applies visual-profile defaults for legacy projects") {
+    std::string content = R"({
+        "schemaVersion": 1,
+        "title": "Legacy",
+        "startMapId": "town",
+        "startPosition": { "x": 0, "y": 0, "direction": "down" },
+        "maps": [{ "id": "town", "path": "maps/town.json" }],
+        "database": { "items": "data/items.json" }
+    })";
+    std::string path = writeTempJson("legacy_visual_profile.json", content);
+
+    auto project = ProjectLoader::load(path);
+    REQUIRE(project.has_value());
+    CHECK(project->visualProfile.aspectRatio == "16:9");
+    CHECK(project->visualProfile.baseResolution.width == 1280);
+    CHECK(project->visualProfile.baseResolution.height == 720);
+    CHECK(project->visualProfile.tileSize == 32);
+    CHECK(project->visualProfile.cameraMode == "follow-player");
+    CHECK(project->visualProfile.mapPresentation == "full-scene");
+    CHECK(project->visualProfile.zoom == doctest::Approx(1.0f));
+    CHECK(project->visualProfile.integerScale);
+
+    removeTempFile(path);
 }
 
 TEST_CASE("ProjectLoader returns nullopt for unsupported schemaVersion") {

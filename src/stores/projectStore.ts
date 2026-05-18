@@ -15,6 +15,7 @@ import type {
 import type { FullProjectState } from '../adapters/types';
 import { mergeDatabases } from '../adapters/defaultDatabases';
 import { validateProject } from '../validation/validateProject';
+import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -295,6 +296,7 @@ export const initialProjectStoreState: ProjectStoreState = {
     startPosition: { x: 0, y: 0, direction: 'down' },
     maps: [],
     database: { items: '' },
+    visualProfile: undefined,
   },
   maps: {},
   items: { items: [] },
@@ -362,7 +364,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
       const payload = action.payload;
       const next: ProjectStoreState = {
         ...state,
-        project: deepClone(payload.project),
+        project: withNormalizedVisualProfile(deepClone(payload.project)),
         maps: deepClone(payload.maps),
         items: deepClone(payload.items),
         databases: mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),

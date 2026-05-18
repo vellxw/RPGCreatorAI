@@ -12,22 +12,24 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 1 — game visual design source of truth + project visual profile
-2. Slice 2 — shared viewport / aspect-ratio / camera model
-3. Slice 3 — editor canvas scaling, fit controls, and screen overlays
-4. Slice 4 — no-gap rendering, tile completeness validation, and void
+1. Slice 2 — shared viewport / aspect-ratio / camera model
+2. Slice 3 — editor canvas scaling, fit controls, and screen overlays
+3. Slice 4 — no-gap rendering, tile completeness validation, and void
    detection
-5. Slice 5 — original visual asset expansion for scene authoring
-6. Slice 6 — complete starter scene templates
-7. Slice 7 — runtime visual-profile support and camera framing
-8. Slice 8 — editor/runtime preview consistency and screenshot checks
-9. Slice 9 — map authoring workflow hardening
-10. Slice 10 — runtime UX/playability polish under the new visual standard
-11. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+4. Slice 5 — original visual asset expansion for scene authoring
+5. Slice 6 — complete starter scene templates
+6. Slice 7 — runtime visual-profile support and camera framing
+7. Slice 8 — editor/runtime preview consistency and screenshot checks
+8. Slice 9 — map authoring workflow hardening
+9. Slice 10 — runtime UX/playability polish under the new visual standard
+10. Slice 11 — end-to-end sample-game validation, visual QA, and phase
     closeout
 
 ## Closed subgoals
 
+- Slice 1 — visual source of truth, QA rubric, phase reset, and
+  backward-compatible project visual profile. Commits `38926b9`,
+  `928079a`.
 - Phase 7 — Polished creator-to-player loop — DONE (`f951dd6`).
 - Phase 6 — Complete RPG Creation System Foundation — DONE (`a12efa8`).
 - Slice 0 — original asset foundation (generated atlases, editor assets,

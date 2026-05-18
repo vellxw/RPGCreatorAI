@@ -32,6 +32,21 @@ struct DatabaseReference {
     std::string commonEventsPath;
 };
 
+struct Resolution {
+    int width = 1280;
+    int height = 720;
+};
+
+struct VisualProfile {
+    std::string aspectRatio = "16:9";
+    Resolution baseResolution;
+    int tileSize = 32;
+    std::string cameraMode = "follow-player";
+    std::string mapPresentation = "full-scene";
+    float zoom = 1.0f;
+    bool integerScale = true;
+};
+
 struct ProjectData {
     int schemaVersion = 0;
     std::string title;
@@ -39,4 +54,5 @@ struct ProjectData {
     StartPosition startPosition;
     std::vector<MapReference> maps;
     DatabaseReference database;
+    VisualProfile visualProfile;
 };

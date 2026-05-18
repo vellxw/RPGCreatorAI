@@ -30,5 +30,17 @@
     "switches": "data/database/switches.json",
     "variables": "data/database/variables.json",
     "commonEvents": "data/database/commonEvents.json"
+  },
+  "visualProfile": {
+    "aspectRatio": "16:9",
+    "baseResolution": {
+      "width": 1280,
+      "height": 720
+    },
+    "tileSize": 32,
+    "cameraMode": "follow-player",
+    "mapPresentation": "full-scene",
+    "zoom": 1,
+    "integerScale": true
   }
 }
