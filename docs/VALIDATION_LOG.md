@@ -536,3 +536,15 @@ Error: Port 1420 is already in use
   — PASS (17 native runtime screenshots captured after widening the smoke
   traversal to the new authored sample layout).
 
+### Slice 8 — editor/runtime preview consistency
+
+- `2026-05-18 00:46 -03:00` —
+  `npx vitest run src/visual/__tests__/viewport.test.ts src/templates/__tests__/sceneTemplates.test.ts src/validation/__tests__/bundledSample.test.ts`
+  — PASS (12 tests).
+- `2026-05-18 00:46 -03:00` — `npx tsc --noEmit` — PASS.
+- `2026-05-18 00:46 -03:00` — `npx vite build` — PASS.
+- Result: the simulated playtest surface now derives its viewport from the
+  same visual profile/camera helpers as the editor and native runtime, and
+  editor collision cells render as an overlay rather than erasing authored
+  scene art.
+

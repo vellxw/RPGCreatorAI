@@ -12,14 +12,16 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 8 — editor/runtime preview consistency and screenshot checks
-2. Slice 9 — map authoring workflow hardening
-3. Slice 10 — runtime UX/playability polish under the new visual standard
-4. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+1. Slice 9 — map authoring workflow hardening
+2. Slice 10 — runtime UX/playability polish under the new visual standard
+3. Slice 11 — end-to-end sample-game validation, visual QA, and phase
     closeout
 
 ## Closed subgoals
 
+- Slice 8 — runtime-like playtest framing, project-seeded preview state,
+  and editor collision overlays that expose truth without replacing the
+  authored visual layer.
 - Slice 7 — runtime authored-blocker rendering, widened smoke traversal,
   and validated native widescreen scene playback on the upgraded sample.
 - Slice 6 — reusable authored starter scenes, in-editor template application,

@@ -291,12 +291,13 @@ export function MapCanvas() {
                 const y = Math.floor(i / map.width) * tileSize;
                 return (
                   <image
-                    key={`wall-${i}`}
+                    key={`collision-${i}`}
                     x={x}
                     y={y}
                     width={tileSize}
                     height={tileSize}
-                    href={gameAssets.wall}
+                    href={gameAssets.collisionOverlay}
+                    opacity="0.72"
                     style={{ imageRendering: 'pixelated' }}
                   />
                 );

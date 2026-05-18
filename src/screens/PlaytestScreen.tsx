@@ -19,6 +19,9 @@ import {
 import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
 import { performSave } from '../stores/saveActions';
 import { editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
+import { normalizeVisualProfile } from '../visual/visualProfile';
+import { computeCameraFrame } from '../visual/viewport';
+import { isSupportedVisualTile, isVoidVisualTile } from '../visual/tileCatalog';
 
 function PlaytestControls({
   onMove,
@@ -123,9 +126,18 @@ function GamePreview({
   const map = project.maps[currentMap];
   if (!map) return null;
 
-  const TILE = 28;
-  const w = map.width * TILE;
-  const h = map.height * TILE;
+  const profile = normalizeVisualProfile(project.project.visualProfile);
+  const tileSize = map.tileSize || profile.tileSize;
+  const mapPixelSize = { width: map.width * tileSize, height: map.height * tileSize };
+  const cameraFrame = computeCameraFrame({
+    viewport: profile.baseResolution,
+    map: mapPixelSize,
+    focus: {
+      x: playerX * tileSize + tileSize / 2,
+      y: playerY * tileSize + tileSize / 2,
+    },
+    cameraMode: profile.cameraMode,
+  });
   const previewGroundAssets: Record<number, string> = {
     1: gameAssets.grass,
     2: gameAssets.path,
@@ -149,52 +161,79 @@ function GamePreview({
         </div>
       </div>
 
-      <div className="relative">
-        <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="rounded shadow-2xl">
+      <div
+        className="relative max-w-full max-h-full"
+        style={{
+          width: `min(100%, calc((100vh - 280px) * ${profile.baseResolution.width / profile.baseResolution.height}))`,
+          aspectRatio: `${profile.baseResolution.width} / ${profile.baseResolution.height}`,
+        }}
+      >
+        <svg
+          width={profile.baseResolution.width}
+          height={profile.baseResolution.height}
+          viewBox={`${cameraFrame.x} ${cameraFrame.y} ${cameraFrame.width} ${cameraFrame.height}`}
+          className="w-full h-full rounded shadow-2xl bg-slate-950"
+        >
+          <rect
+            x={cameraFrame.x}
+            y={cameraFrame.y}
+            width={cameraFrame.width}
+            height={cameraFrame.height}
+            fill="#0f172a"
+          />
           {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
-            const x = (i % map.width) * TILE;
-            const y = Math.floor(i / map.width) * TILE;
+            const x = (i % map.width) * tileSize;
+            const y = Math.floor(i / map.width) * tileSize;
+            if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
+              return (
+                <image
+                  key={i}
+                  x={x}
+                  y={y}
+                  width={tileSize}
+                  height={tileSize}
+                  href={gameAssets.voidWarning}
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              );
+            }
             return (
               <image
                 key={i}
                 x={x}
                 y={y}
-                width={TILE}
-                height={TILE}
+                width={tileSize}
+                height={tileSize}
                 href={previewGroundAssets[tile] ?? gameAssets.voidWarning}
+                style={{ imageRendering: 'pixelated' }}
               />
             );
-          })}
-          {map.layers.find(l => l.type === 'collision')?.tiles.map((tile, i) => {
-            if (tile !== 9) return null;
-            const x = (i % map.width) * TILE;
-            const y = Math.floor(i / map.width) * TILE;
-            return <image key={`wall-${i}`} x={x} y={y} width={TILE} height={TILE} href={gameAssets.wall} />;
           })}
 
           {map.events.map(event => (
             <g key={event.id}>
               <image
-                x={event.x * TILE + 1}
-                y={event.y * TILE + 1}
-                width={TILE - 2}
-                height={TILE - 2}
+                x={event.x * tileSize + 2}
+                y={event.y * tileSize + 2}
+                width={tileSize - 4}
+                height={tileSize - 4}
                 href={eventAssets[event.type]}
+                style={{ imageRendering: 'pixelated' }}
               />
               {event.type === 'npc' && (
                 <>
                   <rect
-                    x={event.x * TILE - 8}
-                    y={event.y * TILE - 16}
-                    width={TILE + 16}
+                    x={event.x * tileSize - 8}
+                    y={event.y * tileSize - 16}
+                    width={tileSize + 16}
                     height={14}
                     fill="#1f2937"
                     rx="3"
                     opacity="0.85"
                   />
                   <text
-                    x={event.x * TILE + TILE / 2}
-                    y={event.y * TILE - 6}
+                    x={event.x * tileSize + tileSize / 2}
+                    y={event.y * tileSize - 6}
                     textAnchor="middle"
                     fontSize="9"
                     fill="white"
@@ -208,13 +247,17 @@ function GamePreview({
           ))}
 
           <image
-            x={playerX * TILE + 2}
-            y={playerY * TILE + 2}
-            width={TILE - 4}
-            height={TILE - 4}
+            x={playerX * tileSize + 2}
+            y={playerY * tileSize + 2}
+            width={tileSize - 4}
+            height={tileSize - 4}
             href={gameAssets.player}
+            style={{ imageRendering: 'pixelated' }}
           />
         </svg>
+        <div className="absolute left-3 bottom-3 bg-black/70 text-white px-3 py-1.5 rounded-md text-[11px] font-mono">
+          Viewport {profile.baseResolution.width}×{profile.baseResolution.height} · {profile.aspectRatio}
+        </div>
       </div>
     </div>
   );
@@ -452,12 +495,22 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
 }
 
 export function PlaytestScreen() {
-  const { state, logs, movePlayer, restart } = usePlaytestStore();
+  const project = useProject();
+  const { state, logs, movePlayer, restart } = usePlaytestStore({
+    currentMap: project.project.startMapId,
+    playerX: project.project.startPosition.x,
+    playerY: project.project.startPosition.y,
+    direction: project.project.startPosition.direction,
+  });
+  const previewMap = project.maps[state.currentMap];
+  const movePreviewPlayer = (dx: number, dy: number) => {
+    movePlayer(dx, dy, previewMap?.width ?? 1, previewMap?.height ?? 1);
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
-        <PlaytestControls onMove={movePlayer} onRestart={restart} />
+        <PlaytestControls onMove={movePreviewPlayer} onRestart={restart} />
         <GamePreview playerX={state.playerX} playerY={state.playerY} currentMap={state.currentMap} />
         <RuntimeStateInspector state={state} />
       </div>
