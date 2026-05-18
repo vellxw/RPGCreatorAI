@@ -29,7 +29,7 @@ for game visuals.
 
 - Slice 1 — visual source of truth, QA rubric, phase reset, and
   backward-compatible project visual profile. Commits `38926b9`,
-  `928079a`.
+  `2135017`.
 - Phase 7 — Polished creator-to-player loop — DONE (`f951dd6`).
 - Phase 6 — Complete RPG Creation System Foundation — DONE (`a12efa8`).
 - Slice 0 — original asset foundation (generated atlases, editor assets,
