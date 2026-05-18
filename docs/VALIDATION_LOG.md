@@ -58,6 +58,33 @@ Append-only log of major validation runs. Newest entries on top.
 - C++ runtime focused validation: PASS
 - TypeScript compile: PASS
 
+## Phase 8 — Slice 3 Editor Canvas Scale + Screen Bounds Overlay
+
+**Date**: 2026-05-18
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npx vitest run src/visual/__tests__/viewport.test.ts src/stores/__tests__/editorStore.test.ts` | FAIL → PASS | Initial RED: missing camera-frame helpers and no zoom-mode state. Final: 7/7 tests passed. |
+| `npx tsc --noEmit` | PASS | 0 errors. |
+| `npx vite build` | PASS | Production bundle built successfully. |
+| Live browser verification at `http://127.0.0.1:3000/` | PASS | DOM exposed `Frame 1280×720`, `Fit`, `100%`, and SVG geometry proved stage `1280×720`, map bounds `320×320`, viewport frame `1280×720`. |
+
+### Fixes applied
+
+- Switched the editor from raw-map sizing to a profile-aware scene stage.
+- Added fit-to-view / actual-size controls, map bounds, camera rail, and
+  current viewport overlay.
+- Preserved editing coordinates while supporting stage bounds larger than
+  the authored map.
+
+### Final pass/fail
+
+- Frontend focused tests: PASS
+- Production build: PASS
+- Browser verification: PASS
+
 ## Phase 7 — Slice 0 Original Asset Foundation
 
 **Date**: 2026-05-17

@@ -12,6 +12,7 @@ export interface EditorState {
   selectedEvent: GameEvent | null;
   selectedEventMapId: string | null;
   zoom: number;
+  zoomMode: 'fit' | 'manual';
   saved: boolean;
   brush: BrushSelection;
   interactionMode: 'paint' | 'select';
@@ -22,6 +23,8 @@ export type EditorAction =
   | { type: 'SELECT_MAP'; mapId: string }
   | { type: 'SELECT_EVENT'; event: GameEvent | null; mapId: string | null }
   | { type: 'SET_ZOOM'; zoom: number }
+  | { type: 'FIT_TO_VIEW' }
+  | { type: 'SET_ACTUAL_SIZE' }
   | { type: 'SET_BRUSH'; brush: BrushSelection }
   | { type: 'SET_INTERACTION_MODE'; mode: 'paint' | 'select' }
   | { type: 'MARK_SAVED' }
@@ -33,6 +36,7 @@ export const initialEditorState: EditorState = {
   selectedEvent: null,
   selectedEventMapId: null,
   zoom: 100,
+  zoomMode: 'fit',
   saved: true,
   brush: { kind: 'tile', tileId: 1, label: 'grass' },
   interactionMode: 'paint',
@@ -47,7 +51,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'SELECT_EVENT':
       return { ...state, selectedEvent: action.event, selectedEventMapId: action.mapId };
     case 'SET_ZOOM':
-      return { ...state, zoom: action.zoom };
+      return { ...state, zoom: action.zoom, zoomMode: 'manual' };
+    case 'FIT_TO_VIEW':
+      return { ...state, zoomMode: 'fit' };
+    case 'SET_ACTUAL_SIZE':
+      return { ...state, zoom: 100, zoomMode: 'manual' };
     case 'SET_BRUSH':
       return { ...state, brush: action.brush, interactionMode: 'paint' };
     case 'SET_INTERACTION_MODE':

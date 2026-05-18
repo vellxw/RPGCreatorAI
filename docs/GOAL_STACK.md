@@ -12,20 +12,21 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 3 — editor canvas scaling, fit controls, and screen overlays
-2. Slice 4 — no-gap rendering, tile completeness validation, and void
+1. Slice 4 — no-gap rendering, tile completeness validation, and void
    detection
-3. Slice 5 — original visual asset expansion for scene authoring
-4. Slice 6 — complete starter scene templates
-5. Slice 7 — runtime visual-profile support and camera framing
-6. Slice 8 — editor/runtime preview consistency and screenshot checks
-7. Slice 9 — map authoring workflow hardening
-8. Slice 10 — runtime UX/playability polish under the new visual standard
-9. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+2. Slice 5 — original visual asset expansion for scene authoring
+3. Slice 6 — complete starter scene templates
+4. Slice 7 — runtime visual-profile support and camera framing
+5. Slice 8 — editor/runtime preview consistency and screenshot checks
+6. Slice 9 — map authoring workflow hardening
+7. Slice 10 — runtime UX/playability polish under the new visual standard
+8. Slice 11 — end-to-end sample-game validation, visual QA, and phase
     closeout
 
 ## Closed subgoals
 
+- Slice 3 — editor scene-stage sizing, fit/100% controls, map bounds,
+  camera rail, and viewport-frame overlays.
 - Slice 2 — shared viewport helpers, project-driven runtime resolution,
   and clamped camera model.
 - Slice 1 — visual source of truth, QA rubric, phase reset, and

@@ -1,11 +1,15 @@
-import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProject, useProjectStore } from '../../stores/projectStore';
 import type { EventType, GameEvent } from '../../types/project';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
-
-const TILE_SIZE = 32;
+import { normalizeVisualProfile } from '../../visual/visualProfile';
+import {
+  computeCameraFrame,
+  computeFitScale,
+  computePreviewSceneBounds,
+} from '../../visual/viewport';
 
 const groundAssets: Record<number, string> = {
   0: gameAssets.grass,
@@ -19,19 +23,63 @@ export function MapCanvas() {
   const project = useProject();
   const { dispatch: projectDispatch } = useProjectStore();
   const map = project.maps[state.selectedMapId];
+  const canvasAreaRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [painting, setPainting] = useState(false);
   const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
+  const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
 
   if (!map) return <div className="flex-1 flex items-center justify-center text-gray-400">No map selected</div>;
 
+  const profile = normalizeVisualProfile(project.project.visualProfile);
+  const tileSize = map.tileSize || profile.tileSize;
   const groundLayer = map.layers.find(l => l.name === 'ground');
   const collisionLayer = map.layers.find(l => l.type === 'collision');
   const freshSelectedEvent = state.selectedEvent
     ? map.events.find(event => event.id === state.selectedEvent?.id) ?? null
     : null;
-  const canvasWidth = map.width * TILE_SIZE;
-  const canvasHeight = map.height * TILE_SIZE;
+  const mapPixelSize = { width: map.width * tileSize, height: map.height * tileSize };
+  const focusCell =
+    map.id === project.project.startMapId
+      ? project.project.startPosition
+      : freshSelectedEvent ?? { x: Math.floor(map.width / 2), y: Math.floor(map.height / 2) };
+  const cameraFrame = computeCameraFrame({
+    viewport: profile.baseResolution,
+    map: mapPixelSize,
+    focus: {
+      x: focusCell.x * tileSize + tileSize / 2,
+      y: focusCell.y * tileSize + tileSize / 2,
+    },
+    cameraMode: profile.cameraMode,
+  });
+  const sceneBounds = computePreviewSceneBounds({ map: mapPixelSize, frame: cameraFrame });
+  const stageWidth = sceneBounds.width;
+  const stageHeight = sceneBounds.height;
+  const stageOffsetX = -sceneBounds.x;
+  const stageOffsetY = -sceneBounds.y;
+  const fitScale = computeFitScale(
+    { width: stageWidth, height: stageHeight },
+    {
+      width: Math.max(1, availableSize.width - 64),
+      height: Math.max(1, availableSize.height - 64),
+    },
+  );
+  const effectiveScale = state.zoomMode === 'fit' ? fitScale : state.zoom / 100;
+  const zoomReadout = Math.round(effectiveScale * 100);
+  const cameraRange = {
+    width: Math.max(0, mapPixelSize.width - profile.baseResolution.width),
+    height: Math.max(0, mapPixelSize.height - profile.baseResolution.height),
+  };
+
+  useEffect(() => {
+    const node = canvasAreaRef.current;
+    if (!node) return;
+    const update = () => setAvailableSize({ width: node.clientWidth, height: node.clientHeight });
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const handleEventClick = (event: GameEvent) => {
     dispatch({ type: 'SELECT_EVENT', event, mapId: map.id });
@@ -43,8 +91,10 @@ export function MapCanvas() {
     const svg = svgRef.current;
     if (!svg) return null;
     const rect = svg.getBoundingClientRect();
-    const x = Math.floor(((e.clientX - rect.left) / rect.width) * map.width);
-    const y = Math.floor(((e.clientY - rect.top) / rect.height) * map.height);
+    const svgX = ((e.clientX - rect.left) / rect.width) * stageWidth;
+    const svgY = ((e.clientY - rect.top) / rect.height) * stageHeight;
+    const x = Math.floor((svgX - stageOffsetX) / tileSize);
+    const y = Math.floor((svgY - stageOffsetY) / tileSize);
     if (x < 0 || x >= map.width || y < 0 || y >= map.height) return null;
     return { x, y };
   };
@@ -158,136 +208,179 @@ export function MapCanvas() {
   return (
     <div className="flex-1 flex flex-col bg-gray-100 overflow-hidden relative">
       {/* Canvas area */}
-      <div className="flex-1 overflow-auto flex items-center justify-center p-8">
+      <div ref={canvasAreaRef} className="flex-1 overflow-auto flex items-center justify-center p-8">
         <div
-          className="relative bg-white shadow-lg rounded-sm"
-          style={{ width: canvasWidth * (state.zoom / 100), height: canvasHeight * (state.zoom / 100) }}
+          className="relative bg-slate-950 shadow-2xl rounded-[10px] ring-1 ring-slate-300"
+          style={{ width: stageWidth * effectiveScale, height: stageHeight * effectiveScale }}
         >
-          {/* Grid */}
           <svg
             ref={svgRef}
-            width={canvasWidth}
-            height={canvasHeight}
-            viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-            className="w-full h-full"
+            width={stageWidth}
+            height={stageHeight}
+            viewBox={`0 0 ${stageWidth} ${stageHeight}`}
+            className="w-full h-full overflow-visible"
             onPointerDown={handleCanvasPointerDown}
             onPointerMove={handleCanvasPointerMove}
             onPointerUp={stopPointerInteractions}
             onPointerLeave={stopPointerInteractions}
           >
-            {/* Tiles */}
-            {groundLayer && groundLayer.tiles.map((tile, i) => {
-              const x = (i % map.width) * TILE_SIZE;
-              const y = Math.floor(i / map.width) * TILE_SIZE;
-              return (
-                <image
-                  key={i}
-                  x={x}
-                  y={y}
-                  width={TILE_SIZE}
-                  height={TILE_SIZE}
-                  href={groundAssets[tile] ?? gameAssets.grass}
-                />
-              );
-            })}
-            {collisionLayer && collisionLayer.tiles.map((tile, i) => {
-              if (tile !== 9) return null;
-              const x = (i % map.width) * TILE_SIZE;
-              const y = Math.floor(i / map.width) * TILE_SIZE;
-              return (
-                <image
-                  key={`wall-${i}`}
-                  x={x}
-                  y={y}
-                  width={TILE_SIZE}
-                  height={TILE_SIZE}
-                  href={gameAssets.wall}
-                />
-              );
-            })}
+            <rect width={stageWidth} height={stageHeight} fill="#0f172a" />
 
-            {/* Grid lines */}
-            {Array.from({ length: map.width + 1 }).map((_, i) => (
-              <line
-                key={`v${i}`}
-                x1={i * TILE_SIZE}
-                y1={0}
-                x2={i * TILE_SIZE}
-                y2={canvasHeight}
-                stroke="rgba(0,0,0,0.08)"
-                strokeWidth="0.5"
-              />
-            ))}
-            {Array.from({ length: map.height + 1 }).map((_, i) => (
-              <line
-                key={`h${i}`}
-                x1={0}
-                y1={i * TILE_SIZE}
-                x2={canvasWidth}
-                y2={i * TILE_SIZE}
-                stroke="rgba(0,0,0,0.08)"
-                strokeWidth="0.5"
-              />
-            ))}
-
-            {/* Player spawn */}
-            {state.selectedMapId === project.project.startMapId && (
-              <g>
-                <rect
-                  x={project.project.startPosition.x * TILE_SIZE + 4}
-                  y={project.project.startPosition.y * TILE_SIZE + 4}
-                  width={TILE_SIZE - 8}
-                  height={TILE_SIZE - 8}
-                  fill="#3b82f6"
-                  rx="4"
-                  opacity="0.9"
-                />
-                <text
-                  x={project.project.startPosition.x * TILE_SIZE + TILE_SIZE / 2}
-                  y={project.project.startPosition.y * TILE_SIZE + TILE_SIZE / 2 + 4}
-                  textAnchor="middle"
-                  fontSize="10"
-                  fill="white"
-                  fontWeight="bold"
-                >
-                  P
-                </text>
-              </g>
-            )}
-
-            {/* Events */}
-            {map.events.map(event => {
-              const isSelected = state.selectedEvent?.id === event.id;
-              return (
-                <g
-                  key={event.id}
-                  onClick={() => handleEventClick(event)}
-                  onPointerDown={e => startEventDrag(event, e)}
-                  className="cursor-pointer"
-                >
-                  {isSelected && (
-                    <rect
-                      x={event.x * TILE_SIZE - 2}
-                      y={event.y * TILE_SIZE - 2}
-                      width={TILE_SIZE + 4}
-                      height={TILE_SIZE + 4}
-                      fill="none"
-                      stroke="#6366f1"
-                      strokeWidth="2"
-                      strokeDasharray="4 2"
-                      rx="3"
-                    />
-                  )}
+            <g transform={`translate(${stageOffsetX} ${stageOffsetY})`}>
+              {/* Tiles */}
+              {groundLayer && groundLayer.tiles.map((tile, i) => {
+                const x = (i % map.width) * tileSize;
+                const y = Math.floor(i / map.width) * tileSize;
+                return (
                   <image
-                    x={event.x * TILE_SIZE + 2}
-                    y={event.y * TILE_SIZE + 2}
-                    width={TILE_SIZE - 4}
-                    height={TILE_SIZE - 4}
-                    href={eventAssets[event.type]}
+                    key={i}
+                    x={x}
+                    y={y}
+                    width={tileSize}
+                    height={tileSize}
+                    href={groundAssets[tile] ?? gameAssets.grass}
                   />
+                );
+              })}
+              {collisionLayer && collisionLayer.tiles.map((tile, i) => {
+                if (tile !== 9) return null;
+                const x = (i % map.width) * tileSize;
+                const y = Math.floor(i / map.width) * tileSize;
+                return (
+                  <image
+                    key={`wall-${i}`}
+                    x={x}
+                    y={y}
+                    width={tileSize}
+                    height={tileSize}
+                    href={gameAssets.wall}
+                  />
+                );
+              })}
+
+              {/* Grid lines */}
+              {Array.from({ length: map.width + 1 }).map((_, i) => (
+                <line
+                  key={`v${i}`}
+                  x1={i * tileSize}
+                  y1={0}
+                  x2={i * tileSize}
+                  y2={mapPixelSize.height}
+                  stroke="rgba(255,255,255,0.12)"
+                  strokeWidth="0.5"
+                />
+              ))}
+              {Array.from({ length: map.height + 1 }).map((_, i) => (
+                <line
+                  key={`h${i}`}
+                  x1={0}
+                  y1={i * tileSize}
+                  x2={mapPixelSize.width}
+                  y2={i * tileSize}
+                  stroke="rgba(255,255,255,0.12)"
+                  strokeWidth="0.5"
+                />
+              ))}
+
+              {/* Player spawn */}
+              {state.selectedMapId === project.project.startMapId && (
+                <g>
+                  <rect
+                    x={project.project.startPosition.x * tileSize + 4}
+                    y={project.project.startPosition.y * tileSize + 4}
+                    width={tileSize - 8}
+                    height={tileSize - 8}
+                    fill="#3b82f6"
+                    rx="4"
+                    opacity="0.9"
+                  />
+                  <text
+                    x={project.project.startPosition.x * tileSize + tileSize / 2}
+                    y={project.project.startPosition.y * tileSize + tileSize / 2 + 4}
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill="white"
+                    fontWeight="bold"
+                  >
+                    P
+                  </text>
                 </g>
-              );
-            })}
+              )}
+
+              {/* Events */}
+              {map.events.map(event => {
+                const isSelected = state.selectedEvent?.id === event.id;
+                return (
+                  <g
+                    key={event.id}
+                    onClick={() => handleEventClick(event)}
+                    onPointerDown={e => startEventDrag(event, e)}
+                    className="cursor-pointer"
+                  >
+                    {isSelected && (
+                      <rect
+                        x={event.x * tileSize - 2}
+                        y={event.y * tileSize - 2}
+                        width={tileSize + 4}
+                        height={tileSize + 4}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="2"
+                        strokeDasharray="4 2"
+                        rx="3"
+                      />
+                    )}
+                    <image
+                      x={event.x * tileSize + 2}
+                      y={event.y * tileSize + 2}
+                      width={tileSize - 4}
+                      height={tileSize - 4}
+                      href={eventAssets[event.type]}
+                    />
+                  </g>
+                );
+              })}
+            </g>
+
+            <rect
+              x={stageOffsetX}
+              y={stageOffsetY}
+              width={mapPixelSize.width}
+              height={mapPixelSize.height}
+              fill="none"
+              stroke="#22c55e"
+              strokeWidth="2"
+              strokeDasharray="10 6"
+            />
+            <rect
+              x={cameraFrame.x + stageOffsetX}
+              y={cameraFrame.y + stageOffsetY}
+              width={cameraFrame.width}
+              height={cameraFrame.height}
+              fill="none"
+              stroke="#f59e0b"
+              strokeWidth="3"
+            />
+            <rect
+              x={stageOffsetX}
+              y={stageOffsetY}
+              width={cameraRange.width}
+              height={cameraRange.height}
+              fill="none"
+              stroke="#a78bfa"
+              strokeWidth="2"
+              strokeDasharray="6 6"
+              opacity="0.9"
+            />
+            <text
+              x={cameraFrame.x + stageOffsetX + 14}
+              y={cameraFrame.y + stageOffsetY + 22}
+              fill="#fef3c7"
+              fontSize="14"
+              fontWeight="700"
+            >
+              GAME VIEWPORT · {profile.aspectRatio}
+            </text>
           </svg>
         </div>
       </div>
@@ -309,6 +402,10 @@ export function MapCanvas() {
                   : 'Erase collision'
                 : `Paint ${state.brush.label}`}
         </span>
+        <span className="text-[11px] text-gray-400">·</span>
+        <span className="text-[12px] text-gray-600">
+          Frame {profile.baseResolution.width}×{profile.baseResolution.height}
+        </span>
       </div>
 
       {/* Zoom controls */}
@@ -319,7 +416,7 @@ export function MapCanvas() {
         >
           <ZoomOut size={14} className="text-gray-500" />
         </button>
-        <span className="text-[12px] text-gray-600 font-medium px-2">{state.zoom}%</span>
+        <span className="text-[12px] text-gray-600 font-medium px-2">{zoomReadout}%</span>
         <button
           onClick={() => dispatch({ type: 'SET_ZOOM', zoom: Math.min(200, state.zoom + 25) })}
           className="p-1 hover:bg-gray-100 rounded cursor-pointer"
@@ -327,8 +424,29 @@ export function MapCanvas() {
           <ZoomIn size={14} className="text-gray-500" />
         </button>
         <button
-          onClick={() => dispatch({ type: 'SET_ZOOM', zoom: 100 })}
-          className="p-1 hover:bg-gray-100 rounded cursor-pointer ml-1"
+          onClick={() => dispatch({ type: 'FIT_TO_VIEW' })}
+          className={`px-2 py-1 text-[11px] rounded cursor-pointer ml-1 ${
+            state.zoomMode === 'fit'
+              ? 'bg-indigo-50 text-indigo-700'
+              : 'text-gray-500 hover:bg-gray-100'
+          }`}
+        >
+          Fit
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'SET_ACTUAL_SIZE' })}
+          className={`px-2 py-1 text-[11px] rounded cursor-pointer ${
+            state.zoomMode === 'manual' && state.zoom === 100
+              ? 'bg-indigo-50 text-indigo-700'
+              : 'text-gray-500 hover:bg-gray-100'
+          }`}
+        >
+          100%
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'FIT_TO_VIEW' })}
+          className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+          title="Fit to view"
         >
           <Maximize2 size={14} className="text-gray-500" />
         </button>
