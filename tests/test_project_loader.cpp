@@ -26,8 +26,8 @@ TEST_CASE("ProjectLoader loads valid project.json correctly") {
     CHECK(project->schemaVersion == 1);
     CHECK(project->title == "My First RPG");
     CHECK(project->startMapId == "town");
-    CHECK(project->startPosition.pos.x == 4);
-    CHECK(project->startPosition.pos.y == 4);
+    CHECK(project->startPosition.pos.x == 20);
+    CHECK(project->startPosition.pos.y == 13);
     CHECK(project->startPosition.direction == Direction::Down);
     CHECK(project->maps.size() == 2);
     CHECK(project->visualProfile.aspectRatio == "16:9");

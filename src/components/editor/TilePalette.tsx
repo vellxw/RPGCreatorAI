@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, X, Pencil, Eraser, Square, Circle, Move, Pipette } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 import { useEditor, type BrushSelection } from '../../stores/editorStore';
+import { useProjectStore } from '../../stores/projectStore';
+import { SCENE_TEMPLATES, cloneSceneTemplateMap, getSceneTemplate } from '../../templates/sceneTemplates';
 
 interface TileCategory {
   id: string;
@@ -40,8 +42,10 @@ const tilePreviewAssets: Record<string, string> = {
 
 export function TilePalette() {
   const { state: editor, dispatch } = useEditor();
+  const { state: project, dispatch: projectDispatch } = useProjectStore();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ terrain: true });
   const [search, setSearch] = useState('');
+  const selectedMap = project.maps[editor.selectedMapId];
 
   const toggleCategory = (id: string) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -66,6 +70,22 @@ export function TilePalette() {
     editor.brush.kind === 'event' && editor.brush.label === 'transfer'
       ? 'door'
       : editor.brush.label;
+
+  const applyTemplate = (templateId: (typeof SCENE_TEMPLATES)[number]['id']) => {
+    if (!selectedMap) return;
+    const template = getSceneTemplate(templateId);
+    projectDispatch({
+      type: 'REPLACE_MAP',
+      mapId: selectedMap.id,
+      map: cloneSceneTemplateMap(templateId, selectedMap.id, selectedMap.name),
+    });
+    if (project.project.startMapId === selectedMap.id) {
+      projectDispatch({
+        type: 'UPDATE_PROJECT_META',
+        changes: { startPosition: template.startPosition },
+      });
+    }
+  };
 
   return (
     <div className="w-[220px] flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
@@ -148,6 +168,24 @@ export function TilePalette() {
             )}
           </div>
         ))}
+        <div className="border-t border-gray-100 mt-2 pt-2">
+          <div className="px-3 pb-2">
+            <div className="text-[12px] font-semibold text-gray-700 mb-2">Scene Templates</div>
+            <div className="space-y-1.5">
+              {SCENE_TEMPLATES.map(template => (
+                <button
+                  key={template.id}
+                  onClick={() => applyTemplate(template.id)}
+                  className="w-full text-left px-2.5 py-2 rounded-md border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+                  title={template.description}
+                >
+                  <div className="text-[12px] font-medium text-gray-700">{template.label}</div>
+                  <div className="text-[10px] text-gray-500">{template.aspectRatio}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

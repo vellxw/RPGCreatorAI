@@ -499,3 +499,23 @@ Error: Port 1420 is already in use
 - `2026-05-18 00:26 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
   — PASS; runtime tests now include the expanded tile catalog coverage.
 
+### Slice 6 — authored scene templates and widescreen bundled sample
+
+- `2026-05-18 00:30 -03:00` —
+  `npx vitest run src/templates/__tests__/sceneTemplates.test.ts src/validation/__tests__/bundledSample.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — initially FAILED because scene templates, map replacement support, and
+  the widescreen bundled sample did not exist yet; fix applied: added seven
+  reusable templates, template application in the editor, reducer support,
+  and upgraded the bundled project maps.
+- `2026-05-18 00:33 -03:00` —
+  `npx vitest run src/templates/__tests__/sceneTemplates.test.ts src/validation/__tests__/bundledSample.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — PASS (25 tests).
+- `2026-05-18 00:33 -03:00` — `npx tsc --noEmit` — PASS.
+- `2026-05-18 00:34 -03:00` — `npx vite build` — PASS.
+- `2026-05-18 00:34 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — initially FAILED because native loader tests still asserted the obsolete
+  `10x10` town and old start position; fix applied: updated those tests to
+  assert the new authored widescreen sample.
+- `2026-05-18 00:35 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — PASS after the stale native assertions were updated.
+

@@ -20,8 +20,8 @@ TEST_CASE("MapLoader loads town.json with expected dimensions and events") {
     auto m = MapLoader::load("data/maps/town.json");
     REQUIRE(m.has_value());
     CHECK(m->id == "town");
-    CHECK(m->width == 10);
-    CHECK(m->height == 10);
+    CHECK(m->width == 40);
+    CHECK(m->height == 23);
     CHECK(m->tileSize == 32);
 
     bool foundOldMan = false;

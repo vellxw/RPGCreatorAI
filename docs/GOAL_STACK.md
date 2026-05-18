@@ -12,16 +12,18 @@ for game visuals.
 
 ## Open subgoals (top of stack first)
 
-1. Slice 6 — complete starter scene templates
-2. Slice 7 — runtime visual-profile support and camera framing
-3. Slice 8 — editor/runtime preview consistency and screenshot checks
-4. Slice 9 — map authoring workflow hardening
-5. Slice 10 — runtime UX/playability polish under the new visual standard
-6. Slice 11 — end-to-end sample-game validation, visual QA, and phase
+1. Slice 7 — runtime visual-profile support and camera framing
+2. Slice 8 — editor/runtime preview consistency and screenshot checks
+3. Slice 9 — map authoring workflow hardening
+4. Slice 10 — runtime UX/playability polish under the new visual standard
+5. Slice 11 — end-to-end sample-game validation, visual QA, and phase
     closeout
 
 ## Closed subgoals
 
+- Slice 6 — reusable authored starter scenes, in-editor template application,
+  and a bundled widescreen sample project replacing the old tiny-board
+  default.
 - Slice 5 — deterministic supplementary visual assets for authored scenes:
   snow, tree, interior surfaces, collision/void overlays, and shop/battle
   markers shared by editor and runtime.

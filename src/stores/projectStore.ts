@@ -57,6 +57,11 @@ export type ProjectAction =
       tile: number;
     }
   | {
+      type: 'REPLACE_MAP';
+      mapId: string;
+      map: MapData;
+    }
+  | {
       type: 'ADD_EVENT';
       mapId: string;
       event: GameEvent;
@@ -403,6 +408,11 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         if (!layer) return;
         const index = action.y * map.width + action.x;
         layer.tiles[index] = action.tile;
+      });
+
+    case 'REPLACE_MAP':
+      return withMap(state, action.mapId, map => {
+        Object.assign(map, deepClone(action.map));
       });
 
     case 'ADD_EVENT':

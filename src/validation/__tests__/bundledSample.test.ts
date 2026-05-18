@@ -69,4 +69,16 @@ describe('Bundled sample project (Phase 6 slice 10)', () => {
       expect(seen).toContain(required);
     }
   });
+
+  it('opens on a full-scene widescreen town instead of the old tiny square board', async () => {
+    const adapter = new BrowserMemoryAdapter();
+    const state = await adapter.loadProject();
+    expect(state.project.visualProfile).toMatchObject({
+      aspectRatio: '16:9',
+      baseResolution: { width: 1280, height: 720 },
+    });
+    expect(state.maps.town.width).toBeGreaterThanOrEqual(40);
+    expect(state.maps.town.height).toBeGreaterThanOrEqual(23);
+    expect(state.maps.town.layers[0].tiles).not.toContain(0);
+  });
 });

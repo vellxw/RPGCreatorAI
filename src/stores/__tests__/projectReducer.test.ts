@@ -303,6 +303,34 @@ describe('projectReducer', () => {
     expect(s4.maps.town.events.map(e => e.id)).not.toContain('chest_1');
   });
 
+  it('REPLACE_MAP swaps authored scene data while preserving undo support', () => {
+    const s1 = loadedState();
+    const replacement: MapData = {
+      schemaVersion: 1,
+      id: 'town',
+      name: 'Town',
+      width: 4,
+      height: 4,
+      tileSize: 32,
+      layers: [
+        { name: 'ground', type: 'visual', tiles: new Array(16).fill(6) },
+        { name: 'collision', type: 'collision', tiles: new Array(16).fill(0) },
+      ],
+      events: [],
+    };
+
+    const s2 = projectReducer(s1, {
+      type: 'REPLACE_MAP',
+      mapId: 'town',
+      map: replacement,
+    });
+    expect(s2.maps.town.width).toBe(4);
+    expect(s2.maps.town.layers[0].tiles[0]).toBe(6);
+
+    const s3 = projectReducer(s2, { type: 'UNDO' });
+    expect(s3.maps.town.width).toBe(10);
+  });
+
   it('VALIDATE refreshes errors/warnings', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {
