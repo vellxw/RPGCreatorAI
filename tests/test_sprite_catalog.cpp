@@ -6,6 +6,10 @@ TEST_CASE("SpriteCatalog resolves generated tile assets") {
     CHECK(SpriteCatalog::tileAssetFor(1, 0) == "tile_grass");
     CHECK(SpriteCatalog::tileAssetFor(2, 0) == "tile_path");
     CHECK(SpriteCatalog::tileAssetFor(3, 0) == "tile_water");
+    CHECK(SpriteCatalog::tileAssetFor(4, 0) == "tile_snow");
+    CHECK(SpriteCatalog::tileAssetFor(5, 0) == "tile_tree");
+    CHECK(SpriteCatalog::tileAssetFor(6, 0) == "tile_interior_floor");
+    CHECK(SpriteCatalog::tileAssetFor(7, 0) == "tile_interior_wall");
     CHECK(SpriteCatalog::tileAssetFor(1, 9) == "tile_wall");
     CHECK(SpriteCatalog::tileAssetFor(0, 0) == "tile_void_warning");
     CHECK(SpriteCatalog::tileAssetFor(99, 0) == "tile_void_warning");

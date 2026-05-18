@@ -126,6 +126,15 @@ function GamePreview({
   const TILE = 28;
   const w = map.width * TILE;
   const h = map.height * TILE;
+  const previewGroundAssets: Record<number, string> = {
+    1: gameAssets.grass,
+    2: gameAssets.path,
+    3: gameAssets.water,
+    4: gameAssets.snow,
+    5: gameAssets.tree,
+    6: gameAssets.interiorFloor,
+    7: gameAssets.interiorWall,
+  };
 
   return (
     <div className="flex-1 bg-gray-900 flex items-center justify-center relative overflow-hidden">
@@ -152,7 +161,7 @@ function GamePreview({
                 y={y}
                 width={TILE}
                 height={TILE}
-                href={tile === 2 ? gameAssets.path : tile === 3 ? gameAssets.water : gameAssets.grass}
+                href={previewGroundAssets[tile] ?? gameAssets.voidWarning}
               />
             );
           })}

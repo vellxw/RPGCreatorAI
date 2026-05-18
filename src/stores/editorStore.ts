@@ -2,7 +2,11 @@ import { createContext, useContext, useReducer, type Dispatch } from 'react';
 import type { Screen, GameEvent, EventType } from '../types/project';
 
 export type BrushSelection =
-  | { kind: 'tile'; tileId: number; label: 'grass' | 'path' | 'water' }
+  | {
+      kind: 'tile';
+      tileId: number;
+      label: 'grass' | 'path' | 'water' | 'snow' | 'tree' | 'interiorFloor' | 'interiorWall';
+    }
   | { kind: 'collision'; tileId: 0 | 9; label: 'erase' | 'wall' }
   | { kind: 'event'; eventType: EventType; label: 'npc' | 'chest' | 'transfer' | 'trigger' };
 

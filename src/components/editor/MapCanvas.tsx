@@ -16,6 +16,10 @@ const groundAssets: Record<number, string> = {
   1: gameAssets.grass,
   2: gameAssets.path,
   3: gameAssets.water,
+  4: gameAssets.snow,
+  5: gameAssets.tree,
+  6: gameAssets.interiorFloor,
+  7: gameAssets.interiorWall,
 };
 
 export function MapCanvas() {

@@ -8,11 +8,19 @@ describe('generated asset catalog', () => {
       path: expect.stringContaining('tile_path'),
       water: expect.stringContaining('tile_water'),
       wall: expect.stringContaining('tile_wall'),
+      snow: expect.stringContaining('tile_snow'),
+      tree: expect.stringContaining('tile_tree'),
+      interiorFloor: expect.stringContaining('tile_interior_floor'),
+      interiorWall: expect.stringContaining('tile_interior_wall'),
+      collisionOverlay: expect.stringContaining('tile_collision_overlay'),
+      voidWarning: expect.stringContaining('tile_void_warning'),
       player: expect.stringContaining('player_adventurer'),
       oldMan: expect.stringContaining('npc_old_man'),
       shopkeeper: expect.stringContaining('npc_shopkeeper'),
       chest: expect.stringContaining('chest_closed'),
       door: expect.stringContaining('transfer_door'),
+      shopMarker: expect.stringContaining('shop_marker'),
+      battleMarker: expect.stringContaining('battle_marker'),
       slime: expect.stringContaining('enemy_slime'),
       potion: expect.stringContaining('item_potion'),
       sword: expect.stringContaining('item_sword'),
@@ -38,7 +46,7 @@ describe('generated asset catalog', () => {
       transfer: gameAssets.door,
       chest: gameAssets.chest,
       object: gameAssets.slime,
-      trigger: uiAssets.battle,
+      trigger: gameAssets.battleMarker,
     });
   });
 });

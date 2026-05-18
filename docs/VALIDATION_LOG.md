@@ -477,3 +477,25 @@ Error: Port 1420 is already in use
 - `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-7` —
   PASS (17 native runtime screenshots refreshed).
 
+---
+
+## Phase 8 — Game visual foundation and creator workflow hardening
+
+### Slice 5 — supplementary original visual assets
+
+- `2026-05-18 00:23 -03:00` —
+  `npx vitest run src/assets/generated/__tests__/assetCatalog.test.ts src/visual/__tests__/tileCatalog.test.ts`
+  — initially FAILED because the expanded scene-asset catalog and tile IDs
+  did not exist yet; fix applied: added deterministic supplementary asset
+  generation plus editor/runtime catalog wiring.
+- `2026-05-18 00:25 -03:00` —
+  `python scripts/dev/generate_visual_assets.py` — PASS; generated original
+  scene-support assets into `src/assets/generated/`,
+  `assets/generated/web/`, and `assets/generated/runtime/`.
+- `2026-05-18 00:25 -03:00` —
+  `npx vitest run src/assets/generated/__tests__/assetCatalog.test.ts src/visual/__tests__/tileCatalog.test.ts`
+  — PASS (4 tests).
+- `2026-05-18 00:25 -03:00` — `npx tsc --noEmit` — PASS.
+- `2026-05-18 00:26 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — PASS; runtime tests now include the expanded tile catalog coverage.
+

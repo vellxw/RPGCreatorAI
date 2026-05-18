@@ -10,6 +10,14 @@ std::string SpriteCatalog::tileAssetFor(int groundTile, int collisionTile) {
             return "tile_path";
         case 3:
             return "tile_water";
+        case 4:
+            return "tile_snow";
+        case 5:
+            return "tile_tree";
+        case 6:
+            return "tile_interior_floor";
+        case 7:
+            return "tile_interior_wall";
         case 1:
             return "tile_grass";
         default:
