@@ -519,3 +519,20 @@ Error: Port 1420 is already in use
 - `2026-05-18 00:35 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
   — PASS after the stale native assertions were updated.
 
+### Slice 7 — runtime scene framing and authored blocker rendering
+
+- `2026-05-18 00:38 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — initially FAILED because native sprite routing still collapsed authored
+  `tree` and `interiorWall` blockers into the old generic wall sprite; fix
+  applied: preserve explicit authored blocker visuals while retaining the
+  legacy wall fallback.
+- `2026-05-18 00:39 -03:00` — `cmd /c scripts\dev\verify-runtime.bat`
+  — PASS after the sprite-routing fix.
+- `2026-05-18 00:40 -03:00` — `cmd /c scripts\dev\smoke-runtime.bat`
+  — PASS; runtime opened the widescreen sample and reached
+  `SMOKE PASSED`.
+- `2026-05-18 00:40 -03:00` —
+  `rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-8-runtime-smoke`
+  — PASS (17 native runtime screenshots captured after widening the smoke
+  traversal to the new authored sample layout).
+

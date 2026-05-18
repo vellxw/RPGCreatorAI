@@ -124,15 +124,20 @@ bool Application::runSmokeShots(const std::string& outputDir) {
             game->pumpEvents(dt);
         }
     };
+    auto moveMany = [&](int dx, int dy, Direction dir, int count) {
+        for (int i = 0; i < count; ++i) {
+            game->stepMove(dx, dy, dir);
+            game->pumpEvents(dt);
+        }
+    };
 
     // 01 — Town initial
     game->pumpEvents(dt);
     if (!snapshot(outputDir, "01-town-initial")) return false;
 
-    // 02 — Walk to NPC and interact (NPC at (6,4), player starts at (4,4))
-    game->stepMove(1, 0, Direction::Right);   // (4,4) -> (5,4)
-    game->pumpEvents(dt);
-    game->stepMove(1, 0, Direction::Right);   // blocked by NPC, direction updates
+    // 02 — Walk to NPC and interact (NPC at (20,9), player starts at (20,13))
+    moveMany(0, -1, Direction::Up, 3);        // (20,13) -> (20,10)
+    game->stepMove(0, -1, Direction::Up);     // blocked by NPC, direction updates
     game->pumpEvents(dt);
     game->stepInteract();                     // opens dialogue
     game->pumpEvents(dt);
@@ -143,20 +148,17 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     // so the smoke harness proves the transfer route honestly.
     drainDialogueAndEvents();
 
-    // 03 — Walk back left x2 then up to door (3,3) → transfer to house at (3,4)
-    game->stepMove(-1, 0, Direction::Left);   // (5,4) -> (4,4)
-    game->pumpEvents(dt);
-    game->stepMove(-1, 0, Direction::Left);   // (4,4) -> (3,4)
-    game->pumpEvents(dt);
-    game->stepMove(0, -1, Direction::Up);     // (3,4) -> (3,3) → triggers transferMap
+    // 03 — Walk around the NPC to the door at (20,8) → house at (20,19)
+    game->stepMove(-1, 0, Direction::Left);   game->pumpEvents(dt); // (20,10) -> (19,10)
+    moveMany(0, -1, Direction::Up, 2);        // (19,10) -> (19,8)
+    game->stepMove(1, 0, Direction::Right);   game->pumpEvents(dt); // (20,8), touches transfer
     game->pumpEvents(dt);                     // event runner produces request
     game->pumpEvents(dt);                     // game applies transfer
     if (!snapshot(outputDir, "03-house-arrived")) return false;
 
-    // 04 — In house: from (3,4) go up x3 to (3,1), face right, interact with chest at (4,1)
-    game->stepMove(0, -1, Direction::Up);  game->pumpEvents(dt);  // (3,3)
-    game->stepMove(0, -1, Direction::Up);  game->pumpEvents(dt);  // (3,2)
-    game->stepMove(0, -1, Direction::Up);  game->pumpEvents(dt);  // (3,1)
+    // 04 — In house: from (20,19) walk beside chest at (30,10), face right, interact.
+    moveMany(1, 0, Direction::Right, 9);   // (20,19) -> (29,19)
+    moveMany(0, -1, Direction::Up, 9);     // (29,19) -> (29,10)
     game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt); // blocked by chest, faces right
     game->stepInteract();                  game->pumpEvents(dt);
     if (!snapshot(outputDir, "04-chest-first-open")) return false;
@@ -176,12 +178,9 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     if (!snapshot(outputDir, "06-save-feedback")) return false;
     game->stepDismissDialogue();           game->pumpEvents(dt);
 
-    // 07 — Walk back to door (3,5) and transfer to town. We are at
-    // (3,1) facing right after interacting with the chest at (4,1).
-    game->stepMove(0, 1, Direction::Down);  game->pumpEvents(dt); // (3,1)→(3,2)
-    game->stepMove(0, 1, Direction::Down);  game->pumpEvents(dt); // (3,2)→(3,3)
-    game->stepMove(0, 1, Direction::Down);  game->pumpEvents(dt); // (3,3)→(3,4)
-    game->stepMove(0, 1, Direction::Down);  game->pumpEvents(dt); // (3,4)→(3,5) touch transfer
+    // 07 — Walk back to door (20,22) and transfer to town.
+    moveMany(0, 1, Direction::Down, 12);   // (29,10) -> (29,22)
+    moveMany(-1, 0, Direction::Left, 9);   // (29,22) -> (20,22), touches transfer
     game->pumpEvents(dt);                                         // apply transfer
     if (!snapshot(outputDir, "07-back-in-town")) return false;
 
@@ -227,18 +226,12 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     tap(SDL_SCANCODE_ESCAPE); // close
 
     // 16 — Shop UI. Return to town from the loaded house state, then speak
-    // to the shop keeper.
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
+    // to the shop keeper at (31,13).
+    moveMany(0, 1, Direction::Down, 12);   // (29,10) -> (29,22)
+    moveMany(-1, 0, Direction::Left, 9);   // (29,22) -> (20,22), touches transfer
     game->pumpEvents(dt); // apply transfer back to town
-    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
-    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt);
-    game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt);
+    moveMany(1, 0, Direction::Right, 10);  // (20,10) -> (30,10)
+    moveMany(0, 1, Direction::Down, 3);    // (30,10) -> (30,13)
     game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt); // face shop keeper
     game->stepInteract(); game->pumpEvents(dt); // dialogue
     game->stepDismissDialogue(); game->pumpEvents(dt); // open shop
@@ -247,11 +240,8 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     game->pumpEvents(dt);     // let the paused event list finish
 
     // 17 — Battle reward presentation after the visible wild-slime trigger.
-    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
-    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
-    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
-    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt);
-    game->stepMove(-1, 0, Direction::Left); game->pumpEvents(dt); // touch slime
+    moveMany(-1, 0, Direction::Left, 20);  // (30,13) -> (10,13)
+    moveMany(0, 1, Direction::Down, 5);    // (10,13) -> (10,18), touch slime
     game->stepDismissDialogue(); game->pumpEvents(dt); // resolve startBattle
     if (!snapshot(outputDir, "17-battle-summary")) return false;
 

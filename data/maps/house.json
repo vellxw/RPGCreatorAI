@@ -1873,7 +1873,7 @@
           "type": "transferMap",
           "mapId": "town",
           "x": 20,
-          "y": 9,
+          "y": 10,
           "direction": "down"
         }
       ]

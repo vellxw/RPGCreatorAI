@@ -2,7 +2,11 @@
 #include "types/EventTypes.h"
 
 std::string SpriteCatalog::tileAssetFor(int groundTile, int collisionTile) {
-    if (collisionTile == 9) return "tile_wall";
+    if (collisionTile == 9) {
+        if (groundTile == 5) return "tile_tree";
+        if (groundTile == 7) return "tile_interior_wall";
+        return "tile_wall";
+    }
     switch (groundTile) {
         case 0:
             return "tile_void_warning";
