@@ -14,6 +14,14 @@ import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
+const VALID_MOVEMENT_SPEEDS = new Set([
+  'oneEighth',
+  'oneQuarter',
+  'half',
+  'normal',
+  'double',
+  'quadruple',
+]);
 
 // Phase 6 v1 command set. Used both for editor-side type checks and for
 // the runtime parser, which mirrors this list.
@@ -230,6 +238,58 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
         });
       }
       seen.add(entry.id);
+    }
+  }
+
+  if (
+    db.system.playerMovementSpeed !== undefined &&
+    !VALID_MOVEMENT_SPEEDS.has(db.system.playerMovementSpeed)
+  ) {
+    out.push({
+      level: 'error',
+      message: `System playerMovementSpeed "${db.system.playerMovementSpeed}" is invalid`,
+      source: 'database/system',
+    });
+  }
+  if (
+    db.system.defaultCharacterHeightTiles !== undefined &&
+    (!Number.isFinite(db.system.defaultCharacterHeightTiles) || db.system.defaultCharacterHeightTiles <= 0)
+  ) {
+    out.push({
+      level: 'error',
+      message: `System defaultCharacterHeightTiles must be a positive finite number`,
+      source: 'database/system',
+    });
+  }
+
+  for (const set of db.animations.sets) {
+    if (!set.display) continue;
+    if (!Number.isFinite(set.display.heightTiles) || set.display.heightTiles <= 0) {
+      out.push({
+        level: 'error',
+        message: `Animation set "${set.id}" display.heightTiles must be a positive finite number`,
+        source: `database/animations/${set.id}`,
+      });
+    }
+    if (
+      set.display.widthTiles !== undefined &&
+      (!Number.isFinite(set.display.widthTiles) || set.display.widthTiles <= 0)
+    ) {
+      out.push({
+        level: 'error',
+        message: `Animation set "${set.id}" display.widthTiles must be a positive finite number`,
+        source: `database/animations/${set.id}`,
+      });
+    }
+    if (
+      set.display.yOffsetPx !== undefined &&
+      !Number.isFinite(set.display.yOffsetPx)
+    ) {
+      out.push({
+        level: 'error',
+        message: `Animation set "${set.id}" display.yOffsetPx must be finite`,
+        source: `database/animations/${set.id}`,
+      });
     }
   }
   return out;

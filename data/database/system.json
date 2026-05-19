@@ -5,5 +5,7 @@
   "defaultBgm": "town_theme",
   "windowTint": "indigo",
   "battleBackground": "grass_field",
-  "playerAnimationSet": "player_adventurer"
+  "playerAnimationSet": "player_adventurer",
+  "playerMovementSpeed": "double",
+  "defaultCharacterHeightTiles": 1.5
 }

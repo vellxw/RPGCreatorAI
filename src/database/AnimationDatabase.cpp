@@ -41,6 +41,15 @@ AnimationClip parseClip(const json& j) {
     return clip;
 }
 
+AnimationDisplay parseDisplay(const json& j) {
+    AnimationDisplay display;
+    if (!j.is_object()) return display;
+    display.heightTiles = j.value("heightTiles", 0.0f);
+    display.widthTiles = j.value("widthTiles", 0.0f);
+    display.yOffsetPx = j.value("yOffsetPx", 0.0f);
+    return display;
+}
+
 } // namespace
 
 bool AnimationDatabase::load(const std::string& path) {
@@ -61,6 +70,9 @@ bool AnimationDatabase::load(const std::string& path) {
         for (const auto& setJson : root.at("sets")) {
             AnimationSet set;
             set.id = setJson.at("id").get<std::string>();
+            if (setJson.contains("display")) {
+                set.display = parseDisplay(setJson.at("display"));
+            }
             for (const auto& clipJson : setJson.at("clips")) {
                 set.clips.push_back(parseClip(clipJson));
             }
@@ -93,4 +105,11 @@ const AnimationClip* AnimationDatabase::findClip(const std::string& setId,
         }
     }
     return anyDirection;
+}
+
+const AnimationSet* AnimationDatabase::findSet(const std::string& setId) const {
+    for (const auto& set : sets_) {
+        if (set.id == setId) return &set;
+    }
+    return nullptr;
 }

@@ -557,6 +557,18 @@ function EventProperties({ event, mapId }: { event: GameEvent; mapId: string }) 
           value={event.animationSet ?? ''}
           onChange={e => update({ animationSet: e.target.value || undefined })}
         />
+        <Input
+          label="Display height (tiles)"
+          type="number"
+          step="0.1"
+          min="0.1"
+          value={event.displayHeightTiles ?? ''}
+          onChange={e =>
+            update({
+              displayHeightTiles: e.target.value === '' ? undefined : Number(e.target.value),
+            })
+          }
+        />
       </div>
     </div>
   );

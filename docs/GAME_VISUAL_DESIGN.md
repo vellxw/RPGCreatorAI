@@ -224,6 +224,13 @@ Rules:
   paths, and room size.
 - Default placeholder actors should read clearly at the default camera
   scale without becoming toy-sized specks.
+- Character animation sets may declare
+  `display: { heightTiles, widthTiles?, yOffsetPx? }`. Characters render
+  bottom-center on their logical tile using that display size; the bundled
+  default is `heightTiles: 1.5`.
+- `GameEvent.displayHeightTiles` may override one event's character
+  height. Props and simple objects stay tile-sized unless they opt into
+  character display metadata.
 - In compact interiors, one character should usually occupy a meaningful
   fraction of a tile or multi-tile footprint; if the art style needs
   different proportions, author it consistently.
@@ -237,8 +244,9 @@ Rules:
 - Rendering may interpolate an entity between logical tiles. Camera focus
   follows that interpolated visual position, not only the committed tile,
   so held movement reads smoothly.
-- Default walking speed is `4 tiles/s`. Faster or slower speeds must be
-  explicit data or design changes, not hidden renderer behavior.
+- Movement speed is explicit data. The bundled player uses
+  `playerMovementSpeed: "double"` (`8 tiles/s`, `125 ms/tile`) while
+  `"normal"` remains the classic `4 tiles/s`.
 - Diagonal movement is not part of the default RPG control model.
 - Player and event animations are selected from data-driven animation
   sets. Static `sprite` keys remain a fallback when no matching clip
@@ -291,6 +299,9 @@ The editor preview must make the final game frame legible before launch.
   - collision cells
 - The canvas should use available workspace intelligently instead of
   shrinking valid maps into a tiny centered square.
+- Playtest preview must reuse the runtime character display rules and
+  should keep the map/event SVG layers static while only the active player
+  motion updates per animation frame.
 
 ## 19. Runtime rendering rules
 

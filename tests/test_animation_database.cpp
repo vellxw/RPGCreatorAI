@@ -11,6 +11,7 @@ TEST_CASE("AnimationDatabase loads directional clips and resolves fallback direc
       "sets": [
         {
           "id": "player_adventurer",
+          "display": { "heightTiles": 1.5, "yOffsetPx": -2 },
           "clips": [
             {
               "action": "walk",
@@ -40,6 +41,11 @@ TEST_CASE("AnimationDatabase loads directional clips and resolves fallback direc
 
     AnimationDatabase db;
     REQUIRE(db.load(path.string()));
+
+    REQUIRE(db.sets().size() == 1);
+    CHECK(db.sets()[0].display.heightTiles == doctest::Approx(1.5f));
+    CHECK(db.sets()[0].display.widthTiles == doctest::Approx(0.0f));
+    CHECK(db.sets()[0].display.yOffsetPx == doctest::Approx(-2.0f));
 
     const AnimationClip* walk = db.findClip("player_adventurer", "walk", Direction::Down);
     REQUIRE(walk != nullptr);

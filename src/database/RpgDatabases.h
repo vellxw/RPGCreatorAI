@@ -101,6 +101,8 @@ struct SystemRecord {
     std::string windowTint;
     std::string battleBackground;
     std::string playerAnimationSet;
+    std::string playerMovementSpeed = "double";
+    float defaultCharacterHeightTiles = 1.5f;
 };
 
 struct ItemRecord {

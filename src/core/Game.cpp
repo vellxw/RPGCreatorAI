@@ -1,5 +1,6 @@
 #include "core/Game.h"
 #include "core/Logger.h"
+#include "core/MovementSpeed.h"
 #include "world/MapLoader.h"
 #include "world/CollisionSystem.h"
 #include "save/SaveManager.h"
@@ -49,6 +50,11 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
     if (!databases.system().playerAnimationSet.empty()) {
         playerAnimationSet = databases.system().playerAnimationSet;
     }
+    playerTilesPerSecond = movementSpeedToTilesPerSecond(databases.system().playerMovementSpeed);
+    defaultCharacterHeightTiles =
+        databases.system().defaultCharacterHeightTiles > 0.0f
+            ? databases.system().defaultCharacterHeightTiles
+            : 1.5f;
 
     // Seed runtime state from the system database when a save isn't loaded.
     if (state.getParty().empty()) {
@@ -236,7 +242,7 @@ bool Game::tryStartSmoothMove(int dx, int dy, Direction dir) {
 
     int tileSize = currentScene.getTileSize();
     if (tileSize <= 0) tileSize = 32;
-    playerMotion.startMove(targetX, targetY, dir, tileSize, kPlayerTilesPerSecond);
+    playerMotion.startMove(targetX, targetY, dir, tileSize, playerTilesPerSecond);
     return true;
 }
 
@@ -492,6 +498,8 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
             static_cast<float>(event.x * tileSize),
             static_cast<float>(event.y * tileSize),
             tileSize,
+            event.displayHeightTiles,
+            event.type == "npc" || !event.animationSet.empty(),
             false));
     }
 
@@ -509,6 +517,8 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
         playerMotion.visualX(),
         playerMotion.visualY(),
         tileSize,
+        0.0f,
+        true,
         true);
 
     return snapshot;
@@ -522,6 +532,8 @@ EntityRenderSprite Game::buildAnimatedSprite(const std::string& animationSet,
                                              float worldX,
                                              float worldY,
                                              int tileSize,
+                                             float displayHeightOverride,
+                                             bool useCharacterDisplayDefault,
                                              bool showDirectionDot) const {
     EntityRenderSprite sprite;
     sprite.assetKey = fallbackAsset;
@@ -532,9 +544,39 @@ EntityRenderSprite Game::buildAnimatedSprite(const std::string& animationSet,
     sprite.direction = direction;
     sprite.showDirectionDot = showDirectionDot;
 
-    if (animationSet.empty()) return sprite;
-    const AnimationClip* clip = animationDatabase.findClip(animationSet, action, direction);
-    if (!clip) return sprite;
+    const AnimationSet* set = animationSet.empty() ? nullptr : animationDatabase.findSet(animationSet);
+    const AnimationClip* clip =
+        animationSet.empty() ? nullptr : animationDatabase.findClip(animationSet, action, direction);
+
+    auto applyDisplay = [&](float aspect) {
+        float heightTiles = displayHeightOverride > 0.0f ? displayHeightOverride : 0.0f;
+        float widthTiles = 0.0f;
+        float yOffsetPx = 0.0f;
+        if (heightTiles <= 0.0f && set && set->display.heightTiles > 0.0f) {
+            heightTiles = set->display.heightTiles;
+            widthTiles = set->display.widthTiles;
+            yOffsetPx = set->display.yOffsetPx;
+        }
+        if (heightTiles <= 0.0f && useCharacterDisplayDefault) {
+            heightTiles = defaultCharacterHeightTiles > 0.0f ? defaultCharacterHeightTiles : 1.5f;
+        }
+        if (heightTiles <= 0.0f) {
+            return;
+        }
+
+        const float renderH = static_cast<float>(tileSize) * heightTiles;
+        const float renderW = static_cast<float>(tileSize) *
+                              (widthTiles > 0.0f ? widthTiles : heightTiles * aspect);
+        sprite.worldX = worldX + static_cast<float>(tileSize) * 0.5f - renderW * 0.5f;
+        sprite.worldY = worldY + static_cast<float>(tileSize) - renderH + yOffsetPx;
+        sprite.worldW = std::max(1, static_cast<int>(std::round(renderW)));
+        sprite.worldH = std::max(1, static_cast<int>(std::round(renderH)));
+    };
+
+    if (!clip) {
+        applyDisplay(1.0f);
+        return sprite;
+    }
 
     int frameIndex = 0;
     if (clip->frameCount > 1 && clip->fps > 0.0f) {
@@ -552,6 +594,11 @@ EntityRenderSprite Game::buildAnimatedSprite(const std::string& animationSet,
     sprite.source.y = 0;
     sprite.source.w = clip->frameSize.width;
     sprite.source.h = clip->frameSize.height;
+    const float aspect =
+        clip->frameSize.height > 0
+            ? static_cast<float>(clip->frameSize.width) / static_cast<float>(clip->frameSize.height)
+            : 1.0f;
+    applyDisplay(aspect);
     sprite.showDirectionDot = false;
     return sprite;
 }

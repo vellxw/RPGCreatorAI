@@ -154,6 +154,7 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             ed.solid = evt.value("solid", false);
             ed.sprite = evt.value("sprite", "");
             ed.animationSet = evt.value("animationSet", "");
+            ed.displayHeightTiles = evt.value("displayHeightTiles", 0.0f);
             ed.trigger = evt.value("trigger", "interact");
 
             for (const auto& cmd : evt.at("commands")) {

@@ -15,7 +15,12 @@
 ## Movement Rules
 
 - Grid-based logic with smooth visual movement: hold a movement key to
-  keep walking tile by tile at the default `4 tiles/s`.
+  keep walking tile by tile. The bundled sample defaults to
+  `playerMovementSpeed: "double"` (`8 tiles/s`, `125 ms/tile`) so input
+  feels immediate; `"normal"` remains available as `4 tiles/s`.
+- Movement speed is data-driven through `data/database/system.json`.
+  Supported tiers are `oneEighth`, `oneQuarter`, `half`, `normal`,
+  `double`, and `quadruple`.
 - Saves, collision, touch events, and transfers still use logical tile
   coordinates. The transient interpolated pixel position is render-only.
 - Diagonal movement is not supported; the first active direction in the

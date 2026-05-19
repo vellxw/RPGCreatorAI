@@ -2,7 +2,7 @@
 
 ## Current Goal
 
-Phase 9 — Smooth movement and character animation foundation — DONE.
+Phase 9 Hotfix — RPG Maker scale and no-lag movement — DONE.
 
 ## Active Phase
 
@@ -10,6 +10,9 @@ Phase 9 is governed by `docs/GAME_VISUAL_DESIGN.md` for runtime visual
 truth and `docs/ASSET_PIPELINE.md` for generated character animation
 assets. Logical movement, collision, events, and saves remain tile-based;
 rendering and editor preview interpolate visually between tiles.
+The hotfix keeps that architecture and corrects presentation defaults:
+characters render bottom-center at RPG field scale and the bundled player
+uses `playerMovementSpeed: "double"` for immediate held movement.
 
 ## Open subgoals (top of stack first)
 
@@ -17,6 +20,12 @@ rendering and editor preview interpolate visually between tiles.
 
 ## Closed subgoals
 
+- Phase 9 hotfix — character sheets now render at `display.heightTiles`
+  instead of padded tile interiors; runtime/editor both use bottom-center
+  character anchoring; `playerMovementSpeed` and
+  `defaultCharacterHeightTiles` are editable system data; event
+  `displayHeightTiles` overrides are validated; editor playtest memoizes
+  static SVG layers and starts/chains held movement without a dead frame.
 - Phase 9 implementation slice — input now uses held movement in the
   native runtime and editor playtest preview; player rendering follows a
   transient interpolated position while GameState remains tile-based;

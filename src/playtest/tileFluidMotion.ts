@@ -1,4 +1,4 @@
-import type { Direction } from '../types/project';
+import type { Direction, MovementSpeed } from '../types/project';
 
 export interface TileFluidMotion {
   tileX: number;
@@ -43,6 +43,27 @@ const DELTAS: Record<Direction, { dx: number; dy: number }> = {
   left: { dx: -1, dy: 0 },
   right: { dx: 1, dy: 0 },
 };
+
+export function movementSpeedToTilesPerSecond(speed?: MovementSpeed | string): number {
+  switch (speed) {
+    case 'oneEighth':
+      return 0.5;
+    case 'oneQuarter':
+      return 1;
+    case 'half':
+      return 2;
+    case 'normal':
+      return 4;
+    case 'quadruple':
+      return 16;
+    case 'double':
+    case undefined:
+    case '':
+      return 8;
+    default:
+      return 8;
+  }
+}
 
 export function directionFromKey(key: string): Direction | null {
   switch (key) {
@@ -93,7 +114,7 @@ export function beginTileFluidStep(
   motion: TileFluidMotion,
   direction: Direction,
   bounds: TileFluidBounds,
-  tilesPerSecond = 4,
+  tilesPerSecond = movementSpeedToTilesPerSecond(),
 ): boolean {
   if (motion.moving) return false;
   motion.direction = direction;
@@ -132,7 +153,7 @@ export function beginTileFluidStep(
 export function advanceTileFluidMotion(
   motion: TileFluidMotion,
   dt: number,
-  tilesPerSecond = 4,
+  tilesPerSecond = movementSpeedToTilesPerSecond(),
 ): CompletedTileStep | null {
   if (!motion.moving) return null;
   const duration = motion.duration > 0 ? motion.duration : 1 / tilesPerSecond;

@@ -62,6 +62,7 @@ export interface GameEvent {
   solid: boolean;
   sprite?: string;
   animationSet?: string;
+  displayHeightTiles?: number;
   trigger: TriggerType;
   commands: EventCommand[];
 }
@@ -69,6 +70,7 @@ export interface GameEvent {
 export type EventType = 'npc' | 'transfer' | 'chest' | 'object' | 'trigger';
 export type TriggerType = 'interact' | 'touch' | 'autorun' | 'parallel';
 export type Direction = 'up' | 'down' | 'left' | 'right';
+export type MovementSpeed = 'oneEighth' | 'oneQuarter' | 'half' | 'normal' | 'double' | 'quadruple';
 
 // ---------------------------------------------------------------------------
 // Event commands
@@ -398,6 +400,8 @@ export interface SystemData {
   windowTint?: string;
   battleBackground?: string;
   playerAnimationSet?: string;
+  playerMovementSpeed?: MovementSpeed;
+  defaultCharacterHeightTiles?: number;
 }
 
 export interface SwitchData {
@@ -430,8 +434,15 @@ export interface AnimationClipData {
   anchor: { x: number; y: number };
 }
 
+export interface AnimationSetDisplayData {
+  heightTiles: number;
+  widthTiles?: number;
+  yOffsetPx?: number;
+}
+
 export interface AnimationSetData {
   id: string;
+  display?: AnimationSetDisplayData;
   clips: AnimationClipData[];
 }
 

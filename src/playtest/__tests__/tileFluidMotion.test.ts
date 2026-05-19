@@ -4,6 +4,7 @@ import {
   beginTileFluidStep,
   createTileFluidMotion,
   directionFromKey,
+  movementSpeedToTilesPerSecond,
 } from '../tileFluidMotion';
 
 describe('tileFluidMotion', () => {
@@ -24,7 +25,7 @@ describe('tileFluidMotion', () => {
       width: 5,
       height: 5,
       isBlocked: () => false,
-    });
+    }, 4);
 
     expect(started).toBe(true);
     expect(motion.tileX).toBe(2);
@@ -41,6 +42,33 @@ describe('tileFluidMotion', () => {
     expect(motion.tileX).toBe(3);
     expect(motion.visualX).toBe(96);
     expect(motion.moving).toBe(false);
+  });
+
+  it('uses RPG Maker-style speed tiers', () => {
+    expect(movementSpeedToTilesPerSecond('normal')).toBe(4);
+    expect(movementSpeedToTilesPerSecond('double')).toBe(8);
+    expect(movementSpeedToTilesPerSecond('quadruple')).toBe(16);
+    expect(movementSpeedToTilesPerSecond('half')).toBe(2);
+    expect(movementSpeedToTilesPerSecond('oneQuarter')).toBe(1);
+    expect(movementSpeedToTilesPerSecond('oneEighth')).toBe(0.5);
+    expect(movementSpeedToTilesPerSecond(undefined)).toBe(8);
+  });
+
+  it('chains a held step without a dead frame at double speed', () => {
+    const motion = createTileFluidMotion({ tileX: 1, tileY: 1, direction: 'down', tileSize: 32 });
+    const bounds = { width: 5, height: 5, isBlocked: () => false };
+    const speed = movementSpeedToTilesPerSecond('double');
+
+    expect(beginTileFluidStep(motion, 'right', bounds, speed)).toBe(true);
+    expect(advanceTileFluidMotion(motion, 0.125, speed)).toEqual({
+      tileX: 2,
+      tileY: 1,
+      direction: 'right',
+    });
+    expect(beginTileFluidStep(motion, 'right', bounds, speed)).toBe(true);
+    expect(motion.moving).toBe(true);
+    expect(motion.tileX).toBe(2);
+    expect(motion.targetTileX).toBe(3);
   });
 
   it('turns toward blocked movement but does not start interpolation', () => {

@@ -123,6 +123,31 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('unknown item'))).toBe(true);
   });
 
+  it('flags invalid event display height overrides', () => {
+    const event: GameEvent = {
+      id: 'tiny_actor',
+      type: 'npc',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      displayHeightTiles: 0,
+      commands: [],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('displayHeightTiles'))).toBe(true);
+  });
+
+  it('flags invalid system movement and display defaults', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.system.playerMovementSpeed = 'warp' as never;
+    project.databases.system.defaultCharacterHeightTiles = -1;
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('playerMovementSpeed'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('defaultCharacterHeightTiles'))).toBe(true);
+  });
+
   it('accepts playAnimation commands that target known animation clips', () => {
     const event: GameEvent = {
       id: 'actor_event',

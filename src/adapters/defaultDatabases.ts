@@ -22,6 +22,8 @@ export function emptyDatabases(): DatabaseEntries {
     system: {
       startingParty: [],
       startingGold: 0,
+      playerMovementSpeed: 'double',
+      defaultCharacterHeightTiles: 1.5,
     },
   };
 }
@@ -64,6 +66,11 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
       windowTint: input.system.windowTint,
       battleBackground: input.system.battleBackground,
       playerAnimationSet: input.system.playerAnimationSet,
+      playerMovementSpeed: input.system.playerMovementSpeed ?? base.system.playerMovementSpeed,
+      defaultCharacterHeightTiles:
+        typeof input.system.defaultCharacterHeightTiles === 'number'
+          ? input.system.defaultCharacterHeightTiles
+          : base.system.defaultCharacterHeightTiles,
     };
   }
   if (input.animations && typeof input.animations === 'object') {

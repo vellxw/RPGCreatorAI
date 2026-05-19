@@ -105,6 +105,14 @@ function extractSystem(json: Record<string, unknown>): SystemData {
       typeof json.battleBackground === 'string' ? (json.battleBackground as string) : undefined,
     playerAnimationSet:
       typeof json.playerAnimationSet === 'string' ? (json.playerAnimationSet as string) : undefined,
+    playerMovementSpeed:
+      typeof json.playerMovementSpeed === 'string'
+        ? (json.playerMovementSpeed as SystemData['playerMovementSpeed'])
+        : 'double',
+    defaultCharacterHeightTiles:
+      typeof json.defaultCharacterHeightTiles === 'number'
+        ? (json.defaultCharacterHeightTiles as number)
+        : 1.5,
   };
 }
 

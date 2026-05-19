@@ -124,6 +124,17 @@ export function validateEvent(event: GameEvent, map: MapData, allMapIds: string[
     });
   }
 
+  if (
+    event.displayHeightTiles !== undefined &&
+    (!Number.isFinite(event.displayHeightTiles) || event.displayHeightTiles <= 0)
+  ) {
+    messages.push({
+      level: 'error',
+      message: `Event "${event.id}" displayHeightTiles must be a positive finite number`,
+      source: `${map.id}/${event.id}`,
+    });
+  }
+
   messages.push(...validateCommands(event.commands, event.id, map.id, allMapIds));
 
   if (event.type === 'npc' && !event.sprite) {

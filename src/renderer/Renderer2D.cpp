@@ -94,28 +94,27 @@ void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities, const Ca
     Vec2i cam = camera.getPosition();
 
     auto drawEntity = [&](const EntityRenderSprite& sprite) {
-        const int tileSize = std::max(1, sprite.worldW);
         const int sx = static_cast<int>(std::round(sprite.worldX)) - cam.x;
         const int sy = static_cast<int>(std::round(sprite.worldY)) - cam.y;
-        const int pad = std::max(2, tileSize / 8);
+        const int w = std::max(1, sprite.worldW);
+        const int h = std::max(1, sprite.worldH);
         if (sprite.source.active) {
-            renderSprite(sprite.assetKey, sprite.source, sx + pad, sy + pad,
-                         tileSize - 2 * pad, sprite.worldH - 2 * pad);
+            renderSprite(sprite.assetKey, sprite.source, sx, sy, w, h);
         } else {
-            renderSprite(sprite.assetKey, sx + pad, sy + pad,
-                         tileSize - 2 * pad, sprite.worldH - 2 * pad);
+            renderSprite(sprite.assetKey, sx, sy, w, h);
         }
 
         if (!sprite.showDirectionDot) return;
 
-        const int dotSize = std::max(3, tileSize / 6);
-        int cx = sx + tileSize / 2 - dotSize / 2;
-        int cy = sy + sprite.worldH / 2 - dotSize / 2;
+        const int dotSize = std::max(3, std::min(w, h) / 6);
+        const int pad = std::max(2, std::min(w, h) / 8);
+        int cx = sx + w / 2 - dotSize / 2;
+        int cy = sy + h / 2 - dotSize / 2;
         switch (sprite.direction) {
             case Direction::Up:    cy = sy + pad + 1; break;
-            case Direction::Down:  cy = sy + sprite.worldH - pad - dotSize - 1; break;
+            case Direction::Down:  cy = sy + h - pad - dotSize - 1; break;
             case Direction::Left:  cx = sx + pad + 1; break;
-            case Direction::Right: cx = sx + tileSize - pad - dotSize - 1; break;
+            case Direction::Right: cx = sx + w - pad - dotSize - 1; break;
         }
         fillRect(sdlRenderer, cx, cy, dotSize, dotSize, kColorPlayerEye);
     };

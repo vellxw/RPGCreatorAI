@@ -99,6 +99,7 @@ struct EventData {
     bool solid = false;
     std::string sprite;
     std::string animationSet;
+    float displayHeightTiles = 0.0f;
     std::string trigger; // "interact", "touch", "autorun", "parallel"
     std::vector<std::shared_ptr<EventCommand>> commands;
 };

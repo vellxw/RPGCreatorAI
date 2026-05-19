@@ -293,7 +293,11 @@ def build() -> None:
                         },
                     }
                 )
-        animation_sets.append({"id": character.set_id, "clips": clips})
+        animation_sets.append({
+            "id": character.set_id,
+            "display": {"heightTiles": 1.5, "yOffsetPx": 0},
+            "clips": clips,
+        })
 
     DB_OUT.write_text(
         json.dumps({"schemaVersion": 1, "sets": animation_sets}, indent=2) + "\n",

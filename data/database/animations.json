@@ -3,6 +3,10 @@
   "sets": [
     {
       "id": "player_adventurer",
+      "display": {
+        "heightTiles": 1.5,
+        "yOffsetPx": 0
+      },
       "clips": [
         {
           "action": "idle",
@@ -392,6 +396,10 @@
     },
     {
       "id": "npc_old_man",
+      "display": {
+        "heightTiles": 1.5,
+        "yOffsetPx": 0
+      },
       "clips": [
         {
           "action": "idle",
@@ -525,6 +533,10 @@
     },
     {
       "id": "npc_shopkeeper",
+      "display": {
+        "heightTiles": 1.5,
+        "yOffsetPx": 0
+      },
       "clips": [
         {
           "action": "idle",

@@ -78,6 +78,7 @@ The `collision` layer uses `0` for walkable and `9` for solid wall.
   "solid": true,
   "sprite": "npc_old_man",
   "animationSet": "npc_old_man",
+  "displayHeightTiles": 1.5,
   "trigger": "interact",
   "commands": [ /* event commands */ ]
 }
@@ -87,6 +88,8 @@ Recognized event types (visual hint only): `npc`, `chest`, `transfer`.
 Any other value falls back to the generic event color.
 `sprite` is a static asset fallback. `animationSet` points at an entry in
 `database/animations.json` and enables action/direction clip lookup.
+`displayHeightTiles` is optional; when present it overrides the rendered
+character height for that event while collision remains one logical tile.
 
 See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
 
@@ -111,6 +114,7 @@ inventory itself is keyed by `id` and lives in `GameState`.
   "sets": [
     {
       "id": "player_adventurer",
+      "display": { "heightTiles": 1.5, "yOffsetPx": 0 },
       "clips": [
         {
           "action": "walk",
@@ -131,3 +135,23 @@ inventory itself is keyed by `id` and lives in `GameState`.
 Animation assets are horizontal sheets. Runtime BMPs live under
 `assets/generated/runtime/`; editor PNGs live under
 `src/assets/generated/`.
+
+`display.heightTiles` controls field character scale in both runtime and
+editor preview. `widthTiles` is optional and otherwise derived from frame
+aspect ratio. `yOffsetPx` adjusts the bottom-center anchor in pixels.
+
+## database/system.json movement/display fields
+
+```json
+{
+  "playerAnimationSet": "player_adventurer",
+  "playerMovementSpeed": "double",
+  "defaultCharacterHeightTiles": 1.5
+}
+```
+
+`playerMovementSpeed` accepts `oneEighth`, `oneQuarter`, `half`,
+`normal`, `double`, or `quadruple`. The bundled sample uses `double`
+(`125 ms/tile`). `defaultCharacterHeightTiles` is used when an event has
+no per-event override and its animation set does not define display
+metadata.

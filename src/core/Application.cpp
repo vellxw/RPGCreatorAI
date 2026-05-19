@@ -160,7 +160,7 @@ bool Application::runSmokeShots(const std::string& outputDir) {
 
     // Phase 9 — held input starts a smooth visual step before committing
     // the logical tile.
-    if (!holdMove(SDL_SCANCODE_W, 18, 8, "phase9-01-walk-midstep")) return false;
+    if (!holdMove(SDL_SCANCODE_W, 18, 4, "phase9-01-walk-midstep")) return false;
 
     // 02 — Walk to NPC and interact (NPC at (20,9), player now at (20,12))
     moveMany(0, -1, Direction::Up, 2);        // (20,12) -> (20,10)

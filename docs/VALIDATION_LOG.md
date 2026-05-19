@@ -4,6 +4,45 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 9 Hotfix — RPG Maker scale and no-lag movement
+
+**Date**: 2026-05-19
+
+### Commands run
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npm test -- --run src/playtest/__tests__/tileFluidMotion.test.ts src/validation/__tests__/validateProject.test.ts src/validation/__tests__/bundledSample.test.ts` | FAIL -> PASS | Initial RED covered missing movement-speed helper, missing `displayHeightTiles`/system validation, and missing bundled defaults. Final: 26/26 focused tests passed. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke` | PASS | Configure/build/CTest passed using the repo's MSVC bootstrap and out-of-OneDrive build dir. |
+| `npm test` | PASS | 18 files, 107 tests. |
+| `npm run build` | PASS | `tsc --noEmit` and `vite build` passed. |
+| `cargo test --manifest-path src-tauri/Cargo.toml --lib` | PASS | 17/17 Rust tests. |
+| `%LOCALAPPDATA%\RPGCreatorAI\build\rpg_creator_runtime.exe --smoke-shots docs/screenshots/phase-9-animation-hotfix` | PASS | Runtime wrote the full smoke set plus Phase 9 hotfix frames. |
+| Screenshot bbox audit for `phase9-01-walk-midstep.bmp` | PASS | Player bbox measured `48px` high in the runtime smoke screenshot. |
+| Playwright browser check at `http://127.0.0.1:5173` | PASS | Editor preview player clip was `48px` high and moved `12.8px` within 80ms of holding `W`; screenshot saved as `editor-preview-playtest.png`. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1` | PASS | Final configure/build/CTest plus runtime 3-second smoke passed with `SMOKE PASSED`. |
+| Pre-commit rerun at `2026-05-19 02:29:09 -03:00`: `npm test`; `npm run build`; `cargo test --manifest-path src-tauri/Cargo.toml --lib`; `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1` | PASS | Fresh closeout validation: 107/107 Vitest tests, Vite build, 17/17 Rust tests, CTest, and runtime smoke passed. |
+
+### Fixes applied
+
+- Removed sprite padding from runtime entity drawing and made character
+  render rects bottom-center on the logical tile.
+- Added animation-set display metadata, event display-height overrides,
+  and system-level `playerMovementSpeed` / `defaultCharacterHeightTiles`.
+- Changed the bundled sample to `playerMovementSpeed: "double"` and kept
+  tile logic/collision/saves unchanged.
+- Updated editor playtest preview to use the runtime display rules,
+  memoize static map/event layers, and start/chained held movement in the
+  same visual update.
+
+### Final pass/fail
+
+- Frontend: PASS
+- C++ runtime: PASS
+- Rust shell: PASS
+- Runtime smoke screenshots: PASS
+- Editor browser preview: PASS
+
 ## Phase 8 — Slice 1 Game Visual Source of Truth + Visual Profile
 
 **Date**: 2026-05-17

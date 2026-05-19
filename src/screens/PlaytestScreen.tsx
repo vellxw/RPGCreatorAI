@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
 import { useProject, useProjectStore } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
@@ -27,9 +27,52 @@ import {
   beginTileFluidStep,
   createTileFluidMotion,
   directionFromKey,
+  movementSpeedToTilesPerSecond,
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
-import type { Direction, MapData } from '../types/project';
+import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
+
+const previewGroundAssets: Record<number, string> = {
+  1: gameAssets.grass,
+  2: gameAssets.path,
+  3: gameAssets.water,
+  4: gameAssets.snow,
+  5: gameAssets.tree,
+  6: gameAssets.interiorFloor,
+  7: gameAssets.interiorWall,
+};
+
+function displayForCharacter(
+  tileSize: number,
+  display: AnimationSetDisplayData | undefined,
+  fallbackHeightTiles: number,
+  overrideHeightTiles?: number,
+  aspect = 1,
+) {
+  const heightTiles = overrideHeightTiles ?? display?.heightTiles ?? fallbackHeightTiles;
+  const widthTiles = display?.widthTiles ?? heightTiles * aspect;
+  const height = tileSize * heightTiles;
+  const width = tileSize * widthTiles;
+  const yOffset = display?.yOffsetPx ?? 0;
+  return { width, height, yOffset };
+}
+
+function animationSheetFor(
+  setId: string | undefined,
+  action: 'idle' | 'walk',
+  direction: Direction,
+): string | null {
+  switch (setId) {
+    case 'player_adventurer':
+      return animationAssets.playerAdventurer[action][direction];
+    case 'npc_old_man':
+      return animationAssets.oldMan[action][direction];
+    case 'npc_shopkeeper':
+      return animationAssets.shopkeeper[action][direction];
+    default:
+      return null;
+  }
+}
 
 function PlaytestControls({
   onMove,
@@ -121,6 +164,182 @@ function PlaytestControls({
   );
 }
 
+const PreviewGroundLayer = memo(function PreviewGroundLayer({
+  map,
+  tileSize,
+}: {
+  map: MapData;
+  tileSize: number;
+}) {
+  return (
+    <>
+      {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
+        const x = (i % map.width) * tileSize;
+        const y = Math.floor(i / map.width) * tileSize;
+        if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
+          return (
+            <image
+              key={i}
+              x={x}
+              y={y}
+              width={tileSize}
+              height={tileSize}
+              href={gameAssets.voidWarning}
+              style={{ imageRendering: 'pixelated' }}
+            />
+          );
+        }
+        return (
+          <image
+            key={i}
+            x={x}
+            y={y}
+            width={tileSize}
+            height={tileSize}
+            href={previewGroundAssets[tile] ?? gameAssets.voidWarning}
+            style={{ imageRendering: 'pixelated' }}
+          />
+        );
+      })}
+    </>
+  );
+});
+
+const PreviewEventLayer = memo(function PreviewEventLayer({
+  events,
+  tileSize,
+  animationDisplays,
+  defaultCharacterHeightTiles,
+}: {
+  events: GameEvent[];
+  tileSize: number;
+  animationDisplays: Record<string, AnimationSetDisplayData | undefined>;
+  defaultCharacterHeightTiles: number;
+}) {
+  return (
+    <>
+      {events.map(event => {
+        const sheet = animationSheetFor(event.animationSet, 'idle', 'down');
+        const display = animationDisplays[event.animationSet ?? ''];
+        const usesCharacterScale =
+          !!sheet || event.type === 'npc' || event.displayHeightTiles !== undefined;
+        const size = usesCharacterScale
+          ? displayForCharacter(tileSize, display, defaultCharacterHeightTiles, event.displayHeightTiles)
+          : { width: tileSize, height: tileSize, yOffset: 0 };
+        const x = event.x * tileSize + tileSize / 2 - size.width / 2;
+        const y = event.y * tileSize + tileSize - size.height + size.yOffset;
+        const clipId = `event-frame-${event.id}`;
+        return (
+          <g key={event.id}>
+            {sheet ? (
+              <>
+                <clipPath id={clipId}>
+                  <rect x={x} y={y} width={size.width} height={size.height} />
+                </clipPath>
+                <image
+                  x={x}
+                  y={y}
+                  width={size.width * 4}
+                  height={size.height}
+                  href={sheet}
+                  clipPath={`url(#${clipId})`}
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              </>
+            ) : (
+              <image
+                x={x}
+                y={y}
+                width={size.width}
+                height={size.height}
+                href={eventAssets[event.type]}
+                style={{ imageRendering: 'pixelated' }}
+              />
+            )}
+            {event.type === 'npc' && (
+              <>
+                <rect
+                  x={event.x * tileSize - 8}
+                  y={event.y * tileSize - 16}
+                  width={tileSize + 16}
+                  height={14}
+                  fill="#1f2937"
+                  rx="3"
+                  opacity="0.85"
+                />
+                <text
+                  x={event.x * tileSize + tileSize / 2}
+                  y={event.y * tileSize - 6}
+                  textAnchor="middle"
+                  fontSize="9"
+                  fill="white"
+                  fontWeight="bold"
+                >
+                  {event.id}
+                </text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </>
+  );
+});
+
+function PreviewPlayerSprite({
+  visualX,
+  visualY,
+  direction,
+  moving,
+  motionElapsed,
+  tileSize,
+  display,
+  defaultCharacterHeightTiles,
+  currentMap,
+}: {
+  visualX: number;
+  visualY: number;
+  direction: Direction;
+  moving: boolean;
+  motionElapsed: number;
+  tileSize: number;
+  display?: AnimationSetDisplayData;
+  defaultCharacterHeightTiles: number;
+  currentMap: string;
+}) {
+  const playerAction = moving ? 'walk' : 'idle';
+  const playerFrame = moving ? Math.floor((motionElapsed * 8) % 4) : 0;
+  const playerSheet = animationAssets.playerAdventurer[playerAction][direction];
+  const playerSize = displayForCharacter(tileSize, display, defaultCharacterHeightTiles);
+  const playerX = visualX + tileSize / 2 - playerSize.width / 2;
+  const playerY = visualY + tileSize - playerSize.height + playerSize.yOffset;
+  const playerClipId = `player-frame-${currentMap}`;
+
+  return (
+    <>
+      <defs>
+        <clipPath id={playerClipId}>
+          <rect
+            x={playerX}
+            y={playerY}
+            width={playerSize.width}
+            height={playerSize.height}
+          />
+        </clipPath>
+      </defs>
+      <image
+        x={playerX - playerFrame * playerSize.width}
+        y={playerY}
+        width={playerSize.width * 4}
+        height={playerSize.height}
+        href={playerSheet}
+        clipPath={`url(#${playerClipId})`}
+        style={{ imageRendering: 'pixelated' }}
+      />
+    </>
+  );
+}
+
 function GamePreview({
   playerX,
   playerY,
@@ -142,10 +361,20 @@ function GamePreview({
 }) {
   const project = useProject();
   const map = project.maps[currentMap];
+  const animationDisplays = useMemo(
+    () =>
+      Object.fromEntries(
+        project.databases.animations.sets.map(set => [set.id, set.display]),
+      ) as Record<string, AnimationSetDisplayData | undefined>,
+    [project.databases.animations.sets],
+  );
   if (!map) return null;
 
   const profile = normalizeVisualProfile(project.project.visualProfile);
   const tileSize = map.tileSize || profile.tileSize;
+  const defaultCharacterHeightTiles =
+    project.databases.system.defaultCharacterHeightTiles ?? 1.5;
+  const playerAnimationSet = project.databases.system.playerAnimationSet ?? 'player_adventurer';
   const mapPixelSize = { width: map.width * tileSize, height: map.height * tileSize };
   const cameraFrame = computeCameraFrame({
     viewport: profile.baseResolution,
@@ -156,21 +385,6 @@ function GamePreview({
     },
     cameraMode: profile.cameraMode,
   });
-  const previewGroundAssets: Record<number, string> = {
-    1: gameAssets.grass,
-    2: gameAssets.path,
-    3: gameAssets.water,
-    4: gameAssets.snow,
-    5: gameAssets.tree,
-    6: gameAssets.interiorFloor,
-    7: gameAssets.interiorWall,
-  };
-  const playerAction = moving ? 'walk' : 'idle';
-  const playerFrame = moving ? Math.floor((motionElapsed * 8) % 4) : 0;
-  const playerSheet = animationAssets.playerAdventurer[playerAction][direction];
-  const playerRenderSize = tileSize - 4;
-  const playerClipId = `player-frame-${currentMap}`;
-
   return (
     <div className="flex-1 bg-gray-900 flex items-center justify-center relative overflow-hidden">
       <div className="absolute top-3 left-3 bg-amber-100/95 text-amber-900 px-3 py-1.5 rounded-md text-[11px] font-medium z-10 border border-amber-300">
@@ -204,89 +418,23 @@ function GamePreview({
             height={cameraFrame.height}
             fill="#0f172a"
           />
-          <defs>
-            <clipPath id={playerClipId}>
-              <rect
-                x={visualX + 2}
-                y={visualY + 2}
-                width={playerRenderSize}
-                height={playerRenderSize}
-              />
-            </clipPath>
-          </defs>
-          {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
-            const x = (i % map.width) * tileSize;
-            const y = Math.floor(i / map.width) * tileSize;
-            if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
-              return (
-                <image
-                  key={i}
-                  x={x}
-                  y={y}
-                  width={tileSize}
-                  height={tileSize}
-                  href={gameAssets.voidWarning}
-                  style={{ imageRendering: 'pixelated' }}
-                />
-              );
-            }
-            return (
-              <image
-                key={i}
-                x={x}
-                y={y}
-                width={tileSize}
-                height={tileSize}
-                href={previewGroundAssets[tile] ?? gameAssets.voidWarning}
-                style={{ imageRendering: 'pixelated' }}
-              />
-            );
-          })}
-
-          {map.events.map(event => (
-            <g key={event.id}>
-              <image
-                x={event.x * tileSize + 2}
-                y={event.y * tileSize + 2}
-                width={tileSize - 4}
-                height={tileSize - 4}
-                href={eventAssets[event.type]}
-                style={{ imageRendering: 'pixelated' }}
-              />
-              {event.type === 'npc' && (
-                <>
-                  <rect
-                    x={event.x * tileSize - 8}
-                    y={event.y * tileSize - 16}
-                    width={tileSize + 16}
-                    height={14}
-                    fill="#1f2937"
-                    rx="3"
-                    opacity="0.85"
-                  />
-                  <text
-                    x={event.x * tileSize + tileSize / 2}
-                    y={event.y * tileSize - 6}
-                    textAnchor="middle"
-                    fontSize="9"
-                    fill="white"
-                    fontWeight="bold"
-                  >
-                    {event.id}
-                  </text>
-                </>
-              )}
-            </g>
-          ))}
-
-          <image
-            x={visualX + 2 - playerFrame * playerRenderSize}
-            y={visualY + 2}
-            width={playerRenderSize * 4}
-            height={playerRenderSize}
-            href={playerSheet}
-            clipPath={`url(#${playerClipId})`}
-            style={{ imageRendering: 'pixelated' }}
+          <PreviewGroundLayer map={map} tileSize={tileSize} />
+          <PreviewEventLayer
+            events={map.events}
+            tileSize={tileSize}
+            animationDisplays={animationDisplays}
+            defaultCharacterHeightTiles={defaultCharacterHeightTiles}
+          />
+          <PreviewPlayerSprite
+            visualX={visualX}
+            visualY={visualY}
+            direction={direction}
+            moving={moving}
+            motionElapsed={motionElapsed}
+            tileSize={tileSize}
+            display={animationDisplays[playerAnimationSet]}
+            defaultCharacterHeightTiles={defaultCharacterHeightTiles}
+            currentMap={currentMap}
           />
         </svg>
         <div className="absolute left-3 bottom-3 bg-black/70 text-white px-3 py-1.5 rounded-md text-[11px] font-mono">
@@ -550,6 +698,9 @@ export function PlaytestScreen() {
   const motionRef = useRef(motionView);
   const heldDirectionRef = useRef<Direction | null>(null);
   const lastBlockedDirectionRef = useRef<Direction | null>(null);
+  const playerTilesPerSecond = movementSpeedToTilesPerSecond(
+    project.databases.system.playerMovementSpeed,
+  );
 
   useEffect(() => {
     const next = createTileFluidMotion({
@@ -562,21 +713,21 @@ export function PlaytestScreen() {
     setMotionView({ ...next });
   }, [state.currentMap, seedTileSize]);
 
-  const isBlocked = (map: MapData | undefined, x: number, y: number) => {
+  const isBlocked = useCallback((map: MapData | undefined, x: number, y: number) => {
     if (!map) return true;
     const collision = map.layers.find(layer => layer.name === 'collision');
     const tile = collision?.tiles[y * map.width + x] ?? 0;
     if (tile === 9) return true;
     return map.events.some(event => event.solid && event.x === x && event.y === y);
-  };
+  }, []);
 
-  const movePreviewPlayer = (direction: Direction) => {
+  const movePreviewPlayer = useCallback((direction: Direction) => {
     const motion = motionRef.current;
     const started = beginTileFluidStep(motion, direction, {
       width: previewMap?.width ?? 1,
       height: previewMap?.height ?? 1,
       isBlocked: (x, y) => isBlocked(previewMap, x, y),
-    });
+    }, playerTilesPerSecond);
     if (!started) {
       if (lastBlockedDirectionRef.current !== direction) {
         faceDirection(direction);
@@ -586,7 +737,7 @@ export function PlaytestScreen() {
       lastBlockedDirectionRef.current = null;
     }
     setMotionView({ ...motion });
-  };
+  }, [faceDirection, isBlocked, playerTilesPerSecond, previewMap]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -594,6 +745,9 @@ export function PlaytestScreen() {
       if (!direction) return;
       event.preventDefault();
       heldDirectionRef.current = direction;
+      if (!motionRef.current.moving) {
+        movePreviewPlayer(direction);
+      }
     };
     const onKeyUp = (event: KeyboardEvent) => {
       const direction = directionFromKey(event.key);
@@ -610,7 +764,7 @@ export function PlaytestScreen() {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, []);
+  }, [movePreviewPlayer]);
 
   useEffect(() => {
     let frame = 0;
@@ -625,7 +779,7 @@ export function PlaytestScreen() {
           width: previewMap?.width ?? 1,
           height: previewMap?.height ?? 1,
           isBlocked: (x, y) => isBlocked(previewMap, x, y),
-        });
+        }, playerTilesPerSecond);
         if (!started) {
           if (lastBlockedDirectionRef.current !== heldDirectionRef.current) {
             faceDirection(heldDirectionRef.current);
@@ -636,16 +790,26 @@ export function PlaytestScreen() {
         }
       }
 
-      const completed = advanceTileFluidMotion(motion, dt, 4);
+      const completed = advanceTileFluidMotion(motion, dt, playerTilesPerSecond);
       if (completed) {
         setPlayerPose(completed.tileX, completed.tileY, completed.direction);
+        if (heldDirectionRef.current) {
+          const started = beginTileFluidStep(motion, heldDirectionRef.current, {
+            width: previewMap?.width ?? 1,
+            height: previewMap?.height ?? 1,
+            isBlocked: (x, y) => isBlocked(previewMap, x, y),
+          }, playerTilesPerSecond);
+          if (!started) {
+            faceDirection(heldDirectionRef.current);
+          }
+        }
       }
       setMotionView({ ...motion });
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [previewMap, setPlayerPose, faceDirection]);
+  }, [previewMap, setPlayerPose, faceDirection, isBlocked, playerTilesPerSecond]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">

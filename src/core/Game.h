@@ -66,6 +66,8 @@ private:
                                            float worldX,
                                            float worldY,
                                            int tileSize,
+                                           float displayHeightOverride,
+                                           bool useCharacterDisplayDefault,
                                            bool showDirectionDot) const;
     void updateCamera();
     bool saveGame(int slotIndex = 1, bool showDialogueFeedback = true);
@@ -101,7 +103,8 @@ private:
     RuntimeAnimationState playerAnimation;
     std::unordered_map<std::string, RuntimeAnimationState> eventAnimations;
     std::string playerAnimationSet = "player_adventurer";
-    static constexpr float kPlayerTilesPerSecond = 4.0f;
+    float playerTilesPerSecond = 8.0f;
+    float defaultCharacterHeightTiles = 1.5f;
 
     int viewportW = 800;
     int viewportH = 600;

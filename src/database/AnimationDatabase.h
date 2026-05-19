@@ -19,8 +19,15 @@ struct AnimationClip {
     Vec2i anchor{32, 54};
 };
 
+struct AnimationDisplay {
+    float heightTiles = 0.0f;
+    float widthTiles = 0.0f;
+    float yOffsetPx = 0.0f;
+};
+
 struct AnimationSet {
     std::string id;
+    AnimationDisplay display;
     std::vector<AnimationClip> clips;
 };
 
@@ -33,6 +40,7 @@ public:
     const AnimationClip* findClip(const std::string& setId,
                                   const std::string& action,
                                   const std::string& direction) const;
+    const AnimationSet* findSet(const std::string& setId) const;
     const std::vector<AnimationSet>& sets() const { return sets_; }
 
 private:

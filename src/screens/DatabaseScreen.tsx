@@ -20,6 +20,7 @@ import type {
   Stats,
   SwitchData,
   SystemData,
+  MovementSpeed,
   TroopData,
   VariableData,
 } from '../types/project';
@@ -36,6 +37,15 @@ const TAB_ORDER: Array<{ key: DatabaseListKey | 'system'; label: string }> = [
   { key: 'variables', label: 'Variables' },
   { key: 'commonEvents', label: 'Common Events' },
   { key: 'system', label: 'System' },
+];
+
+const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
+  { value: 'oneEighth', label: '1/8 speed' },
+  { value: 'oneQuarter', label: '1/4 speed' },
+  { value: 'half', label: 'Half speed' },
+  { value: 'normal', label: 'Normal (250 ms/tile)' },
+  { value: 'double', label: 'Double (125 ms/tile)' },
+  { value: 'quadruple', label: 'Quadruple' },
 ];
 
 function emptyStats(): Stats {
@@ -696,6 +706,20 @@ function SystemPanel({ system }: { system: SystemData }) {
         label="Player animation set"
         value={system.playerAnimationSet ?? ''}
         onChange={e => update({ playerAnimationSet: e.target.value || undefined })}
+      />
+      <Select
+        label="Player movement speed"
+        value={system.playerMovementSpeed ?? 'double'}
+        options={MOVEMENT_SPEED_OPTIONS}
+        onChange={v => update({ playerMovementSpeed: v as MovementSpeed })}
+      />
+      <Input
+        label="Default character height (tiles)"
+        type="number"
+        step="0.1"
+        min="0.1"
+        value={system.defaultCharacterHeightTiles ?? 1.5}
+        onChange={e => update({ defaultCharacterHeightTiles: Number(e.target.value) })}
       />
       <div>
         <label className="text-[12px] font-medium text-gray-500">Starting party (actor ids)</label>

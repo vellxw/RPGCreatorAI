@@ -46,9 +46,12 @@ four directions:
 - `npc_shopkeeper`
 
 `data/database/animations.json` is the source of truth for action,
-direction, asset key, frame size, frame count, FPS, loop behavior, and
-anchor. If a generated sheet fails metadata or visual QA, regenerate it
-before committing.
+direction, asset key, frame size, frame count, FPS, loop behavior,
+anchor, and optional field-display metadata. Character sets should
+declare `display.heightTiles`; the bundled player and NPC sets use
+`1.5` so `64x64` frames render as field characters instead of being
+compressed into a padded tile interior. If a generated sheet fails
+metadata or visual QA, regenerate it before committing.
 
 ## Regeneration
 
@@ -62,6 +65,7 @@ Quality gates:
 
 - every required sheet exists in PNG and BMP form
 - each sheet has four non-empty `64x64` frames
+- every character animation set declares positive display metadata
 - runtime BMP transparency uses magenta only as the color key background
 - preview GIFs under `docs/screenshots/phase-9-animation/` show readable
   motion at game scale

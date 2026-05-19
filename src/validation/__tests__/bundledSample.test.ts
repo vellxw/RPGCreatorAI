@@ -27,7 +27,10 @@ describe('Bundled sample project (Phase 6 slice 10)', () => {
     expect(state.databases.commonEvents.length).toBeGreaterThan(0);
     expect(state.databases.system.startingParty.length).toBeGreaterThan(0);
     expect(state.databases.system.playerAnimationSet).toBe('player_adventurer');
+    expect(state.databases.system.playerMovementSpeed).toBe('double');
+    expect(state.databases.system.defaultCharacterHeightTiles).toBe(1.5);
     expect(state.databases.animations.sets.length).toBeGreaterThan(0);
+    expect(state.databases.animations.sets[0].display?.heightTiles).toBe(1.5);
   });
 
   it('sample town map exercises every category of v1 commands', async () => {
