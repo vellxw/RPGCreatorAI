@@ -14,8 +14,12 @@
 
 ## Movement Rules
 
-- Grid-based: one tile per key press (key must be released and pressed
-  again to move another tile).
+- Grid-based logic with smooth visual movement: hold a movement key to
+  keep walking tile by tile at the default `4 tiles/s`.
+- Saves, collision, touch events, and transfers still use logical tile
+  coordinates. The transient interpolated pixel position is render-only.
+- Diagonal movement is not supported; the first active direction in the
+  input priority order is used.
 - Direction always updates on a movement key, even when blocked.
 - Movement is blocked by:
   - the collision layer (tile value `9`),
@@ -24,6 +28,8 @@
 - Stepping onto an event with `trigger: "touch"` runs its commands.
 - Pressing the interact key runs commands of an event with
   `trigger: "interact"` on the cell directly in front of the player.
+- `isPressed` / held state drives movement. `isJustPressed` remains for
+  interactions, menu commands, save/load, and dialogue advancement.
 
 ## Dialogue Rules
 

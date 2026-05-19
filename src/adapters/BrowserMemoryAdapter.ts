@@ -23,6 +23,7 @@ import type {
   SystemData,
   TroopData,
   VariableData,
+  AnimationDatabaseData,
 } from '../types/project';
 import { buildExportBundle, parseImportBundle, safeStringify } from './jsonUtils';
 import { mergeDatabases } from './defaultDatabases';
@@ -42,6 +43,7 @@ import systemJson from '../../data/database/system.json';
 import switchesJson from '../../data/database/switches.json';
 import variablesJson from '../../data/database/variables.json';
 import commonEventsJson from '../../data/database/commonEvents.json';
+import animationsJson from '../../data/database/animations.json';
 
 function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -87,6 +89,7 @@ function seedFromBundle(): FullProjectState {
         deepClone(commonEventsJson) as SchemaWrapper<CommonEventData>,
         'commonEvents',
       ),
+      animations: extractAnimations(deepClone(animationsJson) as Record<string, unknown>),
       system: extractSystem(deepClone(systemJson) as Record<string, unknown>),
     }),
   };
@@ -100,6 +103,14 @@ function extractSystem(json: Record<string, unknown>): SystemData {
     windowTint: typeof json.windowTint === 'string' ? (json.windowTint as string) : undefined,
     battleBackground:
       typeof json.battleBackground === 'string' ? (json.battleBackground as string) : undefined,
+    playerAnimationSet:
+      typeof json.playerAnimationSet === 'string' ? (json.playerAnimationSet as string) : undefined,
+  };
+}
+
+function extractAnimations(json: Record<string, unknown>): AnimationDatabaseData {
+  return {
+    sets: Array.isArray(json.sets) ? (json.sets as AnimationDatabaseData['sets']) : [],
   };
 }
 

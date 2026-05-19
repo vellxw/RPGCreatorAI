@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 1,
+  "pipeline": "agent-sprite-forge-compatible full-strip normalization",
+  "sourceRepo": "https://github.com/0x0funky/agent-sprite-forge",
+  "sourceCommit": "fff651a89223b044ccfc0b75ed9f3754c6d739b1",
+  "sourceSkill": "generate2dsprite/SKILL.md",
+  "frameSize": {
+    "width": 64,
+    "height": 64
+  },
+  "frameCount": 4,
+  "backgroundKey": {
+    "runtimeBmpTransparency": "#ff00ff"
+  },
+  "generatedAssets": [
+    {
+      "asset": "player_adventurer_idle_down",
+      "character": "player_adventurer",
+      "action": "idle",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_idle_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_idle_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_idle_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_idle_left",
+      "character": "player_adventurer",
+      "action": "idle",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_idle_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_idle_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_idle_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_idle_right",
+      "character": "player_adventurer",
+      "action": "idle",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_idle_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_idle_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_idle_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_idle_up",
+      "character": "player_adventurer",
+      "action": "idle",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_idle_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_idle_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_idle_up.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_walk_down",
+      "character": "player_adventurer",
+      "action": "walk",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_walk_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_walk_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_walk_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_walk_left",
+      "character": "player_adventurer",
+      "action": "walk",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_walk_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_walk_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_walk_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_walk_right",
+      "character": "player_adventurer",
+      "action": "walk",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_walk_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_walk_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_walk_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_walk_up",
+      "character": "player_adventurer",
+      "action": "walk",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_walk_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_walk_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_walk_up.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_interact_down",
+      "character": "player_adventurer",
+      "action": "interact",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_interact_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_interact_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_interact_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_interact_left",
+      "character": "player_adventurer",
+      "action": "interact",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_interact_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_interact_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_interact_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_interact_right",
+      "character": "player_adventurer",
+      "action": "interact",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_interact_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_interact_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_interact_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_interact_up",
+      "character": "player_adventurer",
+      "action": "interact",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_interact_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_interact_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_interact_up.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_attack_down",
+      "character": "player_adventurer",
+      "action": "attack",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_attack_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_attack_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_attack_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_attack_left",
+      "character": "player_adventurer",
+      "action": "attack",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_attack_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_attack_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_attack_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_attack_right",
+      "character": "player_adventurer",
+      "action": "attack",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_attack_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_attack_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_attack_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_attack_up",
+      "character": "player_adventurer",
+      "action": "attack",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_attack_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_attack_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_attack_up.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_hurt_down",
+      "character": "player_adventurer",
+      "action": "hurt",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_hurt_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_hurt_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_hurt_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_hurt_left",
+      "character": "player_adventurer",
+      "action": "hurt",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_hurt_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_hurt_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_hurt_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_hurt_right",
+      "character": "player_adventurer",
+      "action": "hurt",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_hurt_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_hurt_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_hurt_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_hurt_up",
+      "character": "player_adventurer",
+      "action": "hurt",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_hurt_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_hurt_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_hurt_up.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_death_down",
+      "character": "player_adventurer",
+      "action": "death",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_death_down.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_death_down.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_death_down.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_death_left",
+      "character": "player_adventurer",
+      "action": "death",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_death_left.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_death_left.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_death_left.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_death_right",
+      "character": "player_adventurer",
+      "action": "death",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_death_right.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_death_right.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_death_right.png"
+      }
+    },
+    {
+      "asset": "player_adventurer_death_up",
+      "character": "player_adventurer",
+      "action": "death",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/player_adventurer_death_up.png",
+        "runtimeBmp": "assets/generated/runtime/player_adventurer_death_up.bmp",
+        "editorPng": "src/assets/generated/player_adventurer_death_up.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_idle_down",
+      "character": "npc_old_man",
+      "action": "idle",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_idle_down.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_idle_down.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_idle_down.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_idle_left",
+      "character": "npc_old_man",
+      "action": "idle",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_idle_left.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_idle_left.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_idle_left.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_idle_right",
+      "character": "npc_old_man",
+      "action": "idle",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_idle_right.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_idle_right.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_idle_right.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_idle_up",
+      "character": "npc_old_man",
+      "action": "idle",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_idle_up.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_idle_up.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_idle_up.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_walk_down",
+      "character": "npc_old_man",
+      "action": "walk",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_walk_down.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_walk_down.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_walk_down.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_walk_left",
+      "character": "npc_old_man",
+      "action": "walk",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_walk_left.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_walk_left.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_walk_left.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_walk_right",
+      "character": "npc_old_man",
+      "action": "walk",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_walk_right.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_walk_right.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_walk_right.png"
+      }
+    },
+    {
+      "asset": "npc_old_man_walk_up",
+      "character": "npc_old_man",
+      "action": "walk",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_old_man_walk_up.png",
+        "runtimeBmp": "assets/generated/runtime/npc_old_man_walk_up.bmp",
+        "editorPng": "src/assets/generated/npc_old_man_walk_up.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_idle_down",
+      "character": "npc_shopkeeper",
+      "action": "idle",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_idle_down.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_idle_down.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_idle_down.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_idle_left",
+      "character": "npc_shopkeeper",
+      "action": "idle",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_idle_left.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_idle_left.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_idle_left.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_idle_right",
+      "character": "npc_shopkeeper",
+      "action": "idle",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_idle_right.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_idle_right.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_idle_right.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_idle_up",
+      "character": "npc_shopkeeper",
+      "action": "idle",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_idle_up.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_idle_up.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_idle_up.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_walk_down",
+      "character": "npc_shopkeeper",
+      "action": "walk",
+      "direction": "down",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_walk_down.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_walk_down.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_walk_down.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_walk_left",
+      "character": "npc_shopkeeper",
+      "action": "walk",
+      "direction": "left",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_walk_left.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_walk_left.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_walk_left.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_walk_right",
+      "character": "npc_shopkeeper",
+      "action": "walk",
+      "direction": "right",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_walk_right.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_walk_right.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_walk_right.png"
+      }
+    },
+    {
+      "asset": "npc_shopkeeper_walk_up",
+      "character": "npc_shopkeeper",
+      "action": "walk",
+      "direction": "up",
+      "outputs": {
+        "webPng": "assets/generated/web/npc_shopkeeper_walk_up.png",
+        "runtimeBmp": "assets/generated/runtime/npc_shopkeeper_walk_up.bmp",
+        "editorPng": "src/assets/generated/npc_shopkeeper_walk_up.png"
+      }
+    }
+  ]
+}

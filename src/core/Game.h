@@ -1,12 +1,15 @@
 #pragma once
 #include "platform/Window.h"
 #include "platform/InputManager.h"
+#include "core/PlayerMotion.h"
 #include "renderer/Renderer2D.h"
+#include "renderer/RenderSnapshot.h"
 #include "world/MapScene.h"
 #include "events/GameState.h"
 #include "events/EventRunner.h"
 #include "dialogue/DialogueSystem.h"
 #include "database/ItemDatabase.h"
+#include "database/AnimationDatabase.h"
 #include "database/RpgDatabases.h"
 #include "runtime/BattleSystem.h"
 #include "runtime/BattleSummarySystem.h"
@@ -15,6 +18,7 @@
 #include "types/ProjectTypes.h"
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 class Game {
 public:
@@ -45,9 +49,24 @@ private:
     bool loadMap(const std::string& mapId);
     void handlePlayerInput(const InputManager& input);
     bool tryMove(int dx, int dy, Direction dir);
+    bool tryStartSmoothMove(int dx, int dy, Direction dir);
+    void finalizeSmoothStepIfNeeded();
     void interact();
     void runEventCommands(const EventData& event);
     void applyTransferIfPending();
+    void applyAnimationIfPending();
+    void applyAnimationRequest(const AnimationRequest& request);
+    void updateAnimationStates(float dt);
+    RenderEntitiesSnapshot buildRenderSnapshot() const;
+    EntityRenderSprite buildAnimatedSprite(const std::string& animationSet,
+                                           const std::string& fallbackAsset,
+                                           const std::string& action,
+                                           Direction direction,
+                                           float elapsed,
+                                           float worldX,
+                                           float worldY,
+                                           int tileSize,
+                                           bool showDirectionDot) const;
     void updateCamera();
     bool saveGame(int slotIndex = 1, bool showDialogueFeedback = true);
     bool loadGameFromDisk(int slotIndex = 1, bool showDialogueFeedback = true);
@@ -67,6 +86,22 @@ private:
     rpg::BattleSummarySystem battleSummarySystem;
     rpg::MenuSystem menuSystem;
     rpg::ShopSystem shopSystem;
+    AnimationDatabase animationDatabase;
+    PlayerMotion playerMotion;
+
+    struct RuntimeAnimationState {
+        std::string action = "idle";
+        Direction direction = Direction::Down;
+        float elapsed = 0.0f;
+        float duration = 0.0f;
+        bool manual = false;
+        bool loop = false;
+    };
+
+    RuntimeAnimationState playerAnimation;
+    std::unordered_map<std::string, RuntimeAnimationState> eventAnimations;
+    std::string playerAnimationSet = "player_adventurer";
+    static constexpr float kPlayerTilesPerSecond = 4.0f;
 
     int viewportW = 800;
     int viewportH = 600;

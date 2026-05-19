@@ -19,6 +19,7 @@ import type {
   IfVariableCommand,
   OpenShopCommand,
   PlaySoundCommand,
+  PlayAnimationCommand,
   RemoveGoldCommand,
   RemoveItemCommand,
   SetFlagCommand,
@@ -112,6 +113,8 @@ function Body({
       return <StartBattleEditor command={command} onChange={onChange} />;
     case 'changeActorHp':
       return <ChangeActorHpEditor command={command} onChange={onChange} />;
+    case 'playAnimation':
+      return <PlayAnimationEditor command={command} onChange={onChange} />;
     case 'setPlayerPosition':
       return <TransferMapEditor command={{ ...command, type: 'transferMap' as const }} mapIds={mapIds} onChange={(next) => onChange({ ...next, type: 'setPlayerPosition' })} />;
   }
@@ -575,6 +578,62 @@ function ChangeActorHpEditor({ command, onChange }: { command: ChangeActorHpComm
       </Field>
       <Field label="Delta (negative for damage)">
         {input({ type: 'number', value: command.delta, onChange: e => onChange({ ...command, delta: Number(e.target.value) }) })}
+      </Field>
+    </div>
+  );
+}
+
+function PlayAnimationEditor({ command, onChange }: { command: PlayAnimationCommand; onChange: (n: PlayAnimationCommand) => void }) {
+  const target = command.target;
+  return (
+    <div className="space-y-2">
+      <Field label="Target">
+        {select(target, [
+          { value: 'player', label: 'Player' },
+          { value: 'thisEvent', label: 'This event' },
+          { value: 'event', label: 'Named event' },
+        ], v => onChange({ ...command, target: v }))}
+      </Field>
+      {target === 'event' && (
+        <Field label="Event ID">
+          {input({ value: command.eventId ?? '', onChange: e => onChange({ ...command, eventId: e.target.value }) })}
+        </Field>
+      )}
+      <Field label="Action">
+        {select(command.action, [
+          { value: 'idle', label: 'Idle' },
+          { value: 'walk', label: 'Walk' },
+          { value: 'interact', label: 'Interact' },
+          { value: 'attack', label: 'Attack' },
+          { value: 'hurt', label: 'Hurt' },
+          { value: 'death', label: 'Death' },
+        ], v => onChange({ ...command, action: v }))}
+      </Field>
+      <Field label="Direction">
+        {select(command.direction, [
+          { value: 'current', label: 'Current' },
+          { value: 'up', label: 'Up' },
+          { value: 'down', label: 'Down' },
+          { value: 'left', label: 'Left' },
+          { value: 'right', label: 'Right' },
+        ], v => onChange({ ...command, direction: v }))}
+      </Field>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Duration (ms)">
+          {input({ type: 'number', value: command.durationMs, onChange: e => onChange({ ...command, durationMs: Number(e.target.value) }) })}
+        </Field>
+        <Field label="Blocking">
+          {select(command.blocking ? 'true' : 'false', [
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' },
+          ], v => onChange({ ...command, blocking: v === 'true' }))}
+        </Field>
+      </div>
+      <Field label="Loop">
+        {select(command.loop ? 'true' : 'false', [
+          { value: 'false', label: 'No' },
+          { value: 'true', label: 'Yes' },
+        ], v => onChange({ ...command, loop: v === 'true' }))}
       </Field>
     </div>
   );

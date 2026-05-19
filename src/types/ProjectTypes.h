@@ -30,6 +30,7 @@ struct DatabaseReference {
     std::string switchesPath;
     std::string variablesPath;
     std::string commonEventsPath;
+    std::string animationsPath;
 };
 
 struct Resolution {

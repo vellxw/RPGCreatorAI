@@ -16,6 +16,9 @@ export function emptyDatabases(): DatabaseEntries {
     switches: [],
     variables: [],
     commonEvents: [],
+    animations: {
+      sets: [],
+    },
     system: {
       startingParty: [],
       startingGold: 0,
@@ -60,6 +63,12 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
       defaultBgm: input.system.defaultBgm,
       windowTint: input.system.windowTint,
       battleBackground: input.system.battleBackground,
+      playerAnimationSet: input.system.playerAnimationSet,
+    };
+  }
+  if (input.animations && typeof input.animations === 'object') {
+    merged.animations = {
+      sets: Array.isArray(input.animations.sets) ? [...input.animations.sets] : base.animations.sets,
     };
   }
   return merged;

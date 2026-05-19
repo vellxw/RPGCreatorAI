@@ -1867,8 +1867,18 @@
       "y": 9,
       "solid": true,
       "sprite": "npc_old_man",
+      "animationSet": "npc_old_man",
       "trigger": "interact",
       "commands": [
+        {
+          "type": "playAnimation",
+          "target": "player",
+          "action": "interact",
+          "direction": "current",
+          "durationMs": 500,
+          "blocking": false,
+          "loop": false
+        },
         {
           "type": "ifSwitch",
           "switchId": "talked_to_old_man",
@@ -1963,8 +1973,18 @@
       "y": 13,
       "solid": true,
       "sprite": "npc_shopkeeper",
+      "animationSet": "npc_shopkeeper",
       "trigger": "interact",
       "commands": [
+        {
+          "type": "playAnimation",
+          "target": "player",
+          "action": "interact",
+          "direction": "current",
+          "durationMs": 500,
+          "blocking": false,
+          "loop": false
+        },
         {
           "type": "showText",
           "speaker": "Tendera",
@@ -1991,8 +2011,26 @@
           "equals": false,
           "then": [
             {
+              "type": "playAnimation",
+              "target": "player",
+              "action": "hurt",
+              "direction": "current",
+              "durationMs": 350,
+              "blocking": false,
+              "loop": false
+            },
+            {
               "type": "showText",
               "text": "\u00c2\u00a1Un par de slimes te ataca!"
+            },
+            {
+              "type": "playAnimation",
+              "target": "player",
+              "action": "attack",
+              "direction": "current",
+              "durationMs": 450,
+              "blocking": false,
+              "loop": false
             },
             {
               "type": "startBattle",
@@ -2016,6 +2054,15 @@
                 }
               ],
               "defeatBranch": [
+                {
+                  "type": "playAnimation",
+                  "target": "player",
+                  "action": "death",
+                  "direction": "current",
+                  "durationMs": 700,
+                  "blocking": true,
+                  "loop": false
+                },
                 {
                   "type": "showText",
                   "text": "Has ca\u00c3\u00addo... Despiertas en el pueblo."

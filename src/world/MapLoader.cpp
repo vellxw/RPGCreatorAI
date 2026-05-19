@@ -90,6 +90,14 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
     } else if (type == "changeActorHp") {
         cmd->actorId = j.at("actorId").get<std::string>();
         cmd->delta = j.at("delta").get<int>();
+    } else if (type == "playAnimation") {
+        cmd->animationTarget = j.value("target", std::string{"player"});
+        cmd->animationEventId = j.value("eventId", std::string{});
+        cmd->animationAction = j.value("action", std::string{"idle"});
+        cmd->animationDirection = j.value("direction", std::string{"current"});
+        cmd->animationDurationMs = j.value("durationMs", 0);
+        cmd->animationBlocking = j.value("blocking", false);
+        cmd->animationLoop = j.value("loop", false);
     } else {
         Logger::warning("MapLoader: unknown command type '" + type + "' (kept as opaque)");
     }
@@ -145,6 +153,7 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             ed.y = evt.at("y").get<int>();
             ed.solid = evt.value("solid", false);
             ed.sprite = evt.value("sprite", "");
+            ed.animationSet = evt.value("animationSet", "");
             ed.trigger = evt.value("trigger", "interact");
 
             for (const auto& cmd : evt.at("commands")) {

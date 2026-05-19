@@ -1,4 +1,16 @@
 const asset = (name: string) => new URL(`./${name}.png`, import.meta.url).href;
+const animationAsset = (prefix: string, action: string, direction: string) =>
+  asset(`${prefix}_${action}_${direction}`);
+const directions = ['down', 'left', 'right', 'up'] as const;
+
+function animationStripSet(prefix: string, actions: readonly string[]) {
+  return Object.fromEntries(
+    actions.map(action => [
+      action,
+      Object.fromEntries(directions.map(direction => [direction, animationAsset(prefix, action, direction)])),
+    ]),
+  );
+}
 
 export const gameAssets = {
   grass: asset('tile_grass'),
@@ -23,6 +35,19 @@ export const gameAssets = {
   sword: asset('item_sword'),
   shield: asset('item_shield'),
   skillBook: asset('skill_book'),
+} as const;
+
+export const animationAssets = {
+  playerAdventurer: animationStripSet('player_adventurer', [
+    'idle',
+    'walk',
+    'interact',
+    'attack',
+    'hurt',
+    'death',
+  ]),
+  oldMan: animationStripSet('npc_old_man', ['idle', 'walk']),
+  shopkeeper: animationStripSet('npc_shopkeeper', ['idle', 'walk']),
 } as const;
 
 export const editorAssets = {

@@ -123,6 +123,79 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('unknown item'))).toBe(true);
   });
 
+  it('accepts playAnimation commands that target known animation clips', () => {
+    const event: GameEvent = {
+      id: 'actor_event',
+      type: 'npc',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      animationSet: 'player_adventurer',
+      commands: [
+        {
+          type: 'playAnimation',
+          target: 'thisEvent',
+          action: 'attack',
+          direction: 'current',
+          durationMs: 300,
+          blocking: true,
+          loop: false,
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    project.databases.animations = {
+      sets: [
+        {
+          id: 'player_adventurer',
+          clips: [
+            {
+              action: 'attack',
+              direction: 'down',
+              asset: 'player_adventurer_attack_down',
+              frameSize: { width: 64, height: 64 },
+              frameCount: 4,
+              fps: 10,
+              loop: false,
+              anchor: { x: 32, y: 54 },
+            },
+          ],
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+    expect(report.errors).toEqual([]);
+  });
+
+  it('flags playAnimation commands that target missing events or clips', () => {
+    const event: GameEvent = {
+      id: 'director',
+      type: 'trigger',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      commands: [
+        {
+          type: 'playAnimation',
+          target: 'event',
+          eventId: 'missing_event',
+          action: 'hurt',
+          direction: 'down',
+          durationMs: 300,
+          blocking: true,
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('targets unknown event "missing_event"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('references unknown animation clip'))).toBe(true);
+  });
+
   it('flags layer tile count mismatch', () => {
     const map = makeMap({ width: 4, height: 4 });
     map.layers[0].tiles = [1, 2, 3]; // wrong length

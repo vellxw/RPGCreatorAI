@@ -2,12 +2,14 @@
 
 ## Current Goal
 
-Phase 8 — Game visual foundation and creator workflow hardening — DONE.
+Phase 9 — Smooth movement and character animation foundation — DONE.
 
 ## Active Phase
 
-Phase 8 is governed by `docs/GAME_VISUAL_DESIGN.md`, the source of truth
-for game visuals.
+Phase 9 is governed by `docs/GAME_VISUAL_DESIGN.md` for runtime visual
+truth and `docs/ASSET_PIPELINE.md` for generated character animation
+assets. Logical movement, collision, events, and saves remain tile-based;
+rendering and editor preview interpolate visually between tiles.
 
 ## Open subgoals (top of stack first)
 
@@ -15,6 +17,13 @@ for game visuals.
 
 ## Closed subgoals
 
+- Phase 9 implementation slice — input now uses held movement in the
+  native runtime and editor playtest preview; player rendering follows a
+  transient interpolated position while GameState remains tile-based;
+  animation sets are data-driven through `data/database/animations.json`;
+  `playAnimation` commands are validated and applied by `Game`; generated
+  player/NPC animation sheets, prompts, manifests, and preview GIFs are
+  versioned.
 - Slice 11 — end-to-end visual QA closeout with committed editor/runtime
   evidence, full-bleed visual tile regression coverage, corrected runtime
   screenshot tooling, final validation, and phase documentation.

@@ -188,6 +188,7 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
         system_.defaultBgm = sys.value("defaultBgm", "");
         system_.windowTint = sys.value("windowTint", "");
         system_.battleBackground = sys.value("battleBackground", "");
+        system_.playerAnimationSet = sys.value("playerAnimationSet", "");
     }
 
     Logger::info("Databases loaded: " +

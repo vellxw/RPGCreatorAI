@@ -2,6 +2,7 @@
 #include "world/ProjectLoader.h"
 #include "core/Logger.h"
 #include <SDL.h>
+#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <string>
@@ -130,17 +131,45 @@ bool Application::runSmokeShots(const std::string& outputDir) {
             game->pumpEvents(dt);
         }
     };
+    auto holdMove = [&](SDL_Scancode code,
+                        int frames,
+                        int captureFrame,
+                        const std::string& captureName) {
+        keys.fill(0);
+        inputManager.update(keys.data());
+        keys[code] = 1;
+        inputManager.update(keys.data());
+        const int heldFrames = std::min(frames, captureFrame + 1);
+        for (int i = 0; i < heldFrames; ++i) {
+            game->update(inputManager, dt);
+            if (i == captureFrame) {
+                if (!snapshot(outputDir, captureName)) return false;
+            }
+        }
+        keys.fill(0);
+        inputManager.update(keys.data());
+        for (int i = heldFrames; i < frames; ++i) {
+            game->pumpEvents(dt);
+        }
+        return true;
+    };
 
     // 01 — Town initial
     game->pumpEvents(dt);
     if (!snapshot(outputDir, "01-town-initial")) return false;
 
-    // 02 — Walk to NPC and interact (NPC at (20,9), player starts at (20,13))
-    moveMany(0, -1, Direction::Up, 3);        // (20,13) -> (20,10)
+    // Phase 9 — held input starts a smooth visual step before committing
+    // the logical tile.
+    if (!holdMove(SDL_SCANCODE_W, 18, 8, "phase9-01-walk-midstep")) return false;
+
+    // 02 — Walk to NPC and interact (NPC at (20,9), player now at (20,12))
+    moveMany(0, -1, Direction::Up, 2);        // (20,12) -> (20,10)
     game->stepMove(0, -1, Direction::Up);     // blocked by NPC, direction updates
     game->pumpEvents(dt);
     game->stepInteract();                     // opens dialogue
     game->pumpEvents(dt);
+    if (!snapshot(outputDir, "phase9-02-player-interact")) return false;
+    game->pumpEvents(dt);                     // showText follows the animation request
     if (!snapshot(outputDir, "02-npc-dialogue")) return false;
 
     // The bundled NPC now includes a deterministic first-choice branch with
@@ -242,7 +271,11 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     // 17 — Battle reward presentation after the visible wild-slime trigger.
     moveMany(-1, 0, Direction::Left, 20);  // (30,13) -> (10,13)
     moveMany(0, 1, Direction::Down, 5);    // (10,13) -> (10,18), touch slime
-    game->stepDismissDialogue(); game->pumpEvents(dt); // resolve startBattle
+    if (!snapshot(outputDir, "phase9-03-player-hurt")) return false;
+    game->pumpEvents(dt);                  // showText follows the hurt animation
+    game->stepDismissDialogue(); game->pumpEvents(dt); // attack animation request
+    if (!snapshot(outputDir, "phase9-04-player-attack")) return false;
+    game->pumpEvents(dt);                  // resolve startBattle and open summary
     if (!snapshot(outputDir, "17-battle-summary")) return false;
 
     Logger::info("Smoke shots complete.");

@@ -692,6 +692,11 @@ function SystemPanel({ system }: { system: SystemData }) {
         value={system.battleBackground ?? ''}
         onChange={e => update({ battleBackground: e.target.value || undefined })}
       />
+      <Input
+        label="Player animation set"
+        value={system.playerAnimationSet ?? ''}
+        onChange={e => update({ playerAnimationSet: e.target.value || undefined })}
+      />
       <div>
         <label className="text-[12px] font-medium text-gray-500">Starting party (actor ids)</label>
         <div className="space-y-1 mt-1">

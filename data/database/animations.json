@@ -1,0 +1,660 @@
+{
+  "schemaVersion": 1,
+  "sets": [
+    {
+      "id": "player_adventurer",
+      "clips": [
+        {
+          "action": "idle",
+          "direction": "down",
+          "asset": "player_adventurer_idle_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "left",
+          "asset": "player_adventurer_idle_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "right",
+          "asset": "player_adventurer_idle_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "up",
+          "asset": "player_adventurer_idle_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "down",
+          "asset": "player_adventurer_walk_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "left",
+          "asset": "player_adventurer_walk_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "right",
+          "asset": "player_adventurer_walk_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "up",
+          "asset": "player_adventurer_walk_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "interact",
+          "direction": "down",
+          "asset": "player_adventurer_interact_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "interact",
+          "direction": "left",
+          "asset": "player_adventurer_interact_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "interact",
+          "direction": "right",
+          "asset": "player_adventurer_interact_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "interact",
+          "direction": "up",
+          "asset": "player_adventurer_interact_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "attack",
+          "direction": "down",
+          "asset": "player_adventurer_attack_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 10,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "attack",
+          "direction": "left",
+          "asset": "player_adventurer_attack_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 10,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "attack",
+          "direction": "right",
+          "asset": "player_adventurer_attack_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 10,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "attack",
+          "direction": "up",
+          "asset": "player_adventurer_attack_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 10,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "hurt",
+          "direction": "down",
+          "asset": "player_adventurer_hurt_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "hurt",
+          "direction": "left",
+          "asset": "player_adventurer_hurt_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "hurt",
+          "direction": "right",
+          "asset": "player_adventurer_hurt_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "hurt",
+          "direction": "up",
+          "asset": "player_adventurer_hurt_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "death",
+          "direction": "down",
+          "asset": "player_adventurer_death_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 6,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "death",
+          "direction": "left",
+          "asset": "player_adventurer_death_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 6,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "death",
+          "direction": "right",
+          "asset": "player_adventurer_death_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 6,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "death",
+          "direction": "up",
+          "asset": "player_adventurer_death_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 6,
+          "loop": false,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        }
+      ]
+    },
+    {
+      "id": "npc_old_man",
+      "clips": [
+        {
+          "action": "idle",
+          "direction": "down",
+          "asset": "npc_old_man_idle_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "left",
+          "asset": "npc_old_man_idle_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "right",
+          "asset": "npc_old_man_idle_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "up",
+          "asset": "npc_old_man_idle_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "down",
+          "asset": "npc_old_man_walk_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "left",
+          "asset": "npc_old_man_walk_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "right",
+          "asset": "npc_old_man_walk_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "up",
+          "asset": "npc_old_man_walk_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        }
+      ]
+    },
+    {
+      "id": "npc_shopkeeper",
+      "clips": [
+        {
+          "action": "idle",
+          "direction": "down",
+          "asset": "npc_shopkeeper_idle_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "left",
+          "asset": "npc_shopkeeper_idle_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "right",
+          "asset": "npc_shopkeeper_idle_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "idle",
+          "direction": "up",
+          "asset": "npc_shopkeeper_idle_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 4,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "down",
+          "asset": "npc_shopkeeper_walk_down",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "left",
+          "asset": "npc_shopkeeper_walk_left",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "right",
+          "asset": "npc_shopkeeper_walk_right",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        },
+        {
+          "action": "walk",
+          "direction": "up",
+          "asset": "npc_shopkeeper_walk_up",
+          "frameSize": {
+            "width": 64,
+            "height": 64
+          },
+          "frameCount": 4,
+          "fps": 8,
+          "loop": true,
+          "anchor": {
+            "x": 32,
+            "y": 54
+          }
+        }
+      ]
+    }
+  ]
+}

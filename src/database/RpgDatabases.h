@@ -100,6 +100,7 @@ struct SystemRecord {
     std::string defaultBgm;
     std::string windowTint;
     std::string battleBackground;
+    std::string playerAnimationSet;
 };
 
 struct ItemRecord {

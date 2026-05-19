@@ -42,6 +42,7 @@ const VALID_COMMAND_TYPES = new Set([
   'openShop',
   'startBattle',
   'changeActorHp',
+  'playAnimation',
 ]);
 
 export interface ValidationReport {
@@ -62,12 +63,21 @@ interface RefIndex {
   shopIds: Set<string>;
   commonEventIds: Set<string>;
   questObjectives: Map<string, Set<string>>;
+  animationClips: Map<string, Set<string>>;
+  playerAnimationSet: string;
 }
 
 function buildIndex(items: ItemDatabase, db: DatabaseEntries): RefIndex {
   const questObjectives = new Map<string, Set<string>>();
   for (const q of db.quests) {
     questObjectives.set(q.id, new Set(q.objectives.map(o => o.id)));
+  }
+  const animationClips = new Map<string, Set<string>>();
+  for (const set of db.animations.sets) {
+    animationClips.set(
+      set.id,
+      new Set(set.clips.map(clip => `${clip.action}:${clip.direction}`)),
+    );
   }
   return {
     itemIds: new Set(items.items.map(i => i.id)),
@@ -82,6 +92,8 @@ function buildIndex(items: ItemDatabase, db: DatabaseEntries): RefIndex {
     shopIds: new Set(db.shops.map(s => s.id)),
     commonEventIds: new Set(db.commonEvents.map(c => c.id)),
     questObjectives,
+    animationClips,
+    playerAnimationSet: db.system.playerAnimationSet || 'player_adventurer',
   };
 }
 
@@ -332,7 +344,7 @@ function validateCrossDbRefs(db: DatabaseEntries, index: RefIndex): ValidationMe
 function validateCommandsInMap(map: MapData, mapIds: string[], index: RefIndex): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   for (const event of map.events) {
-    out.push(...validateCommandList(event.commands, mapIds, index, `${map.id}/${event.id}`, event.id));
+    out.push(...validateCommandList(event.commands, mapIds, index, `${map.id}/${event.id}`, event.id, map.events, event));
   }
   return out;
 }
@@ -342,7 +354,7 @@ function validateCommandsInCommonEvent(
   mapIds: string[],
   index: RefIndex,
 ): ValidationMessage[] {
-  return validateCommandList(ce.commands, mapIds, index, `commonEvent/${ce.id}`, ce.id);
+  return validateCommandList(ce.commands, mapIds, index, `commonEvent/${ce.id}`, ce.id, [], undefined);
 }
 
 function validateCommandList(
@@ -351,6 +363,8 @@ function validateCommandList(
   index: RefIndex,
   source: string,
   ownerLabel: string,
+  mapEvents: GameEvent[],
+  ownerEvent: GameEvent | undefined,
 ): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   for (const cmd of commands) {
@@ -362,22 +376,22 @@ function validateCommandList(
       });
       continue;
     }
-    out.push(...validateSingleCommand(cmd, mapIds, index, source, ownerLabel));
+    out.push(...validateSingleCommand(cmd, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
 
     // Walk nested branches.
     if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
-      out.push(...validateCommandList(cmd.then, mapIds, index, source, ownerLabel));
-      out.push(...validateCommandList(cmd.else, mapIds, index, source, ownerLabel));
+      out.push(...validateCommandList(cmd.then, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
+      out.push(...validateCommandList(cmd.else, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
     } else if (cmd.type === 'showChoices') {
       for (const choice of cmd.choices) {
-        out.push(...validateCommandList(choice.commands, mapIds, index, source, ownerLabel));
+        out.push(...validateCommandList(choice.commands, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
       }
     } else if (cmd.type === 'startBattle') {
       if (cmd.victoryBranch) {
-        out.push(...validateCommandList(cmd.victoryBranch, mapIds, index, source, ownerLabel));
+        out.push(...validateCommandList(cmd.victoryBranch, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
       }
       if (cmd.defeatBranch) {
-        out.push(...validateCommandList(cmd.defeatBranch, mapIds, index, source, ownerLabel));
+        out.push(...validateCommandList(cmd.defeatBranch, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
       }
     }
   }
@@ -390,6 +404,8 @@ function validateSingleCommand(
   index: RefIndex,
   source: string,
   ownerLabel: string,
+  mapEvents: GameEvent[],
+  ownerEvent: GameEvent | undefined,
 ): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const err = (msg: string) => {
@@ -448,6 +464,35 @@ function validateSingleCommand(
     case 'changeActorHp':
       if (!index.actorIds.has(cmd.actorId)) err(`changeActorHp references unknown actor "${cmd.actorId}"`);
       break;
+    case 'playAnimation': {
+      const targetEvent =
+        cmd.target === 'thisEvent'
+          ? ownerEvent
+          : cmd.target === 'event'
+            ? mapEvents.find(e => e.id === cmd.eventId)
+            : undefined;
+      if (cmd.target === 'event' && !targetEvent) {
+        err(`playAnimation targets unknown event "${cmd.eventId ?? ''}"`);
+      }
+
+      const setId =
+        cmd.target === 'player'
+          ? index.animationClips.has(index.playerAnimationSet) ? index.playerAnimationSet : ''
+          : targetEvent?.animationSet ?? '';
+      const clips = setId ? index.animationClips.get(setId) : undefined;
+      const directionMatches =
+        cmd.direction === 'current'
+          ? [...(clips ?? new Set<string>())].some(key => key.startsWith(`${cmd.action}:`))
+          : clips?.has(`${cmd.action}:${cmd.direction}`) || clips?.has(`${cmd.action}:any`);
+
+      if (!clips || !directionMatches) {
+        err(`playAnimation references unknown animation clip "${setId || '(missing-set)'}/${cmd.action}/${cmd.direction}"`);
+      }
+      if (!Number.isFinite(cmd.durationMs) || cmd.durationMs < 0) {
+        err(`playAnimation durationMs must be a non-negative finite number`);
+      }
+      break;
+    }
     case 'addGold':
     case 'removeGold':
       if (!Number.isFinite(cmd.amount) || cmd.amount < 0)

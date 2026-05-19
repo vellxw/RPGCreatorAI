@@ -7,9 +7,11 @@ set(PHASE2_TEST_SOURCES
     test_map_loader.cpp
     test_camera.cpp
     test_collision.cpp
+    test_player_motion.cpp
     test_event_runner.cpp
     test_game_state.cpp
     test_save_manager.cpp
+    test_animation_database.cpp
     test_battle_system.cpp
     test_battle_summary_system.cpp
     test_sprite_catalog.cpp

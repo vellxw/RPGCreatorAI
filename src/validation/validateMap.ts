@@ -32,6 +32,7 @@ const VALID_COMMAND_TYPES = new Set([
   'openShop',
   'startBattle',
   'changeActorHp',
+  'playAnimation',
 ]);
 
 export function validateMap(map: MapData, allMapIds: string[]): ValidationMessage[] {

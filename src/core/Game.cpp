@@ -4,7 +4,10 @@
 #include "world/CollisionSystem.h"
 #include "save/SaveManager.h"
 #include "renderer/IRenderer.h"
+#include "renderer/SpriteCatalog.h"
 #include <SDL.h>
+#include <algorithm>
+#include <cmath>
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -38,6 +41,14 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
     // resulting empty defaults keep the runtime alive so we never crash on
     // a partially-authored project.
     databases.loadAll(project);
+    if (!project.database.animationsPath.empty()) {
+        if (!animationDatabase.load(project.database.animationsPath)) {
+            Logger::warning("Animation database failed to load: " + project.database.animationsPath);
+        }
+    }
+    if (!databases.system().playerAnimationSet.empty()) {
+        playerAnimationSet = databases.system().playerAnimationSet;
+    }
 
     // Seed runtime state from the system database when a save isn't loaded.
     if (state.getParty().empty()) {
@@ -56,6 +67,7 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
         return false;
     }
 
+    playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
     updateCamera();
     return true;
 }
@@ -81,12 +93,18 @@ bool Game::loadMap(const std::string& mapId) {
     }
 
     currentScene.loadFromData(*mapData);
+    eventAnimations.clear();
     state.setCurrentMap(mapId);
     Logger::info("Map loaded: " + mapId);
     return true;
 }
 
 void Game::update(const InputManager& input, float dt) {
+    playerMotion.update(dt);
+    finalizeSmoothStepIfNeeded();
+    updateAnimationStates(dt);
+    updateCamera();
+
     // Save / load shortcuts always available (even during dialogue).
     if (input.isJustPressed(KeyButton::Save)) {
         saveGame();
@@ -143,6 +161,7 @@ void Game::update(const InputManager& input, float dt) {
 
     // Apply any transfer requested by an event command.
     applyTransferIfPending();
+    applyAnimationIfPending();
 
     if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
         battleSummary.active) {
@@ -182,6 +201,8 @@ void Game::update(const InputManager& input, float dt) {
 }
 
 void Game::handlePlayerInput(const InputManager& input) {
+    if (playerMotion.isMoving()) return;
+
     if (input.isJustPressed(KeyButton::Confirm)) {
         interact();
         return;
@@ -189,15 +210,34 @@ void Game::handlePlayerInput(const InputManager& input) {
 
     int dx = 0, dy = 0;
     Direction dir = state.getPlayerDirection();
-    if (input.isJustPressed(KeyButton::Up))    { dx = 0;  dy = -1; dir = Direction::Up; }
-    else if (input.isJustPressed(KeyButton::Down))  { dx = 0;  dy = 1;  dir = Direction::Down; }
-    else if (input.isJustPressed(KeyButton::Left))  { dx = -1; dy = 0;  dir = Direction::Left; }
-    else if (input.isJustPressed(KeyButton::Right)) { dx = 1;  dy = 0;  dir = Direction::Right; }
+    if (input.isPressed(KeyButton::Up))    { dx = 0;  dy = -1; dir = Direction::Up; }
+    else if (input.isPressed(KeyButton::Down))  { dx = 0;  dy = 1;  dir = Direction::Down; }
+    else if (input.isPressed(KeyButton::Left))  { dx = -1; dy = 0;  dir = Direction::Left; }
+    else if (input.isPressed(KeyButton::Right)) { dx = 1;  dy = 0;  dir = Direction::Right; }
     else {
         return;
     }
 
-    tryMove(dx, dy, dir);
+    tryStartSmoothMove(dx, dy, dir);
+}
+
+bool Game::tryStartSmoothMove(int dx, int dy, Direction dir) {
+    const int curX = state.getPlayerX();
+    const int curY = state.getPlayerY();
+    const int targetX = curX + dx;
+    const int targetY = curY + dy;
+
+    // Direction updates immediately even if the destination is blocked.
+    state.setPlayerPosition(curX, curY, dir);
+
+    if (!CollisionSystem::canMoveTo(currentScene, targetX, targetY)) {
+        return false;
+    }
+
+    int tileSize = currentScene.getTileSize();
+    if (tileSize <= 0) tileSize = 32;
+    playerMotion.startMove(targetX, targetY, dir, tileSize, kPlayerTilesPerSecond);
+    return true;
 }
 
 bool Game::tryMove(int dx, int dy, Direction dir) {
@@ -214,6 +254,7 @@ bool Game::tryMove(int dx, int dy, Direction dir) {
     }
 
     state.setPlayerPosition(targetX, targetY, dir);
+    playerMotion.snapToTile(targetX, targetY, currentScene.getTileSize());
 
     // Touch-trigger events fire when stepping onto the destination cell.
     if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
@@ -223,6 +264,21 @@ bool Game::tryMove(int dx, int dy, Direction dir) {
     }
 
     return true;
+}
+
+void Game::finalizeSmoothStepIfNeeded() {
+    if (!playerMotion.consumeCompletedStep()) return;
+
+    const int targetX = playerMotion.currentTileX();
+    const int targetY = playerMotion.currentTileY();
+    const Direction dir = playerMotion.direction();
+    state.setPlayerPosition(targetX, targetY, dir);
+
+    if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
+        if (ev->trigger == "touch") {
+            runEventCommands(*ev);
+        }
+    }
 }
 
 void Game::interact() {
@@ -244,7 +300,7 @@ void Game::interact() {
 
 void Game::runEventCommands(const EventData& event) {
     if (!eventRunner) return;
-    eventRunner->runCommandList(event.commands);
+    eventRunner->runCommandList(event.commands, event.id);
 }
 
 void Game::applyTransferIfPending() {
@@ -257,7 +313,86 @@ void Game::applyTransferIfPending() {
         return;
     }
     state.setPlayerPosition(req.targetX, req.targetY, stringToDirection(req.direction));
+    playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
     updateCamera();
+}
+
+void Game::applyAnimationIfPending() {
+    if (!eventRunner) return;
+    auto req = eventRunner->consumeAnimationRequest();
+    if (!req.active) return;
+    applyAnimationRequest(req);
+}
+
+void Game::applyAnimationRequest(const AnimationRequest& request) {
+    auto resolveDuration = [&](const std::string& setId, const std::string& action, Direction dir) {
+        if (request.durationMs > 0) return static_cast<float>(request.durationMs) / 1000.0f;
+        if (const AnimationClip* clip = animationDatabase.findClip(setId, action, dir)) {
+            if (clip->fps > 0.0f) {
+                return static_cast<float>(clip->frameCount) / clip->fps;
+            }
+        }
+        return 0.0f;
+    };
+
+    auto applyToState = [&](RuntimeAnimationState& state,
+                            const std::string& setId,
+                            Direction fallbackDirection) {
+        Direction dir = fallbackDirection;
+        if (request.direction != "current") {
+            dir = stringToDirection(request.direction);
+        }
+        state.action = request.action.empty() ? "idle" : request.action;
+        state.direction = dir;
+        state.elapsed = 0.0f;
+        state.duration = resolveDuration(setId, state.action, dir);
+        state.manual = true;
+        state.loop = request.loop;
+    };
+
+    if (request.target == "player") {
+        applyToState(playerAnimation, playerAnimationSet, state.getPlayerDirection());
+        return;
+    }
+
+    const std::string targetEventId =
+        request.target == "thisEvent" ? request.ownerEventId : request.eventId;
+    if (targetEventId.empty()) return;
+
+    const EventData* event = nullptr;
+    for (const auto& candidate : currentScene.getData().events) {
+        if (candidate.id == targetEventId) {
+            event = &candidate;
+            break;
+        }
+    }
+    if (!event) {
+        Logger::warning("playAnimation target event not found: " + targetEventId);
+        return;
+    }
+
+    auto& anim = eventAnimations[targetEventId];
+    applyToState(anim, event->animationSet, Direction::Down);
+}
+
+void Game::updateAnimationStates(float dt) {
+    auto updateOne = [dt](RuntimeAnimationState& anim) {
+        anim.elapsed += std::max(0.0f, dt);
+        if (!anim.manual) return;
+        if (anim.loop && anim.duration <= 0.0f) return;
+        if (anim.duration > 0.0f && anim.elapsed >= anim.duration) {
+            anim.action = "idle";
+            anim.elapsed = 0.0f;
+            anim.duration = 0.0f;
+            anim.manual = false;
+            anim.loop = false;
+        }
+    };
+
+    updateOne(playerAnimation);
+    for (auto& [_, anim] : eventAnimations) {
+        updateOne(anim);
+    }
 }
 
 void Game::hookEventRunnerResolvers() {
@@ -291,8 +426,8 @@ void Game::updateCamera() {
         return;
     }
 
-    int px = state.getPlayerX() * tileSize + tileSize / 2;
-    int py = state.getPlayerY() * tileSize + tileSize / 2;
+    int px = static_cast<int>(std::round(playerMotion.visualX())) + tileSize / 2;
+    int py = static_cast<int>(std::round(playerMotion.visualY())) + tileSize / 2;
     camera.follow(px, py, mapPixelWidth, mapPixelHeight);
 }
 
@@ -320,6 +455,7 @@ bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback) {
         if (showDialogueFeedback) dialogue.showText("", "Error al cargar mapa.");
         return false;
     }
+    playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
     updateCamera();
     if (showDialogueFeedback) dialogue.showText("", "Partida cargada.");
     return true;
@@ -327,12 +463,97 @@ bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback) {
 
 void Game::render(IRenderer& renderer) {
     renderer.renderMap(currentScene, camera);
-    renderer.renderEntities(currentScene, state, camera);
+    renderer.renderEntities(buildRenderSnapshot(), camera);
     renderer.renderHUD(state);
     renderer.renderDialogue(dialogue);
     renderer.renderMenu(menuSystem.snapshot(state, databases));
     renderer.renderShop(shopSystem.snapshot(state, databases));
     renderer.renderBattleSummary(battleSummarySystem.snapshot());
+}
+
+RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
+    RenderEntitiesSnapshot snapshot;
+    int tileSize = currentScene.getTileSize();
+    if (tileSize <= 0) tileSize = 32;
+
+    for (const auto& event : currentScene.getData().events) {
+        const auto animIt = eventAnimations.find(event.id);
+        const RuntimeAnimationState fallbackAnim;
+        const RuntimeAnimationState& anim =
+            animIt == eventAnimations.end() ? fallbackAnim : animIt->second;
+        const std::string action = anim.manual ? anim.action : "idle";
+        const Direction dir = anim.manual ? anim.direction : Direction::Down;
+        snapshot.events.push_back(buildAnimatedSprite(
+            event.animationSet,
+            SpriteCatalog::eventAssetFor(event),
+            action,
+            dir,
+            anim.elapsed,
+            static_cast<float>(event.x * tileSize),
+            static_cast<float>(event.y * tileSize),
+            tileSize,
+            false));
+    }
+
+    const bool playerManual = playerAnimation.manual;
+    const std::string playerAction =
+        playerManual ? playerAnimation.action : (playerMotion.isMoving() ? "walk" : "idle");
+    const Direction playerDir =
+        playerManual ? playerAnimation.direction : state.getPlayerDirection();
+    snapshot.player = buildAnimatedSprite(
+        playerAnimationSet,
+        "player_adventurer",
+        playerAction,
+        playerDir,
+        playerAnimation.elapsed,
+        playerMotion.visualX(),
+        playerMotion.visualY(),
+        tileSize,
+        true);
+
+    return snapshot;
+}
+
+EntityRenderSprite Game::buildAnimatedSprite(const std::string& animationSet,
+                                             const std::string& fallbackAsset,
+                                             const std::string& action,
+                                             Direction direction,
+                                             float elapsed,
+                                             float worldX,
+                                             float worldY,
+                                             int tileSize,
+                                             bool showDirectionDot) const {
+    EntityRenderSprite sprite;
+    sprite.assetKey = fallbackAsset;
+    sprite.worldX = worldX;
+    sprite.worldY = worldY;
+    sprite.worldW = tileSize;
+    sprite.worldH = tileSize;
+    sprite.direction = direction;
+    sprite.showDirectionDot = showDirectionDot;
+
+    if (animationSet.empty()) return sprite;
+    const AnimationClip* clip = animationDatabase.findClip(animationSet, action, direction);
+    if (!clip) return sprite;
+
+    int frameIndex = 0;
+    if (clip->frameCount > 1 && clip->fps > 0.0f) {
+        frameIndex = static_cast<int>(std::floor(elapsed * clip->fps));
+        if (clip->loop) {
+            frameIndex %= clip->frameCount;
+        } else {
+            frameIndex = std::min(frameIndex, clip->frameCount - 1);
+        }
+    }
+
+    sprite.assetKey = clip->asset;
+    sprite.source.active = true;
+    sprite.source.x = frameIndex * clip->frameSize.width;
+    sprite.source.y = 0;
+    sprite.source.w = clip->frameSize.width;
+    sprite.source.h = clip->frameSize.height;
+    sprite.showDirectionDot = false;
+    return sprite;
 }
 
 // ---- Public verbs ---------------------------------------------------------
@@ -357,8 +578,12 @@ void Game::stepLoad() { loadGameFromDisk(); }
 
 void Game::pumpEvents(float dt) {
     if (!eventRunner) return;
+    playerMotion.update(dt);
+    finalizeSmoothStepIfNeeded();
+    updateAnimationStates(dt);
     eventRunner->update(dt);
     applyTransferIfPending();
+    applyAnimationIfPending();
     if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
         battleSummary.active) {
         battleSummarySystem.open(battleSummary.troopId, battleSummary.result,

@@ -27,6 +27,7 @@ export interface DatabasePaths {
   switches?: string;
   variables?: string;
   commonEvents?: string;
+  animations?: string;
 }
 
 export type DatabaseKey = keyof Omit<DatabasePaths, 'items'>;
@@ -60,6 +61,7 @@ export interface GameEvent {
   y: number;
   solid: boolean;
   sprite?: string;
+  animationSet?: string;
   trigger: TriggerType;
   commands: EventCommand[];
 }
@@ -96,7 +98,8 @@ export type EventCommand =
   | CompleteQuestCommand
   | OpenShopCommand
   | StartBattleCommand
-  | ChangeActorHpCommand;
+  | ChangeActorHpCommand
+  | PlayAnimationCommand;
 
 export interface ShowTextCommand {
   type: 'showText';
@@ -253,6 +256,20 @@ export interface ChangeActorHpCommand {
   delta: number;
 }
 
+export type AnimationTarget = 'player' | 'thisEvent' | 'event';
+export type AnimationDirection = Direction | 'current';
+
+export interface PlayAnimationCommand {
+  type: 'playAnimation';
+  target: AnimationTarget;
+  eventId?: string;
+  action: string;
+  direction: AnimationDirection;
+  durationMs: number;
+  blocking: boolean;
+  loop?: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Database entries
 // ---------------------------------------------------------------------------
@@ -380,6 +397,7 @@ export interface SystemData {
   defaultBgm?: string;
   windowTint?: string;
   battleBackground?: string;
+  playerAnimationSet?: string;
 }
 
 export interface SwitchData {
@@ -401,6 +419,26 @@ export interface CommonEventData {
   commands: EventCommand[];
 }
 
+export interface AnimationClipData {
+  action: string;
+  direction: Direction | 'any';
+  asset: string;
+  frameSize: { width: number; height: number };
+  frameCount: number;
+  fps: number;
+  loop: boolean;
+  anchor: { x: number; y: number };
+}
+
+export interface AnimationSetData {
+  id: string;
+  clips: AnimationClipData[];
+}
+
+export interface AnimationDatabaseData {
+  sets: AnimationSetData[];
+}
+
 export interface DatabaseEntries {
   actors: ActorData[];
   classes: ClassData[];
@@ -412,10 +450,11 @@ export interface DatabaseEntries {
   switches: SwitchData[];
   variables: VariableData[];
   commonEvents: CommonEventData[];
+  animations: AnimationDatabaseData;
   system: SystemData;
 }
 
-export type DatabaseListKey = Exclude<keyof DatabaseEntries, 'system'>;
+export type DatabaseListKey = Exclude<keyof DatabaseEntries, 'system' | 'animations'>;
 
 // Editor-specific types
 export type Screen = 'editor' | 'events' | 'database' | 'ai-tools' | 'playtest';

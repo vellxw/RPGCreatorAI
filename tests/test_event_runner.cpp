@@ -309,6 +309,39 @@ TEST_CASE("EventRunner transferMap produces a transfer request") {
     CHECK(req2.active == false);
 }
 
+TEST_CASE("EventRunner playAnimation emits an animation request and honors blocking duration") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto cmd = makeCmd("playAnimation");
+    cmd->animationTarget = "thisEvent";
+    cmd->animationAction = "attack";
+    cmd->animationDirection = "current";
+    cmd->animationDurationMs = 250;
+    cmd->animationBlocking = true;
+    cmd->animationLoop = false;
+
+    runner.runCommandList({cmd}, "slime_trigger");
+    runner.update(0.016f);
+
+    auto req = runner.consumeAnimationRequest();
+    CHECK(req.active == true);
+    CHECK(req.target == "thisEvent");
+    CHECK(req.ownerEventId == "slime_trigger");
+    CHECK(req.action == "attack");
+    CHECK(req.direction == "current");
+    CHECK(req.durationMs == 250);
+    CHECK(req.blocking == true);
+    CHECK(req.loop == false);
+
+    CHECK(runner.isRunning());
+    runner.update(0.100f);
+    CHECK(runner.isRunning());
+    runner.update(0.200f);
+    CHECK_FALSE(runner.isRunning());
+}
+
 TEST_CASE("EventRunner unsupported command logs warning and continues") {
     GameState state;
     DialogueSystem dialogue;

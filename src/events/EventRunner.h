@@ -33,6 +33,18 @@ struct BattleSummaryRequest {
     BattleResult result;
 };
 
+struct AnimationRequest {
+    bool active = false;
+    std::string target;
+    std::string ownerEventId;
+    std::string eventId;
+    std::string action;
+    std::string direction;
+    int durationMs = 0;
+    bool blocking = false;
+    bool loop = false;
+};
+
 class EventRunner {
 public:
     EventRunner(class GameState& state, class DialogueSystem& dialogueSystem);
@@ -57,13 +69,15 @@ public:
         choicePicker = std::move(p);
     }
 
-    void runCommandList(const std::vector<std::shared_ptr<struct EventCommand>>& commands);
+    void runCommandList(const std::vector<std::shared_ptr<struct EventCommand>>& commands,
+                        const std::string& ownerEventId = "");
     void update(float dt);
     bool isRunning() const { return executing; }
 
     MapTransferRequest consumeTransferRequest();
     ShopOpenRequest consumeShopRequest();
     BattleSummaryRequest consumeBattleSummaryRequest();
+    AnimationRequest consumeAnimationRequest();
 
 private:
     void executeNext();
@@ -80,6 +94,8 @@ private:
     MapTransferRequest transferRequest;
     ShopOpenRequest shopRequest;
     BattleSummaryRequest battleSummaryRequest;
+    AnimationRequest animationRequest;
+    std::string currentOwnerEventId;
 
     CommonEventResolver commonEventResolver;
     QuestObjectiveResolver questObjectiveResolver;

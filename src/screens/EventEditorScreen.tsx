@@ -27,6 +27,7 @@ import {
   Store,
   Swords,
   HeartPulse,
+  Clapperboard,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Input, Select } from '../components/ui/Input';
@@ -86,6 +87,16 @@ function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
       return { type: 'startBattle', troopId: '', canEscape: false };
     case 'changeActorHp':
       return { type: 'changeActorHp', actorId: '', delta: -1 };
+    case 'playAnimation':
+      return {
+        type: 'playAnimation',
+        target: 'player',
+        action: 'interact',
+        direction: 'current',
+        durationMs: 300,
+        blocking: true,
+        loop: false,
+      };
   }
 }
 
@@ -190,6 +201,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     openShop: { icon: <Store size={18} />, color: 'text-pink-600', bg: 'bg-pink-50' },
     startBattle: { icon: <Swords size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
     changeActorHp: { icon: <HeartPulse size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
+    playAnimation: { icon: <Clapperboard size={18} />, color: 'text-fuchsia-600', bg: 'bg-fuchsia-50' },
   };
   const info = icons[command.type] || { icon: <NotebookPen size={18} />, color: 'text-gray-600', bg: 'bg-gray-50' };
 
@@ -218,6 +230,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     openShop: 'Open Shop',
     startBattle: 'Start Battle',
     changeActorHp: 'Change Actor HP',
+    playAnimation: 'Play Animation',
   };
 
   const getDescription = (cmd: EventCommand): string => {
@@ -246,6 +259,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       case 'openShop': return cmd.shopId;
       case 'startBattle': return `Troop: ${cmd.troopId}${cmd.canEscape ? ' (escapable)' : ''}`;
       case 'changeActorHp': return `${cmd.actorId} ${cmd.delta >= 0 ? '+' : ''}${cmd.delta}`;
+      case 'playAnimation': return `${cmd.target}${cmd.eventId ? `:${cmd.eventId}` : ''} → ${cmd.action}`;
       default: return (cmd as { type: string }).type;
     }
   };
@@ -366,6 +380,7 @@ function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
             <option value="openShop">Open Shop</option>
             <option value="startBattle">Start Battle</option>
             <option value="changeActorHp">Change Actor HP</option>
+            <option value="playAnimation">Play Animation</option>
           </select>
         </div>
       </div>
@@ -536,6 +551,11 @@ function EventProperties({ event, mapId }: { event: GameEvent; mapId: string }) 
             { value: 'npc_placeholder', label: 'Placeholder NPC' },
           ]}
           onChange={v => update({ sprite: v || undefined })}
+        />
+        <Input
+          label="Animation Set"
+          value={event.animationSet ?? ''}
+          onChange={e => update({ animationSet: e.target.value || undefined })}
         />
       </div>
     </div>

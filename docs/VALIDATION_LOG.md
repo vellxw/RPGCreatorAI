@@ -626,3 +626,50 @@ Error: Port 1420 is already in use
   evidence remained full-page `1600x900` captures with the authored frame
   visible inside the UI.
 
+### Phase 9 — smooth movement and character animation foundation
+
+- `2026-05-18 21:31 -03:00` —
+  `git ls-remote https://github.com/0x0funky/agent-sprite-forge.git HEAD`
+  — PASS; verified pinned upstream commit
+  `fff651a89223b044ccfc0b75ed9f3754c6d739b1`.
+- `2026-05-18 21:32 -03:00` — Python dependency check — Pillow present,
+  NumPy missing. Fix applied:
+  `python -m pip install numpy` — PASS (`numpy 2.4.6` installed).
+- `2026-05-18 21:34 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\generate-animation-assets.ps1`
+  — PASS; generated 40 animation sheets plus manifest, prompts, metadata,
+  and preview PNG/GIF evidence.
+- `2026-05-18 21:39 -03:00` — `npm test` — PASS (18 files, 103 tests).
+- `2026-05-18 21:40 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed.
+- `2026-05-18 21:40 -03:00` —
+  `cargo fmt --manifest-path src-tauri\Cargo.toml` — initially FAILED
+  because `rustfmt` was not installed. Fix applied:
+  `rustup component add rustfmt`, then `cargo fmt --manifest-path
+  src-tauri\Cargo.toml` — PASS.
+- `2026-05-18 21:40 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml --lib` — PASS
+  (17/17 Rust tests).
+- `2026-05-18 21:41 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-18 21:46 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\verify.ps1 -SkipSmoke`
+  — PASS after updating `runSmokeShots()` to account for leading
+  `playAnimation` commands.
+- `2026-05-18 21:47 -03:00` —
+  `%LOCALAPPDATA%\RPGCreatorAI\build\rpg_creator_runtime.exe --smoke-shots docs\screenshots\phase-9-animation`
+  — PASS; native screenshot harness wrote the normal RPG smoke sequence
+  plus Phase 9 frames for walk mid-step, player interact, hurt, and
+  attack.
+- `2026-05-18 21:48 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\verify.ps1`
+  — PASS; configure/build/CTest passed and runtime 3-second smoke stayed
+  alive with no stderr errors.
+- `2026-05-18 21:49 -03:00` — `npm test` — PASS (18 files, 103 tests).
+- `2026-05-18 21:49 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml --lib` — PASS
+  (17/17 Rust tests).
+- `2026-05-18 21:49 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+

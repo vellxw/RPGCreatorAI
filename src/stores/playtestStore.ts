@@ -61,6 +61,16 @@ export function usePlaytestStore(seed: PlaytestSeed = fallbackPlaytestSeed) {
     addLog('INFO', `Player moved to (${state.playerX + dx}, ${state.playerY + dy})`);
   }, [state.playerX, state.playerY, addLog]);
 
+  const setPlayerPose = useCallback((playerX: number, playerY: number, direction: Direction) => {
+    setState(prev => ({ ...prev, playerX, playerY, direction }));
+    addLog('INFO', `Player moved to (${playerX}, ${playerY})`);
+  }, [addLog]);
+
+  const faceDirection = useCallback((direction: Direction) => {
+    setState(prev => ({ ...prev, direction }));
+    addLog('WARN', `Player blocked facing ${direction}`);
+  }, [addLog]);
+
   const restart = useCallback(() => {
     setState(createInitialPlaytestState(seed));
     setLogs([]);
@@ -72,5 +82,5 @@ export function usePlaytestStore(seed: PlaytestSeed = fallbackPlaytestSeed) {
     addLog('INFO', 'Playtest stopped');
   }, [addLog]);
 
-  return { state, logs, addLog, movePlayer, restart, stop };
+  return { state, logs, addLog, movePlayer, setPlayerPose, faceDirection, restart, stop };
 }

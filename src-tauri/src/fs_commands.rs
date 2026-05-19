@@ -63,8 +63,14 @@ pub struct DatabaseRefs {
     pub switches: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variables: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "commonEvents")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "commonEvents"
+    )]
     pub common_events: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub animations: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -171,9 +177,10 @@ pub fn fs_write_project(
 
     // 2. each map
     for map_ref in &project_state.project.maps {
-        let map_value = project_state.maps.get(&map_ref.id).ok_or_else(|| {
-            format!("save state is missing data for map id '{}'", map_ref.id)
-        })?;
+        let map_value = project_state
+            .maps
+            .get(&map_ref.id)
+            .ok_or_else(|| format!("save state is missing data for map id '{}'", map_ref.id))?;
         write_with_backup(&canonical, &map_ref.path, map_value, &mut warnings)
             .map_err(|e| e.to_string())?;
     }
@@ -190,7 +197,7 @@ pub fn fs_write_project(
     // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
     // so old runtime/editor pipelines keep parsing them.
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 11] = [
+        let pairs: [(&str, Option<&String>); 12] = [
             ("actors", project_state.project.database.actors.as_ref()),
             ("classes", project_state.project.database.classes.as_ref()),
             ("skills", project_state.project.database.skills.as_ref()),
@@ -200,20 +207,29 @@ pub fn fs_write_project(
             ("shops", project_state.project.database.shops.as_ref()),
             ("system", project_state.project.database.system.as_ref()),
             ("switches", project_state.project.database.switches.as_ref()),
-            ("variables", project_state.project.database.variables.as_ref()),
+            (
+                "variables",
+                project_state.project.database.variables.as_ref(),
+            ),
             (
                 "commonEvents",
                 project_state.project.database.common_events.as_ref(),
             ),
+            (
+                "animations",
+                project_state.project.database.animations.as_ref(),
+            ),
         ];
         for (key, maybe_rel) in pairs {
             let Some(rel) = maybe_rel else { continue };
-            let Some(payload) = map.get(key) else { continue };
-            let wrapped = if key == "system" {
+            let Some(payload) = map.get(key) else {
+                continue;
+            };
+            let wrapped = if key == "system" || key == "animations" {
                 let mut m = serde_json::Map::new();
                 m.insert("schemaVersion".into(), serde_json::Value::from(1));
-                if let serde_json::Value::Object(sys) = payload {
-                    for (k, v) in sys {
+                if let serde_json::Value::Object(object_payload) = payload {
+                    for (k, v) in object_payload {
                         if k == "schemaVersion" {
                             continue;
                         }
@@ -301,7 +317,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     // and the file exists on disk. Missing files are tolerated and surface as
     // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
     let mut databases = serde_json::Map::new();
-    let pairs: [(&str, Option<&String>); 11] = [
+    let pairs: [(&str, Option<&String>); 12] = [
         ("actors", project.database.actors.as_ref()),
         ("classes", project.database.classes.as_ref()),
         ("skills", project.database.skills.as_ref()),
@@ -313,6 +329,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
         ("switches", project.database.switches.as_ref()),
         ("variables", project.database.variables.as_ref()),
         ("commonEvents", project.database.common_events.as_ref()),
+        ("animations", project.database.animations.as_ref()),
     ];
     for (key, maybe_rel) in pairs {
         if let Some(rel) = maybe_rel {
@@ -335,12 +352,13 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
 }
 
 /// Most database shards on disk wrap their payload in `{ "schemaVersion": 1, "<key>": [...] }`.
-/// The renderer's in-memory shape is the unwrapped list (or system object).
+/// The renderer's in-memory shape is the unwrapped list (or object shards like
+/// system and animations).
 /// Round-trip safely by extracting the inner field when it exists; otherwise
 /// pass the raw value through.
 fn extract_database_payload(key: &str, value: serde_json::Value) -> serde_json::Value {
     if let serde_json::Value::Object(mut map) = value {
-        if key == "system" {
+        if key == "system" || key == "animations" {
             map.remove("schemaVersion");
             return serde_json::Value::Object(map);
         }
@@ -385,8 +403,8 @@ fn write_with_backup<T: Serialize>(
 
     // Validate JSON serialisation BEFORE touching disk so we never write a
     // half-baked file. We re-parse to confirm the output is well-formed.
-    let pretty = serde_json::to_string_pretty(value)
-        .map_err(|e| format!("serialise {relative}: {e}"))?;
+    let pretty =
+        serde_json::to_string_pretty(value).map_err(|e| format!("serialise {relative}: {e}"))?;
     serde_json::from_str::<serde_json::Value>(&pretty)
         .map_err(|e| format!("post-serialise validation failed for {relative}: {e}"))?;
 
@@ -433,9 +451,7 @@ fn backup_existing(root: &Path, relative: &str) -> Result<(), String> {
         .map(|s| s.to_string_lossy().to_string())
         .ok_or_else(|| "invalid file name".to_string())?;
 
-    let ts = chrono::Utc::now()
-        .format("%Y-%m-%dT%H-%M-%SZ")
-        .to_string();
+    let ts = chrono::Utc::now().format("%Y-%m-%dT%H-%M-%SZ").to_string();
     let dest = backups_dir.join(format!("{stem}.{ts}.json"));
 
     fs::copy(&source, &dest).map_err(|e| format!("copy to backup: {e}"))?;
@@ -462,11 +478,7 @@ fn prune_backups(root: &Path, max_per_file: usize) -> Result<(), String> {
     }
 
     for (_stem, mut files) in by_stem {
-        files.sort_by_key(|p| {
-            fs::metadata(p)
-                .and_then(|m| m.modified())
-                .ok()
-        });
+        files.sort_by_key(|p| fs::metadata(p).and_then(|m| m.modified()).ok());
         // Keep newest `max_per_file`, drop the rest from the front.
         if files.len() > max_per_file {
             let drop_count = files.len() - max_per_file;
@@ -534,11 +546,7 @@ mod tests {
             serde_json::to_string_pretty(&map).unwrap(),
         )
         .unwrap();
-        fs::write(
-            root.join("data/database/items.json"),
-            r#"{"items":[]}"#,
-        )
-        .unwrap();
+        fs::write(root.join("data/database/items.json"), r#"{"items":[]}"#).unwrap();
     }
 
     #[test]
@@ -572,7 +580,12 @@ mod tests {
         // Backup created
         let backups: Vec<_> = fs::read_dir(root.join(".backups")).unwrap().collect();
         assert_eq!(backups.len(), 1);
-        let backup_name = backups[0].as_ref().unwrap().file_name().to_string_lossy().to_string();
+        let backup_name = backups[0]
+            .as_ref()
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .to_string();
         assert!(backup_name.starts_with("project."));
         assert!(backup_name.ends_with(".json"));
 
@@ -648,7 +661,8 @@ mod tests {
                 "items": "data/database/items.json",
                 "actors": "data/database/actors.json",
                 "system": "data/database/system.json",
-                "switches": "data/database/switches.json"
+                "switches": "data/database/switches.json",
+                "animations": "data/database/animations.json"
             }
         });
         fs::write(
@@ -690,6 +704,11 @@ mod tests {
             r#"{"schemaVersion":1,"switches":[{"id":"s1","name":"S1","initial":false}]}"#,
         )
         .unwrap();
+        fs::write(
+            root.join("data/database/animations.json"),
+            r#"{"schemaVersion":1,"sets":[{"id":"player_adventurer","clips":[{"action":"idle","direction":"down","asset":"player_adventurer_idle_down","frameSize":{"width":64,"height":64},"frameCount":4,"fps":6,"loop":true,"anchor":{"x":32,"y":54}}]}]}"#,
+        )
+        .unwrap();
     }
 
     #[test]
@@ -703,6 +722,7 @@ mod tests {
         assert!(dbs.contains_key("actors"));
         assert!(dbs.contains_key("system"));
         assert!(dbs.contains_key("switches"));
+        assert!(dbs.contains_key("animations"));
         // actors should be unwrapped to the list, not the wrapping object
         let actors = dbs.get("actors").unwrap().as_array().unwrap();
         assert_eq!(actors.len(), 1);
@@ -710,6 +730,8 @@ mod tests {
         // system should be unwrapped to the bare object
         let system = dbs.get("system").unwrap().as_object().unwrap();
         assert_eq!(system.get("startingGold").unwrap(), 50);
+        let animations = dbs.get("animations").unwrap().as_object().unwrap();
+        assert!(animations.get("sets").unwrap().as_array().unwrap().len() > 0);
     }
 
     #[test]
@@ -740,7 +762,7 @@ mod tests {
         // Re-implement what fs_write_project does for databases inline so we
         // don't need a State<AppState>.
         if let serde_json::Value::Object(map) = &state.databases {
-            let pairs: [(&str, Option<&String>); 11] = [
+            let pairs: [(&str, Option<&String>); 12] = [
                 ("actors", state.project.database.actors.as_ref()),
                 ("classes", state.project.database.classes.as_ref()),
                 ("skills", state.project.database.skills.as_ref()),
@@ -751,16 +773,22 @@ mod tests {
                 ("system", state.project.database.system.as_ref()),
                 ("switches", state.project.database.switches.as_ref()),
                 ("variables", state.project.database.variables.as_ref()),
-                ("commonEvents", state.project.database.common_events.as_ref()),
+                (
+                    "commonEvents",
+                    state.project.database.common_events.as_ref(),
+                ),
+                ("animations", state.project.database.animations.as_ref()),
             ];
             for (key, maybe_rel) in pairs {
                 let Some(rel) = maybe_rel else { continue };
-                let Some(payload) = map.get(key) else { continue };
-                let wrapped = if key == "system" {
+                let Some(payload) = map.get(key) else {
+                    continue;
+                };
+                let wrapped = if key == "system" || key == "animations" {
                     let mut m = serde_json::Map::new();
                     m.insert("schemaVersion".into(), serde_json::Value::from(1));
-                    if let serde_json::Value::Object(sys) = payload {
-                        for (k, v) in sys {
+                    if let serde_json::Value::Object(object_payload) = payload {
+                        for (k, v) in object_payload {
                             if k == "schemaVersion" {
                                 continue;
                             }
@@ -786,6 +814,15 @@ mod tests {
             .as_array()
             .unwrap();
         assert_eq!(actors[0].get("name").unwrap(), "Renamed");
+        let animations = reloaded
+            .databases
+            .as_object()
+            .unwrap()
+            .get("animations")
+            .unwrap()
+            .as_object()
+            .unwrap();
+        assert!(animations.get("sets").unwrap().is_array());
     }
 
     #[test]
@@ -797,16 +834,8 @@ mod tests {
         let mut state = read_project_at(&root).unwrap();
         let town = state.maps.get_mut("town").unwrap();
         let town_obj = town.as_object_mut().unwrap();
-        let layers = town_obj
-            .get_mut("layers")
-            .unwrap()
-            .as_array_mut()
-            .unwrap();
-        layers[0]
-            .get_mut("tiles")
-            .unwrap()
-            .as_array_mut()
-            .unwrap()[0] = serde_json::Value::from(3);
+        let layers = town_obj.get_mut("layers").unwrap().as_array_mut().unwrap();
+        layers[0].get_mut("tiles").unwrap().as_array_mut().unwrap()[0] = serde_json::Value::from(3);
         town_obj
             .get_mut("events")
             .unwrap()
@@ -834,11 +863,7 @@ mod tests {
         let reloaded = read_project_at(&root).unwrap();
         let map = reloaded.maps.get("town").unwrap().as_object().unwrap();
         let layers = map.get("layers").unwrap().as_array().unwrap();
-        let first_tile = layers[0]
-            .get("tiles")
-            .unwrap()
-            .as_array()
-            .unwrap()[0]
+        let first_tile = layers[0].get("tiles").unwrap().as_array().unwrap()[0]
             .as_i64()
             .unwrap();
         let events = map.get("events").unwrap().as_array().unwrap();

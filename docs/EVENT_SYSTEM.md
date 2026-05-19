@@ -17,7 +17,7 @@ Solid events block movement onto their cell. Non-solid events are
 walkable (e.g. door / transfer tiles) — the event's `solid` flag overrides
 the collision-layer tile underneath.
 
-## Supported Commands (Phase 2)
+## Supported Commands
 
 | Command | Fields | Behavior |
 |---------|--------|----------|
@@ -28,6 +28,7 @@ the collision-layer tile underneath.
 | `transferMap` | `mapId`, `x`, `y`, `direction` | Produces a `MapTransferRequest` consumed by `Game`. The new map is loaded and the player is placed at `(x, y)` facing `direction`. |
 | `wait` | `ms` (int) | Pauses the queue for the given duration. |
 | `playSound` | `soundId` | Audio is not implemented in Phase 2; logs `[INFO] playSound: <id>`. |
+| `playAnimation` | `target`, optional `eventId`, `action`, `direction`, `durationMs`, `blocking`, `loop` | Emits an `AnimationRequest`. `Game` applies it to the player, the owning event, or a named event. |
 
 Any command type not listed above is logged as a warning and skipped;
 this lets later phases extend the system without breaking existing
@@ -42,7 +43,9 @@ encounters a blocking effect:
   `DialogueSystem::isActive()` becomes false again,
 - a `wait` arms an internal timer that decrements per frame,
 - a `transferMap` sets the transfer request — `Game` consumes it,
-  reloads the map, and resumes the queue.
+  reloads the map, and resumes the queue,
+- a blocking `playAnimation` emits an animation request and arms the wait
+  timer for `durationMs`.
 
 While the runner is busy, player movement and interact input are
 blocked.

@@ -4,5 +4,6 @@
   "startingGold": 50,
   "defaultBgm": "town_theme",
   "windowTint": "indigo",
-  "battleBackground": "grass_field"
+  "battleBackground": "grass_field",
+  "playerAnimationSet": "player_adventurer"
 }

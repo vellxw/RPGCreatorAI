@@ -9,8 +9,10 @@
 EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
     : gameState(state), dialogue(dialogueSystem) {}
 
-void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>>& commands) {
+void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>>& commands,
+                                 const std::string& ownerEventId) {
     commandStack.clear();
+    currentOwnerEventId = ownerEventId;
     // Push commands in reverse order so we process them front-to-back via pop_back.
     for (auto it = commands.rbegin(); it != commands.rend(); ++it) {
         commandStack.push_back(*it);
@@ -40,7 +42,7 @@ void EventRunner::update(float dt) {
         commandStack.pop_back();
         processCommand(cmd);
         if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active ||
-            shopRequest.active || battleSummaryRequest.active) {
+            shopRequest.active || battleSummaryRequest.active || animationRequest.active) {
             return;
         }
     }
@@ -227,6 +229,21 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         gameState.setActorHp(cmd->actorId, next);
         return;
     }
+    if (type == "playAnimation") {
+        animationRequest.active = true;
+        animationRequest.target = cmd->animationTarget.empty() ? "player" : cmd->animationTarget;
+        animationRequest.ownerEventId = currentOwnerEventId;
+        animationRequest.eventId = cmd->animationEventId;
+        animationRequest.action = cmd->animationAction.empty() ? "idle" : cmd->animationAction;
+        animationRequest.direction = cmd->animationDirection.empty() ? "current" : cmd->animationDirection;
+        animationRequest.durationMs = cmd->animationDurationMs;
+        animationRequest.blocking = cmd->animationBlocking;
+        animationRequest.loop = cmd->animationLoop;
+        if (cmd->animationBlocking && cmd->animationDurationMs > 0) {
+            waitTimer = static_cast<float>(cmd->animationDurationMs) / 1000.0f;
+        }
+        return;
+    }
 
     Logger::warning("Unsupported event command type: " + type);
 }
@@ -251,5 +268,11 @@ ShopOpenRequest EventRunner::consumeShopRequest() {
 BattleSummaryRequest EventRunner::consumeBattleSummaryRequest() {
     BattleSummaryRequest req = battleSummaryRequest;
     battleSummaryRequest = {};
+    return req;
+}
+
+AnimationRequest EventRunner::consumeAnimationRequest() {
+    AnimationRequest req = animationRequest;
+    animationRequest = {};
     return req;
 }

@@ -230,6 +230,29 @@ Rules:
 - Event markers and player sprites should preserve silhouette clarity at
   editor preview zoom levels.
 
+## 15a. Character motion and animation rules
+
+- Runtime movement remains tile-authored for collision, saves, touch
+  events, and map transfers.
+- Rendering may interpolate an entity between logical tiles. Camera focus
+  follows that interpolated visual position, not only the committed tile,
+  so held movement reads smoothly.
+- Default walking speed is `4 tiles/s`. Faster or slower speeds must be
+  explicit data or design changes, not hidden renderer behavior.
+- Diagonal movement is not part of the default RPG control model.
+- Player and event animations are selected from data-driven animation
+  sets. Static `sprite` keys remain a fallback when no matching clip
+  exists.
+- Animation sheets use fixed-size frames, bottom-center anchors, and
+  nearest-neighbor sampling. Frame dimensions and FPS live in
+  `data/database/animations.json`.
+- Event commands may request a named animation, but `EventRunner` only
+  emits an animation request. `Game` applies it to the player or event
+  runtime state so rendering stays separate from event execution.
+- Development-time AI or procedural tools may generate assets, but the
+  runtime must never depend on AI services. It consumes only committed
+  PNG/BMP/JSON assets.
+
 ## 16. Object placement density rules
 
 - Empty cells are not automatically bad; accidental emptiness is.

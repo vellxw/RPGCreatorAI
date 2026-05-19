@@ -3,6 +3,7 @@
 #include "renderer/SpriteCatalog.h"
 #include <SDL.h>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -88,38 +89,41 @@ void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera) {
     }
 }
 
-void Renderer2D::renderEntities(const MapScene& scene, const GameState& state, const Camera2D& camera) {
+void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities, const Camera2D& camera) {
     if (!sdlRenderer) return;
-    int tileSize = scene.getTileSize();
-    if (tileSize <= 0) tileSize = 32;
     Vec2i cam = camera.getPosition();
 
-    // Events
-    for (const auto& ev : scene.getData().events) {
-        int sx = ev.x * tileSize - cam.x;
-        int sy = ev.y * tileSize - cam.y;
-        int pad = std::max(2, tileSize / 8);
-        renderSprite(SpriteCatalog::eventAssetFor(ev), sx + pad, sy + pad,
-                     tileSize - 2 * pad, tileSize - 2 * pad);
-    }
+    auto drawEntity = [&](const EntityRenderSprite& sprite) {
+        const int tileSize = std::max(1, sprite.worldW);
+        const int sx = static_cast<int>(std::round(sprite.worldX)) - cam.x;
+        const int sy = static_cast<int>(std::round(sprite.worldY)) - cam.y;
+        const int pad = std::max(2, tileSize / 8);
+        if (sprite.source.active) {
+            renderSprite(sprite.assetKey, sprite.source, sx + pad, sy + pad,
+                         tileSize - 2 * pad, sprite.worldH - 2 * pad);
+        } else {
+            renderSprite(sprite.assetKey, sx + pad, sy + pad,
+                         tileSize - 2 * pad, sprite.worldH - 2 * pad);
+        }
 
-    // Player
-    int psx = state.getPlayerX() * tileSize - cam.x;
-    int psy = state.getPlayerY() * tileSize - cam.y;
-    int pad = std::max(2, tileSize / 8);
-    renderSprite("player_adventurer", psx + pad, psy + pad, tileSize - 2 * pad, tileSize - 2 * pad);
+        if (!sprite.showDirectionDot) return;
 
-    // Direction indicator (small dot on the facing edge)
-    int dotSize = std::max(3, tileSize / 6);
-    int cx = psx + tileSize / 2 - dotSize / 2;
-    int cy = psy + tileSize / 2 - dotSize / 2;
-    switch (state.getPlayerDirection()) {
-        case Direction::Up:    cy = psy + pad + 1; break;
-        case Direction::Down:  cy = psy + tileSize - pad - dotSize - 1; break;
-        case Direction::Left:  cx = psx + pad + 1; break;
-        case Direction::Right: cx = psx + tileSize - pad - dotSize - 1; break;
+        const int dotSize = std::max(3, tileSize / 6);
+        int cx = sx + tileSize / 2 - dotSize / 2;
+        int cy = sy + sprite.worldH / 2 - dotSize / 2;
+        switch (sprite.direction) {
+            case Direction::Up:    cy = sy + pad + 1; break;
+            case Direction::Down:  cy = sy + sprite.worldH - pad - dotSize - 1; break;
+            case Direction::Left:  cx = sx + pad + 1; break;
+            case Direction::Right: cx = sx + tileSize - pad - dotSize - 1; break;
+        }
+        fillRect(sdlRenderer, cx, cy, dotSize, dotSize, kColorPlayerEye);
+    };
+
+    for (const auto& event : entities.events) {
+        drawEntity(event);
     }
-    fillRect(sdlRenderer, cx, cy, dotSize, dotSize, kColorPlayerEye);
+    drawEntity(entities.player);
 }
 
 void Renderer2D::renderDialogue(const DialogueSystem& dialogue) {
@@ -215,6 +219,18 @@ void Renderer2D::renderSprite(const std::string& assetKey, int x, int y, int w, 
     if (SDL_Texture* texture = textureFor(assetKey)) {
         SDL_Rect dst{x, y, w, h};
         SDL_RenderCopy(sdlRenderer, texture, nullptr, &dst);
+        return;
+    }
+
+    fillRect(sdlRenderer, x, y, w, h, kColorEvent);
+    drawRect(sdlRenderer, x, y, w, h, kColorDlgEdge);
+}
+
+void Renderer2D::renderSprite(const std::string& assetKey, const SpriteSourceRect& src, int x, int y, int w, int h) {
+    if (SDL_Texture* texture = textureFor(assetKey)) {
+        SDL_Rect dst{x, y, w, h};
+        SDL_Rect source{src.x, src.y, src.w, src.h};
+        SDL_RenderCopy(sdlRenderer, texture, &source, &dst);
         return;
     }
 

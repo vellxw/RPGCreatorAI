@@ -67,6 +67,15 @@ struct EventCommand {
     std::string actorId;
     int delta = 0;
 
+    // playAnimation
+    std::string animationTarget;      // "player", "thisEvent", "event"
+    std::string animationEventId;
+    std::string animationAction;
+    std::string animationDirection;   // "current" or direction string
+    int animationDurationMs = 0;
+    bool animationBlocking = false;
+    bool animationLoop = false;
+
     // showChoices
     std::string prompt;
     struct Choice {
@@ -89,6 +98,7 @@ struct EventData {
     int y = 0;
     bool solid = false;
     std::string sprite;
+    std::string animationSet;
     std::string trigger; // "interact", "touch", "autorun", "parallel"
     std::vector<std::shared_ptr<EventCommand>> commands;
 };

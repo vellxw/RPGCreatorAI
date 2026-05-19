@@ -39,4 +39,6 @@ TEST_CASE("SpriteCatalog prefers explicit event sprites and falls back by type")
 TEST_CASE("SpriteCatalog builds runtime bmp paths") {
     CHECK(SpriteCatalog::runtimePathFor("player_adventurer") ==
           "assets/generated/runtime/player_adventurer.bmp");
+    CHECK(SpriteCatalog::runtimePathFor("player_adventurer_walk_down") ==
+          "assets/generated/runtime/player_adventurer_walk_down.bmp");
 }

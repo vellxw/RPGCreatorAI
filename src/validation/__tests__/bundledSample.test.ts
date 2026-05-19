@@ -26,6 +26,8 @@ describe('Bundled sample project (Phase 6 slice 10)', () => {
     expect(state.databases.switches.length).toBeGreaterThan(0);
     expect(state.databases.commonEvents.length).toBeGreaterThan(0);
     expect(state.databases.system.startingParty.length).toBeGreaterThan(0);
+    expect(state.databases.system.playerAnimationSet).toBe('player_adventurer');
+    expect(state.databases.animations.sets.length).toBeGreaterThan(0);
   });
 
   it('sample town map exercises every category of v1 commands', async () => {
@@ -65,6 +67,7 @@ describe('Bundled sample project (Phase 6 slice 10)', () => {
       'openShop',
       'startBattle',
       'transferMap',
+      'playAnimation',
     ]) {
       expect(seen).toContain(required);
     }

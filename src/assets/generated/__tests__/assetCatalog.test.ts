@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { editorAssets, eventAssets, gameAssets, uiAssets } from '../assetCatalog';
+import { animationAssets, editorAssets, eventAssets, gameAssets, uiAssets } from '../assetCatalog';
 
 describe('generated asset catalog', () => {
   it('exposes the required production game assets', () => {
@@ -48,5 +48,14 @@ describe('generated asset catalog', () => {
       object: gameAssets.slime,
       trigger: gameAssets.battleMarker,
     });
+  });
+
+  it('catalogs generated animation sheets for runtime and editor preview use', () => {
+    expect(animationAssets.playerAdventurer.walk.down).toContain('player_adventurer_walk_down');
+    expect(animationAssets.playerAdventurer.attack.down).toContain('player_adventurer_attack_down');
+    expect(animationAssets.playerAdventurer.hurt.down).toContain('player_adventurer_hurt_down');
+    expect(animationAssets.playerAdventurer.death.down).toContain('player_adventurer_death_down');
+    expect(animationAssets.oldMan.idle.down).toContain('npc_old_man_idle_down');
+    expect(animationAssets.shopkeeper.walk.up).toContain('npc_shopkeeper_walk_up');
   });
 });

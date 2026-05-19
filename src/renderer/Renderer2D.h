@@ -11,7 +11,7 @@ public:
     bool initialize(Window& window) override;
     void beginFrame() override;
     void renderMap(const MapScene& scene, const Camera2D& camera) override;
-    void renderEntities(const MapScene& scene, const GameState& state, const Camera2D& camera) override;
+    void renderEntities(const RenderEntitiesSnapshot& entities, const Camera2D& camera) override;
     void renderDialogue(const DialogueSystem& dialogue) override;
     void renderHUD(const GameState& state) override;
     void renderMenu(const rpg::MenuSystem::ViewModel& vm) override;
@@ -23,6 +23,7 @@ public:
 private:
     SDL_Texture* textureFor(const std::string& assetKey);
     void renderSprite(const std::string& assetKey, int x, int y, int w, int h);
+    void renderSprite(const std::string& assetKey, const SpriteSourceRect& src, int x, int y, int w, int h);
 
     SDL_Renderer* sdlRenderer = nullptr;
     int screenWidth = 800;

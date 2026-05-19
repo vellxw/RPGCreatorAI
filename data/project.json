@@ -29,7 +29,8 @@
     "system": "data/database/system.json",
     "switches": "data/database/switches.json",
     "variables": "data/database/variables.json",
-    "commonEvents": "data/database/commonEvents.json"
+    "commonEvents": "data/database/commonEvents.json",
+    "animations": "data/database/animations.json"
   },
   "visualProfile": {
     "aspectRatio": "16:9",

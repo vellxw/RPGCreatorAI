@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
 import { useProject, useProjectStore } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
@@ -18,16 +18,24 @@ import {
 } from 'lucide-react';
 import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
 import { performSave } from '../stores/saveActions';
-import { editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
+import { animationAssets, editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
 import { isSupportedVisualTile, isVoidVisualTile } from '../visual/tileCatalog';
+import {
+  advanceTileFluidMotion,
+  beginTileFluidStep,
+  createTileFluidMotion,
+  directionFromKey,
+  type TileFluidMotion,
+} from '../playtest/tileFluidMotion';
+import type { Direction, MapData } from '../types/project';
 
 function PlaytestControls({
   onMove,
   onRestart,
 }: {
-  onMove: (dx: number, dy: number) => void;
+  onMove: (direction: Direction) => void;
   onRestart: () => void;
 }) {
   return (
@@ -42,26 +50,26 @@ function PlaytestControls({
         <div className="grid grid-cols-3 gap-1 w-[100px] mx-auto">
           <div />
           <button
-            onClick={() => onMove(0, -1)}
+            onClick={() => onMove('up')}
             className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-[11px] font-bold text-gray-600 hover:bg-gray-200 cursor-pointer"
           >
             ↑
           </button>
           <div />
           <button
-            onClick={() => onMove(-1, 0)}
+            onClick={() => onMove('left')}
             className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-[11px] font-bold text-gray-600 hover:bg-gray-200 cursor-pointer"
           >
             ←
           </button>
           <button
-            onClick={() => onMove(0, 1)}
+            onClick={() => onMove('down')}
             className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-[11px] font-bold text-gray-600 hover:bg-gray-200 cursor-pointer"
           >
             ↓
           </button>
           <button
-            onClick={() => onMove(1, 0)}
+            onClick={() => onMove('right')}
             className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center text-[11px] font-bold text-gray-600 hover:bg-gray-200 cursor-pointer"
           >
             →
@@ -116,10 +124,20 @@ function PlaytestControls({
 function GamePreview({
   playerX,
   playerY,
+  visualX,
+  visualY,
+  direction,
+  moving,
+  motionElapsed,
   currentMap,
 }: {
   playerX: number;
   playerY: number;
+  visualX: number;
+  visualY: number;
+  direction: Direction;
+  moving: boolean;
+  motionElapsed: number;
   currentMap: string;
 }) {
   const project = useProject();
@@ -133,8 +151,8 @@ function GamePreview({
     viewport: profile.baseResolution,
     map: mapPixelSize,
     focus: {
-      x: playerX * tileSize + tileSize / 2,
-      y: playerY * tileSize + tileSize / 2,
+      x: visualX + tileSize / 2,
+      y: visualY + tileSize / 2,
     },
     cameraMode: profile.cameraMode,
   });
@@ -147,6 +165,11 @@ function GamePreview({
     6: gameAssets.interiorFloor,
     7: gameAssets.interiorWall,
   };
+  const playerAction = moving ? 'walk' : 'idle';
+  const playerFrame = moving ? Math.floor((motionElapsed * 8) % 4) : 0;
+  const playerSheet = animationAssets.playerAdventurer[playerAction][direction];
+  const playerRenderSize = tileSize - 4;
+  const playerClipId = `player-frame-${currentMap}`;
 
   return (
     <div className="flex-1 bg-gray-900 flex items-center justify-center relative overflow-hidden">
@@ -181,6 +204,16 @@ function GamePreview({
             height={cameraFrame.height}
             fill="#0f172a"
           />
+          <defs>
+            <clipPath id={playerClipId}>
+              <rect
+                x={visualX + 2}
+                y={visualY + 2}
+                width={playerRenderSize}
+                height={playerRenderSize}
+              />
+            </clipPath>
+          </defs>
           {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
             const x = (i % map.width) * tileSize;
             const y = Math.floor(i / map.width) * tileSize;
@@ -247,11 +280,12 @@ function GamePreview({
           ))}
 
           <image
-            x={playerX * tileSize + 2}
-            y={playerY * tileSize + 2}
-            width={tileSize - 4}
-            height={tileSize - 4}
-            href={gameAssets.player}
+            x={visualX + 2 - playerFrame * playerRenderSize}
+            y={visualY + 2}
+            width={playerRenderSize * 4}
+            height={playerRenderSize}
+            href={playerSheet}
+            clipPath={`url(#${playerClipId})`}
             style={{ imageRendering: 'pixelated' }}
           />
         </svg>
@@ -496,22 +530,137 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
 
 export function PlaytestScreen() {
   const project = useProject();
-  const { state, logs, movePlayer, restart } = usePlaytestStore({
+  const { state, logs, setPlayerPose, faceDirection, restart } = usePlaytestStore({
     currentMap: project.project.startMapId,
     playerX: project.project.startPosition.x,
     playerY: project.project.startPosition.y,
     direction: project.project.startPosition.direction,
   });
   const previewMap = project.maps[state.currentMap];
-  const movePreviewPlayer = (dx: number, dy: number) => {
-    movePlayer(dx, dy, previewMap?.width ?? 1, previewMap?.height ?? 1);
+  const profile = normalizeVisualProfile(project.project.visualProfile);
+  const seedTileSize = previewMap?.tileSize || profile.tileSize;
+  const [motionView, setMotionView] = useState<TileFluidMotion>(() =>
+    createTileFluidMotion({
+      tileX: project.project.startPosition.x,
+      tileY: project.project.startPosition.y,
+      direction: project.project.startPosition.direction,
+      tileSize: seedTileSize,
+    }),
+  );
+  const motionRef = useRef(motionView);
+  const heldDirectionRef = useRef<Direction | null>(null);
+  const lastBlockedDirectionRef = useRef<Direction | null>(null);
+
+  useEffect(() => {
+    const next = createTileFluidMotion({
+      tileX: state.playerX,
+      tileY: state.playerY,
+      direction: state.direction,
+      tileSize: seedTileSize,
+    });
+    motionRef.current = next;
+    setMotionView({ ...next });
+  }, [state.currentMap, seedTileSize]);
+
+  const isBlocked = (map: MapData | undefined, x: number, y: number) => {
+    if (!map) return true;
+    const collision = map.layers.find(layer => layer.name === 'collision');
+    const tile = collision?.tiles[y * map.width + x] ?? 0;
+    if (tile === 9) return true;
+    return map.events.some(event => event.solid && event.x === x && event.y === y);
   };
+
+  const movePreviewPlayer = (direction: Direction) => {
+    const motion = motionRef.current;
+    const started = beginTileFluidStep(motion, direction, {
+      width: previewMap?.width ?? 1,
+      height: previewMap?.height ?? 1,
+      isBlocked: (x, y) => isBlocked(previewMap, x, y),
+    });
+    if (!started) {
+      if (lastBlockedDirectionRef.current !== direction) {
+        faceDirection(direction);
+        lastBlockedDirectionRef.current = direction;
+      }
+    } else {
+      lastBlockedDirectionRef.current = null;
+    }
+    setMotionView({ ...motion });
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const direction = directionFromKey(event.key);
+      if (!direction) return;
+      event.preventDefault();
+      heldDirectionRef.current = direction;
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      const direction = directionFromKey(event.key);
+      if (!direction) return;
+      event.preventDefault();
+      if (heldDirectionRef.current === direction) {
+        heldDirectionRef.current = null;
+        lastBlockedDirectionRef.current = null;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const motion = motionRef.current;
+
+      if (!motion.moving && heldDirectionRef.current) {
+        const started = beginTileFluidStep(motion, heldDirectionRef.current, {
+          width: previewMap?.width ?? 1,
+          height: previewMap?.height ?? 1,
+          isBlocked: (x, y) => isBlocked(previewMap, x, y),
+        });
+        if (!started) {
+          if (lastBlockedDirectionRef.current !== heldDirectionRef.current) {
+            faceDirection(heldDirectionRef.current);
+            lastBlockedDirectionRef.current = heldDirectionRef.current;
+          }
+        } else {
+          lastBlockedDirectionRef.current = null;
+        }
+      }
+
+      const completed = advanceTileFluidMotion(motion, dt, 4);
+      if (completed) {
+        setPlayerPose(completed.tileX, completed.tileY, completed.direction);
+      }
+      setMotionView({ ...motion });
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [previewMap, setPlayerPose, faceDirection]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
         <PlaytestControls onMove={movePreviewPlayer} onRestart={restart} />
-        <GamePreview playerX={state.playerX} playerY={state.playerY} currentMap={state.currentMap} />
+        <GamePreview
+          playerX={motionView.tileX}
+          playerY={motionView.tileY}
+          visualX={motionView.visualX}
+          visualY={motionView.visualY}
+          direction={motionView.direction}
+          moving={motionView.moving}
+          motionElapsed={motionView.elapsed}
+          currentMap={state.currentMap}
+        />
         <RuntimeStateInspector state={state} />
       </div>
       <RuntimeBridgePanel />
