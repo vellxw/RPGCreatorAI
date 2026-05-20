@@ -712,3 +712,18 @@ Error: Port 1420 is already in use
 - `2026-05-18 21:49 -03:00` — `npm run build` — PASS (`tsc --noEmit`
   and `vite build`).
 
+### Phase 9 Hotfix — character scale and movement parity baseline
+
+- `2026-05-19 21:01 -03:00` — `git diff --check` — PASS.
+- `2026-05-19 21:01 -03:00` — `npm test` — PASS (18 files,
+  107 tests).
+- `2026-05-19 21:01 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-19 21:01 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (17/17 Rust tests).
+- `2026-05-19 21:01 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+
