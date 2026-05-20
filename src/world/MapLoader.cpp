@@ -182,6 +182,7 @@ static EventPage parsePage(const json& j) {
         page.options.trigger = options.value("trigger", page.options.trigger);
         page.options.priority = options.value("priority", page.options.priority);
         page.options.solid = options.value("solid", false);
+        page.options.through = options.value("through", false);
     }
     page.options.trigger = j.value("trigger", page.options.trigger);
     page.options.priority = j.value("priority", page.options.priority);

@@ -151,6 +151,105 @@ TEST_CASE("EventRunner controlSwitch and ifSwitch") {
     CHECK(state.getFlag("branch_taken") == true);
 }
 
+TEST_CASE("EventRunner controlSelfSwitch and ifSelfSwitch use current map and owner event") {
+    GameState state;
+    state.setCurrentMap("town");
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto setSelf = makeCmd("controlSelfSwitch");
+    setSelf->switchId = "A";
+    setSelf->boolValue = true;
+
+    auto inner = makeCmd("setFlag");
+    inner->flag = "self_branch_taken";
+    inner->boolValue = true;
+
+    auto check = makeCmd("ifSelfSwitch");
+    check->switchId = "A";
+    check->boolValue = true;
+    check->thenCommands = { inner };
+
+    runner.runCommandList({setSelf, check}, "chest_001");
+    runUntilIdle(runner);
+
+    CHECK(state.getSelfSwitch("town", "chest_001", 'A') == true);
+    CHECK(state.getSelfSwitch("town", "other_event", 'A') == false);
+    CHECK(state.getFlag("self_branch_taken") == true);
+}
+
+TEST_CASE("EventRunner ifSelfSwitch executes else branch when default value differs") {
+    GameState state;
+    state.setCurrentMap("town");
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto thenCmd = makeCmd("setFlag");
+    thenCmd->flag = "then_taken";
+    thenCmd->boolValue = true;
+
+    auto elseCmd = makeCmd("setFlag");
+    elseCmd->flag = "else_taken";
+    elseCmd->boolValue = true;
+
+    auto check = makeCmd("ifSelfSwitch");
+    check->switchId = "A";
+    check->boolValue = true;
+    check->thenCommands = { thenCmd };
+    check->elseCommands = { elseCmd };
+
+    runner.runCommandList({check}, "chest_001");
+    runUntilIdle(runner);
+
+    CHECK(state.getFlag("then_taken") == false);
+    CHECK(state.getFlag("else_taken") == true);
+}
+
+TEST_CASE("EventRunner ignores controlSelfSwitch without owner event") {
+    GameState state;
+    state.setCurrentMap("town");
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto setSelf = makeCmd("controlSelfSwitch");
+    setSelf->switchId = "A";
+    setSelf->boolValue = true;
+
+    runner.runCommandList({setSelf});
+    runUntilIdle(runner);
+
+    CHECK(state.getSelfSwitch("town", "", 'A') == false);
+}
+
+TEST_CASE("EventRunner self switches use owner map captured before transfer") {
+    GameState state;
+    state.setCurrentMap("town");
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto transfer = makeCmd("transferMap");
+    transfer->mapId = "house";
+    transfer->x = 1;
+    transfer->y = 2;
+    transfer->direction = "down";
+
+    auto setSelf = makeCmd("controlSelfSwitch");
+    setSelf->switchId = "A";
+    setSelf->boolValue = true;
+
+    runner.runCommandList({transfer, setSelf}, "chest_001");
+    runner.update(0.016f);
+
+    auto req = runner.consumeTransferRequest();
+    CHECK(req.active == true);
+    state.setCurrentMap("house");
+
+    runner.update(0.016f);
+
+    CHECK(state.getSelfSwitch("town", "chest_001", 'A') == true);
+    CHECK(state.getSelfSwitch("house", "chest_001", 'A') == false);
+}
+
 TEST_CASE("EventRunner controlVariable performs arithmetic") {
     GameState state;
     DialogueSystem dialogue;

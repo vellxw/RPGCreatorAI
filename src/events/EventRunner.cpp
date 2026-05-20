@@ -5,6 +5,7 @@
 #include "core/Logger.h"
 #include <vector>
 #include <memory>
+#include <cctype>
 
 EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
     : gameState(state), dialogue(dialogueSystem) {}
@@ -12,6 +13,7 @@ EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
 void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>>& commands,
                                  const std::string& ownerEventId) {
     commandStack.clear();
+    currentOwnerMapId = gameState.getCurrentMapId();
     currentOwnerEventId = ownerEventId;
     // Push commands in reverse order so we process them front-to-back via pop_back.
     for (auto it = commands.rbegin(); it != commands.rend(); ++it) {
@@ -64,6 +66,12 @@ static int compareInts(int lhs, int rhs, const std::string& op) {
     return 0;
 }
 
+static char selfSwitchLetter(const std::string& id) {
+    return id.empty()
+        ? '\0'
+        : static_cast<char>(std::toupper(static_cast<unsigned char>(id.front())));
+}
+
 void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     if (!cmd) return;
     const std::string& type = cmd->type;
@@ -100,6 +108,22 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     }
     if (type == "ifSwitch") {
         bool current = gameState.getSwitch(cmd->switchId);
+        pushFront((current == cmd->boolValue) ? cmd->thenCommands : cmd->elseCommands);
+        return;
+    }
+    if (type == "controlSelfSwitch") {
+        if (!currentOwnerMapId.empty() && !currentOwnerEventId.empty() && !cmd->switchId.empty()) {
+            gameState.setSelfSwitch(currentOwnerMapId, currentOwnerEventId,
+                                    selfSwitchLetter(cmd->switchId), cmd->boolValue);
+        }
+        return;
+    }
+    if (type == "ifSelfSwitch") {
+        bool current = false;
+        if (!currentOwnerMapId.empty() && !currentOwnerEventId.empty() && !cmd->switchId.empty()) {
+            current = gameState.getSelfSwitch(currentOwnerMapId, currentOwnerEventId,
+                                              selfSwitchLetter(cmd->switchId));
+        }
         pushFront((current == cmd->boolValue) ? cmd->thenCommands : cmd->elseCommands);
         return;
     }

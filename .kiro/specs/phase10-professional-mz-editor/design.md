@@ -76,10 +76,24 @@ tileset database loading.
   through `SaveManager`, and parses both legacy flat events and paged events
   through `MapLoader`.
 
-## Slice 3A Deferred Work
+## Slice 3B Runtime Activation
+
+- `EventPageEvaluator` resolves the active page by scanning pages from last
+  to first and requiring every switch, variable, and self-switch condition to
+  match.
+- Legacy flat events remain active without pages. Paged events with no active
+  page expose no trigger or commands, are skipped by event rendering, and do
+  not override collision tiles.
+- `Game` uses the active page for interact/touch triggers, command list
+  execution, render graphic/animation metadata, collision priority, and
+  `through`.
+- `EventRunner` now executes `controlSelfSwitch` and `ifSelfSwitch` against
+  the map/event owner captured when the command list starts, so transfers do
+  not retarget the self-switch scope mid-list.
+
+## Slice 3B Deferred Work
 
 The autorun/parallel scheduler is intentionally not implemented in this cut.
 It needs separate runner contexts so parallel events do not overwrite the
-interactive `EventRunner` stack. The next Slice 3 cut should add active-page
-selection in runtime, `controlSelfSwitch` execution, and deterministic
-autorun/parallel scheduling.
+interactive `EventRunner` stack. Slice 3C should add deterministic map and
+common-event scheduling plus command-stack polish.

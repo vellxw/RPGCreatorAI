@@ -39,7 +39,12 @@ without copying proprietary assets, formats, or runtime dependencies.
    switch letter `A-D`, and save/load shall round-trip them.
 15. Runtime map loading shall parse both legacy flat events and editor-authored
    event pages without rejecting old projects.
-16. Toolbar and inspector buttons that imply unimplemented workflows shall be
+16. Runtime event dispatch shall select the active page by switch, variable,
+   and self-switch conditions before evaluating trigger, collision, graphics,
+   or commands.
+17. `EventRunner` shall execute `controlSelfSwitch` and `ifSelfSwitch` against
+   the owning map/event scope.
+18. Toolbar and inspector buttons that imply unimplemented workflows shall be
    removed or disabled until real behavior exists.
 
 ## Non-Goals
@@ -48,5 +53,5 @@ without copying proprietary assets, formats, or runtime dependencies.
 - No general scripting/plugin execution in this slice.
 - No AI runtime dependency.
 - No autotile rules in Slice 2.
-- No autorun/parallel scheduler runners in Slice 3A; page parsing and self
-  switches land first, scheduler work follows in the next Slice 3 cut.
+- No autorun/parallel scheduler runners in Slice 3B; page parsing, active-page
+  dispatch, and self switches land first, scheduler work follows in Slice 3C.

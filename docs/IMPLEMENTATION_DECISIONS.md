@@ -34,7 +34,9 @@
 - Variables: `{ "variables": [{ "id": "gold_quest_progress", "name": "...", "initial": 0 }, ...] }`.
 - Self switches: stored on the runtime side keyed by `mapId:eventId:A|B|C|D`.
   Phase 10 Slice 3A exposes all four letters to event-page conditions and
-  persists them in saves; command execution against those keys is Slice 3B.
+  persists them in saves. Slice 3B executes `controlSelfSwitch` and
+  `ifSelfSwitch` against the owning map/event captured when the command list
+  starts.
 - The legacy `flags` field in saves is preserved for backward compatibility;
   new switches are merged with it on load.
 
@@ -47,8 +49,11 @@
   switches, variables, and self switches.
 - The C++ loader accepts both the compact runtime page shape and the
   editor-authored shape with `conditions`, `options`, `movement`, and
-  top-level `trigger` / `priority` fields. Runtime active-page selection is
-  intentionally deferred until the scheduler slice.
+  top-level `trigger` / `priority` fields.
+- Runtime active-page selection scans pages from last to first. Paged events
+  with no active page expose no trigger or commands, are not rendered, and do
+  not override collision tiles. Autorun/parallel scheduling remains deferred
+  until Slice 3C.
 
 ## Common events
 

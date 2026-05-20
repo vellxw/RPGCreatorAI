@@ -95,6 +95,7 @@ private:
     ShopOpenRequest shopRequest;
     BattleSummaryRequest battleSummaryRequest;
     AnimationRequest animationRequest;
+    std::string currentOwnerMapId;
     std::string currentOwnerEventId;
 
     CommonEventResolver commonEventResolver;

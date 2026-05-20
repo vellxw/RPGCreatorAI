@@ -4,6 +4,57 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 Slice 3B — runtime event page activation
+
+- `2026-05-20 09:43 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS after adding `EventPageEvaluator`, active-page trigger/command/
+  render/collision routing, and `controlSelfSwitch` / `ifSelfSwitch`
+  execution.
+- QA scout found that self switches must use the event-owner map captured at
+  command-list start rather than the live current map after a transfer, and
+  that inactive paged events must not override collision tiles. Fix applied:
+  `EventRunner` captures `currentOwnerMapId`, paged events without an active
+  page expose no commands/triggers, and `Game::canPlayerMoveTo` falls back to
+  tile collision for inactive paged events.
+- `2026-05-20 09:46 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS after the owner-map and inactive-page fixes.
+- `2026-05-20 09:47 -03:00` — `git diff --check` — PASS.
+- `2026-05-20 09:47 -03:00` — `npm test` — PASS (18 files,
+  133 tests).
+- `2026-05-20 09:48 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 09:48 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 09:49 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-20 09:50 -03:00` — `npm run desktop:verify-content` — PASS;
+  a temporary `dev:tauri` server on `127.0.0.1:1420` served the editor and
+  was stopped after verification.
+
+### Fixes applied
+
+- Added a C++ active-page evaluator that scans event pages from last to first
+  and checks switch, variable, and self-switch conditions.
+- Routed interact/touch triggers, command execution, render graphics,
+  animation metadata, collision priority, and `through` through the active
+  event page.
+- Implemented `controlSelfSwitch` and `ifSelfSwitch` in `EventRunner` with
+  owner map/event scoping preserved across transfers.
+- Added C++ coverage for page selection, inactive-page behavior, `through`,
+  self-switch command branches, owner-map capture, and loader parsing.
+
+### Deferred from this slice
+
+- Automatic `autorun` / `parallel` map and common-event scheduling remains
+  Slice 3C.
+
+---
+
 ## Phase 10 Slice 3A — event pages and self-switch foundation
 
 - `2026-05-20 09:09 -03:00` —

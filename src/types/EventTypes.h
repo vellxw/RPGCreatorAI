@@ -109,6 +109,7 @@ struct EventPageOptions {
     std::string trigger = "interact";
     std::string priority = "same";
     bool solid = false;
+    bool through = false;
 };
 
 struct EventPageMovement {

@@ -15,9 +15,6 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3B — Event runtime activation: choose the active event page by
-  MZ-like priority rules, execute self-switch commands, and wire page
-  conditions into interaction/touch/autorun evaluation.
 - Slice 3C — Event scheduler and command-stack polish: autorun/parallel
   common-event scheduling, movement-route basics, and range clipboard /
   branch editing for command lists.
@@ -32,6 +29,14 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3B — runtime event page activation: C++ runtime now selects
+  the active page from last to first by switch, variable, and self-switch
+  conditions; `Game` uses active pages for interact/touch triggers, command
+  execution, render graphic/animation metadata, collision priority, and
+  `through`; inactive paged events do not render or override collision; and
+  `EventRunner` executes `controlSelfSwitch` / `ifSelfSwitch` against the
+  owning map/event scope captured at command-list start. Autorun/parallel
+  scheduling remains Slice 3C.
 - Phase 10 Slice 3A — event page and self-switch foundation: `GameEvent`
   now supports normalized `pages`; the editor can add, update, reorder, and
   edit page-scoped commands; page conditions include self switches A-D; event

@@ -211,7 +211,7 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
                         },
                         "graphic": { "sprite": "npc_old_man" },
                         "movement": { "type": "fixed", "speed": "normal" },
-                        "options": { "walking": true, "stepping": false, "directionFix": false, "through": false },
+                        "options": { "walking": true, "stepping": false, "directionFix": false, "through": true },
                         "priority": "sameAsCharacters",
                         "trigger": "parallel",
                         "commands": [
@@ -237,6 +237,7 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
     const auto& page = m->events[0].pages[0];
     CHECK(page.options.trigger == "parallel");
     CHECK(page.options.priority == "sameAsCharacters");
+    CHECK(page.options.through == true);
     CHECK(page.graphic.sprite == "npc_old_man");
     REQUIRE(page.conditions.size() == 3);
     CHECK(page.conditions[0].type == "selfSwitch");

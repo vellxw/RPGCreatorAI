@@ -1,6 +1,7 @@
 #include "core/Game.h"
 #include "core/Logger.h"
 #include "core/MovementSpeed.h"
+#include "events/EventPageEvaluator.h"
 #include "world/MapLoader.h"
 #include "world/CollisionSystem.h"
 #include "save/SaveManager.h"
@@ -236,7 +237,7 @@ bool Game::tryStartSmoothMove(int dx, int dy, Direction dir) {
     // Direction updates immediately even if the destination is blocked.
     state.setPlayerPosition(curX, curY, dir);
 
-    if (!CollisionSystem::canMoveTo(currentScene, targetX, targetY)) {
+    if (!canPlayerMoveTo(targetX, targetY)) {
         return false;
     }
 
@@ -255,7 +256,7 @@ bool Game::tryMove(int dx, int dy, Direction dir) {
     // Direction always updates, even when blocked.
     state.setPlayerPosition(curX, curY, dir);
 
-    if (!CollisionSystem::canMoveTo(currentScene, targetX, targetY)) {
+    if (!canPlayerMoveTo(targetX, targetY)) {
         return false;
     }
 
@@ -264,12 +265,27 @@ bool Game::tryMove(int dx, int dy, Direction dir) {
 
     // Touch-trigger events fire when stepping onto the destination cell.
     if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
-        if (ev->trigger == "touch") {
+        if (rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "touch") {
             runEventCommands(*ev);
         }
     }
 
     return true;
+}
+
+bool Game::canPlayerMoveTo(int targetX, int targetY) const {
+    if (targetX < 0 || targetX >= currentScene.getWidth() ||
+        targetY < 0 || targetY >= currentScene.getHeight()) {
+        return false;
+    }
+
+    if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
+        if (rpg::eventHasActivePage(*ev, state, state.getCurrentMapId())) {
+            return !rpg::activeEventBlocksMovement(*ev, state, state.getCurrentMapId());
+        }
+    }
+
+    return currentScene.getTileAt("collision", targetX, targetY) != 9;
 }
 
 void Game::finalizeSmoothStepIfNeeded() {
@@ -281,7 +297,7 @@ void Game::finalizeSmoothStepIfNeeded() {
     state.setPlayerPosition(targetX, targetY, dir);
 
     if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
-        if (ev->trigger == "touch") {
+        if (rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "touch") {
             runEventCommands(*ev);
         }
     }
@@ -299,14 +315,16 @@ void Game::interact() {
     int ty = state.getPlayerY() + dy;
 
     const EventData* ev = currentScene.getEventAt(tx, ty);
-    if (ev && ev->trigger == "interact") {
+    if (ev && rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "interact") {
         runEventCommands(*ev);
     }
 }
 
 void Game::runEventCommands(const EventData& event) {
     if (!eventRunner) return;
-    eventRunner->runCommandList(event.commands, event.id);
+    eventRunner->runCommandList(
+        rpg::activeEventCommands(event, state, state.getCurrentMapId()),
+        event.id);
 }
 
 void Game::applyTransferIfPending() {
@@ -378,7 +396,14 @@ void Game::applyAnimationRequest(const AnimationRequest& request) {
     }
 
     auto& anim = eventAnimations[targetEventId];
-    applyToState(anim, event->animationSet, Direction::Down);
+    const EventPage* activePage = event->pages.empty()
+        ? nullptr
+        : rpg::selectActiveEventPage(*event, state, state.getCurrentMapId());
+    const std::string animationSet =
+        activePage && !activePage->graphic.animationSet.empty()
+            ? activePage->graphic.animationSet
+            : event->animationSet;
+    applyToState(anim, animationSet, Direction::Down);
 }
 
 void Game::updateAnimationStates(float dt) {
@@ -483,23 +508,40 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
     if (tileSize <= 0) tileSize = 32;
 
     for (const auto& event : currentScene.getData().events) {
+        const EventPage* activePage = event.pages.empty()
+            ? nullptr
+            : rpg::selectActiveEventPage(event, state, state.getCurrentMapId());
+        if (!event.pages.empty() && !activePage) continue;
+
         const auto animIt = eventAnimations.find(event.id);
         const RuntimeAnimationState fallbackAnim;
         const RuntimeAnimationState& anim =
             animIt == eventAnimations.end() ? fallbackAnim : animIt->second;
         const std::string action = anim.manual ? anim.action : "idle";
         const Direction dir = anim.manual ? anim.direction : Direction::Down;
+        const std::string animationSet =
+            activePage && !activePage->graphic.animationSet.empty()
+                ? activePage->graphic.animationSet
+                : event.animationSet;
+        const std::string fallbackAsset =
+            activePage && !activePage->graphic.sprite.empty()
+                ? activePage->graphic.sprite
+                : SpriteCatalog::eventAssetFor(event);
+        const float displayHeightTiles =
+            activePage && activePage->graphic.displayHeightTiles > 0.0f
+                ? activePage->graphic.displayHeightTiles
+                : event.displayHeightTiles;
         snapshot.events.push_back(buildAnimatedSprite(
-            event.animationSet,
-            SpriteCatalog::eventAssetFor(event),
+            animationSet,
+            fallbackAsset,
             action,
             dir,
             anim.elapsed,
             static_cast<float>(event.x * tileSize),
             static_cast<float>(event.y * tileSize),
             tileSize,
-            event.displayHeightTiles,
-            event.type == "npc" || !event.animationSet.empty(),
+            displayHeightTiles,
+            event.type == "npc" || !animationSet.empty(),
             false));
     }
 

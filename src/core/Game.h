@@ -50,6 +50,7 @@ private:
     void handlePlayerInput(const InputManager& input);
     bool tryMove(int dx, int dy, Direction dir);
     bool tryStartSmoothMove(int dx, int dy, Direction dir);
+    bool canPlayerMoveTo(int targetX, int targetY) const;
     void finalizeSmoothStepIfNeeded();
     void interact();
     void runEventCommands(const EventData& event);

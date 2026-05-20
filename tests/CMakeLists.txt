@@ -18,6 +18,7 @@ set(PHASE2_TEST_SOURCES
     test_menu_system.cpp
     test_shop_system.cpp
     test_tileset_runtime_data.cpp
+    test_event_page_evaluator.cpp
 )
 
 add_executable(rpg_tests ${PHASE2_TEST_SOURCES})

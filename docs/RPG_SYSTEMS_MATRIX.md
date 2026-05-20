@@ -14,12 +14,12 @@ Legend:
 |--------|--------|--------|--------|---------|------------|-------|-------|
 | Project metadata | val | yes | yes | yes | yes | yes | Phase 8 adds backward-compatible visual profiles for aspect ratio, resolution, camera mode, tile size, and zoom |
 | Maps + tilesets / sprites | val | yes | yes | yes | yes | yes | Phase 8 adds full-bleed generated tiles, no-gap validation, scene templates, and widescreen visual QA |
-| Events (id, position, trigger, solid, sprite, pages) | val | yes | yes | partial | yes | yes | Phase 10 Slice 3A adds multi-page editor data and C++ loading; active-page runtime selection is Slice 3B |
+| Events (id, position, trigger, solid, sprite, pages) | val | yes | yes | yes | yes | yes | Phase 10 Slice 3B adds active-page runtime selection for interact/touch, commands, render metadata, and collision; autorun/parallel scheduler remains separate |
 | Event commands v0 (showText, setFlag, ifFlag, addItem, transferMap, playSound) | val | yes | yes | yes | yes | yes | Phase 1/2 |
-| Event commands v1 (choices, vars, gold, quest, shop, battle, common events) | val | yes | yes | yes | yes | yes | Slice 3 (24 commands total) |
+| Event commands v1 (choices, vars, gold, quest, shop, battle, common events, self switches) | val | yes | yes | yes | yes | yes | Phase 10 Slice 3B executes controlSelfSwitch/ifSelfSwitch |
 | Switches (typed) | val | yes | yes | yes | yes | yes | Slice 1/4 |
 | Variables (typed) | val | yes | yes | yes | yes | yes | Slice 1/4 |
-| Self switches | partial | yes | yes | partial | yes | yes | Phase 10 Slice 3A adds A-D page conditions plus GameState/save storage; command execution is Slice 3B |
+| Self switches | val | yes | yes | yes | yes | yes | Phase 10 Slice 3B adds active-page conditions plus control/branch command execution scoped by map/event |
 | Common events | val | yes | partial | yes | yes | yes | Slice 1/3 (editor command-list editing in Phase 7) |
 | Items DB | val | yes | partial | yes | yes | yes | Phase 2 / Slice 1 |
 | Actors / party | val | yes | yes | yes | yes | yes | Slice 1/6/7 |

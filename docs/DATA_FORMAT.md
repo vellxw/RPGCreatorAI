@@ -108,7 +108,10 @@ Any other value falls back to the generic event color.
 character height for that event while collision remains one logical tile.
 `pages` is optional and backward-compatible. When absent, the editor
 normalizes the legacy `trigger` and `commands` into one page. Page 1 mirrors
-back to legacy fields while the runtime scheduler work is staged.
+back to legacy fields. The C++ runtime selects the last page whose switch,
+variable, and self-switch conditions match, then uses that page's trigger,
+commands, graphic metadata, priority, and `through` option. Automatic
+`autorun`/`parallel` scheduling is still deferred.
 
 See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
 

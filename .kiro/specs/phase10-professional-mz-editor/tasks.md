@@ -50,10 +50,12 @@
 - [x] Slice 3A: add C++ self-switch state and save/load round-trip.
 - [x] Slice 3A: parse legacy flat events and paged events in the C++ map
   loader.
-- [ ] Slice 3B: active-page runtime selection by switch/variable/self-switch
+- [x] Slice 3B: active-page runtime selection by switch/variable/self-switch
   conditions.
-- [ ] Slice 3B: `controlSelfSwitch` and `ifSelfSwitch` execution in
+- [x] Slice 3B: `controlSelfSwitch` and `ifSelfSwitch` execution in
   `EventRunner`.
+- [x] Slice 3B: use the active page for interact/touch triggers, command
+  lists, render graphics, event collision priority, and `through`.
 - [ ] Slice 3C: deterministic autorun/parallel map and common-event scheduler.
 
 ## Next Slices
