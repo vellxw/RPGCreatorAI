@@ -1,5 +1,6 @@
 #include "events/GameState.h"
 #include <algorithm>
+#include <cctype>
 
 GameState::GameState() = default;
 
@@ -29,6 +30,36 @@ void GameState::setSwitch(const std::string& id, bool value) {
     // Mirror to legacy flags so existing event commands and saves remain
     // backward-compatible.
     flags[id] = value;
+}
+
+// ---- self switches -------------------------------------------------------
+
+namespace {
+
+char normalizeSelfSwitch(char letter) {
+    const auto upper = static_cast<char>(std::toupper(static_cast<unsigned char>(letter)));
+    return upper >= 'A' && upper <= 'D' ? upper : '\0';
+}
+
+std::string selfSwitchKey(const std::string& mapId, const std::string& eventId, char letter) {
+    return mapId + ":" + eventId + ":" + std::string(1, letter);
+}
+
+} // namespace
+
+bool GameState::getSelfSwitch(const std::string& mapId, const std::string& eventId, char letter) const {
+    const char normalized = normalizeSelfSwitch(letter);
+    if (normalized == '\0') return false;
+
+    const auto it = selfSwitches.find(selfSwitchKey(mapId, eventId, normalized));
+    return it != selfSwitches.end() ? it->second : false;
+}
+
+void GameState::setSelfSwitch(const std::string& mapId, const std::string& eventId, char letter, bool value) {
+    const char normalized = normalizeSelfSwitch(letter);
+    if (normalized == '\0') return;
+
+    selfSwitches[selfSwitchKey(mapId, eventId, normalized)] = value;
 }
 
 // ---- variables -----------------------------------------------------------

@@ -80,7 +80,23 @@ The `collision` layer uses `0` for walkable and `9` for solid wall.
   "animationSet": "npc_old_man",
   "displayHeightTiles": 1.5,
   "trigger": "interact",
-  "commands": [ /* event commands */ ]
+  "commands": [ /* legacy event commands */ ],
+  "pages": [
+    {
+      "id": "page_1",
+      "conditions": {
+        "selfSwitches": { "A": true },
+        "switches": { "quest_started": true },
+        "variables": [{ "variableId": "progress", "op": "gte", "value": 2 }]
+      },
+      "graphic": { "sprite": "npc_old_man", "animationSet": "npc_old_man" },
+      "movement": { "type": "fixed", "speed": "normal" },
+      "options": { "walking": true, "stepping": false, "directionFix": false, "through": false },
+      "priority": "sameAsCharacters",
+      "trigger": "interact",
+      "commands": [ /* page commands */ ]
+    }
+  ]
 }
 ```
 
@@ -90,6 +106,9 @@ Any other value falls back to the generic event color.
 `database/animations.json` and enables action/direction clip lookup.
 `displayHeightTiles` is optional; when present it overrides the rendered
 character height for that event while collision remains one logical tile.
+`pages` is optional and backward-compatible. When absent, the editor
+normalizes the legacy `trigger` and `commands` into one page. Page 1 mirrors
+back to legacy fields while the runtime scheduler work is staged.
 
 See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
 

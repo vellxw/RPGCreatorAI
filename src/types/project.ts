@@ -123,12 +123,51 @@ export interface GameEvent {
   displayHeightTiles?: number;
   trigger: TriggerType;
   commands: EventCommand[];
+  pages?: EventPage[];
 }
 
 export type EventType = 'npc' | 'transfer' | 'chest' | 'object' | 'trigger';
 export type TriggerType = 'interact' | 'touch' | 'autorun' | 'parallel';
 export type Direction = 'up' | 'down' | 'left' | 'right';
 export type MovementSpeed = 'oneEighth' | 'oneQuarter' | 'half' | 'normal' | 'double' | 'quadruple';
+export type SelfSwitchId = 'A' | 'B' | 'C' | 'D';
+export type EventPriority = 'belowCharacters' | 'sameAsCharacters' | 'aboveCharacters';
+
+export interface EventPageConditions {
+  switches?: Record<string, boolean>;
+  variables?: Array<{ variableId: string; op: VariableComparison; value: number }>;
+  selfSwitches?: Partial<Record<string, boolean>>;
+}
+
+export interface EventPageGraphic {
+  sprite?: string;
+  animationSet?: string;
+  displayHeightTiles?: number;
+}
+
+export interface EventPageMovement {
+  type: 'fixed' | 'random' | 'approach' | 'custom';
+  speed: MovementSpeed;
+}
+
+export interface EventPageOptions {
+  walking: boolean;
+  stepping: boolean;
+  directionFix: boolean;
+  through: boolean;
+}
+
+export interface EventPage {
+  id: string;
+  name?: string;
+  conditions: EventPageConditions;
+  graphic: EventPageGraphic;
+  movement: EventPageMovement;
+  options: EventPageOptions;
+  priority: EventPriority;
+  trigger: TriggerType;
+  commands: EventCommand[];
+}
 
 // ---------------------------------------------------------------------------
 // Event commands
@@ -140,8 +179,10 @@ export type EventCommand =
   | SetFlagCommand
   | IfFlagCommand
   | IfSwitchCommand
+  | IfSelfSwitchCommand
   | IfVariableCommand
   | ControlSwitchCommand
+  | ControlSelfSwitchCommand
   | ControlVariableCommand
   | AddItemCommand
   | RemoveItemCommand
@@ -195,6 +236,14 @@ export interface IfSwitchCommand {
   else: EventCommand[];
 }
 
+export interface IfSelfSwitchCommand {
+  type: 'ifSelfSwitch';
+  switchId: SelfSwitchId;
+  equals: boolean;
+  then: EventCommand[];
+  else: EventCommand[];
+}
+
 export type VariableComparison = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte';
 
 export interface IfVariableCommand {
@@ -209,6 +258,12 @@ export interface IfVariableCommand {
 export interface ControlSwitchCommand {
   type: 'controlSwitch';
   switchId: string;
+  value: boolean;
+}
+
+export interface ControlSelfSwitchCommand {
+  type: 'controlSelfSwitch';
+  switchId: SelfSwitchId;
   value: boolean;
 }
 

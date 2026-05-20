@@ -31,8 +31,10 @@ const VALID_COMMAND_TYPES = new Set([
   'setFlag',
   'ifFlag',
   'ifSwitch',
+  'ifSelfSwitch',
   'ifVariable',
   'controlSwitch',
+  'controlSelfSwitch',
   'controlVariable',
   'addItem',
   'removeItem',
@@ -507,6 +509,9 @@ function validateCommandsInMap(map: MapData, mapIds: string[], index: RefIndex):
   const out: ValidationMessage[] = [];
   for (const event of map.events) {
     out.push(...validateCommandList(event.commands, mapIds, index, `${map.id}/${event.id}`, event.id, map.events, event));
+    for (const page of event.pages ?? []) {
+      out.push(...validateCommandList(page.commands, mapIds, index, `${map.id}/${event.id}/${page.id}`, event.id, map.events, event));
+    }
   }
   return out;
 }
@@ -541,7 +546,7 @@ function validateCommandList(
     out.push(...validateSingleCommand(cmd, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
 
     // Walk nested branches.
-    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
+    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifSelfSwitch' || cmd.type === 'ifVariable') {
       out.push(...validateCommandList(cmd.then, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
       out.push(...validateCommandList(cmd.else, mapIds, index, source, ownerLabel, mapEvents, ownerEvent));
     } else if (cmd.type === 'showChoices') {
@@ -586,6 +591,10 @@ function validateSingleCommand(
     case 'controlSwitch':
     case 'ifSwitch':
       if (!index.switchIds.has(cmd.switchId)) err(`${cmd.type} references unknown switch "${cmd.switchId}"`);
+      break;
+    case 'controlSelfSwitch':
+    case 'ifSelfSwitch':
+      if (!['A', 'B', 'C', 'D'].includes(cmd.switchId)) err(`${cmd.type} references invalid self switch "${cmd.switchId}"`);
       break;
     case 'controlVariable':
       if (!index.variableIds.has(cmd.variableId))
@@ -675,7 +684,7 @@ function validateSingleCommand(
 export function validateItemReferencesInMap(map: MapData, itemIds: Set<string>): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   for (const event of map.events) {
-    walkAllCommands(event.commands, cmd => {
+    forEachEventCommandList(event, commands => walkAllCommands(commands, cmd => {
       if (cmd.type === 'addItem' && !itemIds.has(cmd.itemId)) {
         out.push({
           level: 'error',
@@ -683,7 +692,7 @@ export function validateItemReferencesInMap(map: MapData, itemIds: Set<string>):
           source: `${map.id}/${event.id}`,
         });
       }
-    });
+    }));
   }
   return out;
 }
@@ -698,7 +707,7 @@ export function validateTriggerAndCommandTypesInMap(map: MapData): ValidationMes
         source: `${map.id}/${event.id}`,
       });
     }
-    walkAllCommands(event.commands, cmd => {
+    forEachEventCommandList(event, commands => walkAllCommands(commands, cmd => {
       if (!VALID_COMMAND_TYPES.has(cmd.type)) {
         out.push({
           level: 'error',
@@ -706,7 +715,7 @@ export function validateTriggerAndCommandTypesInMap(map: MapData): ValidationMes
           source: `${map.id}/${event.id}`,
         });
       }
-    });
+    }));
   }
   return out;
 }
@@ -714,7 +723,7 @@ export function validateTriggerAndCommandTypesInMap(map: MapData): ValidationMes
 export function validateTransferTargetsInMap(map: MapData, mapIds: string[]): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   for (const event of map.events) {
-    walkAllCommands(event.commands, cmd => {
+    forEachEventCommandList(event, commands => walkAllCommands(commands, cmd => {
       if (cmd.type === 'transferMap' && !mapIds.includes(cmd.mapId)) {
         out.push({
           level: 'error',
@@ -722,15 +731,20 @@ export function validateTransferTargetsInMap(map: MapData, mapIds: string[]): Va
           source: `${map.id}/${event.id}`,
         });
       }
-    });
+    }));
   }
   return out;
+}
+
+function forEachEventCommandList(event: GameEvent, visit: (commands: EventCommand[]) => void): void {
+  visit(event.commands);
+  for (const page of event.pages ?? []) visit(page.commands);
 }
 
 function walkAllCommands(commands: EventCommand[], visit: (cmd: EventCommand) => void): void {
   for (const cmd of commands) {
     visit(cmd);
-    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
+    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifSelfSwitch' || cmd.type === 'ifVariable') {
       walkAllCommands(cmd.then, visit);
       walkAllCommands(cmd.else, visit);
     } else if (cmd.type === 'showChoices') {

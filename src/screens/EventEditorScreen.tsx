@@ -34,7 +34,7 @@ import { Input, Select } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { CommandEditor } from '../components/events/CommandEditor';
 import { validateEvent } from '../validation/validateMap';
-import type { EventCommand, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
+import type { EventCommand, EventPage, EventPriority, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
 import { eventAssets } from '../assets/generated/assetCatalog';
 
 function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
@@ -49,10 +49,14 @@ function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
       return { type: 'ifFlag', flag: 'flag_name', equals: true, then: [], else: [] };
     case 'ifSwitch':
       return { type: 'ifSwitch', switchId: '', equals: true, then: [], else: [] };
+    case 'ifSelfSwitch':
+      return { type: 'ifSelfSwitch', switchId: 'A', equals: true, then: [], else: [] };
     case 'ifVariable':
       return { type: 'ifVariable', variableId: '', op: 'eq', value: 0, then: [], else: [] };
     case 'controlSwitch':
       return { type: 'controlSwitch', switchId: '', value: true };
+    case 'controlSelfSwitch':
+      return { type: 'controlSelfSwitch', switchId: 'A', value: true };
     case 'controlVariable':
       return { type: 'controlVariable', variableId: '', op: 'set', value: 0 };
     case 'addItem':
@@ -181,6 +185,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     showChoices: { icon: <GitBranch size={18} />, color: 'text-blue-600', bg: 'bg-blue-50' },
     ifFlag: { icon: <Flag size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
     ifSwitch: { icon: <GitBranch size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
+    ifSelfSwitch: { icon: <GitBranch size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
     ifVariable: { icon: <Binary size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
     addItem: { icon: <Backpack size={18} />, color: 'text-green-600', bg: 'bg-green-50' },
     removeItem: { icon: <Backpack size={18} />, color: 'text-green-600', bg: 'bg-green-50' },
@@ -188,6 +193,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     removeGold: { icon: <Coins size={18} />, color: 'text-yellow-600', bg: 'bg-yellow-50' },
     setFlag: { icon: <Flag size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
     controlSwitch: { icon: <ToggleLeft size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
+    controlSelfSwitch: { icon: <ToggleLeft size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
     controlVariable: { icon: <Binary size={18} />, color: 'text-purple-600', bg: 'bg-purple-50' },
     transferMap: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     setPlayerPosition: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
@@ -210,6 +216,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     showChoices: 'Show Choices',
     ifFlag: 'If Flag',
     ifSwitch: 'If Switch',
+    ifSelfSwitch: 'If Self Switch',
     ifVariable: 'If Variable',
     addItem: 'Add Item',
     removeItem: 'Remove Item',
@@ -217,6 +224,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     removeGold: 'Remove Gold',
     setFlag: 'Set Flag',
     controlSwitch: 'Control Switch',
+    controlSelfSwitch: 'Control Self Switch',
     controlVariable: 'Control Variable',
     transferMap: 'Transfer Map',
     setPlayerPosition: 'Set Player Position',
@@ -239,6 +247,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       case 'showChoices': return `${cmd.prompt} (${cmd.choices.length} choices)`;
       case 'ifFlag': return `${cmd.flag} is ${cmd.equals ? 'ON' : 'OFF'}`;
       case 'ifSwitch': return `${cmd.switchId} is ${cmd.equals ? 'ON' : 'OFF'}`;
+      case 'ifSelfSwitch': return `Self ${cmd.switchId} is ${cmd.equals ? 'ON' : 'OFF'}`;
       case 'ifVariable': return `${cmd.variableId} ${cmd.op} ${cmd.value}`;
       case 'addItem':
       case 'removeItem': return `Item: ${cmd.itemId} × ${cmd.amount}`;
@@ -246,6 +255,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       case 'removeGold': return `${cmd.amount} gold`;
       case 'setFlag': return `${cmd.flag} → ${cmd.value ? 'ON' : 'OFF'}`;
       case 'controlSwitch': return `${cmd.switchId} → ${cmd.value ? 'ON' : 'OFF'}`;
+      case 'controlSelfSwitch': return `Self ${cmd.switchId} → ${cmd.value ? 'ON' : 'OFF'}`;
       case 'controlVariable': return `${cmd.variableId} ${cmd.op} ${cmd.value}`;
       case 'transferMap':
       case 'setPlayerPosition': return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
@@ -282,7 +292,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-semibold text-gray-800">{titles[command.type] || command.type}</span>
-          {(command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifVariable' || command.type === 'showChoices' || command.type === 'startBattle') && (
+          {(command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable' || command.type === 'showChoices' || command.type === 'startBattle') && (
             <Badge variant="info">Branch</Badge>
           )}
         </div>
@@ -292,49 +302,69 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
   );
 }
 
-function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
+function commandAtPath(commands: EventCommand[], path: number[]): EventCommand | null {
+  let current = commands;
+  for (let i = 0; i < path.length; i += 1) {
+    const command = current[path[i]];
+    if (!command) return null;
+    if (i === path.length - 1) return command;
+    const branchIndex = path[i + 1];
+    if (command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable') {
+      current = branchIndex === 0 ? command.then : command.else;
+    } else if (command.type === 'showChoices') {
+      current = command.choices[branchIndex]?.commands ?? [];
+    } else if (command.type === 'startBattle') {
+      current = branchIndex === 0 ? command.victoryBranch ?? [] : command.defeatBranch ?? [];
+    } else {
+      return null;
+    }
+    i += 1;
+  }
+  return null;
+}
+
+function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string; page: EventPage | null }) {
   const { state: project, dispatch: projectDispatch } = useProjectStore();
   const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
 
-  const flat = flattenCommands(event.commands);
+  const commands = page?.commands ?? event.commands;
+  const flat = flattenCommands(commands);
   const mapIds = Object.keys(project.maps);
   const itemIds = project.items.items.map(i => i.id);
-
-  const findCommandAtPath = (path: number[]): EventCommand | null => {
-    let cmds: EventCommand[] = event.commands;
-    for (let i = 0; i < path.length; i++) {
-      const idx = path[i];
-      if (i === path.length - 1) return cmds[idx] ?? null;
-      const branchIdx = path[i + 1];
-      const cmd = cmds[idx];
-      if (cmd?.type !== 'ifFlag') return null;
-      cmds = branchIdx === 0 ? cmd.then : cmd.else;
-      i += 1; // skip the branch index slot
-    }
-    return null;
-  };
 
   const samePath = (a: number[] | null, b: number[]) => {
     if (!a || a.length !== b.length) return false;
     return a.every((v, i) => v === b[i]);
   };
 
-  const selectedCommand = selectedPath ? findCommandAtPath(selectedPath) : null;
+  const selectedCommand = selectedPath ? commandAtPath(commands, selectedPath) : null;
 
   const updateSelected = (next: EventCommand) => {
     if (!selectedPath) return;
-    projectDispatch({ type: 'UPDATE_COMMAND', mapId, eventId: event.id, path: selectedPath, command: next });
+    if (page) {
+      projectDispatch({ type: 'UPDATE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath, command: next });
+    } else {
+      projectDispatch({ type: 'UPDATE_COMMAND', mapId, eventId: event.id, path: selectedPath, command: next });
+    }
   };
 
   const removeSelected = () => {
     if (!selectedPath) return;
-    projectDispatch({ type: 'REMOVE_COMMAND', mapId, eventId: event.id, path: selectedPath });
+    if (page) {
+      projectDispatch({ type: 'REMOVE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath });
+    } else {
+      projectDispatch({ type: 'REMOVE_COMMAND', mapId, eventId: event.id, path: selectedPath });
+    }
     setSelectedPath(null);
   };
 
   const addCommand = (type: EventCommand['type'] = 'showText') => {
     const placeholder = makePlaceholderCommand(type);
-    projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
+    if (page) {
+      projectDispatch({ type: 'ADD_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, command: placeholder });
+    } else {
+      projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
+    }
   };
 
   return (
@@ -361,7 +391,9 @@ function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
             <option value="setFlag">Set Flag (legacy)</option>
             <option value="ifFlag">If Flag (legacy)</option>
             <option value="controlSwitch">Control Switch</option>
+            <option value="controlSelfSwitch">Control Self Switch</option>
             <option value="ifSwitch">If Switch</option>
+            <option value="ifSelfSwitch">If Self Switch</option>
             <option value="controlVariable">Control Variable</option>
             <option value="ifVariable">If Variable</option>
             <option value="addItem">Add Item</option>
@@ -408,6 +440,87 @@ function CommandStack({ event, mapId }: { event: GameEvent; mapId: string }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function makeEventPage(id: string, index: number): EventPage {
+  return {
+    id,
+    name: `Page ${index + 1}`,
+    conditions: {},
+    graphic: {},
+    movement: { type: 'fixed', speed: 'normal' },
+    options: { walking: true, stepping: false, directionFix: false, through: false },
+    priority: 'sameAsCharacters',
+    trigger: 'interact',
+    commands: [],
+  };
+}
+
+function EventPageTabs({
+  event,
+  mapId,
+  selectedPageId,
+  onSelect,
+}: {
+  event: GameEvent;
+  mapId: string;
+  selectedPageId: string | null;
+  onSelect(pageId: string): void;
+}) {
+  const { dispatch } = useProjectStore();
+  const pages = event.pages ?? [];
+  const addPage = () => {
+    const used = new Set(pages.map(page => page.id));
+    let next = pages.length + 1;
+    while (used.has(`page_${next}`)) next += 1;
+    const page = makeEventPage(`page_${next}`, pages.length);
+    dispatch({ type: 'ADD_EVENT_PAGE', mapId, eventId: event.id, page });
+    onSelect(page.id);
+  };
+
+  return (
+    <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-200 bg-white">
+      {pages.map((page, index) => (
+        <div key={page.id} className="flex items-center">
+          <button
+            type="button"
+            onClick={() => onSelect(page.id)}
+            className={`px-3 py-1.5 text-[12px] border rounded-md ${
+              (selectedPageId ?? pages[0]?.id) === page.id
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {page.name ?? `Page ${index + 1}`}
+          </button>
+          <button
+            type="button"
+            title="Move page left"
+            onClick={() => dispatch({ type: 'REORDER_EVENT_PAGE', mapId, eventId: event.id, pageId: page.id, direction: 'up' })}
+            className="px-1 text-[11px] text-gray-400 hover:text-gray-700"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            title="Move page right"
+            onClick={() => dispatch({ type: 'REORDER_EVENT_PAGE', mapId, eventId: event.id, pageId: page.id, direction: 'down' })}
+            className="px-1 text-[11px] text-gray-400 hover:text-gray-700"
+          >
+            →
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={addPage}
+        className="ml-auto flex items-center gap-1 px-2 py-1.5 text-[12px] text-indigo-600 hover:bg-indigo-50 rounded-md"
+      >
+        <Plus size={12} />
+        Page
+      </button>
     </div>
   );
 }
@@ -474,11 +587,22 @@ function MapPreview({ event, map }: { event: GameEvent; map: MapData }) {
   );
 }
 
-function EventProperties({ event, mapId }: { event: GameEvent; mapId: string }) {
+function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: string; page: EventPage | null }) {
   const { dispatch } = useProjectStore();
 
   const update = (changes: Partial<Omit<GameEvent, 'commands'>>) => {
     dispatch({ type: 'UPDATE_EVENT', mapId, eventId: event.id, changes });
+  };
+  const updatePage = (changes: Partial<EventPage>) => {
+    if (!page) return;
+    dispatch({ type: 'UPDATE_EVENT_PAGE', mapId, eventId: event.id, pageId: page.id, changes });
+  };
+  const updateSelfSwitchCondition = (switchId: 'A' | 'B' | 'C' | 'D', enabled: boolean) => {
+    if (!page) return;
+    const next = { ...(page.conditions.selfSwitches ?? {}) };
+    if (enabled) next[switchId] = true;
+    else delete next[switchId];
+    updatePage({ conditions: { ...page.conditions, selfSwitches: next } });
   };
 
   return (
@@ -525,23 +649,58 @@ function EventProperties({ event, mapId }: { event: GameEvent; mapId: string }) 
         </div>
         <Select
           label="Trigger"
-          value={event.trigger}
+          value={page?.trigger ?? event.trigger}
           options={[
             { value: 'interact', label: 'Interact' },
             { value: 'touch', label: 'Touch' },
             { value: 'autorun', label: 'Autorun' },
             { value: 'parallel', label: 'Parallel' },
           ]}
-          onChange={v => update({ trigger: v as TriggerType })}
+          onChange={v => page ? updatePage({ trigger: v as TriggerType }) : update({ trigger: v as TriggerType })}
         />
+        {page && (
+          <div className="space-y-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+            <div className="text-[12px] font-semibold text-gray-700">Page Settings</div>
+            <Input
+              label="Page Name"
+              value={page.name ?? ''}
+              onChange={e => updatePage({ name: e.target.value })}
+            />
+            <Select
+              label="Priority"
+              value={page.priority}
+              options={[
+                { value: 'belowCharacters', label: 'Below characters' },
+                { value: 'sameAsCharacters', label: 'Same as characters' },
+                { value: 'aboveCharacters', label: 'Above characters' },
+              ]}
+              onChange={v => updatePage({ priority: v as EventPriority })}
+            />
+            <div>
+              <div className="text-[12px] font-medium text-gray-500 mb-1">Self Switch Conditions</div>
+              <div className="grid grid-cols-4 gap-1">
+                {(['A', 'B', 'C', 'D'] as const).map(id => (
+                  <label key={id} className="flex items-center justify-center gap-1 rounded border border-gray-200 bg-white px-2 py-1 text-[11px] text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={page.conditions.selfSwitches?.[id] === true}
+                      onChange={e => updateSelfSwitchCondition(id, e.target.checked)}
+                    />
+                    {id}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <Select
           label="Solid"
-          value={event.solid ? 'yes' : 'no'}
+          value={(page?.priority ?? (event.solid ? 'sameAsCharacters' : 'belowCharacters')) === 'sameAsCharacters' ? 'yes' : 'no'}
           options={[
             { value: 'yes', label: 'Yes' },
             { value: 'no', label: 'No' },
           ]}
-          onChange={v => update({ solid: v === 'yes' })}
+          onChange={v => page ? updatePage({ priority: v === 'yes' ? 'sameAsCharacters' : 'belowCharacters' }) : update({ solid: v === 'yes' })}
         />
         <Select
           label="Sprite"
@@ -624,6 +783,7 @@ function ValidationPanel({ event, map, mapIds }: { event: GameEvent; map: MapDat
 export function EventEditorScreen() {
   const { state: editor } = useEditor();
   const { state: project } = useProjectStore();
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
   // Default to first event if none selected
   const selected = editor.selectedEvent;
@@ -639,6 +799,10 @@ export function EventEditorScreen() {
     return <div className="flex-1 flex items-center justify-center text-gray-400">No events found</div>;
   }
 
+  const pages = event.pages ?? [];
+  const activePage = pages.find(page => page.id === selectedPageId) ?? pages[0] ?? null;
+  const activePageId = activePage?.id ?? null;
+
   return (
     <div className="flex-1 flex overflow-hidden">
       <EventList />
@@ -646,9 +810,10 @@ export function EventEditorScreen() {
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden">
             <MapPreview event={event} map={map} />
-            <CommandStack event={event} mapId={map.id} />
+            <EventPageTabs event={event} mapId={map.id} selectedPageId={activePageId} onSelect={setSelectedPageId} />
+            <CommandStack event={event} mapId={map.id} page={activePage} />
           </div>
-          <EventProperties event={event} mapId={map.id} />
+          <EventProperties event={event} mapId={map.id} page={activePage} />
         </div>
         <ValidationPanel event={event} map={map} mapIds={Object.keys(project.maps)} />
       </div>

@@ -6,7 +6,7 @@ import {
   type ProjectStoreState,
 } from '../projectStore';
 import type { FullProjectState } from '../../adapters/types';
-import type { GameEvent, MapData } from '../../types/project';
+import type { EventPage, GameEvent, MapData } from '../../types/project';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function loadedState(): ProjectStoreState {
@@ -203,6 +203,90 @@ describe('projectReducer', () => {
     expect(s2.dirty).toBe(true);
   });
 
+  it('normalizes legacy event commands into a single event page', () => {
+    const s1 = loadedState();
+    const event = s1.maps.town.events[0];
+    expect(event.pages).toHaveLength(1);
+    expect(event.pages?.[0]).toMatchObject({
+      id: 'page_1',
+      trigger: 'interact',
+      priority: 'sameAsCharacters',
+    });
+    expect(event.pages?.[0].commands).toEqual(event.commands);
+  });
+
+  it('UPDATE_EVENT_PAGE updates a page and mirrors page 1 to legacy fields', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: {
+        trigger: 'touch',
+        priority: 'belowCharacters',
+        commands: [{ type: 'showText', text: 'Paged command' }],
+      },
+    });
+
+    const event = s2.maps.town.events[0];
+    expect(event.pages?.[0].trigger).toBe('touch');
+    expect(event.trigger).toBe('touch');
+    expect(event.commands).toEqual([{ type: 'showText', text: 'Paged command' }]);
+  });
+
+  it('ADD_EVENT_PAGE and REORDER_EVENT_PAGE manage page order', () => {
+    const s1 = loadedState();
+    const page: EventPage = {
+      id: 'page_2',
+      name: 'Chest opened',
+      conditions: { selfSwitches: { A: true } },
+      graphic: { sprite: 'chest_open' },
+      movement: { type: 'fixed', speed: 'normal' },
+      options: { walking: false, stepping: false, directionFix: false, through: false },
+      priority: 'sameAsCharacters',
+      trigger: 'interact',
+      commands: [{ type: 'showText', text: 'Already open' }],
+    };
+    const s2 = projectReducer(s1, {
+      type: 'ADD_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      page,
+    });
+    expect(s2.maps.town.events[0].pages?.map(p => p.id)).toEqual(['page_1', 'page_2']);
+
+    const s3 = projectReducer(s2, {
+      type: 'REORDER_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_2',
+      direction: 'up',
+    });
+    expect(s3.maps.town.events[0].pages?.map(p => p.id)).toEqual(['page_2', 'page_1']);
+  });
+
+  it('page-scoped command actions edit the selected page', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'ADD_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      command: { type: 'showText', text: 'Page add' },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'UPDATE_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [1],
+      command: { type: 'showText', text: 'Page replace' },
+    });
+    expect(s3.maps.town.events[0].pages?.[0].commands[1]).toEqual({ type: 'showText', text: 'Page replace' });
+    expect(s3.maps.town.events[0].commands[1]).toEqual({ type: 'showText', text: 'Page replace' });
+  });
+
   it('UPDATE_COMMAND replaces a top-level command', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {
@@ -227,6 +311,42 @@ describe('projectReducer', () => {
     const ifCmd = s2.maps.town.events[0].commands[0];
     if (ifCmd.type !== 'ifFlag') throw new Error('expected ifFlag');
     expect((ifCmd.then[0] as { text: string }).text).toBe('Then-branch new');
+  });
+
+  it('UPDATE_COMMAND can edit showChoices and battle branch commands', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: {
+        commands: [
+          { type: 'showChoices', prompt: 'Pick', choices: [{ label: 'A', commands: [{ type: 'showText', text: 'Choice A' }] }] },
+          { type: 'startBattle', troopId: 'slime', canEscape: true, victoryBranch: [{ type: 'showText', text: 'Win' }] },
+        ],
+      },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'UPDATE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [0, 0, 0],
+      command: { type: 'showText', text: 'Choice edited' },
+    });
+    const s4 = projectReducer(s3, {
+      type: 'UPDATE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [1, 0, 0],
+      command: { type: 'showText', text: 'Victory edited' },
+    });
+
+    const choice = s4.maps.town.events[0].commands[0];
+    const battle = s4.maps.town.events[0].commands[1];
+    if (choice.type !== 'showChoices' || battle.type !== 'startBattle') throw new Error('unexpected commands');
+    expect(choice.choices[0].commands[0]).toEqual({ type: 'showText', text: 'Choice edited' });
+    expect(battle.victoryBranch?.[0]).toEqual({ type: 'showText', text: 'Victory edited' });
   });
 
   it('REMOVE_COMMAND deletes a top-level command', () => {

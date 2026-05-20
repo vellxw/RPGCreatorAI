@@ -91,6 +91,40 @@ struct EventCommand {
     std::vector<std::shared_ptr<EventCommand>> defeatBranch;
 };
 
+struct EventPageCondition {
+    std::string type; // "switch", "variable", "selfSwitch"
+    std::string id;
+    std::string op; // variable comparison, defaults to "eq"
+    bool boolValue = true;
+    int intValue = 0;
+};
+
+struct EventPageGraphic {
+    std::string sprite;
+    std::string animationSet;
+    float displayHeightTiles = 0.0f;
+};
+
+struct EventPageOptions {
+    std::string trigger = "interact";
+    std::string priority = "same";
+    bool solid = false;
+};
+
+struct EventPageMovement {
+    std::string type = "fixed";
+    int speed = 3;
+    int frequency = 3;
+};
+
+struct EventPage {
+    std::vector<EventPageCondition> conditions;
+    EventPageGraphic graphic;
+    EventPageOptions options;
+    EventPageMovement movement;
+    std::vector<std::shared_ptr<EventCommand>> commands;
+};
+
 struct EventData {
     std::string id;
     std::string type;
@@ -102,4 +136,5 @@ struct EventData {
     float displayHeightTiles = 0.0f;
     std::string trigger; // "interact", "touch", "autorun", "parallel"
     std::vector<std::shared_ptr<EventCommand>> commands;
+    std::vector<EventPage> pages;
 };

@@ -34,9 +34,30 @@
   paths, map tileset ids, display names, and layer metadata.
 - [x] Add focused TypeScript and C++ tests.
 
+## Slice 3 — Event Pages, Self Switches, and Scheduler
+
+- [x] Slice 3A: add TypeScript event page model while preserving legacy flat
+  events.
+- [x] Slice 3A: normalize legacy commands into `page_1` in the project store.
+- [x] Slice 3A: add reducer actions for add/update/remove/reorder page and
+  page-scoped command editing.
+- [x] Slice 3A: support command path editing inside conditionals, choices, and
+  battle branches.
+- [x] Slice 3A: add event editor page tabs, page settings, priority, trigger,
+  and self-switch condition controls.
+- [x] Slice 3A: validate page triggers, priorities, self-switch conditions, and
+  page command references.
+- [x] Slice 3A: add C++ self-switch state and save/load round-trip.
+- [x] Slice 3A: parse legacy flat events and paged events in the C++ map
+  loader.
+- [ ] Slice 3B: active-page runtime selection by switch/variable/self-switch
+  conditions.
+- [ ] Slice 3B: `controlSelfSwitch` and `ifSelfSwitch` execution in
+  `EventRunner`.
+- [ ] Slice 3C: deterministic autorun/parallel map and common-event scheduler.
+
 ## Next Slices
 
-- [ ] Slice 3: event pages, self switches, and scheduler.
 - [ ] Slice 4: database v2 editors.
 - [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
 - [ ] Slice 6: playtest/debug programmer tools.

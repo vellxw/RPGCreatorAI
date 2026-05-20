@@ -56,3 +56,30 @@ paint refusal, layer metadata undo, region painting, missing layer validation,
 unknown tileset references, and invalid region ids. C++ tests cover project
 tileset database paths, map tileset/layer metadata parsing, and runtime
 tileset database loading.
+
+## Slice 3A Architecture
+
+- `GameEvent.pages?: EventPage[]` is additive. Legacy events with only
+  top-level `trigger` and `commands` are normalized in the editor to a single
+  `page_1` and remain valid on disk.
+- Page 1 mirrors back to the legacy projection (`trigger`, `commands`, sprite,
+  animation set, display height, and solid-ish priority) so existing runtime
+  paths keep working while deeper page-resolution runtime work is staged.
+- Event pages carry `conditions`, `graphic`, `movement`, `options`, `priority`,
+  `trigger`, and `commands`. Self switch conditions use letters `A-D`.
+- The event editor screen now has page tabs, page reordering, page-scoped
+  command stacks, page priority/trigger controls, and self-switch condition
+  toggles.
+- Command tree path editing now supports conditionals, choices, and battle
+  victory/defeat branches consistently.
+- C++ runtime data now stores self switches in `GameState`, saves/loads them
+  through `SaveManager`, and parses both legacy flat events and paged events
+  through `MapLoader`.
+
+## Slice 3A Deferred Work
+
+The autorun/parallel scheduler is intentionally not implemented in this cut.
+It needs separate runner contexts so parallel events do not overwrite the
+interactive `EventRunner` stack. The next Slice 3 cut should add active-page
+selection in runtime, `controlSelfSwitch` execution, and deterministic
+autorun/parallel scheduling.

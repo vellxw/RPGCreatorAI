@@ -347,6 +347,64 @@ describe('validateProject', () => {
     const report = validateProject(project);
     expect(report.errors.some(e => e.message.includes('invalid trigger'))).toBe(true);
   });
+
+  it('validates event page triggers and self switch letters', () => {
+    const event: GameEvent = {
+      id: 'paged',
+      type: 'npc',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      commands: [],
+      pages: [
+        {
+          id: 'page_1',
+          conditions: { selfSwitches: { A: true, E: true } },
+          graphic: {},
+          movement: { type: 'fixed', speed: 'normal' },
+          options: { walking: false, stepping: false, directionFix: false, through: false },
+          // @ts-expect-error -- intentionally invalid for test
+          priority: 'overEverything',
+          // @ts-expect-error -- intentionally invalid for test
+          trigger: 'wave',
+          commands: [{ type: 'showText', text: 'Bad page' }],
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('page "page_1" has invalid trigger "wave"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('invalid self switch "E"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('invalid priority "overEverything"'))).toBe(true);
+  });
+
+  it('validates commands inside event pages', () => {
+    const event: GameEvent = {
+      id: 'paged',
+      type: 'npc',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      commands: [],
+      pages: [
+        {
+          id: 'page_1',
+          conditions: {},
+          graphic: {},
+          movement: { type: 'fixed', speed: 'normal' },
+          options: { walking: false, stepping: false, directionFix: false, through: false },
+          priority: 'sameAsCharacters',
+          trigger: 'interact',
+          commands: [{ type: 'transferMap', mapId: 'missing', x: 0, y: 0, direction: 'down' }],
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('targets unknown map "missing"'))).toBe(true);
+  });
 });
 
 describe('validateUniqueEventIds', () => {

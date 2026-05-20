@@ -1,5 +1,7 @@
 #include <doctest/doctest.h>
 #include "events/GameState.h"
+#include "save/SaveManager.h"
+#include <cstdio>
 
 TEST_CASE("GameState defaults") {
     GameState s;
@@ -67,6 +69,44 @@ TEST_CASE("GameState typed switches mirror legacy flags") {
 
     s.setFlag("legacy_only", true);
     CHECK(s.getSwitch("legacy_only") == true);
+}
+
+TEST_CASE("GameState self switches default false and store A-D per map event") {
+    GameState s;
+
+    CHECK_FALSE(s.getSelfSwitch("town", "chest_001", 'A'));
+    CHECK_FALSE(s.getSelfSwitch("town", "chest_001", 'B'));
+
+    s.setSelfSwitch("town", "chest_001", 'A', true);
+    s.setSelfSwitch("town", "chest_001", 'D', true);
+
+    CHECK(s.getSelfSwitch("town", "chest_001", 'A'));
+    CHECK_FALSE(s.getSelfSwitch("town", "chest_001", 'B'));
+    CHECK_FALSE(s.getSelfSwitch("town", "other_event", 'A'));
+    CHECK(s.getSelfSwitch("town", "chest_001", 'D'));
+
+    s.setSelfSwitch("town", "chest_001", 'A', false);
+    CHECK_FALSE(s.getSelfSwitch("town", "chest_001", 'A'));
+}
+
+TEST_CASE("SaveManager round-trips self switches") {
+    constexpr const char* slot = "test_self_switch_slot";
+
+    GameState src;
+    src.setCurrentMap("town");
+    src.setPlayerPosition(1, 2, Direction::Down);
+    src.setSelfSwitch("town", "chest_001", 'A', true);
+    src.setSelfSwitch("house", "door_to_town", 'C', true);
+
+    REQUIRE(SaveManager::save(slot, src));
+    auto loaded = SaveManager::load(slot);
+    REQUIRE(loaded.has_value());
+
+    CHECK(loaded->getSelfSwitch("town", "chest_001", 'A'));
+    CHECK_FALSE(loaded->getSelfSwitch("town", "chest_001", 'B'));
+    CHECK(loaded->getSelfSwitch("house", "door_to_town", 'C'));
+
+    std::remove((std::string("saves/") + slot + ".json").c_str());
 }
 
 TEST_CASE("GameState quest progression is idempotent") {

@@ -15,8 +15,12 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3 — Event Editor V2: event pages, page conditions, self switches,
-  autorun/parallel scheduler, and command stack editing.
+- Slice 3B — Event runtime activation: choose the active event page by
+  MZ-like priority rules, execute self-switch commands, and wire page
+  conditions into interaction/touch/autorun evaluation.
+- Slice 3C — Event scheduler and command-stack polish: autorun/parallel
+  common-event scheduling, movement-route basics, and range clipboard /
+  branch editing for command lists.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
   types/terms/animations editors and common-event command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
@@ -28,6 +32,13 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3A — event page and self-switch foundation: `GameEvent`
+  now supports normalized `pages`; the editor can add, update, reorder, and
+  edit page-scoped commands; page conditions include self switches A-D; event
+  command validation understands `controlSelfSwitch` and `ifSelfSwitch`; the
+  C++ map loader accepts both legacy command lists and editor-authored page
+  data; `GameState` and saves persist self switches. Runtime page activation
+  and self-switch command execution remain the next open slice.
 - Phase 10 Slice 2 — map authoring v2: tilesets are data-driven through
   `data/database/tilesets.json`; editor layers cover ground, decoration,
   foreground, collision, region, and events; layer visibility/lock controls

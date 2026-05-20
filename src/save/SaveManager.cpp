@@ -21,6 +21,7 @@ bool SaveManager::save(const std::string& slotId, const GameState& state) {
 
     j["flags"] = state.getFlags();
     j["switches"] = state.getSwitches();
+    j["selfSwitches"] = state.getSelfSwitches();
     j["variables"] = state.getVariables();
     j["inventory"] = state.getInventory();
     j["gold"] = state.getGold();
@@ -80,6 +81,19 @@ std::optional<GameState> SaveManager::load(const std::string& slotId) {
         if (j.contains("switches")) {
             for (const auto& [id, val] : j.at("switches").items()) {
                 state.setSwitch(id, val.get<bool>());
+            }
+        }
+        if (j.contains("selfSwitches")) {
+            for (const auto& [key, val] : j.at("selfSwitches").items()) {
+                const auto first = key.find(':');
+                const auto last = key.rfind(':');
+                if (first == std::string::npos || last == std::string::npos || first == last || last + 1 >= key.size()) {
+                    continue;
+                }
+
+                const std::string mapId = key.substr(0, first);
+                const std::string eventId = key.substr(first + 1, last - first - 1);
+                state.setSelfSwitch(mapId, eventId, key[last + 1], val.get<bool>());
             }
         }
         if (j.contains("gold")) state.setGold(j.at("gold").get<int>());

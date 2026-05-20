@@ -37,6 +37,9 @@ public:
     bool getSwitch(const std::string& id) const;
     void setSwitch(const std::string& id, bool value);
 
+    bool getSelfSwitch(const std::string& mapId, const std::string& eventId, char letter) const;
+    void setSelfSwitch(const std::string& mapId, const std::string& eventId, char letter, bool value);
+
     int getVariable(const std::string& name) const;
     void setVariable(const std::string& name, int value);
 
@@ -73,6 +76,7 @@ public:
     const std::unordered_map<std::string, bool>& getFlags() const { return flags; }
     const std::unordered_map<std::string, int>& getVariables() const { return variables; }
     const std::unordered_map<std::string, bool>& getSwitches() const { return switches; }
+    const std::unordered_map<std::string, bool>& getSelfSwitches() const { return selfSwitches; }
 
     void loadFromMaps(const std::unordered_map<std::string, bool>& newFlags,
                       const std::unordered_map<std::string, int>& newVariables,
@@ -90,6 +94,7 @@ private:
 
     std::unordered_map<std::string, bool> flags;
     std::unordered_map<std::string, bool> switches;
+    std::unordered_map<std::string, bool> selfSwitches;
     std::unordered_map<std::string, int> variables;
     std::unordered_map<std::string, int> inventory;
 

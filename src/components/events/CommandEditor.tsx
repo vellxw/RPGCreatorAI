@@ -10,11 +10,13 @@ import type {
   ChangeActorHpCommand,
   CommentCommand,
   CompleteQuestCommand,
+  ControlSelfSwitchCommand,
   ControlSwitchCommand,
   ControlVariableCommand,
   Direction,
   EventCommand,
   IfFlagCommand,
+  IfSelfSwitchCommand,
   IfSwitchCommand,
   IfVariableCommand,
   OpenShopCommand,
@@ -87,10 +89,13 @@ function Body({
       return <ShowChoicesEditor command={command} onChange={onChange} />;
     case 'controlSwitch':
       return <ControlSwitchEditor command={command} onChange={onChange} />;
+    case 'controlSelfSwitch':
+      return <ControlSelfSwitchEditor command={command} onChange={onChange} />;
     case 'controlVariable':
       return <ControlVariableEditor command={command} onChange={onChange} />;
     case 'ifFlag':
     case 'ifSwitch':
+    case 'ifSelfSwitch':
     case 'ifVariable':
       return <ConditionalEditor command={command} onChange={onChange} />;
     case 'addGold':
@@ -336,6 +341,22 @@ function ControlSwitchEditor({ command, onChange }: { command: ControlSwitchComm
   );
 }
 
+function ControlSelfSwitchEditor({ command, onChange }: { command: ControlSelfSwitchCommand; onChange: (n: ControlSelfSwitchCommand) => void }) {
+  return (
+    <div className="space-y-2">
+      <Field label="Self Switch">
+        {selfSwitchSelect(command.switchId, switchId => onChange({ ...command, switchId }))}
+      </Field>
+      <Field label="Value">
+        {select(command.value ? 'true' : 'false', [
+          { value: 'true', label: 'ON' },
+          { value: 'false', label: 'OFF' },
+        ], v => onChange({ ...command, value: v === 'true' }))}
+      </Field>
+    </div>
+  );
+}
+
 function ControlVariableEditor({ command, onChange }: { command: ControlVariableCommand; onChange: (n: ControlVariableCommand) => void }) {
   const { state } = useProjectStore();
   const variables = state.databases.variables;
@@ -368,7 +389,7 @@ function ControlVariableEditor({ command, onChange }: { command: ControlVariable
   );
 }
 
-function ConditionalEditor({ command, onChange }: { command: IfFlagCommand | IfSwitchCommand | IfVariableCommand; onChange: (n: EventCommand) => void }) {
+function ConditionalEditor({ command, onChange }: { command: IfFlagCommand | IfSwitchCommand | IfSelfSwitchCommand | IfVariableCommand; onChange: (n: EventCommand) => void }) {
   const { state } = useProjectStore();
   if (command.type === 'ifFlag') {
     return (
@@ -398,6 +419,21 @@ function ConditionalEditor({ command, onChange }: { command: IfFlagCommand | IfS
             {state.databases.switches.length === 0 && <option value="">(no switches)</option>}
             {state.databases.switches.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
+        </Field>
+        <Field label="Equals">
+          {select(command.equals ? 'true' : 'false', [
+            { value: 'true', label: 'ON' }, { value: 'false', label: 'OFF' },
+          ], v => onChange({ ...command, equals: v === 'true' }))}
+        </Field>
+      </div>
+    );
+  }
+  if (command.type === 'ifSelfSwitch') {
+    return (
+      <div className="space-y-2">
+        <p className="text-[11px] text-gray-500">If/Else branches are edited inline in the command stack above.</p>
+        <Field label="Self Switch">
+          {selfSwitchSelect(command.switchId, switchId => onChange({ ...command, switchId }))}
         </Field>
         <Field label="Equals">
           {select(command.equals ? 'true' : 'false', [
@@ -581,6 +617,15 @@ function ChangeActorHpEditor({ command, onChange }: { command: ChangeActorHpComm
       </Field>
     </div>
   );
+}
+
+function selfSwitchSelect<T extends 'A' | 'B' | 'C' | 'D'>(value: T, onChange: (v: T) => void) {
+  return select<T>(value, [
+    { value: 'A' as T, label: 'A' },
+    { value: 'B' as T, label: 'B' },
+    { value: 'C' as T, label: 'C' },
+    { value: 'D' as T, label: 'D' },
+  ], onChange);
 }
 
 function PlayAnimationEditor({ command, onChange }: { command: PlayAnimationCommand; onChange: (n: PlayAnimationCommand) => void }) {

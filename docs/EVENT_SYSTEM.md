@@ -12,10 +12,25 @@ An `EventData` belongs to a map and has one of these triggers:
 |---------|------------|
 | `interact` | The player faces the event's cell and presses the interact key. |
 | `touch` | The player steps onto the event's cell. |
+| `autorun` | Parsed and valid in data; scheduler execution is deferred until Slice 3C. |
+| `parallel` | Parsed and valid in data; scheduler execution is deferred until Slice 3C. |
 
 Solid events block movement onto their cell. Non-solid events are
 walkable (e.g. door / transfer tiles) — the event's `solid` flag overrides
 the collision-layer tile underneath.
+
+## Event Pages
+
+Events may declare `pages`. A legacy flat event without pages is treated by the
+editor as one `page_1` that mirrors the event-level `trigger` and `commands`.
+Each page carries conditions, graphic metadata, movement metadata, options,
+priority, trigger, and its own command list.
+
+Self switch conditions use letters `A-D` and are scoped as
+`mapId:eventId:letter`. `GameState` and `SaveManager` now persist those self
+switches. Runtime active-page selection and autorun/parallel scheduling are
+the next Slice 3 runtime step; this cut establishes the data, editor, loader,
+and save foundations.
 
 ## Supported Commands
 
@@ -24,6 +39,8 @@ the collision-layer tile underneath.
 | `showText` | `text`, optional `speaker` | Opens the dialogue UI. The runner pauses until the player dismisses the dialogue (Enter / Space / E / Esc). |
 | `setFlag` | `flag`, `value` (bool) | Sets a boolean flag in `GameState`. |
 | `ifFlag` | `flag`, `equals` (bool), `then` (commands), `else` (commands) | Compares the flag with `equals` and pushes the matching branch onto the queue. |
+| `controlSelfSwitch` | `switchId` (`A-D`), `value` (bool) | Data/editor command is supported; runtime execution follows with active-page scheduling. |
+| `ifSelfSwitch` | `switchId` (`A-D`), `equals` (bool), `then`, `else` | Data/editor command is supported; runtime execution follows with active-page scheduling. |
 | `addItem` | `itemId`, `amount` (int) | Increments the inventory counter for `itemId`. |
 | `transferMap` | `mapId`, `x`, `y`, `direction` | Produces a `MapTransferRequest` consumed by `Game`. The new map is loaded and the player is placed at `(x, y)` facing `direction`. |
 | `wait` | `ms` (int) | Pauses the queue for the given duration. |

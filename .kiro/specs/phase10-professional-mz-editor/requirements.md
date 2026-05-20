@@ -29,7 +29,17 @@ without copying proprietary assets, formats, or runtime dependencies.
    and database tilesets.
 10. Desktop persistence shall round-trip map-tree metadata and tileset database
    shards.
-11. Toolbar and inspector buttons that imply unimplemented workflows shall be
+11. Events shall support optional `pages` while preserving legacy top-level
+   `trigger` and `commands` for old projects and the current runtime bridge.
+12. Event pages shall include conditions, graphic, movement, options, priority,
+   trigger, and command lists.
+13. The editor shall expose page tabs, page ordering, page settings, self
+   switch conditions, and page-scoped command editing.
+14. Runtime state shall store self switches scoped by map id, event id, and
+   switch letter `A-D`, and save/load shall round-trip them.
+15. Runtime map loading shall parse both legacy flat events and editor-authored
+   event pages without rejecting old projects.
+16. Toolbar and inspector buttons that imply unimplemented workflows shall be
    removed or disabled until real behavior exists.
 
 ## Non-Goals
@@ -38,3 +48,5 @@ without copying proprietary assets, formats, or runtime dependencies.
 - No general scripting/plugin execution in this slice.
 - No AI runtime dependency.
 - No autotile rules in Slice 2.
+- No autorun/parallel scheduler runners in Slice 3A; page parsing and self
+  switches land first, scheduler work follows in the next Slice 3 cut.

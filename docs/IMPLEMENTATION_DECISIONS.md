@@ -23,6 +23,7 @@
   - `switches`      → `data/database/switches.json`
   - `variables`     → `data/database/variables.json`
   - `commonEvents`  → `data/database/commonEvents.json`
+  - `tilesets`      → `data/database/tilesets.json`
 - Missing paths are tolerated by the loader; a synthetic empty database is
   used in their place so `npm run dev` always starts.
 - `items` keeps its existing shape and path.
@@ -31,10 +32,23 @@
 
 - Switches: `{ "switches": [{ "id": "talked_to_old_man", "name": "...", "initial": false }, ...] }`.
 - Variables: `{ "variables": [{ "id": "gold_quest_progress", "name": "...", "initial": 0 }, ...] }`.
-- Self switches: stored on the runtime side keyed by `mapId/eventId/A|B|C|D`
-  (we use `A` and `B` only in Phase 6).
+- Self switches: stored on the runtime side keyed by `mapId:eventId:A|B|C|D`.
+  Phase 10 Slice 3A exposes all four letters to event-page conditions and
+  persists them in saves; command execution against those keys is Slice 3B.
 - The legacy `flags` field in saves is preserved for backward compatibility;
   new switches are merged with it on load.
+
+## Event pages
+
+- `GameEvent.pages` is the professional authoring shape. Legacy flat event
+  fields (`trigger`, `solid`, `commands`) remain as a synchronized projection
+  of the first page so older projects, tests, and runtime paths keep loading.
+- Page conditions are stored as structured data, not string expressions:
+  switches, variables, and self switches.
+- The C++ loader accepts both the compact runtime page shape and the
+  editor-authored shape with `conditions`, `options`, `movement`, and
+  top-level `trigger` / `priority` fields. Runtime active-page selection is
+  intentionally deferred until the scheduler slice.
 
 ## Common events
 

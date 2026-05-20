@@ -7,6 +7,8 @@ import {
 } from '../visual/tileCatalog';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
+const VALID_PAGE_PRIORITIES = ['belowCharacters', 'sameAsCharacters', 'aboveCharacters'];
+const VALID_SELF_SWITCHES = ['A', 'B', 'C', 'D'];
 
 const VALID_COMMAND_TYPES = new Set([
   'showText',
@@ -14,8 +16,10 @@ const VALID_COMMAND_TYPES = new Set([
   'setFlag',
   'ifFlag',
   'ifSwitch',
+  'ifSelfSwitch',
   'ifVariable',
   'controlSwitch',
+  'controlSelfSwitch',
   'controlVariable',
   'addItem',
   'removeItem',
@@ -159,6 +163,9 @@ export function validateEvent(event: GameEvent, map: MapData, allMapIds: string[
   }
 
   messages.push(...validateCommands(event.commands, event.id, map.id, allMapIds));
+  if (event.pages) {
+    messages.push(...validateEventPages(event, map, allMapIds));
+  }
 
   if (event.type === 'npc' && !event.sprite) {
     messages.push({
@@ -168,6 +175,53 @@ export function validateEvent(event: GameEvent, map: MapData, allMapIds: string[
     });
   }
 
+  return messages;
+}
+
+function validateEventPages(event: GameEvent, map: MapData, allMapIds: string[]): ValidationMessage[] {
+  const messages: ValidationMessage[] = [];
+  const seen = new Set<string>();
+  for (const page of event.pages ?? []) {
+    if (!page.id || !page.id.trim()) {
+      messages.push({
+        level: 'error',
+        message: `Event "${event.id}" has a page without an id`,
+        source: `${map.id}/${event.id}`,
+      });
+    } else if (seen.has(page.id)) {
+      messages.push({
+        level: 'error',
+        message: `Event "${event.id}" has duplicate page id "${page.id}"`,
+        source: `${map.id}/${event.id}`,
+      });
+    }
+    seen.add(page.id);
+
+    if (!VALID_TRIGGERS.includes(page.trigger)) {
+      messages.push({
+        level: 'error',
+        message: `Event "${event.id}" page "${page.id}" has invalid trigger "${page.trigger}"`,
+        source: `${map.id}/${event.id}/${page.id}`,
+      });
+    }
+    if (!VALID_PAGE_PRIORITIES.includes(page.priority)) {
+      messages.push({
+        level: 'error',
+        message: `Event "${event.id}" page "${page.id}" has invalid priority "${page.priority}"`,
+        source: `${map.id}/${event.id}/${page.id}`,
+      });
+    }
+    for (const key of Object.keys(page.conditions?.selfSwitches ?? {})) {
+      if (!VALID_SELF_SWITCHES.includes(key)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${event.id}" page "${page.id}" has invalid self switch "${key}"`,
+          source: `${map.id}/${event.id}/${page.id}`,
+        });
+      }
+    }
+    messages.push(...validateCommands(page.commands, event.id, map.id, allMapIds));
+  }
   return messages;
 }
 
@@ -198,9 +252,24 @@ function validateCommands(
       }
     }
 
-    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
+    if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifSelfSwitch' || cmd.type === 'ifVariable') {
+      if (cmd.type === 'ifSelfSwitch' && !VALID_SELF_SWITCHES.includes(cmd.switchId)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${eventId}" ifSelfSwitch uses invalid self switch "${cmd.switchId}"`,
+          source: `${mapId}/${eventId}`,
+        });
+      }
       messages.push(...validateCommands(cmd.then, eventId, mapId, allMapIds));
       messages.push(...validateCommands(cmd.else, eventId, mapId, allMapIds));
+    } else if (cmd.type === 'controlSelfSwitch') {
+      if (!VALID_SELF_SWITCHES.includes(cmd.switchId)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${eventId}" controlSelfSwitch uses invalid self switch "${cmd.switchId}"`,
+          source: `${mapId}/${eventId}`,
+        });
+      }
     } else if (cmd.type === 'showChoices') {
       for (const choice of cmd.choices) {
         messages.push(...validateCommands(choice.commands, eventId, mapId, allMapIds));

@@ -40,6 +40,11 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         cmd->boolValue = j.at("equals").get<bool>();
         if (j.contains("then")) for (const auto& c : j.at("then")) cmd->thenCommands.push_back(parseCommand(c));
         if (j.contains("else")) for (const auto& c : j.at("else")) cmd->elseCommands.push_back(parseCommand(c));
+    } else if (type == "ifSelfSwitch") {
+        cmd->switchId = j.at("switchId").get<std::string>();
+        cmd->boolValue = j.at("equals").get<bool>();
+        if (j.contains("then")) for (const auto& c : j.at("then")) cmd->thenCommands.push_back(parseCommand(c));
+        if (j.contains("else")) for (const auto& c : j.at("else")) cmd->elseCommands.push_back(parseCommand(c));
     } else if (type == "ifVariable") {
         cmd->variableId = j.at("variableId").get<std::string>();
         cmd->compareOp = j.value("op", std::string{"eq"});
@@ -47,6 +52,9 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         if (j.contains("then")) for (const auto& c : j.at("then")) cmd->thenCommands.push_back(parseCommand(c));
         if (j.contains("else")) for (const auto& c : j.at("else")) cmd->elseCommands.push_back(parseCommand(c));
     } else if (type == "controlSwitch") {
+        cmd->switchId = j.at("switchId").get<std::string>();
+        cmd->boolValue = j.at("value").get<bool>();
+    } else if (type == "controlSelfSwitch") {
         cmd->switchId = j.at("switchId").get<std::string>();
         cmd->boolValue = j.at("value").get<bool>();
     } else if (type == "controlVariable") {
@@ -103,6 +111,97 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
     }
 
     return cmd;
+}
+
+static EventPageCondition parsePageCondition(const json& j) {
+    EventPageCondition condition;
+    condition.type = j.value("type", std::string{});
+    condition.id = j.value("id", std::string{});
+    condition.op = j.value("op", std::string{"eq"});
+    if (j.contains("value")) {
+        const auto& value = j.at("value");
+        if (value.is_boolean()) {
+            condition.boolValue = value.get<bool>();
+        } else if (value.is_number_integer()) {
+            condition.intValue = value.get<int>();
+        }
+    }
+    return condition;
+}
+
+static EventPage parsePage(const json& j) {
+    EventPage page;
+
+    if (j.contains("conditions")) {
+        const auto& conditions = j.at("conditions");
+        if (conditions.is_array()) {
+            for (const auto& conditionJson : conditions) {
+                page.conditions.push_back(parsePageCondition(conditionJson));
+            }
+        } else if (conditions.is_object()) {
+            if (conditions.contains("selfSwitches")) {
+                for (const auto& [id, value] : conditions.at("selfSwitches").items()) {
+                    EventPageCondition condition;
+                    condition.type = "selfSwitch";
+                    condition.id = id;
+                    condition.boolValue = value.get<bool>();
+                    page.conditions.push_back(std::move(condition));
+                }
+            }
+            if (conditions.contains("switches")) {
+                for (const auto& [id, value] : conditions.at("switches").items()) {
+                    EventPageCondition condition;
+                    condition.type = "switch";
+                    condition.id = id;
+                    condition.boolValue = value.get<bool>();
+                    page.conditions.push_back(std::move(condition));
+                }
+            }
+            if (conditions.contains("variables")) {
+                for (const auto& variableJson : conditions.at("variables")) {
+                    EventPageCondition condition;
+                    condition.type = "variable";
+                    condition.id = variableJson.value("variableId", std::string{});
+                    condition.op = variableJson.value("op", std::string{"eq"});
+                    condition.intValue = variableJson.value("value", 0);
+                    page.conditions.push_back(std::move(condition));
+                }
+            }
+        }
+    }
+
+    if (j.contains("graphic")) {
+        const auto& graphic = j.at("graphic");
+        page.graphic.sprite = graphic.value("sprite", std::string{});
+        page.graphic.animationSet = graphic.value("animationSet", std::string{});
+        page.graphic.displayHeightTiles = graphic.value("displayHeightTiles", 0.0f);
+    }
+
+    if (j.contains("options")) {
+        const auto& options = j.at("options");
+        page.options.trigger = options.value("trigger", page.options.trigger);
+        page.options.priority = options.value("priority", page.options.priority);
+        page.options.solid = options.value("solid", false);
+    }
+    page.options.trigger = j.value("trigger", page.options.trigger);
+    page.options.priority = j.value("priority", page.options.priority);
+
+    if (j.contains("movement")) {
+        const auto& movement = j.at("movement");
+        page.movement.type = movement.value("type", std::string{"fixed"});
+        if (movement.contains("speed") && movement.at("speed").is_number_integer()) {
+            page.movement.speed = movement.at("speed").get<int>();
+        }
+        page.movement.frequency = movement.value("frequency", 3);
+    }
+
+    if (j.contains("commands")) {
+        for (const auto& commandJson : j.at("commands")) {
+            page.commands.push_back(parseCommand(commandJson));
+        }
+    }
+
+    return page;
 }
 
 std::optional<MapData> MapLoader::load(const std::string& path) {
@@ -162,8 +261,16 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             ed.displayHeightTiles = evt.value("displayHeightTiles", 0.0f);
             ed.trigger = evt.value("trigger", "interact");
 
-            for (const auto& cmd : evt.at("commands")) {
-                ed.commands.push_back(parseCommand(cmd));
+            if (evt.contains("commands")) {
+                for (const auto& cmd : evt.at("commands")) {
+                    ed.commands.push_back(parseCommand(cmd));
+                }
+            }
+
+            if (evt.contains("pages")) {
+                for (const auto& pageJson : evt.at("pages")) {
+                    ed.pages.push_back(parsePage(pageJson));
+                }
             }
 
             map.events.push_back(ed);

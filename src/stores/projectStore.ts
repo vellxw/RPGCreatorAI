@@ -5,12 +5,14 @@ import type {
   DatabaseEntries,
   DatabaseListKey,
   EventCommand,
+  EventPage,
   GameEvent,
   ItemDatabase,
   MapData,
   MapReference,
   ProjectData,
   SystemData,
+  TriggerType,
   ValidationMessage,
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
@@ -158,6 +160,32 @@ export type ProjectAction =
       changes: Partial<Omit<GameEvent, 'commands'>>;
     }
   | {
+      type: 'ADD_EVENT_PAGE';
+      mapId: string;
+      eventId: string;
+      page: EventPage;
+    }
+  | {
+      type: 'UPDATE_EVENT_PAGE';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      changes: Partial<EventPage>;
+    }
+  | {
+      type: 'REMOVE_EVENT_PAGE';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+    }
+  | {
+      type: 'REORDER_EVENT_PAGE';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      direction: 'up' | 'down';
+    }
+  | {
       type: 'RENAME_EVENT';
       mapId: string;
       oldId: string;
@@ -175,6 +203,28 @@ export type ProjectAction =
       mapId: string;
       eventId: string;
       command: EventCommand;
+    }
+  | {
+      type: 'UPDATE_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      path: number[];
+      command: EventCommand;
+    }
+  | {
+      type: 'ADD_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      command: EventCommand;
+    }
+  | {
+      type: 'REMOVE_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      path: number[];
     }
   | {
       type: 'REMOVE_COMMAND';
@@ -375,7 +425,132 @@ function applyEventChanges(
   event: GameEvent,
   changes: Partial<Omit<GameEvent, 'commands'>>,
 ): GameEvent {
-  return { ...event, ...changes };
+  const next = normalizeEventPages({ ...event, ...changes });
+  if (changes.trigger && next.pages?.[0]) {
+    next.pages[0] = { ...next.pages[0], trigger: changes.trigger };
+  }
+  if ('sprite' in changes || 'animationSet' in changes || 'displayHeightTiles' in changes || 'solid' in changes) {
+    next.pages = (next.pages ?? []).map((page, index) =>
+      index === 0
+        ? {
+            ...page,
+            graphic: {
+              ...page.graphic,
+              sprite: next.sprite,
+              animationSet: next.animationSet,
+              displayHeightTiles: next.displayHeightTiles,
+            },
+            priority: next.solid ? 'sameAsCharacters' : page.priority,
+          }
+        : page,
+    );
+  }
+  return syncLegacyEventProjection(next);
+}
+
+function defaultEventPage(event: GameEvent): EventPage {
+  return {
+    id: 'page_1',
+    name: 'Page 1',
+    conditions: {},
+    graphic: {
+      sprite: event.sprite,
+      animationSet: event.animationSet,
+      displayHeightTiles: event.displayHeightTiles,
+    },
+    movement: { type: 'fixed', speed: 'normal' },
+    options: { walking: true, stepping: false, directionFix: false, through: false },
+    priority: event.solid ? 'sameAsCharacters' : 'belowCharacters',
+    trigger: event.trigger,
+    commands: deepClone(event.commands ?? []),
+  };
+}
+
+function normalizeEventPage(page: EventPage, index: number): EventPage {
+  return {
+    id: page.id || `page_${index + 1}`,
+    name: page.name ?? `Page ${index + 1}`,
+    conditions: page.conditions ?? {},
+    graphic: page.graphic ?? {},
+    movement: page.movement ?? { type: 'fixed', speed: 'normal' },
+    options: page.options ?? { walking: true, stepping: false, directionFix: false, through: false },
+    priority: page.priority ?? 'sameAsCharacters',
+    trigger: page.trigger ?? 'interact',
+    commands: page.commands ?? [],
+  };
+}
+
+function normalizeEventPages(event: GameEvent): GameEvent {
+  const pages = event.pages && event.pages.length > 0 ? event.pages : [defaultEventPage(event)];
+  return {
+    ...event,
+    pages: pages.map((page, index) => normalizeEventPage(deepClone(page), index)),
+  };
+}
+
+function syncLegacyEventProjection(event: GameEvent): GameEvent {
+  const normalized = normalizeEventPages(event);
+  const first = normalized.pages?.[0];
+  if (!first) return normalized;
+  return {
+    ...normalized,
+    trigger: first.trigger as TriggerType,
+    commands: deepClone(first.commands),
+    sprite: first.graphic.sprite ?? normalized.sprite,
+    animationSet: first.graphic.animationSet ?? normalized.animationSet,
+    displayHeightTiles: first.graphic.displayHeightTiles ?? normalized.displayHeightTiles,
+    solid: first.priority === 'sameAsCharacters' ? true : first.priority === 'belowCharacters' ? false : normalized.solid,
+  };
+}
+
+function normalizeMapsForEditing(maps: Record<string, MapData>): Record<string, MapData> {
+  const cloned = deepClone(maps);
+  for (const map of Object.values(cloned)) {
+    map.events = map.events.map(event => syncLegacyEventProjection(event));
+  }
+  return cloned;
+}
+
+function pageIndex(event: GameEvent, pageId: string): number {
+  const pages = event.pages ?? [];
+  return pages.findIndex(page => page.id === pageId);
+}
+
+function replacePage(event: GameEvent, pageId: string, mut: (page: EventPage) => EventPage): GameEvent {
+  const normalized = normalizeEventPages(event);
+  const index = pageIndex(normalized, pageId);
+  if (index === -1 || !normalized.pages) return normalized;
+  normalized.pages[index] = mut(normalized.pages[index]);
+  return index === 0 ? syncLegacyEventProjection(normalized) : normalized;
+}
+
+function commandBranch(target: EventCommand, branchIdx: number): EventCommand[] | null {
+  if (target.type === 'ifFlag' || target.type === 'ifSwitch' || target.type === 'ifSelfSwitch' || target.type === 'ifVariable') {
+    return branchIdx === 0 ? target.then : target.else;
+  }
+  if (target.type === 'showChoices') {
+    return target.choices[branchIdx]?.commands ?? null;
+  }
+  if (target.type === 'startBattle') {
+    return branchIdx === 0 ? target.victoryBranch ?? [] : target.defeatBranch ?? [];
+  }
+  return null;
+}
+
+function withCommandBranch(target: EventCommand, branchIdx: number, branch: EventCommand[]): EventCommand {
+  if (target.type === 'ifFlag' || target.type === 'ifSwitch' || target.type === 'ifSelfSwitch' || target.type === 'ifVariable') {
+    return branchIdx === 0 ? { ...target, then: branch } : { ...target, else: branch };
+  }
+  if (target.type === 'showChoices') {
+    return {
+      ...target,
+      choices: target.choices.map((choice, index) => index === branchIdx ? { ...choice, commands: branch } : choice),
+    };
+  }
+  if (target.type === 'startBattle') {
+    return branchIdx === 0 ? { ...target, victoryBranch: branch } : { ...target, defeatBranch: branch };
+  }
+  return target;
 }
 
 function setCommandAtPath(commands: EventCommand[], path: number[], replacement: EventCommand): EventCommand[] {
@@ -387,17 +562,15 @@ function setCommandAtPath(commands: EventCommand[], path: number[], replacement:
     return result;
   }
   const target = result[head];
-  if (target.type !== 'ifFlag' && target.type !== 'ifSwitch' && target.type !== 'ifVariable') {
+  if (!target) return commands;
+  const branchIdx = rest[0];
+  const branch = commandBranch(target, branchIdx);
+  if (!branch) {
     return commands; // path invalid
   }
-  const branchIdx = rest[0];
   const branchPath = rest.slice(1);
-  const branch = branchIdx === 0 ? target.then : target.else;
   const newBranch = setCommandAtPath(branch, branchPath, replacement);
-  result[head] =
-    branchIdx === 0
-      ? { ...target, then: newBranch }
-      : { ...target, else: newBranch };
+  result[head] = withCommandBranch(target, branchIdx, newBranch);
   return result;
 }
 
@@ -411,17 +584,15 @@ function removeCommandAtPath(commands: EventCommand[], path: number[]): EventCom
   }
   const result = commands.slice();
   const target = result[head];
-  if (target.type !== 'ifFlag' && target.type !== 'ifSwitch' && target.type !== 'ifVariable') {
+  if (!target) return commands;
+  const branchIdx = rest[0];
+  const branch = commandBranch(target, branchIdx);
+  if (!branch) {
     return commands;
   }
-  const branchIdx = rest[0];
   const branchPath = rest.slice(1);
-  const branch = branchIdx === 0 ? target.then : target.else;
   const newBranch = removeCommandAtPath(branch, branchPath);
-  result[head] =
-    branchIdx === 0
-      ? { ...target, then: newBranch }
-      : { ...target, else: newBranch };
+  result[head] = withCommandBranch(target, branchIdx, newBranch);
   return result;
 }
 
@@ -506,7 +677,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
       const next: ProjectStoreState = {
         ...state,
         project: withNormalizedVisualProfile(deepClone(payload.project)),
-        maps: deepClone(payload.maps),
+        maps: normalizeMapsForEditing(payload.maps),
         items: deepClone(payload.items),
         databases: mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
         dirty: false,
@@ -767,7 +938,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'ADD_EVENT':
       return withMap(state, action.mapId, map => {
         if (map.events.some(e => e.id === action.event.id)) return;
-        map.events.push(deepClone(action.event));
+        map.events.push(syncLegacyEventProjection(deepClone(action.event)));
       });
 
     case 'DUPLICATE_EVENT':
@@ -775,7 +946,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         if (map.events.some(e => e.id === action.newId)) return;
         const source = map.events.find(e => e.id === action.eventId);
         if (!source) return;
-        map.events.push({ ...deepClone(source), id: action.newId, x: action.x, y: action.y });
+        map.events.push(syncLegacyEventProjection({ ...deepClone(source), id: action.newId, x: action.x, y: action.y }));
       });
 
     case 'REMOVE_EVENT':
@@ -790,6 +961,47 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         const idx = map.events.findIndex(e => e.id === action.eventId);
         if (idx === -1) return;
         map.events[idx] = applyEventChanges(map.events[idx], action.changes);
+      });
+
+    case 'ADD_EVENT_PAGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        const normalized = normalizeEventPages(event);
+        if (normalized.pages?.some(page => page.id === action.page.id)) return;
+        normalized.pages = [...(normalized.pages ?? []), normalizeEventPage(deepClone(action.page), normalized.pages?.length ?? 0)];
+        Object.assign(event, normalized);
+      });
+
+    case 'UPDATE_EVENT_PAGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => normalizeEventPage({ ...page, ...deepClone(action.changes) }, 0)));
+      });
+
+    case 'REMOVE_EVENT_PAGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        const normalized = normalizeEventPages(event);
+        if (!normalized.pages || normalized.pages.length <= 1) return;
+        normalized.pages = normalized.pages.filter(page => page.id !== action.pageId);
+        Object.assign(event, syncLegacyEventProjection(normalized));
+      });
+
+    case 'REORDER_EVENT_PAGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        const normalized = normalizeEventPages(event);
+        const pages = normalized.pages ?? [];
+        const index = pages.findIndex(page => page.id === action.pageId);
+        const nextIndex = action.direction === 'up' ? index - 1 : index + 1;
+        if (index < 0 || nextIndex < 0 || nextIndex >= pages.length) return;
+        [pages[index], pages[nextIndex]] = [pages[nextIndex], pages[index]];
+        normalized.pages = pages;
+        Object.assign(event, syncLegacyEventProjection(normalized));
       });
 
     case 'RENAME_EVENT': {
@@ -810,6 +1022,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         const event = map.events.find(e => e.id === action.eventId);
         if (!event) return;
         event.commands = setCommandAtPath(event.commands, action.path, action.command);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
       });
 
     case 'ADD_COMMAND':
@@ -817,6 +1030,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         const event = map.events.find(e => e.id === action.eventId);
         if (!event) return;
         event.commands = [...event.commands, action.command];
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
       });
 
     case 'REMOVE_COMMAND':
@@ -824,6 +1038,37 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         const event = map.events.find(e => e.id === action.eventId);
         if (!event) return;
         event.commands = removeCommandAtPath(event.commands, action.path);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
+      });
+
+    case 'UPDATE_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: setCommandAtPath(page.commands, action.path, action.command),
+        })));
+      });
+
+    case 'ADD_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: [...page.commands, action.command],
+        })));
+      });
+
+    case 'REMOVE_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: removeCommandAtPath(page.commands, action.path),
+        })));
       });
 
     case 'ADD_DATABASE_ENTRY':
@@ -921,7 +1166,7 @@ export function flattenCommands(
     cmds.forEach((cmd, i) => {
       const path = [...prefix, i];
       result.push({ command: cmd, depth, path });
-      if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifVariable') {
+      if (cmd.type === 'ifFlag' || cmd.type === 'ifSwitch' || cmd.type === 'ifSelfSwitch' || cmd.type === 'ifVariable') {
         walk(cmd.then, depth + 1, [...path, 0]);
         walk(cmd.else, depth + 1, [...path, 1]);
       } else if (cmd.type === 'showChoices') {

@@ -4,6 +4,88 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 Slice 3A — event pages and self-switch foundation
+
+- `2026-05-20 09:09 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — initially FAILED as expected under TDD because event page normalization,
+  page actions, page-scoped command editing, and event-page validation were
+  not implemented yet.
+- `2026-05-20 09:17 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS after implementing event pages, page actions, self-switch command
+  validation, and nested page command editing (2 files, 61 tests).
+- `2026-05-20 09:18 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 09:18 -03:00` — `npm test` — PASS (18 files,
+  133 tests).
+- `2026-05-20 09:19 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 09:21 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — initially FAILED because the C++ loader did not read
+  editor-authored `options.trigger` inside an event page. Fix applied:
+  `MapLoader` now accepts both compact runtime pages and editor-authored
+  page objects.
+- `2026-05-20 09:24 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed after the dual-shape page parser fix.
+- `2026-05-20 09:28 -03:00` — `git diff --check` — PASS.
+- `2026-05-20 09:28 -03:00` — `npm test` — PASS (18 files,
+  133 tests).
+- `2026-05-20 09:29 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 09:29 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 09:30 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-20 09:31 -03:00` — `npm run desktop:verify-content` — PASS;
+  a temporary `dev:tauri` server on `127.0.0.1:1420` served the
+  RPGCreatorAI editor and was stopped after the check.
+- `2026-05-20 09:34 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS after QA fix for preserving `controlSelfSwitch` and
+  `ifSelfSwitch` command data in `MapLoader`.
+- `2026-05-20 09:35 -03:00` — `git diff --check` — PASS.
+- `2026-05-20 09:35 -03:00` — `npm test` — PASS (18 files,
+  133 tests).
+- `2026-05-20 09:36 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 09:36 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 09:37 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-20 09:38 -03:00` — `npm run desktop:verify-content` — PASS;
+  a temporary `dev:tauri` server on `127.0.0.1:1420` served the editor and
+  was stopped after verification.
+
+### Fixes applied
+
+- Added `EventPage` data types, A-D self-switch conditions, and
+  `controlSelfSwitch` / `ifSelfSwitch` command types.
+- Normalized legacy flat events into single-page events while preserving the
+  old first-page projection for compatibility.
+- Added editor page tabs, page metadata editing, and page-scoped command
+  editing across nested branches.
+- Added C++ self-switch storage and save/load persistence plus loader support
+  for optional `event.pages`.
+- Preserved editor-authored `controlSelfSwitch` and `ifSelfSwitch` command
+  data, including nested branches, in the C++ map loader.
+
+### Deferred from this slice
+
+- Runtime active-page selection, self-switch command execution, and
+  autorun/parallel scheduling remain Slice 3B/3C work.
+
+---
+
 ## Phase 9 Hotfix — RPG Maker scale and no-lag movement
 
 **Date**: 2026-05-19
