@@ -19,6 +19,9 @@ export function emptyDatabases(): DatabaseEntries {
     animations: {
       sets: [],
     },
+    tilesets: {
+      tilesets: [],
+    },
     system: {
       startingParty: [],
       startingGold: 0,
@@ -76,6 +79,13 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
   if (input.animations && typeof input.animations === 'object') {
     merged.animations = {
       sets: Array.isArray(input.animations.sets) ? [...input.animations.sets] : base.animations.sets,
+    };
+  }
+  if (input.tilesets && typeof input.tilesets === 'object') {
+    merged.tilesets = {
+      tilesets: Array.isArray(input.tilesets.tilesets)
+        ? [...input.tilesets.tilesets]
+        : base.tilesets.tilesets,
     };
   }
   return merged;

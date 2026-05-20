@@ -15,8 +15,6 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 2 — Map Authoring V2: data-driven tilesets, layer visibility/lock,
-  region painting, passability overlays, and layer validation.
 - Slice 3 — Event Editor V2: event pages, page conditions, self switches,
   autorun/parallel scheduler, and command stack editing.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
@@ -30,6 +28,14 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 2 — map authoring v2: tilesets are data-driven through
+  `data/database/tilesets.json`; editor layers cover ground, decoration,
+  foreground, collision, region, and events; layer visibility/lock controls
+  are available in the palette; locked layers reject paint mutations; region
+  painting and region overlays are active; passability overlays read tileset
+  metadata; map/project validation detects missing layers, invalid regions,
+  unsupported tiles, and unknown tilesets; Tauri and C++ loaders round-trip
+  tileset database paths, map tileset ids, display names, and layer metadata.
 - Phase 10 Slice 1 — editor shell map tree and professional map properties:
   map references now support `parentId`, `order`, and `expanded`; maps support
   display name, tileset, scroll, encounter, battleback, parallax, and layer

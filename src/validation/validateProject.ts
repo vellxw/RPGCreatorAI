@@ -72,6 +72,7 @@ interface RefIndex {
   commonEventIds: Set<string>;
   questObjectives: Map<string, Set<string>>;
   animationClips: Map<string, Set<string>>;
+  tilesetIds: Set<string>;
   playerAnimationSet: string;
 }
 
@@ -101,6 +102,7 @@ function buildIndex(items: ItemDatabase, db: DatabaseEntries): RefIndex {
     commonEventIds: new Set(db.commonEvents.map(c => c.id)),
     questObjectives,
     animationClips,
+    tilesetIds: new Set(db.tilesets.tilesets.map(tileset => tileset.id)),
     playerAnimationSet: db.system.playerAnimationSet || 'player_adventurer',
   };
 }
@@ -123,6 +125,13 @@ export function validateProject(state: FullProjectState): ValidationReport {
     for (const m of mapMessages) {
       if (m.level === 'error') errors.push(m);
       else if (m.level === 'warning') warnings.push(m);
+    }
+    if (map.tilesetId && !index.tilesetIds.has(map.tilesetId)) {
+      errors.push({
+        level: 'error',
+        message: `Map "${map.id}" references unknown tileset "${map.tilesetId}"`,
+        source: `${map.id}/tilesetId`,
+      });
     }
     errors.push(...validateUniqueEventIds(map));
     errors.push(...validateCommandsInMap(map, mapIds, index));

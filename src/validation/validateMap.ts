@@ -1,6 +1,7 @@
 import type { MapData, ValidationMessage, GameEvent, EventCommand } from '../types/project';
 import {
   isSupportedCollisionTile,
+  isSupportedRegionTile,
   isSupportedVisualTile,
   isVoidVisualTile,
 } from '../visual/tileCatalog';
@@ -40,6 +41,18 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
 
   // Check dimensions
   const expectedTiles = map.width * map.height;
+  if (map.tilesetId !== undefined) {
+    const requiredLayers = ['ground', 'decoration', 'foreground', 'collision', 'region'];
+    for (const name of requiredLayers) {
+      if (!map.layers.some(layer => layer.name === name)) {
+        messages.push({
+          level: 'error',
+          message: `Map "${map.id}" is missing required layer "${name}"`,
+          source: `${map.id}/layers`,
+        });
+      }
+    }
+  }
   for (const layer of map.layers) {
     if (layer.tiles.length !== expectedTiles) {
       messages.push({
@@ -59,7 +72,7 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
         });
       }
 
-      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedVisualTile(tile)))];
+      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedVisualTile(tile, map.tilesetId)))];
       for (const tileId of unsupported) {
         messages.push({
           level: 'error',
@@ -75,6 +88,16 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
         messages.push({
           level: 'error',
           message: `Layer "${layer.name}" uses unsupported collision tile id "${tileId}"`,
+          source: `${map.id}/${layer.name}`,
+        });
+      }
+    }
+    if (layer.type === 'region') {
+      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedRegionTile(tile)))];
+      for (const tileId of unsupported) {
+        messages.push({
+          level: 'error',
+          message: `Layer "${layer.name}" uses unsupported region id "${tileId}"`,
           source: `${map.id}/${layer.name}`,
         });
       }

@@ -5,10 +5,13 @@ export type BrushSelection =
   | {
       kind: 'tile';
       tileId: number;
-      label: 'grass' | 'path' | 'water' | 'snow' | 'tree' | 'interiorFloor' | 'interiorWall';
+      label: string;
     }
   | { kind: 'collision'; tileId: 0 | 9; label: 'erase' | 'wall' }
+  | { kind: 'region'; regionId: number; label: string }
   | { kind: 'event'; eventType: EventType; label: 'npc' | 'chest' | 'transfer' | 'trigger' };
+
+export type AuthoringLayer = 'ground' | 'decoration' | 'foreground' | 'collision' | 'region' | 'event';
 
 export interface EditorState {
   activeScreen: Screen;
@@ -19,7 +22,7 @@ export interface EditorState {
   zoomMode: 'fit' | 'manual';
   saved: boolean;
   brush: BrushSelection;
-  activeLayer: 'visual' | 'collision' | 'event';
+  activeLayer: AuthoringLayer;
   tool: 'brush' | 'fill' | 'rectangle' | 'erase' | 'select';
   brushSize: 1 | 2 | 3 | 5;
   interactionMode: 'paint' | 'select';
@@ -49,7 +52,7 @@ export const initialEditorState: EditorState = {
   zoomMode: 'fit',
   saved: true,
   brush: { kind: 'tile', tileId: 1, label: 'grass' },
-  activeLayer: 'visual',
+  activeLayer: 'ground',
   tool: 'brush',
   brushSize: 1,
   interactionMode: 'paint',
@@ -75,9 +78,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         brush: action.brush,
         activeLayer:
           action.brush.kind === 'tile'
-            ? 'visual'
+            ? 'ground'
             : action.brush.kind === 'collision'
               ? 'collision'
+              : action.brush.kind === 'region'
+                ? 'region'
               : 'event',
         tool: state.tool === 'select' ? 'brush' : state.tool,
         interactionMode: 'paint',
@@ -87,7 +92,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         ...state,
         activeLayer: action.layer,
         brush:
-          action.layer === 'visual'
+          action.layer === 'ground' || action.layer === 'decoration' || action.layer === 'foreground'
             ? state.brush.kind === 'tile'
               ? state.brush
               : { kind: 'tile', tileId: 1, label: 'grass' }
@@ -95,6 +100,10 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
               ? state.brush.kind === 'collision'
                 ? state.brush
                 : { kind: 'collision', tileId: 9, label: 'wall' }
+              : action.layer === 'region'
+                ? state.brush.kind === 'region'
+                  ? state.brush
+                  : { kind: 'region', regionId: 1, label: 'Region 1' }
               : state.brush.kind === 'event'
                 ? state.brush
                 : { kind: 'event', eventType: 'npc', label: 'npc' },

@@ -267,6 +267,64 @@ describe('projectReducer', () => {
     expect(s1.maps.town.layers[0].tiles[32]).toBe(1);
   });
 
+  it('PAINT_TILE refuses locked layers', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_MAP_LAYER_META',
+      mapId: 'town',
+      layerName: 'ground',
+      changes: { locked: true },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 2,
+    });
+
+    expect(s3.maps.town.layers[0].tiles[0]).toBe(1);
+  });
+
+  it('UPDATE_MAP_LAYER_META changes visibility and lock state with undo support', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_MAP_LAYER_META',
+      mapId: 'town',
+      layerName: 'ground',
+      changes: { visible: false, locked: true },
+    });
+    expect(s2.maps.town.layers[0]).toMatchObject({ visible: false, locked: true });
+
+    const s3 = projectReducer(s2, { type: 'UNDO' });
+    expect(s3.maps.town.layers[0].visible).toBeUndefined();
+    expect(s3.maps.town.layers[0].locked).toBeUndefined();
+  });
+
+  it('paints region ids without changing visual or collision layers', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'field',
+      name: 'Field',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'PAINT_TILE',
+      mapId: 'field',
+      layerName: 'region',
+      x: 1,
+      y: 1,
+      tile: 7,
+    });
+
+    const region = s2.maps.field.layers.find(layer => layer.name === 'region');
+    expect(region?.tiles[5]).toBe(7);
+    expect(s2.maps.field.layers.find(layer => layer.name === 'ground')?.tiles[5]).toBe(1);
+    expect(s2.maps.field.layers.find(layer => layer.name === 'collision')?.tiles[5]).toBe(0);
+  });
+
   it('PAINT_RECT fills a rectangular region on the requested layer', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

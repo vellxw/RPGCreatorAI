@@ -28,6 +28,7 @@ export interface DatabasePaths {
   variables?: string;
   commonEvents?: string;
   animations?: string;
+  tilesets?: string;
 }
 
 export type DatabaseKey = keyof Omit<DatabasePaths, 'items'>;
@@ -81,6 +82,34 @@ export interface MapLayer {
   visible?: boolean;
   locked?: boolean;
   tiles: number[];
+}
+
+export type TilePassability = 'passable' | 'blocked';
+
+export interface TilesetTileMetadata {
+  id: number;
+  name: string;
+  asset: string;
+  group: 'A' | 'B' | 'C' | 'D' | 'E' | 'Region' | 'Collision';
+  passability: TilePassability;
+  directionalPassability?: Partial<Record<Direction, boolean>>;
+  terrainTag?: string;
+  ladder?: boolean;
+  bush?: boolean;
+  counter?: boolean;
+  damage?: boolean;
+  priority?: number;
+}
+
+export interface TilesetData {
+  id: string;
+  name: string;
+  tileSize: number;
+  tiles: TilesetTileMetadata[];
+}
+
+export interface TilesetDatabaseData {
+  tilesets: TilesetData[];
 }
 
 export interface GameEvent {
@@ -491,10 +520,11 @@ export interface DatabaseEntries {
   variables: VariableData[];
   commonEvents: CommonEventData[];
   animations: AnimationDatabaseData;
+  tilesets: TilesetDatabaseData;
   system: SystemData;
 }
 
-export type DatabaseListKey = Exclude<keyof DatabaseEntries, 'system' | 'animations'>;
+export type DatabaseListKey = Exclude<keyof DatabaseEntries, 'system' | 'animations' | 'tilesets'>;
 
 // Editor-specific types
 export type Screen = 'editor' | 'events' | 'database' | 'ai-tools' | 'playtest';

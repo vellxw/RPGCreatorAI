@@ -10,11 +10,16 @@ import {
   Move,
   Pipette,
   PaintBucket,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 import { useEditor, type BrushSelection } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { SCENE_TEMPLATES, cloneSceneTemplateMap, getSceneTemplate } from '../../templates/sceneTemplates';
+import { listTilesetTiles, tileAssetForId } from '../../visual/tileCatalog';
 
 interface TileCategory {
   id: string;
@@ -23,72 +28,77 @@ interface TileCategory {
   tiles: string[];
 }
 
-const categories: TileCategory[] = [
-  {
-    id: 'terrain',
-    name: 'Terrain',
-    color: '#22c55e',
-    tiles: ['grass', 'path', 'water', 'snow'],
-  },
-  { id: 'nature', name: 'Nature', color: '#10b981', tiles: ['tree'] },
-  { id: 'interior', name: 'Interior', color: '#8b5cf6', tiles: ['interiorFloor', 'interiorWall'] },
-  { id: 'walls', name: 'Walls', color: '#6b7280', tiles: ['wall'] },
-  { id: 'events', name: 'Events', color: '#ec4899', tiles: ['npc', 'chest', 'door', 'trigger'] },
-];
-
-const tilePreviewAssets: Record<string, string> = {
-  grass: gameAssets.grass,
-  path: gameAssets.path,
-  water: gameAssets.water,
-  snow: gameAssets.snow,
-  tree: gameAssets.tree,
-  interiorFloor: gameAssets.interiorFloor,
-  interiorWall: gameAssets.interiorWall,
-  wall: gameAssets.wall,
-  npc: eventAssets.npc,
-  chest: eventAssets.chest,
-  door: eventAssets.transfer,
-  trigger: eventAssets.trigger,
-};
+const layerLabels = [
+  ['ground', 'Ground'],
+  ['decoration', 'Decor'],
+  ['foreground', 'Front'],
+  ['collision', 'Pass'],
+  ['region', 'Region'],
+  ['event', 'Events'],
+] as const;
 
 export function TilePalette({ embedded = false }: { embedded?: boolean }) {
   const { state: editor, dispatch } = useEditor();
   const { state: project, dispatch: projectDispatch } = useProjectStore();
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ terrain: true });
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({ A: true, B: true });
   const [search, setSearch] = useState('');
   const selectedMap = project.maps[editor.selectedMapId];
+  const tilesetTiles = listTilesetTiles(selectedMap?.tilesetId);
+  const tileCategories: TileCategory[] = [
+    { id: 'A', name: 'Tiles A', color: '#22c55e', tiles: tilesetTiles.filter(tile => tile.group === 'A').map(tile => String(tile.id)) },
+    { id: 'B', name: 'Tiles B', color: '#10b981', tiles: tilesetTiles.filter(tile => tile.group === 'B').map(tile => String(tile.id)) },
+    { id: 'C', name: 'Tiles C', color: '#8b5cf6', tiles: tilesetTiles.filter(tile => tile.group === 'C').map(tile => String(tile.id)) },
+    { id: 'regions', name: 'Regions', color: '#0ea5e9', tiles: ['region_1', 'region_2', 'region_3', 'region_4', 'region_5', 'region_6', 'region_7', 'region_8'] },
+    { id: 'collision', name: 'Passability', color: '#6b7280', tiles: ['eraseCollision', 'wall'] },
+    { id: 'events', name: 'Events', color: '#ec4899', tiles: ['npc', 'chest', 'door', 'trigger'] },
+  ].filter(cat => cat.tiles.length > 0);
 
   const toggleCategory = (id: string) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const brushes: Record<string, BrushSelection> = {
-    grass: { kind: 'tile', tileId: 1, label: 'grass' },
-    path: { kind: 'tile', tileId: 2, label: 'path' },
-    water: { kind: 'tile', tileId: 3, label: 'water' },
-    snow: { kind: 'tile', tileId: 4, label: 'snow' },
-    tree: { kind: 'tile', tileId: 5, label: 'tree' },
-    interiorFloor: { kind: 'tile', tileId: 6, label: 'interiorFloor' },
-    interiorWall: { kind: 'tile', tileId: 7, label: 'interiorWall' },
+  const brushes: Record<string, BrushSelection> = Object.fromEntries(
+    tilesetTiles.map(tile => [String(tile.id), { kind: 'tile', tileId: tile.id, label: tile.name } satisfies BrushSelection]),
+  );
+  Object.assign(brushes, {
     wall: { kind: 'collision', tileId: 9, label: 'wall' },
+    eraseCollision: { kind: 'collision', tileId: 0, label: 'erase' },
+    region_1: { kind: 'region', regionId: 1, label: 'Region 1' },
+    region_2: { kind: 'region', regionId: 2, label: 'Region 2' },
+    region_3: { kind: 'region', regionId: 3, label: 'Region 3' },
+    region_4: { kind: 'region', regionId: 4, label: 'Region 4' },
+    region_5: { kind: 'region', regionId: 5, label: 'Region 5' },
+    region_6: { kind: 'region', regionId: 6, label: 'Region 6' },
+    region_7: { kind: 'region', regionId: 7, label: 'Region 7' },
+    region_8: { kind: 'region', regionId: 8, label: 'Region 8' },
     npc: { kind: 'event', eventType: 'npc', label: 'npc' },
     chest: { kind: 'event', eventType: 'chest', label: 'chest' },
     door: { kind: 'event', eventType: 'transfer', label: 'transfer' },
     trigger: { kind: 'event', eventType: 'trigger', label: 'trigger' },
-  };
+  });
 
   const selectedTile =
-    editor.brush.kind === 'event' && editor.brush.label === 'transfer'
-      ? 'door'
-      : editor.brush.label;
+    editor.brush.kind === 'tile'
+      ? String(editor.brush.tileId)
+      : editor.brush.kind === 'region'
+        ? `region_${editor.brush.regionId}`
+        : editor.brush.kind === 'event' && editor.brush.label === 'transfer'
+          ? 'door'
+          : editor.brush.kind === 'collision' && editor.brush.tileId === 0
+            ? 'eraseCollision'
+            : editor.brush.label;
   const selectedPreview =
     editor.brush.kind === 'tile'
-      ? tilePreviewAssets[editor.brush.label]
+      ? tileAssetForId(selectedMap?.tilesetId, editor.brush.tileId)
       : editor.brush.kind === 'collision'
         ? editor.brush.tileId === 9
           ? gameAssets.collisionOverlay
           : gameAssets.voidWarning
-        : tilePreviewAssets[editor.brush.label === 'transfer' ? 'door' : editor.brush.label];
+        : editor.brush.kind === 'region'
+          ? gameAssets.collisionOverlay
+          : editor.brush.label === 'transfer'
+            ? eventAssets.transfer
+            : eventAssets[editor.brush.label];
 
   const applyTemplate = (templateId: (typeof SCENE_TEMPLATES)[number]['id']) => {
     if (!selectedMap) return;
@@ -119,24 +129,60 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100 space-y-2">
-        <div className="grid grid-cols-3 gap-1">
-          {([
-            ['visual', 'Visual'],
-            ['collision', 'Collision'],
-            ['event', 'Events'],
-          ] as const).map(([layer, label]) => (
-            <button
-              key={layer}
-              onClick={() => dispatch({ type: 'SET_ACTIVE_LAYER', layer })}
-              className={`px-2 py-1.5 text-[11px] rounded-md border ${
-                editor.activeLayer === layer
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="space-y-1">
+          {layerLabels.map(([layer, label]) => {
+            const mapLayer = selectedMap?.layers.find(item => item.name === layer);
+            const disabled = layer !== 'event' && !mapLayer;
+            return (
+              <div key={layer} className="flex items-center gap-1">
+                <button
+                  onClick={() => dispatch({ type: 'SET_ACTIVE_LAYER', layer })}
+                  disabled={disabled}
+                  className={`flex-1 px-2 py-1.5 text-[11px] rounded-md border text-left ${
+                    editor.activeLayer === layer
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {label}
+                </button>
+                {mapLayer && (
+                  <>
+                    <button
+                      type="button"
+                      title={mapLayer.visible === false ? 'Show layer' : 'Hide layer'}
+                      onClick={() =>
+                        projectDispatch({
+                          type: 'UPDATE_MAP_LAYER_META',
+                          mapId: selectedMap.id,
+                          layerName: mapLayer.name,
+                          changes: { visible: mapLayer.visible === false },
+                        })
+                      }
+                      className="p-1 text-gray-400 hover:text-gray-700"
+                    >
+                      {mapLayer.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}
+                    </button>
+                    <button
+                      type="button"
+                      title={mapLayer.locked ? 'Unlock layer' : 'Lock layer'}
+                      onClick={() =>
+                        projectDispatch({
+                          type: 'UPDATE_MAP_LAYER_META',
+                          mapId: selectedMap.id,
+                          layerName: mapLayer.name,
+                          changes: { locked: !mapLayer.locked },
+                        })
+                      }
+                      className="p-1 text-gray-400 hover:text-gray-700"
+                    >
+                      {mapLayer.locked ? <Lock size={12} /> : <Unlock size={12} />}
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
         <div className="flex items-center gap-2 p-2 rounded-md bg-gray-50 border border-gray-100">
           <img src={selectedPreview} alt="" className="w-8 h-8 object-contain" />
@@ -209,7 +255,7 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
 
       {/* Categories */}
       <div className="flex-1 overflow-y-auto">
-        {categories.map(cat => (
+        {tileCategories.map(cat => (
           <div key={cat.id}>
             <button
               onClick={() => toggleCategory(cat.id)}
@@ -222,7 +268,10 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
             {expanded[cat.id] && (
               <div className="grid grid-cols-4 gap-1 px-3 pb-2">
                 {cat.tiles
-                  .filter(tile => tile.toLowerCase().includes(search.toLowerCase()))
+                  .filter(tile => {
+                    const brush = brushes[tile];
+                    return (brush?.label ?? tile).toLowerCase().includes(search.toLowerCase());
+                  })
                   .map(tile => (
                   <button
                     key={tile}
@@ -232,9 +281,29 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
                         ? 'border-indigo-500 shadow-md scale-105'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    title={tile}
+                    title={brushes[tile]?.label ?? tile}
                   >
-                    <img src={tilePreviewAssets[tile]} alt="" className="w-full h-full object-contain" />
+                    {brushes[tile]?.kind === 'region' ? (
+                      <span className="flex h-full items-center justify-center text-[12px] font-semibold text-sky-700">
+                        {brushes[tile].label.replace('Region ', '')}
+                      </span>
+                    ) : (
+                      <img
+                        src={
+                          brushes[tile]?.kind === 'tile'
+                            ? tileAssetForId(selectedMap?.tilesetId, brushes[tile].tileId)
+                            : tile === 'wall'
+                              ? gameAssets.collisionOverlay
+                              : tile === 'eraseCollision'
+                                ? gameAssets.voidWarning
+                                : tile === 'door'
+                                  ? eventAssets.transfer
+                                  : eventAssets[(brushes[tile] as { label?: keyof typeof eventAssets } | undefined)?.label ?? 'trigger']
+                        }
+                        alt=""
+                        className="w-full h-full object-contain"
+                      />
+                    )}
                   </button>
                 ))}
               </div>

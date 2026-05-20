@@ -293,7 +293,7 @@ describe('validateProject', () => {
   });
 
   it('warns when a visual layer contains explicit void cells', () => {
-    const map = makeMap();
+    const map = makeMap({ tilesetId: 'sample-town' });
     map.layers[0].tiles[0] = 0;
     const project = makeProject({ town: map });
     const report = validateProject(project);
@@ -301,13 +301,35 @@ describe('validateProject', () => {
   });
 
   it('flags unsupported visual and collision tile ids', () => {
-    const map = makeMap();
+    const map = makeMap({ tilesetId: 'sample-town' });
     map.layers[0].tiles[0] = 99;
     map.layers[1].tiles[1] = 7;
     const project = makeProject({ town: map });
     const report = validateProject(project);
     expect(report.errors.some(e => e.message.includes('unsupported visual tile id "99"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('unsupported collision tile id "7"'))).toBe(true);
+  });
+
+  it('flags maps that reference missing tilesets', () => {
+    const project = makeProject({ town: makeMap({ tilesetId: 'missing-tileset' }) });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('unknown tileset "missing-tileset"'))).toBe(true);
+  });
+
+  it('flags missing required authoring layers and invalid region ids', () => {
+    const map = makeMap({ tilesetId: 'sample-town' });
+    map.layers = [
+      { name: 'ground', type: 'visual', role: 'ground', tiles: new Array(16).fill(1) },
+      { name: 'collision', type: 'collision', role: 'collision', tiles: new Array(16).fill(0) },
+      { name: 'region', type: 'region', role: 'region', tiles: new Array(16).fill(0) },
+    ];
+    map.layers[2].tiles[0] = 300;
+    const project = makeProject({ town: map });
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('missing required layer "decoration"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('missing required layer "foreground"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unsupported region id "300"'))).toBe(true);
   });
 
   it('flags invalid trigger', () => {

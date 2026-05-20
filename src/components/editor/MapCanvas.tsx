@@ -10,17 +10,12 @@ import {
   computeFitScale,
   computePreviewSceneBounds,
 } from '../../visual/viewport';
-import { isSupportedVisualTile, isVoidVisualTile } from '../../visual/tileCatalog';
-
-const groundAssets: Record<number, string> = {
-  1: gameAssets.grass,
-  2: gameAssets.path,
-  3: gameAssets.water,
-  4: gameAssets.snow,
-  5: gameAssets.tree,
-  6: gameAssets.interiorFloor,
-  7: gameAssets.interiorWall,
-};
+import {
+  isSupportedVisualTile,
+  isVoidVisualTile,
+  tileAssetForId,
+  tilePassabilityForId,
+} from '../../visual/tileCatalog';
 
 export function MapCanvas() {
   const { state, dispatch } = useEditor();
@@ -39,7 +34,9 @@ export function MapCanvas() {
   const profile = normalizeVisualProfile(project.project.visualProfile);
   const tileSize = map.tileSize || profile.tileSize;
   const groundLayer = map.layers.find(l => l.name === 'ground');
+  const visualLayers = map.layers.filter(l => l.type === 'visual' && l.visible !== false);
   const collisionLayer = map.layers.find(l => l.type === 'collision');
+  const regionLayer = map.layers.find(l => l.type === 'region');
   const freshSelectedEvent = state.selectedEvent
     ? map.events.find(event => event.id === state.selectedEvent?.id) ?? null
     : null;
@@ -104,14 +101,18 @@ export function MapCanvas() {
     return { x, y };
   };
 
-  const currentLayerName = state.activeLayer === 'collision' ? 'collision' : 'ground';
+  const currentLayerName = state.activeLayer === 'event' ? 'ground' : state.activeLayer;
   const currentPaintTile =
     state.tool === 'erase'
       ? 0
-      : state.activeLayer === 'visual'
+      : state.activeLayer === 'ground' || state.activeLayer === 'decoration' || state.activeLayer === 'foreground'
         ? state.brush.kind === 'tile'
           ? state.brush.tileId
           : 1
+        : state.activeLayer === 'region'
+          ? state.brush.kind === 'region'
+            ? state.brush.regionId
+            : 1
         : state.brush.kind === 'collision'
           ? state.brush.tileId
           : 9;
@@ -281,12 +282,13 @@ export function MapCanvas() {
 
             <g transform={`translate(${stageOffsetX} ${stageOffsetY})`}>
               {/* Tiles */}
-              {groundLayer && groundLayer.tiles.map((tile, i) => {
+              {visualLayers.map(layer => layer.tiles.map((tile, i) => {
                 const x = (i % map.width) * tileSize;
                 const y = Math.floor(i / map.width) * tileSize;
-                if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
+                if (tile === 0 && layer.name !== 'ground') return null;
+                if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile, map.tilesetId)) {
                   return (
-                    <g key={i}>
+                    <g key={`${layer.name}-${i}`}>
                       <rect x={x} y={y} width={tileSize} height={tileSize} fill="#2a1026" />
                       <rect
                         x={x}
@@ -317,17 +319,36 @@ export function MapCanvas() {
                 }
                 return (
                   <image
-                    key={i}
+                    key={`${layer.name}-${i}`}
                     x={x}
                     y={y}
                     width={tileSize}
                     height={tileSize}
-                    href={groundAssets[tile] ?? gameAssets.grass}
+                    href={tileAssetForId(map.tilesetId, tile)}
+                    opacity={layer.name === 'foreground' ? 0.92 : 1}
                     style={{ imageRendering: 'pixelated' }}
                   />
                 );
+              }))}
+              {state.activeLayer === 'collision' && groundLayer && groundLayer.tiles.map((tile, i) => {
+                if (tilePassabilityForId(map.tilesetId, tile) !== 'blocked') return null;
+                const x = (i % map.width) * tileSize;
+                const y = Math.floor(i / map.width) * tileSize;
+                return (
+                  <rect
+                    key={`passability-${i}`}
+                    x={x + 3}
+                    y={y + 3}
+                    width={tileSize - 6}
+                    height={tileSize - 6}
+                    fill="#ef4444"
+                    opacity="0.18"
+                    stroke="#ef4444"
+                    strokeWidth="1"
+                  />
+                );
               })}
-              {state.activeLayer === 'collision' && collisionLayer && collisionLayer.tiles.map((tile, i) => {
+              {state.activeLayer === 'collision' && collisionLayer?.visible !== false && collisionLayer && collisionLayer.tiles.map((tile, i) => {
                 if (tile !== 9) return null;
                 const x = (i % map.width) * tileSize;
                 const y = Math.floor(i / map.width) * tileSize;
@@ -342,6 +363,19 @@ export function MapCanvas() {
                     opacity="0.72"
                     style={{ imageRendering: 'pixelated' }}
                   />
+                );
+              })}
+              {state.activeLayer === 'region' && regionLayer?.visible !== false && regionLayer && regionLayer.tiles.map((tile, i) => {
+                if (tile <= 0) return null;
+                const x = (i % map.width) * tileSize;
+                const y = Math.floor(i / map.width) * tileSize;
+                return (
+                  <g key={`region-${i}`}>
+                    <rect x={x + 2} y={y + 2} width={tileSize - 4} height={tileSize - 4} fill="#0ea5e9" opacity="0.28" />
+                    <text x={x + tileSize / 2} y={y + tileSize / 2 + 4} textAnchor="middle" fontSize="12" fill="#075985" fontWeight="700">
+                      {tile}
+                    </text>
+                  </g>
                 );
               })}
 

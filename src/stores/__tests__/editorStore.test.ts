@@ -20,13 +20,26 @@ describe('editorStore viewport controls', () => {
   });
 
   it('tracks authoring layer, tool, and brush size explicitly', () => {
-    const visualLayer = editorReducer(initialEditorState, { type: 'SET_ACTIVE_LAYER', layer: 'visual' });
-    expect(visualLayer.activeLayer).toBe('visual');
+    const foregroundLayer = editorReducer(initialEditorState, { type: 'SET_ACTIVE_LAYER', layer: 'foreground' });
+    expect(foregroundLayer.activeLayer).toBe('foreground');
+    expect(foregroundLayer.brush.kind).toBe('tile');
 
-    const fillTool = editorReducer(visualLayer, { type: 'SET_TOOL', tool: 'fill' });
+    const fillTool = editorReducer(foregroundLayer, { type: 'SET_TOOL', tool: 'fill' });
     expect(fillTool.tool).toBe('fill');
 
     const largerBrush = editorReducer(fillTool, { type: 'SET_BRUSH_SIZE', brushSize: 3 });
     expect(largerBrush.brushSize).toBe(3);
+  });
+
+  it('selects collision, region, and event layers with matching brushes', () => {
+    const collisionLayer = editorReducer(initialEditorState, { type: 'SET_ACTIVE_LAYER', layer: 'collision' });
+    expect(collisionLayer.brush.kind).toBe('collision');
+
+    const regionLayer = editorReducer(collisionLayer, { type: 'SET_ACTIVE_LAYER', layer: 'region' });
+    expect(regionLayer.activeLayer).toBe('region');
+    expect(regionLayer.brush).toMatchObject({ kind: 'region', regionId: 1 });
+
+    const eventLayer = editorReducer(regionLayer, { type: 'SET_ACTIVE_LAYER', layer: 'event' });
+    expect(eventLayer.brush.kind).toBe('event');
   });
 });

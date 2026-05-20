@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "tilesets": [
+    {
+      "id": "sample-town",
+      "name": "Sample Town",
+      "tileSize": 32,
+      "tiles": [
+        { "id": 0, "name": "Transparent", "asset": "voidWarning", "group": "A", "passability": "blocked", "terrainTag": "void", "priority": 0 },
+        { "id": 1, "name": "Grass", "asset": "grass", "group": "A", "passability": "passable", "terrainTag": "field", "priority": 0 },
+        { "id": 2, "name": "Path", "asset": "path", "group": "A", "passability": "passable", "terrainTag": "road", "priority": 0 },
+        { "id": 3, "name": "Water", "asset": "water", "group": "A", "passability": "blocked", "terrainTag": "water", "priority": 0 },
+        { "id": 4, "name": "Snow", "asset": "snow", "group": "A", "passability": "passable", "terrainTag": "snow", "priority": 0 },
+        { "id": 5, "name": "Tree", "asset": "tree", "group": "B", "passability": "blocked", "terrainTag": "forest", "bush": true, "priority": 1 },
+        { "id": 6, "name": "Interior Floor", "asset": "interiorFloor", "group": "A", "passability": "passable", "terrainTag": "floor", "priority": 0 },
+        { "id": 7, "name": "Interior Wall", "asset": "interiorWall", "group": "A", "passability": "blocked", "terrainTag": "wall", "counter": true, "priority": 1 }
+      ]
+    },
+    {
+      "id": "interior",
+      "name": "Interior",
+      "tileSize": 32,
+      "tiles": [
+        { "id": 0, "name": "Transparent", "asset": "voidWarning", "group": "A", "passability": "blocked", "terrainTag": "void", "priority": 0 },
+        { "id": 6, "name": "Interior Floor", "asset": "interiorFloor", "group": "A", "passability": "passable", "terrainTag": "floor", "priority": 0 },
+        { "id": 7, "name": "Interior Wall", "asset": "interiorWall", "group": "A", "passability": "blocked", "terrainTag": "wall", "counter": true, "priority": 1 },
+        { "id": 2, "name": "Path", "asset": "path", "group": "B", "passability": "passable", "terrainTag": "rug", "priority": 0 }
+      ]
+    }
+  ]
+}

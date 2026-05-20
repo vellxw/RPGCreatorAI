@@ -88,6 +88,12 @@ export type ProjectAction =
       map: MapData;
     }
   | {
+      type: 'UPDATE_MAP_LAYER_META';
+      mapId: string;
+      layerName: string;
+      changes: Partial<Pick<MapData['layers'][number], 'visible' | 'locked' | 'role'>>;
+    }
+  | {
       type: 'UPDATE_MAP_PROPERTIES';
       mapId: string;
       changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>;
@@ -237,6 +243,12 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
     dirty: true,
     maps: { ...state.maps, [mapId]: cloned },
   };
+}
+
+function findEditableLayer(map: MapData, layerName: string) {
+  const layer = map.layers.find(l => l.name === layerName);
+  if (!layer || layer.locked) return null;
+  return layer;
 }
 
 function makeMapPath(mapId: string): string {
@@ -528,7 +540,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         if (action.x < 0 || action.x >= map.width || action.y < 0 || action.y >= map.height) {
           return;
         }
-        const layer = map.layers.find(l => l.name === action.layerName);
+        const layer = findEditableLayer(map, action.layerName);
         if (!layer) return;
         const index = action.y * map.width + action.x;
         layer.tiles[index] = action.tile;
@@ -536,7 +548,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
 
     case 'PAINT_RECT':
       return withMap(state, action.mapId, map => {
-        const layer = map.layers.find(l => l.name === action.layerName);
+        const layer = findEditableLayer(map, action.layerName);
         if (!layer) return;
         const minX = Math.max(0, Math.min(action.x1, action.x2));
         const maxX = Math.min(map.width - 1, Math.max(action.x1, action.x2));
@@ -551,7 +563,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
 
     case 'FLOOD_FILL':
       return withMap(state, action.mapId, map => {
-        const layer = map.layers.find(l => l.name === action.layerName);
+        const layer = findEditableLayer(map, action.layerName);
         if (!layer) return;
         if (action.x < 0 || action.x >= map.width || action.y < 0 || action.y >= map.height) return;
         const startIndex = action.y * map.width + action.x;
@@ -579,7 +591,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         const width = Math.max(1, Math.floor(action.width));
         const height = Math.max(1, Math.floor(action.height));
         for (const layer of map.layers) {
-          const fill = layer.type === 'visual' ? action.visualFillTile : 0;
+          const fill = layer.name === 'ground' ? action.visualFillTile : 0;
           const nextTiles = new Array(width * height).fill(fill);
           const copyWidth = Math.min(map.width, width);
           const copyHeight = Math.min(map.height, height);
@@ -598,6 +610,13 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'REPLACE_MAP':
       return withMap(state, action.mapId, map => {
         Object.assign(map, deepClone(action.map));
+      });
+
+    case 'UPDATE_MAP_LAYER_META':
+      return withMap(state, action.mapId, map => {
+        const layer = map.layers.find(l => l.name === action.layerName);
+        if (!layer) return;
+        Object.assign(layer, deepClone(action.changes));
       });
 
     case 'UPDATE_MAP_PROPERTIES':

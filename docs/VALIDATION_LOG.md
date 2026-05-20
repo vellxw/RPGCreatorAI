@@ -783,3 +783,55 @@ Error: Port 1420 is already in use
 - `2026-05-19 21:19 -03:00` — `npm run build` — PASS (`tsc --noEmit`
   and `vite build`).
 
+### Phase 10 Slice 2 — data-driven tilesets and layer authoring
+
+- `2026-05-20 02:34 -03:00` —
+  `npm test -- src/visual/__tests__/tileCatalog.test.ts src/stores/__tests__/editorStore.test.ts src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts src/validation/__tests__/bundledSample.test.ts`
+  — initially FAILED as expected under TDD because tile catalog helpers,
+  concrete authoring layers, locked-layer paint refusal, layer metadata
+  reducer actions, tileset validation, and region validation did not exist
+  yet. Fix applied: implemented data-driven tilesets, layer controls, region
+  authoring, passability overlays, and validation.
+- `2026-05-20 02:35 -03:00` — focused TypeScript slice tests — PASS
+  (5 files, 65 tests).
+- `2026-05-20 02:35 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 02:35 -03:00` — `npm test` — PASS (18 files,
+  126 tests).
+- `2026-05-20 02:36 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 02:36 -03:00` —
+  `cmake --build --preset default --target rpg_tests` — PASS/no rebuild
+  required for the in-repo build tree.
+- `2026-05-20 02:36 -03:00` — `ctest --preset default` — PASS
+  (1/1 C++ tests).
+- `2026-05-20 02:38 -03:00` — Browser smoke at
+  `http://127.0.0.1:3000` — PASS; editor loaded, layer controls for
+  Ground/Decor/Front/Pass/Region were present, Region selection exposed
+  region brushes, and console error log was empty. Screenshot capture through
+  the in-app browser timed out twice, so this run is recorded as DOM/console
+  smoke rather than screenshot evidence.
+- `2026-05-20 02:39 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `Databases loaded: ... 2 tilesets ...` followed by `SMOKE PASSED`.
+- `2026-05-20 02:39 -03:00` — `npm run desktop:verify-content` —
+  initially FAILED because no Vite server was running on the Tauri-only
+  port `127.0.0.1:1420`. Fix applied: started `npm run dev:tauri`.
+- `2026-05-20 02:40 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-05-20 02:41 -03:00` — `git diff --check` — PASS.
+- `2026-05-20 02:41 -03:00` — `npm test` — PASS (18 files,
+  126 tests) after normalizing sample map layer order.
+- `2026-05-20 02:41 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-20 02:42 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-20 02:42 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED` with `2 tilesets` loaded.
+- `2026-05-20 02:42 -03:00` — `npm run desktop:verify-content` — PASS.
+

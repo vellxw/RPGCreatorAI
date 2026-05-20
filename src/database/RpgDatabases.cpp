@@ -179,6 +179,27 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
         }
     }
 
+    if (auto j = readJson(project.database.tilesetsPath)) {
+        for (const auto& ts : (*j).value("tilesets", json::array())) {
+            TilesetRecord r;
+            r.id = ts.value("id", "");
+            r.name = ts.value("name", "");
+            r.tileSize = ts.value("tileSize", 32);
+            r.image = ts.value("image", "");
+            r.columns = ts.value("columns", 0);
+            for (const auto& tile : ts.value("tiles", json::array())) {
+                TilesetTileRecord tr;
+                tr.id = tile.value("id", 0);
+                tr.name = tile.value("name", "");
+                tr.asset = tile.value("asset", "");
+                tr.passability = tile.value("passability", tr.passability);
+                tr.terrainTag = tile.value("terrainTag", "");
+                r.tiles.push_back(std::move(tr));
+            }
+            tilesets_.push_back(std::move(r));
+        }
+    }
+
     if (auto j = readJson(project.database.systemPath)) {
         const auto& sys = *j;
         for (const auto& a : sys.value("startingParty", json::array())) {
@@ -200,6 +221,7 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
                  std::to_string(troops_.size()) + " troops, " +
                  std::to_string(quests_.size()) + " quests, " +
                  std::to_string(shops_.size()) + " shops, " +
+                 std::to_string(tilesets_.size()) + " tilesets, " +
                  std::to_string(commonEvents_.size()) + " common events");
 
     return true;
@@ -235,6 +257,10 @@ const CommonEventRecord* RpgDatabases::findCommonEvent(const std::string& id) co
 }
 const ItemRecord* RpgDatabases::findItem(const std::string& id) const {
     for (const auto& i : items_) if (i.id == id) return &i;
+    return nullptr;
+}
+const TilesetRecord* RpgDatabases::findTileset(const std::string& id) const {
+    for (const auto& t : tilesets_) if (t.id == id) return &t;
     return nullptr;
 }
 

@@ -77,6 +77,8 @@ pub struct DatabaseRefs {
     pub common_events: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub animations: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tilesets: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -214,7 +216,7 @@ pub fn fs_write_project(
     // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
     // so old runtime/editor pipelines keep parsing them.
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 12] = [
+        let pairs: [(&str, Option<&String>); 13] = [
             ("actors", project_state.project.database.actors.as_ref()),
             ("classes", project_state.project.database.classes.as_ref()),
             ("skills", project_state.project.database.skills.as_ref()),
@@ -236,13 +238,14 @@ pub fn fs_write_project(
                 "animations",
                 project_state.project.database.animations.as_ref(),
             ),
+            ("tilesets", project_state.project.database.tilesets.as_ref()),
         ];
         for (key, maybe_rel) in pairs {
             let Some(rel) = maybe_rel else { continue };
             let Some(payload) = map.get(key) else {
                 continue;
             };
-            let wrapped = if key == "system" || key == "animations" {
+            let wrapped = if key == "system" || key == "animations" || key == "tilesets" {
                 let mut m = serde_json::Map::new();
                 m.insert("schemaVersion".into(), serde_json::Value::from(1));
                 if let serde_json::Value::Object(object_payload) = payload {
@@ -334,7 +337,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     // and the file exists on disk. Missing files are tolerated and surface as
     // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
     let mut databases = serde_json::Map::new();
-    let pairs: [(&str, Option<&String>); 12] = [
+    let pairs: [(&str, Option<&String>); 13] = [
         ("actors", project.database.actors.as_ref()),
         ("classes", project.database.classes.as_ref()),
         ("skills", project.database.skills.as_ref()),
@@ -347,6 +350,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
         ("variables", project.database.variables.as_ref()),
         ("commonEvents", project.database.common_events.as_ref()),
         ("animations", project.database.animations.as_ref()),
+        ("tilesets", project.database.tilesets.as_ref()),
     ];
     for (key, maybe_rel) in pairs {
         if let Some(rel) = maybe_rel {
@@ -375,7 +379,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
 /// pass the raw value through.
 fn extract_database_payload(key: &str, value: serde_json::Value) -> serde_json::Value {
     if let serde_json::Value::Object(mut map) = value {
-        if key == "system" || key == "animations" {
+        if key == "system" || key == "animations" || key == "tilesets" {
             map.remove("schemaVersion");
             return serde_json::Value::Object(map);
         }
@@ -611,6 +615,7 @@ mod tests {
                 variables: None,
                 common_events: None,
                 animations: None,
+                tilesets: None,
             },
         };
 
@@ -822,7 +827,7 @@ mod tests {
         // Re-implement what fs_write_project does for databases inline so we
         // don't need a State<AppState>.
         if let serde_json::Value::Object(map) = &state.databases {
-            let pairs: [(&str, Option<&String>); 12] = [
+            let pairs: [(&str, Option<&String>); 13] = [
                 ("actors", state.project.database.actors.as_ref()),
                 ("classes", state.project.database.classes.as_ref()),
                 ("skills", state.project.database.skills.as_ref()),
@@ -838,13 +843,14 @@ mod tests {
                     state.project.database.common_events.as_ref(),
                 ),
                 ("animations", state.project.database.animations.as_ref()),
+                ("tilesets", state.project.database.tilesets.as_ref()),
             ];
             for (key, maybe_rel) in pairs {
                 let Some(rel) = maybe_rel else { continue };
                 let Some(payload) = map.get(key) else {
                     continue;
                 };
-                let wrapped = if key == "system" || key == "animations" {
+                let wrapped = if key == "system" || key == "animations" || key == "tilesets" {
                     let mut m = serde_json::Map::new();
                     m.insert("schemaVersion".into(), serde_json::Value::from(1));
                     if let serde_json::Value::Object(object_payload) = payload {

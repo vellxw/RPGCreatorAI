@@ -124,6 +124,8 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
         }
         map.id = j.at("id").get<std::string>();
         map.name = j.at("name").get<std::string>();
+        map.displayName = j.value("displayName", std::string{});
+        map.tilesetId = j.value("tilesetId", std::string{});
         map.width = j.at("width").get<int>();
         map.height = j.at("height").get<int>();
         map.tileSize = j.at("tileSize").get<int>();
@@ -132,6 +134,9 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             MapLayer ml;
             ml.name = layer.at("name").get<std::string>();
             ml.type = layer.at("type").get<std::string>();
+            ml.role = layer.value("role", std::string{});
+            ml.visible = layer.value("visible", true);
+            ml.locked = layer.value("locked", false);
             for (int tileId : layer.at("tiles")) {
                 ml.tiles.push_back(tileId);
             }

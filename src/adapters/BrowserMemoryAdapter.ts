@@ -24,6 +24,7 @@ import type {
   TroopData,
   VariableData,
   AnimationDatabaseData,
+  TilesetDatabaseData,
 } from '../types/project';
 import { buildExportBundle, parseImportBundle, safeStringify } from './jsonUtils';
 import { mergeDatabases } from './defaultDatabases';
@@ -44,6 +45,7 @@ import switchesJson from '../../data/database/switches.json';
 import variablesJson from '../../data/database/variables.json';
 import commonEventsJson from '../../data/database/commonEvents.json';
 import animationsJson from '../../data/database/animations.json';
+import tilesetsJson from '../../data/database/tilesets.json';
 
 function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -90,6 +92,7 @@ function seedFromBundle(): FullProjectState {
         'commonEvents',
       ),
       animations: extractAnimations(deepClone(animationsJson) as Record<string, unknown>),
+      tilesets: extractTilesets(deepClone(tilesetsJson) as Record<string, unknown>),
       system: extractSystem(deepClone(systemJson) as Record<string, unknown>),
     }),
   };
@@ -119,6 +122,12 @@ function extractSystem(json: Record<string, unknown>): SystemData {
 function extractAnimations(json: Record<string, unknown>): AnimationDatabaseData {
   return {
     sets: Array.isArray(json.sets) ? (json.sets as AnimationDatabaseData['sets']) : [],
+  };
+}
+
+function extractTilesets(json: Record<string, unknown>): TilesetDatabaseData {
+  return {
+    tilesets: Array.isArray(json.tilesets) ? (json.tilesets as TilesetDatabaseData['tilesets']) : [],
   };
 }
 

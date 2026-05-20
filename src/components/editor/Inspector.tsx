@@ -15,6 +15,7 @@ import { eventAssets } from '../../assets/generated/assetCatalog';
 import { findDuplicatePlacement } from '../../utils/eventEditing';
 import { normalizeVisualProfile } from '../../visual/visualProfile';
 import { getVisibleTileSpan } from '../../visual/viewport';
+import { getTileset, listTilesetTiles } from '../../visual/tileCatalog';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -279,6 +280,11 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
 
   const profile = normalizeVisualProfile(projectState.project.visualProfile);
   const visibleSpan = getVisibleTileSpan(profile.baseResolution, map.tileSize || profile.tileSize);
+  const tilesetOptions = projectState.databases.tilesets.tilesets.map(tileset => ({
+    value: tileset.id,
+    label: tileset.name,
+  }));
+  const selectedTileset = getTileset(map.tilesetId);
   const updateMap = (changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>) => {
     dispatch({ type: 'UPDATE_MAP_PROPERTIES', mapId: map.id, changes });
   };
@@ -344,10 +350,7 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
             <Select
               label="Tileset"
               value={map.tilesetId ?? 'sample-town'}
-              options={[
-                { value: 'sample-town', label: 'Sample Town' },
-                { value: 'interior', label: 'Interior' },
-              ]}
+              options={tilesetOptions.length > 0 ? tilesetOptions : [{ value: 'sample-town', label: 'Sample Town' }]}
               onChange={v => updateMap({ tilesetId: v })}
             />
             <Select
@@ -406,6 +409,14 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
           <p className="text-[11px] text-gray-500 mt-2">
             Current frame: {profile.baseResolution.width}×{profile.baseResolution.height}
           </p>
+        </div>
+
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-2">Tileset Metadata</div>
+          <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-500">
+            <div>Tiles: {listTilesetTiles(map.tilesetId).length}</div>
+            <div>Tile size: {selectedTileset?.tileSize ?? map.tileSize}</div>
+          </div>
         </div>
 
         <div>

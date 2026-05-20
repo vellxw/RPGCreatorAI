@@ -7,6 +7,9 @@
 struct MapLayer {
     std::string name;
     std::string type;
+    std::string role;
+    bool visible = true;
+    bool locked = false;
     std::vector<int> tiles;
 };
 
@@ -14,6 +17,8 @@ struct MapData {
     int schemaVersion;
     std::string id;
     std::string name;
+    std::string displayName;
+    std::string tilesetId;
     int width;
     int height;
     int tileSize;

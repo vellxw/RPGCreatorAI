@@ -117,6 +117,23 @@ struct ItemRecord {
     std::string slot;
 };
 
+struct TilesetTileRecord {
+    int id = 0;
+    std::string name;
+    std::string asset;
+    std::string passability = "blocked";
+    std::string terrainTag;
+};
+
+struct TilesetRecord {
+    std::string id;
+    std::string name;
+    int tileSize = 32;
+    std::string image;
+    int columns = 0;
+    std::vector<TilesetTileRecord> tiles;
+};
+
 class RpgDatabases {
 public:
     bool loadAll(const ::ProjectData& project);
@@ -130,6 +147,7 @@ public:
     const std::vector<ShopRecord>& shops() const { return shops_; }
     const std::vector<CommonEventRecord>& commonEvents() const { return commonEvents_; }
     const std::vector<ItemRecord>& items() const { return items_; }
+    const std::vector<TilesetRecord>& tilesets() const { return tilesets_; }
     const SystemRecord& system() const { return system_; }
 
     const ActorRecord* findActor(const std::string& id) const;
@@ -140,6 +158,7 @@ public:
     const ShopRecord* findShop(const std::string& id) const;
     const CommonEventRecord* findCommonEvent(const std::string& id) const;
     const ItemRecord* findItem(const std::string& id) const;
+    const TilesetRecord* findTileset(const std::string& id) const;
 
 private:
     std::vector<ActorRecord> actors_;
@@ -151,6 +170,7 @@ private:
     std::vector<ShopRecord> shops_;
     std::vector<CommonEventRecord> commonEvents_;
     std::vector<ItemRecord> items_;
+    std::vector<TilesetRecord> tilesets_;
     SystemRecord system_{};
 };
 

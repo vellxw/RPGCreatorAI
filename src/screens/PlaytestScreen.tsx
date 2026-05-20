@@ -21,7 +21,7 @@ import { performSave } from '../stores/saveActions';
 import { animationAssets, editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
-import { isSupportedVisualTile, isVoidVisualTile } from '../visual/tileCatalog';
+import { isSupportedVisualTile, isVoidVisualTile, tileAssetForId } from '../visual/tileCatalog';
 import {
   advanceTileFluidMotion,
   beginTileFluidStep,
@@ -31,16 +31,6 @@ import {
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
 import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
-
-const previewGroundAssets: Record<number, string> = {
-  1: gameAssets.grass,
-  2: gameAssets.path,
-  3: gameAssets.water,
-  4: gameAssets.snow,
-  5: gameAssets.tree,
-  6: gameAssets.interiorFloor,
-  7: gameAssets.interiorWall,
-};
 
 function displayForCharacter(
   tileSize: number,
@@ -176,7 +166,7 @@ const PreviewGroundLayer = memo(function PreviewGroundLayer({
       {map.layers.find(l => l.name === 'ground')?.tiles.map((tile, i) => {
         const x = (i % map.width) * tileSize;
         const y = Math.floor(i / map.width) * tileSize;
-        if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile)) {
+        if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile, map.tilesetId)) {
           return (
             <image
               key={i}
@@ -196,7 +186,7 @@ const PreviewGroundLayer = memo(function PreviewGroundLayer({
             y={y}
             width={tileSize}
             height={tileSize}
-            href={previewGroundAssets[tile] ?? gameAssets.voidWarning}
+            href={tileAssetForId(map.tilesetId, tile)}
             style={{ imageRendering: 'pixelated' }}
           />
         );

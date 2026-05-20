@@ -36,7 +36,8 @@
     "switches": "data/database/switches.json",
     "variables": "data/database/variables.json",
     "commonEvents": "data/database/commonEvents.json",
-    "animations": "data/database/animations.json"
+    "animations": "data/database/animations.json",
+    "tilesets": "data/database/tilesets.json"
   },
   "visualProfile": {
     "aspectRatio": "16:9",

@@ -25,3 +25,34 @@ lack professional properties still load because all new fields are optional.
 Editor validation checks project map references before command validation. Map
 data that is loaded but not referenced is a warning, not a hard failure, so
 manual repair remains possible.
+
+## Slice 2 Architecture
+
+- `data/database/tilesets.json` is the first project-owned tileset database.
+  It describes authored tile groups, tile ids, asset keys, passability,
+  directional passability, terrain tags, ladder/bush/counter/damage flags,
+  and visual priority without adopting RPG Maker proprietary formats.
+- `tileCatalog` resolves editor/runtime-preview tile assets from tileset data
+  instead of hardcoded tile lists. Unknown visual tiles intentionally fall
+  back to the existing void warning asset.
+- `MapData.layers` is now treated as a professional authoring stack:
+  `ground`, `decoration`, `foreground`, `collision`, and `region`. Visibility
+  affects rendering overlays, and `locked` prevents reducer paint mutations.
+- `TilePalette` selects concrete authoring layers and exposes layer visibility
+  and lock controls. Region brushes write region ids to the region layer;
+  collision brushes remain explicit collision authoring.
+- `MapCanvas` renders visible visual layers in stack order, shows tileset
+  passability metadata while the passability layer is active, and shows region
+  ids while the region layer is active.
+- The C++ runtime schema now parses map `displayName`, `tilesetId`, layer
+  `role`/`visible`/`locked`, and the optional project `database.tilesets`
+  shard. Runtime database loading exposes tileset lookup for later validator
+  and renderer work.
+
+## Slice 2 Validation
+
+TypeScript tests cover data-driven tileset resolution, layer selection, locked
+paint refusal, layer metadata undo, region painting, missing layer validation,
+unknown tileset references, and invalid region ids. C++ tests cover project
+tileset database paths, map tileset/layer metadata parsing, and runtime
+tileset database loading.
