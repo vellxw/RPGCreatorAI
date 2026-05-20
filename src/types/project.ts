@@ -35,12 +35,22 @@ export type DatabaseKey = keyof Omit<DatabasePaths, 'items'>;
 export interface MapReference {
   id: string;
   path: string;
+  parentId?: string | null;
+  order?: number;
+  expanded?: boolean;
 }
 
 export interface MapData {
   schemaVersion: number;
   id: string;
   name: string;
+  displayName?: string;
+  tilesetId?: string;
+  scrollType?: MapScrollType;
+  battleback?: string;
+  encounterSteps?: number;
+  encounters?: MapEncounter[];
+  parallax?: MapParallax;
   width: number;
   height: number;
   tileSize: number;
@@ -48,9 +58,28 @@ export interface MapData {
   events: GameEvent[];
 }
 
+export type MapScrollType = 'none' | 'vertical' | 'horizontal' | 'both';
+
+export interface MapEncounter {
+  troopId: string;
+  weight: number;
+  regionIds?: number[];
+}
+
+export interface MapParallax {
+  image?: string;
+  loopX?: boolean;
+  loopY?: boolean;
+  scrollX?: number;
+  scrollY?: number;
+}
+
 export interface MapLayer {
   name: string;
-  type: 'visual' | 'collision';
+  type: 'visual' | 'collision' | 'region';
+  role?: 'ground' | 'decoration' | 'foreground' | 'collision' | 'region';
+  visible?: boolean;
+  locked?: boolean;
   tiles: number[];
 }
 

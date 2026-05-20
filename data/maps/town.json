@@ -2,6 +2,13 @@
   "schemaVersion": 1,
   "id": "town",
   "name": "Town",
+  "displayName": "Town",
+  "tilesetId": "sample-town",
+  "scrollType": "none",
+  "battleback": "field",
+  "encounterSteps": 30,
+  "encounters": [],
+  "parallax": {},
   "width": 40,
   "height": 23,
   "tileSize": 32,
@@ -9,6 +16,9 @@
     {
       "name": "ground",
       "type": "visual",
+      "role": "ground",
+      "visible": true,
+      "locked": false,
       "tiles": [
         5,
         5,
@@ -935,6 +945,9 @@
     {
       "name": "collision",
       "type": "collision",
+      "role": "collision",
+      "visible": true,
+      "locked": false,
       "tiles": [
         9,
         9,

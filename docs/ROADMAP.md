@@ -1,8 +1,27 @@
 # Roadmap
 
-- **Phase 1 (Current):** C++ Runtime MVP. Data-driven JSON loading, basic rendering, grid movement, basic events.
-- **Phase 2:** Asset Pipeline. Support for real images, spritesheets, audio files, and basic animations.
-- **Phase 3:** Advanced Systems. Combat framework, party system, stats, and a robust UI framework.
-- **Phase 4:** Visual Editor MVP. A Qt/ImGui tool to generate the JSON files visually without editing them by hand.
-- **Phase 5:** HD-2D Renderer. 3D environments with 2D sprites, dynamic lighting, and post-processing.
-- **Phase 6:** Scripting. Lua/Python integration for complex logic beyond JSON event commands.
+## Active Direction
+
+- **Phase 10 (Current):** Professional RPG Maker MZ-style editor adaptation.
+  Focus: map tree workflow, data-driven tilesets and layers, event pages,
+  robust database editors, runtime validation, integrated playtest, and debug
+  tooling. No proprietary RPG Maker assets or formats are used.
+
+## Completed Foundation
+
+- **Phase 1:** C++ runtime bootstrap.
+- **Phase 2:** Visible playable runtime.
+- **Phase 3:** Visual editor MVP.
+- **Phase 4:** Editor persistence and runtime bridge.
+- **Phase 5:** Desktop shell and filesystem/runtime bridge.
+- **Phase 6:** Complete RPG creation system foundation.
+- **Phase 7:** Polished creator-to-player loop.
+- **Phase 8:** Game visual foundation and creator workflow hardening.
+- **Phase 9:** Smooth movement and generated character animation foundation.
+
+## Deferred Until Foundation Is Solid
+
+- General scripting and plugin execution.
+- AI provider/runtime dependency layers.
+- Networked or backend project services.
+- Non-deterministic runtime features that would compromise local saves.

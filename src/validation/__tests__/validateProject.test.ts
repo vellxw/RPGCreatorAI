@@ -60,6 +60,69 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('startMapId'))).toBe(true);
   });
 
+  it('validates project map references and hierarchy metadata', () => {
+    const project = makeProject({
+      town: makeMap(),
+      house: makeMap({ id: 'house', name: 'House' }),
+    });
+    project.project.maps = [
+      { id: 'town', path: 'data/maps/town.json', parentId: null, order: 0, expanded: true },
+      { id: 'town', path: 'data/maps/town-copy.json', parentId: null, order: 1, expanded: true },
+      { id: 'house', path: 'data/maps/house.json', parentId: 'missing_parent', order: 0, expanded: true },
+      { id: 'ghost', path: 'data/maps/ghost.json', parentId: null, order: 2, expanded: true },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Duplicate project map reference id "town"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('references missing map data "ghost"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unknown parent map "missing_parent"'))).toBe(true);
+  });
+
+  it('validates project map reference paths before desktop save', () => {
+    const project = makeProject({
+      town: makeMap(),
+      house: makeMap({ id: 'house', name: 'House' }),
+    });
+    project.project.maps = [
+      { id: 'town', path: 'data/maps/shared.json', parentId: null, order: 0 },
+      { id: 'house', path: 'data/maps/shared.json', parentId: null, order: 1 },
+      { id: 'blank', path: '   ', parentId: null, order: 2 },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Duplicate project map path "data/maps/shared.json"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('has an empty path'))).toBe(true);
+  });
+
+  it('warns when loaded map data has no project tree reference', () => {
+    const project = makeProject({
+      town: makeMap(),
+      unused: makeMap({ id: 'unused', name: 'Unused' }),
+    });
+    project.project.maps = [{ id: 'town', path: 'data/maps/town.json' }];
+
+    const report = validateProject(project);
+
+    expect(report.warnings.some(w => w.message.includes('Loaded map "unused" has no project reference'))).toBe(true);
+  });
+
+  it('flags cyclic map parent chains', () => {
+    const project = makeProject({
+      town: makeMap(),
+      house: makeMap({ id: 'house', name: 'House' }),
+    });
+    project.project.maps = [
+      { id: 'town', path: 'data/maps/town.json', parentId: 'house', order: 0 },
+      { id: 'house', path: 'data/maps/house.json', parentId: 'town', order: 0 },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('cyclic map parent chain'))).toBe(true);
+  });
+
   it('flags duplicate event IDs in a map', () => {
     const event: GameEvent = {
       id: 'dup',

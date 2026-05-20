@@ -10,11 +10,17 @@
   "maps": [
     {
       "id": "town",
-      "path": "data/maps/town.json"
+      "path": "data/maps/town.json",
+      "parentId": null,
+      "order": 0,
+      "expanded": true
     },
     {
       "id": "house",
-      "path": "data/maps/house.json"
+      "path": "data/maps/house.json",
+      "parentId": "town",
+      "order": 0,
+      "expanded": true
     }
   ],
   "database": {

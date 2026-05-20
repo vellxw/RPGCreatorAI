@@ -380,6 +380,174 @@ describe('projectReducer', () => {
     expect(s3.maps.town.width).toBe(10);
   });
 
+  it('UPDATE_MAP_PROPERTIES changes professional map settings with undo support', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_MAP_PROPERTIES',
+      mapId: 'town',
+      changes: {
+        name: 'Harbor Town',
+        displayName: 'Harbor',
+        tilesetId: 'sample-town',
+        scrollType: 'none',
+        encounterSteps: 32,
+        battleback: 'field',
+      },
+    });
+
+    expect(s2.dirty).toBe(true);
+    expect(s2.maps.town.name).toBe('Harbor Town');
+    expect(s2.maps.town.displayName).toBe('Harbor');
+    expect(s2.maps.town.tilesetId).toBe('sample-town');
+    expect(s2.maps.town.scrollType).toBe('none');
+    expect(s2.maps.town.encounterSteps).toBe(32);
+    expect(s2.maps.town.battleback).toBe('field');
+
+    const s3 = projectReducer(s2, { type: 'UNDO' });
+    expect(s3.maps.town.name).toBe('Town');
+  });
+
+  it('CREATE_MAP appends a map reference and default authoring layers', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'CREATE_MAP',
+      mapId: 'forest',
+      name: 'Forest',
+      parentId: 'town',
+      width: 6,
+      height: 5,
+    });
+
+    expect(s2.project.maps.find(ref => ref.id === 'forest')).toMatchObject({
+      id: 'forest',
+      path: 'data/maps/forest.json',
+      parentId: 'town',
+      order: 0,
+      expanded: true,
+    });
+    expect(s2.maps.forest.layers.map(layer => layer.name)).toEqual([
+      'ground',
+      'decoration',
+      'foreground',
+      'collision',
+      'region',
+    ]);
+    expect(s2.maps.forest.layers).toHaveLength(5);
+    expect(s2.maps.forest.layers[4].type).toBe('region');
+  });
+
+  it('DUPLICATE_MAP deep-clones maps without aliasing source arrays', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'DUPLICATE_MAP',
+      sourceMapId: 'town',
+      newMapId: 'town_copy',
+      name: 'Town Copy',
+    });
+
+    expect(s2.maps.town_copy.name).toBe('Town Copy');
+    expect(s2.project.maps.map(ref => ref.id)).toEqual(['town', 'town_copy']);
+    expect(s2.maps.town_copy.layers[0].tiles).not.toBe(s2.maps.town.layers[0].tiles);
+
+    s2.maps.town_copy.layers[0].tiles[0] = 9;
+    expect(s2.maps.town.layers[0].tiles[0]).toBe(1);
+  });
+
+  it('UPDATE_MAP_REFERENCE and MOVE_MAP maintain tree metadata with undo support', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'forest',
+      name: 'Forest',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_MAP_REFERENCE',
+      mapId: 'forest',
+      changes: { expanded: false },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'MOVE_MAP',
+      mapId: 'forest',
+      parentId: 'town',
+      order: 0,
+    });
+
+    expect(s3.project.maps.find(ref => ref.id === 'forest')).toMatchObject({
+      parentId: 'town',
+      order: 0,
+      expanded: false,
+    });
+
+    const s4 = projectReducer(s3, { type: 'UNDO' });
+    expect(s4.project.maps.find(ref => ref.id === 'forest')?.parentId).toBeNull();
+  });
+
+  it('SWAP_MAP_ORDER reorders siblings in one undoable step', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'forest',
+      name: 'Forest',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'CREATE_MAP',
+      mapId: 'cave',
+      name: 'Cave',
+      width: 4,
+      height: 4,
+    });
+    const s3 = projectReducer(s2, {
+      type: 'SWAP_MAP_ORDER',
+      firstMapId: 'forest',
+      secondMapId: 'cave',
+    });
+
+    expect(s3.project.maps.find(ref => ref.id === 'forest')?.order).toBe(2);
+    expect(s3.project.maps.find(ref => ref.id === 'cave')?.order).toBe(1);
+
+    const s4 = projectReducer(s3, { type: 'UNDO' });
+    expect(s4.project.maps.find(ref => ref.id === 'forest')?.order).toBe(1);
+    expect(s4.project.maps.find(ref => ref.id === 'cave')?.order).toBe(2);
+  });
+
+  it('MOVE_MAP refuses to move a parent under its own descendant', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'house',
+      name: 'House',
+      parentId: 'town',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'MOVE_MAP',
+      mapId: 'town',
+      parentId: 'house',
+      order: 0,
+    });
+
+    expect(s2).toBe(s1);
+  });
+
+  it('REMOVE_MAP refuses the last or start map and removes other maps atomically', () => {
+    const s1 = loadedState();
+    const refusedStart = projectReducer(s1, { type: 'REMOVE_MAP', mapId: 'town' });
+    expect(refusedStart).toBe(s1);
+
+    const s2 = projectReducer(s1, {
+      type: 'CREATE_MAP',
+      mapId: 'forest',
+      name: 'Forest',
+      width: 4,
+      height: 4,
+    });
+    const s3 = projectReducer(s2, { type: 'REMOVE_MAP', mapId: 'forest' });
+    expect(s3.project.maps.map(ref => ref.id)).toEqual(['town']);
+    expect(s3.maps.forest).toBeUndefined();
+  });
+
   it('VALIDATE refreshes errors/warnings', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

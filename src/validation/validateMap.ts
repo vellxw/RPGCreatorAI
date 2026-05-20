@@ -51,7 +51,7 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
 
     if (layer.type === 'visual') {
       const voidCount = layer.tiles.filter(isVoidVisualTile).length;
-      if (voidCount > 0) {
+      if (voidCount > 0 && (layer.role ?? layer.name) === 'ground') {
         messages.push({
           level: 'warning',
           message: `Layer "${layer.name}" contains ${voidCount} void tile${voidCount === 1 ? '' : 's'}`,

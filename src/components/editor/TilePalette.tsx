@@ -51,7 +51,7 @@ const tilePreviewAssets: Record<string, string> = {
   trigger: eventAssets.trigger,
 };
 
-export function TilePalette() {
+export function TilePalette({ embedded = false }: { embedded?: boolean }) {
   const { state: editor, dispatch } = useEditor();
   const { state: project, dispatch: projectDispatch } = useProjectStore();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ terrain: true });
@@ -107,7 +107,11 @@ export function TilePalette() {
   };
 
   return (
-    <div className="w-[220px] flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
+    <div
+      className={`bg-white flex flex-col min-h-0 ${
+        embedded ? 'h-full' : 'w-[220px] flex-shrink-0 border-r border-gray-200'
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-200">
         <span className="text-[13px] font-semibold text-gray-700">Tile Palette</span>

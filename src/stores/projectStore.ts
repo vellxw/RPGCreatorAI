@@ -8,6 +8,7 @@ import type {
   GameEvent,
   ItemDatabase,
   MapData,
+  MapReference,
   ProjectData,
   SystemData,
   ValidationMessage,
@@ -85,6 +86,46 @@ export type ProjectAction =
       type: 'REPLACE_MAP';
       mapId: string;
       map: MapData;
+    }
+  | {
+      type: 'UPDATE_MAP_PROPERTIES';
+      mapId: string;
+      changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>;
+    }
+  | {
+      type: 'UPDATE_MAP_REFERENCE';
+      mapId: string;
+      changes: Partial<Omit<MapReference, 'id'>>;
+    }
+  | {
+      type: 'CREATE_MAP';
+      mapId: string;
+      name: string;
+      parentId?: string | null;
+      width?: number;
+      height?: number;
+      tileSize?: number;
+    }
+  | {
+      type: 'DUPLICATE_MAP';
+      sourceMapId: string;
+      newMapId: string;
+      name?: string;
+    }
+  | {
+      type: 'REMOVE_MAP';
+      mapId: string;
+    }
+  | {
+      type: 'MOVE_MAP';
+      mapId: string;
+      parentId?: string | null;
+      order: number;
+    }
+  | {
+      type: 'SWAP_MAP_ORDER';
+      firstMapId: string;
+      secondMapId: string;
     }
   | {
       type: 'ADD_EVENT';
@@ -195,6 +236,64 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
     ...state,
     dirty: true,
     maps: { ...state.maps, [mapId]: cloned },
+  };
+}
+
+function makeMapPath(mapId: string): string {
+  return `data/maps/${mapId}.json`;
+}
+
+function nextMapOrder(project: ProjectData, parentId: string | null): number {
+  const siblingOrders = project.maps
+    .filter(ref => (ref.parentId ?? null) === parentId)
+    .map(ref => ref.order ?? 0);
+  return siblingOrders.length === 0 ? 0 : Math.max(...siblingOrders) + 1;
+}
+
+function wouldCreateMapParentCycle(project: ProjectData, mapId: string, parentId: string | null): boolean {
+  let cursor = parentId;
+  const seen = new Set<string>();
+  while (cursor) {
+    if (cursor === mapId) return true;
+    if (seen.has(cursor)) return true;
+    seen.add(cursor);
+    cursor = project.maps.find(ref => ref.id === cursor)?.parentId ?? null;
+  }
+  return false;
+}
+
+function createAuthoringMap(
+  mapId: string,
+  name: string,
+  width: number,
+  height: number,
+  tileSize: number,
+): MapData {
+  const w = Math.max(1, Math.floor(width));
+  const h = Math.max(1, Math.floor(height));
+  const count = w * h;
+  return {
+    schemaVersion: 1,
+    id: mapId,
+    name,
+    displayName: name,
+    tilesetId: 'sample-town',
+    scrollType: 'none',
+    battleback: '',
+    encounterSteps: 30,
+    encounters: [],
+    parallax: {},
+    width: w,
+    height: h,
+    tileSize,
+    layers: [
+      { name: 'ground', type: 'visual', role: 'ground', visible: true, locked: false, tiles: new Array(count).fill(1) },
+      { name: 'decoration', type: 'visual', role: 'decoration', visible: true, locked: false, tiles: new Array(count).fill(0) },
+      { name: 'foreground', type: 'visual', role: 'foreground', visible: true, locked: false, tiles: new Array(count).fill(0) },
+      { name: 'collision', type: 'collision', role: 'collision', visible: true, locked: false, tiles: new Array(count).fill(0) },
+      { name: 'region', type: 'region', role: 'region', visible: true, locked: false, tiles: new Array(count).fill(0) },
+    ],
+    events: [],
   };
 }
 
@@ -500,6 +599,151 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
       return withMap(state, action.mapId, map => {
         Object.assign(map, deepClone(action.map));
       });
+
+    case 'UPDATE_MAP_PROPERTIES':
+      return withMap(state, action.mapId, map => {
+        Object.assign(map, deepClone(action.changes), { id: map.id });
+      });
+
+    case 'UPDATE_MAP_REFERENCE': {
+      if (!state.project.maps.some(ref => ref.id === action.mapId)) return state;
+      return {
+        ...state,
+        dirty: true,
+        project: {
+          ...state.project,
+          maps: state.project.maps.map(ref =>
+            ref.id === action.mapId
+              ? {
+                  ...ref,
+                  ...deepClone(action.changes),
+                  id: ref.id,
+                  parentId: action.changes.parentId === undefined ? ref.parentId ?? null : action.changes.parentId,
+                }
+              : ref,
+          ),
+        },
+      };
+    }
+
+    case 'CREATE_MAP': {
+      const mapId = action.mapId.trim();
+      if (!mapId || state.maps[mapId] || state.project.maps.some(ref => ref.id === mapId)) return state;
+      const parentId = action.parentId ?? null;
+      if (parentId && !state.maps[parentId]) return state;
+      const tileSize = action.tileSize ?? state.maps[state.project.startMapId]?.tileSize ?? 32;
+      const map = createAuthoringMap(
+        mapId,
+        action.name.trim() || mapId,
+        action.width ?? 20,
+        action.height ?? 15,
+        tileSize,
+      );
+      const ref: MapReference = {
+        id: mapId,
+        path: makeMapPath(mapId),
+        parentId,
+        order: nextMapOrder(state.project, parentId),
+        expanded: true,
+      };
+      return {
+        ...state,
+        dirty: true,
+        project: { ...state.project, maps: [...state.project.maps, ref] },
+        maps: { ...state.maps, [mapId]: map },
+      };
+    }
+
+    case 'DUPLICATE_MAP': {
+      const source = state.maps[action.sourceMapId];
+      const newMapId = action.newMapId.trim();
+      if (!source || !newMapId || state.maps[newMapId] || state.project.maps.some(ref => ref.id === newMapId)) {
+        return state;
+      }
+      const sourceRef = state.project.maps.find(ref => ref.id === action.sourceMapId);
+      const parentId = sourceRef?.parentId ?? null;
+      const duplicate: MapData = {
+        ...deepClone(source),
+        id: newMapId,
+        name: action.name?.trim() || `${source.name} Copy`,
+      };
+      if (duplicate.displayName) {
+        duplicate.displayName = action.name?.trim() || `${source.displayName ?? source.name} Copy`;
+      }
+      const ref: MapReference = {
+        id: newMapId,
+        path: makeMapPath(newMapId),
+        parentId,
+        order: nextMapOrder(state.project, parentId),
+        expanded: true,
+      };
+      return {
+        ...state,
+        dirty: true,
+        project: { ...state.project, maps: [...state.project.maps, ref] },
+        maps: { ...state.maps, [newMapId]: duplicate },
+      };
+    }
+
+    case 'REMOVE_MAP': {
+      if (state.project.maps.length <= 1) return state;
+      if (action.mapId === state.project.startMapId) return state;
+      if (!state.maps[action.mapId]) return state;
+      const maps = { ...state.maps };
+      delete maps[action.mapId];
+      return {
+        ...state,
+        dirty: true,
+        maps,
+        project: {
+          ...state.project,
+          maps: state.project.maps
+            .filter(ref => ref.id !== action.mapId)
+            .map(ref => ({
+              ...ref,
+              parentId: (ref.parentId ?? null) === action.mapId ? null : ref.parentId ?? null,
+            })),
+        },
+      };
+    }
+
+    case 'MOVE_MAP': {
+      if (!state.project.maps.some(ref => ref.id === action.mapId)) return state;
+      const parentId = action.parentId ?? null;
+      if (parentId === action.mapId || (parentId && !state.maps[parentId])) return state;
+      if (wouldCreateMapParentCycle(state.project, action.mapId, parentId)) return state;
+      return {
+        ...state,
+        dirty: true,
+        project: {
+          ...state.project,
+          maps: state.project.maps.map(ref =>
+            ref.id === action.mapId
+              ? { ...ref, parentId, order: Math.max(0, Math.floor(action.order)) }
+              : ref,
+          ),
+        },
+      };
+    }
+
+    case 'SWAP_MAP_ORDER': {
+      const first = state.project.maps.find(ref => ref.id === action.firstMapId);
+      const second = state.project.maps.find(ref => ref.id === action.secondMapId);
+      if (!first || !second) return state;
+      if ((first.parentId ?? null) !== (second.parentId ?? null)) return state;
+      return {
+        ...state,
+        dirty: true,
+        project: {
+          ...state.project,
+          maps: state.project.maps.map(ref => {
+            if (ref.id === first.id) return { ...ref, order: second.order ?? 0 };
+            if (ref.id === second.id) return { ...ref, order: first.order ?? 0 };
+            return ref;
+          }),
+        },
+      };
+    }
 
     case 'ADD_EVENT':
       return withMap(state, action.mapId, map => {

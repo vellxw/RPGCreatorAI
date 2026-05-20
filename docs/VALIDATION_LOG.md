@@ -727,3 +727,59 @@ Error: Port 1420 is already in use
   — PASS; configure/build/CTest passed and runtime smoke reported
   `SMOKE PASSED`.
 
+### Phase 10 Slice 1 — professional editor shell and map tree
+
+- `2026-05-19 21:03 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — initially
+  FAILED as expected under TDD because map tree reducer actions did not
+  exist yet. Fix applied: implemented map property, create, duplicate,
+  remove, reference update, move, and reorder reducer actions.
+- `2026-05-19 21:05 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (26/26 tests).
+- `2026-05-19 21:05 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` —
+  initially FAILED as expected under TDD because project map-tree validation
+  did not exist yet. Fix applied: added duplicate id, missing map data,
+  missing parent, orphan map, and cycle validation.
+- `2026-05-19 21:06 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` — PASS
+  (20/20 tests).
+- `2026-05-19 21:11 -03:00` — `npm test` — PASS (18 files,
+  115 tests).
+- `2026-05-19 21:11 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-19 21:12 -03:00` — `npm run desktop:verify-content` —
+  PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-05-19 21:12 -03:00` —
+  `npx --yes playwright screenshot --timeout=30000 http://127.0.0.1:1420 output\phase10-slice1\editor-map-tree.png`
+  — PASS; screenshot captured for the new map tree editor shell and copied
+  to `docs/screenshots/phase10-slice1/editor-map-tree.png`.
+- `2026-05-19 21:17 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (49/49 tests) after QA fixes for atomic reorder, descendant-cycle
+  prevention, and map path validation.
+- `2026-05-19 21:17 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests) after adding stable root `parentId: null` serialization
+  and map-reference metadata round-trip coverage.
+- `2026-05-19 21:18 -03:00` — `git diff --check` — PASS.
+- `2026-05-19 21:18 -03:00` — `npm test` — PASS (18 files,
+  118 tests).
+- `2026-05-19 21:18 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-19 21:18 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-19 21:18 -03:00` — `npm run desktop:verify-content` —
+  PASS.
+- `2026-05-19 21:19 -03:00` — `npm run build` — initially FAILED because
+  `ExternalLink` was still used by the AI Tools toolbar after placeholder
+  button cleanup. Fix applied: restored the icon import.
+- `2026-05-19 21:19 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+

@@ -2,24 +2,43 @@
 
 ## Current Goal
 
-Phase 9 Hotfix — RPG Maker scale and no-lag movement — DONE.
+Phase 10 — Professional RPG Maker MZ-style editor adaptation — ACTIVE.
 
 ## Active Phase
 
-Phase 9 is governed by `docs/GAME_VISUAL_DESIGN.md` for runtime visual
-truth and `docs/ASSET_PIPELINE.md` for generated character animation
-assets. Logical movement, collision, events, and saves remain tile-based;
-rendering and editor preview interpolate visually between tiles.
-The hotfix keeps that architecture and corrects presentation defaults:
-characters render bottom-center at RPG field scale and the bundled player
-uses `playerMovementSpeed: "double"` for immediate held movement.
+Phase 10 adapts the creator workflow toward a professional RPG
+Maker MZ-style editor while keeping RPGCreatorAI local, deterministic,
+data-driven, and legally independent. The active priority is editor
+ergonomics and data shape: map tree, map properties, tilesets/layers,
+event pages, database editors, runtime validation, playtest, and debug
+tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- None.
+- Slice 2 — Map Authoring V2: data-driven tilesets, layer visibility/lock,
+  region painting, passability overlays, and layer validation.
+- Slice 3 — Event Editor V2: event pages, page conditions, self switches,
+  autorun/parallel scheduler, and command stack editing.
+- Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
+  types/terms/animations editors and common-event command editing.
+- Slice 5 — Runtime MZ foundation: runtime project validator, interactive
+  choices, movement routes, event priority/Y-sort, foreground occlusion, and
+  local audio v1.
+- Slice 6 — Playtest and programmer tools: current map/event playtest,
+  integrated logs, event trace, runtime state inspector, and deterministic
+  plugin-command v1.
 
 ## Closed subgoals
 
+- Phase 10 Slice 1 — editor shell map tree and professional map properties:
+  map references now support `parentId`, `order`, and `expanded`; maps support
+  display name, tileset, scroll, encounter, battleback, parallax, and layer
+  role metadata; the editor has a visible map tree with create, duplicate,
+  delete, reorder, expand/collapse, child map creation, and rename via
+  double-click; placeholder controls for unreal AI/debug/event-page flows were
+  removed until implemented.
+- Phase 9 hotfix validation baseline — recorded validation for commit
+  `13f6545` on the Phase 10 branch before starting Phase 10 work.
 - Phase 9 hotfix — character sheets now render at `display.heightTiles`
   instead of padded tile interiors; runtime/editor both use bottom-center
   character anchoring; `playerMovementSpeed` and

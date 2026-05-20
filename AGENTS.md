@@ -1,6 +1,6 @@
 # AGENTS.md — Permanent Operational Rules for RPGCreatorAI
 
-## Current Phase: Phase 8 — Game Visual Foundation & Creator Workflow Hardening
+## Current Phase: Phase 10 — Professional RPG Maker MZ-style Editor Adaptation
 
 This file is the source of truth for all autonomous agents working on
 RPGCreatorAI. It distills the permanent operational rules from the phase

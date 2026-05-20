@@ -496,10 +496,6 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
           )}
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer">
-          <span className="font-mono text-[10px]">{'{}'}</span>
-          View Full State (JSON)
-        </button>
       </div>
     </div>
   );

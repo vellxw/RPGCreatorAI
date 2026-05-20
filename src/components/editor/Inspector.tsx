@@ -3,7 +3,14 @@ import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
 import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react';
-import type { EventCommand, GameEvent, MapData, ShowTextCommand, TriggerType } from '../../types/project';
+import type {
+  EventCommand,
+  GameEvent,
+  MapData,
+  MapScrollType,
+  ShowTextCommand,
+  TriggerType,
+} from '../../types/project';
 import { eventAssets } from '../../assets/generated/assetCatalog';
 import { findDuplicatePlacement } from '../../utils/eventEditing';
 import { normalizeVisualProfile } from '../../visual/visualProfile';
@@ -232,10 +239,7 @@ export function Inspector() {
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-gray-200 flex items-center gap-2">
-        <button className="flex-1 px-3 py-1.5 text-[12px] font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 cursor-pointer">
-          Edit Event Page
-        </button>
+      <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end gap-2">
         <button
           onClick={duplicateEvent}
           title="Duplicate event"
@@ -275,6 +279,9 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
 
   const profile = normalizeVisualProfile(projectState.project.visualProfile);
   const visibleSpan = getVisibleTileSpan(profile.baseResolution, map.tileSize || profile.tileSize);
+  const updateMap = (changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>) => {
+    dispatch({ type: 'UPDATE_MAP_PROPERTIES', mapId: map.id, changes });
+  };
   const applyResize = () => {
     dispatch({
       type: 'RESIZE_MAP',
@@ -322,6 +329,42 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
         <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">General</div>
+          <div className="space-y-3">
+            <Input
+              label="Name"
+              value={map.name}
+              onChange={e => updateMap({ name: e.target.value })}
+            />
+            <Input
+              label="Display Name"
+              value={map.displayName ?? ''}
+              onChange={e => updateMap({ displayName: e.target.value })}
+            />
+            <Select
+              label="Tileset"
+              value={map.tilesetId ?? 'sample-town'}
+              options={[
+                { value: 'sample-town', label: 'Sample Town' },
+                { value: 'interior', label: 'Interior' },
+              ]}
+              onChange={v => updateMap({ tilesetId: v })}
+            />
+            <Select
+              label="Scroll"
+              value={map.scrollType ?? 'none'}
+              options={[
+                { value: 'none', label: 'No loop' },
+                { value: 'vertical', label: 'Vertical loop' },
+                { value: 'horizontal', label: 'Horizontal loop' },
+                { value: 'both', label: 'Both axes' },
+              ]}
+              onChange={v => updateMap({ scrollType: v as MapScrollType })}
+            />
+          </div>
+        </div>
+
+        <div>
           <div className="text-[12px] font-semibold text-gray-700 mb-3">Map Size</div>
           <div className="grid grid-cols-2 gap-2">
             <Input label="Width" type="number" value={width} onChange={e => setWidth(Number(e.target.value))} />
@@ -365,11 +408,36 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
           </p>
         </div>
 
-        <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-          <div className="text-[12px] font-semibold text-slate-700">No event selected</div>
-          <p className="text-[12px] text-slate-500 mt-1">
-            Select an object to edit event details, or use these controls to shape the scene itself.
-          </p>
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">Encounters</div>
+          <div className="space-y-3">
+            <Input
+              label="Encounter Steps"
+              type="number"
+              value={map.encounterSteps ?? 30}
+              onChange={e => updateMap({ encounterSteps: Number(e.target.value) })}
+            />
+            <Input
+              label="Battleback"
+              value={map.battleback ?? ''}
+              onChange={e => updateMap({ battleback: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">Start</div>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: 'UPDATE_PROJECT_META', changes: { startMapId: map.id } })}
+            className={`w-full px-3 py-1.5 text-[12px] rounded-md border ${
+              projectState.project.startMapId === map.id
+                ? 'border-blue-200 bg-blue-50 text-blue-700'
+                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {projectState.project.startMapId === map.id ? 'Start map' : 'Set as start map'}
+          </button>
         </div>
       </div>
     </div>

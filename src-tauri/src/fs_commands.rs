@@ -4,7 +4,7 @@
 // any read/write. Writes are atomic (tmp file + rename) and create timestamped
 // backups in <projectRoot>/.backups/ pruned to MAX_BACKUPS_PER_FILE per file.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -37,6 +37,12 @@ pub struct StartPosition {
 pub struct MapReference {
     pub id: String,
     pub path: String,
+    #[serde(default)]
+    pub parent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expanded: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -176,7 +182,18 @@ pub fn fs_write_project(
     .map_err(|e| e.to_string())?;
 
     // 2. each map
+    let mut map_paths = HashSet::new();
     for map_ref in &project_state.project.maps {
+        let path_key = map_ref.path.trim().replace('\\', "/").to_lowercase();
+        if path_key.is_empty() {
+            return Err(format!("map '{}' has an empty path", map_ref.id));
+        }
+        if !map_paths.insert(path_key) {
+            return Err(format!(
+                "duplicate map path '{}' would overwrite map data",
+                map_ref.path
+            ));
+        }
         let map_value = project_state
             .maps
             .get(&map_ref.id)
@@ -524,7 +541,7 @@ mod tests {
             "title": "T",
             "startMapId": "town",
             "startPosition": { "x": 0, "y": 0, "direction": "down" },
-            "maps": [{ "id": "town", "path": "data/maps/town.json" }],
+            "maps": [{ "id": "town", "path": "data/maps/town.json", "parentId": null, "order": 0, "expanded": true }],
             "database": { "items": "data/database/items.json" }
         });
         fs::write(
@@ -558,6 +575,49 @@ mod tests {
         let result = read_project_at(&root).unwrap();
         assert_eq!(result.project.title, "T");
         assert!(result.maps.contains_key("town"));
+        assert_eq!(result.project.maps[0].order, Some(0));
+        assert_eq!(result.project.maps[0].expanded, Some(true));
+    }
+
+    #[test]
+    fn project_data_serializes_root_parent_id_as_null() {
+        let project = ProjectData {
+            schema_version: 1,
+            title: "T".into(),
+            start_map_id: "town".into(),
+            start_position: StartPosition {
+                x: 0,
+                y: 0,
+                direction: "down".into(),
+            },
+            maps: vec![MapReference {
+                id: "town".into(),
+                path: "data/maps/town.json".into(),
+                parent_id: None,
+                order: Some(0),
+                expanded: Some(true),
+            }],
+            database: DatabaseRefs {
+                items: "data/database/items.json".into(),
+                actors: None,
+                classes: None,
+                skills: None,
+                enemies: None,
+                troops: None,
+                quests: None,
+                shops: None,
+                system: None,
+                switches: None,
+                variables: None,
+                common_events: None,
+                animations: None,
+            },
+        };
+
+        let json = serde_json::to_value(project).unwrap();
+        assert!(json["maps"][0].get("parentId").unwrap().is_null());
+        assert_eq!(json["maps"][0]["order"], 0);
+        assert_eq!(json["maps"][0]["expanded"], true);
     }
 
     #[test]

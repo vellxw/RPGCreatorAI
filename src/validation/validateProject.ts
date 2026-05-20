@@ -109,7 +109,9 @@ export function validateProject(state: FullProjectState): ValidationReport {
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
 
-  errors.push(...validateProjectMeta(state.project, state.maps));
+  const projectMeta = validateProjectMeta(state.project, state.maps);
+  errors.push(...projectMeta.errors);
+  warnings.push(...projectMeta.warnings);
   errors.push(...validateDatabaseInternal(state.databases));
   errors.push(...validateItemDatabaseInternal(state.items));
 
@@ -146,29 +148,120 @@ export function validateProject(state: FullProjectState): ValidationReport {
   return { errors, warnings };
 }
 
-function validateProjectMeta(project: ProjectData, maps: Record<string, MapData>): ValidationMessage[] {
-  const out: ValidationMessage[] = [];
+function validateProjectMeta(project: ProjectData, maps: Record<string, MapData>): ValidationReport {
+  const errors: ValidationMessage[] = [];
+  const warnings: ValidationMessage[] = [];
+
+  const referencedIds = new Set<string>();
+  const referencedPaths = new Set<string>();
+  const parentById = new Map<string, string | null>();
+  for (const ref of project.maps) {
+    if (referencedIds.has(ref.id)) {
+      errors.push({
+        level: 'error',
+        message: `Duplicate project map reference id "${ref.id}"`,
+        source: 'project/maps',
+      });
+    }
+    referencedIds.add(ref.id);
+    parentById.set(ref.id, ref.parentId ?? null);
+
+    const path = ref.path.trim();
+    if (!path) {
+      errors.push({
+        level: 'error',
+        message: `Project map "${ref.id}" has an empty path`,
+        source: `project/maps/${ref.id}`,
+      });
+    } else {
+      const normalizedPath = path.replace(/\\/g, '/').toLowerCase();
+      if (referencedPaths.has(normalizedPath)) {
+        errors.push({
+          level: 'error',
+          message: `Duplicate project map path "${path}"`,
+          source: `project/maps/${ref.id}`,
+        });
+      }
+      referencedPaths.add(normalizedPath);
+      if (path.includes('..') || /^[a-z]:/i.test(path) || path.startsWith('/') || path.startsWith('\\')) {
+        errors.push({
+          level: 'error',
+          message: `Project map "${ref.id}" has unsafe path "${path}"`,
+          source: `project/maps/${ref.id}`,
+        });
+      }
+    }
+
+    if (!maps[ref.id]) {
+      errors.push({
+        level: 'error',
+        message: `Project maps references missing map data "${ref.id}"`,
+        source: `project/maps/${ref.id}`,
+      });
+    }
+    if ((ref.parentId ?? null) && !project.maps.some(candidate => candidate.id === ref.parentId)) {
+      errors.push({
+        level: 'error',
+        message: `Project map "${ref.id}" references unknown parent map "${ref.parentId}"`,
+        source: `project/maps/${ref.id}`,
+      });
+    }
+    if (ref.order !== undefined && (!Number.isFinite(ref.order) || ref.order < 0)) {
+      errors.push({
+        level: 'error',
+        message: `Project map "${ref.id}" has invalid order "${ref.order}"`,
+        source: `project/maps/${ref.id}`,
+      });
+    }
+  }
+
+  for (const mapId of Object.keys(maps)) {
+    if (!referencedIds.has(mapId)) {
+      warnings.push({
+        level: 'warning',
+        message: `Loaded map "${mapId}" has no project reference`,
+        source: `maps/${mapId}`,
+      });
+    }
+  }
+
+  for (const ref of project.maps) {
+    const seen = new Set<string>();
+    let cursor: string | null = ref.id;
+    while (cursor) {
+      if (seen.has(cursor)) {
+        errors.push({
+          level: 'error',
+          message: `Project map "${ref.id}" has a cyclic map parent chain`,
+          source: `project/maps/${ref.id}`,
+        });
+        break;
+      }
+      seen.add(cursor);
+      cursor = parentById.get(cursor) ?? null;
+    }
+  }
 
   if (!project.startMapId || !maps[project.startMapId]) {
-    out.push({
+    errors.push({
       level: 'error',
       message: `Project startMapId "${project.startMapId}" does not exist`,
       source: 'project',
     });
-    return out;
+    return { errors, warnings };
   }
 
   const startMap = maps[project.startMapId];
   const { x, y } = project.startPosition;
   if (x < 0 || x >= startMap.width || y < 0 || y >= startMap.height) {
-    out.push({
+    errors.push({
       level: 'error',
       message: `Project startPosition (${x}, ${y}) is out of bounds for map "${project.startMapId}"`,
       source: 'project',
     });
   }
 
-  return out;
+  return { errors, warnings };
 }
 
 export function validateUniqueEventIds(map: MapData): ValidationMessage[] {

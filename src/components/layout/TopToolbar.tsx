@@ -3,12 +3,10 @@ import {
   Save,
   Play,
   Download,
-  Sparkles,
   Undo2,
   Redo2,
   CheckCircle2,
   Square,
-  RotateCcw,
   Upload,
   ExternalLink,
   Settings,
@@ -185,7 +183,6 @@ export function TopToolbar() {
         <Button icon={<Upload size={14} />} onClick={handleImportClick}>
           Import
         </Button>
-        <Button icon={<Sparkles size={14} />}>AI Assist</Button>
       </div>
     </>
   );
@@ -206,7 +203,6 @@ export function TopToolbar() {
         <Button icon={<Save size={14} />} onClick={handleSave}>
           Save
         </Button>
-        <Button icon={<Play size={14} />}>Playtest Event</Button>
         <Button
           variant="primary"
           icon={<CheckCircle2 size={14} />}
@@ -214,7 +210,6 @@ export function TopToolbar() {
         >
           Validate
         </Button>
-        <Button icon={<Sparkles size={14} />}>AI Assist</Button>
       </div>
     </>
   );
@@ -244,13 +239,6 @@ export function TopToolbar() {
       <div className="flex items-center gap-2">
         <Button variant="danger" icon={<Square size={12} />}>
           Stop
-        </Button>
-        <Button icon={<RotateCcw size={14} />}>Restart</Button>
-        <Button icon={<Save size={14} />}>Save State</Button>
-        <Button icon={<Upload size={14} />}>Load State</Button>
-        <Button icon={<ExternalLink size={14} />}>Open in Runtime</Button>
-        <Button variant="primary" icon={<Sparkles size={14} />}>
-          AI Debug Assist
         </Button>
       </div>
     </>
