@@ -14,6 +14,7 @@ import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
+const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
 const VALID_MOVEMENT_SPEEDS = new Set([
   'oneEighth',
   'oneQuarter',
@@ -342,6 +343,34 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
         });
       }
       seen.add(entry.id);
+    }
+  }
+
+  const switchIds = new Set(db.switches.map(s => s.id));
+  for (const commonEvent of db.commonEvents) {
+    if (!VALID_COMMON_EVENT_TRIGGERS.includes(commonEvent.trigger)) {
+      out.push({
+        level: 'error',
+        message: `Common event "${commonEvent.id}" has invalid trigger "${commonEvent.trigger}"`,
+        source: `database/commonEvents/${commonEvent.id}`,
+      });
+    }
+    if (
+      (commonEvent.trigger === 'autorun' || commonEvent.trigger === 'parallel') &&
+      !commonEvent.switchId
+    ) {
+      out.push({
+        level: 'error',
+        message: `Common event "${commonEvent.id}" requires a condition switch for ${commonEvent.trigger}`,
+        source: `database/commonEvents/${commonEvent.id}`,
+      });
+    }
+    if (commonEvent.switchId && !switchIds.has(commonEvent.switchId)) {
+      out.push({
+        level: 'error',
+        message: `Common event "${commonEvent.id}" references unknown switch "${commonEvent.switchId}"`,
+        source: `database/commonEvents/${commonEvent.id}`,
+      });
     }
   }
 

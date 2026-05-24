@@ -46,6 +46,11 @@ without copying proprietary assets, formats, or runtime dependencies.
    the owning map/event scope.
 18. Toolbar and inspector buttons that imply unimplemented workflows shall be
    removed or disabled until real behavior exists.
+19. Runtime scheduling shall execute active-page map events with `autorun` and
+    `parallel` triggers through runner contexts separate from the interactive
+    event runner.
+20. Common events with `autorun` or `parallel` triggers shall require a known
+    condition switch and shall run only while that switch is ON.
 
 ## Non-Goals
 
@@ -53,5 +58,5 @@ without copying proprietary assets, formats, or runtime dependencies.
 - No general scripting/plugin execution in this slice.
 - No AI runtime dependency.
 - No autotile rules in Slice 2.
-- No autorun/parallel scheduler runners in Slice 3B; page parsing, active-page
-  dispatch, and self switches land first, scheduler work follows in Slice 3C.
+- No command-stack clipboard/range editing or autonomous movement routes in
+  Slice 3C; those remain Slice 3D / Runtime MZ foundation work.

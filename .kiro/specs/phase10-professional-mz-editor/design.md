@@ -91,9 +91,22 @@ tileset database loading.
   the map/event owner captured when the command list starts, so transfers do
   not retarget the self-switch scope mid-list.
 
-## Slice 3B Deferred Work
+## Slice 3C Scheduler Architecture
 
-The autorun/parallel scheduler is intentionally not implemented in this cut.
-It needs separate runner contexts so parallel events do not overwrite the
-interactive `EventRunner` stack. Slice 3C should add deterministic map and
-common-event scheduling plus command-stack polish.
+- `EventScheduler` owns independent `EventRunner` instances for scheduled
+  map events and common events, so autorun/parallel execution no longer
+  overwrites the interactive runner used by interact/touch events.
+- `Game` rebuilds scheduled candidates from the active map each frame after
+  active-page selection. Map candidates use the active page trigger and command
+  list; common-event candidates require `trigger` to be `autorun` or `parallel`
+  and require their condition switch to be ON.
+- Autorun runners block player input while running. Parallel runners do not
+  block for waits, but global modal effects they open (dialogue, shop, battle
+  summary, map transfer) still take normal gameplay focus.
+- Scheduled runners receive the same common-event, quest, and battle resolvers
+  as the interactive runner. Common-event command parsing now mirrors
+  self-switch and animation commands used by map events.
+- When a scheduled runner requests `transferMap`, the scheduler preserves that
+  runner as detached until its remaining command queue completes, then syncs
+  against the new map on subsequent frames. Other scheduled runners are
+  discarded deterministically at the map transition boundary.

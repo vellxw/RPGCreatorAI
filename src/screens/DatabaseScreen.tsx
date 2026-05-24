@@ -118,7 +118,7 @@ function makePlaceholder(table: DatabaseListKey, id: string): DatabaseRecord {
     case 'variables':
       return { id, name: id, initial: 0 } as unknown as DatabaseRecord;
     case 'commonEvents':
-      return { id, name: id, trigger: 'manual', commands: [] } as unknown as DatabaseRecord;
+      return { id, name: id, trigger: 'manual', switchId: '', commands: [] } as unknown as DatabaseRecord;
   }
 }
 
@@ -620,6 +620,12 @@ function CommonEventDetail({
   update: UpdateFn;
   idField: React.ReactNode;
 }) {
+  const { state } = useProjectStore();
+  const switchOptions = [
+    { value: '', label: entry.trigger === 'manual' ? '(none)' : '(required)' },
+    ...state.databases.switches.map(s => ({ value: s.id, label: s.name || s.id })),
+  ];
+
   return (
     <div className="space-y-3 max-w-md">
       {idField}
@@ -629,15 +635,20 @@ function CommonEventDetail({
         value={entry.trigger}
         options={[
           { value: 'manual', label: 'Manual (callCommonEvent)' },
-          { value: 'autorun', label: 'Autorun (Phase 7)' },
-          { value: 'parallel', label: 'Parallel (Phase 7)' },
+          { value: 'autorun', label: 'Autorun' },
+          { value: 'parallel', label: 'Parallel' },
         ]}
         onChange={v => update({ trigger: v as CommonEventData['trigger'] })}
       />
+      <Select
+        label="Condition Switch"
+        value={entry.switchId ?? ''}
+        options={switchOptions}
+        onChange={v => update({ switchId: v })}
+      />
       <p className="text-[11px] text-gray-500">
-        Command list editing for common events arrives in a later slice. The runtime
-        already accepts the schema; for now use this tab to declare the trigger and
-        name.
+        Autorun and parallel common events run while their condition switch is ON.
+        Command list editing for common events arrives in a later slice.
       </p>
       <p className="text-[11px] text-gray-500">Commands ({entry.commands.length})</p>
     </div>

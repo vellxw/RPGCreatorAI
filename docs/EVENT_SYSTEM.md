@@ -12,8 +12,8 @@ An `EventData` belongs to a map and has one of these triggers:
 |---------|------------|
 | `interact` | The player faces the event's cell and presses the interact key. |
 | `touch` | The player steps onto the event's cell. |
-| `autorun` | Parsed and valid in data; scheduler execution is deferred until Slice 3C. |
-| `parallel` | Parsed and valid in data; scheduler execution is deferred until Slice 3C. |
+| `autorun` | The active page is scheduled automatically and blocks player input while its command list runs. |
+| `parallel` | The active page is scheduled automatically without blocking player movement for waits. |
 
 Legacy solid events block movement onto their cell. Non-solid legacy events
 are walkable (e.g. door / transfer tiles) and override the collision-layer
@@ -35,8 +35,21 @@ switches.
 At runtime, paged events select the last page whose switch, variable, and
 self-switch conditions all match. `Game` uses that active page for interact
 and touch triggers, command execution, render graphic/animation metadata,
-collision priority, and `through`. `autorun` and `parallel` are still parsed
-but require the Slice 3C scheduler before they execute automatically.
+collision priority, `through`, and autorun/parallel scheduling.
+
+## Scheduled Events
+
+`EventScheduler` runs autorun and parallel map events in runner contexts
+separate from the interactive runner. Scheduled map events use the active
+page's trigger and command list. Scheduled common events run only when their
+trigger is `autorun` or `parallel` and their `switchId` condition is ON.
+
+Autorun runners are blocking. Parallel waits are non-blocking, but a parallel
+event that opens dialogue, shop, battle summary, or map transfer still gives
+that modal system normal gameplay focus. If a scheduled runner transfers maps,
+that runner is preserved until its remaining command queue completes; other
+scheduled runners are discarded at the transition boundary and the scheduler
+syncs against the new map on the next frame.
 
 ## Supported Commands
 
@@ -71,4 +84,5 @@ encounters a blocking effect:
   timer for `durationMs`.
 
 While the runner is busy, player movement and interact input are
-blocked.
+blocked for interactive and autorun runners. Parallel runner waits do not block
+movement.

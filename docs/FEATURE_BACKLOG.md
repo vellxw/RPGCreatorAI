@@ -97,7 +97,7 @@ merged and validated.
 ## Phase 8 candidates
 
 - Skill use in battle (currently each combatant attacks).
-- Autorun and parallel common events.
-- Self switches (per-event A/B/C/D).
+- [x] Autorun and parallel common events with switch conditions.
+- [x] Self switches (per-event A/B/C/D).
 - Real audio playback / BGM / SFX asset management.
 - Richer battle presentation if a later polish pass wants it.

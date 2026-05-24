@@ -31,6 +31,7 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
     );
 
     eventRunner = std::make_unique<EventRunner>(state, dialogue);
+    eventScheduler = std::make_unique<EventScheduler>(state, dialogue);
 
     // Load item database (optional; missing/invalid is logged but not fatal).
     if (!project.database.itemsPath.empty()) {
@@ -86,7 +87,7 @@ std::string Game::getMapPath(const std::string& mapId) const {
     return {};
 }
 
-bool Game::loadMap(const std::string& mapId) {
+bool Game::loadMap(const std::string& mapId, bool clearScheduledRunners) {
     std::string path = getMapPath(mapId);
     if (path.empty()) {
         Logger::error("Map id not declared in project: " + mapId);
@@ -101,6 +102,7 @@ bool Game::loadMap(const std::string& mapId) {
 
     currentScene.loadFromData(*mapData);
     eventAnimations.clear();
+    if (clearScheduledRunners && eventScheduler) eventScheduler->clear();
     state.setCurrentMap(mapId);
     Logger::info("Map loaded: " + mapId);
     return true;
@@ -157,6 +159,7 @@ void Game::update(const InputManager& input, float dt) {
     // Escape / Tab open the pause menu only when gameplay is otherwise idle.
     if (!dialogue.isActive() &&
         (!eventRunner || !eventRunner->isRunning()) &&
+        !hasBlockingScheduledRunner() &&
         (input.isJustPressed(KeyButton::Cancel) ||
          input.isJustPressed(KeyButton::Menu))) {
         menuSystem.open();
@@ -166,28 +169,13 @@ void Game::update(const InputManager& input, float dt) {
     // Drive the event runner; it self-pauses while dialogue is active.
     eventRunner->update(dt);
 
-    // Apply any transfer requested by an event command.
-    applyTransferIfPending();
-    applyAnimationIfPending();
+    if (applyRunnerRequests(*eventRunner)) return;
 
-    if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
-        battleSummary.active) {
-        battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
-                                 databases, state);
-        return;
-    }
+    if (battleSummarySystem.isOpen() || shopSystem.isOpen()) return;
 
-    // Open requested shops as a real modal UI.
-    if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
-        const auto* shop = databases.findShop(shopReq.shopId);
-        if (shop) {
-            Logger::info("Shop opened: " + shop->name + " with " +
-                         std::to_string(shop->listings.size()) + " listings");
-            shopSystem.open(shopReq.shopId, databases);
-        } else {
-            Logger::warning("openShop: unknown shop '" + shopReq.shopId + "'");
-        }
-    }
+    updateScheduledEvents(dt);
+
+    if (battleSummarySystem.isOpen() || shopSystem.isOpen()) return;
 
     // If a dialogue is active, only the dismiss/advance keys are handled.
     if (dialogue.isActive()) {
@@ -199,7 +187,7 @@ void Game::update(const InputManager& input, float dt) {
     }
 
     // If the runner is still busy (e.g. a wait), block player input.
-    if (eventRunner->isRunning()) {
+    if (eventRunner->isRunning() || hasBlockingScheduledRunner()) {
         return;
     }
 
@@ -327,25 +315,108 @@ void Game::runEventCommands(const EventData& event) {
         event.id);
 }
 
+std::vector<ScheduledEventCandidate> Game::buildScheduledEventCandidates() const {
+    std::vector<ScheduledEventCandidate> candidates;
+    const std::string mapId = state.getCurrentMapId();
+
+    for (const auto& event : currentScene.getData().events) {
+        const std::string trigger = rpg::activeEventTrigger(event, state, mapId);
+        if (trigger != "autorun" && trigger != "parallel") continue;
+
+        const auto& commands = rpg::activeEventCommands(event, state, mapId);
+        if (commands.empty()) continue;
+
+        ScheduledEventCandidate candidate;
+        candidate.key = "map:" + mapId + ":" + event.id;
+        candidate.trigger = trigger;
+        candidate.ownerMapId = mapId;
+        candidate.ownerEventId = event.id;
+        candidate.commands = commands;
+        candidates.push_back(std::move(candidate));
+    }
+
+    for (const auto& commonEvent : databases.commonEvents()) {
+        if (commonEvent.trigger != "autorun" && commonEvent.trigger != "parallel") continue;
+        if (commonEvent.switchId.empty() || !state.getSwitch(commonEvent.switchId)) continue;
+        if (commonEvent.commands.empty()) continue;
+
+        ScheduledEventCandidate candidate;
+        candidate.key = "common:" + commonEvent.id;
+        candidate.trigger = commonEvent.trigger;
+        candidate.ownerMapId = mapId;
+        candidate.commands = commonEvent.commands;
+        candidates.push_back(std::move(candidate));
+    }
+
+    return candidates;
+}
+
+void Game::updateScheduledEvents(float dt) {
+    if (!eventScheduler) return;
+
+    eventScheduler->sync(buildScheduledEventCandidates());
+    eventScheduler->update(dt);
+
+    for (EventRunner* runner : eventScheduler->runners()) {
+        if (runner && applyRunnerRequests(*runner)) return;
+        if (battleSummarySystem.isOpen() || shopSystem.isOpen()) return;
+    }
+}
+
+bool Game::hasBlockingScheduledRunner() const {
+    return eventScheduler && eventScheduler->hasBlockingRunner();
+}
+
 void Game::applyTransferIfPending() {
     if (!eventRunner) return;
-    auto req = eventRunner->consumeTransferRequest();
-    if (!req.active) return;
+    applyRunnerRequests(*eventRunner);
+}
 
-    if (!loadMap(req.mapId)) {
-        Logger::error("Map transfer failed; staying on current map.");
-        return;
+bool Game::applyRunnerRequests(EventRunner& runner) {
+    auto req = runner.consumeTransferRequest();
+    if (req.active) {
+        const bool scheduledRunner = eventScheduler && eventScheduler->ownsRunner(&runner);
+        if (scheduledRunner) {
+            eventScheduler->preserveOnly(&runner);
+        }
+        if (!loadMap(req.mapId, !scheduledRunner)) {
+            Logger::error("Map transfer failed; staying on current map.");
+            return false;
+        }
+        state.setPlayerPosition(req.targetX, req.targetY, stringToDirection(req.direction));
+        playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
+        updateCamera();
+        return true;
     }
-    state.setPlayerPosition(req.targetX, req.targetY, stringToDirection(req.direction));
-    playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
-    updateCamera();
+
+    auto animReq = runner.consumeAnimationRequest();
+    if (animReq.active) {
+        applyAnimationRequest(animReq);
+    }
+
+    if (auto battleSummary = runner.consumeBattleSummaryRequest();
+        battleSummary.active) {
+        battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
+                                 databases, state);
+    }
+
+    if (auto shopReq = runner.consumeShopRequest(); shopReq.active) {
+        const auto* shop = databases.findShop(shopReq.shopId);
+        if (shop) {
+            Logger::info("Shop opened: " + shop->name + " with " +
+                         std::to_string(shop->listings.size()) + " listings");
+            shopSystem.open(shopReq.shopId, databases);
+        } else {
+            Logger::warning("openShop: unknown shop '" + shopReq.shopId + "'");
+        }
+    }
+
+    return false;
 }
 
 void Game::applyAnimationIfPending() {
     if (!eventRunner) return;
-    auto req = eventRunner->consumeAnimationRequest();
-    if (!req.active) return;
-    applyAnimationRequest(req);
+    applyRunnerRequests(*eventRunner);
 }
 
 void Game::applyAnimationRequest(const AnimationRequest& request) {
@@ -428,19 +499,28 @@ void Game::updateAnimationStates(float dt) {
 
 void Game::hookEventRunnerResolvers() {
     if (!eventRunner) return;
-    eventRunner->setCommonEventResolver(
+    configureEventRunner(*eventRunner);
+    if (eventScheduler) {
+        eventScheduler->setRunnerConfigurator([this](EventRunner& runner) {
+            configureEventRunner(runner);
+        });
+    }
+}
+
+void Game::configureEventRunner(EventRunner& runner) {
+    runner.setCommonEventResolver(
         [this](const std::string& id) -> std::vector<std::shared_ptr<EventCommand>> {
             const auto* ce = databases.findCommonEvent(id);
             return ce ? ce->commands : std::vector<std::shared_ptr<EventCommand>>{};
         });
-    eventRunner->setQuestObjectiveResolver(
+    runner.setQuestObjectiveResolver(
         [this](const std::string& qid) -> std::vector<std::string> {
             const auto* q = databases.findQuest(qid);
             std::vector<std::string> out;
             if (q) for (const auto& obj : q->objectives) out.push_back(obj.id);
             return out;
         });
-    eventRunner->setBattleRunner([this](const std::string& troopId) {
+    runner.setBattleRunner([this](const std::string& troopId) {
         if (!battleSystem) return BattleResult{};
         return battleSystem->run(troopId);
     });
@@ -648,13 +728,17 @@ EntityRenderSprite Game::buildAnimatedSprite(const std::string& animationSet,
 // ---- Public verbs ---------------------------------------------------------
 
 void Game::stepMove(int dx, int dy, Direction dir) {
-    if (dialogue.isActive() || (eventRunner && eventRunner->isRunning())) return;
+    if (dialogue.isActive() ||
+        (eventRunner && eventRunner->isRunning()) ||
+        hasBlockingScheduledRunner()) return;
     tryMove(dx, dy, dir);
     updateCamera();
 }
 
 void Game::stepInteract() {
-    if (dialogue.isActive() || (eventRunner && eventRunner->isRunning())) return;
+    if (dialogue.isActive() ||
+        (eventRunner && eventRunner->isRunning()) ||
+        hasBlockingScheduledRunner()) return;
     interact();
 }
 
@@ -671,22 +755,11 @@ void Game::pumpEvents(float dt) {
     finalizeSmoothStepIfNeeded();
     updateAnimationStates(dt);
     eventRunner->update(dt);
-    applyTransferIfPending();
-    applyAnimationIfPending();
-    if (auto battleSummary = eventRunner->consumeBattleSummaryRequest();
-        battleSummary.active) {
-        battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
-                                 databases, state);
-    }
-    if (auto shopReq = eventRunner->consumeShopRequest(); shopReq.active) {
-        const auto* shop = databases.findShop(shopReq.shopId);
-        if (shop) {
-            Logger::info("Shop opened (pump): " + shop->name);
-            shopSystem.open(shopReq.shopId, databases);
-        }
-    }
+    if (applyRunnerRequests(*eventRunner)) return;
+    updateScheduledEvents(dt);
 }
 
 bool Game::isEventRunnerRunning() const {
-    return eventRunner && eventRunner->isRunning();
+    return (eventRunner && eventRunner->isRunning()) ||
+           (eventScheduler && eventScheduler->hasBlockingRunner());
 }

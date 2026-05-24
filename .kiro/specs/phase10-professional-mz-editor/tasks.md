@@ -56,10 +56,12 @@
   `EventRunner`.
 - [x] Slice 3B: use the active page for interact/touch triggers, command
   lists, render graphics, event collision priority, and `through`.
-- [ ] Slice 3C: deterministic autorun/parallel map and common-event scheduler.
+- [x] Slice 3C: deterministic autorun/parallel map and common-event scheduler.
 
 ## Next Slices
 
+- [ ] Slice 3D: command-stack polish, movement-route basics, and range
+  clipboard / branch editing.
 - [ ] Slice 4: database v2 editors.
 - [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
 - [ ] Slice 6: playtest/debug programmer tools.

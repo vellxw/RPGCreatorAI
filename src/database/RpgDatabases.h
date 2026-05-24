@@ -91,6 +91,7 @@ struct CommonEventRecord {
     std::string id;
     std::string name;
     std::string trigger;
+    std::string switchId;
     std::vector<std::shared_ptr<EventCommand>> commands;
 };
 

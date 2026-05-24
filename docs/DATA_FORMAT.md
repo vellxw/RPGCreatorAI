@@ -111,9 +111,30 @@ normalizes the legacy `trigger` and `commands` into one page. Page 1 mirrors
 back to legacy fields. The C++ runtime selects the last page whose switch,
 variable, and self-switch conditions match, then uses that page's trigger,
 commands, graphic metadata, priority, and `through` option. Automatic
-`autorun`/`parallel` scheduling is still deferred.
+`autorun`/`parallel` scheduling runs through independent scheduler runners.
 
 See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
+
+## database/commonEvents.json
+
+```json
+{
+  "schemaVersion": 1,
+  "commonEvents": [
+    {
+      "id": "night_warning",
+      "name": "Night Warning",
+      "trigger": "parallel",
+      "switchId": "night_mode",
+      "commands": [{ "type": "showText", "text": "It is getting late." }]
+    }
+  ]
+}
+```
+
+`trigger` accepts `manual`, `autorun`, or `parallel`. Manual common events run
+through `callCommonEvent`. Autorun and parallel common events require
+`switchId` and run only while that switch is ON.
 
 ## database/items.json
 

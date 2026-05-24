@@ -533,6 +533,7 @@ export interface CommonEventData {
   id: string;
   name: string;
   trigger: 'manual' | 'autorun' | 'parallel';
+  switchId?: string;
   commands: EventCommand[];
 }
 

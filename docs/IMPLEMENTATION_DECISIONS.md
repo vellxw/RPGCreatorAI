@@ -52,14 +52,16 @@
   top-level `trigger` / `priority` fields.
 - Runtime active-page selection scans pages from last to first. Paged events
   with no active page expose no trigger or commands, are not rendered, and do
-  not override collision tiles. Autorun/parallel scheduling remains deferred
-  until Slice 3C.
+  not override collision tiles. Slice 3C schedules active-page autorun and
+  parallel events through independent runner contexts.
 
 ## Common events
 
-- Stored as a list of `{ id, name, trigger: "manual" | "autorun" | "parallel", commands: [...] }`.
-- Phase 6 implements `manual` only; autorun/parallel are validated and stored
-  but only execute in a future slice.
+- Stored as a list of `{ id, name, trigger: "manual" | "autorun" | "parallel", switchId?, commands: [...] }`.
+- `manual` common events execute through `callCommonEvent`.
+- Slice 3C executes `autorun` and `parallel` common events while their
+  condition `switchId` is ON. Editor validation rejects autorun/parallel common
+  events without a known condition switch.
 
 ## Quests
 

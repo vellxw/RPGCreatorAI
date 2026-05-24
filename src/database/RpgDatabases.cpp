@@ -172,6 +172,7 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
             r.id = ce.value("id", "");
             r.name = ce.value("name", "");
             r.trigger = ce.value("trigger", "manual");
+            r.switchId = ce.value("switchId", "");
             for (const auto& cmdJson : ce.value("commands", json::array())) {
                 r.commands.push_back(parseCommand(cmdJson));
             }
@@ -296,6 +297,11 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         cmd->boolValue = j.value("equals", false);
         for (const auto& c : j.value("then", json::array())) cmd->thenCommands.push_back(parseCommand(c));
         for (const auto& c : j.value("else", json::array())) cmd->elseCommands.push_back(parseCommand(c));
+    } else if (type == "ifSelfSwitch") {
+        cmd->switchId = j.value("switchId", "");
+        cmd->boolValue = j.value("equals", false);
+        for (const auto& c : j.value("then", json::array())) cmd->thenCommands.push_back(parseCommand(c));
+        for (const auto& c : j.value("else", json::array())) cmd->elseCommands.push_back(parseCommand(c));
     } else if (type == "ifVariable") {
         cmd->variableId = j.value("variableId", "");
         cmd->compareOp = j.value("op", "eq");
@@ -303,6 +309,9 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         for (const auto& c : j.value("then", json::array())) cmd->thenCommands.push_back(parseCommand(c));
         for (const auto& c : j.value("else", json::array())) cmd->elseCommands.push_back(parseCommand(c));
     } else if (type == "controlSwitch") {
+        cmd->switchId = j.value("switchId", "");
+        cmd->boolValue = j.value("value", false);
+    } else if (type == "controlSelfSwitch") {
         cmd->switchId = j.value("switchId", "");
         cmd->boolValue = j.value("value", false);
     } else if (type == "controlVariable") {
@@ -344,6 +353,14 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
     } else if (type == "changeActorHp") {
         cmd->actorId = j.value("actorId", "");
         cmd->delta = j.value("delta", 0);
+    } else if (type == "playAnimation") {
+        cmd->animationTarget = j.value("target", std::string{"player"});
+        cmd->animationEventId = j.value("eventId", std::string{});
+        cmd->animationAction = j.value("action", std::string{"idle"});
+        cmd->animationDirection = j.value("direction", std::string{"current"});
+        cmd->animationDurationMs = j.value("durationMs", 0);
+        cmd->animationBlocking = j.value("blocking", false);
+        cmd->animationLoop = j.value("loop", false);
     }
     return cmd;
 }

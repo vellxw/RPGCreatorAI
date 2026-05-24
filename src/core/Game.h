@@ -7,6 +7,7 @@
 #include "world/MapScene.h"
 #include "events/GameState.h"
 #include "events/EventRunner.h"
+#include "events/EventScheduler.h"
 #include "dialogue/DialogueSystem.h"
 #include "database/ItemDatabase.h"
 #include "database/AnimationDatabase.h"
@@ -46,7 +47,7 @@ public:
     const rpg::RpgDatabases& getDatabases() const { return databases; }
 
 private:
-    bool loadMap(const std::string& mapId);
+    bool loadMap(const std::string& mapId, bool clearScheduledRunners = true);
     void handlePlayerInput(const InputManager& input);
     bool tryMove(int dx, int dy, Direction dir);
     bool tryStartSmoothMove(int dx, int dy, Direction dir);
@@ -54,8 +55,12 @@ private:
     void finalizeSmoothStepIfNeeded();
     void interact();
     void runEventCommands(const EventData& event);
+    std::vector<ScheduledEventCandidate> buildScheduledEventCandidates() const;
+    void updateScheduledEvents(float dt);
+    bool hasBlockingScheduledRunner() const;
     void applyTransferIfPending();
     void applyAnimationIfPending();
+    bool applyRunnerRequests(EventRunner& runner);
     void applyAnimationRequest(const AnimationRequest& request);
     void updateAnimationStates(float dt);
     RenderEntitiesSnapshot buildRenderSnapshot() const;
@@ -74,6 +79,7 @@ private:
     bool saveGame(int slotIndex = 1, bool showDialogueFeedback = true);
     bool loadGameFromDisk(int slotIndex = 1, bool showDialogueFeedback = true);
     void hookEventRunnerResolvers();
+    void configureEventRunner(EventRunner& runner);
 
     std::string getMapPath(const std::string& mapId) const;
 
@@ -82,6 +88,7 @@ private:
     GameState state;
     DialogueSystem dialogue;
     std::unique_ptr<EventRunner> eventRunner;
+    std::unique_ptr<EventScheduler> eventScheduler;
     Camera2D camera;
     ItemDatabase itemDatabase;
     rpg::RpgDatabases databases;

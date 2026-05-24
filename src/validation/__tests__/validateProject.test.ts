@@ -348,6 +348,56 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('invalid trigger'))).toBe(true);
   });
 
+  it('flags invalid common event triggers', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.commonEvents = [
+      {
+        id: 'bad_common_event',
+        name: 'Bad Common Event',
+        // @ts-expect-error -- intentionally invalid for test
+        trigger: 'touch',
+        commands: [],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Common event "bad_common_event" has invalid trigger "touch"'))).toBe(true);
+  });
+
+  it('requires autorun and parallel common events to have known condition switches', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.switches = [{ id: 'story_ready', name: 'Story Ready', initial: false }];
+    project.databases.commonEvents = [
+      {
+        id: 'missing_condition',
+        name: 'Missing Condition',
+        trigger: 'autorun',
+        commands: [],
+      },
+      {
+        id: 'unknown_condition',
+        name: 'Unknown Condition',
+        trigger: 'parallel',
+        switchId: 'missing_switch',
+        commands: [],
+      },
+      {
+        id: 'valid_condition',
+        name: 'Valid Condition',
+        trigger: 'parallel',
+        switchId: 'story_ready',
+        commands: [],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Common event "missing_condition" requires a condition switch'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Common event "unknown_condition" references unknown switch "missing_switch"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Common event "valid_condition"'))).toBe(false);
+  });
+
   it('validates event page triggers and self switch letters', () => {
     const event: GameEvent = {
       id: 'paged',

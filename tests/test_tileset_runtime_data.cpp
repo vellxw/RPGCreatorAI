@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include "database/RpgDatabases.h"
+#include "types/EventTypes.h"
 #include "world/MapLoader.h"
 #include "world/ProjectLoader.h"
 #include <cstdio>
@@ -106,6 +107,56 @@ TEST_CASE("RpgDatabases keeps legacy projects without tilesets empty") {
     CHECK(databases.loadAll(project));
     CHECK(databases.tilesets().empty());
     CHECK(databases.findTileset("sample-town") == nullptr);
+}
+
+TEST_CASE("RpgDatabases parses common event self switches and animations") {
+    const std::string commonEventsPath = writeTempJson("common_events_database.json", R"({
+        "schemaVersion": 1,
+        "commonEvents": [
+            {
+                "id": "common_reward",
+                "name": "Common Reward",
+                "trigger": "parallel",
+                "switchId": "story_ready",
+                "commands": [
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true },
+                    {
+                        "type": "playAnimation",
+                        "target": "player",
+                        "action": "attack",
+                        "direction": "down",
+                        "durationMs": 250,
+                        "blocking": true,
+                        "loop": false
+                    }
+                ]
+            }
+        ]
+    })");
+
+    ProjectData project;
+    project.database.commonEventsPath = commonEventsPath;
+
+    rpg::RpgDatabases databases;
+    CHECK(databases.loadAll(project));
+
+    const auto* commonEvent = databases.findCommonEvent("common_reward");
+    REQUIRE(commonEvent != nullptr);
+    CHECK(commonEvent->trigger == "parallel");
+    CHECK(commonEvent->switchId == "story_ready");
+    REQUIRE(commonEvent->commands.size() == 2);
+    CHECK(commonEvent->commands[0]->type == "controlSelfSwitch");
+    CHECK(commonEvent->commands[0]->switchId == "A");
+    CHECK(commonEvent->commands[0]->boolValue);
+    CHECK(commonEvent->commands[1]->type == "playAnimation");
+    CHECK(commonEvent->commands[1]->animationTarget == "player");
+    CHECK(commonEvent->commands[1]->animationAction == "attack");
+    CHECK(commonEvent->commands[1]->animationDirection == "down");
+    CHECK(commonEvent->commands[1]->animationDurationMs == 250);
+    CHECK(commonEvent->commands[1]->animationBlocking);
+    CHECK_FALSE(commonEvent->commands[1]->animationLoop);
+
+    removeTempFile(commonEventsPath);
 }
 
 TEST_CASE("MapLoader parses map tileset identity and editor layer metadata") {

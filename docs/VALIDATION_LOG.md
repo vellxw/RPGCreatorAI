@@ -968,3 +968,35 @@ Error: Port 1420 is already in use
   `SMOKE PASSED` with `2 tilesets` loaded.
 - `2026-05-20 02:42 -03:00` — `npm run desktop:verify-content` — PASS.
 
+### Phase 10 Slice 3C — deterministic scheduled events
+
+- `2026-05-24 15:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed after adding `EventScheduler` and
+  runtime scheduled-event integration.
+- `2026-05-24 15:55 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` — PASS
+  (1 file, 26 tests) after adding common-event trigger validation.
+- `2026-05-24 19:49 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` — PASS
+  (1 file, 27 tests) after adding required condition switches for
+  autorun/parallel common events.
+- `2026-05-24 19:49 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed after preserving scheduled runners
+  through map-transfer tails and parsing common-event animations.
+- `2026-05-24 19:50 -03:00` — `git diff --check` — PASS.
+- `2026-05-24 19:51 -03:00` — `npm test` — PASS (18 files,
+  135 tests).
+- `2026-05-24 19:51 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-24 19:51 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-24 19:52 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED` after loading `2 tilesets` and `1 common events`.
+- `2026-05-24 19:52 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+

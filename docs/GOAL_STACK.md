@@ -15,9 +15,8 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3C — Event scheduler and command-stack polish: autorun/parallel
-  common-event scheduling, movement-route basics, and range clipboard /
-  branch editing for command lists.
+- Slice 3D — Event command-stack polish: movement-route basics and range
+  clipboard / branch editing for command lists.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
   types/terms/animations editors and common-event command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
@@ -29,14 +28,20 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3C — deterministic scheduled events: `EventScheduler` now
+  runs active-page map autorun/parallel events and switch-conditioned
+  autorun/parallel common events in separate runner contexts; autorun blocks
+  input while parallel waits do not; scheduled runners share runtime
+  resolvers; common-event parsing covers self switches and animations; and
+  scheduled map transfers preserve the transferring runner until its command
+  tail completes.
 - Phase 10 Slice 3B — runtime event page activation: C++ runtime now selects
   the active page from last to first by switch, variable, and self-switch
   conditions; `Game` uses active pages for interact/touch triggers, command
   execution, render graphic/animation metadata, collision priority, and
   `through`; inactive paged events do not render or override collision; and
   `EventRunner` executes `controlSelfSwitch` / `ifSelfSwitch` against the
-  owning map/event scope captured at command-list start. Autorun/parallel
-  scheduling remains Slice 3C.
+  owning map/event scope captured at command-list start.
 - Phase 10 Slice 3A — event page and self-switch foundation: `GameEvent`
   now supports normalized `pages`; the editor can add, update, reorder, and
   edit page-scoped commands; page conditions include self switches A-D; event
