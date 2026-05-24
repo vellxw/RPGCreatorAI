@@ -1000,3 +1000,30 @@ Error: Port 1420 is already in use
 - `2026-05-24 19:52 -03:00` — `npm run desktop:verify-content` — PASS;
   `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
 
+### Phase 10 Slice 3D — command stack v1 polish
+
+- `2026-05-24 19:59 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 39 tests) after adding reducer operations for insert, move,
+  duplicate, and branch-target command insertion.
+- `2026-05-24 19:59 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`) after wiring the event-editor command toolbar.
+- `2026-05-24 20:02 -03:00` — `git diff --check` — PASS.
+- `2026-05-24 20:02 -03:00` — `npm test` — PASS (18 files,
+  138 tests).
+- `2026-05-24 20:02 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-24 20:02 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-24 20:03 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-24 20:03 -03:00` — Chrome DevTools UI smoke at
+  `http://127.0.0.1:1420/` — PASS; Events screen rendered command toolbar
+  actions, branch target rows, copy enabled paste, paste duplicated the
+  selected command branch, dirty state updated, and console had no errors.
+- `2026-05-24 20:03 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+

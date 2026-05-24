@@ -110,3 +110,22 @@ tileset database loading.
   runner as detached until its remaining command queue completes, then syncs
   against the new map on subsequent frames. Other scheduled runners are
   discarded deterministically at the map transition boundary.
+
+## Slice 3D Command Stack V1
+
+- `projectReducer` now has command-list operations for insert, move, and
+  duplicate, with legacy event actions mirrored back through page 1 and
+  page-scoped actions applied through `replacePage()`.
+- Command insertion accepts command paths and branch-list paths. A path like
+  `[]` appends to the root list; `[0]` inserts around command 0; `[0, 1]`
+  appends into command 0 branch 1. The existing path shape remains compatible
+  with conditionals, choices, and battle branches.
+- `EventEditorScreen` renders branch target rows for Then, Else, choice
+  labels, Victory, and Defeat, including empty branches. Selecting a branch
+  target and adding or pasting a command inserts into that branch instead of
+  forcing authors to create data indirectly.
+- The command-stack toolbar exposes move up/down, duplicate, cut, copy, paste,
+  and delete for the selected command. Clipboard state is intentionally local
+  to the command stack; persisted project state remains data-only.
+- Range selection/delete and runtime movement-route commands remain open
+  Slice 3D work.

@@ -1,9 +1,13 @@
 import { useState, type ReactNode } from 'react';
-import { useProjectStore, getEventsByMap, flattenCommands } from '../stores/projectStore';
+import { useProjectStore, getEventsByMap } from '../stores/projectStore';
 import { useEditor } from '../stores/editorStore';
 import {
   ChevronDown,
   ChevronRight,
+  ArrowDown,
+  ArrowUp,
+  ClipboardPaste,
+  Copy,
   Plus,
   Search,
   MoreVertical,
@@ -28,6 +32,8 @@ import {
   Swords,
   HeartPulse,
   Clapperboard,
+  Scissors,
+  Trash2,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { Input, Select } from '../components/ui/Input';
@@ -323,12 +329,119 @@ function commandAtPath(commands: EventCommand[], path: number[]): EventCommand |
   return null;
 }
 
+type CommandStackRow =
+  | { type: 'command'; command: EventCommand; depth: number; path: number[] }
+  | { type: 'branch'; label: string; depth: number; listPath: number[]; empty: boolean };
+
+function commandBranchRows(command: EventCommand, path: number[], depth: number): CommandStackRow[] {
+  const rows: CommandStackRow[] = [];
+  const addBranch = (label: string, listPath: number[], commands: EventCommand[]) => {
+    rows.push({ type: 'branch', label, depth, listPath, empty: commands.length === 0 });
+    rows.push(...flattenCommandRows(commands, depth + 1, listPath));
+  };
+
+  if (command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable') {
+    addBranch('Then', [...path, 0], command.then);
+    addBranch('Else', [...path, 1], command.else);
+  } else if (command.type === 'showChoices') {
+    command.choices.forEach((choice, index) => {
+      addBranch(`Choice: ${choice.label || `Option ${index + 1}`}`, [...path, index], choice.commands);
+    });
+  } else if (command.type === 'startBattle') {
+    addBranch('Victory', [...path, 0], command.victoryBranch ?? []);
+    addBranch('Defeat', [...path, 1], command.defeatBranch ?? []);
+  }
+
+  return rows;
+}
+
+function flattenCommandRows(commands: EventCommand[], depth = 0, prefix: number[] = []): CommandStackRow[] {
+  const rows: CommandStackRow[] = [];
+  commands.forEach((command, index) => {
+    const path = [...prefix, index];
+    rows.push({ type: 'command', command, depth, path });
+    rows.push(...commandBranchRows(command, path, depth + 1));
+  });
+  return rows;
+}
+
+function cloneCommand(command: EventCommand): EventCommand {
+  return JSON.parse(JSON.stringify(command)) as EventCommand;
+}
+
+function movePath(path: number[], direction: 'up' | 'down'): number[] {
+  if (path.length === 0) return path;
+  const next = path.slice();
+  const last = next.length - 1;
+  next[last] = direction === 'up'
+    ? Math.max(0, next[last] - 1)
+    : next[last] + 1;
+  return next;
+}
+
+function StackIconButton({
+  title,
+  disabled = false,
+  onClick,
+  children,
+}: {
+  title: string;
+  disabled?: boolean;
+  onClick(): void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:text-indigo-600 hover:border-indigo-300 disabled:opacity-35 disabled:pointer-events-none"
+    >
+      {children}
+    </button>
+  );
+}
+
+function BranchTargetRow({
+  label,
+  depth,
+  selected,
+  empty,
+  onSelect,
+}: {
+  label: string;
+  depth: number;
+  selected: boolean;
+  empty: boolean;
+  onSelect(): void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      style={{ marginLeft: depth * 16 }}
+      className={`w-full flex items-center gap-2 px-3 py-1.5 border border-dashed rounded-md text-left cursor-pointer ${
+        selected
+          ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+          : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
+      }`}
+    >
+      <GitBranch size={13} />
+      <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
+      {empty && <span className="text-[11px] text-gray-400">Empty</span>}
+    </button>
+  );
+}
+
 function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string; page: EventPage | null }) {
   const { state: project, dispatch: projectDispatch } = useProjectStore();
   const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
+  const [selectedBranchPath, setSelectedBranchPath] = useState<number[] | null>(null);
+  const [clipboardCommand, setClipboardCommand] = useState<EventCommand | null>(null);
 
   const commands = page?.commands ?? event.commands;
-  const flat = flattenCommands(commands);
+  const rows = flattenCommandRows(commands);
   const mapIds = Object.keys(project.maps);
   const itemIds = project.items.items.map(i => i.id);
 
@@ -338,6 +451,17 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
   };
 
   const selectedCommand = selectedPath ? commandAtPath(commands, selectedPath) : null;
+  const canOperateOnSelected = selectedPath !== null && selectedCommand !== null;
+
+  const selectCommand = (path: number[]) => {
+    setSelectedPath(path);
+    setSelectedBranchPath(null);
+  };
+
+  const selectBranch = (path: number[]) => {
+    setSelectedBranchPath(path);
+    setSelectedPath(null);
+  };
 
   const updateSelected = (next: EventCommand) => {
     if (!selectedPath) return;
@@ -358,13 +482,53 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
     setSelectedPath(null);
   };
 
-  const addCommand = (type: EventCommand['type'] = 'showText') => {
-    const placeholder = makePlaceholderCommand(type);
+  const insertCommand = (command: EventCommand, placement: 'before' | 'after' | 'append' = 'after') => {
+    const path = selectedPath ?? selectedBranchPath ?? [];
+    const effectivePlacement = selectedPath ? placement : 'append';
     if (page) {
-      projectDispatch({ type: 'ADD_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, command: placeholder });
+      projectDispatch({ type: 'INSERT_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path, placement: effectivePlacement, command });
     } else {
-      projectDispatch({ type: 'ADD_COMMAND', mapId, eventId: event.id, command: placeholder });
+      projectDispatch({ type: 'INSERT_COMMAND', mapId, eventId: event.id, path, placement: effectivePlacement, command });
     }
+  };
+
+  const addCommand = (type: EventCommand['type'] = 'showText') => {
+    insertCommand(makePlaceholderCommand(type), selectedPath ? 'after' : 'append');
+  };
+
+  const moveSelected = (direction: 'up' | 'down') => {
+    if (!selectedPath) return;
+    if (page) {
+      projectDispatch({ type: 'MOVE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath, direction });
+    } else {
+      projectDispatch({ type: 'MOVE_COMMAND', mapId, eventId: event.id, path: selectedPath, direction });
+    }
+    setSelectedPath(movePath(selectedPath, direction));
+  };
+
+  const duplicateSelected = () => {
+    if (!selectedPath) return;
+    if (page) {
+      projectDispatch({ type: 'DUPLICATE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath });
+    } else {
+      projectDispatch({ type: 'DUPLICATE_COMMAND', mapId, eventId: event.id, path: selectedPath });
+    }
+    setSelectedPath(movePath(selectedPath, 'down'));
+  };
+
+  const copySelected = () => {
+    if (selectedCommand) setClipboardCommand(cloneCommand(selectedCommand));
+  };
+
+  const cutSelected = () => {
+    if (!selectedCommand) return;
+    setClipboardCommand(cloneCommand(selectedCommand));
+    removeSelected();
+  };
+
+  const pasteCommand = () => {
+    if (!clipboardCommand) return;
+    insertCommand(cloneCommand(clipboardCommand), selectedPath ? 'after' : 'append');
   };
 
   return (
@@ -375,6 +539,27 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
           <p className="text-[11px] text-gray-400">Executed top to bottom.</p>
         </div>
         <div className="flex items-center gap-1">
+          <StackIconButton title="Move up" disabled={!canOperateOnSelected} onClick={() => moveSelected('up')}>
+            <ArrowUp size={13} />
+          </StackIconButton>
+          <StackIconButton title="Move down" disabled={!canOperateOnSelected} onClick={() => moveSelected('down')}>
+            <ArrowDown size={13} />
+          </StackIconButton>
+          <StackIconButton title="Duplicate" disabled={!canOperateOnSelected} onClick={duplicateSelected}>
+            <Copy size={13} />
+          </StackIconButton>
+          <StackIconButton title="Cut" disabled={!canOperateOnSelected} onClick={cutSelected}>
+            <Scissors size={13} />
+          </StackIconButton>
+          <StackIconButton title="Copy" disabled={!canOperateOnSelected} onClick={copySelected}>
+            <Copy size={13} />
+          </StackIconButton>
+          <StackIconButton title="Paste" disabled={!clipboardCommand} onClick={pasteCommand}>
+            <ClipboardPaste size={13} />
+          </StackIconButton>
+          <StackIconButton title="Delete" disabled={!canOperateOnSelected} onClick={removeSelected}>
+            <Trash2 size={13} />
+          </StackIconButton>
           <select
             className="px-2 py-1 text-[12px] border border-gray-200 rounded"
             onChange={e => {
@@ -417,16 +602,25 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {flat.map(({ command, depth, path }, i) => (
-          <CommandCard
-            key={`${path.join('-')}-${i}`}
-            index={i + 1}
-            command={command}
-            depth={depth}
-            selected={samePath(selectedPath, path)}
-            onSelect={() => setSelectedPath(path)}
-          />
-        ))}
+        {rows.map((row, i) => row.type === 'command' ? (
+            <CommandCard
+              key={`command-${row.path.join('-')}-${i}`}
+              index={i + 1}
+              command={row.command}
+              depth={row.depth}
+              selected={samePath(selectedPath, row.path)}
+              onSelect={() => selectCommand(row.path)}
+            />
+          ) : (
+            <BranchTargetRow
+              key={`branch-${row.listPath.join('-')}-${i}`}
+              label={row.label}
+              depth={row.depth}
+              empty={row.empty}
+              selected={samePath(selectedBranchPath, row.listPath)}
+              onSelect={() => selectBranch(row.listPath)}
+            />
+          ))}
         {selectedCommand && selectedPath && (
           <div className="mt-3">
             <p className="text-[11px] text-gray-500 mb-1">Editing selected command</p>

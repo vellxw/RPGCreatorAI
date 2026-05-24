@@ -60,8 +60,9 @@
 
 ## Next Slices
 
-- [ ] Slice 3D: command-stack polish, movement-route basics, and range
-  clipboard / branch editing.
+- [x] Slice 3D: command-stack v1 polish with insert, move, duplicate,
+  cut/copy/paste, and empty-branch insertion targets.
+- [ ] Slice 3D: range selection/delete and movement-route basics.
 - [ ] Slice 4: database v2 editors.
 - [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
 - [ ] Slice 6: playtest/debug programmer tools.

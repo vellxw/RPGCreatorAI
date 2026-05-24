@@ -205,6 +205,27 @@ export type ProjectAction =
       command: EventCommand;
     }
   | {
+      type: 'INSERT_COMMAND';
+      mapId: string;
+      eventId: string;
+      path: number[];
+      placement: 'before' | 'after' | 'append';
+      command: EventCommand;
+    }
+  | {
+      type: 'MOVE_COMMAND';
+      mapId: string;
+      eventId: string;
+      path: number[];
+      direction: 'up' | 'down';
+    }
+  | {
+      type: 'DUPLICATE_COMMAND';
+      mapId: string;
+      eventId: string;
+      path: number[];
+    }
+  | {
       type: 'UPDATE_PAGE_COMMAND';
       mapId: string;
       eventId: string;
@@ -218,6 +239,30 @@ export type ProjectAction =
       eventId: string;
       pageId: string;
       command: EventCommand;
+    }
+  | {
+      type: 'INSERT_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      path: number[];
+      placement: 'before' | 'after' | 'append';
+      command: EventCommand;
+    }
+  | {
+      type: 'MOVE_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      path: number[];
+      direction: 'up' | 'down';
+    }
+  | {
+      type: 'DUPLICATE_PAGE_COMMAND';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      path: number[];
     }
   | {
       type: 'REMOVE_PAGE_COMMAND';
@@ -572,6 +617,87 @@ function setCommandAtPath(commands: EventCommand[], path: number[], replacement:
   const newBranch = setCommandAtPath(branch, branchPath, replacement);
   result[head] = withCommandBranch(target, branchIdx, newBranch);
   return result;
+}
+
+function getCommandAtPath(commands: EventCommand[], path: number[]): EventCommand | null {
+  if (path.length === 0) return null;
+  const [head, ...rest] = path;
+  const target = commands[head];
+  if (!target) return null;
+  if (rest.length === 0) return target;
+  const branchIdx = rest[0];
+  const branch = commandBranch(target, branchIdx);
+  return branch ? getCommandAtPath(branch, rest.slice(1)) : null;
+}
+
+function insertCommandAtPath(
+  commands: EventCommand[],
+  path: number[],
+  command: EventCommand,
+  placement: 'before' | 'after' | 'append',
+): EventCommand[] {
+  const inserted = deepClone(command);
+  if (path.length === 0) {
+    return [...commands, inserted];
+  }
+
+  const [head, ...rest] = path;
+  if (rest.length === 0) {
+    const result = commands.slice();
+    const insertAt = placement === 'before'
+      ? Math.max(0, head)
+      : Math.min(commands.length, head + 1);
+    result.splice(insertAt, 0, inserted);
+    return result;
+  }
+
+  const result = commands.slice();
+  const target = result[head];
+  if (!target) return commands;
+  const branchIdx = rest[0];
+  const branch = commandBranch(target, branchIdx);
+  if (!branch) return commands;
+  const branchPath = rest.slice(1);
+  const newBranch = branchPath.length === 0
+    ? [...branch, inserted]
+    : insertCommandAtPath(branch, branchPath, inserted, placement);
+  result[head] = withCommandBranch(target, branchIdx, newBranch);
+  return result;
+}
+
+function moveCommandAtPath(
+  commands: EventCommand[],
+  path: number[],
+  direction: 'up' | 'down',
+): EventCommand[] {
+  if (path.length === 0) return commands;
+  const [head, ...rest] = path;
+  if (rest.length === 0) {
+    const targetIndex = direction === 'up' ? head - 1 : head + 1;
+    if (head < 0 || head >= commands.length || targetIndex < 0 || targetIndex >= commands.length) {
+      return commands;
+    }
+    const result = commands.slice();
+    [result[head], result[targetIndex]] = [result[targetIndex], result[head]];
+    return result;
+  }
+
+  const result = commands.slice();
+  const target = result[head];
+  if (!target) return commands;
+  const branchIdx = rest[0];
+  const branch = commandBranch(target, branchIdx);
+  if (!branch) return commands;
+  const newBranch = moveCommandAtPath(branch, rest.slice(1), direction);
+  result[head] = withCommandBranch(target, branchIdx, newBranch);
+  return result;
+}
+
+function duplicateCommandAtPath(commands: EventCommand[], path: number[]): EventCommand[] {
+  const command = getCommandAtPath(commands, path);
+  return command
+    ? insertCommandAtPath(commands, path, deepClone(command), 'after')
+    : commands;
 }
 
 function removeCommandAtPath(commands: EventCommand[], path: number[]): EventCommand[] {
@@ -1033,6 +1159,30 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
       });
 
+    case 'INSERT_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        event.commands = insertCommandAtPath(event.commands, action.path, action.command, action.placement);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
+      });
+
+    case 'MOVE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        event.commands = moveCommandAtPath(event.commands, action.path, action.direction);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
+      });
+
+    case 'DUPLICATE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        event.commands = duplicateCommandAtPath(event.commands, action.path);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
+      });
+
     case 'REMOVE_COMMAND':
       return withMap(state, action.mapId, map => {
         const event = map.events.find(e => e.id === action.eventId);
@@ -1058,6 +1208,36 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         Object.assign(event, replacePage(event, action.pageId, page => ({
           ...page,
           commands: [...page.commands, action.command],
+        })));
+      });
+
+    case 'INSERT_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: insertCommandAtPath(page.commands, action.path, action.command, action.placement),
+        })));
+      });
+
+    case 'MOVE_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: moveCommandAtPath(page.commands, action.path, action.direction),
+        })));
+      });
+
+    case 'DUPLICATE_PAGE_COMMAND':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: duplicateCommandAtPath(page.commands, action.path),
         })));
       });
 

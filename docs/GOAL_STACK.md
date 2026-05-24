@@ -15,8 +15,8 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3D — Event command-stack polish: movement-route basics and range
-  clipboard / branch editing for command lists.
+- Slice 3D — Event command-stack polish follow-up: range selection/delete
+  and movement-route basics.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
   types/terms/animations editors and common-event command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
@@ -28,6 +28,11 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3D command stack v1 — event command editing now supports
+  insert around selection, move up/down, duplicate, local cut/copy/paste,
+  delete, and explicit empty branch targets for Then, Else, choice labels,
+  Victory, and Defeat. Reducer coverage locks page-1 legacy mirroring and
+  nested insertion into conditionals, choices, and battle branches.
 - Phase 10 Slice 3C — deterministic scheduled events: `EventScheduler` now
   runs active-page map autorun/parallel events and switch-conditioned
   autorun/parallel common events in separate runner contexts; autorun blocks

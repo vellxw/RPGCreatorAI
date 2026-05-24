@@ -51,6 +51,9 @@ without copying proprietary assets, formats, or runtime dependencies.
     event runner.
 20. Common events with `autorun` or `parallel` triggers shall require a known
     condition switch and shall run only while that switch is ON.
+21. Event command stacks shall support insertion around selected commands,
+    movement within the current sibling list, duplication, local cut/copy/paste,
+    deletion, and insertion into empty conditional/choice/battle branches.
 
 ## Non-Goals
 
@@ -58,5 +61,6 @@ without copying proprietary assets, formats, or runtime dependencies.
 - No general scripting/plugin execution in this slice.
 - No AI runtime dependency.
 - No autotile rules in Slice 2.
-- No command-stack clipboard/range editing or autonomous movement routes in
-  Slice 3C; those remain Slice 3D / Runtime MZ foundation work.
+- No command-stack range selection/delete or autonomous movement routes in
+  Slice 3D command-stack v1; those remain follow-up Slice 3D / Runtime MZ
+  foundation work.

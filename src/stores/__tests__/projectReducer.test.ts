@@ -6,7 +6,7 @@ import {
   type ProjectStoreState,
 } from '../projectStore';
 import type { FullProjectState } from '../../adapters/types';
-import type { EventPage, GameEvent, MapData } from '../../types/project';
+import type { EventCommand, EventPage, GameEvent, MapData } from '../../types/project';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function loadedState(): ProjectStoreState {
@@ -358,6 +358,118 @@ describe('projectReducer', () => {
       path: [0],
     });
     expect(s2.maps.town.events[0].commands).toHaveLength(0);
+  });
+
+  it('command stack actions insert, move, and duplicate root commands', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'INSERT_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [0],
+      placement: 'before',
+      command: { type: 'showText', text: 'Intro' },
+    });
+    expect(s2.maps.town.events[0].commands[0]).toEqual({ type: 'showText', text: 'Intro' });
+    expect(s2.maps.town.events[0].pages?.[0].commands[0]).toEqual({ type: 'showText', text: 'Intro' });
+
+    const s3 = projectReducer(s2, {
+      type: 'MOVE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [0],
+      direction: 'down',
+    });
+    expect(s3.maps.town.events[0].commands[1]).toEqual({ type: 'showText', text: 'Intro' });
+
+    const s4 = projectReducer(s3, {
+      type: 'DUPLICATE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [0],
+    });
+    expect(s4.maps.town.events[0].commands).toHaveLength(3);
+    expect(s4.maps.town.events[0].commands[1]).toEqual(s4.maps.town.events[0].commands[0]);
+    expect(s4.maps.town.events[0].commands[1]).not.toBe(s4.maps.town.events[0].commands[0]);
+  });
+
+  it('INSERT_COMMAND appends into empty nested branches', () => {
+    const branchCommands: EventCommand[] = [
+      { type: 'ifFlag', flag: 'talked', equals: false, then: [], else: [] },
+      { type: 'showChoices', prompt: 'Pick', choices: [{ label: 'A', commands: [] }] },
+      { type: 'startBattle', troopId: 'slime', canEscape: true },
+    ];
+    const s1 = projectReducer(loadedState(), {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: { commands: branchCommands },
+    });
+    const s2 = projectReducer(s1, {
+      type: 'INSERT_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [0, 0],
+      placement: 'append',
+      command: { type: 'showText', text: 'Then branch' },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'INSERT_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [1, 0],
+      placement: 'append',
+      command: { type: 'showText', text: 'Choice branch' },
+    });
+    const s4 = projectReducer(s3, {
+      type: 'INSERT_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      path: [2, 0],
+      placement: 'append',
+      command: { type: 'showText', text: 'Victory branch' },
+    });
+
+    const [ifCmd, choiceCmd, battleCmd] = s4.maps.town.events[0].commands;
+    if (ifCmd.type !== 'ifFlag' || choiceCmd.type !== 'showChoices' || battleCmd.type !== 'startBattle') {
+      throw new Error('unexpected commands');
+    }
+    expect(ifCmd.then[0]).toEqual({ type: 'showText', text: 'Then branch' });
+    expect(choiceCmd.choices[0].commands[0]).toEqual({ type: 'showText', text: 'Choice branch' });
+    expect(battleCmd.victoryBranch?.[0]).toEqual({ type: 'showText', text: 'Victory branch' });
+  });
+
+  it('page command stack actions edit page 1 and mirror legacy commands', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'INSERT_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [],
+      placement: 'append',
+      command: { type: 'showText', text: 'Tail' },
+    });
+    const s3 = projectReducer(s2, {
+      type: 'MOVE_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [1],
+      direction: 'up',
+    });
+    const s4 = projectReducer(s3, {
+      type: 'DUPLICATE_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [0],
+    });
+
+    expect(s4.maps.town.events[0].pages?.[0].commands[0]).toEqual({ type: 'showText', text: 'Tail' });
+    expect(s4.maps.town.events[0].pages?.[0].commands[1]).toEqual({ type: 'showText', text: 'Tail' });
+    expect(s4.maps.town.events[0].commands).toEqual(s4.maps.town.events[0].pages?.[0].commands);
   });
 
   it('MARK_SAVED clears dirty', () => {
