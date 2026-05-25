@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { useProjectStore, getEventsByMap } from '../stores/projectStore';
 import { useEditor } from '../stores/editorStore';
 import {
@@ -40,6 +40,12 @@ import { Input, Select } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { CommandEditor } from '../components/events/CommandEditor';
 import { validateEvent } from '../validation/validateMap';
+import {
+  commandPathKey,
+  isCommandStackTextEditingTarget,
+  resolveCommandRangeSelection,
+  sameCommandPath,
+} from '../utils/commandSelection';
 import type { EventCommand, EventPage, EventPriority, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
 import { eventAssets } from '../assets/generated/assetCatalog';
 
@@ -190,11 +196,13 @@ interface CommandCardProps {
   index: number;
   command: EventCommand;
   selected: boolean;
-  onSelect: () => void;
+  rangeSelected: boolean;
+  onSelect: (event: MouseEvent<HTMLButtonElement>) => void;
+  onToggleRangeSelected: (extendRange: boolean) => void;
   depth: number;
 }
 
-function CommandCard({ index, command, selected, onSelect, depth }: CommandCardProps) {
+function CommandCard({ index, command, selected, rangeSelected, onSelect, onToggleRangeSelected, depth }: CommandCardProps) {
   const icons: Record<string, { icon: ReactNode; color: string; bg: string }> = {
     showText: { icon: <MessageSquare size={18} />, color: 'text-blue-600', bg: 'bg-blue-50' },
     showChoices: { icon: <GitBranch size={18} />, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -291,32 +299,51 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       default: return (cmd as { type: string }).type;
     }
   };
+  const commandTitle = titles[command.type] || command.type;
+  const commandDescription = getDescription(command);
+
+  const highlighted = selected || rangeSelected;
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
       style={{ marginLeft: depth * 16 }}
-      className={`w-full flex items-start gap-3 p-3 border rounded-lg transition-shadow text-left cursor-pointer ${
-        selected
+      className={`w-full flex items-start gap-2 p-2 border rounded-lg transition-shadow ${
+        highlighted
           ? 'bg-indigo-50 border-indigo-300 shadow-sm'
           : 'bg-white border-gray-200 hover:shadow-sm'
       }`}
     >
-      <span className="text-[12px] text-gray-400 font-mono mt-1 w-4">{index}</span>
-      <div className={`w-9 h-9 rounded-lg ${info.bg} ${info.color} flex items-center justify-center text-lg flex-shrink-0`}>
-        {info.icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] font-semibold text-gray-800">{titles[command.type] || command.type}</span>
-          {(command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable' || command.type === 'showChoices' || command.type === 'startBattle') && (
-            <Badge variant="info">Branch</Badge>
-          )}
+      <input
+        type="checkbox"
+        aria-label={`Select command ${index}: ${commandTitle} ${commandDescription}`}
+        checked={rangeSelected}
+        onChange={() => undefined}
+        onClick={event => {
+          event.stopPropagation();
+          onToggleRangeSelected(event.shiftKey);
+        }}
+        className="mt-3 h-4 w-4 rounded border-gray-300 text-indigo-600"
+      />
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex flex-1 items-start gap-3 text-left min-w-0 cursor-pointer"
+      >
+        <span className="text-[12px] text-gray-400 font-mono mt-1 w-4">{index}</span>
+        <div className={`w-9 h-9 rounded-lg ${info.bg} ${info.color} flex items-center justify-center text-lg flex-shrink-0`}>
+          {info.icon}
         </div>
-        <p className="text-[12px] text-gray-500 mt-0.5 truncate">{getDescription(command)}</p>
-      </div>
-    </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold text-gray-800">{commandTitle}</span>
+            {(command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable' || command.type === 'showChoices' || command.type === 'startBattle') && (
+              <Badge variant="info">Branch</Badge>
+            )}
+          </div>
+          <p className="text-[12px] text-gray-500 mt-0.5 truncate">{commandDescription}</p>
+        </div>
+      </button>
+    </div>
   );
 }
 
@@ -379,6 +406,10 @@ function flattenCommandRows(commands: EventCommand[], depth = 0, prefix: number[
 
 function cloneCommand(command: EventCommand): EventCommand {
   return JSON.parse(JSON.stringify(command)) as EventCommand;
+}
+
+function sameOptionalPath(a: number[] | null, b: number[]): boolean {
+  return !!a && sameCommandPath(a, b);
 }
 
 function movePath(path: number[], direction: 'up' | 'down'): number[] {
@@ -450,29 +481,61 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
   const { state: project, dispatch: projectDispatch } = useProjectStore();
   const [selectedPath, setSelectedPath] = useState<number[] | null>(null);
   const [selectedBranchPath, setSelectedBranchPath] = useState<number[] | null>(null);
+  const [selectedCommandPaths, setSelectedCommandPaths] = useState<number[][]>([]);
+  const [selectionAnchorPath, setSelectionAnchorPath] = useState<number[] | null>(null);
   const [clipboardCommand, setClipboardCommand] = useState<EventCommand | null>(null);
 
   const commands = page?.commands ?? event.commands;
   const rows = flattenCommandRows(commands);
+  const commandRows = rows.filter((row): row is Extract<CommandStackRow, { type: 'command' }> => row.type === 'command');
+  const commandPaths = commandRows.map(row => row.path);
+  const commandPathKeys = new Set(commandPaths.map(commandPathKey));
+  const activeSelectedCommandPaths = selectedCommandPaths.filter(path => commandPathKeys.has(commandPathKey(path)));
+  const activeSelectedPathKeys = new Set(activeSelectedCommandPaths.map(commandPathKey));
+  const hasMultiSelection = activeSelectedCommandPaths.length > 1;
   const mapIds = Object.keys(project.maps);
   const itemIds = project.items.items.map(i => i.id);
 
-  const samePath = (a: number[] | null, b: number[]) => {
-    if (!a || a.length !== b.length) return false;
-    return a.every((v, i) => v === b[i]);
-  };
+  const selectedCommand = selectedPath && commandPathKeys.has(commandPathKey(selectedPath)) && !hasMultiSelection
+    ? commandAtPath(commands, selectedPath)
+    : null;
+  const canOperateOnSelected = selectedPath !== null && selectedCommand !== null && !hasMultiSelection;
+  const canDeleteSelection = activeSelectedCommandPaths.length > 0 || canOperateOnSelected;
 
-  const selectedCommand = selectedPath ? commandAtPath(commands, selectedPath) : null;
-  const canOperateOnSelected = selectedPath !== null && selectedCommand !== null;
-
-  const selectCommand = (path: number[]) => {
+  const selectCommand = (path: number[], extendRange = false) => {
+    const nextSelection = resolveCommandRangeSelection({
+      anchorPath: selectionAnchorPath,
+      targetPath: path,
+      commandPaths,
+      extendRange,
+    });
     setSelectedPath(path);
+    setSelectedCommandPaths(nextSelection.paths);
+    setSelectionAnchorPath(nextSelection.anchorPath);
     setSelectedBranchPath(null);
   };
 
   const selectBranch = (path: number[]) => {
     setSelectedBranchPath(path);
     setSelectedPath(null);
+    setSelectedCommandPaths([]);
+    setSelectionAnchorPath(null);
+  };
+
+  const toggleCommandRangeSelection = (path: number[], extendRange = false) => {
+    if (extendRange) {
+      selectCommand(path, true);
+      return;
+    }
+    const key = commandPathKey(path);
+    const isOnlySelected = activeSelectedCommandPaths.length === 1 && commandPathKey(activeSelectedCommandPaths[0]) === key;
+    if (isOnlySelected) {
+      setSelectedPath(null);
+      setSelectedCommandPaths([]);
+      setSelectionAnchorPath(null);
+      return;
+    }
+    selectCommand(path, false);
   };
 
   const updateSelected = (next: EventCommand) => {
@@ -485,13 +548,32 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
   };
 
   const removeSelected = () => {
-    if (!selectedPath) return;
+    const selectedForDelete = activeSelectedCommandPaths.length > 0
+      ? activeSelectedCommandPaths
+      : selectedPath ? [selectedPath] : [];
+    if (selectedForDelete.length === 0) return;
+    if (selectedForDelete.length > 1) {
+      const fromPath = selectedForDelete[0];
+      const toPath = selectedForDelete[selectedForDelete.length - 1];
+      if (page) {
+        projectDispatch({ type: 'REMOVE_PAGE_COMMAND_RANGE', mapId, eventId: event.id, pageId: page.id, fromPath, toPath });
+      } else {
+        projectDispatch({ type: 'REMOVE_COMMAND_RANGE', mapId, eventId: event.id, fromPath, toPath });
+      }
+      setSelectedPath(null);
+      setSelectedCommandPaths([]);
+      setSelectionAnchorPath(null);
+      return;
+    }
+    const [path] = selectedForDelete;
     if (page) {
-      projectDispatch({ type: 'REMOVE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath });
+      projectDispatch({ type: 'REMOVE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path });
     } else {
-      projectDispatch({ type: 'REMOVE_COMMAND', mapId, eventId: event.id, path: selectedPath });
+      projectDispatch({ type: 'REMOVE_COMMAND', mapId, eventId: event.id, path });
     }
     setSelectedPath(null);
+    setSelectedCommandPaths([]);
+    setSelectionAnchorPath(null);
   };
 
   const insertCommand = (command: EventCommand, placement: 'before' | 'after' | 'append' = 'after') => {
@@ -510,22 +592,28 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
 
   const moveSelected = (direction: 'up' | 'down') => {
     if (!selectedPath) return;
+    const nextPath = movePath(selectedPath, direction);
     if (page) {
       projectDispatch({ type: 'MOVE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath, direction });
     } else {
       projectDispatch({ type: 'MOVE_COMMAND', mapId, eventId: event.id, path: selectedPath, direction });
     }
-    setSelectedPath(movePath(selectedPath, direction));
+    setSelectedPath(nextPath);
+    setSelectedCommandPaths([nextPath]);
+    setSelectionAnchorPath(nextPath);
   };
 
   const duplicateSelected = () => {
     if (!selectedPath) return;
+    const nextPath = movePath(selectedPath, 'down');
     if (page) {
       projectDispatch({ type: 'DUPLICATE_PAGE_COMMAND', mapId, eventId: event.id, pageId: page.id, path: selectedPath });
     } else {
       projectDispatch({ type: 'DUPLICATE_COMMAND', mapId, eventId: event.id, path: selectedPath });
     }
-    setSelectedPath(movePath(selectedPath, 'down'));
+    setSelectedPath(nextPath);
+    setSelectedCommandPaths([nextPath]);
+    setSelectionAnchorPath(nextPath);
   };
 
   const copySelected = () => {
@@ -541,6 +629,14 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
   const pasteCommand = () => {
     if (!clipboardCommand) return;
     insertCommand(cloneCommand(clipboardCommand), selectedPath ? 'after' : 'append');
+  };
+
+  const handleStackKeyDown = (keyboardEvent: KeyboardEvent<HTMLDivElement>) => {
+    if (isCommandStackTextEditingTarget(keyboardEvent.target)) return;
+    if ((keyboardEvent.key === 'Delete' || keyboardEvent.key === 'Backspace') && canDeleteSelection) {
+      keyboardEvent.preventDefault();
+      removeSelected();
+    }
   };
 
   return (
@@ -566,12 +662,15 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
           <StackIconButton title="Copy" disabled={!canOperateOnSelected} onClick={copySelected}>
             <Copy size={13} />
           </StackIconButton>
-          <StackIconButton title="Paste" disabled={!clipboardCommand} onClick={pasteCommand}>
+          <StackIconButton title="Paste" disabled={!clipboardCommand || hasMultiSelection} onClick={pasteCommand}>
             <ClipboardPaste size={13} />
           </StackIconButton>
-          <StackIconButton title="Delete" disabled={!canOperateOnSelected} onClick={removeSelected}>
+          <StackIconButton title="Delete" disabled={!canDeleteSelection} onClick={removeSelected}>
             <Trash2 size={13} />
           </StackIconButton>
+          {hasMultiSelection && (
+            <span className="px-1.5 text-[11px] font-medium text-indigo-700">{activeSelectedCommandPaths.length} selected</span>
+          )}
           <select
             className="px-2 py-1 text-[12px] border border-gray-200 rounded"
             onChange={e => {
@@ -614,15 +713,17 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
           </select>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2" onKeyDown={handleStackKeyDown}>
         {rows.map((row, i) => row.type === 'command' ? (
             <CommandCard
               key={`command-${row.path.join('-')}-${i}`}
               index={i + 1}
               command={row.command}
               depth={row.depth}
-              selected={samePath(selectedPath, row.path)}
-              onSelect={() => selectCommand(row.path)}
+              selected={sameOptionalPath(selectedPath, row.path)}
+              rangeSelected={activeSelectedPathKeys.has(commandPathKey(row.path))}
+              onSelect={event => selectCommand(row.path, event.shiftKey)}
+              onToggleRangeSelected={extendRange => toggleCommandRangeSelection(row.path, extendRange)}
             />
           ) : (
             <BranchTargetRow
@@ -630,11 +731,11 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
               label={row.label}
               depth={row.depth}
               empty={row.empty}
-              selected={samePath(selectedBranchPath, row.listPath)}
+              selected={sameOptionalPath(selectedBranchPath, row.listPath)}
               onSelect={() => selectBranch(row.listPath)}
             />
           ))}
-        {selectedCommand && selectedPath && (
+        {selectedCommand && selectedPath && !hasMultiSelection && (
           <div className="mt-3">
             <p className="text-[11px] text-gray-500 mb-1">Editing selected command</p>
             <CommandEditor
@@ -1018,7 +1119,7 @@ export function EventEditorScreen() {
           <div className="flex-1 flex flex-col overflow-hidden">
             <MapPreview event={event} map={map} />
             <EventPageTabs event={event} mapId={map.id} selectedPageId={activePageId} onSelect={setSelectedPageId} />
-            <CommandStack event={event} mapId={map.id} page={activePage} />
+            <CommandStack key={`${map.id}:${event.id}:${activePageId ?? 'legacy'}`} event={event} mapId={map.id} page={activePage} />
           </div>
           <EventProperties event={event} mapId={map.id} page={activePage} />
         </div>

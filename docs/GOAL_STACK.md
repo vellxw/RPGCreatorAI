@@ -15,7 +15,6 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3D — Event command-stack polish follow-up: range selection/delete.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
   types/terms/animations editors and common-event command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
@@ -27,6 +26,11 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3D command-stack range selection/delete — event command rows
+  now have checkbox selection, shift-click range selection within the same
+  command-list parent, toolbar and keyboard delete for selected ranges, and
+  reducer-level `REMOVE_COMMAND_RANGE` / `REMOVE_PAGE_COMMAND_RANGE` actions
+  that preserve page-1 legacy mirroring while no-oping cross-branch endpoints.
 - Phase 10 Slice 3D movement-route basics — `setMovementRoute` is now a typed
   event command with editor controls, route-step validation, C++ map/common
   event parsing, `EventRunner` movement-route requests, and deterministic

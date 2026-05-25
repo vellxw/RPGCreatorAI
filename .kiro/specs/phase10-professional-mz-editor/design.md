@@ -127,8 +127,14 @@ tileset database loading.
 - The command-stack toolbar exposes move up/down, duplicate, cut, copy, paste,
   and delete for the selected command. Clipboard state is intentionally local
   to the command stack; persisted project state remains data-only.
-- Range selection/delete and runtime movement-route commands remain open
-  Slice 3D work.
+- Range selection/delete is handled with command-row checkboxes and
+  shift-click over command rows only. Branch target rows remain insertion
+  targets and are never included in range payloads.
+- Range deletion is a reducer-level batch operation. `REMOVE_COMMAND_RANGE`
+  and `REMOVE_PAGE_COMMAND_RANGE` delete an inclusive range only when both
+  endpoints share the same command-list parent path, then preserve page-1
+  legacy mirroring. Endpoints across different branches no-op instead of
+  trying to infer cross-branch order.
 
 ## Slice 3D Movement Route Basics
 

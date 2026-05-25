@@ -169,9 +169,25 @@ pub fn runtime_status(state: State<'_, AppState>) -> RuntimeStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Mutex, OnceLock};
+
+    fn runtime_env_lock() -> &'static Mutex<()> {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        LOCK.get_or_init(|| Mutex::new(()))
+    }
+
+    fn restore_runtime_env(previous: Option<std::ffi::OsString>) {
+        if let Some(value) = previous {
+            std::env::set_var("RPG_RUNTIME_EXE", value);
+        } else {
+            std::env::remove_var("RPG_RUNTIME_EXE");
+        }
+    }
 
     #[test]
     fn locate_returns_none_when_nothing_present() {
+        let _guard = runtime_env_lock().lock().unwrap();
+        let previous = std::env::var_os("RPG_RUNTIME_EXE");
         // Hide the env override and use a guaranteed-empty project root.
         let tmp = tempfile::TempDir::new().unwrap();
         std::env::remove_var("RPG_RUNTIME_EXE");
@@ -180,10 +196,13 @@ mod tests {
         // We cannot assert None unconditionally because LOCALAPPDATA could
         // contain a built runtime on this machine. Just assert it does not panic.
         let _ = result;
+        restore_runtime_env(previous);
     }
 
     #[test]
     fn locate_picks_up_env_override() {
+        let _guard = runtime_env_lock().lock().unwrap();
+        let previous = std::env::var_os("RPG_RUNTIME_EXE");
         let tmp = tempfile::TempDir::new().unwrap();
         let exe = tmp.path().join(if cfg!(windows) {
             "rpg_creator_runtime.exe"
@@ -196,6 +215,6 @@ mod tests {
         let result = locate_runtime_executable(None);
         assert_eq!(result.as_deref(), Some(exe.as_path()));
 
-        std::env::remove_var("RPG_RUNTIME_EXE");
+        restore_runtime_env(previous);
     }
 }

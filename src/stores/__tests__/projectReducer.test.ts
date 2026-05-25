@@ -472,6 +472,105 @@ describe('projectReducer', () => {
     expect(s4.maps.town.events[0].commands).toEqual(s4.maps.town.events[0].pages?.[0].commands);
   });
 
+  it('REMOVE_COMMAND_RANGE deletes contiguous root commands and mirrors page 1', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: {
+        commands: [
+          { type: 'showText', text: 'A' },
+          { type: 'showText', text: 'B' },
+          { type: 'showText', text: 'C' },
+          { type: 'showText', text: 'D' },
+        ],
+      },
+    });
+    const s2 = projectReducer(s1, {
+      type: 'REMOVE_COMMAND_RANGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      fromPath: [1],
+      toPath: [2],
+    });
+
+    expect(s2.maps.town.events[0].commands).toEqual([
+      { type: 'showText', text: 'A' },
+      { type: 'showText', text: 'D' },
+    ]);
+    expect(s2.maps.town.events[0].pages?.[0].commands).toEqual(s2.maps.town.events[0].commands);
+  });
+
+  it('REMOVE_PAGE_COMMAND_RANGE deletes contiguous nested branch commands and mirrors page 1', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: {
+        commands: [
+          {
+            type: 'ifFlag',
+            flag: 'talked',
+            equals: false,
+            then: [
+              { type: 'showText', text: 'Then A' },
+              { type: 'showText', text: 'Then B' },
+              { type: 'showText', text: 'Then C' },
+            ],
+            else: [{ type: 'showText', text: 'Else A' }],
+          },
+        ],
+      },
+    });
+    const s2 = projectReducer(s1, {
+      type: 'REMOVE_PAGE_COMMAND_RANGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      fromPath: [0, 0, 1],
+      toPath: [0, 0, 0],
+    });
+
+    const event = s2.maps.town.events[0];
+    const command = event.pages?.[0].commands[0];
+    if (!command || command.type !== 'ifFlag') throw new Error('expected ifFlag');
+    expect(command.then).toEqual([{ type: 'showText', text: 'Then C' }]);
+    expect(command.else).toEqual([{ type: 'showText', text: 'Else A' }]);
+    expect(event.commands).toEqual(event.pages?.[0].commands);
+  });
+
+  it('REMOVE_PAGE_COMMAND_RANGE ignores endpoints in different command lists', () => {
+    const commands: EventCommand[] = [
+      {
+        type: 'ifFlag',
+        flag: 'talked',
+        equals: false,
+        then: [{ type: 'showText', text: 'Then A' }],
+        else: [{ type: 'showText', text: 'Else A' }],
+      },
+    ];
+    const s1 = projectReducer(loadedState(), {
+      type: 'UPDATE_EVENT_PAGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      changes: { commands },
+    });
+    const s2 = projectReducer(s1, {
+      type: 'REMOVE_PAGE_COMMAND_RANGE',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      fromPath: [0, 0, 0],
+      toPath: [0, 1, 0],
+    });
+
+    expect(s2.maps.town.events[0].pages?.[0].commands).toEqual(commands);
+    expect(s2.maps.town.events[0].commands).toEqual(commands);
+  });
+
   it('page command stack updates setMovementRoute commands and mirrors page 1', () => {
     const s1 = projectReducer(loadedState(), {
       type: 'INSERT_PAGE_COMMAND',

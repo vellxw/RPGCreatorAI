@@ -1090,3 +1090,85 @@ Error: Port 1420 is already in use
 - `2026-05-25 10:36 -03:00` — `npm run desktop:verify-content` — PASS;
   `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
 
+### Phase 10 Slice 3D — command-stack range selection/delete
+
+- `2026-05-25 10:40 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — RED; new
+  `REMOVE_COMMAND_RANGE` and `REMOVE_PAGE_COMMAND_RANGE` expectations left
+  root and nested branch commands unchanged because reducer batch actions did
+  not exist yet.
+- `2026-05-25 10:42 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 42 tests) after adding same-list range delete actions and page-1
+  mirroring.
+- `2026-05-25 10:45 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 42 tests) after wiring command-row range selection UI.
+- `2026-05-25 10:45 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-25 10:45 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 43 tests) after adding cross-branch range no-op coverage.
+- `2026-05-25 10:47 -03:00` — `npm test` — PASS (19 files,
+  145 tests).
+- `2026-05-25 10:47 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-25 10:48 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-25 10:48 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-25 10:49 -03:00` — Chrome DevTools UI smoke at
+  `http://127.0.0.1:1420/` — PASS; Events screen rendered command-row
+  checkboxes, shift-click selected a 4-command range inside one choice branch,
+  toolbar showed `4 selected`, Delete removed that inclusive range and marked
+  the project dirty, branch headers stayed outside selection, and console had
+  no errors.
+- `2026-05-25 10:49 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-05-25 10:51 -03:00` —
+  `npm test -- src/utils/__tests__/commandSelection.test.ts` — RED; the
+  extracted command-selection helper did not exist yet, proving the new
+  anchor-reset and checkbox-keyboard tests were active before implementation.
+- `2026-05-25 10:52 -03:00` —
+  `npm test -- src/utils/__tests__/commandSelection.test.ts` — PASS
+  (1 file, 3 tests) after adding shared command-selection helpers.
+- `2026-05-25 10:53 -03:00` —
+  `npm test -- src/utils/__tests__/commandSelection.test.ts src/stores/__tests__/projectReducer.test.ts`
+  — PASS (2 files, 46 tests) after wiring the event editor to the helper,
+  improving checkbox accessible names, and keying the command stack by
+  map/event/page to clear stale selection on context changes.
+- `2026-05-25 10:53 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`) after the helper refactor.
+- `2026-05-25 10:54 -03:00` — `npm test` — PASS (20 files,
+  148 tests).
+- `2026-05-25 10:54 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — FAIL; the
+  `runtime_commands::tests::locate_picks_up_env_override` test raced with
+  another test mutating the global `RPG_RUNTIME_EXE` environment variable and
+  observed the local runtime fallback path instead of the temporary override.
+- `2026-05-25 10:54 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib runtime_commands::tests::locate_picks_up_env_override -- --exact --nocapture`
+  — PASS; isolated reproduction supported an environment-race root cause.
+- `2026-05-25 10:54 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib runtime_commands::tests -- --test-threads=1`
+  — PASS; serializing the two env-mutating tests confirmed the race.
+- `2026-05-25 10:55 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests) after guarding env-mutating runtime tests with a
+  test-only mutex and restoring the previous env var.
+- `2026-05-25 10:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-25 10:57 -03:00` — Chrome DevTools UI smoke at
+  `http://127.0.0.1:1420/` — PASS; checkbox labels now include command
+  titles/descriptions, shift-click selected a 4-command range, pressing
+  Delete while focus remained on the checkbox removed the range, switching to
+  `shop_keeper` remounted the stack with zero checked commands and disabled
+  Delete, and console had no errors.
+- `2026-05-25 10:57 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+

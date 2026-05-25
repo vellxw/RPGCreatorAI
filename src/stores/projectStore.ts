@@ -272,10 +272,25 @@ export type ProjectAction =
       path: number[];
     }
   | {
+      type: 'REMOVE_PAGE_COMMAND_RANGE';
+      mapId: string;
+      eventId: string;
+      pageId: string;
+      fromPath: number[];
+      toPath: number[];
+    }
+  | {
       type: 'REMOVE_COMMAND';
       mapId: string;
       eventId: string;
       path: number[];
+    }
+  | {
+      type: 'REMOVE_COMMAND_RANGE';
+      mapId: string;
+      eventId: string;
+      fromPath: number[];
+      toPath: number[];
     }
   // ---- new database actions ------------------------------------------------
   | {
@@ -718,6 +733,52 @@ function removeCommandAtPath(commands: EventCommand[], path: number[]): EventCom
   }
   const branchPath = rest.slice(1);
   const newBranch = removeCommandAtPath(branch, branchPath);
+  result[head] = withCommandBranch(target, branchIdx, newBranch);
+  return result;
+}
+
+function sameNumberPath(a: number[], b: number[]): boolean {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function removeCommandRangeAtPath(commands: EventCommand[], fromPath: number[], toPath: number[]): EventCommand[] {
+  if (fromPath.length === 0 || toPath.length === 0) return commands;
+  const fromParent = fromPath.slice(0, -1);
+  const toParent = toPath.slice(0, -1);
+  if (!sameNumberPath(fromParent, toParent)) return commands;
+  return removeCommandRangeFromList(commands, fromParent, fromPath[fromPath.length - 1], toPath[toPath.length - 1]);
+}
+
+function removeCommandRangeFromList(
+  commands: EventCommand[],
+  listPath: number[],
+  fromIndex: number,
+  toIndex: number,
+): EventCommand[] {
+  if (listPath.length === 0) {
+    if (
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= commands.length ||
+      toIndex >= commands.length
+    ) {
+      return commands;
+    }
+    const start = Math.min(fromIndex, toIndex);
+    const end = Math.max(fromIndex, toIndex);
+    const result = commands.slice();
+    result.splice(start, end - start + 1);
+    return result;
+  }
+
+  if (listPath.length < 2) return commands;
+  const [head, branchIdx, ...rest] = listPath;
+  const target = commands[head];
+  if (!target) return commands;
+  const branch = commandBranch(target, branchIdx);
+  if (!branch) return commands;
+  const newBranch = removeCommandRangeFromList(branch, rest, fromIndex, toIndex);
+  const result = commands.slice();
   result[head] = withCommandBranch(target, branchIdx, newBranch);
   return result;
 }
@@ -1191,6 +1252,14 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
       });
 
+    case 'REMOVE_COMMAND_RANGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        event.commands = removeCommandRangeAtPath(event.commands, action.fromPath, action.toPath);
+        Object.assign(event, replacePage(event, 'page_1', page => ({ ...page, commands: event.commands })));
+      });
+
     case 'UPDATE_PAGE_COMMAND':
       return withMap(state, action.mapId, map => {
         const event = map.events.find(e => e.id === action.eventId);
@@ -1248,6 +1317,16 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         Object.assign(event, replacePage(event, action.pageId, page => ({
           ...page,
           commands: removeCommandAtPath(page.commands, action.path),
+        })));
+      });
+
+    case 'REMOVE_PAGE_COMMAND_RANGE':
+      return withMap(state, action.mapId, map => {
+        const event = map.events.find(e => e.id === action.eventId);
+        if (!event) return;
+        Object.assign(event, replacePage(event, action.pageId, page => ({
+          ...page,
+          commands: removeCommandRangeAtPath(page.commands, action.fromPath, action.toPath),
         })));
       });
 

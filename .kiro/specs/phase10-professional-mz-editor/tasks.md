@@ -64,7 +64,7 @@
   cut/copy/paste, and empty-branch insertion targets.
 - [x] Slice 3D: movement-route basics with editor command data, validation,
   C++ parsing, `EventRunner` requests, and player-target runtime execution.
-- [ ] Slice 3D: command-stack range selection/delete.
+- [x] Slice 3D: command-stack range selection/delete.
 - [ ] Slice 4: database v2 editors.
 - [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
 - [ ] Slice 6: playtest/debug programmer tools.

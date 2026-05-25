@@ -53,7 +53,8 @@ without copying proprietary assets, formats, or runtime dependencies.
     condition switch and shall run only while that switch is ON.
 21. Event command stacks shall support insertion around selected commands,
     movement within the current sibling list, duplication, local cut/copy/paste,
-    deletion, and insertion into empty conditional/choice/battle branches.
+    single/range deletion, and insertion into empty conditional/choice/battle
+    branches.
 22. Event command data shall support `setMovementRoute` with route target
     metadata, repeat/skippable/wait flags, ordered move/turn/wait steps,
     editor-side validation, C++ map/common-event parsing, and deterministic
@@ -65,7 +66,6 @@ without copying proprietary assets, formats, or runtime dependencies.
 - No general scripting/plugin execution in this slice.
 - No AI runtime dependency.
 - No autotile rules in Slice 2.
-- No command-stack range selection/delete or autonomous event movement in
-  this Slice 3D follow-up. Player-target `setMovementRoute` is supported as
-  the first deterministic movement-route baseline; event-target motion remains
-  future Runtime MZ foundation work.
+- No autonomous event movement in this Slice 3D follow-up. Player-target
+  `setMovementRoute` is supported as the first deterministic movement-route
+  baseline; event-target motion remains future Runtime MZ foundation work.
