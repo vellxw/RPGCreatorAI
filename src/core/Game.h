@@ -62,6 +62,9 @@ private:
     void applyAnimationIfPending();
     bool applyRunnerRequests(EventRunner& runner);
     void applyAnimationRequest(const AnimationRequest& request);
+    int applyMovementRouteRequest(const MovementRouteRequest& request);
+    bool applyPlayerMovementRouteStep(const MovementRouteRequest::Step& step, bool skippable);
+    bool triggerTouchEventAt(int x, int y);
     void updateAnimationStates(float dt);
     RenderEntitiesSnapshot buildRenderSnapshot() const;
     EntityRenderSprite buildAnimatedSprite(const std::string& animationSet,

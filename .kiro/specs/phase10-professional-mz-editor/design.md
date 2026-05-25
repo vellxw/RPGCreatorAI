@@ -129,3 +129,31 @@ tileset database loading.
   to the command stack; persisted project state remains data-only.
 - Range selection/delete and runtime movement-route commands remain open
   Slice 3D work.
+
+## Slice 3D Movement Route Basics
+
+- `EventCommand` now includes `setMovementRoute` with `target`, optional
+  `eventId`, `repeat`, `skippable`, `wait`, and ordered route `steps`.
+  Supported route steps are `moveUp`, `moveDown`, `moveLeft`, `moveRight`,
+  `turnUp`, `turnDown`, `turnLeft`, `turnRight`, and route-local `wait`.
+- The event command editor exposes a focused route-step editor with target
+  selection, repeat/skippable/wait flags, ordered step editing, and add/remove
+  controls. Route commands live inside the normal command stack and use the
+  existing page-command update path, so page 1 still mirrors to legacy
+  `event.commands`.
+- TypeScript map/project validation accepts `setMovementRoute`, checks named
+  event targets, validates route step names, and rejects negative/non-finite
+  route wait durations.
+- C++ `MapLoader` and `RpgDatabases` parse the same command shape for map
+  events and common events. `EventRunner` emits a `MovementRouteRequest`
+  rather than owning world movement.
+- `Game` consumes player-target movement routes deterministically by applying
+  move/turn steps through existing collision and facing rules. Route movement
+  reuses touch-event dispatch at destination tiles, and `wait: true` blocks
+  the issuing runner by the route's move-step duration plus explicit route
+  waits before continuing to following commands.
+- Malformed route data is handled as validation errors instead of throwing:
+  target values must be supported, `steps` must be an array, step names must
+  be known, and wait durations must be non-negative finite numbers.
+- Event-target movement and repeat-loop playback are logged as unsupported
+  runtime extensions for a later foundation slice.

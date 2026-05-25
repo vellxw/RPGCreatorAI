@@ -9,6 +9,18 @@ import {
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_PAGE_PRIORITIES = ['belowCharacters', 'sameAsCharacters', 'aboveCharacters'];
 const VALID_SELF_SWITCHES = ['A', 'B', 'C', 'D'];
+const VALID_MOVEMENT_ROUTE_TARGETS = ['player', 'thisEvent', 'event'];
+const VALID_MOVEMENT_ROUTE_STEPS = new Set([
+  'moveUp',
+  'moveDown',
+  'moveLeft',
+  'moveRight',
+  'turnUp',
+  'turnDown',
+  'turnLeft',
+  'turnRight',
+  'wait',
+]);
 
 const VALID_COMMAND_TYPES = new Set([
   'showText',
@@ -38,6 +50,7 @@ const VALID_COMMAND_TYPES = new Set([
   'startBattle',
   'changeActorHp',
   'playAnimation',
+  'setMovementRoute',
 ]);
 
 export function validateMap(map: MapData, allMapIds: string[]): ValidationMessage[] {
@@ -162,7 +175,7 @@ export function validateEvent(event: GameEvent, map: MapData, allMapIds: string[
     });
   }
 
-  messages.push(...validateCommands(event.commands, event.id, map.id, allMapIds));
+    messages.push(...validateCommands(event.commands, event.id, map.id, allMapIds, map.events));
   if (event.pages) {
     messages.push(...validateEventPages(event, map, allMapIds));
   }
@@ -220,7 +233,7 @@ function validateEventPages(event: GameEvent, map: MapData, allMapIds: string[])
         });
       }
     }
-    messages.push(...validateCommands(page.commands, event.id, map.id, allMapIds));
+    messages.push(...validateCommands(page.commands, event.id, map.id, allMapIds, map.events));
   }
   return messages;
 }
@@ -230,6 +243,7 @@ function validateCommands(
   eventId: string,
   mapId: string,
   allMapIds: string[],
+  mapEvents: GameEvent[],
 ): ValidationMessage[] {
   const messages: ValidationMessage[] = [];
 
@@ -260,8 +274,8 @@ function validateCommands(
           source: `${mapId}/${eventId}`,
         });
       }
-      messages.push(...validateCommands(cmd.then, eventId, mapId, allMapIds));
-      messages.push(...validateCommands(cmd.else, eventId, mapId, allMapIds));
+      messages.push(...validateCommands(cmd.then, eventId, mapId, allMapIds, mapEvents));
+      messages.push(...validateCommands(cmd.else, eventId, mapId, allMapIds, mapEvents));
     } else if (cmd.type === 'controlSelfSwitch') {
       if (!VALID_SELF_SWITCHES.includes(cmd.switchId)) {
         messages.push({
@@ -272,11 +286,50 @@ function validateCommands(
       }
     } else if (cmd.type === 'showChoices') {
       for (const choice of cmd.choices) {
-        messages.push(...validateCommands(choice.commands, eventId, mapId, allMapIds));
+        messages.push(...validateCommands(choice.commands, eventId, mapId, allMapIds, mapEvents));
       }
     } else if (cmd.type === 'startBattle') {
-      if (cmd.victoryBranch) messages.push(...validateCommands(cmd.victoryBranch, eventId, mapId, allMapIds));
-      if (cmd.defeatBranch) messages.push(...validateCommands(cmd.defeatBranch, eventId, mapId, allMapIds));
+      if (cmd.victoryBranch) messages.push(...validateCommands(cmd.victoryBranch, eventId, mapId, allMapIds, mapEvents));
+      if (cmd.defeatBranch) messages.push(...validateCommands(cmd.defeatBranch, eventId, mapId, allMapIds, mapEvents));
+    } else if (cmd.type === 'setMovementRoute') {
+      if (!VALID_MOVEMENT_ROUTE_TARGETS.includes(cmd.target)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${eventId}" setMovementRoute has invalid target "${cmd.target}"`,
+          source: `${mapId}/${eventId}`,
+        });
+      }
+      if (cmd.target === 'event' && !mapEvents.some(event => event.id === cmd.eventId)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${eventId}" setMovementRoute targets unknown event "${cmd.eventId ?? ''}"`,
+          source: `${mapId}/${eventId}`,
+        });
+      }
+      if (!Array.isArray(cmd.steps)) {
+        messages.push({
+          level: 'error',
+          message: `Event "${eventId}" setMovementRoute steps must be an array`,
+          source: `${mapId}/${eventId}`,
+        });
+        continue;
+      }
+      cmd.steps.forEach((step, index) => {
+        if (!VALID_MOVEMENT_ROUTE_STEPS.has(step.type)) {
+          messages.push({
+            level: 'error',
+            message: `Event "${eventId}" setMovementRoute step ${index + 1} has invalid step type "${step.type}"`,
+            source: `${mapId}/${eventId}`,
+          });
+        }
+        if (step.type === 'wait' && (!Number.isFinite(step.ms) || (step.ms ?? 0) < 0)) {
+          messages.push({
+            level: 'error',
+            message: `Event "${eventId}" setMovementRoute step ${index + 1} wait ms must be a non-negative finite number`,
+            source: `${mapId}/${eventId}`,
+          });
+        }
+      });
     }
   }
 

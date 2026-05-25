@@ -106,6 +106,18 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         cmd->animationDurationMs = j.value("durationMs", 0);
         cmd->animationBlocking = j.value("blocking", false);
         cmd->animationLoop = j.value("loop", false);
+    } else if (type == "setMovementRoute") {
+        cmd->movementRouteTarget = j.value("target", std::string{"player"});
+        cmd->movementRouteEventId = j.value("eventId", std::string{});
+        cmd->movementRouteRepeat = j.value("repeat", false);
+        cmd->movementRouteSkippable = j.value("skippable", true);
+        cmd->movementRouteWait = j.value("wait", true);
+        for (const auto& stepJson : j.value("steps", json::array())) {
+            EventCommand::MovementRouteStep step;
+            step.type = stepJson.value("type", std::string{});
+            step.ms = stepJson.value("ms", 0);
+            cmd->movementRouteSteps.push_back(std::move(step));
+        }
     } else {
         Logger::warning("MapLoader: unknown command type '" + type + "' (kept as opaque)");
     }

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <cctype>
+#include <algorithm>
 
 EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
     : gameState(state), dialogue(dialogueSystem) {}
@@ -44,12 +45,18 @@ void EventRunner::update(float dt) {
         commandStack.pop_back();
         processCommand(cmd);
         if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active ||
-            shopRequest.active || battleSummaryRequest.active || animationRequest.active) {
+            shopRequest.active || battleSummaryRequest.active || animationRequest.active ||
+            movementRouteRequest.active) {
             return;
         }
     }
 
     executing = false;
+}
+
+void EventRunner::waitForMs(int ms) {
+    if (ms <= 0) return;
+    waitTimer = std::max(waitTimer, static_cast<float>(ms) / 1000.0f);
 }
 
 void EventRunner::executeNext() {
@@ -268,6 +275,22 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         }
         return;
     }
+    if (type == "setMovementRoute") {
+        movementRouteRequest.active = true;
+        movementRouteRequest.target =
+            cmd->movementRouteTarget.empty() ? "player" : cmd->movementRouteTarget;
+        movementRouteRequest.ownerEventId = currentOwnerEventId;
+        movementRouteRequest.eventId = cmd->movementRouteEventId;
+        movementRouteRequest.repeat = cmd->movementRouteRepeat;
+        movementRouteRequest.skippable = cmd->movementRouteSkippable;
+        movementRouteRequest.wait = cmd->movementRouteWait;
+        movementRouteRequest.steps.clear();
+
+        for (const auto& step : cmd->movementRouteSteps) {
+            movementRouteRequest.steps.push_back({step.type, step.ms});
+        }
+        return;
+    }
 
     Logger::warning("Unsupported event command type: " + type);
 }
@@ -298,5 +321,11 @@ BattleSummaryRequest EventRunner::consumeBattleSummaryRequest() {
 AnimationRequest EventRunner::consumeAnimationRequest() {
     AnimationRequest req = animationRequest;
     animationRequest = {};
+    return req;
+}
+
+MovementRouteRequest EventRunner::consumeMovementRouteRequest() {
+    MovementRouteRequest req = movementRouteRequest;
+    movementRouteRequest = {};
     return req;
 }

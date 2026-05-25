@@ -45,6 +45,21 @@ struct AnimationRequest {
     bool loop = false;
 };
 
+struct MovementRouteRequest {
+    struct Step {
+        std::string type;
+        int ms = 0;
+    };
+    bool active = false;
+    std::string target;
+    std::string ownerEventId;
+    std::string eventId;
+    bool repeat = false;
+    bool skippable = true;
+    bool wait = true;
+    std::vector<Step> steps;
+};
+
 class EventRunner {
 public:
     EventRunner(class GameState& state, class DialogueSystem& dialogueSystem);
@@ -73,11 +88,13 @@ public:
                         const std::string& ownerEventId = "");
     void update(float dt);
     bool isRunning() const { return executing; }
+    void waitForMs(int ms);
 
     MapTransferRequest consumeTransferRequest();
     ShopOpenRequest consumeShopRequest();
     BattleSummaryRequest consumeBattleSummaryRequest();
     AnimationRequest consumeAnimationRequest();
+    MovementRouteRequest consumeMovementRouteRequest();
 
 private:
     void executeNext();
@@ -95,6 +112,7 @@ private:
     ShopOpenRequest shopRequest;
     BattleSummaryRequest battleSummaryRequest;
     AnimationRequest animationRequest;
+    MovementRouteRequest movementRouteRequest;
     std::string currentOwnerMapId;
     std::string currentOwnerEventId;
 

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateProject, validateUniqueEventIds } from '../validateProject';
 import type { FullProjectState } from '../../adapters/types';
-import type { GameEvent, MapData } from '../../types/project';
+import type { EventCommand, GameEvent, MapData } from '../../types/project';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function makeMap(overrides: Partial<MapData> = {}): MapData {
@@ -454,6 +454,74 @@ describe('validateProject', () => {
     const project = makeProject({ town: makeMap({ events: [event] }) });
     const report = validateProject(project);
     expect(report.errors.some(e => e.message.includes('targets unknown map "missing"'))).toBe(true);
+  });
+
+  it('validates setMovementRoute targets and route steps', () => {
+    const badRoute = {
+      type: 'setMovementRoute',
+      target: 'event',
+      eventId: 'missing_event',
+      repeat: false,
+      skippable: true,
+      wait: true,
+      steps: [
+        { type: 'moveRight' },
+        { type: 'wait', ms: -10 },
+        { type: 'jump' },
+      ],
+    } as unknown as EventCommand;
+    const goodRoute = {
+      type: 'setMovementRoute',
+      target: 'player',
+      repeat: false,
+      skippable: true,
+      wait: true,
+      steps: [
+        { type: 'moveRight' },
+        { type: 'turnDown' },
+        { type: 'wait', ms: 50 },
+      ],
+    } as unknown as EventCommand;
+    const event: GameEvent = {
+      id: 'mover',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [badRoute, goodRoute],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('setMovementRoute targets unknown event "missing_event"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('setMovementRoute step 2 wait ms must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('setMovementRoute step 3 has invalid step type "jump"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unknown command type "setMovementRoute"'))).toBe(false);
+  });
+
+  it('reports malformed setMovementRoute shapes without throwing', () => {
+    const route = {
+      type: 'setMovementRoute',
+      target: 'player',
+      repeat: false,
+      skippable: true,
+      wait: true,
+    } as unknown as EventCommand;
+    const event: GameEvent = {
+      id: 'mover',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [route],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('setMovementRoute steps must be an array'))).toBe(true);
   });
 });
 

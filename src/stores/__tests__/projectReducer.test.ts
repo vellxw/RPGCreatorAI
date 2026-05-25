@@ -472,6 +472,51 @@ describe('projectReducer', () => {
     expect(s4.maps.town.events[0].commands).toEqual(s4.maps.town.events[0].pages?.[0].commands);
   });
 
+  it('page command stack updates setMovementRoute commands and mirrors page 1', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'INSERT_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [],
+      placement: 'append',
+      command: {
+        type: 'setMovementRoute',
+        target: 'player',
+        repeat: false,
+        skippable: true,
+        wait: true,
+        steps: [{ type: 'moveRight' }],
+      },
+    });
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_PAGE_COMMAND',
+      mapId: 'town',
+      eventId: 'old_man',
+      pageId: 'page_1',
+      path: [1],
+      command: {
+        type: 'setMovementRoute',
+        target: 'player',
+        repeat: false,
+        skippable: false,
+        wait: true,
+        steps: [{ type: 'moveRight' }, { type: 'turnDown' }],
+      },
+    });
+
+    const route = s2.maps.town.events[0].pages?.[0].commands[1];
+    expect(route).toEqual({
+      type: 'setMovementRoute',
+      target: 'player',
+      repeat: false,
+      skippable: false,
+      wait: true,
+      steps: [{ type: 'moveRight' }, { type: 'turnDown' }],
+    });
+    expect(s2.maps.town.events[0].commands).toEqual(s2.maps.town.events[0].pages?.[0].commands);
+  });
+
   it('MARK_SAVED clears dirty', () => {
     const s1 = projectReducer(loadedState(), {
       type: 'UPDATE_EVENT',

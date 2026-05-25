@@ -76,6 +76,18 @@ struct EventCommand {
     bool animationBlocking = false;
     bool animationLoop = false;
 
+    // setMovementRoute
+    std::string movementRouteTarget;   // "player", "thisEvent", "event"
+    std::string movementRouteEventId;
+    bool movementRouteRepeat = false;
+    bool movementRouteSkippable = true;
+    bool movementRouteWait = true;
+    struct MovementRouteStep {
+        std::string type; // moveUp/down/left/right, turnUp/down/left/right, wait
+        int ms = 0;
+    };
+    std::vector<MovementRouteStep> movementRouteSteps;
+
     // showChoices
     std::string prompt;
     struct Choice {

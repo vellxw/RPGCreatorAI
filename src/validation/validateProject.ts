@@ -23,6 +23,18 @@ const VALID_MOVEMENT_SPEEDS = new Set([
   'double',
   'quadruple',
 ]);
+const VALID_MOVEMENT_ROUTE_TARGETS = ['player', 'thisEvent', 'event'];
+const VALID_MOVEMENT_ROUTE_STEPS = new Set([
+  'moveUp',
+  'moveDown',
+  'moveLeft',
+  'moveRight',
+  'turnUp',
+  'turnDown',
+  'turnLeft',
+  'turnRight',
+  'wait',
+]);
 
 // Phase 6 v1 command set. Used both for editor-side type checks and for
 // the runtime parser, which mirrors this list.
@@ -54,6 +66,7 @@ const VALID_COMMAND_TYPES = new Set([
   'startBattle',
   'changeActorHp',
   'playAnimation',
+  'setMovementRoute',
 ]);
 
 export interface ValidationReport {
@@ -691,6 +704,27 @@ function validateSingleCommand(
       if (!Number.isFinite(cmd.durationMs) || cmd.durationMs < 0) {
         err(`playAnimation durationMs must be a non-negative finite number`);
       }
+      break;
+    }
+    case 'setMovementRoute': {
+      if (!VALID_MOVEMENT_ROUTE_TARGETS.includes(cmd.target)) {
+        err(`setMovementRoute has invalid target "${cmd.target}"`);
+      }
+      if (cmd.target === 'event' && !mapEvents.some(event => event.id === cmd.eventId)) {
+        err(`setMovementRoute targets unknown event "${cmd.eventId ?? ''}"`);
+      }
+      if (!Array.isArray(cmd.steps)) {
+        err(`setMovementRoute steps must be an array`);
+        break;
+      }
+      cmd.steps.forEach((step, index) => {
+        if (!VALID_MOVEMENT_ROUTE_STEPS.has(step.type)) {
+          err(`setMovementRoute step ${index + 1} has invalid step type "${step.type}"`);
+        }
+        if (step.type === 'wait' && (!Number.isFinite(step.ms) || (step.ms ?? 0) < 0)) {
+          err(`setMovementRoute step ${index + 1} wait ms must be a non-negative finite number`);
+        }
+      });
       break;
     }
     case 'addGold':

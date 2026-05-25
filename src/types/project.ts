@@ -200,7 +200,8 @@ export type EventCommand =
   | OpenShopCommand
   | StartBattleCommand
   | ChangeActorHpCommand
-  | PlayAnimationCommand;
+  | PlayAnimationCommand
+  | SetMovementRouteCommand;
 
 export interface ShowTextCommand {
   type: 'showText';
@@ -383,6 +384,33 @@ export interface PlayAnimationCommand {
   durationMs: number;
   blocking: boolean;
   loop?: boolean;
+}
+
+export type MovementRouteTarget = 'player' | 'thisEvent' | 'event';
+export type MovementRouteStepType =
+  | 'moveUp'
+  | 'moveDown'
+  | 'moveLeft'
+  | 'moveRight'
+  | 'turnUp'
+  | 'turnDown'
+  | 'turnLeft'
+  | 'turnRight'
+  | 'wait';
+
+export interface MovementRouteStep {
+  type: MovementRouteStepType;
+  ms?: number;
+}
+
+export interface SetMovementRouteCommand {
+  type: 'setMovementRoute';
+  target: MovementRouteTarget;
+  eventId?: string;
+  repeat: boolean;
+  skippable: boolean;
+  wait: boolean;
+  steps: MovementRouteStep[];
 }
 
 // ---------------------------------------------------------------------------

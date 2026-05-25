@@ -107,6 +107,15 @@ function makePlaceholderCommand(type: EventCommand['type']): EventCommand {
         blocking: true,
         loop: false,
       };
+    case 'setMovementRoute':
+      return {
+        type: 'setMovementRoute',
+        target: 'player',
+        repeat: false,
+        skippable: true,
+        wait: true,
+        steps: [{ type: 'moveDown' }],
+      };
   }
 }
 
@@ -214,6 +223,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     startBattle: { icon: <Swords size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
     changeActorHp: { icon: <HeartPulse size={18} />, color: 'text-rose-600', bg: 'bg-rose-50' },
     playAnimation: { icon: <Clapperboard size={18} />, color: 'text-fuchsia-600', bg: 'bg-fuchsia-50' },
+    setMovementRoute: { icon: <MapPinned size={18} />, color: 'text-teal-600', bg: 'bg-teal-50' },
   };
   const info = icons[command.type] || { icon: <NotebookPen size={18} />, color: 'text-gray-600', bg: 'bg-gray-50' };
 
@@ -245,6 +255,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
     startBattle: 'Start Battle',
     changeActorHp: 'Change Actor HP',
     playAnimation: 'Play Animation',
+    setMovementRoute: 'Set Movement Route',
   };
 
   const getDescription = (cmd: EventCommand): string => {
@@ -276,6 +287,7 @@ function CommandCard({ index, command, selected, onSelect, depth }: CommandCardP
       case 'startBattle': return `Troop: ${cmd.troopId}${cmd.canEscape ? ' (escapable)' : ''}`;
       case 'changeActorHp': return `${cmd.actorId} ${cmd.delta >= 0 ? '+' : ''}${cmd.delta}`;
       case 'playAnimation': return `${cmd.target}${cmd.eventId ? `:${cmd.eventId}` : ''} → ${cmd.action}`;
+      case 'setMovementRoute': return `${cmd.target}${cmd.eventId ? `:${cmd.eventId}` : ''} (${cmd.steps.length} steps)`;
       default: return (cmd as { type: string }).type;
     }
   };
@@ -598,6 +610,7 @@ function CommandStack({ event, mapId, page }: { event: GameEvent; mapId: string;
             <option value="startBattle">Start Battle</option>
             <option value="changeActorHp">Change Actor HP</option>
             <option value="playAnimation">Play Animation</option>
+            <option value="setMovementRoute">Set Movement Route</option>
           </select>
         </div>
       </div>

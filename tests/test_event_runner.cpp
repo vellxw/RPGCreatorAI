@@ -408,6 +408,38 @@ TEST_CASE("EventRunner transferMap produces a transfer request") {
     CHECK(req2.active == false);
 }
 
+TEST_CASE("EventRunner setMovementRoute emits a movement route request") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto cmd = makeCmd("setMovementRoute");
+    cmd->movementRouteTarget = "player";
+    cmd->movementRouteRepeat = false;
+    cmd->movementRouteSkippable = true;
+    cmd->movementRouteWait = true;
+    cmd->movementRouteSteps.push_back({"moveRight", 0});
+    cmd->movementRouteSteps.push_back({"wait", 125});
+    cmd->movementRouteSteps.push_back({"turnDown", 0});
+
+    runner.runCommandList({cmd});
+    runner.update(0.016f);
+
+    auto req = runner.consumeMovementRouteRequest();
+    CHECK(req.active == true);
+    CHECK(req.target == "player");
+    CHECK(req.skippable == true);
+    CHECK(req.wait == true);
+    REQUIRE(req.steps.size() == 3);
+    CHECK(req.steps[0].type == "moveRight");
+    CHECK(req.steps[1].type == "wait");
+    CHECK(req.steps[1].ms == 125);
+    CHECK(req.steps[2].type == "turnDown");
+
+    auto req2 = runner.consumeMovementRouteRequest();
+    CHECK(req2.active == false);
+}
+
 TEST_CASE("EventRunner playAnimation emits an animation request and honors blocking duration") {
     GameState state;
     DialogueSystem dialogue;

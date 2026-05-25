@@ -1027,3 +1027,66 @@ Error: Port 1420 is already in use
 - `2026-05-24 20:03 -03:00` — `npm run desktop:verify-content` — PASS;
   `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
 
+### Phase 10 Slice 3D — movement-route basics
+
+- `2026-05-24 20:11 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` — RED;
+  the new `setMovementRoute` validation test failed because movement-route
+  target/step validation did not exist yet.
+- `2026-05-24 20:11 -03:00` —
+  `cmake --build build --target rpg_tests --config Debug` — BLOCKED before
+  reaching the new C++ test because the direct PowerShell environment did not
+  have MSVC standard include paths (`fatal error C1083: 'string'`). Fix:
+  use repo `scripts/dev/verify.ps1`, which bootstraps `VsDevCmd.bat`.
+- `2026-05-24 20:16 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts` — PASS
+  (1 file, 28 tests) after adding `setMovementRoute` command validation.
+- `2026-05-24 20:16 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`) after wiring the event command editor UI.
+- `2026-05-24 20:16 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 39 tests) before the reducer route regression was added.
+- `2026-05-24 20:17 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed with the new C++ route parser and
+  `EventRunner` request tests.
+- `2026-05-24 20:17 -03:00` —
+  `npm test -- src/stores/__tests__/projectReducer.test.ts` — PASS
+  (1 file, 40 tests) after adding page-1 mirroring coverage for
+  `setMovementRoute`.
+- `2026-05-25 10:29 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts src/validation/__tests__/validateMap.test.ts`
+  — RED; malformed `setMovementRoute` data threw on missing `steps` instead
+  of reporting validation errors.
+- `2026-05-25 10:29 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — RED; new `Game` tests showed player movement routes skipped touch events
+  and `wait: true` did not block tail commands.
+- `2026-05-25 10:31 -03:00` —
+  `npm test -- src/validation/__tests__/validateProject.test.ts src/validation/__tests__/validateMap.test.ts`
+  — PASS (2 files, 30 tests) after route shape validation stopped throwing.
+- `2026-05-25 10:32 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed after route movement reused touch
+  dispatch and `wait: true` blocked by route duration before tail commands.
+- `2026-05-25 10:33 -03:00` — `git diff --check` — PASS.
+- `2026-05-25 10:33 -03:00` — `npm test` — PASS (19 files,
+  142 tests).
+- `2026-05-25 10:34 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-25 10:34 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-25 10:35 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED`.
+- `2026-05-25 10:36 -03:00` — Chrome DevTools UI smoke at
+  `http://127.0.0.1:1420/` — PASS; Events screen exposed
+  `Set Movement Route`, adding it created a selectable command, the route
+  editor rendered target/repeat/skippable/wait controls, adding a `Wait`
+  route step updated the command to 2 steps, dirty state appeared, and
+  console had no errors.
+- `2026-05-25 10:36 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+

@@ -217,6 +217,18 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
                         "commands": [
                             { "type": "controlSelfSwitch", "switchId": "A", "value": true },
                             {
+                                "type": "setMovementRoute",
+                                "target": "player",
+                                "repeat": false,
+                                "skippable": true,
+                                "wait": true,
+                                "steps": [
+                                    { "type": "moveRight" },
+                                    { "type": "wait", "ms": 125 },
+                                    { "type": "turnDown" }
+                                ]
+                            },
+                            {
                                 "type": "ifSelfSwitch",
                                 "switchId": "B",
                                 "equals": false,
@@ -245,16 +257,24 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
     CHECK(page.conditions[2].type == "variable");
     CHECK(page.conditions[2].op == "gte");
     CHECK(page.conditions[2].intValue == 2);
-    REQUIRE(page.commands.size() == 2);
+    REQUIRE(page.commands.size() == 3);
     CHECK(page.commands[0]->type == "controlSelfSwitch");
     CHECK(page.commands[0]->switchId == "A");
     CHECK(page.commands[0]->boolValue == true);
-    CHECK(page.commands[1]->type == "ifSelfSwitch");
-    CHECK(page.commands[1]->switchId == "B");
-    CHECK(page.commands[1]->boolValue == false);
-    REQUIRE(page.commands[1]->thenCommands.size() == 1);
-    CHECK(page.commands[1]->thenCommands[0]->text == "B is off");
-    REQUIRE(page.commands[1]->elseCommands.size() == 1);
-    CHECK(page.commands[1]->elseCommands[0]->text == "B is on");
+    CHECK(page.commands[1]->type == "setMovementRoute");
+    CHECK(page.commands[1]->movementRouteTarget == "player");
+    CHECK(page.commands[1]->movementRouteSkippable == true);
+    CHECK(page.commands[1]->movementRouteWait == true);
+    REQUIRE(page.commands[1]->movementRouteSteps.size() == 3);
+    CHECK(page.commands[1]->movementRouteSteps[0].type == "moveRight");
+    CHECK(page.commands[1]->movementRouteSteps[1].type == "wait");
+    CHECK(page.commands[1]->movementRouteSteps[1].ms == 125);
+    CHECK(page.commands[2]->type == "ifSelfSwitch");
+    CHECK(page.commands[2]->switchId == "B");
+    CHECK(page.commands[2]->boolValue == false);
+    REQUIRE(page.commands[2]->thenCommands.size() == 1);
+    CHECK(page.commands[2]->thenCommands[0]->text == "B is off");
+    REQUIRE(page.commands[2]->elseCommands.size() == 1);
+    CHECK(page.commands[2]->elseCommands[0]->text == "B is on");
     rm(p);
 }

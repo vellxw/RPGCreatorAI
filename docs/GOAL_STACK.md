@@ -15,8 +15,7 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 3D — Event command-stack polish follow-up: range selection/delete
-  and movement-route basics.
+- Slice 3D — Event command-stack polish follow-up: range selection/delete.
 - Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
   types/terms/animations editors and common-event command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
@@ -28,6 +27,13 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 3D movement-route basics — `setMovementRoute` is now a typed
+  event command with editor controls, route-step validation, C++ map/common
+  event parsing, `EventRunner` movement-route requests, and deterministic
+  player-target execution through existing collision/facing rules. Player
+  routes dispatch touch events at destination tiles and `wait: true` blocks
+  the issuing runner before tail commands continue. Event-target movement and
+  repeat-loop playback remain later Runtime MZ foundation work.
 - Phase 10 Slice 3D command stack v1 — event command editing now supports
   insert around selection, move up/down, duplicate, local cut/copy/paste,
   delete, and explicit empty branch targets for Then, Else, choice labels,

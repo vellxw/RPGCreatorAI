@@ -252,11 +252,7 @@ bool Game::tryMove(int dx, int dy, Direction dir) {
     playerMotion.snapToTile(targetX, targetY, currentScene.getTileSize());
 
     // Touch-trigger events fire when stepping onto the destination cell.
-    if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
-        if (rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "touch") {
-            runEventCommands(*ev);
-        }
-    }
+    triggerTouchEventAt(targetX, targetY);
 
     return true;
 }
@@ -284,11 +280,7 @@ void Game::finalizeSmoothStepIfNeeded() {
     const Direction dir = playerMotion.direction();
     state.setPlayerPosition(targetX, targetY, dir);
 
-    if (const EventData* ev = currentScene.getEventAt(targetX, targetY)) {
-        if (rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "touch") {
-            runEventCommands(*ev);
-        }
-    }
+    triggerTouchEventAt(targetX, targetY);
 }
 
 void Game::interact() {
@@ -394,6 +386,14 @@ bool Game::applyRunnerRequests(EventRunner& runner) {
         applyAnimationRequest(animReq);
     }
 
+    auto movementReq = runner.consumeMovementRouteRequest();
+    if (movementReq.active) {
+        const int waitMs = applyMovementRouteRequest(movementReq);
+        if (movementReq.wait && waitMs > 0) {
+            runner.waitForMs(waitMs);
+        }
+    }
+
     if (auto battleSummary = runner.consumeBattleSummaryRequest();
         battleSummary.active) {
         battleSummarySystem.open(battleSummary.troopId, battleSummary.result,
@@ -417,6 +417,80 @@ bool Game::applyRunnerRequests(EventRunner& runner) {
 void Game::applyAnimationIfPending() {
     if (!eventRunner) return;
     applyRunnerRequests(*eventRunner);
+}
+
+int Game::applyMovementRouteRequest(const MovementRouteRequest& request) {
+    const std::string target = request.target.empty() ? "player" : request.target;
+    if (target != "player") {
+        Logger::warning("setMovementRoute: only player target is supported in this runtime slice");
+        return 0;
+    }
+
+    if (request.repeat) {
+        Logger::warning("setMovementRoute: repeat routes execute once in this runtime slice");
+    }
+
+    int waitMs = 0;
+    const int moveStepMs = playerTilesPerSecond > 0.0f
+        ? std::max(1, static_cast<int>(std::ceil(1000.0f / playerTilesPerSecond)))
+        : 125;
+    for (const auto& step : request.steps) {
+        const bool movementStep =
+            step.type == "moveUp" || step.type == "moveDown" ||
+            step.type == "moveLeft" || step.type == "moveRight";
+        if (movementStep) {
+            waitMs += moveStepMs;
+        } else if (step.type == "wait" && step.ms > 0) {
+            waitMs += step.ms;
+        }
+        if (!applyPlayerMovementRouteStep(step, request.skippable)) {
+            break;
+        }
+    }
+    updateCamera();
+    return waitMs;
+}
+
+bool Game::applyPlayerMovementRouteStep(const MovementRouteRequest::Step& step, bool skippable) {
+    auto turn = [this](Direction direction) {
+        state.setPlayerPosition(state.getPlayerX(), state.getPlayerY(), direction);
+    };
+    auto move = [this, skippable](int dx, int dy, Direction direction) {
+        const int curX = state.getPlayerX();
+        const int curY = state.getPlayerY();
+        const int targetX = curX + dx;
+        const int targetY = curY + dy;
+        state.setPlayerPosition(curX, curY, direction);
+        if (!canPlayerMoveTo(targetX, targetY)) {
+            return skippable;
+        }
+        state.setPlayerPosition(targetX, targetY, direction);
+        playerMotion.snapToTile(targetX, targetY, currentScene.getTileSize());
+        return !triggerTouchEventAt(targetX, targetY);
+    };
+
+    if (step.type == "moveUp") return move(0, -1, Direction::Up);
+    if (step.type == "moveDown") return move(0, 1, Direction::Down);
+    if (step.type == "moveLeft") return move(-1, 0, Direction::Left);
+    if (step.type == "moveRight") return move(1, 0, Direction::Right);
+    if (step.type == "turnUp") { turn(Direction::Up); return true; }
+    if (step.type == "turnDown") { turn(Direction::Down); return true; }
+    if (step.type == "turnLeft") { turn(Direction::Left); return true; }
+    if (step.type == "turnRight") { turn(Direction::Right); return true; }
+    if (step.type == "wait") return true;
+
+    Logger::warning("setMovementRoute: unsupported route step '" + step.type + "'");
+    return skippable;
+}
+
+bool Game::triggerTouchEventAt(int x, int y) {
+    if (const EventData* ev = currentScene.getEventAt(x, y)) {
+        if (rpg::activeEventTrigger(*ev, state, state.getCurrentMapId()) == "touch") {
+            runEventCommands(*ev);
+            return true;
+        }
+    }
+    return false;
 }
 
 void Game::applyAnimationRequest(const AnimationRequest& request) {

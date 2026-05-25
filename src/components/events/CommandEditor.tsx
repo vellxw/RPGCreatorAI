@@ -25,12 +25,16 @@ import type {
   RemoveGoldCommand,
   RemoveItemCommand,
   SetFlagCommand,
+  SetMovementRouteCommand,
   ShowChoicesCommand,
   ShowTextCommand,
   StartBattleCommand,
   StartQuestCommand,
   TransferMapCommand,
   UpdateQuestObjectiveCommand,
+  MovementRouteStep,
+  MovementRouteStepType,
+  MovementRouteTarget,
   VariableComparison,
   VariableOp,
   WaitCommand,
@@ -120,6 +124,8 @@ function Body({
       return <ChangeActorHpEditor command={command} onChange={onChange} />;
     case 'playAnimation':
       return <PlayAnimationEditor command={command} onChange={onChange} />;
+    case 'setMovementRoute':
+      return <MovementRouteEditor command={command} onChange={onChange} />;
     case 'setPlayerPosition':
       return <TransferMapEditor command={{ ...command, type: 'transferMap' as const }} mapIds={mapIds} onChange={(next) => onChange({ ...next, type: 'setPlayerPosition' })} />;
   }
@@ -626,6 +632,112 @@ function selfSwitchSelect<T extends 'A' | 'B' | 'C' | 'D'>(value: T, onChange: (
     { value: 'C' as T, label: 'C' },
     { value: 'D' as T, label: 'D' },
   ], onChange);
+}
+
+const MOVEMENT_ROUTE_STEP_OPTIONS: Array<{ value: MovementRouteStepType; label: string }> = [
+  { value: 'moveUp', label: 'Move Up' },
+  { value: 'moveDown', label: 'Move Down' },
+  { value: 'moveLeft', label: 'Move Left' },
+  { value: 'moveRight', label: 'Move Right' },
+  { value: 'turnUp', label: 'Turn Up' },
+  { value: 'turnDown', label: 'Turn Down' },
+  { value: 'turnLeft', label: 'Turn Left' },
+  { value: 'turnRight', label: 'Turn Right' },
+  { value: 'wait', label: 'Wait' },
+];
+
+function defaultRouteStep(type: MovementRouteStepType): MovementRouteStep {
+  return type === 'wait' ? { type, ms: 250 } : { type };
+}
+
+function MovementRouteEditor({ command, onChange }: { command: SetMovementRouteCommand; onChange: (n: SetMovementRouteCommand) => void }) {
+  const updateStep = (index: number, step: MovementRouteStep) => {
+    const next = command.steps.slice();
+    next[index] = step;
+    onChange({ ...command, steps: next });
+  };
+  const moveStep = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= command.steps.length) return;
+    const next = command.steps.slice();
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange({ ...command, steps: next });
+  };
+
+  return (
+    <div className="space-y-2">
+      <Field label="Target">
+        {select<MovementRouteTarget>(command.target, [
+          { value: 'player', label: 'Player' },
+          { value: 'thisEvent', label: 'This event' },
+          { value: 'event', label: 'Named event' },
+        ], v => onChange({ ...command, target: v }))}
+      </Field>
+      {command.target === 'event' && (
+        <Field label="Event ID">
+          {input({ value: command.eventId ?? '', onChange: e => onChange({ ...command, eventId: e.target.value }) })}
+        </Field>
+      )}
+      <div className="grid grid-cols-3 gap-2">
+        <Field label="Repeat">
+          {select(command.repeat ? 'true' : 'false', [
+            { value: 'false', label: 'No' },
+            { value: 'true', label: 'Yes' },
+          ], v => onChange({ ...command, repeat: v === 'true' }))}
+        </Field>
+        <Field label="Skippable">
+          {select(command.skippable ? 'true' : 'false', [
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' },
+          ], v => onChange({ ...command, skippable: v === 'true' }))}
+        </Field>
+        <Field label="Wait">
+          {select(command.wait ? 'true' : 'false', [
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' },
+          ], v => onChange({ ...command, wait: v === 'true' }))}
+        </Field>
+      </div>
+      <Field label="Route Steps">
+        <div className="space-y-1">
+          {command.steps.map((step, index) => (
+            <div key={index} className="grid grid-cols-[1fr_74px_auto_auto_auto] gap-1 items-center">
+              {select<MovementRouteStepType>(step.type, MOVEMENT_ROUTE_STEP_OPTIONS, type => updateStep(index, defaultRouteStep(type)))}
+              {step.type === 'wait'
+                ? input({ type: 'number', value: step.ms ?? 0, onChange: e => updateStep(index, { ...step, ms: Number(e.target.value) }) })
+                : <span className="text-[11px] text-gray-400">step</span>}
+              <button type="button" className="px-2 text-[11px] text-gray-600 cursor-pointer" onClick={() => moveStep(index, -1)}>Up</button>
+              <button type="button" className="px-2 text-[11px] text-gray-600 cursor-pointer" onClick={() => moveStep(index, 1)}>Down</button>
+              <button
+                type="button"
+                className="px-2 text-[11px] text-red-600 cursor-pointer"
+                onClick={() => onChange({ ...command, steps: command.steps.filter((_, i) => i !== index) })}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <select
+            className="w-full px-2 py-1 text-[12px] border border-gray-200 rounded"
+            defaultValue=""
+            onChange={e => {
+              if (!e.target.value) return;
+              onChange({
+                ...command,
+                steps: [...command.steps, defaultRouteStep(e.target.value as MovementRouteStepType)],
+              });
+              e.target.value = '';
+            }}
+          >
+            <option value="">Add route step...</option>
+            {MOVEMENT_ROUTE_STEP_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+      </Field>
+    </div>
+  );
 }
 
 function PlayAnimationEditor({ command, onChange }: { command: PlayAnimationCommand; onChange: (n: PlayAnimationCommand) => void }) {
