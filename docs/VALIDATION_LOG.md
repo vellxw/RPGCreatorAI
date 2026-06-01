@@ -4,6 +4,50 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-9 / DB-004 — item, weapon, armor, and state V2 editors
+
+- TDD RED before implementation (timestamp not captured after context
+  compaction) —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx`
+  — RED; the new component test could not resolve `ItemsEditor`.
+- TDD RED before implementation (timestamp not captured after context
+  compaction) —
+  `npm test -- --run src/stores/__tests__/databaseReducer.test.ts`
+  — RED; `UPDATE_ITEM_DATABASE` did not replace the legacy item shard.
+- TDD RED before implementation (timestamp not captured after context
+  compaction) —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  — RED; invalid item/equipment/state references and numeric ranges were not
+  reported.
+- `2026-06-01 00:13 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx`
+  — RED; 2/3 tests passed, armor slot select emitted an empty value because
+  default UI options omitted the `shield` slot.
+- `2026-06-01 00:13 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx`
+  — PASS (1 file, 3 tests).
+- `2026-06-01 00:13 -03:00` —
+  `npm test -- --run src/stores/__tests__/databaseReducer.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 21 tests).
+- `2026-06-01 00:14 -03:00` — `npm run typecheck` — FAIL; TypeScript
+  could not narrow weapon-only and armor-only fields in `EquipmentEditor`.
+- `2026-06-01 00:14 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-06-01 00:15 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/stores/__tests__/databaseReducer.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (3 files, 24 tests) on the final focused rerun.
+- `2026-06-01 00:15 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  on the final focused rerun.
+- `2026-06-01 00:15 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- Fix applied: added dedicated `ItemsEditor`, `EquipmentEditor`, and
+  `StatesEditor`; added the Database `Items` tab and item database reducer
+  action; and added validation for item categories/slots/effects/modifiers,
+  weapon/armor type refs, equipment slots, animation refs, prices, stat
+  params, state priority, and state restrictions.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-8 / DB-003 — dedicated tileset database editor
 
 - `2026-05-31 23:55 -03:00` —

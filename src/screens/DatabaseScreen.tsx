@@ -9,6 +9,9 @@ import { Input, Select } from '../components/ui/Input';
 import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
 import { IdField } from '../components/database/DatabaseFields';
+import { EquipmentEditor } from '../components/database/EquipmentEditor';
+import { ItemsEditor } from '../components/database/ItemsEditor';
+import { StatesEditor } from '../components/database/StatesEditor';
 import { TilesetEditor } from '../components/database/TilesetEditor';
 import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
 import type {
@@ -31,12 +34,13 @@ import type {
   WeaponData,
 } from '../types/project';
 
-type DatabaseTabKey = DatabaseListKey | 'tilesets' | 'system';
+type DatabaseTabKey = DatabaseListKey | 'items' | 'tilesets' | 'system';
 
 const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'actors', label: 'Actors' },
   { key: 'classes', label: 'Classes' },
   { key: 'skills', label: 'Skills' },
+  { key: 'items', label: 'Items' },
   { key: 'weapons', label: 'Weapons' },
   { key: 'armors', label: 'Armors' },
   { key: 'states', label: 'States' },
@@ -66,7 +70,7 @@ interface DetailProps {
 }
 
 function Detail({ table, entry }: DetailProps) {
-  const { dispatch } = useProjectStore();
+  const { state, dispatch } = useProjectStore();
 
   const update = (changes: Partial<DatabaseRecord>) => {
     dispatch({ type: 'UPDATE_DATABASE_ENTRY', table, id: entry.id, changes });
@@ -84,6 +88,10 @@ function Detail({ table, entry }: DetailProps) {
       onChange={renameId}
     />
   );
+  const animationOptions = state.databases.animations.sets.map(set => ({
+    value: set.id,
+    label: set.id,
+  }));
 
   switch (table) {
     case 'actors':
@@ -93,11 +101,29 @@ function Detail({ table, entry }: DetailProps) {
     case 'skills':
       return <SkillDetail entry={entry as unknown as SkillData} update={update} idField={idField} />;
     case 'weapons':
-      return <WeaponDetail entry={entry as unknown as WeaponData} update={update} idField={idField} />;
+      return (
+        <EquipmentEditor
+          kind="weapon"
+          entry={entry as unknown as WeaponData}
+          types={state.databases.types}
+          animationOptions={animationOptions}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'armors':
-      return <ArmorDetail entry={entry as unknown as ArmorData} update={update} idField={idField} />;
+      return (
+        <EquipmentEditor
+          kind="armor"
+          entry={entry as unknown as ArmorData}
+          types={state.databases.types}
+          animationOptions={animationOptions}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'states':
-      return <StateDetail entry={entry as unknown as StateData} update={update} idField={idField} />;
+      return <StatesEditor entry={entry as unknown as StateData} idField={idField} onChange={update} />;
     case 'enemies':
       return <EnemyDetail entry={entry as unknown as EnemyData} update={update} idField={idField} />;
     case 'troops':
@@ -725,10 +751,11 @@ export function DatabaseScreen() {
   const [selectedId, setSelectedId] = useState<string>('');
 
   const databases = state.databases;
+  const standaloneTab = tab === 'system' || tab === 'tilesets' || tab === 'items';
   const entries =
-    tab === 'system' || tab === 'tilesets'
+    standaloneTab
       ? []
-      : ((databases[tab] as unknown) as DatabaseRecord[]);
+      : ((databases[tab as DatabaseListKey] as unknown) as DatabaseRecord[]);
 
   const selectedEntry = entries.find(e => e.id === selectedId) ?? entries[0];
   const activeTabLabel = TAB_ORDER.find(t => t.key === tab)?.label ?? 'Database';
@@ -741,12 +768,19 @@ export function DatabaseScreen() {
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
     setTab(key);
-    if (key === 'system' || key === 'tilesets') {
+    if (key === 'system' || key === 'tilesets' || key === 'items') {
       setSelectedId('');
       return;
     }
-    const list = (databases[key] as unknown) as DatabaseRecord[];
+    const list = (databases[key as DatabaseListKey] as unknown) as DatabaseRecord[];
     setSelectedId(list[0]?.id ?? '');
+  };
+
+  const tabCount = (key: DatabaseTabKey): number | null => {
+    if (key === 'system') return null;
+    if (key === 'items') return state.items.items.length;
+    if (key === 'tilesets') return databases.tilesets.tilesets.length;
+    return ((databases[key as DatabaseListKey] as unknown) as DatabaseRecord[]).length;
   };
 
   return (
@@ -763,11 +797,9 @@ export function DatabaseScreen() {
             }`}
           >
             {t.label}
-            {t.key !== 'system' && (
+            {tabCount(t.key) !== null && (
               <span className="ml-1.5 text-[11px] text-gray-400">
-                {t.key === 'tilesets'
-                  ? databases.tilesets.tilesets.length
-                  : ((databases[t.key as DatabaseListKey] as unknown) as DatabaseRecord[]).length}
+                {tabCount(t.key)}
               </span>
             )}
           </button>
@@ -777,7 +809,7 @@ export function DatabaseScreen() {
       <DatabaseLayout
         title={activeTabLabel}
         sidebar={
-          tab === 'system' || tab === 'tilesets' ? undefined : (
+          standaloneTab ? undefined : (
             <DatabaseList
               table={tab as DatabaseListKey}
               entries={entries}
@@ -789,6 +821,12 @@ export function DatabaseScreen() {
       >
         {tab === 'system' ? (
           <SystemPanel system={databases.system} />
+        ) : tab === 'items' ? (
+          <ItemsEditor
+            value={state.items}
+            types={databases.types}
+            onChange={items => dispatch({ type: 'UPDATE_ITEM_DATABASE', items })}
+          />
         ) : tab === 'tilesets' ? (
           <TilesetEditor
             value={databases.tilesets}

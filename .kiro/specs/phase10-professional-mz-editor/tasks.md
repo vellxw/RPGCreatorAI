@@ -81,7 +81,7 @@
   Linear Done.
 - [x] FRA-8 / DB-003: build a dedicated tileset database editor with tile
   metadata, asset swatches, validation, and map reference errors.
-- [ ] FRA-9 / DB-004: build item, weapon, armor, and state V2 editors with
+- [x] FRA-9 / DB-004: build item, weapon, armor, and state V2 editors with
   domain fields, type references, numeric validation, and compatibility with
   separated equipment shards.
 - [ ] FRA-10 / DB-005: build actor, class, skill, enemy, and troop V2 editors

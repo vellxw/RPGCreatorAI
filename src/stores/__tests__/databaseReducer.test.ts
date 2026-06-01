@@ -143,4 +143,20 @@ describe('projectReducer database actions', () => {
     expect(s1.databases.system.startingGold).toBe(99);
     expect(s1.dirty).toBe(true);
   });
+
+  it('UPDATE_ITEM_DATABASE replaces the legacy item shard and marks dirty', () => {
+    const s1 = projectReducer(initialProjectStoreState, {
+      type: 'UPDATE_ITEM_DATABASE',
+      items: {
+        items: [
+          { id: 'ether', name: 'Ether', description: '', type: 'consumable', price: 30, effect: { mp: 10 } },
+        ],
+      },
+    });
+
+    expect(s1.items.items).toEqual([
+      { id: 'ether', name: 'Ether', description: '', type: 'consumable', price: 30, effect: { mp: 10 } },
+    ]);
+    expect(s1.dirty).toBe(true);
+  });
 });

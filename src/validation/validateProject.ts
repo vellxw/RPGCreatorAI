@@ -8,6 +8,7 @@ import type {
   ItemDatabase,
   MapData,
   ProjectData,
+  Stats,
   ValidationMessage,
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
@@ -18,6 +19,18 @@ const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
 const VALID_TILE_GROUPS = new Set(['A', 'B', 'C', 'D', 'E', 'Region', 'Collision']);
 const VALID_TILE_PASSABILITY = new Set(['passable', 'blocked']);
+const VALID_LEGACY_ITEM_TYPES = new Set(['weapon', 'armor']);
+const VALID_STATE_RESTRICTIONS = new Set(['none', 'cannotMove']);
+const STAT_KEYS: Array<keyof Stats> = [
+  'maxHp',
+  'maxMp',
+  'attack',
+  'defense',
+  'magicAttack',
+  'magicDefense',
+  'agility',
+  'luck',
+];
 const VALID_MOVEMENT_SPEEDS = new Set([
   'oneEighth',
   'oneQuarter',
@@ -159,7 +172,7 @@ export function validateProject(state: FullProjectState): ValidationReport {
   errors.push(...projectMeta.errors);
   warnings.push(...projectMeta.warnings);
   errors.push(...validateDatabaseInternal(state.databases));
-  errors.push(...validateItemDatabaseInternal(state.items));
+  errors.push(...validateItemDatabaseInternal(state.items, state.databases));
 
   const index = buildIndex(state.items, state.databases);
   const mapIds = Object.keys(state.maps);
@@ -335,9 +348,11 @@ export function validateUniqueEventIds(map: MapData): ValidationMessage[] {
   return out;
 }
 
-function validateItemDatabaseInternal(items: ItemDatabase): ValidationMessage[] {
+function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const seen = new Set<string>();
+  const itemCategoryIds = new Set(db.types.itemCategories.map(entry => entry.id));
+  const equipmentSlotIds = new Set(db.types.equipmentSlots.map(entry => entry.id));
   for (const item of items.items) {
     if (seen.has(item.id)) {
       out.push({
@@ -347,6 +362,63 @@ function validateItemDatabaseInternal(items: ItemDatabase): ValidationMessage[] 
       });
     }
     seen.add(item.id);
+    if (
+      itemCategoryIds.size > 0 &&
+      !itemCategoryIds.has(item.type) &&
+      !VALID_LEGACY_ITEM_TYPES.has(item.type)
+    ) {
+      out.push({
+        level: 'error',
+        message: `Item "${item.id}" references unknown item category "${item.type}"`,
+        source: `database/items/${item.id}`,
+      });
+    }
+    if (item.price !== undefined && (!Number.isFinite(item.price) || item.price < 0)) {
+      out.push({
+        level: 'error',
+        message: `Item "${item.id}" price must be non-negative`,
+        source: `database/items/${item.id}`,
+      });
+    }
+    if (item.slot && equipmentSlotIds.size > 0 && !equipmentSlotIds.has(item.slot)) {
+      out.push({
+        level: 'error',
+        message: `Item "${item.id}" references unknown equipment slot "${item.slot}"`,
+        source: `database/items/${item.id}`,
+      });
+    }
+    if (item.effect) {
+      for (const [key, value] of Object.entries(item.effect)) {
+        if (value !== undefined && !Number.isFinite(value)) {
+          out.push({
+            level: 'error',
+            message: `Item "${item.id}" effect.${key} must be finite`,
+            source: `database/items/${item.id}`,
+          });
+        }
+      }
+    }
+    out.push(...validateStatParams(`Item "${item.id}"`, `database/items/${item.id}`, item.modifiers));
+  }
+  return out;
+}
+
+function validateStatParams(
+  label: string,
+  source: string,
+  params: Partial<Stats> | undefined,
+): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  if (!params) return out;
+  for (const key of STAT_KEYS) {
+    const value = params[key];
+    if (value !== undefined && !Number.isFinite(value)) {
+      out.push({
+        level: 'error',
+        message: `${label} ${key} modifier must be finite`,
+        source,
+      });
+    }
   }
   return out;
 }
@@ -391,6 +463,7 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   }
 
   out.push(...validateTilesetDatabase(db));
+  out.push(...validateEquipmentAndStateDatabases(db));
 
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
@@ -531,6 +604,86 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
       });
     }
   }
+  return out;
+}
+
+function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const weaponTypeIds = new Set(db.types.weaponTypes.map(entry => entry.id));
+  const armorTypeIds = new Set(db.types.armorTypes.map(entry => entry.id));
+  const equipmentSlotIds = new Set(db.types.equipmentSlots.map(entry => entry.id));
+  const animationIds = new Set(db.animations.sets.map(set => set.id));
+
+  for (const weapon of db.weapons) {
+    const source = `database/weapons/${weapon.id}`;
+    if (weaponTypeIds.size > 0 && !weaponTypeIds.has(weapon.weaponTypeId)) {
+      out.push({
+        level: 'error',
+        message: `Weapon "${weapon.id}" references unknown weapon type "${weapon.weaponTypeId}"`,
+        source,
+      });
+    }
+    if (weapon.price !== undefined && (!Number.isFinite(weapon.price) || weapon.price < 0)) {
+      out.push({
+        level: 'error',
+        message: `Weapon "${weapon.id}" price must be non-negative`,
+        source,
+      });
+    }
+    if (weapon.animationId && !animationIds.has(weapon.animationId)) {
+      out.push({
+        level: 'error',
+        message: `Weapon "${weapon.id}" references unknown animation "${weapon.animationId}"`,
+        source,
+      });
+    }
+    out.push(...validateStatParams(`Weapon "${weapon.id}"`, source, weapon.params));
+  }
+
+  for (const armor of db.armors) {
+    const source = `database/armors/${armor.id}`;
+    if (armorTypeIds.size > 0 && !armorTypeIds.has(armor.armorTypeId)) {
+      out.push({
+        level: 'error',
+        message: `Armor "${armor.id}" references unknown armor type "${armor.armorTypeId}"`,
+        source,
+      });
+    }
+    if (equipmentSlotIds.size > 0 && !equipmentSlotIds.has(armor.slot)) {
+      out.push({
+        level: 'error',
+        message: `Armor "${armor.id}" references unknown equipment slot "${armor.slot}"`,
+        source,
+      });
+    }
+    if (armor.price !== undefined && (!Number.isFinite(armor.price) || armor.price < 0)) {
+      out.push({
+        level: 'error',
+        message: `Armor "${armor.id}" price must be non-negative`,
+        source,
+      });
+    }
+    out.push(...validateStatParams(`Armor "${armor.id}"`, source, armor.params));
+  }
+
+  for (const state of db.states) {
+    const source = `database/states/${state.id}`;
+    if (!Number.isFinite(state.priority) || state.priority < 0 || state.priority > 100) {
+      out.push({
+        level: 'error',
+        message: `State "${state.id}" priority must be between 0 and 100`,
+        source,
+      });
+    }
+    if (state.restriction && !VALID_STATE_RESTRICTIONS.has(state.restriction)) {
+      out.push({
+        level: 'error',
+        message: `State "${state.id}" has invalid restriction "${state.restriction}"`,
+        source,
+      });
+    }
+  }
+
   return out;
 }
 

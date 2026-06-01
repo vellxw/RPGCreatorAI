@@ -324,6 +324,10 @@ export type ProjectAction =
       changes: Partial<SystemData>;
     }
   | {
+      type: 'UPDATE_ITEM_DATABASE';
+      items: ItemDatabase;
+    }
+  | {
       type: 'UPDATE_TILESET_DATABASE';
       tilesets: TilesetDatabaseData;
     }
@@ -1424,6 +1428,13 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         db.system = { ...db.system, ...action.changes };
         return true;
       });
+
+    case 'UPDATE_ITEM_DATABASE':
+      return {
+        ...state,
+        dirty: true,
+        items: deepClone(action.items),
+      };
 
     case 'UPDATE_TILESET_DATABASE':
       return withDatabases(state, db => {

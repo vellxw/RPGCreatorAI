@@ -114,6 +114,83 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Duplicate state id'))).toBe(true);
   });
 
+  it('rejects invalid item equipment and state references and numeric ranges', () => {
+    const project = projectWith({
+      types: {
+        weaponTypes: [{ id: 'sword', name: 'Sword' }],
+        armorTypes: [{ id: 'light', name: 'Light Armor' }],
+        skillTypes: [],
+        elements: [],
+        equipmentSlots: [
+          { id: 'weapon', name: 'Weapon' },
+          { id: 'armor', name: 'Armor' },
+          { id: 'accessory', name: 'Accessory' },
+          { id: 'body', name: 'Body' },
+        ],
+        itemCategories: [{ id: 'consumable', name: 'Consumable' }],
+      },
+      weapons: [
+        {
+          id: 'bad_weapon',
+          name: 'Bad Weapon',
+          description: '',
+          weaponTypeId: 'axe',
+          price: -1,
+          params: { attack: Number.NaN },
+          animationId: 'missing_animation',
+          traits: [],
+        },
+      ],
+      armors: [
+        {
+          id: 'bad_armor',
+          name: 'Bad Armor',
+          description: '',
+          armorTypeId: 'plate',
+          slot: 'shield',
+          price: -5,
+          params: { defense: Number.POSITIVE_INFINITY },
+          traits: [],
+        },
+      ],
+      states: [
+        {
+          id: 'bad_state',
+          name: 'Bad State',
+          priority: 200,
+          removeAtBattleEnd: false,
+          restriction: 'sleep' as never,
+          traits: [],
+        },
+      ],
+    });
+    project.items.items = [
+      {
+        id: 'bad_item',
+        name: 'Bad Item',
+        description: '',
+        type: 'rare',
+        price: -2,
+        slot: 'phantom' as never,
+        effect: { hp: Number.NaN },
+        modifiers: { attack: Number.POSITIVE_INFINITY },
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Item "bad_item" references unknown item category "rare"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Item "bad_item" price must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Item "bad_item" references unknown equipment slot "phantom"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" references unknown weapon type "axe"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" price must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" references unknown animation "missing_animation"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Armor "bad_armor" references unknown armor type "plate"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Armor "bad_armor" references unknown equipment slot "shield"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('State "bad_state" priority must be between 0 and 100'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('State "bad_state" has invalid restriction "sleep"'))).toBe(true);
+  });
+
   it('rejects malformed types and missing required terms', () => {
     const project = projectWith({
       types: {
