@@ -18,6 +18,17 @@
       }
     },
     {
+      "name": "windows-dev",
+      "displayName": "Windows Dev (Ninja, out-of-OneDrive build)",
+      "description": "Windows development preset that keeps CMake FetchContent output under %LOCALAPPDATA% to avoid OneDrive file locks.",
+      "generator": "Ninja",
+      "binaryDir": "$env{LOCALAPPDATA}/RPGCreatorAI/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
+      }
+    },
+    {
       "name": "release",
       "inherits": "default",
       "displayName": "Release",
@@ -34,12 +45,23 @@
     {
       "name": "release",
       "configurePreset": "release"
+    },
+    {
+      "name": "windows-dev",
+      "configurePreset": "windows-dev"
     }
   ],
   "testPresets": [
     {
       "name": "default",
       "configurePreset": "default",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-dev",
+      "configurePreset": "windows-dev",
       "output": {
         "outputOnFailure": true
       }

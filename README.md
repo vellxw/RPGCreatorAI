@@ -122,6 +122,20 @@ Windows runtime build and C++ tests:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke
 ```
 
+Restricted-execution-policy fallback:
+
+```cmd
+scripts\dev\build.bat
+```
+
+Manual CMake diagnosis on Windows should use the out-of-OneDrive preset:
+
+```cmd
+cmake --preset windows-dev
+cmake --build --preset windows-dev
+ctest --preset windows-dev
+```
+
 Runtime smoke check:
 
 ```powershell

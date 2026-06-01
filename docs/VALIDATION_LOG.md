@@ -2590,3 +2590,36 @@ Error: Port 1420 is already in use
   planning documentation and task status. CP-007 immediately recorded a green
   full canonical baseline.
 
+### Phase 11 FRA-44 / CP-009 — Windows dev build reliability
+
+- `2026-06-01 19:44:13 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED as
+  expected; the new CP-009 test failed because
+  `scripts/dev/build.bat` did not exist.
+- `2026-06-01 19:45:35 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  adding `build.bat`, `test.bat`, and the `windows-dev` CMake preset; 1 test
+  file and 2 tests passed.
+- `2026-06-01 19:46:13 -03:00` — `cmake --list-presets` — PASS; configure
+  presets include `default`, `windows-dev`, and `release`.
+- `2026-06-01 19:46:13 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1 -Clean`
+  — PASS; clean native configure/build/CTest completed in
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\build`, outside the OneDrive repo
+  path. Non-fatal warnings: missing PkgConfig, CMake FetchContent CMP0135
+  developer warnings, and dependency `cmake_minimum_required` deprecation
+  warnings.
+- `2026-06-01 19:48:13 -03:00` — `cmd /c scripts\dev\build.bat` — PASS;
+  wrapper invoked the PowerShell helper, configured the same out-of-OneDrive
+  build directory, Ninja reported no work to do, and CTest reported 1/1 tests
+  passed.
+- `2026-06-01 19:48:22 -03:00` —
+  `cmd /c scripts\dev\test.bat -SkipFrontend` — PASS; CTest reported 1/1
+  tests passed against `C:\Users\franc\AppData\Local\RPGCreatorAI\build`.
+- `2026-06-01 19:48:24 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipRuntime -SkipSmoke`
+  — PASS; Tauri content check served the RPGCreatorAI editor on
+  `http://127.0.0.1:1420/`, and Rust desktop tests reported 25 passed, 0
+  failed.
+- `2026-06-01 19:49:58 -03:00` — `npm run typecheck` — PASS.
+

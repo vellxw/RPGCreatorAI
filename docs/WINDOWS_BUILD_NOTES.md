@@ -8,7 +8,10 @@ On Windows, build the C++ runtime **outside** the OneDrive-synced repo path. The
 scripts\dev\verify.bat
 
 :: Native configure/build/CTest only
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\build.ps1
+scripts\dev\build.bat
+
+:: Focused frontend Vitest plus CTest against the existing native build
+scripts\dev\test.bat
 ```
 
 The verifier defaults the native build directory to
@@ -42,6 +45,42 @@ scripts\dev\verify-runtime.bat
 .\scripts\dev\verify.ps1 -SkipFrontend        # skip npm typecheck/test/build
 .\scripts\dev\verify.ps1 -SkipDesktop         # skip Tauri content and cargo tests
 .\scripts\dev\verify.ps1 -SkipRuntime         # skip C++ configure/build/CTest
+```
+
+### `build.ps1` / `build.bat`
+```powershell
+.\scripts\dev\build.ps1 -BuildDir D:\rpg-build
+.\scripts\dev\build.ps1 -Clean
+```
+
+```cmd
+scripts\dev\build.bat -BuildDir D:\rpg-build
+scripts\dev\build.bat -Clean
+```
+
+### `test.ps1` / `test.bat`
+```powershell
+.\scripts\dev\test.ps1 -BuildDir D:\rpg-build
+.\scripts\dev\test.ps1 -SkipFrontend
+.\scripts\dev\test.ps1 -SkipRuntime
+```
+
+```cmd
+scripts\dev\test.bat -BuildDir D:\rpg-build
+scripts\dev\test.bat -SkipFrontend
+scripts\dev\test.bat -SkipRuntime
+```
+
+### CMake presets
+For manual CMake diagnosis, prefer the Windows preset that writes to
+`%LOCALAPPDATA%\RPGCreatorAI\build`. If the compiler is not already on
+`PATH`, use `scripts\dev\build.bat` instead; the helper bootstraps
+`VsDevCmd.bat` automatically.
+
+```cmd
+cmake --preset windows-dev
+cmake --build --preset windows-dev
+ctest --preset windows-dev
 ```
 
 ### `build_bootstrap.bat`

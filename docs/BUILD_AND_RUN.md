@@ -49,6 +49,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
 ```
 
+Equivalent `.bat` wrappers are available when direct PowerShell script
+execution is blocked:
+
+```cmd
+scripts\dev\build.bat
+scripts\dev\test.bat
+scripts\dev\smoke-runtime.bat
+```
+
+For manual CMake diagnosis on Windows, prefer the out-of-OneDrive preset:
+
+```cmd
+cmake --preset windows-dev
+cmake --build --preset windows-dev
+ctest --preset windows-dev
+```
+
 ## Development server
 
 ```bash
