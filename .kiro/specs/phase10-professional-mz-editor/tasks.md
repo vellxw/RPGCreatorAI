@@ -131,7 +131,7 @@
 - [x] FRA-5 / MVP-000: lock MVP scope and Linear tracking metadata in docs.
 - [x] FRA-27 / QA-001: expand the bundled sample to exercise MVP features and
   validate the sample references.
-- [ ] FRA-28 / QA-002: add editor-runtime roundtrip coverage for MVP playtest
+- [x] FRA-28 / QA-002: add editor-runtime roundtrip coverage for MVP playtest
   modes.
 - [ ] FRA-29 / QA-003: add runtime smoke coverage for choices, movement,
   audio, foreground occlusion, and plugin-command logs.

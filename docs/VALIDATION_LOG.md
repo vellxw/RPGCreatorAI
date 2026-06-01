@@ -2155,3 +2155,53 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:05:34 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-28 / QA-002 — editor-runtime roundtrip gate
+
+- `2026-06-01 16:11:12 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts`
+  — RED but the first failures were test harness issues: the seed actor id was
+  not `hero`, and script file reads used a non-file `import.meta.url`. Fix:
+  derive the actor id from loaded data and read script files from
+  `process.cwd()`.
+- `2026-06-01 16:11:34 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts`
+  — RED as expected; the roundtrip script lacked the required
+  `FRONTEND ROUNDTRIP TESTS` and later gate sections.
+- `2026-06-01 16:12:50 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts`
+  — PASS after adding database/common-event save coverage, playtest mode
+  session request coverage, and the integrated script gate wiring.
+- `2026-06-01 16:13:06 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1`
+  — FAIL in `RUNTIME SCREENSHOT ROUNDTRIP`; PowerShell treated the optional
+  audio `[WARN]` stderr line as `NativeCommandError` while `$ErrorActionPreference`
+  was `Stop`. Fix: capture runtime screenshot stdout/stderr to temp files and
+  fail only on non-zero exit or `[ERROR]`.
+- `2026-06-01 16:14:13 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts`
+  — PASS; 4 tests passed.
+- `2026-06-01 16:14:27 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1`
+  — PASS; frontend roundtrip tests passed (2 files, 6 tests), Tauri content
+  check passed, Rust desktop tests passed (25 tests), native CMake/CTest passed,
+  runtime launch smoke passed, and screenshot hashes differed:
+  baseline `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944`,
+  edited `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+- `2026-06-01 16:15:55 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 16:16:20 -03:00` — `npm run build` — PASS; Vite build
+  completed with the existing chunk-size warning only.
+- `2026-06-01 16:16:49 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1`
+  — PASS; frontend roundtrip tests passed (2 files, 6 tests), Tauri content
+  check passed, Rust desktop tests passed (25 tests), native CMake/CTest passed,
+  runtime launch smoke passed, and screenshot hashes again differed with the
+  same deterministic baseline/edited values. Existing optional missing-audio
+  and dependency warnings remained non-fatal.
+- `2026-06-01 16:17:20 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- `2026-06-01 16:18:28 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts`
+  — PASS after a minor test import cleanup; 4 tests passed.
+- `2026-06-01 16:18:28 -03:00` — `npm run typecheck` — PASS after the
+  same cleanup.
+

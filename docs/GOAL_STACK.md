@@ -15,12 +15,16 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-28 through FRA-35): editor-runtime
-  roundtrip, runtime smoke expansion, canonical verification script, feature
-  integration, docs closeout, final report, commit, and push.
+- Integration QA — MVP green gate (FRA-29 through FRA-35): runtime smoke
+  expansion, canonical verification script, feature integration, docs closeout,
+  final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 QA-002 (FRA-28) — editor/runtime roundtrip now has one command
+  that runs frontend save/session tests, Tauri content verification, Rust
+  desktop tests, native CMake/CTest, runtime launch smoke, and screenshot
+  hash proof that edited project data changes the rendered runtime frame.
 - Phase 10 QA-001 (FRA-27) — bundled sample now exercises MVP feature
   coverage: choices, self-switch pages, a switch-gated parallel common event,
   event-target movement routes, `playSound`, `pluginCommand debug.log`,

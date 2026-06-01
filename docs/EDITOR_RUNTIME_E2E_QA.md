@@ -1,30 +1,59 @@
-# Editor → Runtime End-to-End QA
+# Editor -> Runtime End-to-End QA
 
-This document records the concrete Phase 7 proof that editor-authored
-project data reaches the runtime. The implementation now uses three
-complementary checks rather than one optimistic manual story:
+This document records the concrete proof that editor-authored project data
+reaches the native runtime. Phase 10 expands the original Phase 7 check into
+one repeatable green gate for editor save data, desktop session generation,
+Tauri content, native build/tests, launch smoke, and runtime consumption.
 
-1. **Editor save path** — Vitest drives the same reducer + `performSave`
-   flow used by the React editor and reloads the active adapter.
-2. **Desktop disk path** — Rust tests round-trip real map edits through
-   the Tauri shell writer/reader.
-3. **Runtime consumption path** — a PowerShell harness copies the bundled
-   project to a temporary folder, edits visible map JSON, launches the
-   native runtime twice, and proves the rendered frame changes.
+The main command is:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1
+```
+
+For restricted PowerShell environments, run:
+
+```bat
+scripts\dev\verify-editor-runtime-roundtrip.bat
+```
+
+The script prints these sections and exits non-zero on the first failed gate:
+
+1. **FRONTEND ROUNDTRIP TESTS** — Vitest drives the reducer + `performSave`
+   flow used by the React editor, mutates map data, database data, and common
+   event commands, reloads the active adapter, and validates the reloaded
+   state. It also proves the desktop playtest adapter sends project-start,
+   current-map, and selected-event session requests.
+2. **TAURI CONTENT CHECK** — the script reuses an existing correct dev server
+   on port 1420 or starts Vite directly, then runs
+   `scripts/dev/verify-tauri-content.ps1` to ensure Tauri would load this app.
+3. **RUST DESKTOP TESTS** — `cargo test --manifest-path src-tauri/Cargo.toml`
+   covers desktop persistence and temp playtest session generation.
+4. **NATIVE BUILD AND TEST** — `scripts/dev/verify.ps1 -SkipSmoke` configures,
+   builds, and runs CTest for the C++ runtime.
+5. **RUNTIME LAUNCH SMOKE** — `scripts/dev/smoke-runtime.ps1` launches the
+   runtime briefly from real project data and rejects early exit or `[ERROR]`
+   output.
+6. **RUNTIME SCREENSHOT ROUNDTRIP** — the harness copies the bundled project
+   to a temp folder, edits visible map JSON, launches the runtime twice with
+   `--smoke-shots`, and proves the rendered frame hash changes.
 
 Together these cover the full path the product actually uses:
 
 ```text
-editor reducer → save adapter → project JSON on disk → C++ runtime loader → rendered frame
+editor reducer -> save adapter -> project JSON on disk -> playtest session root -> C++ runtime loader -> rendered frame
 ```
 
 ## Automated checks
 
 | Layer | Command | Evidence |
 | --- | --- | --- |
-| Editor reducer + save adapter | `npx vitest run src/e2e/__tests__/editorRoundtrip.test.ts` | Paints collision, adds an event, saves, reloads, and asserts both edits persist. |
-| Desktop shell persistence | `cargo test --manifest-path src-tauri/Cargo.toml --lib` | Includes `write_then_read_round_trips_map_edits`. |
-| Runtime reads saved data | `powershell -File scripts/dev/verify-editor-runtime-roundtrip.ps1` | Mutates a copied `town.json`, launches the runtime, and verifies the edited first-frame screenshot hash differs from baseline. |
+| Editor reducer + save adapter | `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts` | Paints collision, adds an event, edits actor data, edits common event commands, saves, reloads, validates, and verifies project-start/current-map/selected-event session requests. |
+| Tauri dev content | `scripts/dev/verify-tauri-content.ps1` through the roundtrip script | Confirms port 1420 serves the RPGCreatorAI editor HTML and entrypoint. |
+| Desktop shell persistence | `cargo test --manifest-path src-tauri/Cargo.toml` | Includes map/database write/read coverage and temp playtest session generation for current-map and selected-event modes. |
+| Native runtime build/tests | `scripts/dev/verify.ps1 -SkipSmoke` through the roundtrip script | Configures CMake, builds the runtime, and runs CTest. |
+| Runtime launch smoke | `scripts/dev/smoke-runtime.ps1` through the roundtrip script | Launches the runtime against real project data and verifies it stays alive without `[ERROR]` output. |
+| Runtime reads saved data | `scripts/dev/verify-editor-runtime-roundtrip.ps1` | Mutates a copied `town.json`, launches the runtime, and verifies the edited first-frame screenshot hash differs from baseline. |
 
 The runtime round-trip script is intentionally safe:
 
