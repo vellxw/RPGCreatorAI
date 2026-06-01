@@ -204,7 +204,7 @@ Invoke-Step 'RUST DESKTOP TESTS' {
 }
 
 Invoke-Step 'NATIVE BUILD AND TEST' {
-    & (Join-Path $PSScriptRoot 'verify.ps1') -BuildDir $resolvedBuildDir -SkipSmoke
+    & (Join-Path $PSScriptRoot 'verify.ps1') -BuildDir $resolvedBuildDir -SkipSmoke -SkipFrontend -SkipDesktop
 }
 
 Invoke-Step 'RUNTIME LAUNCH SMOKE' {

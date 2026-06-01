@@ -1,15 +1,48 @@
 # scripts/dev/test.ps1
-# Runs ctest against an already-built tree (does not rebuild).
+# Runs frontend Vitest and C++ CTest against an already-built native tree.
+
 [CmdletBinding()]
-param()
+param(
+    [switch]$SkipFrontend,
+    [switch]$SkipRuntime,
+    [string]$BuildDir
+)
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location $repoRoot
 
-$cmake = "${env:ProgramFiles}\CMake\bin\cmake.exe"
-$ctest = "${env:ProgramFiles}\CMake\bin\ctest.exe"
-if (-not (Test-Path $ctest)) { throw "ctest not found at $ctest" }
+function Resolve-BuildDir {
+    param([string]$Override)
+    if ($Override) { return $Override }
+    $localBase = $env:LOCALAPPDATA
+    if (-not $localBase) { $localBase = [Environment]::GetFolderPath('LocalApplicationData') }
+    if ($localBase) { return Join-Path $localBase 'RPGCreatorAI\build' }
+    return Join-Path $repoRoot 'build'
+}
 
-& $ctest --preset default
-exit $LASTEXITCODE
+function Invoke-CheckedCommand {
+    param(
+        [string]$Label,
+        [scriptblock]$Command
+    )
+    & $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Label failed (exit $LASTEXITCODE)"
+    }
+}
+
+if (-not $SkipFrontend) {
+    Write-Host '=== FRONTEND TESTS ==='
+    Invoke-CheckedCommand 'npm test' { & npm test }
+}
+
+if (-not $SkipRuntime) {
+    $resolvedBuildDir = Resolve-BuildDir -Override $BuildDir
+    Write-Host '=== C++ TESTS ==='
+    Invoke-CheckedCommand 'ctest' {
+        & ctest --test-dir $resolvedBuildDir --output-on-failure
+    }
+}
+
+Write-Host '=== TESTS PASSED ==='

@@ -1,29 +1,63 @@
 # Build and Run Instructions
 
 ## Requirements
-- A modern C++ compiler (C++20 support or higher).
-- CMake 3.15+
-- SDL2 (can be installed locally or fetched via CMake fetch content; our script uses FetchContent to ensure ease of building).
 
-## Building on Windows (MSVC)
-```bash
-# Generate project files
-cmake -S . -B build
+- Node.js and npm.
+- Rust and Cargo for the Tauri desktop bridge.
+- Visual Studio Build Tools or Visual Studio with the C++ workload.
+- CMake and Ninja.
 
-# Build the project
-cmake --build build --config Debug
+## Canonical MVP verification
 
-# Run the runtime
-./build/Debug/rpg_creator_runtime.exe
+Run the full local green gate from the repository root:
 
-# Run the tests
-ctest --test-dir build --output-on-failure
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
 ```
 
-## Setup using Ninja
+This command runs frontend typecheck, Vitest, frontend build, native C++
+configure/build/CTest, Tauri content verification, Rust desktop tests,
+runtime smoke, and editor-runtime roundtrip validation. The native build
+defaults to `%LOCALAPPDATA%\RPGCreatorAI\build` to avoid OneDrive file locks.
+
+Targeted skip flags for local diagnosis:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipDesktop
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipRuntime
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -BuildDir D:\rpg-build
+```
+
+For restricted PowerShell execution policies:
+
+```cmd
+scripts\dev\verify.bat
+```
+
+## Focused helpers
+
+```powershell
+# Native configure/build/CTest only, no frontend/desktop/smoke gates.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1
+
+# Frontend Vitest plus CTest against the existing native build.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1
+
+# Runtime smoke only.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
+```
+
+## Development server
+
 ```bash
-cmake -S . -B build -G Ninja
-cmake --build build
-./build/rpg_creator_runtime
-ctest --test-dir build --output-on-failure
+npm install
+npm run dev
+```
+
+The desktop dev server uses the strict Tauri port:
+
+```bash
+npm run dev:tauri
 ```

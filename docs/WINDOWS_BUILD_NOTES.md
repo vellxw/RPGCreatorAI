@@ -4,14 +4,15 @@
 On Windows, build the C++ runtime **outside** the OneDrive-synced repo path. The provided scripts already do this by default.
 
 ```cmd
-:: One-click build + test (out-of-OneDrive)
-scripts\dev\verify-runtime.bat
+:: Canonical MVP green gate
+scripts\dev\verify.bat
 
-:: Same, plus a 3-second runtime smoke check
-powershell -ExecutionPolicy Bypass -File scripts\dev\verify.ps1
+:: Native configure/build/CTest only
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev\build.ps1
 ```
 
-Both scripts default the build directory to `%LOCALAPPDATA%\RPGCreatorAI\build`.
+The verifier defaults the native build directory to
+`%LOCALAPPDATA%\RPGCreatorAI\build`.
 
 ## Why
 The repository on this machine lives under `C:\Users\<user>\OneDrive\Escritorio\RPGCreatorAI`. OneDrive's filter driver intermittently locks files inside `build/_deps/` while CMake's `FetchContent` is performing rename steps (e.g. `json-populate1234/json` -> `json-src`). The symptom is:
@@ -37,7 +38,10 @@ scripts\dev\verify-runtime.bat
 ### `verify.ps1`
 ```powershell
 .\scripts\dev\verify.ps1 -BuildDir D:\rpg-build
-.\scripts\dev\verify.ps1 -Clean -SkipSmoke    # clean reconfigure, no smoke
+.\scripts\dev\verify.ps1 -Clean -SkipSmoke    # clean native reconfigure, no smoke/roundtrip
+.\scripts\dev\verify.ps1 -SkipFrontend        # skip npm typecheck/test/build
+.\scripts\dev\verify.ps1 -SkipDesktop         # skip Tauri content and cargo tests
+.\scripts\dev\verify.ps1 -SkipRuntime         # skip C++ configure/build/CTest
 ```
 
 ### `build_bootstrap.bat`
@@ -68,6 +72,22 @@ rmdir /s /q "%LOCALAPPDATA%\RPGCreatorAI\build"
 - Ninja (the scripts auto-detect winget-installed Ninja)
 
 The scripts auto-discover all three.
+
+## Canonical gate
+
+`scripts\dev\verify.ps1` is the source-of-truth MVP validation command. By
+default it runs:
+
+- frontend typecheck
+- Vitest
+- frontend build
+- C++ configure/build/CTest
+- Tauri content verification
+- Rust desktop tests
+- runtime smoke
+- editor-runtime roundtrip validation
+
+Each gate prints its own header and the script ends with a gate summary.
 
 ## Frontend
 

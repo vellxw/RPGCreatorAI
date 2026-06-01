@@ -15,12 +15,17 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-30 through FRA-35): canonical
-  verification script, feature integration, docs closeout, final report,
-  commit, and push.
+- Integration QA — MVP green gate (FRA-31 through FRA-35): feature
+  integration, docs closeout, final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 QA-004 (FRA-30) — `scripts/dev/verify.ps1` is now the canonical
+  MVP green gate. It runs frontend typecheck, Vitest, frontend build, native
+  C++ configure/build/CTest, Tauri content verification, Rust desktop tests,
+  runtime smoke, and editor-runtime roundtrip validation, with targeted
+  `-SkipFrontend`, `-SkipDesktop`, `-SkipRuntime`, and `-SkipSmoke` flags and
+  a final gate summary.
 - Phase 10 QA-003 (FRA-29) — runtime smoke now launches the native runtime,
   runs `--smoke-shots` into `docs/screenshots/phase10-mvp/`, and fails unless
   logs prove choice selection, event-target movement, local `chest_open` audio

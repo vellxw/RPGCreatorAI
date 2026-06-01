@@ -135,7 +135,7 @@
   modes.
 - [x] FRA-29 / QA-003: add runtime smoke coverage for choices, movement,
   audio, foreground occlusion, and plugin-command logs.
-- [ ] FRA-30 / QA-004: create the full verification script for the MVP green
+- [x] FRA-30 / QA-004: create the full verification script for the MVP green
   gate with targeted skip flags.
 - [ ] FRA-31 / INT-001: integrate Database V2 branches and run full frontend
   validation.

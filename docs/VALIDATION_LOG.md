@@ -2256,3 +2256,38 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:31:18 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 10 FRA-30 / QA-004 — canonical MVP green gate
+
+- `2026-06-01 16:35:51 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  — RED as expected; `scripts/dev/verify.ps1` still lacked the frontend,
+  desktop, runtime skip flags, required gate headers, and editor-runtime
+  roundtrip wiring.
+- `2026-06-01 16:38:26 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after adding the canonical verify gate contract; 1 test passed.
+- `2026-06-01 16:38:45 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipRuntime -SkipSmoke`
+  — PASS; skip flags printed all expected skipped gate headers and a gate
+  summary.
+- `2026-06-01 16:39:26 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/e2e/__tests__/runtimeSmokeScript.test.ts`
+  — PASS; 3 files and 6 tests passed.
+- `2026-06-01 16:39:50 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS; helper skipped frontend/desktop/smoke gates and ran native
+  configure/build/CTest against `%LOCALAPPDATA%\RPGCreatorAI\build`.
+- `2026-06-01 16:40:05 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1 -SkipFrontend`
+  — PASS; CTest passed against the existing local native build.
+- `2026-06-01 16:42:20 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; canonical gate ran frontend typecheck, all Vitest tests
+  (35 files, 212 tests), frontend build, C++ configure/build/CTest,
+  Tauri content verification, Rust desktop tests (25 tests), runtime smoke,
+  and editor-runtime screenshot roundtrip. Existing Vite chunk-size,
+  CMake dependency/deprecation, and optional missing-audio warnings remained
+  non-fatal.
+- `2026-06-01 16:42:35 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+
