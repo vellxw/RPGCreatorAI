@@ -140,6 +140,8 @@ std::optional<ProjectData> ProjectLoader::load(const std::string& path) {
         pickPath("actors", project.database.actorsPath);
         pickPath("classes", project.database.classesPath);
         pickPath("skills", project.database.skillsPath);
+        pickPath("types", project.database.typesPath);
+        pickPath("terms", project.database.termsPath);
         pickPath("enemies", project.database.enemiesPath);
         pickPath("troops", project.database.troopsPath);
         pickPath("quests", project.database.questsPath);

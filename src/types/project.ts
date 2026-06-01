@@ -22,6 +22,8 @@ export interface DatabasePaths {
   weapons?: string;
   armors?: string;
   states?: string;
+  types?: string;
+  terms?: string;
   enemies?: string;
   troops?: string;
   quests?: string;
@@ -455,6 +457,66 @@ export interface Stats {
   luck: number;
 }
 
+export interface NamedTypeEntry {
+  id: string;
+  name: string;
+}
+
+export interface TypesDatabaseData {
+  weaponTypes: NamedTypeEntry[];
+  armorTypes: NamedTypeEntry[];
+  skillTypes: NamedTypeEntry[];
+  elements: NamedTypeEntry[];
+  equipmentSlots: NamedTypeEntry[];
+  itemCategories: NamedTypeEntry[];
+}
+
+export type StatTerms = Record<keyof Stats, string>;
+
+export interface MenuTerms {
+  item: string;
+  skill: string;
+  equip: string;
+  status: string;
+  formation: string;
+  options: string;
+  save: string;
+  load: string;
+}
+
+export interface CommandTerms {
+  attack: string;
+  guard: string;
+  item: string;
+  skill: string;
+  escape: string;
+}
+
+export interface BattleTerms {
+  fight: string;
+  escape: string;
+  victory: string;
+  defeat: string;
+  exp: string;
+  levelUp: string;
+}
+
+export interface SaveLoadTerms {
+  save: string;
+  load: string;
+  file: string;
+  empty: string;
+}
+
+export interface TermsDatabaseData {
+  currencyUnit: string;
+  stats: StatTerms;
+  menu: MenuTerms;
+  commands: CommandTerms;
+  battle: BattleTerms;
+  saveLoad: SaveLoadTerms;
+}
+
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
 
 export type ArmorSlot = 'shield' | 'head' | 'body' | 'accessory';
@@ -635,6 +697,8 @@ export interface DatabaseEntries {
   weapons: WeaponData[];
   armors: ArmorData[];
   states: StateData[];
+  types: TypesDatabaseData;
+  terms: TermsDatabaseData;
   enemies: EnemyData[];
   troops: TroopData[];
   quests: QuestData[];
@@ -647,7 +711,10 @@ export interface DatabaseEntries {
   system: SystemData;
 }
 
-export type DatabaseListKey = Exclude<keyof DatabaseEntries, 'system' | 'animations' | 'tilesets'>;
+export type DatabaseListKey = Exclude<
+  keyof DatabaseEntries,
+  'system' | 'animations' | 'tilesets' | 'types' | 'terms'
+>;
 
 // Editor-specific types
 export type Screen = 'editor' | 'events' | 'database' | 'ai-tools' | 'playtest';

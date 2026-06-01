@@ -114,6 +114,74 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Duplicate state id'))).toBe(true);
   });
 
+  it('rejects malformed types and missing required terms', () => {
+    const project = projectWith({
+      types: {
+        weaponTypes: [
+          { id: 'sword', name: 'Sword' },
+          { id: 'sword', name: 'Blade' },
+        ],
+        armorTypes: [{ id: 'light', name: '' }],
+        skillTypes: [{ id: 'magic', name: 'Magic' }],
+        elements: [{ id: 'fire', name: 'Fire' }],
+        equipmentSlots: [{ id: 'weapon', name: 'Weapon' }],
+        itemCategories: [{ id: 'consumable', name: 'Consumable' }],
+      },
+      terms: {
+        currencyUnit: '',
+        stats: {
+          maxHp: 'Max HP',
+          maxMp: 'Max MP',
+          attack: '',
+          defense: 'Defense',
+          magicAttack: 'Magic Attack',
+          magicDefense: 'Magic Defense',
+          agility: 'Agility',
+          luck: 'Luck',
+        },
+        menu: {
+          item: 'Item',
+          skill: 'Skill',
+          equip: '',
+          status: 'Status',
+          formation: 'Formation',
+          options: 'Options',
+          save: 'Save',
+          load: 'Load',
+        },
+        commands: {
+          attack: 'Attack',
+          guard: 'Guard',
+          item: 'Item',
+          skill: 'Skill',
+          escape: 'Escape',
+        },
+        battle: {
+          fight: 'Fight',
+          escape: 'Escape',
+          victory: 'Victory',
+          defeat: 'Defeat',
+          exp: 'EXP',
+          levelUp: 'Level Up',
+        },
+        saveLoad: {
+          save: 'Save',
+          load: 'Load',
+          file: 'File',
+          empty: 'Empty',
+        },
+      },
+    });
+
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('Duplicate weaponTypes id "sword"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('armorTypes entry "light" is missing a name'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('missing required equipment slot "armor"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Terms currencyUnit is required'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Terms stats.attack is required'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Terms menu.equip is required'))).toBe(true);
+  });
+
   it('rejects controlVariable referencing unknown variable', () => {
     const project = projectWith({
       variables: [{ id: 'v1', name: 'V1', initial: 0 }],

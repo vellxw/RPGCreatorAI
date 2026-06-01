@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "currencyUnit": "G",
+  "stats": {
+    "maxHp": "Max HP",
+    "maxMp": "Max MP",
+    "attack": "Attack",
+    "defense": "Defense",
+    "magicAttack": "Magic Attack",
+    "magicDefense": "Magic Defense",
+    "agility": "Agility",
+    "luck": "Luck"
+  },
+  "menu": {
+    "item": "Item",
+    "skill": "Skill",
+    "equip": "Equip",
+    "status": "Status",
+    "formation": "Formation",
+    "options": "Options",
+    "save": "Save",
+    "load": "Load"
+  },
+  "commands": {
+    "attack": "Attack",
+    "guard": "Guard",
+    "item": "Item",
+    "skill": "Skill",
+    "escape": "Escape"
+  },
+  "battle": {
+    "fight": "Fight",
+    "escape": "Escape",
+    "victory": "Victory",
+    "defeat": "Defeat",
+    "exp": "EXP",
+    "levelUp": "Level Up"
+  },
+  "saveLoad": {
+    "save": "Save",
+    "load": "Load",
+    "file": "File",
+    "empty": "Empty"
+  }
+}

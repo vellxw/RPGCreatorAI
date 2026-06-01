@@ -22,6 +22,8 @@ struct DatabaseReference {
     std::string actorsPath;
     std::string classesPath;
     std::string skillsPath;
+    std::string typesPath;
+    std::string termsPath;
     std::string enemiesPath;
     std::string troopsPath;
     std::string questsPath;

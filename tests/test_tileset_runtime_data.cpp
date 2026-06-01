@@ -59,6 +59,28 @@ TEST_CASE("ProjectLoader loads optional database.tilesets path") {
     removeTempFile(projectPath);
 }
 
+TEST_CASE("ProjectLoader loads optional database types and terms paths") {
+    const std::string projectPath = writeTempJson("with_types_terms_project.json", R"({
+        "schemaVersion": 1,
+        "title": "TypesTerms",
+        "startMapId": "town",
+        "startPosition": { "x": 0, "y": 0, "direction": "down" },
+        "maps": [{ "id": "town", "path": "maps/town.json" }],
+        "database": {
+            "items": "data/database/items.json",
+            "types": "data/database/types.json",
+            "terms": "data/database/terms.json"
+        }
+    })");
+
+    auto project = ProjectLoader::load(projectPath);
+    REQUIRE(project.has_value());
+    CHECK(project->database.typesPath == "data/database/types.json");
+    CHECK(project->database.termsPath == "data/database/terms.json");
+
+    removeTempFile(projectPath);
+}
+
 TEST_CASE("RpgDatabases loads tilesets and finds them by id") {
     const std::string tilesetsPath = writeTempJson("tilesets_database.json", R"({
         "schemaVersion": 1,

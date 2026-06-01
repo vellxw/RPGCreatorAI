@@ -15,8 +15,9 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 4 — Database V2: dedicated tilesets/items/weapons/armors/states/
-  types/terms/animations editors and common-event command editing.
+- Slice 4 — Database V2: remaining dedicated tilesets/items/types/terms/
+  animations editors, richer weapons/armors/states fields, and common-event
+  command editing.
 - Slice 5 — Runtime MZ foundation: runtime project validator, interactive
   choices, movement routes, event priority/Y-sort, foreground occlusion, and
   local audio v1.
@@ -26,6 +27,17 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 Slice 4B — Database V2 types/terms foundation: project data now
+  includes `data/database/types.json` and `data/database/terms.json`; the
+  TypeScript schema, browser/export/import adapters, desktop Tauri
+  save/load, C++ `ProjectLoader`, and editor validation all preserve the new
+  shards. Validation now rejects duplicate or unnamed type entries, missing
+  default equipment slots, and missing required term labels.
+- Phase 10 Slice 4A — Database V2 separated equipment/state foundation:
+  weapons, armors, and states are first-class database tables with sample
+  data, browser/Tauri round-trip support, validation for duplicate ids,
+  editor CRUD tabs, and legacy item migration for older projects that still
+  store equipment as item rows.
 - Phase 10 Slice 3D command-stack range selection/delete — event command rows
   now have checkbox selection, shift-click range selection within the same
   command-list parent, toolbar and keyboard delete for selected ranges, and

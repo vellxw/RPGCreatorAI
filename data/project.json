@@ -31,6 +31,8 @@
     "weapons": "data/database/weapons.json",
     "armors": "data/database/armors.json",
     "states": "data/database/states.json",
+    "types": "data/database/types.json",
+    "terms": "data/database/terms.json",
     "enemies": "data/database/enemies.json",
     "troops": "data/database/troops.json",
     "quests": "data/database/quests.json",

@@ -58,13 +58,28 @@
   lists, render graphics, event collision priority, and `through`.
 - [x] Slice 3C: deterministic autorun/parallel map and common-event scheduler.
 
-## Next Slices
+## Slice 4 — Database V2
 
 - [x] Slice 3D: command-stack v1 polish with insert, move, duplicate,
   cut/copy/paste, and empty-branch insertion targets.
 - [x] Slice 3D: movement-route basics with editor command data, validation,
   C++ parsing, `EventRunner` requests, and player-target runtime execution.
 - [x] Slice 3D: command-stack range selection/delete.
-- [ ] Slice 4: database v2 editors.
+- [x] Slice 4A: separated weapons, armors, and states database foundation
+  with seed data, adapter persistence, duplicate-id validation, editor CRUD
+  tabs, and legacy equipment migration from `items`.
+- [x] Slice 4B: add `types` and `terms` database shards with deterministic
+  starter data, TypeScript schema, browser import/export round-trip, Tauri
+  save/load round-trip, C++ optional path parsing, and editor validation for
+  duplicate/unnamed type entries, required equipment slots, and required
+  term labels.
+- [ ] Slice 4C: extract reusable Database V2 editor framework.
+- [ ] Slice 4D: dedicated Items, Types, Terms, Tilesets, and Animations
+  editors.
+- [ ] Slice 4E: richer Weapons, Armors, States, and Common Events editors
+  with complete command editing for common events.
+
+## Next Slices
+
 - [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
 - [ ] Slice 6: playtest/debug programmer tools.

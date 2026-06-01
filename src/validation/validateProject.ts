@@ -35,6 +35,31 @@ const VALID_MOVEMENT_ROUTE_STEPS = new Set([
   'turnRight',
   'wait',
 ]);
+const REQUIRED_EQUIPMENT_SLOT_IDS = ['weapon', 'armor', 'accessory'];
+const TYPE_TABLES = [
+  'weaponTypes',
+  'armorTypes',
+  'skillTypes',
+  'elements',
+  'equipmentSlots',
+  'itemCategories',
+] as const;
+const REQUIRED_TERM_GROUPS = {
+  stats: [
+    'maxHp',
+    'maxMp',
+    'attack',
+    'defense',
+    'magicAttack',
+    'magicDefense',
+    'agility',
+    'luck',
+  ],
+  menu: ['item', 'skill', 'equip', 'status', 'formation', 'options', 'save', 'load'],
+  commands: ['attack', 'guard', 'item', 'skill', 'escape'],
+  battle: ['fight', 'escape', 'victory', 'defeat', 'exp', 'levelUp'],
+  saveLoad: ['save', 'load', 'file', 'empty'],
+} as const;
 
 // Phase 6 v1 command set. Used both for editor-side type checks and for
 // the runtime parser, which mirrors this list.
@@ -359,6 +384,66 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
         });
       }
       seen.add(entry.id);
+    }
+  }
+
+  for (const tableName of TYPE_TABLES) {
+    const seen = new Set<string>();
+    for (const entry of db.types[tableName]) {
+      if (!entry.id || entry.id.trim() === '') {
+        out.push({
+          level: 'error',
+          message: `${tableName} entry is missing an id`,
+          source: `database/types/${tableName}`,
+        });
+        continue;
+      }
+      if (!entry.name || entry.name.trim() === '') {
+        out.push({
+          level: 'error',
+          message: `${tableName} entry "${entry.id}" is missing a name`,
+          source: `database/types/${tableName}/${entry.id}`,
+        });
+      }
+      if (seen.has(entry.id)) {
+        out.push({
+          level: 'error',
+          message: `Duplicate ${tableName} id "${entry.id}"`,
+          source: `database/types/${tableName}`,
+        });
+      }
+      seen.add(entry.id);
+    }
+  }
+
+  const equipmentSlotIds = new Set(db.types.equipmentSlots.map(slot => slot.id));
+  for (const slotId of REQUIRED_EQUIPMENT_SLOT_IDS) {
+    if (!equipmentSlotIds.has(slotId)) {
+      out.push({
+        level: 'error',
+        message: `Types database missing required equipment slot "${slotId}"`,
+        source: 'database/types/equipmentSlots',
+      });
+    }
+  }
+
+  if (!db.terms.currencyUnit || db.terms.currencyUnit.trim() === '') {
+    out.push({
+      level: 'error',
+      message: 'Terms currencyUnit is required',
+      source: 'database/terms/currencyUnit',
+    });
+  }
+  for (const [groupName, labels] of Object.entries(REQUIRED_TERM_GROUPS)) {
+    const group = db.terms[groupName as keyof typeof REQUIRED_TERM_GROUPS] as Record<string, string>;
+    for (const label of labels) {
+      if (!group?.[label] || group[label].trim() === '') {
+        out.push({
+          level: 'error',
+          message: `Terms ${groupName}.${label} is required`,
+          source: `database/terms/${groupName}`,
+        });
+      }
     }
   }
 

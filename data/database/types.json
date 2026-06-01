@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "weaponTypes": [
+    { "id": "sword", "name": "Sword" },
+    { "id": "staff", "name": "Staff" },
+    { "id": "bow", "name": "Bow" }
+  ],
+  "armorTypes": [
+    { "id": "light", "name": "Light Armor" },
+    { "id": "heavy", "name": "Heavy Armor" },
+    { "id": "robe", "name": "Robe" }
+  ],
+  "skillTypes": [
+    { "id": "special", "name": "Special" },
+    { "id": "magic", "name": "Magic" }
+  ],
+  "elements": [
+    { "id": "physical", "name": "Physical" },
+    { "id": "fire", "name": "Fire" },
+    { "id": "ice", "name": "Ice" },
+    { "id": "thunder", "name": "Thunder" }
+  ],
+  "equipmentSlots": [
+    { "id": "weapon", "name": "Weapon" },
+    { "id": "armor", "name": "Armor" },
+    { "id": "shield", "name": "Shield" },
+    { "id": "head", "name": "Head" },
+    { "id": "body", "name": "Body" },
+    { "id": "accessory", "name": "Accessory" }
+  ],
+  "itemCategories": [
+    { "id": "consumable", "name": "Consumable" },
+    { "id": "key", "name": "Key Item" },
+    { "id": "material", "name": "Material" }
+  ]
+}

@@ -22,6 +22,8 @@ import type {
   WeaponData,
   ArmorData,
   StateData,
+  TypesDatabaseData,
+  TermsDatabaseData,
   SwitchData,
   SystemData,
   TroopData,
@@ -42,6 +44,8 @@ import skillsJson from '../../data/database/skills.json';
 import weaponsJson from '../../data/database/weapons.json';
 import armorsJson from '../../data/database/armors.json';
 import statesJson from '../../data/database/states.json';
+import typesJson from '../../data/database/types.json';
+import termsJson from '../../data/database/terms.json';
 import enemiesJson from '../../data/database/enemies.json';
 import troopsJson from '../../data/database/troops.json';
 import questsJson from '../../data/database/quests.json';
@@ -87,6 +91,8 @@ function seedFromBundle(): FullProjectState {
       weapons: unwrapList<WeaponData>(deepClone(weaponsJson) as SchemaWrapper<WeaponData>, 'weapons'),
       armors: unwrapList<ArmorData>(deepClone(armorsJson) as SchemaWrapper<ArmorData>, 'armors'),
       states: unwrapList<StateData>(deepClone(statesJson) as SchemaWrapper<StateData>, 'states'),
+      types: extractTypes(deepClone(typesJson) as Record<string, unknown>),
+      terms: extractTerms(deepClone(termsJson) as Record<string, unknown>),
       enemies: unwrapList<EnemyData>(deepClone(enemiesJson) as SchemaWrapper<EnemyData>, 'enemies'),
       troops: unwrapList<TroopData>(deepClone(troopsJson) as SchemaWrapper<TroopData>, 'troops'),
       quests: unwrapList<QuestData>(deepClone(questsJson) as SchemaWrapper<QuestData>, 'quests'),
@@ -137,6 +143,32 @@ function extractAnimations(json: Record<string, unknown>): AnimationDatabaseData
 function extractTilesets(json: Record<string, unknown>): TilesetDatabaseData {
   return {
     tilesets: Array.isArray(json.tilesets) ? (json.tilesets as TilesetDatabaseData['tilesets']) : [],
+  };
+}
+
+function extractTypes(json: Record<string, unknown>): TypesDatabaseData {
+  return {
+    weaponTypes: Array.isArray(json.weaponTypes) ? (json.weaponTypes as TypesDatabaseData['weaponTypes']) : [],
+    armorTypes: Array.isArray(json.armorTypes) ? (json.armorTypes as TypesDatabaseData['armorTypes']) : [],
+    skillTypes: Array.isArray(json.skillTypes) ? (json.skillTypes as TypesDatabaseData['skillTypes']) : [],
+    elements: Array.isArray(json.elements) ? (json.elements as TypesDatabaseData['elements']) : [],
+    equipmentSlots: Array.isArray(json.equipmentSlots)
+      ? (json.equipmentSlots as TypesDatabaseData['equipmentSlots'])
+      : [],
+    itemCategories: Array.isArray(json.itemCategories)
+      ? (json.itemCategories as TypesDatabaseData['itemCategories'])
+      : [],
+  };
+}
+
+function extractTerms(json: Record<string, unknown>): TermsDatabaseData {
+  return {
+    currencyUnit: typeof json.currencyUnit === 'string' ? json.currencyUnit : 'G',
+    stats: (json.stats ?? {}) as TermsDatabaseData['stats'],
+    menu: (json.menu ?? {}) as TermsDatabaseData['menu'],
+    commands: (json.commands ?? {}) as TermsDatabaseData['commands'],
+    battle: (json.battle ?? {}) as TermsDatabaseData['battle'],
+    saveLoad: (json.saveLoad ?? {}) as TermsDatabaseData['saveLoad'],
   };
 }
 

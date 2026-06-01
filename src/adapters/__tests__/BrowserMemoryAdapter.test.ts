@@ -25,6 +25,14 @@ describe('BrowserMemoryAdapter', () => {
     expect(state.databases.weapons.map(w => w.id)).toContain('iron_sword');
     expect(state.databases.armors.map(armor => armor.id)).toContain('leather_armor');
     expect(state.databases.states.map(status => status.id)).toContain('poison');
+    expect(state.project.database.types).toBe('data/database/types.json');
+    expect(state.project.database.terms).toBe('data/database/terms.json');
+    expect(state.databases.types.weaponTypes.map(type => type.id)).toContain('sword');
+    expect(state.databases.types.equipmentSlots.map(slot => slot.id)).toEqual(
+      expect.arrayContaining(['weapon', 'armor', 'accessory']),
+    );
+    expect(state.databases.terms.currencyUnit).toBe('G');
+    expect(state.databases.terms.stats.attack).toBe('Attack');
   });
 
   it('saveProject updates the in-memory snapshot', async () => {
@@ -51,6 +59,8 @@ describe('BrowserMemoryAdapter', () => {
     const a = new BrowserMemoryAdapter();
     const state = await a.loadProject();
     state.project.title = 'Roundtrip RPG';
+    state.databases.types.weaponTypes.push({ id: 'axe', name: 'Axe' });
+    state.databases.terms.currencyUnit = 'Credits';
     await a.saveAll(state);
 
     const blob = await a.exportAll(state);
@@ -61,6 +71,8 @@ describe('BrowserMemoryAdapter', () => {
     const fresh = new BrowserMemoryAdapter();
     const imported = await fresh.importAll(text);
     expect(imported.project.title).toBe('Roundtrip RPG');
+    expect(imported.databases.types.weaponTypes.map(type => type.id)).toContain('axe');
+    expect(imported.databases.terms.currencyUnit).toBe('Credits');
   });
 
   it('importAll rejects malformed bundles', async () => {

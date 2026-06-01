@@ -163,3 +163,30 @@ tileset database loading.
   be known, and wait durations must be non-negative finite numbers.
 - Event-target movement and repeat-loop playback are logged as unsupported
   runtime extensions for a later foundation slice.
+
+## Slice 4A/4B Database V2 Foundation
+
+- Equipment and state data are now first-class editor database tables:
+  `weapons`, `armors`, and `states` live outside the legacy `items` list
+  while old projects still migrate equipment-like item rows into the new
+  tables when the separated shards are empty.
+- `types` and `terms` are object-style database shards, similar to `system`,
+  `animations`, and `tilesets`. They are stored as project-owned JSON under
+  `data/database/types.json` and `data/database/terms.json`, not copied from
+  any RPG Maker proprietary format.
+- `types` owns named identifiers for weapon types, armor types, skill types,
+  elements, equipment slots, and item categories. It includes the current
+  runtime/editor minimum equipment slots `weapon`, `armor`, and `accessory`
+  plus more granular authoring slots for later equipment UI work.
+- `terms` owns localized UI vocabulary for currency, stats, menu labels,
+  battle labels, command labels, and save/load labels. Runtime consumption is
+  deferred until menu/battle slices, but editor persistence and validation are
+  now stable.
+- Browser import/export, Tauri read/write, and C++ `ProjectLoader` all
+  preserve optional `database.types` and `database.terms` paths. The Tauri
+  shell keeps these shards unwrapped in renderer memory and writes them back
+  with `schemaVersion`, matching other object database shards.
+- Editor validation rejects duplicate type ids, unnamed type entries, missing
+  required equipment slots, empty currency units, and missing required term
+  labels. Cross-reference use of these type ids is intentionally staged for
+  the richer dedicated database editors.

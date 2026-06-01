@@ -1172,3 +1172,60 @@ Error: Port 1420 is already in use
 - `2026-05-25 10:57 -03:00` — `npm run desktop:verify-content` — PASS;
   `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
 
+### Phase 10 Slice 4B — types and terms database shards
+
+- `2026-05-31 22:08 -03:00` —
+  `npm test -- src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — RED; seeded project lacked `database.types` / `database.terms`, and
+  database validation did not inspect type tables or required term labels.
+- `2026-05-31 22:08 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib fs_commands::tests::read_project_extracts_database_shards -- --exact`
+  — RED; Tauri database shard extraction did not include `types` or `terms`.
+- `2026-05-31 22:11 -03:00` —
+  `npm test -- src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 17 tests) after adding the TypeScript schema, bundled
+  shards, browser adapter extraction, default merging, and validation rules.
+- `2026-05-31 22:11 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib fs_commands::tests::read_project_extracts_database_shards -- --exact`
+  — PASS after adding Tauri database refs, object-shard extraction, and
+  fixture coverage for `types` and `terms`.
+- `2026-05-31 22:12 -03:00` —
+  `npm test -- src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 17 tests) after adding export/import assertions for the
+  new shards.
+- `2026-05-31 22:12 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib fs_commands::tests::write_then_read_round_trips_databases -- --exact`
+  — PASS after asserting Tauri write/read preserves object-style
+  `types`/`terms`.
+- `2026-05-31 22:13 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — RED; new C++ ProjectLoader test showed `DatabaseReference` did not yet
+  expose `typesPath` or `termsPath`.
+- `2026-05-31 22:14 -03:00` — `npm run typecheck` — PASS.
+- `2026-05-31 22:14 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke`
+  — PASS; configure/build/CTest passed after `ProjectLoader` parsed optional
+  `database.types` and `database.terms` paths.
+- `2026-05-31 22:14 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-31 22:15 -03:00` — `npm test` — PASS (20 files,
+  152 tests).
+- `2026-05-31 22:15 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`).
+- `2026-05-31 22:15 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml --lib` — PASS
+  (18/18 Rust tests).
+- `2026-05-31 22:16 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest passed and runtime smoke reported
+  `SMOKE PASSED` after loading `My First RPG`.
+- `2026-05-31 22:17 -03:00` — Chrome DevTools UI smoke at
+  `http://127.0.0.1:1420/` — PASS; Database screen opened, Weapons tab
+  showed `Iron Sword`, weapon type and price fields rendered, and console had
+  no warnings or errors.
+- `2026-05-31 22:17 -03:00` — `npm run desktop:verify-content` — PASS;
+  `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-05-31 22:17 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

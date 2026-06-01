@@ -4,6 +4,75 @@
 
 import type { DatabaseEntries, DatabaseListKey } from '../types/project';
 
+const TYPE_TABLE_KEYS = [
+  'weaponTypes',
+  'armorTypes',
+  'skillTypes',
+  'elements',
+  'equipmentSlots',
+  'itemCategories',
+] as const;
+
+function mergeNamedTypeTables(
+  base: DatabaseEntries['types'],
+  input: unknown,
+): DatabaseEntries['types'] {
+  const merged: DatabaseEntries['types'] = {
+    weaponTypes: [...base.weaponTypes],
+    armorTypes: [...base.armorTypes],
+    skillTypes: [...base.skillTypes],
+    elements: [...base.elements],
+    equipmentSlots: [...base.equipmentSlots],
+    itemCategories: [...base.itemCategories],
+  };
+  if (!input || typeof input !== 'object') return merged;
+  for (const key of TYPE_TABLE_KEYS) {
+    const value = (input as Record<string, unknown>)[key];
+    if (Array.isArray(value)) {
+      merged[key] = value as DatabaseEntries['types'][typeof key];
+    }
+  }
+  return merged;
+}
+
+function mergeRequiredLabels<T extends object>(base: T, input: unknown): T {
+  const merged = { ...base };
+  if (!input || typeof input !== 'object') return merged;
+  for (const key of Object.keys(base) as Array<keyof T>) {
+    const value = (input as Record<string, unknown>)[String(key)];
+    if (typeof value === 'string') {
+      merged[key] = value as T[keyof T];
+    }
+  }
+  return merged;
+}
+
+function mergeTermsDatabase(
+  base: DatabaseEntries['terms'],
+  input: unknown,
+): DatabaseEntries['terms'] {
+  if (!input || typeof input !== 'object') {
+    return {
+      currencyUnit: base.currencyUnit,
+      stats: { ...base.stats },
+      menu: { ...base.menu },
+      commands: { ...base.commands },
+      battle: { ...base.battle },
+      saveLoad: { ...base.saveLoad },
+    };
+  }
+  const source = input as Partial<DatabaseEntries['terms']>;
+  return {
+    currencyUnit:
+      typeof source.currencyUnit === 'string' ? source.currencyUnit : base.currencyUnit,
+    stats: mergeRequiredLabels(base.stats, source.stats),
+    menu: mergeRequiredLabels(base.menu, source.menu),
+    commands: mergeRequiredLabels(base.commands, source.commands),
+    battle: mergeRequiredLabels(base.battle, source.battle),
+    saveLoad: mergeRequiredLabels(base.saveLoad, source.saveLoad),
+  };
+}
+
 export function emptyDatabases(): DatabaseEntries {
   return {
     actors: [],
@@ -12,6 +81,62 @@ export function emptyDatabases(): DatabaseEntries {
     weapons: [],
     armors: [],
     states: [],
+    types: {
+      weaponTypes: [],
+      armorTypes: [],
+      skillTypes: [],
+      elements: [],
+      equipmentSlots: [
+        { id: 'weapon', name: 'Weapon' },
+        { id: 'armor', name: 'Armor' },
+        { id: 'accessory', name: 'Accessory' },
+      ],
+      itemCategories: [],
+    },
+    terms: {
+      currencyUnit: 'G',
+      stats: {
+        maxHp: 'Max HP',
+        maxMp: 'Max MP',
+        attack: 'Attack',
+        defense: 'Defense',
+        magicAttack: 'Magic Attack',
+        magicDefense: 'Magic Defense',
+        agility: 'Agility',
+        luck: 'Luck',
+      },
+      menu: {
+        item: 'Item',
+        skill: 'Skill',
+        equip: 'Equip',
+        status: 'Status',
+        formation: 'Formation',
+        options: 'Options',
+        save: 'Save',
+        load: 'Load',
+      },
+      commands: {
+        attack: 'Attack',
+        guard: 'Guard',
+        item: 'Item',
+        skill: 'Skill',
+        escape: 'Escape',
+      },
+      battle: {
+        fight: 'Fight',
+        escape: 'Escape',
+        victory: 'Victory',
+        defeat: 'Defeat',
+        exp: 'EXP',
+        levelUp: 'Level Up',
+      },
+      saveLoad: {
+        save: 'Save',
+        load: 'Load',
+        file: 'File',
+        empty: 'Empty',
+      },
+    },
     enemies: [],
     troops: [],
     quests: [],
@@ -94,5 +219,7 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
         : base.tilesets.tilesets,
     };
   }
+  merged.types = mergeNamedTypeTables(base.types, input.types);
+  merged.terms = mergeTermsDatabase(base.terms, input.terms);
   return merged;
 }
