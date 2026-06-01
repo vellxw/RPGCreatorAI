@@ -1,4 +1,5 @@
 #include "events/EventScheduler.h"
+#include "events/GameState.h"
 #include "types/EventTypes.h"
 #include <algorithm>
 #include <unordered_set>
@@ -39,6 +40,20 @@ void EventScheduler::startRunner(const ScheduledEventCandidate& candidate) {
     running.candidate = candidate;
     running.runner = std::make_unique<EventRunner>(gameState, dialogue);
     if (runnerConfigurator) runnerConfigurator(*running.runner);
+    EventTraceSource traceSource;
+    traceSource.mapId = candidate.ownerMapId.empty()
+        ? gameState.getCurrentMapId()
+        : candidate.ownerMapId;
+    if (!candidate.ownerCommonEventId.empty()) {
+        traceSource.sourceType = "commonEvent";
+        traceSource.commonEventId = candidate.ownerCommonEventId;
+    } else if (!candidate.ownerEventId.empty()) {
+        traceSource.sourceType = "mapEvent";
+        traceSource.eventId = candidate.ownerEventId;
+    } else {
+        traceSource.sourceType = "scheduled";
+    }
+    running.runner->setTraceSource(std::move(traceSource));
     running.runner->runCommandList(candidate.commands, candidate.ownerEventId);
     runningEvents.push_back(std::move(running));
 }

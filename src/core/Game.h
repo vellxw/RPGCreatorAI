@@ -8,6 +8,7 @@
 #include "events/GameState.h"
 #include "events/EventRunner.h"
 #include "events/EventScheduler.h"
+#include "events/EventTrace.h"
 #include "dialogue/DialogueSystem.h"
 #include "database/ItemDatabase.h"
 #include "database/AnimationDatabase.h"
@@ -104,6 +105,7 @@ private:
     DialogueSystem dialogue;
     std::unique_ptr<EventRunner> eventRunner;
     std::unique_ptr<EventScheduler> eventScheduler;
+    EventTraceBuffer eventTraceBuffer;
     Camera2D camera;
     ItemDatabase itemDatabase;
     rpg::RpgDatabases databases;

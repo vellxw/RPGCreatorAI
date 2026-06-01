@@ -4,6 +4,77 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-24 / PT-003 — deterministic event trace output
+
+- `2026-06-01 15:21:25 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new `tests/test_event_trace.cpp` intentionally failed because
+  `events/EventTrace.h` did not exist.
+- `2026-06-01 15:21:25 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/EventTracePanel.test.tsx`
+  — RED; `EventTracePanel` did not exist yet.
+- `2026-06-01 15:24:54 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/EventTracePanel.test.tsx`
+  — PASS; 1 file and 2 tests passed after adding trace parsing and filters.
+- `2026-06-01 15:24:54 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; `EventScheduler.cpp` needed the full `GameState` definition for
+  source map fallback.
+- `2026-06-01 15:25:30 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; `EventTrace.cpp` was not yet included in the current generated build
+  files after adding the new source.
+- `2026-06-01 15:25:55 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default"`
+  — PASS; configure completed with existing third-party CMake warnings and
+  Ninja linked `RuntimeLib`, `rpg_creator_runtime.exe`, and `rpg_tests.exe`.
+- `2026-06-01 15:26:15 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 15:26:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:27:32 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings,
+  Ninja reported no work to do, and `RPGTests` passed.
+- `2026-06-01 15:27:32 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/EventTracePanel.test.tsx`
+  — PASS; 1 file and 2 tests passed on the final required rerun.
+- `2026-06-01 15:27:32 -03:00` — `npm run build` — PASS; `tsc --noEmit`
+  and Vite build completed, with the existing chunk-size warning only.
+- `2026-06-01 15:28:15 -03:00` — `npm run typecheck` — PASS on the exact
+  Linear-required frontend validation command.
+- `2026-06-01 15:28:15 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, loaded the town map, logged the
+  `town_theme` audio request, warned about the missing optional WAV, and
+  reported `SMOKE PASSED`.
+- `2026-06-01 15:28:15 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- `2026-06-01 15:29:40 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — RED; the added `waitFinish` assertion exposed that waits traced start but
+  not timer completion.
+- `2026-06-01 15:30:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS after storing active wait trace metadata and emitting `waitFinish`
+  when the timer drains.
+- `2026-06-01 15:30:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:30:20 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, loaded the town map, logged the
+  `town_theme` audio request, warned about the missing optional WAV, and
+  reported `SMOKE PASSED`.
+- `2026-06-01 15:30:20 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added `EventTraceBuffer` and stable `[TRACE]` JSON-line
+  formatting, threaded trace buffers through `Game`, `EventRunner`, and
+  scheduled map/common-event runners, emitted command start/finish, wait,
+  branch, choice, request, and warning trace rows, and added the Playtest
+  Event Trace panel parser with map/common/warning/branch filters.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-23 / PT-002 — runtime log viewer and bounded log reading
 
 - `2026-06-01 15:07:04 -03:00` —

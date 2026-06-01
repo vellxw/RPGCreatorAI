@@ -119,7 +119,7 @@
   current-map, and selected-event modes without mutating source files.
 - [x] FRA-23 / PT-002: add a runtime log viewer with bounded native log
   reading and honest browser-mode degradation.
-- [ ] FRA-24 / PT-003: add deterministic event trace output and an editor trace
+- [x] FRA-24 / PT-003: add deterministic event trace output and an editor trace
   panel parsed from runtime logs.
 - [ ] FRA-25 / PT-004: add a runtime state snapshot inspector backed by local,
   bounded, atomically written snapshot files.

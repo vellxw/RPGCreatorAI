@@ -62,6 +62,8 @@ bool Game::initialize(Window& window, const ProjectData& projectData,
 
     eventRunner = std::make_unique<EventRunner>(state, dialogue);
     eventScheduler = std::make_unique<EventScheduler>(state, dialogue);
+    eventTraceBuffer.clear();
+    eventRunner->setTraceBuffer(&eventTraceBuffer);
 
     // Load item database (optional; missing/invalid is logged but not fatal).
     if (!project.database.itemsPath.empty()) {
@@ -383,6 +385,7 @@ std::vector<ScheduledEventCandidate> Game::buildScheduledEventCandidates() const
         candidate.key = "common:" + commonEvent.id;
         candidate.trigger = commonEvent.trigger;
         candidate.ownerMapId = mapId;
+        candidate.ownerCommonEventId = commonEvent.id;
         candidate.commands = commonEvent.commands;
         candidates.push_back(std::move(candidate));
     }
@@ -761,6 +764,7 @@ void Game::hookEventRunnerResolvers() {
 }
 
 void Game::configureEventRunner(EventRunner& runner) {
+    runner.setTraceBuffer(&eventTraceBuffer);
     runner.setCommonEventResolver(
         [this](const std::string& id) -> std::vector<std::shared_ptr<EventCommand>> {
             const auto* ce = databases.findCommonEvent(id);

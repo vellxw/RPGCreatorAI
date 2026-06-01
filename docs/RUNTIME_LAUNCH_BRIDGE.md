@@ -173,11 +173,16 @@ validation output, and event trace. Runtime log polling runs while the native
 runtime is reported as running and can also be refreshed manually. Browser mode
 shows the unavailable reason and does not fabricate native log content.
 
-## What FRA-23 Does Not Add
+Event execution trace rows are emitted by the native runtime to stdout with a
+stable `[TRACE]` prefix and JSON payload. Because stdout is already captured
+into bounded runtime logs, the editor parses the latest log tail directly and
+shows map-event, common-event, warning, and branch filters without adding
+runtime-to-editor IPC.
+
+## What The Current Bridge Does Not Add
 
 - No runtime-to-editor IPC.
 - No embedded runtime viewport.
 - No remote runtime.
 - No automatic source project save before launch.
-- No event trace output.
 - No runtime state snapshot reader.

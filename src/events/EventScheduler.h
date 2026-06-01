@@ -13,6 +13,7 @@ struct ScheduledEventCandidate {
     std::string trigger; // "autorun" or "parallel"
     std::string ownerMapId;
     std::string ownerEventId;
+    std::string ownerCommonEventId;
     std::vector<std::shared_ptr<EventCommand>> commands;
 };
 

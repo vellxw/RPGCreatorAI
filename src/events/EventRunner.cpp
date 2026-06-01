@@ -8,26 +8,53 @@
 #include <cctype>
 #include <algorithm>
 #include <optional>
+#include <iostream>
+#include <sstream>
+#include <utility>
 
 EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
     : gameState(state), dialogue(dialogueSystem) {}
+
+void EventRunner::setTraceSource(EventTraceSource source) {
+    traceSource = std::move(source);
+    traceSourceExplicit = true;
+}
 
 void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>>& commands,
                                  const std::string& ownerEventId) {
     commandStack.clear();
     pendingChoiceCommand.reset();
+    pendingChoicePath.clear();
+    activeWaitCommandType.clear();
+    activeWaitCommandPath.clear();
+    activeWaitResult.clear();
     currentOwnerMapId = gameState.getCurrentMapId();
     currentOwnerEventId = ownerEventId;
+
+    if (!traceSourceExplicit || !ownerEventId.empty()) {
+        traceSource.sourceType = ownerEventId.empty() ? "runner" : "mapEvent";
+        traceSource.mapId = currentOwnerMapId;
+        traceSource.eventId = ownerEventId;
+        traceSource.commonEventId.clear();
+    }
+
     // Push commands in reverse order so we process them front-to-back via pop_back.
-    for (auto it = commands.rbegin(); it != commands.rend(); ++it) {
-        commandStack.push_back(*it);
+    for (size_t index = commands.size(); index > 0; --index) {
+        const size_t commandIndex = index - 1;
+        commandStack.push_back({commands[commandIndex], std::to_string(commandIndex)});
     }
     executing = !commandStack.empty();
 }
 
-void EventRunner::pushFront(const std::vector<std::shared_ptr<EventCommand>>& branch) {
-    for (auto it = branch.rbegin(); it != branch.rend(); ++it) {
-        commandStack.push_back(*it);
+void EventRunner::pushFront(const std::vector<std::shared_ptr<EventCommand>>& branch,
+                            const std::string& parentPath) {
+    for (size_t index = branch.size(); index > 0; --index) {
+        const size_t commandIndex = index - 1;
+        const std::string childPath =
+            parentPath.empty()
+                ? std::to_string(commandIndex)
+                : parentPath + "." + std::to_string(commandIndex);
+        commandStack.push_back({branch[commandIndex], childPath});
     }
 }
 
@@ -41,9 +68,15 @@ void EventRunner::update(float dt) {
         if (!result->cancelled &&
             result->index >= 0 &&
             result->index < static_cast<int>(pendingChoiceCommand->choices.size())) {
-            pushFront(pendingChoiceCommand->choices[static_cast<size_t>(result->index)].commands);
+            traceCommand(pendingChoiceCommand.get(), pendingChoicePath, "choice",
+                         "selected=" + std::to_string(result->index));
+            pushFront(pendingChoiceCommand->choices[static_cast<size_t>(result->index)].commands,
+                      pendingChoicePath);
+        } else {
+            traceCommand(pendingChoiceCommand.get(), pendingChoicePath, "choice", "cancelled");
         }
         pendingChoiceCommand.reset();
+        pendingChoicePath.clear();
     }
 
     if (dialogue.isActive()) return;
@@ -52,12 +85,25 @@ void EventRunner::update(float dt) {
         waitTimer -= dt;
         if (waitTimer > 0.0f) return;
         waitTimer = 0.0f;
+        if (!activeWaitCommandType.empty()) {
+            traceCommandType(activeWaitCommandType, activeWaitCommandPath,
+                             "waitFinish", activeWaitResult);
+            activeWaitCommandType.clear();
+            activeWaitCommandPath.clear();
+            activeWaitResult.clear();
+        }
     }
 
     while (!commandStack.empty()) {
-        auto cmd = commandStack.back();
+        auto frame = commandStack.back();
         commandStack.pop_back();
-        processCommand(cmd);
+        if (!frame.command) {
+            traceCommandType("unknown", frame.path, "warning", "null-command");
+            continue;
+        }
+        traceCommand(frame.command.get(), frame.path, "start", "queued");
+        processCommand(frame.command, frame.path);
+        traceCommand(frame.command.get(), frame.path, "finish", "ok");
         if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active ||
             shopRequest.active || battleSummaryRequest.active || animationRequest.active ||
             movementRouteRequest.active || soundRequest.active) {
@@ -71,6 +117,10 @@ void EventRunner::update(float dt) {
 void EventRunner::waitForMs(int ms) {
     if (ms <= 0) return;
     waitTimer = std::max(waitTimer, static_cast<float>(ms) / 1000.0f);
+    activeWaitCommandType = "waitForMs";
+    activeWaitCommandPath.clear();
+    activeWaitResult = std::to_string(ms) + "ms";
+    traceCommandType("waitForMs", "", "wait", activeWaitResult);
 }
 
 void EventRunner::executeNext() {
@@ -120,7 +170,62 @@ static std::optional<double> pluginNumberArg(const EventCommand& cmd,
     return arg->numberValue;
 }
 
-void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
+static std::string boolResult(bool value) {
+    return value ? "true" : "false";
+}
+
+static std::string battleOutcomeString(BattleResult::Outcome outcome) {
+    switch (outcome) {
+        case BattleResult::Outcome::Victory: return "victory";
+        case BattleResult::Outcome::Defeat: return "defeat";
+        case BattleResult::Outcome::Escape: return "escape";
+    }
+    return "unknown";
+}
+
+EventTraceSource EventRunner::activeTraceSource() const {
+    EventTraceSource source = traceSource;
+    if (source.sourceType.empty()) {
+        source.sourceType = currentOwnerEventId.empty() ? "runner" : "mapEvent";
+    }
+    if (source.mapId.empty()) source.mapId = currentOwnerMapId;
+    if (source.sourceType == "mapEvent" && source.eventId.empty()) {
+        source.eventId = currentOwnerEventId;
+    }
+    return source;
+}
+
+void EventRunner::traceCommand(const EventCommand* cmd,
+                               const std::string& commandPath,
+                               const std::string& action,
+                               const std::string& result) {
+    traceCommandType(cmd ? cmd->type : "unknown", commandPath, action, result);
+}
+
+void EventRunner::traceCommandType(const std::string& commandType,
+                                   const std::string& commandPath,
+                                   const std::string& action,
+                                   const std::string& result) {
+    if (!traceBuffer) return;
+
+    const EventTraceSource source = activeTraceSource();
+    EventTraceEntry entry;
+    entry.sourceType = source.sourceType;
+    entry.mapId = source.mapId;
+    entry.eventId = source.eventId;
+    entry.commonEventId = source.commonEventId;
+    entry.commandPath = commandPath;
+    entry.commandType = commandType;
+    entry.action = action;
+    entry.result = result;
+    traceBuffer->record(std::move(entry));
+    if (!traceBuffer->entries().empty()) {
+        std::cout << formatEventTraceLine(traceBuffer->entries().back()) << '\n';
+    }
+}
+
+void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd,
+                                 const std::string& commandPath) {
     if (!cmd) return;
     const std::string& type = cmd->type;
 
@@ -137,12 +242,20 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
             if (choice < 0 || choice >= static_cast<int>(cmd->choices.size())) {
                 choice = cmd->choices.empty() ? -1 : 0;
             }
-            if (choice >= 0) pushFront(cmd->choices[static_cast<size_t>(choice)].commands);
+            if (choice >= 0) {
+                traceCommand(cmd.get(), commandPath, "choice",
+                             "selected=" + std::to_string(choice));
+                pushFront(cmd->choices[static_cast<size_t>(choice)].commands, commandPath);
+            } else {
+                traceCommand(cmd.get(), commandPath, "choice", "empty");
+            }
             return;
         }
         if (cmd->choices.empty()) return;
         pendingChoiceCommand = cmd;
+        pendingChoicePath = commandPath;
         dialogue.showChoices(cmd->prompt, labels);
+        traceCommand(cmd.get(), commandPath, "choice", "waiting");
         return;
     }
     if (type == "setFlag") {
@@ -151,7 +264,9 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     }
     if (type == "ifFlag") {
         bool current = gameState.getFlag(cmd->flag);
-        pushFront((current == cmd->boolValue) ? cmd->thenCommands : cmd->elseCommands);
+        const bool matches = current == cmd->boolValue;
+        traceCommand(cmd.get(), commandPath, "branch", matches ? "then" : "else");
+        pushFront(matches ? cmd->thenCommands : cmd->elseCommands, commandPath);
         return;
     }
     if (type == "controlSwitch") {
@@ -160,13 +275,17 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     }
     if (type == "ifSwitch") {
         bool current = gameState.getSwitch(cmd->switchId);
-        pushFront((current == cmd->boolValue) ? cmd->thenCommands : cmd->elseCommands);
+        const bool matches = current == cmd->boolValue;
+        traceCommand(cmd.get(), commandPath, "branch", matches ? "then" : "else");
+        pushFront(matches ? cmd->thenCommands : cmd->elseCommands, commandPath);
         return;
     }
     if (type == "controlSelfSwitch") {
         if (!currentOwnerMapId.empty() && !currentOwnerEventId.empty() && !cmd->switchId.empty()) {
             gameState.setSelfSwitch(currentOwnerMapId, currentOwnerEventId,
                                     selfSwitchLetter(cmd->switchId), cmd->boolValue);
+        } else {
+            traceCommand(cmd.get(), commandPath, "warning", "missing-self-switch-owner");
         }
         return;
     }
@@ -176,7 +295,9 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
             current = gameState.getSelfSwitch(currentOwnerMapId, currentOwnerEventId,
                                               selfSwitchLetter(cmd->switchId));
         }
-        pushFront((current == cmd->boolValue) ? cmd->thenCommands : cmd->elseCommands);
+        const bool matches = current == cmd->boolValue;
+        traceCommand(cmd.get(), commandPath, "branch", matches ? "then" : "else");
+        pushFront(matches ? cmd->thenCommands : cmd->elseCommands, commandPath);
         return;
     }
     if (type == "controlVariable") {
@@ -198,7 +319,8 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     if (type == "ifVariable") {
         int current = gameState.getVariable(cmd->variableId);
         bool matches = compareInts(current, cmd->varValue, cmd->compareOp) != 0;
-        pushFront(matches ? cmd->thenCommands : cmd->elseCommands);
+        traceCommand(cmd.get(), commandPath, "branch", matches ? "then" : "else");
+        pushFront(matches ? cmd->thenCommands : cmd->elseCommands, commandPath);
         return;
     }
     if (type == "addItem") {
@@ -223,6 +345,9 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         transferRequest.targetX = cmd->x;
         transferRequest.targetY = cmd->y;
         transferRequest.direction = cmd->direction;
+        traceCommand(cmd.get(), commandPath, "request",
+                     "map=" + cmd->mapId + ",x=" + std::to_string(cmd->x) +
+                     ",y=" + std::to_string(cmd->y) + ",direction=" + cmd->direction);
         return;
     }
     if (type == "setPlayerPosition") {
@@ -232,15 +357,23 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         transferRequest.targetX = cmd->x;
         transferRequest.targetY = cmd->y;
         transferRequest.direction = cmd->direction;
+        traceCommand(cmd.get(), commandPath, "request",
+                     "map=" + cmd->mapId + ",x=" + std::to_string(cmd->x) +
+                     ",y=" + std::to_string(cmd->y) + ",direction=" + cmd->direction);
         return;
     }
     if (type == "wait") {
         waitTimer = static_cast<float>(cmd->ms) / 1000.0f;
+        activeWaitCommandType = type;
+        activeWaitCommandPath = commandPath;
+        activeWaitResult = std::to_string(cmd->ms) + "ms";
+        traceCommand(cmd.get(), commandPath, "wait", activeWaitResult);
         return;
     }
     if (type == "playSound") {
         soundRequest.active = true;
         soundRequest.soundId = cmd->soundId;
+        traceCommand(cmd.get(), commandPath, "request", "sound=" + cmd->soundId);
         return;
     }
     if (type == "pluginCommand") {
@@ -258,6 +391,7 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
             const auto value = pluginBoolArg(*cmd, "value");
             if (!switchId || switchId->empty() || !value) {
                 Logger::warning("pluginCommand debug.setSwitch missing switchId or value");
+                traceCommand(cmd.get(), commandPath, "warning", "debug.setSwitch missing switchId or value");
                 return;
             }
             gameState.setSwitch(*switchId, *value);
@@ -269,6 +403,7 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
             const auto value = pluginNumberArg(*cmd, "value");
             if (!variableId || variableId->empty() || !value) {
                 Logger::warning("pluginCommand debug.setVariable missing variableId or value");
+                traceCommand(cmd.get(), commandPath, "warning", "debug.setVariable missing variableId or value");
                 return;
             }
             gameState.setVariable(*variableId, static_cast<int>(*value));
@@ -276,6 +411,7 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         }
 
         Logger::warning("pluginCommand: unsupported command '" + fullCommand + "'");
+        traceCommand(cmd.get(), commandPath, "warning", "unsupported");
         return;
     }
     if (type == "comment") {
@@ -283,11 +419,13 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         return;
     }
     if (type == "callCommonEvent") {
+        traceCommand(cmd.get(), commandPath, "request", "commonEvent=" + cmd->commonEventId);
         if (commonEventResolver) {
             auto cmds = commonEventResolver(cmd->commonEventId);
-            pushFront(cmds);
+            pushFront(cmds, commandPath);
         } else {
             Logger::warning("callCommonEvent: no resolver registered for " + cmd->commonEventId);
+            traceCommand(cmd.get(), commandPath, "warning", "missing-common-event-resolver");
         }
         return;
     }
@@ -308,6 +446,7 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     if (type == "openShop") {
         shopRequest.active = true;
         shopRequest.shopId = cmd->shopId;
+        traceCommand(cmd.get(), commandPath, "request", "shop=" + cmd->shopId);
         return;
     }
     if (type == "startBattle") {
@@ -323,13 +462,18 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
             for (const auto& [itemId, amount] : result.itemsAwarded) {
                 gameState.addItem(itemId, amount);
             }
-            pushFront(cmd->victoryBranch);
+            traceCommand(cmd.get(), commandPath, "branch", "victory");
+            pushFront(cmd->victoryBranch, commandPath);
         } else if (result.outcome == BattleResult::Outcome::Defeat) {
-            pushFront(cmd->defeatBranch);
+            traceCommand(cmd.get(), commandPath, "branch", "defeat");
+            pushFront(cmd->defeatBranch, commandPath);
         }
         battleSummaryRequest.active = true;
         battleSummaryRequest.troopId = cmd->troopId;
         battleSummaryRequest.result = result;
+        traceCommand(cmd.get(), commandPath, "request",
+                     "troop=" + cmd->troopId + ",outcome=" +
+                     battleOutcomeString(result.outcome));
         return;
     }
     if (type == "changeActorHp") {
@@ -353,7 +497,15 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         animationRequest.loop = cmd->animationLoop;
         if (cmd->animationBlocking && cmd->animationDurationMs > 0) {
             waitTimer = static_cast<float>(cmd->animationDurationMs) / 1000.0f;
+            activeWaitCommandType = type;
+            activeWaitCommandPath = commandPath;
+            activeWaitResult = std::to_string(cmd->animationDurationMs) + "ms";
+            traceCommand(cmd.get(), commandPath, "wait", activeWaitResult);
         }
+        traceCommand(cmd.get(), commandPath, "request",
+                     "target=" + animationRequest.target + ",action=" +
+                     animationRequest.action + ",blocking=" +
+                     boolResult(animationRequest.blocking));
         return;
     }
     if (type == "setMovementRoute") {
@@ -370,10 +522,15 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         for (const auto& step : cmd->movementRouteSteps) {
             movementRouteRequest.steps.push_back({step.type, step.ms});
         }
+        traceCommand(cmd.get(), commandPath, "request",
+                     "target=" + movementRouteRequest.target + ",steps=" +
+                     std::to_string(movementRouteRequest.steps.size()) +
+                     ",wait=" + boolResult(movementRouteRequest.wait));
         return;
     }
 
     Logger::warning("Unsupported event command type: " + type);
+    traceCommand(cmd.get(), commandPath, "warning", "unsupported");
 }
 
 MapTransferRequest EventRunner::consumeTransferRequest() {

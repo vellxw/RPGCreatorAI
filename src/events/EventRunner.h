@@ -1,4 +1,5 @@
 #pragma once
+#include "events/EventTrace.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -81,6 +82,8 @@ public:
     void setCommonEventResolver(CommonEventResolver r) { commonEventResolver = std::move(r); }
     void setQuestObjectiveResolver(QuestObjectiveResolver r) { questObjectiveResolver = std::move(r); }
     void setBattleRunner(BattleRunner r) { battleRunner = std::move(r); }
+    void setTraceBuffer(EventTraceBuffer* buffer) { traceBuffer = buffer; }
+    void setTraceSource(EventTraceSource source);
 
     // Pre-configured choice picker for tests. When unset, showChoices opens
     // the runtime choice UI and waits for a DialogueSystem result.
@@ -102,14 +105,30 @@ public:
     SoundRequest consumeSoundRequest();
 
 private:
+    struct QueuedCommand {
+        std::shared_ptr<struct EventCommand> command;
+        std::string path;
+    };
+
     void executeNext();
-    void processCommand(const std::shared_ptr<struct EventCommand>& cmd);
-    void pushFront(const std::vector<std::shared_ptr<struct EventCommand>>& branch);
+    void processCommand(const std::shared_ptr<struct EventCommand>& cmd,
+                        const std::string& commandPath);
+    void pushFront(const std::vector<std::shared_ptr<struct EventCommand>>& branch,
+                   const std::string& parentPath);
+    void traceCommand(const struct EventCommand* cmd,
+                      const std::string& commandPath,
+                      const std::string& action,
+                      const std::string& result);
+    void traceCommandType(const std::string& commandType,
+                          const std::string& commandPath,
+                          const std::string& action,
+                          const std::string& result);
+    EventTraceSource activeTraceSource() const;
 
     class GameState& gameState;
     class DialogueSystem& dialogue;
 
-    std::vector<std::shared_ptr<struct EventCommand>> commandStack;
+    std::vector<QueuedCommand> commandStack;
     bool executing = false;
     float waitTimer = 0.0f;
 
@@ -120,8 +139,15 @@ private:
     MovementRouteRequest movementRouteRequest;
     SoundRequest soundRequest;
     std::shared_ptr<struct EventCommand> pendingChoiceCommand;
+    std::string pendingChoicePath;
+    std::string activeWaitCommandType;
+    std::string activeWaitCommandPath;
+    std::string activeWaitResult;
     std::string currentOwnerMapId;
     std::string currentOwnerEventId;
+    EventTraceBuffer* traceBuffer = nullptr;
+    EventTraceSource traceSource;
+    bool traceSourceExplicit = false;
 
     CommonEventResolver commonEventResolver;
     QuestObjectiveResolver questObjectiveResolver;

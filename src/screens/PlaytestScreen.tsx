@@ -16,6 +16,7 @@ import { getRuntimeLaunchAdapter, getFileSystemAdapter, getPlaytestSessionAdapte
 import { useEditor } from '../stores/editorStore';
 import { validateProject } from '../validation/validateProject';
 import { RuntimeLogPanel } from '../components/playtest/RuntimeLogPanel';
+import { EventTracePanel } from '../components/playtest/EventTracePanel';
 import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
@@ -625,9 +626,11 @@ function StateRow({ label, value }: { label: string; value: string }) {
 function RuntimeLogContainer({
   adapter,
   runtimeStatus,
+  onContentChange,
 }: {
   adapter: RuntimeLaunchAdapter;
   runtimeStatus: RuntimeStatus;
+  onContentChange?: (content: string) => void;
 }) {
   const [content, setContent] = useState('');
   const [logPath, setLogPath] = useState<string | null>(null);
@@ -644,6 +647,7 @@ function RuntimeLogContainer({
       if (!info.success || !info.path) {
         setLogPath(null);
         setContent('');
+        onContentChange?.('');
         setTruncated(false);
         setError(info.error ?? 'No runtime log has been created yet.');
         return;
@@ -652,17 +656,19 @@ function RuntimeLogContainer({
       const tail = await adapter.readLatestLogTail(256 * 1024);
       if (!tail.success) {
         setContent('');
+        onContentChange?.('');
         setTruncated(false);
         setError(tail.error ?? 'Could not read runtime log.');
         return;
       }
       setContent(tail.content ?? '');
+      onContentChange?.(tail.content ?? '');
       setTruncated(!!tail.truncated);
       setError(null);
     } finally {
       setLoading(false);
     }
-  }, [adapter, available]);
+  }, [adapter, available, onContentChange]);
 
   useEffect(() => {
     refresh();
@@ -707,11 +713,33 @@ function LogsPanel({
   runtimeStatus: RuntimeStatus;
 }) {
   const [activeTab, setActiveTab] = useState<'editor' | 'runtime' | 'validation' | 'trace'>('editor');
+  const [runtimeLogText, setRuntimeLogText] = useState('');
   const levelColors = {
     INFO: 'text-blue-600 bg-blue-50',
     WARN: 'text-amber-600 bg-amber-50',
     ERROR: 'text-red-600 bg-red-50',
   };
+
+  const refreshTraceLog = useCallback(async () => {
+    if (!runtimeAdapter.canLaunch()) {
+      setRuntimeLogText('');
+      return;
+    }
+    const info = await runtimeAdapter.getLatestLog();
+    if (!info.success || !info.path) {
+      setRuntimeLogText('');
+      return;
+    }
+    const tail = await runtimeAdapter.readLatestLogTail(256 * 1024);
+    setRuntimeLogText(tail.success ? tail.content ?? '' : '');
+  }, [runtimeAdapter]);
+
+  useEffect(() => {
+    refreshTraceLog();
+    if (runtimeStatus !== 'running') return;
+    const id = window.setInterval(refreshTraceLog, 1000);
+    return () => window.clearInterval(id);
+  }, [refreshTraceLog, runtimeStatus]);
 
   return (
     <div className="h-[180px] flex-shrink-0 bg-white border-t border-gray-200 flex">
@@ -763,13 +791,17 @@ function LogsPanel({
               ))}
             </div>
           )}
-          {activeTab === 'runtime' && <RuntimeLogContainer adapter={runtimeAdapter} runtimeStatus={runtimeStatus} />}
+          {activeTab === 'runtime' && (
+            <RuntimeLogContainer
+              adapter={runtimeAdapter}
+              runtimeStatus={runtimeStatus}
+              onContentChange={setRuntimeLogText}
+            />
+          )}
           {activeTab === 'validation' && (
             <div className="h-full px-4 py-3 text-[12px] text-gray-500">No validation errors in the current preview session.</div>
           )}
-          {activeTab === 'trace' && (
-            <div className="h-full px-4 py-3 text-[12px] text-gray-500">Event trace output is not available yet.</div>
-          )}
+          {activeTab === 'trace' && <EventTracePanel logText={runtimeLogText} />}
         </div>
       </div>
     </div>
