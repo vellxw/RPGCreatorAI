@@ -86,7 +86,8 @@ are P0 unless explicitly marked otherwise:
    deterministic, local playback or explicit logged skips when audio is
    unavailable.
 8. Deterministic plugin command v1 shall support allowlisted commands such as
-   `debug.log` without adding a scripting VM or arbitrary code execution.
+   `debug.log`, `debug.setSwitch`, and `debug.setVariable` without adding a
+   scripting VM or arbitrary code execution.
 9. Playtest shall support project-start, current-map, and selected-event
    sessions without mutating source project files.
 10. The editor shall expose bounded native runtime logs, validation output,

@@ -86,6 +86,29 @@ describe('CommandStackEditor', () => {
     expect(onCommandsChange).toHaveBeenLastCalledWith([{ type: 'showText', text: 'New dialogue' }]);
   });
 
+  it('adds a deterministic plugin command placeholder', () => {
+    const onCommandsChange = vi.fn();
+    const view = render(
+      <CommandStackEditor
+        commands={[]}
+        mapIds={['town']}
+        itemIds={['potion']}
+        onCommandsChange={onCommandsChange}
+      />,
+    );
+
+    changeSelect(selectByLabel(view.container, 'Plugin Command'), 'pluginCommand');
+
+    expect(onCommandsChange).toHaveBeenLastCalledWith([
+      {
+        type: 'pluginCommand',
+        pluginId: 'debug',
+        command: 'log',
+        args: { message: 'New plugin command' },
+      },
+    ]);
+  });
+
   it('edits nested branch commands without mutating the source command list', () => {
     const commands: EventCommand[] = [
       {

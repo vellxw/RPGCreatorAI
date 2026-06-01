@@ -197,6 +197,7 @@ export type EventCommand =
   | SetPlayerPositionCommand
   | WaitCommand
   | PlaySoundCommand
+  | PluginCommand
   | CommentCommand
   | CallCommonEventCommand
   | StartQuestCommand
@@ -329,6 +330,15 @@ export interface WaitCommand {
 export interface PlaySoundCommand {
   type: 'playSound';
   soundId: string;
+}
+
+export type PluginCommandArg = string | number | boolean | null;
+
+export interface PluginCommand {
+  type: 'pluginCommand';
+  pluginId: string;
+  command: string;
+  args: Record<string, PluginCommandArg>;
 }
 
 export interface CommentCommand {

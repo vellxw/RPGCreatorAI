@@ -104,6 +104,7 @@ const VALID_COMMAND_TYPES = new Set([
   'setPlayerPosition',
   'wait',
   'playSound',
+  'pluginCommand',
   'comment',
   'callCommonEvent',
   'startQuest',
@@ -115,6 +116,12 @@ const VALID_COMMAND_TYPES = new Set([
   'playAnimation',
   'setMovementRoute',
 ]);
+
+const SAFE_PLUGIN_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const SAFE_PLUGIN_COMMAND = /^[A-Za-z][A-Za-z0-9_.-]{0,127}$/;
+const SAFE_PLUGIN_ARG_KEY = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const CODE_LIKE_PLUGIN_TEXT =
+  /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
 export interface ValidationReport {
   errors: ValidationMessage[];
@@ -1427,6 +1434,9 @@ function validateSingleCommand(
       }
       break;
     }
+    case 'pluginCommand':
+      validatePluginCommand(cmd, err);
+      break;
     case 'setMovementRoute': {
       if (!VALID_MOVEMENT_ROUTE_TARGETS.includes(cmd.target)) {
         err(`setMovementRoute has invalid target "${cmd.target}"`);
@@ -1461,6 +1471,45 @@ function validateSingleCommand(
   }
 
   return out;
+}
+
+function validatePluginCommand(cmd: EventCommand, err: (msg: string) => void): void {
+  if (cmd.type !== 'pluginCommand') return;
+
+  if (!SAFE_PLUGIN_IDENTIFIER.test(cmd.pluginId)) {
+    err(`pluginCommand pluginId "${cmd.pluginId}" is not a safe identifier`);
+  }
+  if (!SAFE_PLUGIN_COMMAND.test(cmd.command)) {
+    err(`pluginCommand command "${cmd.command}" is not a safe identifier`);
+  }
+
+  const args = (cmd as { args?: unknown }).args;
+  if (!args || typeof args !== 'object' || Array.isArray(args)) {
+    err(`pluginCommand args must be an object of scalar values`);
+    return;
+  }
+
+  for (const [key, value] of Object.entries(args)) {
+    if (!SAFE_PLUGIN_ARG_KEY.test(key)) {
+      err(`pluginCommand arg "${key}" is not a safe identifier`);
+    }
+    if (!isPluginScalarArg(value)) {
+      err(`pluginCommand arg "${key}" must be a scalar`);
+      continue;
+    }
+    if (typeof value === 'string' && CODE_LIKE_PLUGIN_TEXT.test(value)) {
+      err(`pluginCommand arg "${key}" contains code-like text`);
+    }
+  }
+}
+
+function isPluginScalarArg(value: unknown): value is string | number | boolean | null {
+  return (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  );
 }
 
 // ---- Backwards-compatible exports used by older callers / tests. ---------

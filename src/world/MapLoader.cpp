@@ -5,6 +5,31 @@
 
 using json = nlohmann::json;
 
+static void parsePluginArgs(const json& j, EventCommand& cmd) {
+    const auto argsIt = j.find("args");
+    if (argsIt == j.end() || !argsIt->is_object()) return;
+
+    for (const auto& [key, value] : argsIt->items()) {
+        EventCommand::PluginArg arg;
+        if (value.is_null()) {
+            arg.type = EventCommand::PluginArg::Type::Null;
+        } else if (value.is_string()) {
+            arg.type = EventCommand::PluginArg::Type::String;
+            arg.stringValue = value.get<std::string>();
+        } else if (value.is_boolean()) {
+            arg.type = EventCommand::PluginArg::Type::Boolean;
+            arg.boolValue = value.get<bool>();
+        } else if (value.is_number()) {
+            arg.type = EventCommand::PluginArg::Type::Number;
+            arg.numberValue = value.get<double>();
+        } else {
+            Logger::warning("MapLoader: ignored non-scalar pluginCommand arg '" + key + "'");
+            continue;
+        }
+        cmd.pluginArgs[key] = std::move(arg);
+    }
+}
+
 static std::shared_ptr<EventCommand> parseCommand(const json& j) {
     auto cmd = std::make_shared<EventCommand>();
     cmd->type = j.at("type").get<std::string>();
@@ -74,6 +99,10 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         cmd->direction = j.at("direction").get<std::string>();
     } else if (type == "playSound") {
         cmd->soundId = j.at("soundId").get<std::string>();
+    } else if (type == "pluginCommand") {
+        cmd->pluginId = j.value("pluginId", std::string{});
+        cmd->pluginCommand = j.value("command", std::string{});
+        parsePluginArgs(j, *cmd);
     } else if (type == "wait") {
         cmd->ms = j.at("ms").get<int>();
     } else if (type == "comment") {

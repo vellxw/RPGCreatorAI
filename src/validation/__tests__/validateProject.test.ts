@@ -455,6 +455,99 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.source === 'commonEvent/ce_bad_branch' && e.message.includes('targets unknown map "missing_map"'))).toBe(true);
   });
 
+  it('accepts deterministic pluginCommand commands with scalar args', () => {
+    const event: GameEvent = {
+      id: 'plugin_host',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [
+        {
+          type: 'pluginCommand',
+          pluginId: 'debug',
+          command: 'log',
+          args: {
+            message: 'Hello from plugin dispatch',
+            count: 2,
+            enabled: true,
+            empty: null,
+          },
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+
+    const report = validateProject(project);
+
+    expect(report.errors).toEqual([]);
+  });
+
+  it('rejects unsafe pluginCommand identifiers, code strings, and nested args', () => {
+    const event: GameEvent = {
+      id: 'plugin_host',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [
+        {
+          type: 'pluginCommand',
+          pluginId: '../debug',
+          command: 'eval',
+          args: {
+            script: '() => window.alert(1)',
+            nested: { value: true },
+            list: ['bad'],
+          },
+        } as unknown as EventCommand,
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('pluginCommand pluginId "../debug" is not a safe identifier'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('pluginCommand arg "script" contains code-like text'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('pluginCommand arg "nested" must be a scalar'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('pluginCommand arg "list" must be a scalar'))).toBe(true);
+  });
+
+  it('validates pluginCommand commands inside common events', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.commonEvents = [
+      {
+        id: 'ce_plugin',
+        name: 'Plugin Event',
+        trigger: 'manual',
+        commands: [
+          {
+            type: 'pluginCommand',
+            pluginId: 'debug',
+            command: 'setSwitch',
+            args: {
+              switchId: 'story_ready',
+              value: true,
+            },
+          },
+          {
+            type: 'pluginCommand',
+            pluginId: 'debug tools',
+            command: 'log',
+            args: {},
+          } as unknown as EventCommand,
+        ],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.source === 'commonEvent/ce_plugin' && e.message.includes('pluginCommand pluginId "debug tools" is not a safe identifier'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unknown command type "pluginCommand"'))).toBe(false);
+  });
+
   it('validates event page triggers and self switch letters', () => {
     const event: GameEvent = {
       id: 'paged',

@@ -20,6 +20,8 @@ import type {
   IfSwitchCommand,
   IfVariableCommand,
   OpenShopCommand,
+  PluginCommand,
+  PluginCommandArg,
   PlaySoundCommand,
   PlayAnimationCommand,
   RemoveGoldCommand,
@@ -89,6 +91,8 @@ function Body({
       return <TransferMapEditor command={command} mapIds={mapIds} onChange={onChange} />;
     case 'playSound':
       return <PlaySoundEditor command={command} onChange={onChange} />;
+    case 'pluginCommand':
+      return <PluginCommandEditor command={command} onChange={onChange} />;
     case 'showChoices':
       return <ShowChoicesEditor command={command} onChange={onChange} />;
     case 'controlSwitch':
@@ -279,6 +283,100 @@ function PlaySoundEditor({ command, onChange }: { command: PlaySoundCommand; onC
       {input({ value: command.soundId, onChange: e => onChange({ ...command, soundId: e.target.value }) })}
     </Field>
   );
+}
+
+function PluginCommandEditor({ command, onChange }: { command: PluginCommand; onChange: (n: PluginCommand) => void }) {
+  const entries = Object.entries(command.args ?? {});
+  const withEntries = (nextEntries: Array<[string, PluginCommandArg]>) => {
+    onChange({
+      ...command,
+      args: Object.fromEntries(nextEntries.filter(([key]) => key.trim() !== '')),
+    });
+  };
+  const updateArg = (index: number, next: [string, PluginCommandArg]) => {
+    const copy = entries.slice();
+    copy[index] = next;
+    withEntries(copy);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Plugin ID">
+          {input({ value: command.pluginId, onChange: e => onChange({ ...command, pluginId: e.target.value }) })}
+        </Field>
+        <Field label="Command">
+          {input({ value: command.command, onChange: e => onChange({ ...command, command: e.target.value }) })}
+        </Field>
+      </div>
+      <div className="space-y-1.5">
+        {entries.map(([key, value], index) => (
+          <div key={`${key}-${index}`} className="grid grid-cols-[1fr_92px_1.2fr_auto] gap-2 items-end">
+            <Field label="Arg">
+              {input({ value: key, onChange: e => updateArg(index, [e.target.value, value]) })}
+            </Field>
+            <Field label="Type">
+              {select(pluginArgKind(value), [
+                { value: 'string', label: 'Text' },
+                { value: 'number', label: 'Number' },
+                { value: 'boolean', label: 'Boolean' },
+                { value: 'null', label: 'Null' },
+              ], kind => updateArg(index, [key, defaultPluginArg(kind)]))}
+            </Field>
+            <Field label="Value">
+              <PluginArgValueInput value={value} onChange={next => updateArg(index, [key, next])} />
+            </Field>
+            <button
+              type="button"
+              onClick={() => withEntries(entries.filter((_, i) => i !== index))}
+              className="h-[26px] px-2 text-[11px] text-red-600 border border-red-100 rounded bg-white hover:bg-red-50"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => withEntries([...entries, [`arg${entries.length + 1}`, '']])}
+          className="px-2 py-1 text-[11px] text-indigo-600 border border-indigo-100 rounded bg-white hover:bg-indigo-50"
+        >
+          Add arg
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type PluginArgKind = 'string' | 'number' | 'boolean' | 'null';
+
+function pluginArgKind(value: PluginCommandArg): PluginArgKind {
+  if (value === null) return 'null';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
+  return 'string';
+}
+
+function defaultPluginArg(kind: PluginArgKind): PluginCommandArg {
+  if (kind === 'number') return 0;
+  if (kind === 'boolean') return true;
+  if (kind === 'null') return null;
+  return '';
+}
+
+function PluginArgValueInput({ value, onChange }: { value: PluginCommandArg; onChange(next: PluginCommandArg): void }) {
+  if (value === null) {
+    return input({ value: 'null', disabled: true });
+  }
+  if (typeof value === 'boolean') {
+    return select(value ? 'true' : 'false', [
+      { value: 'true', label: 'True' },
+      { value: 'false', label: 'False' },
+    ], next => onChange(next === 'true'));
+  }
+  if (typeof value === 'number') {
+    return input({ type: 'number', value, onChange: e => onChange(Number(e.target.value)) });
+  }
+  return input({ value, onChange: e => onChange(e.target.value) });
 }
 
 function ShowChoicesEditor({ command, onChange }: { command: ShowChoicesCommand; onChange: (n: ShowChoicesCommand) => void }) {

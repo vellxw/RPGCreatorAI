@@ -41,6 +41,7 @@ const VALID_COMMAND_TYPES = new Set([
   'setPlayerPosition',
   'wait',
   'playSound',
+  'pluginCommand',
   'comment',
   'callCommonEvent',
   'startQuest',
@@ -52,6 +53,12 @@ const VALID_COMMAND_TYPES = new Set([
   'playAnimation',
   'setMovementRoute',
 ]);
+
+const SAFE_PLUGIN_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const SAFE_PLUGIN_COMMAND = /^[A-Za-z][A-Za-z0-9_.-]{0,127}$/;
+const SAFE_PLUGIN_ARG_KEY = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const CODE_LIKE_PLUGIN_TEXT =
+  /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
 export function validateMap(map: MapData, allMapIds: string[]): ValidationMessage[] {
   const messages: ValidationMessage[] = [];
@@ -291,6 +298,8 @@ function validateCommands(
     } else if (cmd.type === 'startBattle') {
       if (cmd.victoryBranch) messages.push(...validateCommands(cmd.victoryBranch, eventId, mapId, allMapIds, mapEvents));
       if (cmd.defeatBranch) messages.push(...validateCommands(cmd.defeatBranch, eventId, mapId, allMapIds, mapEvents));
+    } else if (cmd.type === 'pluginCommand') {
+      validatePluginCommand(cmd, eventId, mapId, messages);
     } else if (cmd.type === 'setMovementRoute') {
       if (!VALID_MOVEMENT_ROUTE_TARGETS.includes(cmd.target)) {
         messages.push({
@@ -334,4 +343,52 @@ function validateCommands(
   }
 
   return messages;
+}
+
+function validatePluginCommand(
+  cmd: EventCommand,
+  eventId: string,
+  mapId: string,
+  messages: ValidationMessage[],
+): void {
+  if (cmd.type !== 'pluginCommand') return;
+  const source = `${mapId}/${eventId}`;
+  const error = (message: string) => {
+    messages.push({ level: 'error', message: `Event "${eventId}" ${message}`, source });
+  };
+
+  if (!SAFE_PLUGIN_IDENTIFIER.test(cmd.pluginId)) {
+    error(`pluginCommand pluginId "${cmd.pluginId}" is not a safe identifier`);
+  }
+  if (!SAFE_PLUGIN_COMMAND.test(cmd.command)) {
+    error(`pluginCommand command "${cmd.command}" is not a safe identifier`);
+  }
+
+  const args = (cmd as { args?: unknown }).args;
+  if (!args || typeof args !== 'object' || Array.isArray(args)) {
+    error(`pluginCommand args must be an object of scalar values`);
+    return;
+  }
+
+  for (const [key, value] of Object.entries(args)) {
+    if (!SAFE_PLUGIN_ARG_KEY.test(key)) {
+      error(`pluginCommand arg "${key}" is not a safe identifier`);
+    }
+    if (!isPluginScalarArg(value)) {
+      error(`pluginCommand arg "${key}" must be a scalar`);
+      continue;
+    }
+    if (typeof value === 'string' && CODE_LIKE_PLUGIN_TEXT.test(value)) {
+      error(`pluginCommand arg "${key}" contains code-like text`);
+    }
+  }
+}
+
+function isPluginScalarArg(value: unknown): value is string | number | boolean | null {
+  return (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  );
 }

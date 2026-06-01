@@ -143,6 +143,18 @@ TEST_CASE("RpgDatabases parses common event self switches and animations") {
                 "commands": [
                     { "type": "controlSelfSwitch", "switchId": "A", "value": true },
                     {
+                        "type": "pluginCommand",
+                        "pluginId": "debug",
+                        "command": "setSwitch",
+                        "args": {
+                            "switchId": "story_ready",
+                            "value": true,
+                            "message": "common event",
+                            "missing": null,
+                            "nested": { "ignored": true }
+                        }
+                    },
+                    {
                         "type": "playAnimation",
                         "target": "player",
                         "action": "attack",
@@ -166,17 +178,25 @@ TEST_CASE("RpgDatabases parses common event self switches and animations") {
     REQUIRE(commonEvent != nullptr);
     CHECK(commonEvent->trigger == "parallel");
     CHECK(commonEvent->switchId == "story_ready");
-    REQUIRE(commonEvent->commands.size() == 2);
+    REQUIRE(commonEvent->commands.size() == 3);
     CHECK(commonEvent->commands[0]->type == "controlSelfSwitch");
     CHECK(commonEvent->commands[0]->switchId == "A");
     CHECK(commonEvent->commands[0]->boolValue);
-    CHECK(commonEvent->commands[1]->type == "playAnimation");
-    CHECK(commonEvent->commands[1]->animationTarget == "player");
-    CHECK(commonEvent->commands[1]->animationAction == "attack");
-    CHECK(commonEvent->commands[1]->animationDirection == "down");
-    CHECK(commonEvent->commands[1]->animationDurationMs == 250);
-    CHECK(commonEvent->commands[1]->animationBlocking);
-    CHECK_FALSE(commonEvent->commands[1]->animationLoop);
+    CHECK(commonEvent->commands[1]->type == "pluginCommand");
+    CHECK(commonEvent->commands[1]->pluginId == "debug");
+    CHECK(commonEvent->commands[1]->pluginCommand == "setSwitch");
+    REQUIRE(commonEvent->commands[1]->pluginArgs.size() == 4);
+    CHECK(commonEvent->commands[1]->pluginArgs.at("switchId").stringValue == "story_ready");
+    CHECK(commonEvent->commands[1]->pluginArgs.at("value").boolValue == true);
+    CHECK(commonEvent->commands[1]->pluginArgs.at("missing").type == EventCommand::PluginArg::Type::Null);
+    CHECK(commonEvent->commands[1]->pluginArgs.find("nested") == commonEvent->commands[1]->pluginArgs.end());
+    CHECK(commonEvent->commands[2]->type == "playAnimation");
+    CHECK(commonEvent->commands[2]->animationTarget == "player");
+    CHECK(commonEvent->commands[2]->animationAction == "attack");
+    CHECK(commonEvent->commands[2]->animationDirection == "down");
+    CHECK(commonEvent->commands[2]->animationDurationMs == 250);
+    CHECK(commonEvent->commands[2]->animationBlocking);
+    CHECK_FALSE(commonEvent->commands[2]->animationLoop);
 
     removeTempFile(commonEventsPath);
 }

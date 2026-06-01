@@ -65,11 +65,17 @@ syncs against the new map on the next frame.
 | `transferMap` | `mapId`, `x`, `y`, `direction` | Produces a `MapTransferRequest` consumed by `Game`. The new map is loaded and the player is placed at `(x, y)` facing `direction`. |
 | `wait` | `ms` (int) | Pauses the queue for the given duration. |
 | `playSound` | `soundId` | Emits a sound request consumed by `Game`. `AudioSystem` resolves the id through project/system audio data, logs the request, plays a local WAV when the file and audio device exist, and warns/continues when optional audio is missing. |
+| `pluginCommand` | `pluginId`, `command`, `args` scalar object | Runs deterministic allowlisted registry dispatch only. Built-ins are `debug.log`, `debug.setSwitch`, and `debug.setVariable`; unknown plugin commands log a warning and continue. |
 | `playAnimation` | `target`, optional `eventId`, `action`, `direction`, `durationMs`, `blocking`, `loop` | Emits an `AnimationRequest`. `Game` applies it to the player, the owning event, or a named event. |
 
-Any command type not listed above is logged as a warning and skipped;
-this lets later phases extend the system without breaking existing
-projects.
+`pluginCommand` is not a scripting VM. Its JSON shape is data only:
+`pluginId` and `command` are safe identifiers, and `args` can contain only
+string, number, boolean, or null values. The runtime combines
+`pluginId.command` into a fixed registry key and never evaluates source code
+from project data.
+
+Any command type not listed above is logged as a warning and skipped; this
+lets later phases extend the system without breaking existing projects.
 
 ## Pause Semantics
 

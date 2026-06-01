@@ -280,3 +280,58 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
     CHECK(page.commands[2]->elseCommands[0]->text == "B is on");
     rm(p);
 }
+
+TEST_CASE("MapLoader parses pluginCommand scalar args") {
+    std::string p = writeTemp("plugin_command_map.json", R"({
+        "schemaVersion": 1,
+        "id": "plugin_map",
+        "name": "Plugin Map",
+        "width": 1,
+        "height": 1,
+        "tileSize": 32,
+        "layers": [{ "name": "ground", "type": "visual", "tiles": [1] }],
+        "events": [
+            {
+                "id": "plugin_host",
+                "type": "npc",
+                "x": 0,
+                "y": 0,
+                "commands": [
+                    {
+                        "type": "pluginCommand",
+                        "pluginId": "debug",
+                        "command": "setVariable",
+                        "args": {
+                            "variableId": "score",
+                            "value": 12,
+                            "enabled": true,
+                            "note": "from map",
+                            "empty": null,
+                            "nested": { "ignored": true }
+                        }
+                    }
+                ]
+            }
+        ]
+    })");
+
+    auto m = MapLoader::load(p);
+    REQUIRE(m.has_value());
+    REQUIRE(m->events.size() == 1);
+    REQUIRE(m->events[0].commands.size() == 1);
+    const auto& command = *m->events[0].commands[0];
+    CHECK(command.type == "pluginCommand");
+    CHECK(command.pluginId == "debug");
+    CHECK(command.pluginCommand == "setVariable");
+    REQUIRE(command.pluginArgs.size() == 5);
+    CHECK(command.pluginArgs.at("variableId").type == EventCommand::PluginArg::Type::String);
+    CHECK(command.pluginArgs.at("variableId").stringValue == "score");
+    CHECK(command.pluginArgs.at("value").type == EventCommand::PluginArg::Type::Number);
+    CHECK(command.pluginArgs.at("value").numberValue == 12.0);
+    CHECK(command.pluginArgs.at("enabled").type == EventCommand::PluginArg::Type::Boolean);
+    CHECK(command.pluginArgs.at("enabled").boolValue == true);
+    CHECK(command.pluginArgs.at("empty").type == EventCommand::PluginArg::Type::Null);
+    CHECK(command.pluginArgs.find("nested") == command.pluginArgs.end());
+
+    rm(p);
+}

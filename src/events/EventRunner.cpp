@@ -7,6 +7,7 @@
 #include <memory>
 #include <cctype>
 #include <algorithm>
+#include <optional>
 
 EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
     : gameState(state), dialogue(dialogueSystem) {}
@@ -90,6 +91,33 @@ static char selfSwitchLetter(const std::string& id) {
     return id.empty()
         ? '\0'
         : static_cast<char>(std::toupper(static_cast<unsigned char>(id.front())));
+}
+
+static const EventCommand::PluginArg* findPluginArg(const EventCommand& cmd,
+                                                    const std::string& key) {
+    auto it = cmd.pluginArgs.find(key);
+    return it == cmd.pluginArgs.end() ? nullptr : &it->second;
+}
+
+static std::optional<std::string> pluginStringArg(const EventCommand& cmd,
+                                                  const std::string& key) {
+    const auto* arg = findPluginArg(cmd, key);
+    if (!arg || arg->type != EventCommand::PluginArg::Type::String) return std::nullopt;
+    return arg->stringValue;
+}
+
+static std::optional<bool> pluginBoolArg(const EventCommand& cmd,
+                                         const std::string& key) {
+    const auto* arg = findPluginArg(cmd, key);
+    if (!arg || arg->type != EventCommand::PluginArg::Type::Boolean) return std::nullopt;
+    return arg->boolValue;
+}
+
+static std::optional<double> pluginNumberArg(const EventCommand& cmd,
+                                             const std::string& key) {
+    const auto* arg = findPluginArg(cmd, key);
+    if (!arg || arg->type != EventCommand::PluginArg::Type::Number) return std::nullopt;
+    return arg->numberValue;
 }
 
 void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
@@ -213,6 +241,41 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
     if (type == "playSound") {
         soundRequest.active = true;
         soundRequest.soundId = cmd->soundId;
+        return;
+    }
+    if (type == "pluginCommand") {
+        const std::string fullCommand = cmd->pluginId + "." + cmd->pluginCommand;
+
+        if (fullCommand == "debug.log") {
+            const auto message = pluginStringArg(*cmd, "message");
+            Logger::info(message ? "pluginCommand debug.log: " + *message
+                                 : "pluginCommand debug.log");
+            return;
+        }
+
+        if (fullCommand == "debug.setSwitch") {
+            const auto switchId = pluginStringArg(*cmd, "switchId");
+            const auto value = pluginBoolArg(*cmd, "value");
+            if (!switchId || switchId->empty() || !value) {
+                Logger::warning("pluginCommand debug.setSwitch missing switchId or value");
+                return;
+            }
+            gameState.setSwitch(*switchId, *value);
+            return;
+        }
+
+        if (fullCommand == "debug.setVariable") {
+            const auto variableId = pluginStringArg(*cmd, "variableId");
+            const auto value = pluginNumberArg(*cmd, "value");
+            if (!variableId || variableId->empty() || !value) {
+                Logger::warning("pluginCommand debug.setVariable missing variableId or value");
+                return;
+            }
+            gameState.setVariable(*variableId, static_cast<int>(*value));
+            return;
+        }
+
+        Logger::warning("pluginCommand: unsupported command '" + fullCommand + "'");
         return;
     }
     if (type == "comment") {

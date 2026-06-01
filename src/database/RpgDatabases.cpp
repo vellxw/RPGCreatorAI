@@ -14,6 +14,31 @@ namespace rpg {
 // Keeping it small: the renderer is the validator.
 static std::shared_ptr<EventCommand> parseCommand(const json& j);
 
+static void parsePluginArgs(const json& j, EventCommand& cmd) {
+    const auto argsIt = j.find("args");
+    if (argsIt == j.end() || !argsIt->is_object()) return;
+
+    for (const auto& [key, value] : argsIt->items()) {
+        EventCommand::PluginArg arg;
+        if (value.is_null()) {
+            arg.type = EventCommand::PluginArg::Type::Null;
+        } else if (value.is_string()) {
+            arg.type = EventCommand::PluginArg::Type::String;
+            arg.stringValue = value.get<std::string>();
+        } else if (value.is_boolean()) {
+            arg.type = EventCommand::PluginArg::Type::Boolean;
+            arg.boolValue = value.get<bool>();
+        } else if (value.is_number()) {
+            arg.type = EventCommand::PluginArg::Type::Number;
+            arg.numberValue = value.get<double>();
+        } else {
+            Logger::warning("RpgDatabases: ignored non-scalar pluginCommand arg '" + key + "'");
+            continue;
+        }
+        cmd.pluginArgs[key] = std::move(arg);
+    }
+}
+
 static StatsCpp parseStats(const json& j) {
     StatsCpp s;
     s.maxHp = j.value("maxHp", 1);
@@ -361,6 +386,10 @@ static std::shared_ptr<EventCommand> parseCommand(const json& j) {
         cmd->direction = j.value("direction", "down");
     } else if (type == "playSound") {
         cmd->soundId = j.value("soundId", "");
+    } else if (type == "pluginCommand") {
+        cmd->pluginId = j.value("pluginId", "");
+        cmd->pluginCommand = j.value("command", "");
+        parsePluginArgs(j, *cmd);
     } else if (type == "wait") {
         cmd->ms = j.value("ms", 0);
     } else if (type == "comment") {

@@ -19,7 +19,7 @@ Legend:
 | Tilesets / sprites | partial | yes | partial | yes | partial | partial | Data-driven tilesets exist; dedicated tileset database editor remains FRA-8. |
 | Visual layers / foreground | val | yes | yes | yes | yes | yes | Runtime renders background visual roles, below/same entities, foreground occluders, above entities, then overlays; collision/region stay non-rendered. |
 | Events, pages, and self switches | val | yes | yes | yes | yes | yes | Active-page selection, self switches, and scheduled events are implemented. |
-| Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; audio v1 and plugin commands remain MVP work. |
+| Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; remaining gaps are richer authoring/debug integration rather than the RT-007 command surface. |
 | Runtime choices UI | val | yes | yes | yes | yes | yes | `showChoices` now renders selectable runtime options and waits for confirm/cancel results. |
 | Movement routes | val | yes | yes | yes | yes | yes | Player, `thisEvent`, and named event routes execute against runtime-only event positions with wait/skippable/repeat guard coverage. |
 | Event priority / Y-sort | val | yes | yes | yes | yes | yes | Below/same/above render priority is data-driven from active pages; same-priority entities interleave with the player by foot Y and stable id tie-breaks. |
@@ -35,7 +35,7 @@ Legend:
 | Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |
 | Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |
 | Local audio v1 | partial | yes | partial | yes | yes | yes | Runtime audio registry and local WAV dispatch exist; missing files/devices warn and continue. Dedicated audio authoring remains later editor work. |
-| Deterministic plugin commands | n/s | no | no | no | no | no | Allowlisted `debug.log` style dispatch remains FRA-21. |
+| Deterministic plugin commands | val | yes | yes | yes | yes | yes | `pluginCommand` supports scalar args, editor key/value controls, map/common-event parsing, allowlisted `debug.log`, `debug.setSwitch`, and `debug.setVariable`, plus non-fatal unknown-command warnings. |
 | Playtest session modes | partial | yes | partial | partial | partial | partial | Existing playtest flow needs project/current-map/selected-event temp sessions in FRA-22. |
 | Runtime logs, trace, and state snapshots | n/s | n/a | no | no | no | no | Bounded log viewer, trace output, and state inspector remain FRA-23 through FRA-25. |
 | Placeholder AI/debug UI gating | partial | n/a | partial | n/a | n/a | partial | MVP must remove or gate unavailable AI/debug actions in FRA-26. |

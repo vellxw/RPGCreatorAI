@@ -19,10 +19,6 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
   enemies/troops/quests/shops/switches/variables/system/animations editors,
   common-event command editing, and database reference safety.
-- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): deterministic
-  plugin-command v1 after the completed runtime validator, choices UI,
-  event-target movement-route, priority/Y-sort, foreground occlusion, and
-  local audio v1 slices.
 - Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
   current-map, and selected-event playtest sessions, bounded native logs,
   event trace, runtime state snapshots, and removal/gating of placeholder AI
@@ -34,6 +30,12 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 RT-007 (FRA-21) — deterministic plugin command v1 adds the
+  `pluginCommand` data shape with safe `pluginId`, `command`, and scalar
+  `args`, editor key/value controls, map/common-event C++ parsing,
+  allowlisted runtime dispatch for `debug.log`, `debug.setSwitch`, and
+  `debug.setVariable`, plus non-fatal warnings for unknown commands. This is
+  registry dispatch only, not scripting or arbitrary code execution.
 - Phase 10 RT-006 (FRA-20) — native runtime audio v1 now routes
   `playSound` through `Game` instead of direct `EventRunner` logging.
   `platform/AudioSystem` owns the SDL audio boundary, exposes an injectable

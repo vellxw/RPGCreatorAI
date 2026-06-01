@@ -4,6 +4,58 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-21 / RT-007 — deterministic plugin command v1
+
+- `2026-06-01 14:32:31 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateProject.test.ts`
+  — RED; new plugin-command validation tests failed because
+  `pluginCommand` was still reported as an unknown command type and no
+  safe-identifier/scalar-arg checks existed.
+- `2026-06-01 14:32:31 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — RED; the command selector did not expose a `Plugin Command` option.
+- `2026-06-01 14:33:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new C++ tests failed to compile because `EventCommand` did not yet
+  expose `pluginId`, `pluginCommand`, or `PluginArg`/`pluginArgs`.
+- `2026-06-01 14:35:49 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateProject.test.ts`
+  — PASS after adding the TypeScript command type and validation rules.
+- `2026-06-01 14:35:49 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — PASS after adding the selector placeholder and command card metadata.
+- `2026-06-01 14:36:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS after adding runtime plugin args, map/common-event parsing, and
+  `EventRunner` built-in dispatch.
+- `2026-06-01 14:36:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed with plugin command parser and runner coverage.
+- `2026-06-01 14:39:28 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateProject.test.ts`
+  — PASS; 34 validation tests passed.
+- `2026-06-01 14:39:40 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — PASS; 4 command stack editor tests passed.
+- `2026-06-01 14:39:50 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 14:40:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings,
+  Ninja had no work to do, and `RPGTests` passed.
+- `2026-06-01 14:40:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, logged the `town_theme` audio request,
+  warned about the missing optional WAV, and reported `SMOKE PASSED`.
+- `2026-06-01 14:40:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added `pluginCommand` with safe `pluginId`, `command`, and
+  scalar `args`, editor key/value controls, map/common-event C++ parsing,
+  allowlisted `debug.log`, `debug.setSwitch`, and `debug.setVariable`
+  dispatch, plus non-fatal warnings for unknown plugin commands.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-20 / RT-006 — local audio v1
 
 - `2026-06-01 14:12:00 -03:00` —

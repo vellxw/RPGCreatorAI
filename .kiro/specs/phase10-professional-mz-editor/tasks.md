@@ -110,7 +110,7 @@
   without giving the renderer gameplay ownership.
 - [x] FRA-20 / RT-006: add local audio v1 for project-owned BGM/SFX data with
   deterministic skips when audio is unavailable.
-- [ ] FRA-21 / RT-007: add deterministic plugin command v1 through allowlisted
+- [x] FRA-21 / RT-007: add deterministic plugin command v1 through allowlisted
   commands such as `debug.log`, without adding a scripting VM.
 
 ## Slice 6 — Playtest And Debug Programmer Tools

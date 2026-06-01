@@ -126,6 +126,25 @@ commands, graphic metadata, priority, and `through` option. Automatic
 
 See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
 
+`pluginCommand` uses a deterministic data-only shape:
+
+```json
+{
+  "type": "pluginCommand",
+  "pluginId": "debug",
+  "command": "setVariable",
+  "args": {
+    "variableId": "score",
+    "value": 10
+  }
+}
+```
+
+`pluginId`, `command`, and arg keys must be safe identifiers. `args` may only
+contain string, number, boolean, or null values; nested objects, arrays, and
+code-like strings are rejected by editor validation and ignored by runtime
+parsers if encountered.
+
 ## database/commonEvents.json
 
 ```json

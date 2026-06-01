@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "types/Vec2i.h"
 
 // Phase 6 — fat event command struct that covers every v1 command.
@@ -47,6 +48,18 @@ struct EventCommand {
 
     // playSound
     std::string soundId;
+
+    // pluginCommand
+    std::string pluginId;
+    std::string pluginCommand;
+    struct PluginArg {
+        enum class Type { Null, String, Number, Boolean };
+        Type type = Type::Null;
+        std::string stringValue;
+        double numberValue = 0.0;
+        bool boolValue = false;
+    };
+    std::unordered_map<std::string, PluginArg> pluginArgs;
 
     // callCommonEvent
     std::string commonEventId;

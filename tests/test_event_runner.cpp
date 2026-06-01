@@ -18,6 +18,27 @@ void runUntilIdle(EventRunner& runner, int maxIterations = 32) {
     }
 }
 
+EventCommand::PluginArg pluginString(const std::string& value) {
+    EventCommand::PluginArg arg;
+    arg.type = EventCommand::PluginArg::Type::String;
+    arg.stringValue = value;
+    return arg;
+}
+
+EventCommand::PluginArg pluginNumber(double value) {
+    EventCommand::PluginArg arg;
+    arg.type = EventCommand::PluginArg::Type::Number;
+    arg.numberValue = value;
+    return arg;
+}
+
+EventCommand::PluginArg pluginBool(bool value) {
+    EventCommand::PluginArg arg;
+    arg.type = EventCommand::PluginArg::Type::Boolean;
+    arg.boolValue = value;
+    return arg;
+}
+
 } // namespace
 
 TEST_CASE("EventRunner setFlag updates GameState") {
@@ -476,6 +497,57 @@ TEST_CASE("EventRunner playSound emits a sound request for Game dispatch") {
 
     runner.update(0.016f);
     CHECK(state.getFlag("after_sound") == true);
+}
+
+TEST_CASE("EventRunner pluginCommand handles deterministic debug built-ins") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto log = makeCmd("pluginCommand");
+    log->pluginId = "debug";
+    log->pluginCommand = "log";
+    log->pluginArgs["message"] = pluginString("hello");
+
+    auto setSwitch = makeCmd("pluginCommand");
+    setSwitch->pluginId = "debug";
+    setSwitch->pluginCommand = "setSwitch";
+    setSwitch->pluginArgs["switchId"] = pluginString("door_open");
+    setSwitch->pluginArgs["value"] = pluginBool(true);
+
+    auto setVariable = makeCmd("pluginCommand");
+    setVariable->pluginId = "debug";
+    setVariable->pluginCommand = "setVariable";
+    setVariable->pluginArgs["variableId"] = pluginString("score");
+    setVariable->pluginArgs["value"] = pluginNumber(42);
+
+    runner.runCommandList({log, setSwitch, setVariable});
+    runUntilIdle(runner);
+
+    CHECK(state.getSwitch("door_open") == true);
+    CHECK(state.getVariable("score") == 42);
+    CHECK(runner.isRunning() == false);
+}
+
+TEST_CASE("EventRunner pluginCommand unknown commands are non-fatal") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto unknown = makeCmd("pluginCommand");
+    unknown->pluginId = "unknownPlugin";
+    unknown->pluginCommand = "doThing";
+    unknown->pluginArgs["payload"] = pluginString("ignored");
+
+    auto after = makeCmd("setFlag");
+    after->flag = "after_plugin";
+    after->boolValue = true;
+
+    runner.runCommandList({unknown, after});
+    runUntilIdle(runner);
+
+    CHECK(state.getFlag("after_plugin") == true);
+    CHECK(runner.isRunning() == false);
 }
 
 TEST_CASE("EventRunner setMovementRoute emits a movement route request") {

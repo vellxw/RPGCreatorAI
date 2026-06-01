@@ -751,25 +751,27 @@ Labels: `mvp`, `phase-10`, `runtime-mz`, `parallel-safe`
 - Modify: `src/events/EventRunner.cpp`
 - Modify: `tests/test_event_runner.cpp`
 - Modify: `tests/test_map_loader.cpp`
+- Modify: `tests/test_tileset_runtime_data.cpp`
 - Modify: `src/validation/__tests__/validateProject.test.ts`
+- Modify: `src/components/events/__tests__/CommandStackEditor.test.tsx`
 
 ### Steps
 
-- [ ] Add event command type `pluginCommand` with fields `pluginId`, `command`, and `args: Record<string, string | number | boolean>`.
-- [ ] Add editor controls for plugin ID, command name, and key/value args.
-- [ ] Add validation rules: plugin ID and command are non-empty safe identifiers; arg values are scalar only; no nested objects; no code strings are executed.
-- [ ] Add runtime parser support in map events and common events.
-- [ ] Add `EventRunner` handling for built-in deterministic commands only: `debug.log`, `debug.setSwitch`, and `debug.setVariable`.
-- [ ] Unknown plugin commands must log a warning and continue.
-- [ ] Document this as registry-style deterministic command dispatch, not a scripting/plugin VM.
+- [x] Add event command type `pluginCommand` with fields `pluginId`, `command`, and `args: Record<string, string | number | boolean | null>`.
+- [x] Add editor controls for plugin ID, command name, and key/value args.
+- [x] Add validation rules: plugin ID and command are non-empty safe identifiers; arg values are scalar only; no nested objects; no code strings are executed.
+- [x] Add runtime parser support in map events and common events.
+- [x] Add `EventRunner` handling for built-in deterministic commands only: `debug.log`, `debug.setSwitch`, and `debug.setVariable`.
+- [x] Unknown plugin commands must log a warning and continue.
+- [x] Document this as registry-style deterministic command dispatch, not a scripting/plugin VM.
 
 ### Validation
 
-- [ ] Run `npm test -- --run src/validation/__tests__/validateProject.test.ts`.
-- [ ] Run `npm run typecheck`.
-- [ ] Run `cmake --build --preset default`.
-- [ ] Run `ctest --test-dir build --output-on-failure`.
-- [ ] Expected: all pass.
+- [x] Run `npm test -- --run src/validation/__tests__/validateProject.test.ts`.
+- [x] Run `npm run typecheck`.
+- [x] Run `cmake --build --preset default`.
+- [x] Run `ctest --test-dir build --output-on-failure`.
+- [x] Expected: all pass.
 
 ### Acceptance Criteria
 

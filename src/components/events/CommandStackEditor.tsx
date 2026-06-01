@@ -15,6 +15,7 @@ import {
   MapPinned,
   MessageSquare,
   NotebookPen,
+  Plug,
   Repeat,
   Scissors,
   ScrollText,
@@ -92,6 +93,13 @@ export function makePlaceholderCommand(type: EventCommand['type']): EventCommand
       return { type: 'wait', ms: 250 };
     case 'playSound':
       return { type: 'playSound', soundId: '' };
+    case 'pluginCommand':
+      return {
+        type: 'pluginCommand',
+        pluginId: 'debug',
+        command: 'log',
+        args: { message: 'New plugin command' },
+      };
     case 'comment':
       return { type: 'comment', text: '' };
     case 'callCommonEvent':
@@ -159,6 +167,7 @@ function CommandCard({ index, command, selected, rangeSelected, onSelect, onTogg
     transferMap: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     setPlayerPosition: { icon: <MapPinned size={18} />, color: 'text-cyan-600', bg: 'bg-cyan-50' },
     playSound: { icon: <Volume2 size={18} />, color: 'text-amber-600', bg: 'bg-amber-50' },
+    pluginCommand: { icon: <Plug size={18} />, color: 'text-sky-600', bg: 'bg-sky-50' },
     wait: { icon: <Timer size={18} />, color: 'text-gray-600', bg: 'bg-gray-50' },
     comment: { icon: <NotebookPen size={18} />, color: 'text-gray-500', bg: 'bg-gray-50' },
     callCommonEvent: { icon: <Repeat size={18} />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -191,6 +200,7 @@ function CommandCard({ index, command, selected, rangeSelected, onSelect, onTogg
     transferMap: 'Transfer Map',
     setPlayerPosition: 'Set Player Position',
     playSound: 'Play Sound',
+    pluginCommand: 'Plugin Command',
     wait: 'Wait',
     comment: 'Comment',
     callCommonEvent: 'Call Common Event',
@@ -223,6 +233,7 @@ function CommandCard({ index, command, selected, rangeSelected, onSelect, onTogg
       case 'transferMap':
       case 'setPlayerPosition': return `Map: ${cmd.mapId}  Location: (${cmd.x}, ${cmd.y})`;
       case 'playSound': return cmd.soundId;
+      case 'pluginCommand': return `${cmd.pluginId}.${cmd.command}`;
       case 'wait': return `${cmd.ms} ms`;
       case 'comment': return cmd.text;
       case 'callCommonEvent': return cmd.commonEventId;
@@ -794,6 +805,7 @@ export function CommandStackEditor({
             <option value="setPlayerPosition">Set Player Position</option>
             <option value="wait">Wait</option>
             <option value="playSound">Play Sound</option>
+            <option value="pluginCommand">Plugin Command</option>
             <option value="comment">Comment</option>
             <option value="callCommonEvent">Call Common Event</option>
             <option value="startQuest">Start Quest</option>

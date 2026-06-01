@@ -244,8 +244,11 @@ Linear tracks execution status, validation evidence, commits, and push results.
   `EventRunner` may request behavior, but `Game`, `MapScene`, renderer, audio,
   and debug systems remain responsible for their own domains.
 - Plugin command v1 is an allowlisted deterministic dispatch surface only. It
-  must not become a scripting engine, arbitrary code execution layer, network
-  hook, or AI provider integration.
+  accepts safe `pluginId`, `command`, and scalar `args` data, currently
+  dispatches only `debug.log`, `debug.setSwitch`, and `debug.setVariable`,
+  and logs/continues for unknown commands. It must not become a scripting
+  engine, arbitrary code execution layer, network hook, or AI provider
+  integration.
 
 ### Playtest And Debug Tools
 
