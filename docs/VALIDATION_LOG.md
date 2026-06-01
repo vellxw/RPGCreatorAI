@@ -2308,3 +2308,29 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:49:35 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 10 FRA-32 / INT-002 — Runtime MZ foundation integration validation
+
+- `2026-06-01 16:57:06 -03:00` — `git fetch --all --prune` plus
+  `git branch --all --list '*RT-*'` — PASS; no local or remote `RT-*`
+  branch refs remained after pruning. The integrated runtime foundation
+  commits were already present on `main`: `f35db71` validator seam,
+  `dde0339` interactive choices, `d7d977d` event-target movement routes,
+  `a31a988` priority/Y-sort rendering, `ef012e5` foreground occlusion,
+  `21036a0` local audio runtime v1, and `0211222` deterministic plugin
+  commands.
+- `2026-06-01 16:57:24 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; native configure generated successfully, build reported
+  `ninja: no work to do`, and `RPGTests` passed 1/1. Existing CMake
+  FetchContent/dependency deprecation warnings remained non-fatal.
+- `2026-06-01 16:57:38 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`
+  — PASS; launch smoke stayed alive and the feature smoke asserted real
+  runtime markers for `showChoices selected=0`, `setMovementRoute
+  target=event,steps=3,wait=true`, `pluginCommand debug.log`, local
+  `Audio requested: chest_open -> assets/audio/chest.wav`, foreground
+  occlusion screenshot generation, and `Smoke shots complete`. Optional
+  missing-audio warnings remained non-fatal.
+- `2026-06-01 16:58:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+

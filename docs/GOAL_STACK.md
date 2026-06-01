@@ -15,11 +15,18 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-32 through FRA-35): runtime/playtest
+- Integration QA — MVP green gate (FRA-33 through FRA-35): playtest/debug
   feature integration, docs closeout, final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 INT-002 (FRA-32) — Runtime MZ foundation integration is present on
+  `main`: no local or remote `RT-*` branch refs remain after fetch/prune,
+  Linear shows FRA-15 through FRA-21 Done, Slice 5 tasks are checked, and the
+  integrated code includes the runtime validator, selectable choices,
+  event-target movement routes, event priority/Y-sort, foreground occlusion,
+  local audio v1, and deterministic plugin commands. Native CMake
+  configure/build/CTest and runtime smoke validated those systems together.
 - Phase 10 INT-001 (FRA-31) — Database V2 integration is present on `main`:
   there are no remaining local or remote `DB-*` branch refs after
   fetch/prune, Linear shows FRA-6 through FRA-14 Done, Slice 4 tasks are

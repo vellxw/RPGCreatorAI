@@ -48,6 +48,15 @@
   queue until the player confirms or cancels.
 - Movement input is ignored while a dialogue or choice prompt is active.
 
+## Event-Driven Runtime Actions
+
+- Movement routes, audio requests, foreground occlusion, and plugin commands
+  are triggered by project event data. They do not add separate player
+  controls.
+- The MVP runtime smoke path verifies choice confirmation, event-target
+  movement, a local `chest_open` audio request, foreground occlusion, and
+  `pluginCommand debug.log` output together.
+
 ## Save / Load
 
 - Save is written to `saves/slot_1.json`.

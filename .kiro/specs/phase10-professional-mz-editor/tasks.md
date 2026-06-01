@@ -139,7 +139,7 @@
   gate with targeted skip flags.
 - [x] FRA-31 / INT-001: integrate Database V2 branches and run full frontend
   validation.
-- [ ] FRA-32 / INT-002: integrate Runtime MZ foundation branches and run C++
+- [x] FRA-32 / INT-002: integrate Runtime MZ foundation branches and run C++
   validation plus runtime smoke.
 - [ ] FRA-33 / INT-003: integrate playtest/debug tooling and validate browser
   and desktop degradation paths.

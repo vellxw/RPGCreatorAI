@@ -4,6 +4,17 @@ The runtime executes event command lists declared in JSON via
 `EventRunner`. Commands run sequentially; some commands block the queue
 until an external condition advances them.
 
+## Integrated MVP Runtime Surface
+
+The Phase 10 runtime foundation is integrated as a single native path: the
+project validator runs before startup, choices are visible/selectable,
+movement routes can target the player, the owning event, or named events,
+event rendering uses priority plus Y-sort, foreground layers occlude
+player/events, local audio requests resolve through project data, and
+`pluginCommand` dispatch stays limited to deterministic allowlisted handlers.
+These features remain data-driven; the runtime does not add scripting, AI, or
+editor IPC dependencies.
+
 ## Triggers
 
 An `EventData` belongs to a map and has one of these triggers:
