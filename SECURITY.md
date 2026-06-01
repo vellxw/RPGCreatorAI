@@ -6,6 +6,8 @@ RPGCreatorAI is an alpha-stage local editor/runtime project. The current runtime
 
 Security fixes target the latest code on the default branch until formal releases begin.
 
+The currently supported desktop/runtime target is Windows. Linux desktop packaging is experimental until the Tauri GTK/WebKit dependency stack is validated and covered by CI.
+
 ## Reporting A Vulnerability
 
 Do not open a public issue for a vulnerability.
