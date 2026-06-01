@@ -10,6 +10,7 @@ import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
 import { DATABASE_LIST_KEYS } from '../adapters/defaultDatabases';
 import type {
   ActorData,
+  ArmorData,
   ClassData,
   CommonEventData,
   DatabaseListKey,
@@ -21,14 +22,19 @@ import type {
   SwitchData,
   SystemData,
   MovementSpeed,
+  StateData,
   TroopData,
   VariableData,
+  WeaponData,
 } from '../types/project';
 
 const TAB_ORDER: Array<{ key: DatabaseListKey | 'system'; label: string }> = [
   { key: 'actors', label: 'Actors' },
   { key: 'classes', label: 'Classes' },
   { key: 'skills', label: 'Skills' },
+  { key: 'weapons', label: 'Weapons' },
+  { key: 'armors', label: 'Armors' },
+  { key: 'states', label: 'States' },
   { key: 'enemies', label: 'Enemies' },
   { key: 'troops', label: 'Troops' },
   { key: 'quests', label: 'Quests' },
@@ -91,6 +97,37 @@ function makePlaceholder(table: DatabaseListKey, id: string): DatabaseRecord {
         mpCost: 0,
         power: 100,
         target: 'singleEnemy',
+      } as unknown as DatabaseRecord;
+    case 'weapons':
+      return {
+        id,
+        name: id,
+        description: '',
+        weaponTypeId: 'sword',
+        price: 0,
+        params: {},
+        animationId: '',
+        traits: [],
+      } as unknown as DatabaseRecord;
+    case 'armors':
+      return {
+        id,
+        name: id,
+        description: '',
+        armorTypeId: 'light',
+        slot: 'body',
+        price: 0,
+        params: {},
+        traits: [],
+      } as unknown as DatabaseRecord;
+    case 'states':
+      return {
+        id,
+        name: id,
+        priority: 50,
+        removeAtBattleEnd: false,
+        restriction: 'none',
+        traits: [],
       } as unknown as DatabaseRecord;
     case 'enemies':
       return {
@@ -254,6 +291,12 @@ function Detail({ table, entry }: DetailProps) {
       return <ClassDetail entry={entry as unknown as ClassData} update={update} idField={idField} />;
     case 'skills':
       return <SkillDetail entry={entry as unknown as SkillData} update={update} idField={idField} />;
+    case 'weapons':
+      return <WeaponDetail entry={entry as unknown as WeaponData} update={update} idField={idField} />;
+    case 'armors':
+      return <ArmorDetail entry={entry as unknown as ArmorData} update={update} idField={idField} />;
+    case 'states':
+      return <StateDetail entry={entry as unknown as StateData} update={update} idField={idField} />;
     case 'enemies':
       return <EnemyDetail entry={entry as unknown as EnemyData} update={update} idField={idField} />;
     case 'troops':
@@ -357,6 +400,104 @@ function SkillDetail({ entry, update, idField }: { entry: SkillData; update: Upd
           { value: 'self', label: 'Self' },
         ]}
         onChange={v => update({ target: v as SkillData['target'] })}
+      />
+    </div>
+  );
+}
+
+function WeaponDetail({ entry, update, idField }: { entry: WeaponData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Input
+        label="Description"
+        value={entry.description}
+        onChange={e => update({ description: e.target.value })}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="Weapon type"
+          value={entry.weaponTypeId}
+          onChange={e => update({ weaponTypeId: e.target.value })}
+        />
+        <Input
+          label="Price"
+          type="number"
+          value={entry.price ?? 0}
+          onChange={e => update({ price: Number(e.target.value) })}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ArmorDetail({ entry, update, idField }: { entry: ArmorData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Input
+        label="Description"
+        value={entry.description}
+        onChange={e => update({ description: e.target.value })}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="Armor type"
+          value={entry.armorTypeId}
+          onChange={e => update({ armorTypeId: e.target.value })}
+        />
+        <Select
+          label="Slot"
+          value={entry.slot}
+          options={[
+            { value: 'shield', label: 'Shield' },
+            { value: 'head', label: 'Head' },
+            { value: 'body', label: 'Body' },
+            { value: 'accessory', label: 'Accessory' },
+          ]}
+          onChange={v => update({ slot: v })}
+        />
+      </div>
+      <Input
+        label="Price"
+        type="number"
+        value={entry.price ?? 0}
+        onChange={e => update({ price: Number(e.target.value) })}
+      />
+    </div>
+  );
+}
+
+function StateDetail({ entry, update, idField }: { entry: StateData; update: UpdateFn; idField: React.ReactNode }) {
+  return (
+    <div className="space-y-3 max-w-md">
+      {idField}
+      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+      <Input
+        label="Priority"
+        type="number"
+        value={entry.priority}
+        onChange={e => update({ priority: Number(e.target.value) })}
+      />
+      <Select
+        label="Restriction"
+        value={entry.restriction ?? 'none'}
+        options={[
+          { value: 'none', label: 'None' },
+          { value: 'cannotMove', label: 'Cannot move' },
+        ]}
+        onChange={v => update({ restriction: v })}
+      />
+      <Select
+        label="Remove at battle end"
+        value={entry.removeAtBattleEnd ? 'true' : 'false'}
+        options={[
+          { value: 'false', label: 'No' },
+          { value: 'true', label: 'Yes' },
+        ]}
+        onChange={v => update({ removeAtBattleEnd: v === 'true' })}
       />
     </div>
   );

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "states": [
+    {
+      "id": "poison",
+      "name": "Poison",
+      "priority": 50,
+      "removeAtBattleEnd": false,
+      "restriction": "none",
+      "traits": [
+        "damageOverTime"
+      ]
+    }
+  ]
+}

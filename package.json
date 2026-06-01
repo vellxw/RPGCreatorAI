@@ -3,6 +3,28 @@
   "private": true,
   "version": "0.3.0",
   "type": "module",
+  "description": "Open source RPG creation toolkit with a React/Tauri editor and native C++ data-driven runtime.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vellxw/RPGCreatorAI.git"
+  },
+  "homepage": "https://github.com/vellxw/RPGCreatorAI#readme",
+  "bugs": {
+    "url": "https://github.com/vellxw/RPGCreatorAI/issues"
+  },
+  "keywords": [
+    "rpg",
+    "game-engine",
+    "game-editor",
+    "tauri",
+    "react",
+    "typescript",
+    "cpp",
+    "cmake",
+    "rpg-maker",
+    "ai-assisted"
+  ],
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "dev:tauri": "vite --port=1420 --strictPort --host=127.0.0.1",
@@ -10,6 +32,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm test && npm run build",
+    "verify:runtime:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke",
     "test": "vitest run",
     "test:watch": "vitest",
     "tauri": "tauri",

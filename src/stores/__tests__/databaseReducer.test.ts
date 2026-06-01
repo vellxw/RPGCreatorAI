@@ -12,6 +12,49 @@ describe('projectReducer database actions', () => {
     expect(s1.dirty).toBe(true);
   });
 
+  it('ADD_DATABASE_ENTRY supports separated weapon armor and state tables', () => {
+    let state = projectReducer(initialProjectStoreState, {
+      type: 'ADD_DATABASE_ENTRY',
+      table: 'weapons',
+      entry: {
+        id: 'bronze_sword',
+        name: 'Bronze Sword',
+        description: '',
+        weaponTypeId: 'sword',
+        price: 50,
+        params: { attack: 2 },
+      },
+    });
+    state = projectReducer(state, {
+      type: 'ADD_DATABASE_ENTRY',
+      table: 'armors',
+      entry: {
+        id: 'cloth_armor',
+        name: 'Cloth Armor',
+        description: '',
+        armorTypeId: 'clothes',
+        slot: 'body',
+        price: 30,
+        params: { defense: 1 },
+      },
+    });
+    state = projectReducer(state, {
+      type: 'ADD_DATABASE_ENTRY',
+      table: 'states',
+      entry: {
+        id: 'poison',
+        name: 'Poison',
+        priority: 50,
+        removeAtBattleEnd: false,
+        traits: [],
+      },
+    });
+
+    expect(state.databases.weapons[0].id).toBe('bronze_sword');
+    expect(state.databases.armors[0].slot).toBe('body');
+    expect(state.databases.states[0].priority).toBe(50);
+  });
+
   it('ADD_DATABASE_ENTRY refuses duplicate ids', () => {
     const s1 = projectReducer(initialProjectStoreState, {
       type: 'ADD_DATABASE_ENTRY',

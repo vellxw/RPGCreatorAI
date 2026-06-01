@@ -50,7 +50,27 @@ function loadedState(): ProjectStoreState {
       database: { items: 'data/database/items.json' },
     },
     maps: { town: map },
-    items: { items: [{ id: 'potion', name: 'Potion', description: '', type: 'consumable' }] },
+    items: {
+      items: [
+        { id: 'potion', name: 'Potion', description: '', type: 'consumable' },
+        {
+          id: 'iron_sword',
+          name: 'Iron Sword',
+          description: 'Legacy weapon item',
+          type: 'weapon',
+          slot: 'weapon',
+          modifiers: { attack: 3 },
+        },
+        {
+          id: 'leather_armor',
+          name: 'Leather Armor',
+          description: 'Legacy armor item',
+          type: 'armor',
+          slot: 'armor',
+          modifiers: { defense: 2 },
+        },
+      ],
+    },
     databases: mergeDatabases(undefined),
   };
   return projectReducer(initialProjectStoreState, { type: 'LOAD_PROJECT', payload });
@@ -213,6 +233,12 @@ describe('projectReducer', () => {
       priority: 'sameAsCharacters',
     });
     expect(event.pages?.[0].commands).toEqual(event.commands);
+  });
+
+  it('LOAD_PROJECT migrates legacy weapon and armor items into separated databases when missing', () => {
+    const s1 = loadedState();
+    expect(s1.databases.weapons.map(w => w.id)).toContain('iron_sword');
+    expect(s1.databases.armors.map(armor => armor.id)).toContain('leather_armor');
   });
 
   it('UPDATE_EVENT_PAGE updates a page and mirrors page 1 to legacy fields', () => {

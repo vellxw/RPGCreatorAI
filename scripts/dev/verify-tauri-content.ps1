@@ -18,7 +18,7 @@
 [CmdletBinding()]
 param(
     [int]$Port = 1420,
-    [int]$TimeoutSeconds = 5
+    [int]$TimeoutSeconds = 20
 )
 
 $ErrorActionPreference = 'Stop'

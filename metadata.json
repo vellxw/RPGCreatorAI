@@ -1,6 +1,11 @@
 {
-  "name": "",
-  "description": "",
+  "name": "RPGCreatorAI",
+  "description": "Open source RPG creation toolkit with a React/Tauri editor and native C++ data-driven runtime.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "RPG editor",
+    "native runtime",
+    "data-driven project format",
+    "future AI-assisted authoring"
+  ]
 }

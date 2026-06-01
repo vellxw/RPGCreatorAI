@@ -19,6 +19,9 @@ import type {
   QuestData,
   ShopData,
   SkillData,
+  WeaponData,
+  ArmorData,
+  StateData,
   SwitchData,
   SystemData,
   TroopData,
@@ -36,6 +39,9 @@ import itemsJson from '../../data/database/items.json';
 import actorsJson from '../../data/database/actors.json';
 import classesJson from '../../data/database/classes.json';
 import skillsJson from '../../data/database/skills.json';
+import weaponsJson from '../../data/database/weapons.json';
+import armorsJson from '../../data/database/armors.json';
+import statesJson from '../../data/database/states.json';
 import enemiesJson from '../../data/database/enemies.json';
 import troopsJson from '../../data/database/troops.json';
 import questsJson from '../../data/database/quests.json';
@@ -78,6 +84,9 @@ function seedFromBundle(): FullProjectState {
       actors: unwrapList<ActorData>(deepClone(actorsJson) as SchemaWrapper<ActorData>, 'actors'),
       classes: unwrapList<ClassData>(deepClone(classesJson) as SchemaWrapper<ClassData>, 'classes'),
       skills: unwrapList<SkillData>(deepClone(skillsJson) as SchemaWrapper<SkillData>, 'skills'),
+      weapons: unwrapList<WeaponData>(deepClone(weaponsJson) as SchemaWrapper<WeaponData>, 'weapons'),
+      armors: unwrapList<ArmorData>(deepClone(armorsJson) as SchemaWrapper<ArmorData>, 'armors'),
+      states: unwrapList<StateData>(deepClone(statesJson) as SchemaWrapper<StateData>, 'states'),
       enemies: unwrapList<EnemyData>(deepClone(enemiesJson) as SchemaWrapper<EnemyData>, 'enemies'),
       troops: unwrapList<TroopData>(deepClone(troopsJson) as SchemaWrapper<TroopData>, 'troops'),
       quests: unwrapList<QuestData>(deepClone(questsJson) as SchemaWrapper<QuestData>, 'quests'),

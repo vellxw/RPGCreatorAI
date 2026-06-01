@@ -8,12 +8,15 @@ import type {
   EventPage,
   GameEvent,
   ItemDatabase,
+  ItemData,
   MapData,
   MapReference,
   ProjectData,
   SystemData,
   TriggerType,
   ValidationMessage,
+  WeaponData,
+  ArmorData,
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
 import { mergeDatabases } from '../adapters/defaultDatabases';
@@ -571,6 +574,47 @@ function normalizeMapsForEditing(maps: Record<string, MapData>): Record<string, 
   return cloned;
 }
 
+function migrateEquipmentDatabases(items: ItemDatabase, databases: DatabaseEntries): DatabaseEntries {
+  const next = deepClone(databases);
+  if (next.weapons.length === 0) {
+    next.weapons = items.items
+      .filter(item => item.type === 'weapon')
+      .map(itemToWeapon);
+  }
+  if (next.armors.length === 0) {
+    next.armors = items.items
+      .filter(item => item.type === 'armor')
+      .map(itemToArmor);
+  }
+  return next;
+}
+
+function itemToWeapon(item: ItemData): WeaponData {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    weaponTypeId: item.slot === 'weapon' ? 'sword' : 'weapon',
+    price: item.price ?? 0,
+    params: item.modifiers ?? {},
+    animationId: '',
+    traits: [],
+  };
+}
+
+function itemToArmor(item: ItemData): ArmorData {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    armorTypeId: item.slot === 'accessory' ? 'accessory' : 'light',
+    slot: item.slot === 'accessory' ? 'accessory' : 'body',
+    price: item.price ?? 0,
+    params: item.modifiers ?? {},
+    traits: [],
+  };
+}
+
 function pageIndex(event: GameEvent, pageId: string): number {
   const pages = event.pages ?? [];
   return pages.findIndex(page => page.id === pageId);
@@ -866,7 +910,10 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         project: withNormalizedVisualProfile(deepClone(payload.project)),
         maps: normalizeMapsForEditing(payload.maps),
         items: deepClone(payload.items),
-        databases: mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
+        databases: migrateEquipmentDatabases(
+          payload.items,
+          mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
+        ),
         dirty: false,
         history: [],
         future: [],

@@ -93,6 +93,27 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Duplicate'))).toBe(true);
   });
 
+  it('rejects duplicate weapon armor and state ids', () => {
+    const project = projectWith({
+      weapons: [
+        { id: 'sword', name: 'Sword', description: '', weaponTypeId: 'sword', price: 10, params: {} },
+        { id: 'sword', name: 'Sword 2', description: '', weaponTypeId: 'sword', price: 20, params: {} },
+      ],
+      armors: [
+        { id: 'coat', name: 'Coat', description: '', armorTypeId: 'clothes', slot: 'body', price: 10, params: {} },
+        { id: 'coat', name: 'Coat 2', description: '', armorTypeId: 'clothes', slot: 'body', price: 20, params: {} },
+      ],
+      states: [
+        { id: 'poison', name: 'Poison', priority: 50, removeAtBattleEnd: false, traits: [] },
+        { id: 'poison', name: 'Poison 2', priority: 40, removeAtBattleEnd: true, traits: [] },
+      ],
+    });
+    const report = validateProject(project);
+    expect(report.errors.some(e => e.message.includes('Duplicate weapon id'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Duplicate armor id'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Duplicate state id'))).toBe(true);
+  });
+
   it('rejects controlVariable referencing unknown variable', () => {
     const project = projectWith({
       variables: [{ id: 'v1', name: 'V1', initial: 0 }],

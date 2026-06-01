@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "weapons": [
+    {
+      "id": "iron_sword",
+      "name": "Iron Sword",
+      "description": "A sturdy sword. +3 attack.",
+      "weaponTypeId": "sword",
+      "price": 80,
+      "params": {
+        "attack": 3
+      },
+      "animationId": "",
+      "traits": []
+    }
+  ]
+}

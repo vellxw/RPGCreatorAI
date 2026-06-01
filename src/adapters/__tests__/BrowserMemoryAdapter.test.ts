@@ -22,6 +22,9 @@ describe('BrowserMemoryAdapter', () => {
     expect(state.maps.town).toBeDefined();
     expect(state.maps.house).toBeDefined();
     expect(state.items.items.length).toBeGreaterThan(0);
+    expect(state.databases.weapons.map(w => w.id)).toContain('iron_sword');
+    expect(state.databases.armors.map(armor => armor.id)).toContain('leather_armor');
+    expect(state.databases.states.map(status => status.id)).toContain('poison');
   });
 
   it('saveProject updates the in-memory snapshot', async () => {

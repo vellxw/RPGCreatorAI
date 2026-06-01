@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "armors": [
+    {
+      "id": "leather_armor",
+      "name": "Leather Armor",
+      "description": "Light protection. +2 defense.",
+      "armorTypeId": "light",
+      "slot": "body",
+      "price": 60,
+      "params": {
+        "defense": 2
+      },
+      "traits": []
+    }
+  ]
+}

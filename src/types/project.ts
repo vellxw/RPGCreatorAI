@@ -19,6 +19,9 @@ export interface DatabasePaths {
   actors?: string;
   classes?: string;
   skills?: string;
+  weapons?: string;
+  armors?: string;
+  states?: string;
   enemies?: string;
   troops?: string;
   quests?: string;
@@ -454,6 +457,39 @@ export interface Stats {
 
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
 
+export type ArmorSlot = 'shield' | 'head' | 'body' | 'accessory';
+
+export interface WeaponData {
+  id: string;
+  name: string;
+  description: string;
+  weaponTypeId: string;
+  price?: number;
+  params?: Partial<Stats>;
+  animationId?: string;
+  traits?: string[];
+}
+
+export interface ArmorData {
+  id: string;
+  name: string;
+  description: string;
+  armorTypeId: string;
+  slot: ArmorSlot;
+  price?: number;
+  params?: Partial<Stats>;
+  traits?: string[];
+}
+
+export interface StateData {
+  id: string;
+  name: string;
+  priority: number;
+  removeAtBattleEnd: boolean;
+  restriction?: 'none' | 'cannotMove';
+  traits: string[];
+}
+
 export interface ActorData {
   id: string;
   name: string;
@@ -596,6 +632,9 @@ export interface DatabaseEntries {
   actors: ActorData[];
   classes: ClassData[];
   skills: SkillData[];
+  weapons: WeaponData[];
+  armors: ArmorData[];
+  states: StateData[];
   enemies: EnemyData[];
   troops: TroopData[];
   quests: QuestData[];
