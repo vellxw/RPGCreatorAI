@@ -4,6 +4,41 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-14 / DB-009 — database delete and rename reference safety
+
+- `2026-06-01 13:15 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts`
+  — RED; the new reference index module did not exist before
+  implementation.
+- `2026-06-01 13:15 -03:00` —
+  `npm test -- --run src/stores/__tests__/databaseReducer.test.ts`
+  — RED; `RENAME_DATABASE_ENTRY` changed only the database id and left page
+  conditions and command references untouched.
+- `2026-06-01 13:16 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts src/stores/__tests__/databaseReducer.test.ts`
+  — PASS (2 files, 12 tests).
+- `2026-06-01 13:16 -03:00` — `npm run typecheck` — FAIL; the new reducer
+  test fixture inferred a too-narrow map shape after `projectReducer`
+  returned `ProjectStoreState`.
+- `2026-06-01 13:17 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  after annotating the reducer fixture as `ProjectStoreState`.
+- `2026-06-01 13:17 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts src/stores/__tests__/databaseReducer.test.ts`
+  — PASS (2 files, 12 tests) after wiring delete/rename UI safety.
+- `2026-06-01 13:17 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  after wiring delete/rename UI safety.
+- `2026-06-01 13:18 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`); Vite reported the existing chunk-size warning.
+- `2026-06-01 13:18 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- Fix applied: added `referenceIndex`, indexed map/page/command/common-event
+  and database references, added deterministic reference-updating rename for
+  database entries, blocked deletion of referenced database-list entries, and
+  added an update-references choice when renaming referenced IDs.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-13 / DB-008 — animation database V2 editor and preview
 
 - `2026-06-01 13:08 -03:00` —

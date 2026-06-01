@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useProjectStore, type DatabaseRecord } from '../../stores/projectStore';
+import { findReferences } from '../../validation/referenceIndex';
 import type { DatabaseListKey, Stats } from '../../types/project';
 
 interface DatabaseListProps {
@@ -135,7 +136,7 @@ function entryLabel(entry: DatabaseRecord): string {
 }
 
 export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseListProps) {
-  const { dispatch } = useProjectStore();
+  const { state, dispatch } = useProjectStore();
   const ids = useMemo(() => new Set(entries.map(entry => entry.id)), [entries]);
 
   const addEntry = () => {
@@ -157,6 +158,18 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
   };
 
   const removeEntry = (id: string) => {
+    const refs = findReferences({
+      project: state.project,
+      maps: state.maps,
+      items: state.items,
+      databases: state.databases,
+    }, { table, id });
+    if (refs.length > 0) {
+      const listed = refs.slice(0, 8).map(ref => `- ${ref.source}`).join('\n');
+      const remaining = refs.length > 8 ? `\n...and ${refs.length - 8} more.` : '';
+      alert(`Cannot delete ${table.slice(0, -1)} "${id}" because it is still referenced:\n${listed}${remaining}`);
+      return;
+    }
     if (!confirm(`Delete ${table.slice(0, -1)} "${id}"?`)) return;
     dispatch({ type: 'REMOVE_DATABASE_ENTRY', table, id });
     if (selectedId === id) {

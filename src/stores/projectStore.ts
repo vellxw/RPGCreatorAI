@@ -23,6 +23,7 @@ import type {
 import type { FullProjectState } from '../adapters/types';
 import { mergeDatabases } from '../adapters/defaultDatabases';
 import { validateProject } from '../validation/validateProject';
+import { renameReferences } from '../validation/referenceIndex';
 import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 // ---------------------------------------------------------------------------
@@ -319,6 +320,7 @@ export type ProjectAction =
       table: DatabaseListKey;
       oldId: string;
       newId: string;
+      updateReferences?: boolean;
     }
   | {
       type: 'UPDATE_SYSTEM_DATA';
@@ -1417,16 +1419,26 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         return true;
       });
 
-    case 'RENAME_DATABASE_ENTRY':
-      return withDatabases(state, db => {
-        if (action.oldId === action.newId) return false;
-        const list = db[action.table] as unknown as DatabaseRecord[];
-        if (list.some(e => e.id === action.newId)) return false;
-        const target = list.find(e => e.id === action.oldId);
-        if (!target) return false;
-        target.id = action.newId;
-        return true;
-      });
+    case 'RENAME_DATABASE_ENTRY': {
+      if (action.oldId === action.newId) return state;
+      const next: ProjectStoreState = {
+        ...state,
+        dirty: true,
+        project: deepClone(state.project),
+        maps: deepClone(state.maps),
+        items: deepClone(state.items),
+        databases: deepClone(state.databases),
+      };
+      const list = next.databases[action.table] as unknown as DatabaseRecord[];
+      if (list.some(e => e.id === action.newId)) return state;
+      const target = list.find(e => e.id === action.oldId);
+      if (!target) return state;
+      target.id = action.newId;
+      if (action.updateReferences) {
+        renameReferences(next, action.table, action.oldId, action.newId);
+      }
+      return next;
+    }
 
     case 'UPDATE_SYSTEM_DATA':
       return withDatabases(state, db => {

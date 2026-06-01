@@ -30,6 +30,7 @@ import {
   type DatabaseRecord,
   type ProjectStoreState,
 } from '../stores/projectStore';
+import { findReferences } from '../validation/referenceIndex';
 import type {
   ActorData,
   ArmorData,
@@ -153,7 +154,16 @@ function Detail({ table, entry }: DetailProps) {
 
   const renameId = (newId: string) => {
     if (!newId.trim() || newId === entry.id) return;
-    dispatch({ type: 'RENAME_DATABASE_ENTRY', table, oldId: entry.id, newId });
+    const refs = findReferences({
+      project: state.project,
+      maps: state.maps,
+      items: state.items,
+      databases: state.databases,
+    }, { table, id: entry.id });
+    const updateReferences = refs.length > 0 && confirm(
+      `Rename "${entry.id}" to "${newId}"?\n\nOK: rename and update ${refs.length} reference${refs.length === 1 ? '' : 's'}.\nCancel: rename only the ID.`,
+    );
+    dispatch({ type: 'RENAME_DATABASE_ENTRY', table, oldId: entry.id, newId, updateReferences });
   };
 
   const idField = (

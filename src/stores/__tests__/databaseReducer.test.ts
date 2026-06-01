@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { initialProjectStoreState, projectReducer } from '../projectStore';
+import { initialProjectStoreState, projectReducer, type ProjectStoreState } from '../projectStore';
+import type { EventCommand, MapData } from '../../types/project';
 
 describe('projectReducer database actions', () => {
   it('ADD_DATABASE_ENTRY appends and marks dirty', () => {
@@ -119,6 +120,113 @@ describe('projectReducer database actions', () => {
       newId: 'b',
     });
     expect(s3).toBe(s);
+  });
+
+  it('RENAME_DATABASE_ENTRY can update command and page references deterministically', () => {
+    const commands: EventCommand[] = [
+      { type: 'ifSwitch', switchId: 'story_ready', equals: true, then: [], else: [] },
+      { type: 'controlVariable', variableId: 'score', op: 'set', value: 1 },
+      { type: 'callCommonEvent', commonEventId: 'ce_intro' },
+      { type: 'startQuest', questId: 'lost_chest' },
+      { type: 'openShop', shopId: 'general_store' },
+    ];
+    const map: MapData = {
+      schemaVersion: 1,
+      id: 'town',
+      name: 'Town',
+      width: 4,
+      height: 4,
+      tileSize: 32,
+      layers: [
+        { name: 'ground', type: 'visual', tiles: new Array(16).fill(1) },
+        { name: 'collision', type: 'collision', tiles: new Array(16).fill(0) },
+      ],
+      events: [
+        {
+          id: 'event_1',
+          type: 'npc',
+          x: 0,
+          y: 0,
+          solid: false,
+          trigger: 'interact',
+          commands,
+          pages: [
+            {
+              id: 'page_1',
+              conditions: {
+                switches: { story_ready: true },
+                variables: [{ variableId: 'score', op: 'gte', value: 1 }],
+              },
+              graphic: {},
+              movement: { type: 'fixed', speed: 'normal' },
+              options: { walking: false, stepping: false, directionFix: false, through: false },
+              priority: 'sameAsCharacters',
+              trigger: 'interact',
+              commands,
+            },
+          ],
+        },
+      ],
+    };
+    let state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      maps: { town: map },
+      databases: {
+        ...initialProjectStoreState.databases,
+        switches: [{ id: 'story_ready', name: 'Story Ready', initial: false }],
+        variables: [{ id: 'score', name: 'Score', initial: 0 }],
+        commonEvents: [{ id: 'ce_intro', name: 'Intro', trigger: 'manual' as const, commands: [] }],
+        quests: [{ id: 'lost_chest', title: 'Lost Chest', summary: '', objectives: [], rewards: { gold: 0, exp: 0, items: [] } }],
+        shops: [{ id: 'general_store', name: 'General Store', listings: [] }],
+      },
+    };
+
+    state = projectReducer(state, {
+      type: 'RENAME_DATABASE_ENTRY',
+      table: 'switches',
+      oldId: 'story_ready',
+      newId: 'story_started',
+      updateReferences: true,
+    });
+    state = projectReducer(state, {
+      type: 'RENAME_DATABASE_ENTRY',
+      table: 'variables',
+      oldId: 'score',
+      newId: 'score_total',
+      updateReferences: true,
+    });
+    state = projectReducer(state, {
+      type: 'RENAME_DATABASE_ENTRY',
+      table: 'commonEvents',
+      oldId: 'ce_intro',
+      newId: 'ce_opening',
+      updateReferences: true,
+    });
+    state = projectReducer(state, {
+      type: 'RENAME_DATABASE_ENTRY',
+      table: 'quests',
+      oldId: 'lost_chest',
+      newId: 'found_chest',
+      updateReferences: true,
+    });
+    state = projectReducer(state, {
+      type: 'RENAME_DATABASE_ENTRY',
+      table: 'shops',
+      oldId: 'general_store',
+      newId: 'market',
+      updateReferences: true,
+    });
+
+    const page = state.maps.town.events[0].pages?.[0];
+    expect(page?.conditions.switches).toEqual({ story_started: true });
+    expect(page?.conditions.variables?.[0].variableId).toBe('score_total');
+    expect(page?.commands).toEqual([
+      { type: 'ifSwitch', switchId: 'story_started', equals: true, then: [], else: [] },
+      { type: 'controlVariable', variableId: 'score_total', op: 'set', value: 1 },
+      { type: 'callCommonEvent', commonEventId: 'ce_opening' },
+      { type: 'startQuest', questId: 'found_chest' },
+      { type: 'openShop', shopId: 'market' },
+    ]);
   });
 
   it('REMOVE_DATABASE_ENTRY drops the entry', () => {

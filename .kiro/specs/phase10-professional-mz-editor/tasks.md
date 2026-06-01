@@ -93,7 +93,7 @@
   event command editing with undo-safe reducer behavior.
 - [x] FRA-13 / DB-008: build the animation database V2 editor with a real
   sprite-sheet preview and animation validation.
-- [ ] FRA-14 / DB-009: add database delete/rename reference safety across
+- [x] FRA-14 / DB-009: add database delete/rename reference safety across
   project data and editor workflows.
 
 ## Slice 5 — Runtime MZ Foundation
