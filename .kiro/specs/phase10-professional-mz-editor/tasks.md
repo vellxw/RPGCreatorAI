@@ -102,7 +102,7 @@
   malformed projects before startup with actionable errors.
 - [x] FRA-16 / RT-002: implement visible, selectable runtime choices and branch
   continuation instead of default-first-choice behavior.
-- [ ] FRA-17 / RT-003: implement event-target movement routes with runtime
+- [x] FRA-17 / RT-003: implement event-target movement routes with runtime
   event positions separate from authored map JSON.
 - [ ] FRA-18 / RT-004: implement event priority, Y-sort ordering, and
   above/below rendering behavior.

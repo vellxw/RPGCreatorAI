@@ -19,10 +19,10 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
   enemies/troops/quests/shops/switches/variables/system/animations editors,
   common-event command editing, and database reference safety.
-- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): runtime project
-  validator, interactive choices UI, event-target movement routes, event
+- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): event
   priority/Y-sort, foreground occlusion, local audio v1, and deterministic
-  plugin-command v1.
+  plugin-command v1 after the completed runtime validator, choices UI, and
+  event-target movement-route slices.
 - Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
   current-map, and selected-event playtest sessions, bounded native logs,
   event trace, runtime state snapshots, and removal/gating of placeholder AI
@@ -34,6 +34,12 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 RT-003 (FRA-17) — native runtime movement routes now target the
+  player, `thisEvent`, and named events. `MapScene` stores runtime event
+  positions separately from authored map JSON, `Game` uses those positions for
+  collision/render/event lookup, routes honor blocking, `through`,
+  `skippable`, `wait`, and repeat guard behavior, and map transfers re-seed
+  runtime event state from the new map.
 - Phase 10 MVP-000 (FRA-5) — repository docs now lock the remaining MVP
   closeout scope against Linear issues FRA-6 through FRA-35, including
   Database V2, Runtime MZ foundation, Playtest/Debug tools, Integration QA,
@@ -60,7 +66,7 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   player-target execution through existing collision/facing rules. Player
   routes dispatch touch events at destination tiles and `wait: true` blocks
   the issuing runner before tail commands continue. Event-target movement and
-  repeat-loop playback remain later Runtime MZ foundation work.
+  repeat-loop guard behavior were completed later by FRA-17 / RT-003.
 - Phase 10 Slice 3D command stack v1 — event command editing now supports
   insert around selection, move up/down, duplicate, local cut/copy/paste,
   delete, and explicit empty branch targets for Then, Else, choice labels,

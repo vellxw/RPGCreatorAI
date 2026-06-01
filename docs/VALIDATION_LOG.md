@@ -4,6 +4,42 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-17 / RT-003 — event-target movement routes
+
+- `2026-06-01 13:43:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new movement-route tests failed because `MapScene` did not yet
+  expose runtime event positions.
+- `2026-06-01 13:47:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS after adding runtime event state, event-target route execution, and
+  event-route coverage.
+- `2026-06-01 13:48:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed with new named-event, `thisEvent`,
+  skippable/wait, blocked, repeat-guard, and transfer-reset route cases.
+- `2026-06-01 13:50:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default"`
+  — PASS with existing third-party CMake policy/deprecation warnings only.
+- `2026-06-01 13:51:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS; Ninja reported no work to do after the green build.
+- `2026-06-01 13:51:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 13:51:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime smoke reported `SMOKE PASSED`.
+- `2026-06-01 13:51:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added runtime-only event positions to `MapScene`, event-route
+  execution for `thisEvent` and named event targets, runtime-position aware
+  event lookup/rendering/collision, repeat guard behavior, transfer reset
+  coverage, and parser coverage for named event movement routes.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-14 / DB-009 — database delete and rename reference safety
 
 - `2026-06-01 13:15 -03:00` —

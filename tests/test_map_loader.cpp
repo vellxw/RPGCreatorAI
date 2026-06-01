@@ -218,7 +218,8 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
                             { "type": "controlSelfSwitch", "switchId": "A", "value": true },
                             {
                                 "type": "setMovementRoute",
-                                "target": "player",
+                                "target": "event",
+                                "eventId": "npc",
                                 "repeat": false,
                                 "skippable": true,
                                 "wait": true,
@@ -262,7 +263,8 @@ TEST_CASE("MapLoader accepts editor-authored page shape") {
     CHECK(page.commands[0]->switchId == "A");
     CHECK(page.commands[0]->boolValue == true);
     CHECK(page.commands[1]->type == "setMovementRoute");
-    CHECK(page.commands[1]->movementRouteTarget == "player");
+    CHECK(page.commands[1]->movementRouteTarget == "event");
+    CHECK(page.commands[1]->movementRouteEventId == "npc");
     CHECK(page.commands[1]->movementRouteSkippable == true);
     CHECK(page.commands[1]->movementRouteWait == true);
     REQUIRE(page.commands[1]->movementRouteSteps.size() == 3);

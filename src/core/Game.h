@@ -64,6 +64,11 @@ private:
     void applyAnimationRequest(const AnimationRequest& request);
     int applyMovementRouteRequest(const MovementRouteRequest& request);
     bool applyPlayerMovementRouteStep(const MovementRouteRequest::Step& step, bool skippable);
+    bool applyEventMovementRouteStep(const std::string& eventId,
+                                     const MovementRouteRequest::Step& step,
+                                     bool skippable);
+    bool canEventMoveTo(const std::string& eventId, int targetX, int targetY) const;
+    std::string resolveMovementRouteEventId(const MovementRouteRequest& request) const;
     bool triggerTouchEventAt(int x, int y);
     void updateAnimationStates(float dt);
     RenderEntitiesSnapshot buildRenderSnapshot() const;

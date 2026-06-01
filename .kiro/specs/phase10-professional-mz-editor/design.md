@@ -158,11 +158,18 @@ tileset database loading.
   reuses touch-event dispatch at destination tiles, and `wait: true` blocks
   the issuing runner by the route's move-step duration plus explicit route
   waits before continuing to following commands.
+- `MapScene` keeps mutable runtime event positions keyed by event id while
+  preserving authored `MapData` coordinates. `Game` uses those runtime
+  positions for event lookups, event collision, rendering, named event routes,
+  and `thisEvent` routes.
+- Event-target routes respect map bounds, collision tiles, active-page
+  `through`, same-priority blocking events, player occupancy, `skippable`,
+  `wait`, and a deterministic repeat step guard so malformed repeat routes
+  cannot lock the runtime. Map transfer reloads re-seed runtime event state
+  from the new map data.
 - Malformed route data is handled as validation errors instead of throwing:
   target values must be supported, `steps` must be an array, step names must
   be known, and wait durations must be non-negative finite numbers.
-- Event-target movement and repeat-loop playback are logged as unsupported
-  runtime extensions for a later foundation slice.
 
 ## Slice 4A/4B Database V2 Foundation
 

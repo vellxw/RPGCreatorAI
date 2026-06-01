@@ -577,21 +577,21 @@ Labels: `mvp`, `phase-10`, `runtime-mz`, `parallel-safe`
 
 ### Steps
 
-- [ ] Add mutable runtime event positions without changing authored map data on disk.
-- [ ] Add `RuntimeEventState` keyed by event ID with x, y, direction, optional movement interpolation, and active route state.
-- [ ] Update collision checks so event-target movement respects map bounds, collision layer, `through`, and same-priority blocking events.
-- [ ] Implement `setMovementRoute` targets: `player`, `thisEvent`, and named `event`.
-- [ ] Implement `repeat`: repeat route while the issuing runner remains active, with a deterministic max-step guard per frame to avoid infinite loops.
-- [ ] Implement `skippable`: blocked route steps are skipped when true; otherwise the route stops and blocks if `wait` is true.
-- [ ] Implement `wait`: issuing runner resumes only after the target route completes or stops.
-- [ ] Ensure transfer reload clears event runtime state for the old map and initializes the new map deterministically.
-- [ ] Add tests for event-target route, blocked route, skippable route, wait behavior, repeat guard, and route targeting `thisEvent`.
+- [x] Add mutable runtime event positions without changing authored map data on disk.
+- [x] Add `RuntimeEventState` keyed by event ID with x, y, direction, optional movement interpolation, and active route state.
+- [x] Update collision checks so event-target movement respects map bounds, collision layer, `through`, and same-priority blocking events.
+- [x] Implement `setMovementRoute` targets: `player`, `thisEvent`, and named `event`.
+- [x] Implement `repeat`: repeat route while the issuing runner remains active, with a deterministic max-step guard per frame to avoid infinite loops.
+- [x] Implement `skippable`: blocked route steps are skipped when true; otherwise the route stops and blocks if `wait` is true.
+- [x] Implement `wait`: issuing runner resumes only after the target route completes or stops.
+- [x] Ensure transfer reload clears event runtime state for the old map and initializes the new map deterministically.
+- [x] Add tests for event-target route, blocked route, skippable route, wait behavior, repeat guard, and route targeting `thisEvent`.
 
 ### Validation
 
-- [ ] Run `cmake --build --preset default`.
-- [ ] Run `ctest --test-dir build --output-on-failure`.
-- [ ] Expected: all movement route tests pass.
+- [x] Run `cmake --build --preset default`.
+- [x] Run `ctest --test-dir build --output-on-failure`.
+- [x] Expected: all movement route tests pass.
 
 ### Acceptance Criteria
 

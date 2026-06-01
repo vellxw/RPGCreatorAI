@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "types/Direction.h"
 #include "types/EventTypes.h"
 
 struct MapLayer {
@@ -24,4 +25,13 @@ struct MapData {
     int tileSize;
     std::vector<MapLayer> layers;
     std::vector<EventData> events;
+};
+
+struct RuntimeEventState {
+    int x = 0;
+    int y = 0;
+    Direction direction = Direction::Down;
+    float visualX = 0.0f;
+    float visualY = 0.0f;
+    bool routeActive = false;
 };

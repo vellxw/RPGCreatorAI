@@ -11,6 +11,23 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+
+constexpr int kMaxRepeatedRouteSteps = 64;
+
+bool isMovementRouteMoveStep(const std::string& type) {
+    return type == "moveUp" || type == "moveDown" ||
+           type == "moveLeft" || type == "moveRight";
+}
+
+int movementRouteMoveStepMs(float tilesPerSecond) {
+    return tilesPerSecond > 0.0f
+        ? std::max(1, static_cast<int>(std::ceil(1000.0f / tilesPerSecond)))
+        : 125;
+}
+
+} // namespace
+
 Game::Game() = default;
 Game::~Game() = default;
 
@@ -434,32 +451,42 @@ void Game::applyAnimationIfPending() {
 
 int Game::applyMovementRouteRequest(const MovementRouteRequest& request) {
     const std::string target = request.target.empty() ? "player" : request.target;
-    if (target != "player") {
-        Logger::warning("setMovementRoute: only player target is supported in this runtime slice");
+    const bool targetPlayer = target == "player";
+    const std::string targetEventId = targetPlayer ? std::string{} : resolveMovementRouteEventId(request);
+    if (!targetPlayer && targetEventId.empty()) return 0;
+    if (!targetPlayer && !currentScene.getEventById(targetEventId)) {
+        Logger::warning("setMovementRoute: target event not found: " + targetEventId);
         return 0;
     }
-
-    if (request.repeat) {
-        Logger::warning("setMovementRoute: repeat routes execute once in this runtime slice");
-    }
+    if (request.steps.empty()) return 0;
 
     int waitMs = 0;
-    const int moveStepMs = playerTilesPerSecond > 0.0f
-        ? std::max(1, static_cast<int>(std::ceil(1000.0f / playerTilesPerSecond)))
-        : 125;
-    for (const auto& step : request.steps) {
-        const bool movementStep =
-            step.type == "moveUp" || step.type == "moveDown" ||
-            step.type == "moveLeft" || step.type == "moveRight";
-        if (movementStep) {
-            waitMs += moveStepMs;
-        } else if (step.type == "wait" && step.ms > 0) {
-            waitMs += step.ms;
+    const int moveStepMs = movementRouteMoveStepMs(playerTilesPerSecond);
+    int executedSteps = 0;
+    bool keepRunning = true;
+
+    do {
+        for (const auto& step : request.steps) {
+            if (executedSteps >= kMaxRepeatedRouteSteps) {
+                Logger::warning("setMovementRoute: repeat route stopped by deterministic step guard");
+                keepRunning = false;
+                break;
+            }
+
+            if (isMovementRouteMoveStep(step.type)) {
+                waitMs += moveStepMs;
+            } else if (step.type == "wait" && step.ms > 0) {
+                waitMs += step.ms;
+            }
+
+            keepRunning = targetPlayer
+                ? applyPlayerMovementRouteStep(step, request.skippable)
+                : applyEventMovementRouteStep(targetEventId, step, request.skippable);
+            ++executedSteps;
+            if (!keepRunning) break;
         }
-        if (!applyPlayerMovementRouteStep(step, request.skippable)) {
-            break;
-        }
-    }
+    } while (request.repeat && keepRunning);
+
     updateCamera();
     return waitMs;
 }
@@ -494,6 +521,98 @@ bool Game::applyPlayerMovementRouteStep(const MovementRouteRequest::Step& step, 
 
     Logger::warning("setMovementRoute: unsupported route step '" + step.type + "'");
     return skippable;
+}
+
+bool Game::applyEventMovementRouteStep(const std::string& eventId,
+                                       const MovementRouteRequest::Step& step,
+                                       bool skippable) {
+    auto turn = [this, &eventId](Direction direction) {
+        currentScene.setRuntimeEventDirection(eventId, direction);
+    };
+    auto move = [this, &eventId, skippable](int dx, int dy, Direction direction) {
+        const auto runtimeState = currentScene.getRuntimeEventState(eventId);
+        if (!runtimeState) return false;
+
+        const int targetX = runtimeState->x + dx;
+        const int targetY = runtimeState->y + dy;
+        currentScene.setRuntimeEventDirection(eventId, direction);
+        if (!canEventMoveTo(eventId, targetX, targetY)) {
+            return skippable;
+        }
+        currentScene.setRuntimeEventPosition(eventId, targetX, targetY, direction);
+        return true;
+    };
+
+    if (step.type == "moveUp") return move(0, -1, Direction::Up);
+    if (step.type == "moveDown") return move(0, 1, Direction::Down);
+    if (step.type == "moveLeft") return move(-1, 0, Direction::Left);
+    if (step.type == "moveRight") return move(1, 0, Direction::Right);
+    if (step.type == "turnUp") { turn(Direction::Up); return true; }
+    if (step.type == "turnDown") { turn(Direction::Down); return true; }
+    if (step.type == "turnLeft") { turn(Direction::Left); return true; }
+    if (step.type == "turnRight") { turn(Direction::Right); return true; }
+    if (step.type == "wait") return true;
+
+    Logger::warning("setMovementRoute: unsupported route step '" + step.type + "'");
+    return skippable;
+}
+
+bool Game::canEventMoveTo(const std::string& eventId, int targetX, int targetY) const {
+    if (targetX < 0 || targetX >= currentScene.getWidth() ||
+        targetY < 0 || targetY >= currentScene.getHeight()) {
+        return false;
+    }
+
+    const EventData* movingEvent = currentScene.getEventById(eventId);
+    if (!movingEvent) return false;
+
+    const EventPage* activeMovingPage = movingEvent->pages.empty()
+        ? nullptr
+        : rpg::selectActiveEventPage(*movingEvent, state, state.getCurrentMapId());
+    if (!movingEvent->pages.empty() && !activeMovingPage) return false;
+
+    const bool through = activeMovingPage && activeMovingPage->options.through;
+    if (through) return true;
+
+    if (currentScene.getTileAt("collision", targetX, targetY) == 9) {
+        return false;
+    }
+
+    if (state.getPlayerX() == targetX && state.getPlayerY() == targetY) {
+        return false;
+    }
+
+    for (const auto& event : currentScene.getData().events) {
+        if (event.id == eventId) continue;
+        const Vec2i pos = currentScene.getRuntimeEventPosition(event.id)
+                              .value_or(Vec2i{event.x, event.y});
+        if (pos.x != targetX || pos.y != targetY) continue;
+        if (rpg::eventHasActivePage(event, state, state.getCurrentMapId()) &&
+            rpg::activeEventBlocksMovement(event, state, state.getCurrentMapId())) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+std::string Game::resolveMovementRouteEventId(const MovementRouteRequest& request) const {
+    const std::string target = request.target.empty() ? "player" : request.target;
+    if (target == "thisEvent") {
+        if (request.ownerEventId.empty()) {
+            Logger::warning("setMovementRoute: thisEvent target has no owning event");
+        }
+        return request.ownerEventId;
+    }
+    if (target == "event") {
+        if (request.eventId.empty()) {
+            Logger::warning("setMovementRoute: named event target is empty");
+        }
+        return request.eventId;
+    }
+
+    Logger::warning("setMovementRoute: unsupported route target '" + target + "'");
+    return {};
 }
 
 bool Game::triggerTouchEventAt(int x, int y) {
@@ -561,7 +680,11 @@ void Game::applyAnimationRequest(const AnimationRequest& request) {
         activePage && !activePage->graphic.animationSet.empty()
             ? activePage->graphic.animationSet
             : event->animationSet;
-    applyToState(anim, animationSet, Direction::Down);
+    Direction fallbackDirection = Direction::Down;
+    if (auto runtimeState = currentScene.getRuntimeEventState(targetEventId)) {
+        fallbackDirection = runtimeState->direction;
+    }
+    applyToState(anim, animationSet, fallbackDirection);
 }
 
 void Game::updateAnimationStates(float dt) {
@@ -685,7 +808,10 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
         const RuntimeAnimationState& anim =
             animIt == eventAnimations.end() ? fallbackAnim : animIt->second;
         const std::string action = anim.manual ? anim.action : "idle";
-        const Direction dir = anim.manual ? anim.direction : Direction::Down;
+        const auto runtimeState = currentScene.getRuntimeEventState(event.id);
+        const Direction eventDirection =
+            runtimeState ? runtimeState->direction : Direction::Down;
+        const Direction dir = anim.manual ? anim.direction : eventDirection;
         const std::string animationSet =
             activePage && !activePage->graphic.animationSet.empty()
                 ? activePage->graphic.animationSet
@@ -698,14 +824,16 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
             activePage && activePage->graphic.displayHeightTiles > 0.0f
                 ? activePage->graphic.displayHeightTiles
                 : event.displayHeightTiles;
+        const Vec2i eventPosition = currentScene.getRuntimeEventPosition(event.id)
+                                        .value_or(Vec2i{event.x, event.y});
         snapshot.events.push_back(buildAnimatedSprite(
             animationSet,
             fallbackAsset,
             action,
             dir,
             anim.elapsed,
-            static_cast<float>(event.x * tileSize),
-            static_cast<float>(event.y * tileSize),
+            static_cast<float>(eventPosition.x * tileSize),
+            static_cast<float>(eventPosition.y * tileSize),
             tileSize,
             displayHeightTiles,
             event.type == "npc" || !animationSet.empty(),
