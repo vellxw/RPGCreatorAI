@@ -5,8 +5,10 @@ import {
   getTileset,
   isSupportedVisualTile,
   listTilesetTiles,
+  tileAssetForKey,
   tilePassabilityForId,
 } from '../tileCatalog';
+import { gameAssets } from '../../assets/generated/assetCatalog';
 
 describe('tile catalog', () => {
   it('accepts the expanded authored-scene visual tile vocabulary', () => {
@@ -32,5 +34,10 @@ describe('tile catalog', () => {
     expect(tilePassabilityForId('sample-town', 1)).toBe('passable');
     expect(tilePassabilityForId('sample-town', 5)).toBe('blocked');
     expect(tilePassabilityForId('missing', 5)).toBe('blocked');
+  });
+
+  it('falls back to the void warning swatch for unknown tile assets', () => {
+    expect(tileAssetForKey('grass')).toBe(gameAssets.grass);
+    expect(tileAssetForKey('missingAsset')).toBe(gameAssets.voidWarning);
   });
 });

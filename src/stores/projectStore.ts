@@ -13,6 +13,7 @@ import type {
   MapReference,
   ProjectData,
   SystemData,
+  TilesetDatabaseData,
   TriggerType,
   ValidationMessage,
   WeaponData,
@@ -321,6 +322,10 @@ export type ProjectAction =
   | {
       type: 'UPDATE_SYSTEM_DATA';
       changes: Partial<SystemData>;
+    }
+  | {
+      type: 'UPDATE_TILESET_DATABASE';
+      tilesets: TilesetDatabaseData;
     }
   | {
       type: 'UPDATE_COMMON_EVENT_COMMANDS';
@@ -1417,6 +1422,12 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'UPDATE_SYSTEM_DATA':
       return withDatabases(state, db => {
         db.system = { ...db.system, ...action.changes };
+        return true;
+      });
+
+    case 'UPDATE_TILESET_DATABASE':
+      return withDatabases(state, db => {
+        db.tilesets = deepClone(action.tilesets);
         return true;
       });
 

@@ -4,6 +4,33 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-8 / DB-003 — dedicated tileset database editor
+
+- `2026-05-31 23:55 -03:00` —
+  `npm test -- --run src/components/database/__tests__/TilesetEditor.test.tsx`
+  — RED; new test could not resolve `TilesetEditor`, proving the dedicated
+  editor did not exist before implementation.
+- `2026-05-31 23:56 -03:00` —
+  `npm test -- --run src/visual/__tests__/tileCatalog.test.ts src/validation/__tests__/validateProject.test.ts`
+  — RED; `tileAssetForKey` was missing and tileset duplicate/asset validation
+  did not report errors.
+- `2026-05-31 23:59 -03:00` —
+  `npm test -- --run src/components/database/__tests__/TilesetEditor.test.tsx`
+  — PASS (2/2 tests).
+- `2026-05-31 23:59 -03:00` —
+  `npm test -- --run src/visual/__tests__/tileCatalog.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 34 tests).
+- `2026-05-31 23:59 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-05-31 23:59 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- Fix applied: added `TilesetEditor`, the Database screen `Tilesets` tab,
+  a tileset database reducer action, tile asset fallback helpers, and
+  tileset validation for duplicate tile ids, unknown tile assets, invalid
+  groups/passability, and malformed numeric metadata.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-7 / DB-002 — types and terms database shards verification
 
 - `2026-05-31 23:48 -03:00` —

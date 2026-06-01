@@ -316,6 +316,38 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('unknown tileset "missing-tileset"'))).toBe(true);
   });
 
+  it('flags duplicate tile ids and unknown tile assets in tileset databases', () => {
+    const project = makeProject({ town: makeMap({ tilesetId: 'sample-town' }) });
+    project.databases.tilesets.tilesets = [
+      {
+        id: 'sample-town',
+        name: 'Sample Town',
+        tileSize: 32,
+        tiles: [
+          {
+            id: 1,
+            name: 'Grass',
+            asset: 'missingAsset',
+            group: 'A',
+            passability: 'passable',
+          },
+          {
+            id: 1,
+            name: 'Duplicate Grass',
+            asset: 'grass',
+            group: 'A',
+            passability: 'passable',
+          },
+        ],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Duplicate tile id "1"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('unknown tile asset "missingAsset"'))).toBe(true);
+  });
+
   it('flags missing required authoring layers and invalid region ids', () => {
     const map = makeMap({ tilesetId: 'sample-town' });
     map.layers = [

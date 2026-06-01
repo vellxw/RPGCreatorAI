@@ -79,7 +79,7 @@
 - [x] FRA-7 / DB-002: add and validate project-owned `types` and `terms`
   database shards. Existing implementation should be verified before marking
   Linear Done.
-- [ ] FRA-8 / DB-003: build a dedicated tileset database editor with tile
+- [x] FRA-8 / DB-003: build a dedicated tileset database editor with tile
   metadata, asset swatches, validation, and map reference errors.
 - [ ] FRA-9 / DB-004: build item, weapon, armor, and state V2 editors with
   domain fields, type references, numeric validation, and compatibility with

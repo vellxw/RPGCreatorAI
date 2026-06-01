@@ -12,9 +12,12 @@ import type {
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
+import { TILE_ASSET_KEYS } from '../visual/tileCatalog';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
+const VALID_TILE_GROUPS = new Set(['A', 'B', 'C', 'D', 'E', 'Region', 'Collision']);
+const VALID_TILE_PASSABILITY = new Set(['passable', 'blocked']);
 const VALID_MOVEMENT_SPEEDS = new Set([
   'oneEighth',
   'oneQuarter',
@@ -387,6 +390,8 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
     }
   }
 
+  out.push(...validateTilesetDatabase(db));
+
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
     for (const entry of db.types[tableName]) {
@@ -526,6 +531,104 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
       });
     }
   }
+  return out;
+}
+
+function validateTilesetDatabase(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const seenTilesets = new Set<string>();
+
+  for (const tileset of db.tilesets.tilesets) {
+    if (!tileset.id || tileset.id.trim() === '') {
+      out.push({
+        level: 'error',
+        message: 'Tileset entry is missing an id',
+        source: 'database/tilesets',
+      });
+      continue;
+    }
+    if (seenTilesets.has(tileset.id)) {
+      out.push({
+        level: 'error',
+        message: `Duplicate tileset id "${tileset.id}"`,
+        source: 'database/tilesets',
+      });
+    }
+    seenTilesets.add(tileset.id);
+
+    if (!tileset.name || tileset.name.trim() === '') {
+      out.push({
+        level: 'error',
+        message: `Tileset "${tileset.id}" is missing a name`,
+        source: `database/tilesets/${tileset.id}`,
+      });
+    }
+    if (!Number.isFinite(tileset.tileSize) || tileset.tileSize <= 0) {
+      out.push({
+        level: 'error',
+        message: `Tileset "${tileset.id}" tileSize must be a positive finite number`,
+        source: `database/tilesets/${tileset.id}`,
+      });
+    }
+
+    const seenTiles = new Set<number>();
+    for (const tile of tileset.tiles) {
+      const source = `database/tilesets/${tileset.id}/tiles/${tile.id}`;
+      if (!Number.isInteger(tile.id) || tile.id < 0) {
+        out.push({
+          level: 'error',
+          message: `Tileset "${tileset.id}" has invalid tile id "${tile.id}"`,
+          source,
+        });
+        continue;
+      }
+      if (seenTiles.has(tile.id)) {
+        out.push({
+          level: 'error',
+          message: `Duplicate tile id "${tile.id}" in tileset "${tileset.id}"`,
+          source: `database/tilesets/${tileset.id}`,
+        });
+      }
+      seenTiles.add(tile.id);
+
+      if (!tile.name || tile.name.trim() === '') {
+        out.push({
+          level: 'error',
+          message: `Tile "${tile.id}" in tileset "${tileset.id}" is missing a name`,
+          source,
+        });
+      }
+      if (!TILE_ASSET_KEYS.has(tile.asset)) {
+        out.push({
+          level: 'error',
+          message: `Tile "${tile.id}" in tileset "${tileset.id}" references unknown tile asset "${tile.asset}"`,
+          source,
+        });
+      }
+      if (!VALID_TILE_GROUPS.has(tile.group)) {
+        out.push({
+          level: 'error',
+          message: `Tile "${tile.id}" in tileset "${tileset.id}" has invalid group "${tile.group}"`,
+          source,
+        });
+      }
+      if (!VALID_TILE_PASSABILITY.has(tile.passability)) {
+        out.push({
+          level: 'error',
+          message: `Tile "${tile.id}" in tileset "${tileset.id}" has invalid passability "${tile.passability}"`,
+          source,
+        });
+      }
+      if (tile.priority !== undefined && !Number.isFinite(tile.priority)) {
+        out.push({
+          level: 'error',
+          message: `Tile "${tile.id}" in tileset "${tileset.id}" priority must be finite`,
+          source,
+        });
+      }
+    }
+  }
+
   return out;
 }
 

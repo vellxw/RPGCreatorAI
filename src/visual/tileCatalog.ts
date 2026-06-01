@@ -3,6 +3,18 @@ import { gameAssets } from '../assets/generated/assetCatalog';
 import type { TilePassability, TilesetData, TilesetTileMetadata } from '../types/project';
 
 const tilesetDatabase = tilesetsJson as { tilesets: TilesetData[] };
+export const TILE_ASSET_KEYS = new Set([
+  'grass',
+  'path',
+  'water',
+  'wall',
+  'snow',
+  'tree',
+  'interiorFloor',
+  'interiorWall',
+  'collisionOverlay',
+  'voidWarning',
+]);
 
 export const VISUAL_TILE_IDS = new Set(
   tilesetDatabase.tilesets.flatMap(tileset => tileset.tiles.map(tile => tile.id)).sort((a, b) => a - b),
@@ -33,8 +45,12 @@ export function tilePassabilityForId(
 }
 
 export function tileAssetForId(tilesetId: string | undefined, tileId: number): string {
-  const assetKey = getTileMetadata(tilesetId, tileId)?.asset ?? 'grass';
-  return (gameAssets as Record<string, string>)[assetKey] ?? gameAssets.grass;
+  const assetKey = getTileMetadata(tilesetId, tileId)?.asset ?? 'voidWarning';
+  return tileAssetForKey(assetKey);
+}
+
+export function tileAssetForKey(assetKey: string): string {
+  return (gameAssets as Record<string, string>)[assetKey] ?? gameAssets.voidWarning;
 }
 
 export function isSupportedVisualTile(tileId: number, tilesetId = 'sample-town'): boolean {

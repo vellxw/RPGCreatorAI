@@ -9,6 +9,7 @@ import { Input, Select } from '../components/ui/Input';
 import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
 import { IdField } from '../components/database/DatabaseFields';
+import { TilesetEditor } from '../components/database/TilesetEditor';
 import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
 import type {
   ActorData,
@@ -30,13 +31,16 @@ import type {
   WeaponData,
 } from '../types/project';
 
-const TAB_ORDER: Array<{ key: DatabaseListKey | 'system'; label: string }> = [
+type DatabaseTabKey = DatabaseListKey | 'tilesets' | 'system';
+
+const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'actors', label: 'Actors' },
   { key: 'classes', label: 'Classes' },
   { key: 'skills', label: 'Skills' },
   { key: 'weapons', label: 'Weapons' },
   { key: 'armors', label: 'Armors' },
   { key: 'states', label: 'States' },
+  { key: 'tilesets', label: 'Tilesets' },
   { key: 'enemies', label: 'Enemies' },
   { key: 'troops', label: 'Troops' },
   { key: 'quests', label: 'Quests' },
@@ -716,23 +720,28 @@ function SystemPanel({ system }: { system: SystemData }) {
 }
 
 export function DatabaseScreen() {
-  const { state } = useProjectStore();
-  const [tab, setTab] = useState<DatabaseListKey | 'system'>('actors');
+  const { state, dispatch } = useProjectStore();
+  const [tab, setTab] = useState<DatabaseTabKey>('actors');
   const [selectedId, setSelectedId] = useState<string>('');
 
   const databases = state.databases;
   const entries =
-    tab === 'system'
+    tab === 'system' || tab === 'tilesets'
       ? []
       : ((databases[tab] as unknown) as DatabaseRecord[]);
 
   const selectedEntry = entries.find(e => e.id === selectedId) ?? entries[0];
   const activeTabLabel = TAB_ORDER.find(t => t.key === tab)?.label ?? 'Database';
+  const mapUsage = Object.values(state.maps).reduce<Record<string, string[]>>((acc, map) => {
+    if (!map.tilesetId) return acc;
+    acc[map.tilesetId] = [...(acc[map.tilesetId] ?? []), map.name || map.id];
+    return acc;
+  }, {});
 
   // keep selection consistent when switching tabs
-  const ensureSelection = (key: DatabaseListKey | 'system') => {
+  const ensureSelection = (key: DatabaseTabKey) => {
     setTab(key);
-    if (key === 'system') {
+    if (key === 'system' || key === 'tilesets') {
       setSelectedId('');
       return;
     }
@@ -756,7 +765,9 @@ export function DatabaseScreen() {
             {t.label}
             {t.key !== 'system' && (
               <span className="ml-1.5 text-[11px] text-gray-400">
-                {((databases[t.key as DatabaseListKey] as unknown) as DatabaseRecord[]).length}
+                {t.key === 'tilesets'
+                  ? databases.tilesets.tilesets.length
+                  : ((databases[t.key as DatabaseListKey] as unknown) as DatabaseRecord[]).length}
               </span>
             )}
           </button>
@@ -766,7 +777,7 @@ export function DatabaseScreen() {
       <DatabaseLayout
         title={activeTabLabel}
         sidebar={
-          tab === 'system' ? undefined : (
+          tab === 'system' || tab === 'tilesets' ? undefined : (
             <DatabaseList
               table={tab as DatabaseListKey}
               entries={entries}
@@ -778,6 +789,12 @@ export function DatabaseScreen() {
       >
         {tab === 'system' ? (
           <SystemPanel system={databases.system} />
+        ) : tab === 'tilesets' ? (
+          <TilesetEditor
+            value={databases.tilesets}
+            mapUsage={mapUsage}
+            onChange={tilesets => dispatch({ type: 'UPDATE_TILESET_DATABASE', tilesets })}
+          />
         ) : (
           selectedEntry ? (
             <Detail table={tab as DatabaseListKey} entry={selectedEntry} />
