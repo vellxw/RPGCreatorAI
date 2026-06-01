@@ -3,7 +3,7 @@
 ## 00 Planning And Scope Lock
 
 - [x] CP-001 / FRA-36: lock the product charter and Phase 11 scope.
-- [ ] CP-002 / FRA-37: audit the full repo and product surface.
+- [x] CP-002 / FRA-37: audit the full repo and product surface.
 - [ ] CP-003 / FRA-38: create the complete-platform risk register.
 - [ ] CP-004 / FRA-39: record provider and legal review baseline.
 - [ ] CP-005 / FRA-40: create a repo-tracked backlog source document.

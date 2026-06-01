@@ -2404,3 +2404,22 @@ Error: Port 1420 is already in use
 - `2026-06-01 18:42:53 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-37 / CP-002 — full repo and product surface audit
+
+- `2026-06-01 18:51:40 -03:00` — non-mutating inspection — PASS; audited
+  React editor screens, Tauri shell commands, native runtime systems, scripts,
+  docs, sample data, generated assets, and Linear project issue inventory.
+- `2026-06-01 18:51:40 -03:00` — audit report write — PASS; added
+  `docs/PHASE_11_PRODUCT_SURFACE_AUDIT.md` with an area inventory, status
+  classifications, stale/placeholder surfaces, and downstream Linear
+  references.
+- `2026-06-01 18:51:40 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-01 18:52:50 -03:00` — `git diff --cached --check` — RED; the new
+  audit report had a blank line at EOF. Fix applied: removed the trailing
+  blank line.
+- `2026-06-01 18:52:50 -03:00` — `git diff --cached --check` — PASS.
+- Build/test note: CP-002 is a docs-only audit issue, so no runtime,
+  frontend, desktop, or packaged build commands were required before the
+  dedicated CP-007 baseline gate.
+
