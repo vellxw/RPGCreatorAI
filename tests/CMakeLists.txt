@@ -21,6 +21,7 @@ set(PHASE2_TEST_SOURCES
     test_event_page_evaluator.cpp
     test_event_scheduler.cpp
     test_game_movement_route.cpp
+    test_render_layer_roles.cpp
     test_render_snapshot_order.cpp
     test_runtime_project_validator.cpp
     test_dialogue_choices.cpp

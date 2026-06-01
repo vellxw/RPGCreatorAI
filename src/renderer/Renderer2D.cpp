@@ -57,7 +57,7 @@ void Renderer2D::beginFrame() {
     SDL_RenderClear(sdlRenderer);
 }
 
-void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera) {
+void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera, MapRenderPass pass) {
     if (!sdlRenderer) return;
     int tileSize = scene.getTileSize();
     if (tileSize <= 0) tileSize = 32;
@@ -72,24 +72,30 @@ void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera) {
     int lastX  = std::min(width  - 1, (cam.x + screenWidth)  / tileSize + 1);
     int lastY  = std::min(height - 1, (cam.y + screenHeight) / tileSize + 1);
 
-    for (int y = firstY; y <= lastY; ++y) {
-        for (int x = firstX; x <= lastX; ++x) {
-            int screenX = x * tileSize - cam.x;
-            int screenY = y * tileSize - cam.y;
+    for (const MapLayer* layer : scene.getRenderLayers(pass)) {
+        const std::string role = layer->role.empty() ? layer->name : layer->role;
+        const bool transparentZero = role != "ground";
 
-            int groundTile = scene.getTileAt("ground", x, y);
-            int collisionTile = scene.getTileAt("collision", x, y);
-            if (groundTile == 0 && collisionTile != 9) {
-                fillRect(sdlRenderer, screenX, screenY, tileSize, tileSize, kColorUnknown);
-            } else {
-                renderSprite(SpriteCatalog::tileAssetFor(groundTile, collisionTile),
+        for (int y = firstY; y <= lastY; ++y) {
+            for (int x = firstX; x <= lastX; ++x) {
+                const int index = y * width + x;
+                if (index < 0 || index >= static_cast<int>(layer->tiles.size())) continue;
+
+                const int tileId = layer->tiles[index];
+                if (transparentZero && tileId == 0) continue;
+
+                int screenX = x * tileSize - cam.x;
+                int screenY = y * tileSize - cam.y;
+                renderSprite(SpriteCatalog::tileAssetFor(tileId, 0),
                              screenX, screenY, tileSize, tileSize);
             }
         }
     }
 }
 
-void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities, const Camera2D& camera) {
+void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities,
+                                const Camera2D& camera,
+                                EntityRenderPass pass) {
     if (!sdlRenderer) return;
     Vec2i cam = camera.getPosition();
 
@@ -120,6 +126,7 @@ void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities, const Ca
     };
 
     for (const auto& sprite : buildEntityRenderOrder(entities)) {
+        if (!entityRenderPassIncludes(pass, sprite)) continue;
         drawEntity(sprite);
     }
 }

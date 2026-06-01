@@ -106,7 +106,7 @@
   event positions separate from authored map JSON.
 - [x] FRA-18 / RT-004: implement event priority, Y-sort ordering, and
   above/below rendering behavior.
-- [ ] FRA-19 / RT-005: render the foreground layer as player/event occlusion
+- [x] FRA-19 / RT-005: render the foreground layer as player/event occlusion
   without giving the renderer gameplay ownership.
 - [ ] FRA-20 / RT-006: add local audio v1 for project-owned BGM/SFX data with
   deterministic skips when audio is unavailable.

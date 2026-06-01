@@ -310,6 +310,12 @@ The editor preview must make the final game frame legible before launch.
   aspect ratio.
 - Runtime and editor use the same interpretation of map dimensions, tile
   size, zoom, and camera framing.
+- Runtime map rendering is split into explicit passes: background visual
+  roles (`ground`, `decoration`), below/same-priority entities, foreground
+  visual role (`foreground`), above-priority entities, then UI overlays.
+- Collision and region layers remain gameplay/editor data in the runtime and
+  are not rendered as visual tiles. Collision must be communicated through
+  authored visual layers rather than renderer guesses.
 - Background fill outside map bounds must be intentional and themeable,
   never the accidental result of undersized content.
 - Camera clamping, tile alignment, and sprite placement must avoid seams

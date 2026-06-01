@@ -793,8 +793,11 @@ bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback) {
 }
 
 void Game::render(IRenderer& renderer) {
-    renderer.renderMap(currentScene, camera);
-    renderer.renderEntities(buildRenderSnapshot(), camera);
+    const RenderEntitiesSnapshot entities = buildRenderSnapshot();
+    renderer.renderMap(currentScene, camera, MapRenderPass::Background);
+    renderer.renderEntities(entities, camera, EntityRenderPass::BelowAndSame);
+    renderer.renderMap(currentScene, camera, MapRenderPass::Foreground);
+    renderer.renderEntities(entities, camera, EntityRenderPass::Above);
     renderer.renderHUD(state);
     renderer.renderDialogue(dialogue);
     renderer.renderMenu(menuSystem.snapshot(state, databases));

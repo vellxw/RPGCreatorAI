@@ -660,20 +660,20 @@ Labels: `mvp`, `phase-10`, `runtime-mz`, `parallel-safe`
 
 ### Steps
 
-- [ ] Split map rendering into background roles and foreground roles. Background roles are `ground` and `decoration`; foreground role is `foreground`.
-- [ ] Keep collision and region layers non-rendering in runtime.
-- [ ] Update `IRenderer` with explicit `renderMapBackground` and `renderMapForeground`, or add a role parameter to `renderMap`.
-- [ ] Render order must be: background map, below/same entities, foreground map, above entities, HUD/dialogue/menu overlays.
-- [ ] Use tileset visual assets for foreground the same way ground currently resolves assets.
-- [ ] Ensure missing foreground layer is handled by validation, not renderer crashes.
-- [ ] Add tests for layer role detection and no-op foreground rendering when layer exists but is empty.
+- [x] Split map rendering into background roles and foreground roles. Background roles are `ground` and `decoration`; foreground role is `foreground`.
+- [x] Keep collision and region layers non-rendering in runtime.
+- [x] Update `IRenderer` with explicit `renderMapBackground` and `renderMapForeground`, or add a role parameter to `renderMap`.
+- [x] Render order must be: background map, below/same entities, foreground map, above entities, HUD/dialogue/menu overlays.
+- [x] Use tileset visual assets for foreground the same way ground currently resolves assets.
+- [x] Ensure missing foreground layer is handled by validation, not renderer crashes.
+- [x] Add tests for layer role detection and no-op foreground rendering when layer exists but is empty.
 
 ### Validation
 
-- [ ] Run `cmake --build --preset default`.
-- [ ] Run `ctest --test-dir build --output-on-failure`.
-- [ ] Run visual smoke if available: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`.
-- [ ] Expected: tests pass; foreground tiles appear above same-priority entities.
+- [x] Run `cmake --build --preset default`.
+- [x] Run `ctest --test-dir build --output-on-failure`.
+- [x] Run visual smoke if available: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`.
+- [x] Expected: tests pass; foreground tiles appear above same-priority entities.
 
 ### Acceptance Criteria
 

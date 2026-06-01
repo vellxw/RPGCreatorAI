@@ -10,8 +10,10 @@ class Renderer2D : public IRenderer {
 public:
     bool initialize(Window& window) override;
     void beginFrame() override;
-    void renderMap(const MapScene& scene, const Camera2D& camera) override;
-    void renderEntities(const RenderEntitiesSnapshot& entities, const Camera2D& camera) override;
+    void renderMap(const MapScene& scene, const Camera2D& camera, MapRenderPass pass) override;
+    void renderEntities(const RenderEntitiesSnapshot& entities,
+                        const Camera2D& camera,
+                        EntityRenderPass pass) override;
     void renderDialogue(const DialogueSystem& dialogue) override;
     void renderHUD(const GameState& state) override;
     void renderMenu(const rpg::MenuSystem::ViewModel& vm) override;

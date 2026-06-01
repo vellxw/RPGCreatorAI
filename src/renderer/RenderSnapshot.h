@@ -19,6 +19,11 @@ enum class EntityRenderPriority {
     Above
 };
 
+enum class EntityRenderPass {
+    BelowAndSame,
+    Above
+};
+
 struct EntityRenderSprite {
     std::string id;
     std::string assetKey;
@@ -76,4 +81,11 @@ inline std::vector<EntityRenderSprite> buildEntityRenderOrder(const RenderEntiti
     appendBucket(EntityRenderPriority::Same);
     appendBucket(EntityRenderPriority::Above);
     return ordered;
+}
+
+inline bool entityRenderPassIncludes(EntityRenderPass pass, const EntityRenderSprite& sprite) {
+    if (pass == EntityRenderPass::Above) {
+        return sprite.renderPriority == EntityRenderPriority::Above;
+    }
+    return sprite.renderPriority != EntityRenderPriority::Above;
 }

@@ -14,8 +14,10 @@ public:
     virtual ~IRenderer() = default;
     virtual bool initialize(Window& window) = 0;
     virtual void beginFrame() = 0;
-    virtual void renderMap(const MapScene& scene, const Camera2D& camera) = 0;
-    virtual void renderEntities(const RenderEntitiesSnapshot& entities, const Camera2D& camera) = 0;
+    virtual void renderMap(const MapScene& scene, const Camera2D& camera, MapRenderPass pass) = 0;
+    virtual void renderEntities(const RenderEntitiesSnapshot& entities,
+                                const Camera2D& camera,
+                                EntityRenderPass pass) = 0;
     virtual void renderDialogue(const DialogueSystem& dialogue) = 0;
     virtual void renderHUD(const GameState& state) = 0;
     virtual void renderMenu(const rpg::MenuSystem::ViewModel& vm) = 0;

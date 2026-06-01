@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class MapScene {
 public:
@@ -22,9 +23,12 @@ public:
     std::optional<RuntimeEventState> getRuntimeEventState(const std::string& eventId) const;
     bool setRuntimeEventPosition(const std::string& eventId, int x, int y, Direction direction);
     bool setRuntimeEventDirection(const std::string& eventId, Direction direction);
+    std::vector<const MapLayer*> getRenderLayers(MapRenderPass pass) const;
 
 private:
     Vec2i positionForEvent(const EventData& event) const;
+    bool layerMatchesRenderPass(const MapLayer& layer, MapRenderPass pass) const;
+    bool layerHasRenderableTiles(const MapLayer& layer, MapRenderPass pass) const;
 
     MapData currentData;
     std::unordered_map<std::string, RuntimeEventState> runtimeEvents;

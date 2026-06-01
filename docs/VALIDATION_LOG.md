@@ -4,6 +4,41 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-19 / RT-005 — foreground layer occlusion
+
+- `2026-06-01 14:03:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new render-layer role tests failed because `MapRenderPass` and
+  `MapScene::getRenderLayers` did not exist.
+- `2026-06-01 14:05:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS after adding map render passes, role-filtered render layers,
+  foreground/background map rendering, and split entity rendering.
+- `2026-06-01 14:05:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed with new render-layer role tests.
+- `2026-06-01 14:08:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default"`
+  — PASS with existing third-party CMake policy/deprecation warnings only.
+- `2026-06-01 14:08:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS; Ninja reported no work to do after the green build.
+- `2026-06-01 14:08:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 14:08:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime smoke reported `SMOKE PASSED`.
+- `2026-06-01 14:08:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added map render passes, role-filtered visual layer selection,
+  background/foreground renderer passes, split entity rendering around the
+  foreground pass, foreground-role tests, and visual design documentation for
+  runtime occlusion semantics.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-18 / RT-004 — event priority and Y-sort rendering
 
 - `2026-06-01 13:55:00 -03:00` —

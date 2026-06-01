@@ -17,7 +17,7 @@ Legend:
 | Project metadata | val | yes | yes | yes | yes | yes | Visual profiles, map references, and desktop persistence are covered. |
 | Maps + map tree | val | yes | yes | yes | yes | yes | Phase 10 Slice 1 map tree and map properties are implemented. |
 | Tilesets / sprites | partial | yes | partial | yes | partial | partial | Data-driven tilesets exist; dedicated tileset database editor remains FRA-8. |
-| Visual layers / foreground | partial | yes | yes | partial | yes | partial | Editor layers exist; runtime foreground occlusion remains FRA-19. |
+| Visual layers / foreground | val | yes | yes | yes | yes | yes | Runtime renders background visual roles, below/same entities, foreground occluders, above entities, then overlays; collision/region stay non-rendered. |
 | Events, pages, and self switches | val | yes | yes | yes | yes | yes | Active-page selection, self switches, and scheduled events are implemented. |
 | Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; audio v1 and plugin commands remain MVP work. |
 | Runtime choices UI | val | yes | yes | yes | yes | yes | `showChoices` now renders selectable runtime options and waits for confirm/cancel results. |

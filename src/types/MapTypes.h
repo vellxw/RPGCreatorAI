@@ -27,6 +27,11 @@ struct MapData {
     std::vector<EventData> events;
 };
 
+enum class MapRenderPass {
+    Background,
+    Foreground
+};
+
 struct RuntimeEventState {
     int x = 0;
     int y = 0;

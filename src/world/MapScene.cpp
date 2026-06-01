@@ -1,4 +1,13 @@
 #include "world/MapScene.h"
+#include <algorithm>
+
+namespace {
+
+std::string layerRoleOrName(const MapLayer& layer) {
+    return layer.role.empty() ? layer.name : layer.role;
+}
+
+} // namespace
 
 void MapScene::loadFromData(const MapData& data) {
     currentData = data;
@@ -106,4 +115,34 @@ Vec2i MapScene::positionForEvent(const EventData& event) const {
     const auto it = runtimeEvents.find(event.id);
     if (it == runtimeEvents.end()) return Vec2i{event.x, event.y};
     return Vec2i{it->second.x, it->second.y};
+}
+
+std::vector<const MapLayer*> MapScene::getRenderLayers(MapRenderPass pass) const {
+    std::vector<const MapLayer*> layers;
+    for (const auto& layer : currentData.layers) {
+        if (!layerMatchesRenderPass(layer, pass)) continue;
+        if (!layerHasRenderableTiles(layer, pass)) continue;
+        layers.push_back(&layer);
+    }
+    return layers;
+}
+
+bool MapScene::layerMatchesRenderPass(const MapLayer& layer, MapRenderPass pass) const {
+    if (layer.type != "visual") return false;
+    if (!layer.visible) return false;
+
+    const std::string role = layerRoleOrName(layer);
+    if (pass == MapRenderPass::Background) {
+        return role == "ground" || role == "decoration";
+    }
+    return role == "foreground";
+}
+
+bool MapScene::layerHasRenderableTiles(const MapLayer& layer, MapRenderPass pass) const {
+    const std::string role = layerRoleOrName(layer);
+    if (pass == MapRenderPass::Background && role == "ground") {
+        return true;
+    }
+    return std::any_of(layer.tiles.begin(), layer.tiles.end(),
+                       [](int tileId) { return tileId != 0; });
 }

@@ -228,6 +228,11 @@ Linear tracks execution status, validation evidence, commits, and push results.
   legacy flat-event fallback, and the renderer consumes a deterministic order:
   below-priority events, same-priority events and player sorted by visual foot
   Y with stable id tie-breaks, then above-priority events.
+- Runtime map rendering is split into `Background` and `Foreground` map
+  passes. `MapScene` selects visual layers by role/name, keeps collision and
+  region layers out of the renderer, treats empty foreground as a no-op, and
+  `Game` renders background, below/same entities, foreground, above entities,
+  then UI overlays.
 - Choices, event-target movement routes, priority/Y-sort rendering,
   foreground occlusion, local audio, and plugin commands are runtime features.
   `EventRunner` may request behavior, but `Game`, `MapScene`, renderer, audio,
