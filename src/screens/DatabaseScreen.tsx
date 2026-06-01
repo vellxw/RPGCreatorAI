@@ -22,6 +22,7 @@ import { SwitchesVariablesEditor } from '../components/database/SwitchesVariable
 import { SystemEditor } from '../components/database/SystemEditor';
 import { TilesetEditor } from '../components/database/TilesetEditor';
 import { TroopsEditor } from '../components/database/TroopsEditor';
+import { CommandStackEditor } from '../components/events/CommandStackEditor';
 import {
   flattenCommands,
   useProjectStore,
@@ -728,37 +729,49 @@ function CommonEventDetail({
   update: UpdateFn;
   idField: React.ReactNode;
 }) {
-  const { state } = useProjectStore();
+  const { state, dispatch } = useProjectStore();
   const switchOptions = [
     { value: '', label: entry.trigger === 'manual' ? '(none)' : '(required)' },
     ...state.databases.switches.map(s => ({ value: s.id, label: s.name || s.id })),
   ];
 
   return (
-    <div className="space-y-3 max-w-md">
-      {idField}
-      <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
-      <Select
-        label="Trigger"
-        value={entry.trigger}
-        options={[
-          { value: 'manual', label: 'Manual (callCommonEvent)' },
-          { value: 'autorun', label: 'Autorun' },
-          { value: 'parallel', label: 'Parallel' },
-        ]}
-        onChange={v => update({ trigger: v as CommonEventData['trigger'] })}
-      />
-      <Select
-        label="Condition Switch"
-        value={entry.switchId ?? ''}
-        options={switchOptions}
-        onChange={v => update({ switchId: v })}
-      />
-      <p className="text-[11px] text-gray-500">
-        Autorun and parallel common events run while their condition switch is ON.
-        Command list editing for common events arrives in a later slice.
-      </p>
-      <p className="text-[11px] text-gray-500">Commands ({entry.commands.length})</p>
+    <div className="space-y-4">
+      <div className="space-y-3 max-w-md">
+        {idField}
+        <Input label="Name" value={entry.name} onChange={e => update({ name: e.target.value })} />
+        <Select
+          label="Trigger"
+          value={entry.trigger}
+          options={[
+            { value: 'manual', label: 'Manual (callCommonEvent)' },
+            { value: 'autorun', label: 'Autorun' },
+            { value: 'parallel', label: 'Parallel' },
+          ]}
+          onChange={v => update({ trigger: v as CommonEventData['trigger'] })}
+        />
+        <Select
+          label="Condition Switch"
+          value={entry.switchId ?? ''}
+          options={switchOptions}
+          onChange={v => update({ switchId: v })}
+        />
+        <p className="text-[11px] text-gray-500">
+          Autorun and parallel common events run while their condition switch is ON.
+        </p>
+      </div>
+      <div className="min-h-[420px] max-h-[620px] flex flex-col overflow-hidden rounded-lg border border-gray-200">
+        <CommandStackEditor
+          title="Common Event Commands"
+          subtitle="Reusable command stack for calls, autorun, and parallel common events."
+          commands={entry.commands}
+          mapIds={Object.keys(state.maps)}
+          itemIds={state.items.items.map(item => item.id)}
+          onCommandsChange={commands =>
+            dispatch({ type: 'UPDATE_COMMON_EVENT_COMMANDS', commonEventId: entry.id, commands })
+          }
+        />
+      </div>
     </div>
   );
 }

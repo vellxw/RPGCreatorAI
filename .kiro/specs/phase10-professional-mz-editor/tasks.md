@@ -89,7 +89,7 @@
   coverage.
 - [x] FRA-11 / DB-006: build quest, shop, switches, variables, and system V2
   editors with reference usage warnings and system-default validation.
-- [ ] FRA-12 / DB-007: extract and reuse the command-stack editor for common
+- [x] FRA-12 / DB-007: extract and reuse the command-stack editor for common
   event command editing with undo-safe reducer behavior.
 - [ ] FRA-13 / DB-008: build the animation database V2 editor with a real
   sprite-sheet preview and animation validation.

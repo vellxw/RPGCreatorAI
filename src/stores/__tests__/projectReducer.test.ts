@@ -642,6 +642,51 @@ describe('projectReducer', () => {
     expect(s2.maps.town.events[0].commands).toEqual(s2.maps.town.events[0].pages?.[0].commands);
   });
 
+  it('UPDATE_COMMON_EVENT_COMMANDS edits common events without mutating map events and supports undo', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'ADD_DATABASE_ENTRY',
+      table: 'commonEvents',
+      entry: {
+        id: 'ce_intro',
+        name: 'Intro',
+        trigger: 'manual',
+        commands: [{ type: 'showText', text: 'Common old' }],
+      },
+    });
+    const mapCommandsBefore = s1.maps.town.events[0].commands;
+
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_COMMON_EVENT_COMMANDS',
+      commonEventId: 'ce_intro',
+      commands: [
+        {
+          type: 'ifSwitch',
+          switchId: 'story_ready',
+          equals: true,
+          then: [{ type: 'showText', text: 'Common new' }],
+          else: [],
+        },
+      ],
+    });
+
+    expect(s2.databases.commonEvents[0].commands).toEqual([
+      {
+        type: 'ifSwitch',
+        switchId: 'story_ready',
+        equals: true,
+        then: [{ type: 'showText', text: 'Common new' }],
+        else: [],
+      },
+    ]);
+    expect(s2.maps.town.events[0].commands).toEqual(mapCommandsBefore);
+    expect(s2.maps.town.events[0].commands).toBe(mapCommandsBefore);
+    expect(s2.canUndo).toBe(true);
+
+    const undone = projectReducer(s2, { type: 'UNDO' });
+    expect(undone.databases.commonEvents[0].commands).toEqual([{ type: 'showText', text: 'Common old' }]);
+    expect(undone.maps.town.events[0].commands).toEqual(mapCommandsBefore);
+  });
+
   it('MARK_SAVED clears dirty', () => {
     const s1 = projectReducer(loadedState(), {
       type: 'UPDATE_EVENT',

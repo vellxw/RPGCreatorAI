@@ -430,6 +430,31 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('Common event "valid_condition"'))).toBe(false);
   });
 
+  it('validates nested common event commands with the same command rules as map events', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.switches = [{ id: 'story_ready', name: 'Story Ready', initial: false }];
+    project.databases.commonEvents = [
+      {
+        id: 'ce_bad_branch',
+        name: 'Bad Branch',
+        trigger: 'manual',
+        commands: [
+          {
+            type: 'ifSwitch',
+            switchId: 'story_ready',
+            equals: true,
+            then: [{ type: 'transferMap', mapId: 'missing_map', x: 0, y: 0, direction: 'down' }],
+            else: [],
+          },
+        ],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.source === 'commonEvent/ce_bad_branch' && e.message.includes('targets unknown map "missing_map"'))).toBe(true);
+  });
+
   it('validates event page triggers and self switch letters', () => {
     const event: GameEvent = {
       id: 'paged',

@@ -89,6 +89,9 @@ export function emptyDatabases(): DatabaseEntries {
       equipmentSlots: [
         { id: 'weapon', name: 'Weapon' },
         { id: 'armor', name: 'Armor' },
+        { id: 'shield', name: 'Shield' },
+        { id: 'head', name: 'Head' },
+        { id: 'body', name: 'Body' },
         { id: 'accessory', name: 'Accessory' },
       ],
       itemCategories: [],

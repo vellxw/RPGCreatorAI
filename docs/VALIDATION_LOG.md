@@ -4,6 +4,50 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-12 / DB-007 — common event command-stack editing
+
+- `2026-06-01 12:54 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — RED; the new component test could not resolve `CommandStackEditor`,
+  proving the shared command-stack component did not exist before
+  implementation.
+- `2026-06-01 12:55 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — RED; `LOAD_PROJECT` exposed a fallback database inconsistency where
+  migrated legacy armors used slot `body`, but `emptyDatabases()` did not
+  include the project-owned armor slot ids.
+- `2026-06-01 12:55 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 76 tests) after aligning fallback equipment slots with
+  the real types shard.
+- `2026-06-01 13:00 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — PASS (1 file, 3 tests).
+- `2026-06-01 13:00 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 76 tests).
+- `2026-06-01 13:00 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-06-01 13:03 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — PASS (1 file, 3 tests) after removing the legacy inline command-stack
+  copy from `EventEditorScreen`.
+- `2026-06-01 13:03 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 76 tests) after the extraction cleanup.
+- `2026-06-01 13:03 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  after the extraction cleanup.
+- `2026-06-01 13:04 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`); Vite reported the existing chunk-size warning.
+- Fix applied: added shared `CommandStackEditor`, wired map events through
+  the extracted component using the existing page/legacy command actions,
+  wired common events through `UPDATE_COMMON_EVENT_COMMANDS`, added reducer
+  coverage for common event command undo/isolation, added validation coverage
+  for nested common event commands, and aligned default equipment slots with
+  the seeded `types` database.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-11 / DB-006 — quest, shop, switch, variable, and system V2 editors
 
 - `2026-06-01 12:44 -03:00` —
