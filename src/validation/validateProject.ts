@@ -21,6 +21,7 @@ const VALID_TILE_GROUPS = new Set(['A', 'B', 'C', 'D', 'E', 'Region', 'Collision
 const VALID_TILE_PASSABILITY = new Set(['passable', 'blocked']);
 const VALID_LEGACY_ITEM_TYPES = new Set(['weapon', 'armor']);
 const VALID_STATE_RESTRICTIONS = new Set(['none', 'cannotMove']);
+const VALID_SKILL_TARGETS = new Set(['singleEnemy', 'allEnemies', 'singleAlly', 'allAllies', 'self']);
 const STAT_KEYS: Array<keyof Stats> = [
   'maxHp',
   'maxMp',
@@ -464,6 +465,7 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
 
   out.push(...validateTilesetDatabase(db));
   out.push(...validateEquipmentAndStateDatabases(db));
+  out.push(...validatePartyCombatDatabases(db));
 
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
@@ -604,6 +606,180 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
       });
     }
   }
+  return out;
+}
+
+function validateNonNegativeStats(
+  label: string,
+  source: string,
+  fieldName: string,
+  stats: Stats,
+): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  for (const key of STAT_KEYS) {
+    const value = stats[key];
+    if (!Number.isFinite(value) || value < 0) {
+      out.push({
+        level: 'error',
+        message: `${label} ${fieldName}.${key} must be a non-negative finite number`,
+        source,
+      });
+    }
+  }
+  return out;
+}
+
+function validatePartyCombatDatabases(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const classIds = new Set(db.classes.map(entry => entry.id));
+  const skillIds = new Set(db.skills.map(entry => entry.id));
+  const enemyIds = new Set(db.enemies.map(entry => entry.id));
+  const equipmentSlotIds = new Set(db.types.equipmentSlots.map(entry => entry.id));
+  const elementIds = new Set(db.types.elements.map(entry => entry.id));
+
+  for (const actor of db.actors) {
+    const source = `database/actors/${actor.id}`;
+    if (!Number.isFinite(actor.level) || actor.level < 1) {
+      out.push({
+        level: 'error',
+        message: `Actor "${actor.id}" level must be at least 1`,
+        source,
+      });
+    }
+    if (!Number.isFinite(actor.hp) || actor.hp < 0) {
+      out.push({
+        level: 'error',
+        message: `Actor "${actor.id}" hp must be a non-negative finite number`,
+        source,
+      });
+    }
+    if (!Number.isFinite(actor.mp) || actor.mp < 0) {
+      out.push({
+        level: 'error',
+        message: `Actor "${actor.id}" mp must be a non-negative finite number`,
+        source,
+      });
+    }
+    out.push(...validateNonNegativeStats(`Actor "${actor.id}"`, source, 'baseStats', actor.baseStats));
+  }
+
+  for (const cls of db.classes) {
+    const source = `database/classes/${cls.id}`;
+    out.push(...validateNonNegativeStats(`Class "${cls.id}"`, source, 'growth', cls.growth));
+    for (const slot of cls.usableEquipment) {
+      if (equipmentSlotIds.size > 0 && !equipmentSlotIds.has(slot)) {
+        out.push({
+          level: 'error',
+          message: `Class "${cls.id}" references unknown equipment slot "${slot}"`,
+          source,
+        });
+      }
+    }
+    for (const learned of cls.learnedSkills) {
+      if (!Number.isFinite(learned.level) || learned.level < 1) {
+        out.push({
+          level: 'error',
+          message: `Class "${cls.id}" learned skill level must be at least 1`,
+          source,
+        });
+      }
+      if (skillIds.size > 0 && !skillIds.has(learned.skillId)) {
+        out.push({
+          level: 'error',
+          message: `Class "${cls.id}" references unknown learned skill "${learned.skillId}"`,
+          source,
+        });
+      }
+    }
+  }
+
+  for (const skill of db.skills) {
+    const source = `database/skills/${skill.id}`;
+    if (!Number.isFinite(skill.mpCost) || skill.mpCost < 0) {
+      out.push({
+        level: 'error',
+        message: `Skill "${skill.id}" mpCost must be a non-negative finite number`,
+        source,
+      });
+    }
+    if (!Number.isFinite(skill.power)) {
+      out.push({
+        level: 'error',
+        message: `Skill "${skill.id}" power must be finite`,
+        source,
+      });
+    }
+    if (!VALID_SKILL_TARGETS.has(skill.target)) {
+      out.push({
+        level: 'error',
+        message: `Skill "${skill.id}" has invalid target "${skill.target}"`,
+        source,
+      });
+    }
+    if (skill.element && elementIds.size > 0 && !elementIds.has(skill.element)) {
+      out.push({
+        level: 'error',
+        message: `Skill "${skill.id}" references unknown element "${skill.element}"`,
+        source,
+      });
+    }
+  }
+
+  for (const enemy of db.enemies) {
+    const source = `database/enemies/${enemy.id}`;
+    out.push(...validateNonNegativeStats(`Enemy "${enemy.id}"`, source, 'stats', enemy.stats));
+    if (!Number.isFinite(enemy.exp) || enemy.exp < 0) {
+      out.push({
+        level: 'error',
+        message: `Enemy "${enemy.id}" exp must be a non-negative finite number`,
+        source,
+      });
+    }
+    if (!Number.isFinite(enemy.gold) || enemy.gold < 0) {
+      out.push({
+        level: 'error',
+        message: `Enemy "${enemy.id}" gold must be a non-negative finite number`,
+        source,
+      });
+    }
+    for (const drop of enemy.drops) {
+      if (!Number.isFinite(drop.rate) || drop.rate < 0 || drop.rate > 1) {
+        out.push({
+          level: 'error',
+          message: `Enemy "${enemy.id}" drop rate must be between 0 and 1`,
+          source,
+        });
+      }
+    }
+  }
+
+  for (const troop of db.troops) {
+    if (troop.members.length === 0) {
+      out.push({
+        level: 'error',
+        message: `Troop "${troop.id}" must contain at least one enemy`,
+        source: `database/troops/${troop.id}`,
+      });
+    }
+    for (const memberId of troop.members) {
+      if (enemyIds.size > 0 && !enemyIds.has(memberId)) {
+        out.push({
+          level: 'error',
+          message: `Troop "${troop.id}" references unknown enemy "${memberId}"`,
+          source: `database/troops/${troop.id}`,
+        });
+      }
+    }
+  }
+
+  if (classIds.size === 0 && db.actors.length > 0) {
+    out.push({
+      level: 'error',
+      message: 'Actor database requires at least one class when actors exist',
+      source: 'database/classes',
+    });
+  }
+
   return out;
 }
 

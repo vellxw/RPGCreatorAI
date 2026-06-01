@@ -4,6 +4,55 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-10 / DB-005 — actor, class, skill, enemy, and troop V2 editors
+
+- `2026-06-01 12:34 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — RED; the new component test could not resolve `ActorsEditor`, proving
+  the dedicated party/combat editors did not exist before implementation.
+- `2026-06-01 12:34 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  — RED; invalid party/combat numeric ranges and references were not yet
+  reported.
+- `2026-06-01 12:37 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — PASS (1 file, 5 tests).
+- `2026-06-01 12:37 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (1 file, 13 tests).
+- `2026-06-01 12:38 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-06-01 12:38 -03:00` — `cmake --preset default` — PASS, with
+  existing third-party CMake policy/deprecation warnings only.
+- `2026-06-01 12:38 -03:00` — `cmake --build --preset default` — FAIL when
+  run from the plain PowerShell environment because `cl.exe` could not find
+  the standard library header `<string>`.
+- `2026-06-01 12:39 -03:00` —
+  `cmd /c "call \"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat\" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default"`
+  — PASS; this confirmed the build environment required `VsDevCmd`, matching
+  the repository verification script behavior.
+- `2026-06-01 12:39 -03:00` —
+  `cmd /c "call \"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat\" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS (41 build steps), with existing doctest MSVC warning C5285 only.
+- `2026-06-01 12:40 -03:00` —
+  `cmd /c "call \"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat\" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS (1/1 CTest target, 0 failures).
+- `2026-06-01 12:40 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 18 tests) on the final focused rerun.
+- `2026-06-01 12:40 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  on the final focused rerun.
+- `2026-06-01 12:40 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- Fix applied: added dedicated `ActorsEditor`, `ClassesEditor`,
+  `SkillsEditor`, `EnemiesEditor`, and `TroopsEditor`; wired them into the
+  Database screen; and added validation for actor level/HP/MP/base stats,
+  class growth/usable equipment/learned skill levels, skill target/element/
+  numeric fields, enemy stats/rewards/drop rates, and empty/unknown troop
+  members.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-9 / DB-004 — item, weapon, armor, and state V2 editors
 
 - TDD RED before implementation (timestamp not captured after context

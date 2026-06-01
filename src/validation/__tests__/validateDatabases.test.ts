@@ -191,6 +191,117 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('State "bad_state" has invalid restriction "sleep"'))).toBe(true);
   });
 
+  it('rejects invalid party and combat references and numeric ranges', () => {
+    const project = projectWith({
+      types: {
+        weaponTypes: [],
+        armorTypes: [],
+        skillTypes: [{ id: 'magic', name: 'Magic' }],
+        elements: [{ id: 'fire', name: 'Fire' }],
+        equipmentSlots: [
+          { id: 'weapon', name: 'Weapon' },
+          { id: 'armor', name: 'Armor' },
+          { id: 'accessory', name: 'Accessory' },
+        ],
+        itemCategories: [{ id: 'consumable', name: 'Consumable' }],
+      },
+      actors: [
+        {
+          id: 'bad_actor',
+          name: 'Bad Actor',
+          classId: 'missing_class',
+          level: 0,
+          hp: -1,
+          mp: Number.NaN,
+          baseStats: {
+            maxHp: 10,
+            maxMp: 0,
+            attack: Number.NaN,
+            defense: 1,
+            magicAttack: 1,
+            magicDefense: 1,
+            agility: 1,
+            luck: 1,
+          },
+          equipment: { weapon: 'missing_item', accessory: 'potion' },
+          skills: ['missing_skill'],
+        },
+      ],
+      classes: [
+        {
+          id: 'bad_class',
+          name: 'Bad Class',
+          growth: {
+            maxHp: 1,
+            maxMp: 1,
+            attack: 1,
+            defense: Number.POSITIVE_INFINITY,
+            magicAttack: 1,
+            magicDefense: 1,
+            agility: 1,
+            luck: 1,
+          },
+          usableEquipment: ['phantom' as never],
+          learnedSkills: [{ level: 0, skillId: 'missing_skill' }],
+        },
+      ],
+      skills: [
+        {
+          id: 'bad_skill',
+          name: 'Bad Skill',
+          description: '',
+          mpCost: -1,
+          power: Number.NaN,
+          target: 'everyone' as never,
+          element: 'ice',
+        },
+      ],
+      enemies: [
+        {
+          id: 'bad_enemy',
+          name: 'Bad Enemy',
+          stats: {
+            maxHp: -1,
+            maxMp: 0,
+            attack: 1,
+            defense: 1,
+            magicAttack: 1,
+            magicDefense: 1,
+            agility: 1,
+            luck: 1,
+          },
+          exp: -4,
+          gold: -8,
+          drops: [{ itemId: 'missing_item', rate: 1.5 }],
+        },
+      ],
+      troops: [{ id: 'bad_troop', name: 'Bad Troop', members: ['missing_enemy'] }],
+    });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" level must be at least 1'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" hp must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" mp must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" baseStats.attack must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" equips unknown item "missing_item" in slot "weapon"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Actor "bad_actor" references unknown skill "missing_skill"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Class "bad_class" growth.defense must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Class "bad_class" references unknown equipment slot "phantom"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Class "bad_class" learned skill level must be at least 1'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Class "bad_class" references unknown learned skill "missing_skill"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Skill "bad_skill" mpCost must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Skill "bad_skill" power must be finite'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Skill "bad_skill" has invalid target "everyone"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Skill "bad_skill" references unknown element "ice"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Enemy "bad_enemy" stats.maxHp must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Enemy "bad_enemy" exp must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Enemy "bad_enemy" gold must be a non-negative finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Enemy "bad_enemy" drops unknown item "missing_item"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Enemy "bad_enemy" drop rate must be between 0 and 1'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Troop "bad_troop" references unknown enemy "missing_enemy"'))).toBe(true);
+  });
+
   it('rejects malformed types and missing required terms', () => {
     const project = projectWith({
       types: {

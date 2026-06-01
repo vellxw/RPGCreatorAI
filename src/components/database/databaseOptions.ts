@@ -19,6 +19,13 @@ export const FALLBACK_ARMOR_TYPES: NamedTypeEntry[] = [
   { id: 'robe', name: 'Robe' },
 ];
 
+export const FALLBACK_ELEMENTS: NamedTypeEntry[] = [
+  { id: 'physical', name: 'Physical' },
+  { id: 'fire', name: 'Fire' },
+  { id: 'ice', name: 'Ice' },
+  { id: 'thunder', name: 'Thunder' },
+];
+
 export const FALLBACK_EQUIPMENT_SLOTS: NamedTypeEntry[] = [
   { id: 'weapon', name: 'Weapon' },
   { id: 'armor', name: 'Armor' },

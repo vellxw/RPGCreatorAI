@@ -84,7 +84,7 @@
 - [x] FRA-9 / DB-004: build item, weapon, armor, and state V2 editors with
   domain fields, type references, numeric validation, and compatibility with
   separated equipment shards.
-- [ ] FRA-10 / DB-005: build actor, class, skill, enemy, and troop V2 editors
+- [x] FRA-10 / DB-005: build actor, class, skill, enemy, and troop V2 editors
   with battle authoring fields, reference validation, and runtime test
   coverage.
 - [ ] FRA-11 / DB-006: build quest, shop, switches, variables, and system V2

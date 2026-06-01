@@ -9,10 +9,15 @@ import { Input, Select } from '../components/ui/Input';
 import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
 import { IdField } from '../components/database/DatabaseFields';
+import { ActorsEditor } from '../components/database/ActorsEditor';
+import { ClassesEditor } from '../components/database/ClassesEditor';
 import { EquipmentEditor } from '../components/database/EquipmentEditor';
+import { EnemiesEditor } from '../components/database/EnemiesEditor';
 import { ItemsEditor } from '../components/database/ItemsEditor';
+import { SkillsEditor } from '../components/database/SkillsEditor';
 import { StatesEditor } from '../components/database/StatesEditor';
 import { TilesetEditor } from '../components/database/TilesetEditor';
+import { TroopsEditor } from '../components/database/TroopsEditor';
 import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
 import type {
   ActorData,
@@ -95,11 +100,35 @@ function Detail({ table, entry }: DetailProps) {
 
   switch (table) {
     case 'actors':
-      return <ActorDetail entry={entry as unknown as ActorData} update={update} idField={idField} />;
+      return (
+        <ActorsEditor
+          entry={entry as unknown as ActorData}
+          classes={state.databases.classes}
+          skills={state.databases.skills}
+          items={state.items.items}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'classes':
-      return <ClassDetail entry={entry as unknown as ClassData} update={update} idField={idField} />;
+      return (
+        <ClassesEditor
+          entry={entry as unknown as ClassData}
+          types={state.databases.types}
+          skills={state.databases.skills}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'skills':
-      return <SkillDetail entry={entry as unknown as SkillData} update={update} idField={idField} />;
+      return (
+        <SkillsEditor
+          entry={entry as unknown as SkillData}
+          types={state.databases.types}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'weapons':
       return (
         <EquipmentEditor
@@ -125,9 +154,23 @@ function Detail({ table, entry }: DetailProps) {
     case 'states':
       return <StatesEditor entry={entry as unknown as StateData} idField={idField} onChange={update} />;
     case 'enemies':
-      return <EnemyDetail entry={entry as unknown as EnemyData} update={update} idField={idField} />;
+      return (
+        <EnemiesEditor
+          entry={entry as unknown as EnemyData}
+          items={state.items.items}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'troops':
-      return <TroopDetail entry={entry as unknown as TroopData} update={update} idField={idField} />;
+      return (
+        <TroopsEditor
+          entry={entry as unknown as TroopData}
+          enemies={state.databases.enemies}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'quests':
       return <QuestDetail entry={entry as unknown as QuestData} update={update} idField={idField} />;
     case 'shops':
