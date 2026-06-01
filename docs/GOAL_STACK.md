@@ -2,22 +2,51 @@
 
 ## Current Goal
 
-Phase 10 — Professional RPG Maker MZ-style editor adaptation — MVP COMPLETE.
+Phase 11 — Complete Product Platform — ACTIVE.
 
 ## Active Phase
 
-Phase 10 adapted the creator workflow toward a professional RPG
-Maker MZ-style editor while keeping RPGCreatorAI local, deterministic,
-data-driven, and legally independent. The active priority is editor
-ergonomics and data shape: map tree, map properties, tilesets/layers,
-event pages, database editors, runtime validation, playtest, and debug
-tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
+Phase 11 extends the completed Phase 10 MVP into a complete local-first
+RPGCreatorAI product platform. The active priority is usable-first release
+readiness: Windows dev reliability, packaged builds, onboarding, end-to-end
+authoring workflows, editor/runtime/database polish, asset import and
+generation pipelines, optional AI editor tooling, provider safety, audits, QA,
+docs, and final ship evidence.
+
+The native runtime remains local, deterministic, data-driven, and independent
+of AI providers, network, cloud services, provider credentials, marketplace
+systems, and arbitrary scripting. AI may be added only as optional
+editor/tooling infrastructure above the runtime boundary, with mocks and
+fixtures for normal validation.
+
+Primary Phase 11 sources:
+
+- `docs/PHASE_11_PRODUCT_CHARTER.md`
+- `.kiro/specs/phase11-complete-product-platform/`
+- Linear project `RPGCreatorAI Complete Product Platform`
+- `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Recommended next phase — release hardening and packaging: installer/dev
-  binary packaging, onboarding polish, issue triage, and any post-MVP
-  stabilization found by real use.
+- Phase 11 CP-001 through CP-008 — planning and scope lock: product charter,
+  repo/product audit, risk register, provider/legal baseline, backlog source,
+  execution protocol, validation baseline, and planning integration gate.
+- Phase 11 Linear milestone 01 — release hardening and packaging.
+- Phase 11 Linear milestone 02 — end-to-end usability.
+- Phase 11 Linear milestone 03 — professional editor surface.
+- Phase 11 Linear milestone 04 — runtime feature completeness.
+- Phase 11 Linear milestone 05 — database/system completeness.
+- Phase 11 Linear milestone 06 — asset library and import pipeline.
+- Phase 11 Linear milestone 07 — AI Provider Hub foundation.
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
+- Phase 11 Linear milestone 09 — AI characters and animations.
+- Phase 11 Linear milestone 10 — AI game content pipelines.
+- Phase 11 Linear milestone 11 — multi-provider integrations.
+- Phase 11 Linear milestone 12 — continuous visual/UX audits.
+- Phase 11 Linear milestone 13 — QA automation and regression.
+- Phase 11 Linear milestone 14 — security, privacy, and cost controls.
+- Phase 11 Linear milestone 15 — docs, examples, Linear closeout, and final
+  ship gate. CP-005 will mirror the exact repo-tracked issue/milestone map.
 
 ## Closed subgoals
 

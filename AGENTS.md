@@ -1,6 +1,6 @@
 # AGENTS.md — Permanent Operational Rules for RPGCreatorAI
 
-## Current Phase: Phase 10 — Professional RPG Maker MZ-style Editor Adaptation
+## Current Phase: Phase 11 — Complete Product Platform
 
 This file is the source of truth for all autonomous agents working on
 RPGCreatorAI. It distills the permanent operational rules from the phase
@@ -22,6 +22,13 @@ broader AI-assisted game creator.
 
 The engine remains simple, local, deterministic, testable, and data-driven.
 AI is a future layer above the engine, never a runtime dependency.
+
+Phase 11 extends the completed Phase 10 MVP into a complete local-first
+product platform: release hardening, Windows packaging, onboarding,
+professional editor/runtime/database polish, asset workflows, optional
+AI-assisted editor tooling, audits, QA automation, security controls, docs,
+and final ship readiness. Native runtime behavior remains independent of AI,
+network, cloud, provider credentials, and live APIs.
 
 ## Operating Rule for Agents
 
@@ -214,5 +221,6 @@ hash, push result, known limitations, recommended next phase.
 
 Detailed per-phase protocols live under `docs/agent_prompts/` and remain
 binding for that phase. The current active implementation direction is
-tracked in `docs/GOAL_STACK.md` and visually governed by
-`docs/GAME_VISUAL_DESIGN.md`.
+tracked in `docs/GOAL_STACK.md`, the Phase 11 charter is in
+`docs/PHASE_11_PRODUCT_CHARTER.md`, and authored game visuals remain
+governed by `docs/GAME_VISUAL_DESIGN.md`.

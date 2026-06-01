@@ -2,10 +2,14 @@
 
 ## Active Direction
 
-- **Phase 10 (Current):** Professional RPG Maker MZ-style editor adaptation.
-  Focus: map tree workflow, data-driven tilesets and layers, event pages,
-  robust database editors, runtime validation, integrated playtest, and debug
-  tooling. No proprietary RPG Maker assets or formats are used.
+- **Phase 11 (Current):** Complete Product Platform. Focus: release hardening,
+  Windows packaging, onboarding, end-to-end authoring workflows, professional
+  editor/runtime/database polish, asset import and generation pipelines,
+  optional AI editor tooling, provider safety, continuous audits, QA
+  automation, docs, examples, Linear closeout, and final ship readiness.
+  Runtime remains local, deterministic, data-driven, and independent of AI,
+  network, cloud, provider credentials, marketplace systems, and arbitrary
+  scripting.
 
 ## Completed Foundation
 
@@ -18,10 +22,12 @@
 - **Phase 7:** Polished creator-to-player loop.
 - **Phase 8:** Game visual foundation and creator workflow hardening.
 - **Phase 9:** Smooth movement and generated character animation foundation.
+- **Phase 10:** Professional RPG Maker MZ-style editor adaptation MVP.
 
-## Deferred Until Foundation Is Solid
+## Product Boundaries
 
 - General scripting and plugin execution.
 - AI provider/runtime dependency layers.
 - Networked or backend project services.
 - Non-deterministic runtime features that would compromise local saves.
+- Proprietary RPG Maker format or asset compatibility.

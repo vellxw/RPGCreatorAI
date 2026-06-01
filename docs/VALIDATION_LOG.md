@@ -2392,3 +2392,15 @@ Error: Port 1420 is already in use
   Existing Vite chunk-size, CMake FetchContent/deprecation, and optional
   missing-audio warnings remained non-fatal.
 
+### Phase 11 FRA-36 / CP-001 — product charter and scope lock
+
+- `2026-06-01 18:42:53 -03:00` — changed-file review against `AGENTS.md`,
+  `docs/PHASE_10_MVP_VALIDATION_REPORT.md`, `docs/ROADMAP.md`, Linear project
+  documents, and Phase 11 scope docs — PASS; the updated docs lock Phase 11 as
+  the complete product platform, preserve the local deterministic runtime
+  boundary, keep AI as optional editor/tooling infrastructure, map Phase 10 MVP
+  completion into Phase 11 starting assumptions, and define success criteria
+  from create/open through package/release.
+- `2026-06-01 18:42:53 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+
