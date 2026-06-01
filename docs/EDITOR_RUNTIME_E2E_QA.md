@@ -55,6 +55,23 @@ editor reducer -> save adapter -> project JSON on disk -> playtest session root 
 | Runtime launch smoke | `scripts/dev/smoke-runtime.ps1` through the roundtrip script | Launches the runtime against real project data and verifies it stays alive without `[ERROR]` output. |
 | Runtime reads saved data | `scripts/dev/verify-editor-runtime-roundtrip.ps1` | Mutates a copied `town.json`, launches the runtime, and verifies the edited first-frame screenshot hash differs from baseline. |
 
+## Playtest / Debug Integration Coverage
+
+FRA-33 validates the Playtest/Debug tools as one editor workflow:
+
+- `npm test` covers browser-mode unavailability for native playtest sessions,
+  runtime logs, and runtime state snapshots without fabricated paths/content.
+- `npm test` covers desktop bridge routing for project-start, current-map, and
+  selected-event playtest session requests.
+- `cargo test --manifest-path src-tauri/Cargo.toml` covers temp playtest
+  session generation, source-project immutability, selected-event start
+  positions, bounded runtime log tails, and bounded snapshot reads.
+- `scripts/dev/verify-tauri-content.ps1` confirms the Tauri-only dev port is
+  serving the RPGCreatorAI editor entrypoint before desktop use.
+- MVP placeholder AI/debug actions are gated out of primary navigation and
+  bottom-panel prompts, keeping the playtest screen focused on real local
+  validation, runtime logs, event trace, and runtime state surfaces.
+
 The runtime round-trip script is intentionally safe:
 
 - it works in a disposable temp directory,

@@ -141,7 +141,7 @@
   validation.
 - [x] FRA-32 / INT-002: integrate Runtime MZ foundation branches and run C++
   validation plus runtime smoke.
-- [ ] FRA-33 / INT-003: integrate playtest/debug tooling and validate browser
+- [x] FRA-33 / INT-003: integrate playtest/debug tooling and validate browser
   and desktop degradation paths.
 - [ ] FRA-34 / INT-004: close MVP documentation and user workflow docs against
   actual command names and behavior.

@@ -15,11 +15,19 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-33 through FRA-35): playtest/debug
-  feature integration, docs closeout, final report, commit, and push.
+- Integration QA — MVP green gate (FRA-34 through FRA-35): docs closeout,
+  final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 INT-003 (FRA-33) — Playtest/Debug tooling integration is present on
+  `main`: no local or remote `PT-*` branch refs remain after fetch/prune,
+  Linear shows FRA-22 through FRA-26 Done, Slice 6 tasks are checked, and the
+  integrated code includes temp playtest sessions, bounded runtime logs,
+  deterministic event traces, bounded runtime state snapshots, and MVP
+  placeholder AI/debug UI gating. Frontend typecheck, full Vitest, frontend
+  build, Rust desktop tests, and the Tauri content check passed against the
+  integrated state.
 - Phase 10 INT-002 (FRA-32) — Runtime MZ foundation integration is present on
   `main`: no local or remote `RT-*` branch refs remain after fetch/prune,
   Linear shows FRA-15 through FRA-21 Done, Slice 5 tasks are checked, and the

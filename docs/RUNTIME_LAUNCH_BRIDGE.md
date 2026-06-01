@@ -1,6 +1,6 @@
 # Runtime Launch Bridge
 
-## Status After FRA-23
+## Status After FRA-33
 
 The desktop playtest flow now builds a temporary project root before
 launching the native C++ runtime. The source project folder is used only as
@@ -10,11 +10,17 @@ command-line arguments and no shell interpretation.
 
 Runtime stdout/stderr are captured to bounded local log files under the app
 data directory. The editor can read the latest log tail with a hard 256 KiB
-cap.
+cap, parse deterministic event trace rows from that tail, and read the latest
+native runtime state snapshot with a hard 128 KiB cap.
 
 Browser mode remains honest: it can run the simulated editor preview, but it
 cannot create native playtest sessions, spawn the runtime, or read native
-runtime logs.
+runtime logs or state snapshots.
+
+FRA-33 validated the integrated Playtest/Debug surface together: no `PT-*`
+branch refs remained after pruning, the PT-001 through PT-005 commits were
+already present on `main`, and the frontend, desktop, and Tauri content gates
+passed against the same tree.
 
 ## Renderer Surface
 
@@ -172,9 +178,10 @@ The runtime bridge exposes narrow log and snapshot operations:
   requested value.
 
 The Playtest bottom panel has tabs for editor-preview logs, runtime logs,
-validation output, and event trace. Runtime log polling runs while the native
-runtime is reported as running and can also be refreshed manually. Browser mode
-shows the unavailable reason and does not fabricate native log content.
+validation output, event trace, and runtime state. Runtime log polling runs
+while the native runtime is reported as running and can also be refreshed
+manually. Browser mode shows the unavailable reason and does not fabricate
+native log or snapshot content.
 
 Event execution trace rows are emitted by the native runtime to stdout with a
 stable `[TRACE]` prefix and JSON payload. Because stdout is already captured

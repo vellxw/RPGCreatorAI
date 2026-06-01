@@ -2334,3 +2334,30 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:58:00 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-33 / INT-003 — Playtest/Debug tooling integration validation
+
+- `2026-06-01 17:01:45 -03:00` — `git branch --all --list '*PT-*'` plus
+  PT commit history check — PASS; no local or remote `PT-*` branch refs
+  remained after pruning. The integrated Playtest/Debug commits were already
+  present on `main`: `9cdeca7` playtest session builder, `bde9f33` bounded
+  runtime log viewer, `6044554` deterministic event trace output, `a5e15c0`
+  runtime state snapshot inspector, and `ef527b1` placeholder AI/debug UI
+  gating. Linear showed FRA-22 through FRA-26 Done.
+- `2026-06-01 17:02:55 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 17:03:34 -03:00` — `npm test` — PASS; 35 files and 212
+  Vitest tests passed, including Playtest session adapter, runtime log,
+  event trace, runtime state, and MVP placeholder gating coverage.
+- `2026-06-01 17:04:04 -03:00` — `npm run build` — PASS; Vite build
+  completed with the existing chunk-size warning only.
+- `2026-06-01 17:04:35 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 25 Rust desktop tests passed, including temp playtest session,
+  bounded runtime log tail, and bounded runtime snapshot coverage.
+- `2026-06-01 17:05:02 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-tauri-content.ps1`
+  — PASS after starting `npm run dev:tauri` on `127.0.0.1:1420`; the script
+  confirmed the RPGCreatorAI editor HTML and `/src/main.tsx` entrypoint. The
+  temporary server was stopped and port 1420 was confirmed free afterward.
+- `2026-06-01 17:05:35 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+
