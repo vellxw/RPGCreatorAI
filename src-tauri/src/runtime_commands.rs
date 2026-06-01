@@ -71,6 +71,22 @@ pub struct RuntimeLogActionResult {
     pub error: Option<String>,
 }
 
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeDiagnosticsInfo {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub diagnostics_dir: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_log_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_snapshot_path: Option<String>,
+    pub log_tail_max_bytes: usize,
+    pub snapshot_max_bytes: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum RuntimeStatus {
@@ -172,6 +188,25 @@ fn latest_runtime_log_in_dir(dir: &Path) -> Option<PathBuf> {
         b_modified.cmp(&a_modified).then_with(|| b.cmp(a))
     });
     logs.into_iter().next()
+}
+
+fn runtime_diagnostics_in_dir(dir: &Path) -> RuntimeDiagnosticsInfo {
+    let latest_log_path =
+        latest_runtime_log_in_dir(dir).map(|path| path.to_string_lossy().to_string());
+    let snapshot_path = runtime_debug_snapshot_path(dir);
+    let latest_snapshot_path = snapshot_path
+        .is_file()
+        .then(|| snapshot_path.to_string_lossy().to_string());
+
+    RuntimeDiagnosticsInfo {
+        success: true,
+        diagnostics_dir: Some(dir.to_string_lossy().to_string()),
+        latest_log_path,
+        latest_snapshot_path,
+        log_tail_max_bytes: MAX_RUNTIME_LOG_TAIL_BYTES as usize,
+        snapshot_max_bytes: MAX_RUNTIME_SNAPSHOT_BYTES as usize,
+        error: None,
+    }
 }
 
 fn latest_runtime_log_path(state: &AppState) -> Result<PathBuf, String> {
@@ -407,6 +442,28 @@ mod tests {
         }
     }
 
+    fn restore_app_data_env(
+        appdata: Option<std::ffi::OsString>,
+        local: Option<std::ffi::OsString>,
+        home: Option<std::ffi::OsString>,
+    ) {
+        if let Some(value) = appdata {
+            std::env::set_var("APPDATA", value);
+        } else {
+            std::env::remove_var("APPDATA");
+        }
+        if let Some(value) = local {
+            std::env::set_var("LOCALAPPDATA", value);
+        } else {
+            std::env::remove_var("LOCALAPPDATA");
+        }
+        if let Some(value) = home {
+            std::env::set_var("HOME", value);
+        } else {
+            std::env::remove_var("HOME");
+        }
+    }
+
     #[test]
     fn locate_returns_none_when_nothing_present() {
         let _guard = runtime_env_lock().lock().unwrap();
@@ -482,6 +539,42 @@ mod tests {
         assert_eq!(result.max_bytes, MAX_RUNTIME_SNAPSHOT_BYTES as usize);
         assert!(result.content.unwrap().ends_with(r#"{"frameNumber":9}"#));
     }
+
+    #[test]
+    fn runtime_diagnostics_reports_folder_without_existing_log() {
+        let _guard = crate::app_paths::environment_lock().lock().unwrap();
+        let previous_appdata = std::env::var_os("APPDATA");
+        let previous_local = std::env::var_os("LOCALAPPDATA");
+        let previous_home = std::env::var_os("HOME");
+        let appdata = tempfile::TempDir::new().unwrap();
+
+        std::env::set_var("APPDATA", appdata.path());
+        std::env::remove_var("LOCALAPPDATA");
+        std::env::remove_var("HOME");
+
+        let result = runtime_diagnostics().unwrap();
+        let expected = appdata
+            .path()
+            .join("RPGCreatorAI")
+            .join("runtime-logs")
+            .to_string_lossy()
+            .to_string();
+
+        restore_app_data_env(previous_appdata, previous_local, previous_home);
+        assert!(result.success);
+        assert_eq!(result.diagnostics_dir.as_deref(), Some(expected.as_str()));
+        assert!(result.latest_log_path.is_none());
+        assert!(result.latest_snapshot_path.is_none());
+        assert_eq!(result.log_tail_max_bytes, MAX_RUNTIME_LOG_TAIL_BYTES as usize);
+        assert_eq!(result.snapshot_max_bytes, MAX_RUNTIME_SNAPSHOT_BYTES as usize);
+    }
+}
+
+#[tauri::command]
+pub fn runtime_diagnostics() -> Result<RuntimeDiagnosticsInfo, String> {
+    let dir = runtime_logs_dir()?;
+    fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+    Ok(runtime_diagnostics_in_dir(&dir))
 }
 
 #[tauri::command]

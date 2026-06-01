@@ -3,6 +3,7 @@ import { Copy, FolderOpen, RefreshCw } from 'lucide-react';
 interface RuntimeLogPanelProps {
   available: boolean;
   unavailableReason?: string | null;
+  diagnosticsDir?: string | null;
   logPath?: string | null;
   content?: string;
   error?: string | null;
@@ -20,6 +21,7 @@ function basename(path: string): string {
 export function RuntimeLogPanel({
   available,
   unavailableReason,
+  diagnosticsDir,
   logPath,
   content = '',
   error,
@@ -46,6 +48,12 @@ export function RuntimeLogPanel({
           <div className="text-[11px] text-gray-500 font-mono truncate">
             {logPath ? basename(logPath) : 'No runtime log yet'}
           </div>
+          {diagnosticsDir && (
+            <div className="text-[11px] text-gray-500 truncate">
+              Diagnostics folder:{' '}
+              <span className="font-mono text-gray-600">{diagnosticsDir}</span>
+            </div>
+          )}
         </div>
         {truncated && (
           <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded px-2 py-1">

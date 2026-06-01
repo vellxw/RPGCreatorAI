@@ -19,7 +19,7 @@
   - [x] CP-011 / FRA-46: define installer strategy and release artifact policy.
   - [x] CP-012 / FRA-47: prepare app icon and release branding assets.
   - [x] CP-013 / FRA-48: define first-run directories and local app-data policy.
-  - [ ] CP-014 / FRA-49: define crash log and diagnostics location.
+  - [x] CP-014 / FRA-49: define crash log and diagnostics location.
   - [ ] CP-015 / FRA-50: refresh build, run, and packaging docs.
   - [ ] CP-016 / FRA-51: run the packaging integration gate.
 - [ ] 02 End-To-End Usability.

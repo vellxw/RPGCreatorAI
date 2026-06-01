@@ -11,7 +11,9 @@ command-line arguments and no shell interpretation.
 Runtime stdout/stderr are captured to bounded local log files under the app
 data directory. The editor can read the latest log tail with a hard 256 KiB
 cap, parse deterministic event trace rows from that tail, and read the latest
-native runtime state snapshot with a hard 128 KiB cap.
+native runtime state snapshot with a hard 128 KiB cap. The desktop bridge also
+exposes a stable diagnostics query so support workflows can discover the
+runtime diagnostics folder before any log exists.
 
 Browser mode remains honest: it can run the simulated editor preview, but it
 cannot create native playtest sessions, spawn the runtime, or read native
@@ -39,8 +41,10 @@ interface RuntimeLaunchAdapter {
   ): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
+  getDiagnostics(): Promise<RuntimeDiagnosticsInfo>;
   getLatestLog(): Promise<RuntimeLogInfo>;
   readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+  readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult>;
   openLogFolder(): Promise<RuntimeLogActionResult>;
   getUnavailableReason(): string | null;
 }
@@ -179,6 +183,9 @@ The runtime bridge exposes narrow log and snapshot operations:
 
 - `runtime_latest_log`: returns the current in-memory log path, or the newest
   `runtime-*.log` file in the runtime log directory.
+- `runtime_diagnostics`: creates and reports the allowlisted diagnostics
+  directory, latest log path when present, latest snapshot path when present,
+  and the log/snapshot read caps.
 - `runtime_read_log_tail`: returns the last N bytes of the latest log, capped
   at 256 KiB regardless of the requested value.
 - `runtime_open_log_folder`: opens the allowlisted runtime log directory with
@@ -191,8 +198,9 @@ The runtime bridge exposes narrow log and snapshot operations:
 The Playtest bottom panel has tabs for editor-preview logs, runtime logs,
 validation output, event trace, and runtime state. Runtime log polling runs
 while the native runtime is reported as running and can also be refreshed
-manually. Browser mode shows the unavailable reason and does not fabricate
-native log or snapshot content.
+manually. The Runtime Log tab displays the diagnostics folder even when no
+runtime log has been created yet. Browser mode shows the unavailable reason
+and does not fabricate native log, diagnostics, or snapshot content.
 
 Event execution trace rows are emitted by the native runtime to stdout with a
 stable `[TRACE]` prefix and JSON payload. Because stdout is already captured

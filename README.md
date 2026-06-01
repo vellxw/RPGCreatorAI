@@ -161,7 +161,9 @@ packaged app. It does not create an installer or require signing credentials.
 The current release artifact and future installer policy is documented in
 [Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
 First-run directories and cleanup policy are documented in
-[First-Run App Data Policy](docs/FIRST_RUN_APP_DATA_POLICY.md).
+[First-Run App Data Policy](docs/FIRST_RUN_APP_DATA_POLICY.md). Runtime
+diagnostic folders, log caps, and failed-launch troubleshooting are documented
+in [Diagnostics And Logs](docs/DIAGNOSTICS.md).
 
 ## MVP Editor Workflow
 
@@ -173,6 +175,8 @@ First-run directories and cleanup policy are documented in
 6. Use Playtest mode selectors for Project Start, Current Map, or Selected Event.
 7. In desktop mode, Open in Runtime builds a temporary playtest project root and launches the native C++ runtime from that temp root. Source project files are not mutated by playtest launch.
 8. Inspect Runtime Log, Event Trace, and Runtime State in the Playtest screen. Browser mode shows honest unavailable states for native-only surfaces.
+   The Runtime Log tab displays the local diagnostics folder even before the
+   first native log exists.
 
 ## Data Model
 

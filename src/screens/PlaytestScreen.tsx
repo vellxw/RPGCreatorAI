@@ -638,6 +638,7 @@ function RuntimeLogContainer({
 }) {
   const [content, setContent] = useState('');
   const [logPath, setLogPath] = useState<string | null>(null);
+  const [diagnosticsDir, setDiagnosticsDir] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -647,6 +648,10 @@ function RuntimeLogContainer({
     if (!available) return;
     setLoading(true);
     try {
+      const diagnostics = await adapter.getDiagnostics();
+      if (diagnostics.success) {
+        setDiagnosticsDir(diagnostics.diagnosticsDir ?? null);
+      }
       const info = await adapter.getLatestLog();
       if (!info.success || !info.path) {
         setLogPath(null);
@@ -695,6 +700,7 @@ function RuntimeLogContainer({
     <RuntimeLogPanel
       available={available}
       unavailableReason={adapter.getUnavailableReason()}
+      diagnosticsDir={diagnosticsDir}
       logPath={logPath}
       content={content}
       error={error}

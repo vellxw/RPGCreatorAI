@@ -8,6 +8,7 @@ import type {
   PlaytestSessionResult,
   SaveResult,
   RuntimeStatus,
+  RuntimeDiagnosticsInfo,
   RuntimeLaunchResult,
   RuntimeLogActionResult,
   RuntimeLogInfo,
@@ -46,6 +47,7 @@ export interface RpgBridge {
     launch(projectRoot: string, executableSearchRoot?: string): Promise<RuntimeLaunchResult>;
     kill(): Promise<void>;
     status(): Promise<RuntimeStatus>;
+    getDiagnostics(): Promise<RuntimeDiagnosticsInfo>;
     getLatestLog(): Promise<RuntimeLogInfo>;
     readLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
     readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult>;

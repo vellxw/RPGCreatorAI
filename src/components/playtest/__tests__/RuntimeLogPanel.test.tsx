@@ -46,7 +46,8 @@ describe('RuntimeLogPanel', () => {
     const view = render(
       <RuntimeLogPanel
         available
-        logPath="C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs\\runtime.log"
+        diagnosticsDir={'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs'}
+        logPath={'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs\\runtime.log'}
         content="[INFO] Runtime started"
         truncated
         onRefresh={onRefresh}
@@ -56,6 +57,7 @@ describe('RuntimeLogPanel', () => {
     );
 
     expect(view.container.textContent).toContain('runtime.log');
+    expect(view.container.textContent).toContain('C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs');
     expect(view.container.textContent).toContain('[INFO] Runtime started');
     expect(view.container.textContent).toContain('Showing the latest 256 KiB');
 
@@ -67,6 +69,25 @@ describe('RuntimeLogPanel', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
     expect(onCopy).toHaveBeenCalledTimes(1);
     expect(onOpenFolder).toHaveBeenCalledTimes(1);
+    view.unmount();
+  });
+
+  it('shows a diagnostics folder before the first runtime log exists', () => {
+    const view = render(
+      <RuntimeLogPanel
+        available
+        diagnosticsDir={'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs'}
+        content=""
+        error="no runtime log has been created yet"
+        onRefresh={vi.fn()}
+        onCopy={vi.fn()}
+        onOpenFolder={vi.fn()}
+      />,
+    );
+
+    expect(view.container.textContent).toContain('Diagnostics folder');
+    expect(view.container.textContent).toContain('runtime-logs');
+    expect(view.container.textContent).toContain('no runtime log has been created yet');
     view.unmount();
   });
 });

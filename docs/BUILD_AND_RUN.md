@@ -47,6 +47,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1
 
 # Runtime smoke only.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
+
+# Runtime diagnostics entry point and no-log failure-path coverage.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1
 ```
 
 Equivalent `.bat` wrappers are available when direct PowerShell script
@@ -56,6 +59,7 @@ execution is blocked:
 scripts\dev\build.bat
 scripts\dev\test.bat
 scripts\dev\smoke-runtime.bat
+scripts\dev\verify-diagnostics.bat
 ```
 
 For manual CMake diagnosis on Windows, prefer the out-of-OneDrive preset:
@@ -142,6 +146,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-
    session under the app data directory and launches the native runtime with
    that temp root as `current_dir`.
 7. Use Runtime Log, Event Trace, and Runtime State tabs for local debugging.
+   Diagnostics folders and failed-launch troubleshooting are documented in
+   `docs/DIAGNOSTICS.md`.
 
 ## MVP limitations
 

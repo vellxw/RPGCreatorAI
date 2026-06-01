@@ -9,6 +9,7 @@ import type {
   PlaytestSessionResult,
   SaveResult,
   RuntimeStatus,
+  RuntimeDiagnosticsInfo,
   RuntimeLaunchResult,
   RuntimeLogActionResult,
   RuntimeLogInfo,
@@ -55,6 +56,7 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
         }) as Promise<RuntimeLaunchResult>,
       kill: () => invoke('runtime_kill') as Promise<void>,
       status: () => invoke('runtime_status') as Promise<RuntimeStatus>,
+      getDiagnostics: () => invoke('runtime_diagnostics') as Promise<RuntimeDiagnosticsInfo>,
       getLatestLog: () => invoke('runtime_latest_log') as Promise<RuntimeLogInfo>,
       readLogTail: (maxBytes: number) =>
         invoke('runtime_read_log_tail', { maxBytes }) as Promise<RuntimeLogTailResult>,

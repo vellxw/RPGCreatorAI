@@ -20,6 +20,7 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
       getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
       readLogTail: async () => ({ success: false, error: 'not stubbed' }),
       readLatestSnapshot: async () => ({ success: false, error: 'not stubbed' }),
+      getDiagnostics: async () => ({ success: false, error: 'not stubbed', logTailMaxBytes: 0, snapshotMaxBytes: 0 }),
       openLogFolder: async () => ({ success: false, error: 'not stubbed' }),
       ...overrides,
     },
@@ -131,5 +132,25 @@ describe('DesktopRuntimeAdapter (Phase 5)', () => {
       content: '{"frameNumber":1}',
     });
     expect(calls).toEqual([4096]);
+  });
+
+  it('routes diagnostics location access through the bridge', async () => {
+    window.rpgBridge = bridge({
+      getDiagnostics: async () => ({
+        success: true,
+        diagnosticsDir: 'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs',
+        latestLogPath: 'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs\\runtime.log',
+        logTailMaxBytes: 256 * 1024,
+        snapshotMaxBytes: 128 * 1024,
+      }),
+    });
+    const a = new DesktopRuntimeAdapter();
+
+    await expect(a.getDiagnostics()).resolves.toMatchObject({
+      success: true,
+      diagnosticsDir: expect.stringContaining('runtime-logs'),
+      logTailMaxBytes: 256 * 1024,
+      snapshotMaxBytes: 128 * 1024,
+    });
   });
 });

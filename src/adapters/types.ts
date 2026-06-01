@@ -85,6 +85,16 @@ export interface RuntimeSnapshotResult {
   error?: string;
 }
 
+export interface RuntimeDiagnosticsInfo {
+  success: boolean;
+  diagnosticsDir?: string;
+  latestLogPath?: string;
+  latestSnapshotPath?: string;
+  logTailMaxBytes: number;
+  snapshotMaxBytes: number;
+  error?: string;
+}
+
 export interface RuntimeLogActionResult {
   success: boolean;
   error?: string;
@@ -96,6 +106,7 @@ export interface RuntimeLaunchAdapter {
   launch(projectPath: string, options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
+  getDiagnostics(): Promise<RuntimeDiagnosticsInfo>;
   getLatestLog(): Promise<RuntimeLogInfo>;
   readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
   readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult>;

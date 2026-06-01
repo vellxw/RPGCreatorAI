@@ -202,4 +202,34 @@ describe('MVP verify script', () => {
     expect(smokeWrapper).toContain('smoke-first-run-app-data.ps1');
     expect(smokeWrapper).toContain('exit /b %ERRORLEVEL%');
   });
+
+  it('documents and validates runtime diagnostics discovery', () => {
+    const diagnosticsDoc = readFileSync(join(process.cwd(), 'docs/DIAGNOSTICS.md'), 'utf8');
+    const runtimeBridgeDoc = readFileSync(join(process.cwd(), 'docs/RUNTIME_LAUNCH_BRIDGE.md'), 'utf8');
+    const verifyDiagnostics = readFileSync(join(process.cwd(), 'scripts/dev/verify-diagnostics.ps1'), 'utf8');
+    const verifyDiagnosticsWrapper = readFileSync(join(process.cwd(), 'scripts/dev/verify-diagnostics.bat'), 'utf8');
+
+    for (const expected of [
+      '%APPDATA%\\RPGCreatorAI\\runtime-logs',
+      'runtime_diagnostics',
+      'runtime-*.log',
+      'runtime-state-snapshot.json',
+      'latest 256 KiB',
+      'latest 128 KiB',
+      'failed before the native runtime process started',
+      'Redact any accidental secrets',
+      'scripts/dev/verify-diagnostics.ps1',
+    ]) {
+      expect(diagnosticsDoc).toContain(expected);
+    }
+
+    expect(runtimeBridgeDoc).toContain('getDiagnostics(): Promise<RuntimeDiagnosticsInfo>');
+    expect(runtimeBridgeDoc).toContain('runtime_diagnostics');
+    expect(verifyDiagnostics).toContain('runtime_diagnostics_reports_folder_without_existing_log');
+    expect(verifyDiagnostics).toContain('DesktopRuntimeAdapter.test.ts');
+    expect(verifyDiagnostics).toContain('RuntimeLogPanel.test.tsx');
+    expect(verifyDiagnostics).toContain('npm run typecheck');
+    expect(verifyDiagnosticsWrapper).toContain('verify-diagnostics.ps1');
+    expect(verifyDiagnosticsWrapper).toContain('exit /b %ERRORLEVEL%');
+  });
 });

@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-49 / CP-014 — crash log and diagnostics location
+
+- `2026-06-01 20:42:16 -03:00` —
+  `npm test -- --run src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLogPanel.test.tsx`
+  — RED as expected; new diagnostics tests failed because
+  `DesktopRuntimeAdapter.getDiagnostics()` and Runtime Log diagnostics-folder
+  rendering did not exist yet.
+- `2026-06-01 20:42:16 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::runtime_diagnostics_reports_folder_without_existing_log -- --exact`
+  — RED as expected; `runtime_diagnostics` was not implemented yet.
+- `2026-06-01 20:44:47 -03:00` —
+  `npm test -- --run src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLogPanel.test.tsx`
+  — PASS; 2 files and 11 tests passed after adding the bridge contract,
+  adapter method, and visible diagnostics folder.
+- `2026-06-01 20:44:11 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::runtime_diagnostics_reports_folder_without_existing_log -- --exact`
+  — PASS; safe no-log diagnostics path reports the allowlisted runtime logs
+  directory plus 256 KiB log and 128 KiB snapshot caps.
+- `2026-06-01 20:48:33 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1`
+  — PASS after fixing older bridge test mocks; script verified the empty-log
+  safe failure path, diagnostics adapter/UI tests, and `npm run typecheck`.
+- `2026-06-01 20:49:07 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after documenting the diagnostics entry point, failed-launch
+  workflow, caps, no-secret policy, and restricted-policy wrapper.
+- `2026-06-01 20:49:31 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 30 Rust desktop tests passed.
+- `2026-06-01 20:49:31 -03:00` —
+  `npm test -- --run src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS; 3 files and 18 tests passed.
+- `2026-06-01 20:49:31 -03:00` — `npm run build` — PASS; `tsc --noEmit`
+  and Vite build completed with the existing chunk-size warning only.
+- `2026-06-01 20:49:31 -03:00` —
+  `cmd /c scripts\dev\verify-diagnostics.bat`
+  — PASS; restricted-policy wrapper invoked the same diagnostics gate.
+- `2026-06-01 20:50:15 -03:00` — `npm run desktop:package:windows` — PASS.
+  The helper rebuilt/tested the native runtime, compiled the Tauri shell with
+  the new `runtime_diagnostics` command, copied `rpg_creator_runtime.exe`
+  beside the packaged shell, smoke-launched it, and reported
+  `PACKAGED SMOKE PASSED`. Non-fatal warnings: existing Vite chunk-size
+  warning, missing PkgConfig, CMake FetchContent CMP0135 developer warnings,
+  and dependency `cmake_minimum_required` deprecation warnings.
+- `2026-06-01 20:51:08 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Fix applied: added a Tauri `runtime_diagnostics` command, TypeScript bridge
+  and adapter contract, Playtest Runtime Log diagnostics folder display,
+  diagnostics docs, focused verification script with `.bat` wrapper, and
+  tests for safe no-log diagnostics discovery.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-25 / PT-004 — runtime state snapshot inspector
 
 - `2026-06-01 15:34:12 -03:00` —

@@ -16,6 +16,9 @@ Desktop shell user state uses one shared app-data root:
 The shared root is implemented in `src-tauri/src/app_paths.rs` and used by the
 config, runtime-log, and playtest-session code paths.
 
+Runtime diagnostics, log caps, and failed-launch support steps are documented
+in `docs/DIAGNOSTICS.md`.
+
 Generated development/build output uses `%LOCALAPPDATA%\RPGCreatorAI` by
 default so compiler and package caches stay out of the OneDrive-synced repo.
 

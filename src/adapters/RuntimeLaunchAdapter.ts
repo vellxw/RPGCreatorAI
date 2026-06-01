@@ -2,6 +2,7 @@
 // Tauri shell IPC. Browser mode keeps reporting unavailable honestly.
 
 import type {
+  RuntimeDiagnosticsInfo,
   RuntimeLaunchAdapter,
   RuntimeLaunchOptions,
   RuntimeLaunchResult,
@@ -35,6 +36,15 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
 
   async kill(): Promise<void> {
     // no-op
+  }
+
+  async getDiagnostics(): Promise<RuntimeDiagnosticsInfo> {
+    return {
+      success: false,
+      error: 'Native runtime diagnostics are unavailable in browser mode.',
+      logTailMaxBytes: 256 * 1024,
+      snapshotMaxBytes: 128 * 1024,
+    };
   }
 
   async getLatestLog(): Promise<RuntimeLogInfo> {
@@ -123,6 +133,27 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
       this.cachedStatus = 'ready';
     } catch {
       // swallow; status poll will reconcile
+    }
+  }
+
+  async getDiagnostics(): Promise<RuntimeDiagnosticsInfo> {
+    if (!this.canLaunch()) {
+      return {
+        success: false,
+        error: 'Desktop runtime bridge not detected.',
+        logTailMaxBytes: 256 * 1024,
+        snapshotMaxBytes: 128 * 1024,
+      };
+    }
+    try {
+      return await window.rpgBridge!.runtime.getDiagnostics();
+    } catch (e) {
+      return {
+        success: false,
+        error: (e as Error).message,
+        logTailMaxBytes: 256 * 1024,
+        snapshotMaxBytes: 128 * 1024,
+      };
     }
   }
 
