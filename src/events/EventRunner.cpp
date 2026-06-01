@@ -14,6 +14,7 @@ EventRunner::EventRunner(GameState& state, DialogueSystem& dialogueSystem)
 void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>>& commands,
                                  const std::string& ownerEventId) {
     commandStack.clear();
+    pendingChoiceCommand.reset();
     currentOwnerMapId = gameState.getCurrentMapId();
     currentOwnerEventId = ownerEventId;
     // Push commands in reverse order so we process them front-to-back via pop_back.
@@ -31,6 +32,18 @@ void EventRunner::pushFront(const std::vector<std::shared_ptr<EventCommand>>& br
 
 void EventRunner::update(float dt) {
     if (!executing) return;
+
+    if (pendingChoiceCommand) {
+        auto result = dialogue.consumeChoiceResult();
+        if (!result) return;
+
+        if (!result->cancelled &&
+            result->index >= 0 &&
+            result->index < static_cast<int>(pendingChoiceCommand->choices.size())) {
+            pushFront(pendingChoiceCommand->choices[static_cast<size_t>(result->index)].commands);
+        }
+        pendingChoiceCommand.reset();
+    }
 
     if (dialogue.isActive()) return;
 
@@ -91,13 +104,17 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         std::vector<std::string> labels;
         labels.reserve(cmd->choices.size());
         for (const auto& ch : cmd->choices) labels.push_back(ch.label);
-        int choice = -1;
-        if (choicePicker) choice = choicePicker(cmd->prompt, labels);
-        if (choice < 0 || choice >= static_cast<int>(cmd->choices.size())) {
-            // Default: first choice (deterministic without UI).
-            choice = cmd->choices.empty() ? -1 : 0;
+        if (choicePicker) {
+            int choice = choicePicker(cmd->prompt, labels);
+            if (choice < 0 || choice >= static_cast<int>(cmd->choices.size())) {
+                choice = cmd->choices.empty() ? -1 : 0;
+            }
+            if (choice >= 0) pushFront(cmd->choices[static_cast<size_t>(choice)].commands);
+            return;
         }
-        if (choice >= 0) pushFront(cmd->choices[static_cast<size_t>(choice)].commands);
+        if (cmd->choices.empty()) return;
+        pendingChoiceCommand = cmd;
+        dialogue.showChoices(cmd->prompt, labels);
         return;
     }
     if (type == "setFlag") {

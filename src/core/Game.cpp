@@ -114,6 +114,19 @@ void Game::update(const InputManager& input, float dt) {
     updateAnimationStates(dt);
     updateCamera();
 
+    if (dialogue.isChoiceActive()) {
+        if (input.isJustPressed(KeyButton::Up)) {
+            dialogue.moveChoiceSelection(-1);
+        } else if (input.isJustPressed(KeyButton::Down)) {
+            dialogue.moveChoiceSelection(1);
+        } else if (input.isJustPressed(KeyButton::Confirm)) {
+            dialogue.confirmChoice();
+        } else if (input.isJustPressed(KeyButton::Cancel)) {
+            dialogue.cancelChoice();
+        }
+        return;
+    }
+
     // Save / load shortcuts always available (even during dialogue).
     if (input.isJustPressed(KeyButton::Save)) {
         saveGame();
@@ -817,7 +830,11 @@ void Game::stepInteract() {
 }
 
 void Game::stepDismissDialogue() {
-    if (dialogue.isActive()) dialogue.close();
+    if (dialogue.isChoiceActive()) {
+        dialogue.confirmChoice();
+    } else if (dialogue.isActive()) {
+        dialogue.close();
+    }
 }
 
 void Game::stepSave() { saveGame(); }

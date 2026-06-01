@@ -77,9 +77,8 @@ public:
     void setQuestObjectiveResolver(QuestObjectiveResolver r) { questObjectiveResolver = std::move(r); }
     void setBattleRunner(BattleRunner r) { battleRunner = std::move(r); }
 
-    // Pre-configured choice picker for tests. When unset, showChoices logs
-    // and picks the first choice (or no-op for an empty list) so the runtime
-    // never deadlocks before a real UI lands.
+    // Pre-configured choice picker for tests. When unset, showChoices opens
+    // the runtime choice UI and waits for a DialogueSystem result.
     void setChoicePicker(std::function<int(const std::string&, const std::vector<std::string>&)> p) {
         choicePicker = std::move(p);
     }
@@ -113,6 +112,7 @@ private:
     BattleSummaryRequest battleSummaryRequest;
     AnimationRequest animationRequest;
     MovementRouteRequest movementRouteRequest;
+    std::shared_ptr<struct EventCommand> pendingChoiceCommand;
     std::string currentOwnerMapId;
     std::string currentOwnerEventId;
 

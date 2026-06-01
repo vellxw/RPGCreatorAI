@@ -100,7 +100,7 @@
 
 - [x] FRA-15 / RT-001: add a native runtime project validator seam that fails
   malformed projects before startup with actionable errors.
-- [ ] FRA-16 / RT-002: implement visible, selectable runtime choices and branch
+- [x] FRA-16 / RT-002: implement visible, selectable runtime choices and branch
   continuation instead of default-first-choice behavior.
 - [ ] FRA-17 / RT-003: implement event-target movement routes with runtime
   event positions separate from authored map JSON.

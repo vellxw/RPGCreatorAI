@@ -151,6 +151,33 @@ void Renderer2D::renderDialogue(const DialogueSystem& dialogue) {
         textY += BitmapFont::GlyphHeight * scale + 8;
     }
 
+    if (dialogue.isChoiceActive()) {
+        const int lineH = BitmapFont::GlyphHeight * scale + 6;
+        BitmapFont::drawText(sdlRenderer, textX, textY, dialogue.getText(), scale,
+                             kColorDlgText.r, kColorDlgText.g, kColorDlgText.b, kColorDlgText.a);
+        int choiceY = textY + lineH + 8;
+        const auto& labels = dialogue.getChoiceLabels();
+        const int selected = dialogue.getSelectedChoiceIndex();
+        for (int i = 0; i < static_cast<int>(labels.size()); ++i) {
+            if (choiceY + lineH > boxY + boxH - 24) break;
+            const bool isSelected = i == selected;
+            const std::string line = std::string(isSelected ? "> " : "  ") + labels[static_cast<size_t>(i)];
+            BitmapFont::drawText(sdlRenderer, textX, choiceY, line, scale,
+                                 isSelected ? 240 : kColorDlgText.r,
+                                 isSelected ? 220 : kColorDlgText.g,
+                                 isSelected ? 60 : kColorDlgText.b,
+                                 kColorDlgText.a);
+            choiceY += lineH;
+        }
+
+        std::string hint = "[Up/Down] [Enter] [Esc]";
+        int hintX = boxX + boxW - BitmapFont::measureWidth(hint, 1) - 12;
+        int hintY = boxY + boxH - BitmapFont::GlyphHeight - 8;
+        BitmapFont::drawText(sdlRenderer, hintX, hintY, hint, 1,
+                             kColorDlgText.r, kColorDlgText.g, kColorDlgText.b, kColorDlgText.a);
+        return;
+    }
+
     // Wrap the body text to fit the dialogue box width.
     const int charW = (BitmapFont::GlyphWidth + 1) * scale;
     int maxChars = std::max(8, (boxW - 28) / charW);

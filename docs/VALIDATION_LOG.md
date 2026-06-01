@@ -1600,3 +1600,31 @@ Error: Port 1420 is already in use
 - `2026-06-01 13:30:00 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-16 / RT-002 — interactive runtime choices UI
+
+- `2026-06-01 13:35:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new `DialogueSystem` and `EventRunner` tests failed because choice
+  UI APIs did not exist and `showChoices` still defaulted to first choice.
+- `2026-06-01 13:36:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS after adding choice state, runner wait/branch consumption, input
+  handling, rendering, and smoke-harness choice confirmation.
+- `2026-06-01 13:36:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive for 3 seconds, loaded project/databases/map,
+  and emitted no `[ERROR]` lines.
+- `2026-06-01 13:38:00 -03:00` — `cmake --preset default` — PASS with
+  existing FetchContent/dependency deprecation warnings only.
+- `2026-06-01 13:38:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS.
+- `2026-06-01 13:38:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 13:38:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime smoke reported `SMOKE PASSED`.
+- `2026-06-01 13:38:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+

@@ -19,8 +19,8 @@ Legend:
 | Tilesets / sprites | partial | yes | partial | yes | partial | partial | Data-driven tilesets exist; dedicated tileset database editor remains FRA-8. |
 | Visual layers / foreground | partial | yes | yes | partial | yes | partial | Editor layers exist; runtime foreground occlusion remains FRA-19. |
 | Events, pages, and self switches | val | yes | yes | yes | yes | yes | Active-page selection, self switches, and scheduled events are implemented. |
-| Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; interactive choices, event-target routes, audio v1, and plugin commands remain MVP work. |
-| Runtime choices UI | partial | yes | yes | partial | yes | partial | Choice command data exists; visible runtime selection remains FRA-16. |
+| Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; event-target routes, audio v1, and plugin commands remain MVP work. |
+| Runtime choices UI | val | yes | yes | yes | yes | yes | `showChoices` now renders selectable runtime options and waits for confirm/cancel results. |
 | Movement routes | partial | yes | yes | partial | yes | yes | Player-target routes are implemented; event-target routes remain FRA-17. |
 | Common events | partial | yes | partial | yes | yes | yes | Runtime scheduling exists; common-event command-stack editing remains FRA-12. |
 | Database V2 shared editor framework | n/s | n/a | no | n/a | no | no | FRA-6 extracts reusable database editor primitives. |

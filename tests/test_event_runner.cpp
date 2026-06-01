@@ -299,7 +299,7 @@ TEST_CASE("EventRunner ifVariable comparisons") {
     CHECK(state.getFlag("matched") == true);
 }
 
-TEST_CASE("EventRunner showChoices defaults to first choice without picker") {
+TEST_CASE("EventRunner showChoices without picker waits for visible selection") {
     GameState state;
     DialogueSystem dialogue;
     EventRunner runner(state, dialogue);
@@ -323,10 +323,53 @@ TEST_CASE("EventRunner showChoices defaults to first choice without picker") {
     choices->choices = { yes, no };
 
     runner.runCommandList({choices});
-    runUntilIdle(runner);
+    runner.update(0.016f);
 
-    CHECK(state.getFlag("answered_yes") == true);
+    CHECK(runner.isRunning() == true);
+    CHECK(dialogue.isChoiceActive() == true);
+    CHECK(dialogue.getText() == "Help him?");
     CHECK(state.getFlag("answered_no") == false);
+    CHECK(state.getFlag("answered_yes") == false);
+
+    dialogue.moveChoiceSelection(1);
+    dialogue.confirmChoice();
+    runner.update(0.016f);
+
+    CHECK(state.getFlag("answered_yes") == false);
+    CHECK(state.getFlag("answered_no") == true);
+    CHECK(runner.isRunning() == false);
+}
+
+TEST_CASE("EventRunner cancelled showChoices skips choice branches and continues") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    EventCommand::Choice yes;
+    yes.label = "Yes";
+    auto y = makeCmd("setFlag");
+    y->flag = "answered_yes";
+    y->boolValue = true;
+    yes.commands = { y };
+
+    auto choices = makeCmd("showChoices");
+    choices->prompt = "Help him?";
+    choices->choices = { yes };
+
+    auto after = makeCmd("setFlag");
+    after->flag = "after_choices";
+    after->boolValue = true;
+
+    runner.runCommandList({choices, after});
+    runner.update(0.016f);
+
+    REQUIRE(dialogue.isChoiceActive());
+    dialogue.cancelChoice();
+    runner.update(0.016f);
+
+    CHECK(state.getFlag("answered_yes") == false);
+    CHECK(state.getFlag("after_choices") == true);
+    CHECK(runner.isRunning() == false);
 }
 
 TEST_CASE("EventRunner showChoices respects picker") {

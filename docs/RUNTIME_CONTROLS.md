@@ -8,6 +8,9 @@
 | Move right | `D` / `→` |
 | Interact / Advance dialogue | `E` / `Enter` / `Space` |
 | Close dialogue | `Esc` |
+| Navigate choice/menu rows | `W` / `S` / `↑` / `↓` |
+| Confirm choice/menu row | `E` / `Enter` / `Space` |
+| Cancel choice/menu/dialogue | `Esc` / `Backspace` |
 | Save (slot_1) | `F5` |
 | Load (slot_1) | `F9` |
 | Quit | Close window |
@@ -41,7 +44,9 @@
 - A `showText` command opens a dialogue box and pauses the event queue.
 - The player must press an advance key (Enter/Space/E) or close key
   (Esc) to dismiss.
-- Movement input is ignored while a dialogue is active.
+- A `showChoices` command opens a selectable prompt and pauses the event
+  queue until the player confirms or cancels.
+- Movement input is ignored while a dialogue or choice prompt is active.
 
 ## Save / Load
 

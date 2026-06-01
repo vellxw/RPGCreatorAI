@@ -56,6 +56,7 @@ syncs against the new map on the next frame.
 | Command | Fields | Behavior |
 |---------|--------|----------|
 | `showText` | `text`, optional `speaker` | Opens the dialogue UI. The runner pauses until the player dismisses the dialogue (Enter / Space / E / Esc). |
+| `showChoices` | `prompt`, `choices[]` with `label` and `commands` | Opens a selectable choice UI. Up/Down changes the selected row, Enter/Space/E confirms and runs that choice branch, and Esc cancels without running a choice branch. Injected test pickers can still select a deterministic branch without UI. |
 | `setFlag` | `flag`, `value` (bool) | Sets a boolean flag in `GameState`. |
 | `ifFlag` | `flag`, `equals` (bool), `then` (commands), `else` (commands) | Compares the flag with `equals` and pushes the matching branch onto the queue. |
 | `controlSelfSwitch` | `switchId` (`A-D`), `value` (bool) | Sets a self switch scoped to the owning map/event captured when the command list starts. |
@@ -77,6 +78,8 @@ encounters a blocking effect:
 
 - a `showText` opens the dialogue — `update()` returns until
   `DialogueSystem::isActive()` becomes false again,
+- a `showChoices` opens the choice UI — `update()` returns until
+  `DialogueSystem` produces a confirmed or cancelled choice result,
 - a `wait` arms an internal timer that decrements per frame,
 - a `transferMap` sets the transfer request — `Game` consumes it,
   reloads the map, and resumes the queue,
