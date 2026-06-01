@@ -22,6 +22,7 @@ fixtures for normal validation.
 Primary Phase 11 sources:
 
 - `docs/PHASE_11_PRODUCT_CHARTER.md`
+- `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
@@ -46,7 +47,7 @@ Primary Phase 11 sources:
 - Phase 11 Linear milestone 13 — QA automation and regression.
 - Phase 11 Linear milestone 14 — security, privacy, and cost controls.
 - Phase 11 Linear milestone 15 — docs, examples, Linear closeout, and final
-  ship gate. CP-005 will mirror the exact repo-tracked issue/milestone map.
+  ship gate.
 
 ## Closed subgoals
 

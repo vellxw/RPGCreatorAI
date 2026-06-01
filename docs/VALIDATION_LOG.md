@@ -2472,3 +2472,25 @@ Error: Port 1420 is already in use
   PASS; no connected defaults, required model defaults, non-empty API-key
   defaults, or key-like secret tokens found in the changed provider files.
 
+### Phase 11 FRA-40 / CP-005 — complete platform backlog source document
+
+- `2026-06-01 19:12:09 -03:00` — Linear issue inventory — PASS; fetched
+  milestones plus seven paginated Linear issue pages covering CP-001 through
+  CP-128 / FRA-36 through FRA-163 with no remaining cursor on the final page.
+- `2026-06-01 19:15:10 -03:00` — local CP/FRA sequence validator — RED; the
+  first PowerShell validation command had an interpolation syntax error in its
+  failure message. Fix applied: rewrote the message with `-f` formatting.
+- `2026-06-01 19:15:10 -03:00` — `git diff --check` — RED; the new backlog
+  source file had a blank line at EOF. Fix applied: removed the trailing blank
+  line.
+- `2026-06-01 19:15:45 -03:00` — local CP/FRA sequence validator — PASS;
+  `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
+  contains 128 sequential issue rows, CP-001 through CP-128 and FRA-36 through
+  FRA-163.
+- `2026-06-01 19:15:45 -03:00` — local milestone count validator — PASS; the
+  backlog source contains 16 milestone rows.
+- `2026-06-01 19:15:45 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Build/test note: CP-005 is a docs-only backlog source issue, so no runtime,
+  frontend, desktop, provider, or packaged build command was required.
+

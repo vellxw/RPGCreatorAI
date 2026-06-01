@@ -6,7 +6,7 @@
 - [x] CP-002 / FRA-37: audit the full repo and product surface.
 - [x] CP-003 / FRA-38: create the complete-platform risk register.
 - [x] CP-004 / FRA-39: record provider and legal review baseline.
-- [ ] CP-005 / FRA-40: create a repo-tracked backlog source document.
+- [x] CP-005 / FRA-40: create a repo-tracked backlog source document.
 - [ ] CP-006 / FRA-41: define execution protocol and branch rules.
 - [ ] CP-007 / FRA-42: run and record the Phase 11 validation baseline.
 - [ ] CP-008 / FRA-43: run the planning integration gate.
@@ -33,8 +33,9 @@
 
 - Work issues in Linear order CP-001 through CP-128 unless a later issue is
   explicitly skipped because it is already Done with matching repo evidence.
-- CP-005 owns the complete repo-tracked backlog mirror with exact issue IDs,
-  labels, validation, dependencies, and milestone mapping.
+- CP-005 created the complete repo-tracked backlog mirror with exact issue IDs,
+  labels, validation rules, dependencies, and milestone mapping in
+  `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`.
 - Update this task file at milestone boundaries and integration gates.
 - Keep all AI/provider work optional and editor/tooling-only.
 - Keep native runtime behavior deterministic and provider-independent.
