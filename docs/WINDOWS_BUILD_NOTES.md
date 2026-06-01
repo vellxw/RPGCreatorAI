@@ -82,4 +82,4 @@ npm test
 
 ## Runtime smoke
 
-`scripts\dev\smoke-runtime.ps1` accepts `-BuildDir` and now defaults to the same `%LOCALAPPDATA%\RPGCreatorAI\build` location. It launches the runtime from the repo root so `data/` paths resolve correctly, captures stdout/stderr, and fails on any `[ERROR]` lines.
+`scripts\dev\smoke-runtime.ps1` accepts `-BuildDir` and now defaults to the same `%LOCALAPPDATA%\RPGCreatorAI\build` location. It launches the runtime from the repo root so `data/` paths resolve correctly, captures stdout/stderr, runs the deterministic `--smoke-shots` feature path into `docs\screenshots\phase10-mvp`, and fails on any `[ERROR]` lines or missing MVP smoke markers.

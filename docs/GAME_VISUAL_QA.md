@@ -61,3 +61,22 @@ Scored from the committed evidence set under
 
 Phase 8 satisfies the required visual QA threshold: average is at least
 `8.0` and no category is below `7.0`.
+
+## Phase 10 MVP runtime smoke evidence
+
+FRA-29 extends `scripts/dev/smoke-runtime.ps1` so the native smoke writes
+bounded runtime screenshots under `docs/screenshots/phase10-mvp/` and asserts
+real runtime log markers before passing.
+
+Required Phase 10 MVP evidence:
+
+1. `phase10-01-route-coach-dialogue.bmp` - player interacts with the route
+   coach and the command path is visibly in dialogue.
+2. `phase10-02-event-route-after.bmp` - `setMovementRoute` has moved the
+   `patrol_crate` object one tile to the right.
+3. `phase10-03-foreground-occlusion.bmp` - player stands under the foreground
+   tree layer and is occluded by authored foreground tiles.
+
+The same smoke run asserts the corresponding logs for `showChoices`
+selection, event-target movement, `Audio requested: chest_open`,
+`pluginCommand debug.log`, and `Smoke shots complete`.

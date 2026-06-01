@@ -15,12 +15,18 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-29 through FRA-35): runtime smoke
-  expansion, canonical verification script, feature integration, docs closeout,
-  final report, commit, and push.
+- Integration QA — MVP green gate (FRA-30 through FRA-35): canonical
+  verification script, feature integration, docs closeout, final report,
+  commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 QA-003 (FRA-29) — runtime smoke now launches the native runtime,
+  runs `--smoke-shots` into `docs/screenshots/phase10-mvp/`, and fails unless
+  logs prove choice selection, event-target movement, local `chest_open` audio
+  request, `pluginCommand debug.log`, and clean smoke completion. The smoke
+  path also captures route-coach dialogue, the moved crate, and foreground
+  player occlusion.
 - Phase 10 QA-002 (FRA-28) — editor/runtime roundtrip now has one command
   that runs frontend save/session tests, Tauri content verification, Rust
   desktop tests, native CMake/CTest, runtime launch smoke, and screenshot

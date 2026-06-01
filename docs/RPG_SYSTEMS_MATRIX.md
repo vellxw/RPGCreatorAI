@@ -40,7 +40,7 @@ Legend:
 | Runtime logs, trace, and state snapshots | val | n/a | yes | yes | yes | yes | Bounded native runtime logs, deterministic `[TRACE]` event rows, and local runtime state snapshots are implemented, tested, and exposed in Playtest without runtime-editor IPC. |
 | Placeholder AI/debug UI gating | val | n/a | yes | n/a | yes | yes | Bottom-panel generation prompts are removed, primary navigation no longer exposes `AI Tools`, the future workspace is read-only, and automated UI gating coverage locks the MVP surface to validation, logs, traces, and state. |
 | Bundled sample MVP coverage | val | yes | n/a | yes | yes | yes | Sample covers choices, self-switch pages, a switch-gated common event, event-target movement, `playSound`, `pluginCommand debug.log`, foreground occlusion, and validation/loader tests. |
-| Green-gate scripts and smoke | partial | n/a | n/a | partial | partial | partial | Editor-runtime roundtrip now covers save/session/content/native/smoke/hash gates; expanded runtime smoke and full MVP verify remain FRA-29, FRA-30, and FRA-35. |
+| Green-gate scripts and smoke | partial | n/a | n/a | partial | partial | partial | Editor-runtime roundtrip covers save/session/content/native/smoke/hash gates, and runtime smoke now asserts choices, event-target movement, local audio request, foreground occlusion screenshots, and plugin-command logs. Full MVP verify remains FRA-30 and FRA-35. |
 
 Rows marked `partial` are intentionally not promoted based on planned work.
 They should only move after the corresponding Linear issue is implemented,

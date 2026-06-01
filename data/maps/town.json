@@ -4925,7 +4925,7 @@
         {
           "type": "showText",
           "speaker": "Route Coach",
-          "text": "Watch the crate move one step and return."
+          "text": "Watch the crate move one step and settle."
         },
         {
           "type": "setMovementRoute",
@@ -4943,7 +4943,7 @@
               "ms": 125
             },
             {
-              "type": "moveLeft"
+              "type": "turnLeft"
             }
           ]
         },

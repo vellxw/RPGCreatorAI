@@ -2205,3 +2205,54 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:18:28 -03:00` — `npm run typecheck` — PASS after the
   same cleanup.
 
+### Phase 10 FRA-29 / QA-003 — expanded runtime smoke coverage
+
+- `2026-06-01 16:23:26 -03:00` —
+  `npm test -- --run src/e2e/__tests__/runtimeSmokeScript.test.ts`
+  — RED as expected; `scripts/dev/smoke-runtime.ps1` still only launched the
+  runtime and lacked the Phase 10 MVP feature-smoke section and marker
+  assertions.
+- `2026-06-01 16:25:36 -03:00` —
+  `npm test -- --run src/e2e/__tests__/runtimeSmokeScript.test.ts`
+  — PASS after wiring the script to assert Phase 10 MVP smoke markers and
+  screenshot names; 1 test passed.
+- `2026-06-01 16:26:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; rebuilt `Application.cpp` smoke-shot traversal and `RPGTests`
+  passed.
+- `2026-06-01 16:26:38 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; native launch smoke stayed alive, `--smoke-shots` wrote
+  `docs/screenshots/phase10-mvp/`, logs asserted `showChoices`
+  `selected=0`, `setMovementRoute target=event`, `Audio requested:
+  chest_open`, `pluginCommand debug.log`, and `Smoke shots complete`.
+  Existing optional missing-audio warnings remained non-fatal.
+- `2026-06-01 16:29:01 -03:00` —
+  `npm test -- --run src/e2e/__tests__/runtimeSmokeScript.test.ts`
+  — PASS after keeping only the three FRA-29 evidence screenshots in the
+  default committed screenshot directory; 1 test passed.
+- `2026-06-01 16:29:35 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; the script still asserted the full runtime marker set and left
+  `docs/screenshots/phase10-mvp/` with only the three committed FRA-29 BMP
+  evidence files.
+- `2026-06-01 16:29:54 -03:00` —
+  `npm test -- --run src/e2e/__tests__/runtimeSmokeScript.test.ts src/validation/__tests__/bundledSample.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 3 files and 41 Vitest tests passed.
+- `2026-06-01 16:30:10 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 16:30:25 -03:00` — `npm run build` — PASS; Vite build
+  completed with the existing chunk-size warning only.
+- `2026-06-01 16:30:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; local-appdata configure/build/CTest passed, then the default
+  runtime smoke asserted the Phase 10 MVP markers and screenshot evidence.
+  Existing CMake dependency/deprecation warnings and optional missing-audio
+  warnings remained non-fatal.
+- `2026-06-01 16:31:10 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`
+  — PASS; no-argument smoke used `%LOCALAPPDATA%\RPGCreatorAI\build`, asserted
+  choices, movement route, audio request, plugin log, clean completion, and
+  refreshed the three Phase 10 MVP screenshot BMPs.
+- `2026-06-01 16:31:18 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

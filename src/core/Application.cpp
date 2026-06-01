@@ -218,9 +218,23 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     // so the smoke harness proves the transfer route honestly.
     drainDialogueAndEvents();
 
-    // 03 — Walk around the NPC to the door at (20,8) → house at (20,19)
-    game->stepMove(-1, 0, Direction::Left);   game->pumpEvents(dt); // (20,10) -> (19,10)
-    moveMany(0, -1, Direction::Up, 2);        // (19,10) -> (19,8)
+    // Phase 10 MVP — exercise an event-target movement route and
+    // pluginCommand debug.log before leaving town.
+    moveMany(-1, 0, Direction::Left, 5);      // (20,10) -> (15,10)
+    moveMany(0, 1, Direction::Down, 4);       // (15,10) -> (15,14)
+    game->stepMove(-1, 0, Direction::Left);   game->pumpEvents(dt); // face route coach at (14,14)
+    game->stepInteract();                     game->pumpEvents(dt);
+    if (!snapshot(outputDir, "phase10-01-route-coach-dialogue")) return false;
+    drainDialogueAndEvents();
+    if (!snapshot(outputDir, "phase10-02-event-route-after")) return false;
+
+    // Phase 10 MVP — player stands under the authored foreground layer before
+    // touching the transfer door, proving foreground occlusion in the smoke set.
+    moveMany(1, 0, Direction::Right, 4);      // (15,14) -> (19,14)
+    moveMany(0, -1, Direction::Up, 6);        // (19,14) -> (19,8)
+    if (!snapshot(outputDir, "phase10-03-foreground-occlusion")) return false;
+
+    // 03 — Step onto the door at (20,8) → house at (20,19)
     game->stepMove(1, 0, Direction::Right);   game->pumpEvents(dt); // (20,8), touches transfer
     game->pumpEvents(dt);                     // event runner produces request
     game->pumpEvents(dt);                     // game applies transfer

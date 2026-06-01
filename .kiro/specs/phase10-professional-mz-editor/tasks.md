@@ -133,7 +133,7 @@
   validate the sample references.
 - [x] FRA-28 / QA-002: add editor-runtime roundtrip coverage for MVP playtest
   modes.
-- [ ] FRA-29 / QA-003: add runtime smoke coverage for choices, movement,
+- [x] FRA-29 / QA-003: add runtime smoke coverage for choices, movement,
   audio, foreground occlusion, and plugin-command logs.
 - [ ] FRA-30 / QA-004: create the full verification script for the MVP green
   gate with targeted skip flags.
