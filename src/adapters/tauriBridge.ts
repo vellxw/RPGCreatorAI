@@ -3,7 +3,14 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import type { RpgBridge } from '../types/rpgBridge';
-import type { FullProjectState, SaveResult, RuntimeStatus, RuntimeLaunchResult } from './types';
+import type {
+  FullProjectState,
+  PlaytestSessionRequest,
+  PlaytestSessionResult,
+  SaveResult,
+  RuntimeStatus,
+  RuntimeLaunchResult,
+} from './types';
 
 function isTauri(): boolean {
   // Tauri 2 sets a marker on window.__TAURI_INTERNALS__.
@@ -25,10 +32,23 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
       listBackups: (root: string, file: string) =>
         invoke('fs_list_backups', { root, file }) as Promise<string[]>,
       closeProject: () => invoke('fs_close_project') as Promise<void>,
+      createPlaytestSession: (
+        sourceRoot: string,
+        state: FullProjectState,
+        request: PlaytestSessionRequest,
+      ) =>
+        invoke('fs_create_playtest_session', {
+          sourceRoot,
+          projectState: state,
+          request,
+        }) as Promise<PlaytestSessionResult>,
     },
     runtime: {
-      launch: (projectRoot: string) =>
-        invoke('runtime_launch', { projectRoot }) as Promise<RuntimeLaunchResult>,
+      launch: (projectRoot: string, executableSearchRoot?: string) =>
+        invoke('runtime_launch', {
+          projectRoot,
+          executableSearchRoot: executableSearchRoot ?? null,
+        }) as Promise<RuntimeLaunchResult>,
       kill: () => invoke('runtime_kill') as Promise<void>,
       status: () => invoke('runtime_status') as Promise<RuntimeStatus>,
     },

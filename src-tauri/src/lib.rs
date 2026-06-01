@@ -1,7 +1,7 @@
 // RPGCreatorAI desktop shell — Phase 5
 //
 // Exposes a small, allowlisted IPC surface to the renderer:
-//   fs.openProjectDialog / readProject / writeProject / listBackups / closeProject
+//   fs.openProjectDialog / readProject / writeProject / listBackups / closeProject / createPlaytestSession
 //   runtime.launch / kill / status
 //   config.getRecents / addRecent
 //   shell.info
@@ -9,10 +9,10 @@
 // All filesystem work is sandboxed to the active project root. The runtime
 // bridge spawns the C++ executable located via a documented search order.
 
-mod fs_commands;
-mod runtime_commands;
 mod config_commands;
+mod fs_commands;
 mod project_state;
+mod runtime_commands;
 mod safe_path;
 
 use tauri::Manager;
@@ -29,6 +29,7 @@ pub fn run() {
             fs_commands::fs_write_project,
             fs_commands::fs_list_backups,
             fs_commands::fs_close_project,
+            fs_commands::fs_create_playtest_session,
             runtime_commands::runtime_launch,
             runtime_commands::runtime_kill,
             runtime_commands::runtime_status,

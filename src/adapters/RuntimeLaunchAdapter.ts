@@ -3,6 +3,7 @@
 
 import type {
   RuntimeLaunchAdapter,
+  RuntimeLaunchOptions,
   RuntimeLaunchResult,
   RuntimeStatus,
 } from './types';
@@ -16,7 +17,7 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
     return null;
   }
 
-  async launch(_projectPath: string): Promise<RuntimeLaunchResult> {
+  async launch(_projectPath: string, _options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult> {
     return {
       success: false,
       error:
@@ -49,7 +50,7 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
     return this.cachedExePath;
   }
 
-  async launch(projectRoot: string): Promise<RuntimeLaunchResult> {
+  async launch(projectRoot: string, options: RuntimeLaunchOptions = {}): Promise<RuntimeLaunchResult> {
     if (!this.canLaunch()) {
       return {
         success: false,
@@ -57,7 +58,7 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
       };
     }
     try {
-      const result = await window.rpgBridge!.runtime.launch(projectRoot);
+      const result = await window.rpgBridge!.runtime.launch(projectRoot, options.executableSearchRoot);
       if (result.success) {
         this.cachedStatus = 'running';
         if (result.executablePath) this.cachedExePath = result.executablePath;

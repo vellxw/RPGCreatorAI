@@ -89,7 +89,8 @@ are P0 unless explicitly marked otherwise:
    `debug.log`, `debug.setSwitch`, and `debug.setVariable` without adding a
    scripting VM or arbitrary code execution.
 9. Playtest shall support project-start, current-map, and selected-event
-   sessions without mutating source project files.
+   sessions by writing temporary project roots under the app data directory
+   without mutating source project files.
 10. The editor shall expose bounded native runtime logs, validation output,
     event trace output, and runtime state snapshots from the playtest surface.
 11. Placeholder AI/debug UI that advertises unavailable generation or

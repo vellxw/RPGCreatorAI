@@ -4,11 +4,13 @@
 
 import { BrowserMemoryAdapter } from './BrowserMemoryAdapter';
 import { FileSystemAdapter } from './FileSystemAdapter';
+import { BrowserPlaytestSessionAdapter, DesktopPlaytestSessionAdapter } from './PlaytestSessionAdapter';
 import { BrowserRuntimeAdapter, DesktopRuntimeAdapter } from './RuntimeLaunchAdapter';
-import type { ProjectDataAdapter, RuntimeLaunchAdapter } from './types';
+import type { PlaytestSessionAdapter, ProjectDataAdapter, RuntimeLaunchAdapter } from './types';
 
 let dataAdapter: ProjectDataAdapter | null = null;
 let runtimeAdapter: RuntimeLaunchAdapter | null = null;
+let playtestSessionAdapter: PlaytestSessionAdapter | null = null;
 
 function detectDesktopShell(): boolean {
   return typeof window !== 'undefined' && !!window.rpgBridge;
@@ -31,6 +33,14 @@ export function getRuntimeLaunchAdapter(): RuntimeLaunchAdapter {
   return runtimeAdapter;
 }
 
+export function getPlaytestSessionAdapter(): PlaytestSessionAdapter {
+  if (playtestSessionAdapter) return playtestSessionAdapter;
+  playtestSessionAdapter = detectDesktopShell()
+    ? new DesktopPlaytestSessionAdapter()
+    : new BrowserPlaytestSessionAdapter();
+  return playtestSessionAdapter;
+}
+
 export function isDesktopShell(): boolean {
   return detectDesktopShell();
 }
@@ -39,4 +49,5 @@ export function isDesktopShell(): boolean {
 export function _resetAdaptersForTest(): void {
   dataAdapter = null;
   runtimeAdapter = null;
+  playtestSessionAdapter = null;
 }

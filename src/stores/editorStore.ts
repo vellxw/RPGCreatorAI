@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, type Dispatch } from 'react';
 import type { Screen, GameEvent, EventType } from '../types/project';
+import type { PlaytestSessionMode } from '../adapters/types';
 
 export type BrushSelection =
   | {
@@ -26,6 +27,7 @@ export interface EditorState {
   tool: 'brush' | 'fill' | 'rectangle' | 'erase' | 'select';
   brushSize: 1 | 2 | 3 | 5;
   interactionMode: 'paint' | 'select';
+  playtestMode: PlaytestSessionMode;
 }
 
 export type EditorAction =
@@ -40,6 +42,7 @@ export type EditorAction =
   | { type: 'SET_TOOL'; tool: EditorState['tool'] }
   | { type: 'SET_BRUSH_SIZE'; brushSize: EditorState['brushSize'] }
   | { type: 'SET_INTERACTION_MODE'; mode: 'paint' | 'select' }
+  | { type: 'SET_PLAYTEST_MODE'; mode: PlaytestSessionMode }
   | { type: 'MARK_SAVED' }
   | { type: 'MARK_DIRTY' };
 
@@ -56,6 +59,7 @@ export const initialEditorState: EditorState = {
   tool: 'brush',
   brushSize: 1,
   interactionMode: 'paint',
+  playtestMode: 'projectStart',
 };
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
@@ -63,9 +67,23 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'SET_SCREEN':
       return { ...state, activeScreen: action.screen };
     case 'SELECT_MAP':
-      return { ...state, selectedMapId: action.mapId, selectedEvent: null, selectedEventMapId: null };
+      return {
+        ...state,
+        selectedMapId: action.mapId,
+        selectedEvent: null,
+        selectedEventMapId: null,
+        playtestMode: state.playtestMode === 'selectedEvent' ? 'currentMap' : state.playtestMode,
+      };
     case 'SELECT_EVENT':
-      return { ...state, selectedEvent: action.event, selectedEventMapId: action.mapId };
+      return {
+        ...state,
+        selectedEvent: action.event,
+        selectedEventMapId: action.mapId,
+        playtestMode:
+          action.event === null && state.playtestMode === 'selectedEvent'
+            ? 'currentMap'
+            : state.playtestMode,
+      };
     case 'SET_ZOOM':
       return { ...state, zoom: action.zoom, zoomMode: 'manual' };
     case 'FIT_TO_VIEW':
@@ -119,6 +137,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, brushSize: action.brushSize };
     case 'SET_INTERACTION_MODE':
       return { ...state, interactionMode: action.mode, tool: action.mode === 'select' ? 'select' : state.tool };
+    case 'SET_PLAYTEST_MODE':
+      return { ...state, playtestMode: action.mode };
     case 'MARK_SAVED':
       return { ...state, saved: true };
     case 'MARK_DIRTY':

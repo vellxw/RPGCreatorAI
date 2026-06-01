@@ -11,6 +11,7 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
       writeProject: async () => ({ success: true }),
       listBackups: async () => [],
       closeProject: async () => undefined,
+      createPlaytestSession: async () => ({ success: false, error: 'not stubbed' }),
     },
     runtime: {
       launch: async () => ({ success: true, pid: 1234 }),
@@ -40,13 +41,18 @@ describe('DesktopRuntimeAdapter (Phase 5)', () => {
   });
 
   it('routes launch through the bridge and reports the pid honestly', async () => {
+    const calls: unknown[] = [];
     window.rpgBridge = bridge({
-      launch: async () => ({ success: true, pid: 4242, executablePath: 'C:\\runtime.exe' }),
+      launch: async (projectRoot, executableSearchRoot) => {
+        calls.push({ projectRoot, executableSearchRoot });
+        return { success: true, pid: 4242, executablePath: 'C:\\runtime.exe' };
+      },
     });
     const a = new DesktopRuntimeAdapter();
-    const result = await a.launch('C:\\project');
+    const result = await a.launch('C:\\temp-session', { executableSearchRoot: 'C:\\source-project' });
     expect(result.success).toBe(true);
     expect(result.pid).toBe(4242);
+    expect(calls).toEqual([{ projectRoot: 'C:\\temp-session', executableSearchRoot: 'C:\\source-project' }]);
     expect(a.getExecutablePath()).toBe('C:\\runtime.exe');
     expect(a.getStatus()).toBe('running');
   });

@@ -78,6 +78,7 @@ fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
 pub fn runtime_launch(
     state: State<'_, AppState>,
     project_root: String,
+    executable_search_root: Option<String>,
 ) -> Result<RuntimeLaunchResult, String> {
     // Reject second concurrent launch.
     {
@@ -101,7 +102,8 @@ pub fn runtime_launch(
         }
     }
 
-    let exe = match locate_runtime_executable(Some(&project_root)) {
+    let search_root = executable_search_root.as_deref().unwrap_or(&project_root);
+    let exe = match locate_runtime_executable(Some(search_root)) {
         Some(p) => p,
         None => {
             return Ok(RuntimeLaunchResult {

@@ -4,6 +4,84 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-22 / PT-001 — playtest session builder
+
+- `2026-06-01 14:44:00 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — RED; `PlaytestSessionAdapter` did not exist yet and
+  `DesktopRuntimeAdapter.launch()` did not forward the source executable
+  search root.
+- `2026-06-01 14:44:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — RED; `PlaytestSessionRequest` and `create_playtest_session_at` did not
+  exist yet.
+- `2026-06-01 14:52:46 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — PASS; 2 files and 7 tests passed after adding the playtest session
+  adapter and executable-search-root launch option.
+- `2026-06-01 14:52:46 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 21 Rust tests passed after adding temp session creation,
+  selected-event/current-map start rewriting, source-file non-mutation
+  coverage, asset copy, and pruning coverage.
+- `2026-06-01 14:53:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 14:56:38 -03:00` —
+  `npm test -- --run src/stores/__tests__/editorStore.test.ts`
+  — RED; the new reducer test showed selected-event playtest mode remained
+  active after clearing the selected event.
+- `2026-06-01 14:56:58 -03:00` —
+  `npm test -- --run src/stores/__tests__/editorStore.test.ts`
+  — PASS after resetting selected-event mode to current-map when the event
+  selection is cleared.
+- `2026-06-01 14:57:14 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/stores/__tests__/editorStore.test.ts`
+  — PASS; 3 files and 12 tests passed.
+- `2026-06-01 14:57:14 -03:00` — `npm run typecheck` — FAIL; the new
+  editor-store test fixture used `as const`, making `commands` readonly and
+  incompatible with `GameEvent`.
+- `2026-06-01 14:57:14 -03:00` — `npm run build` — FAIL for the same
+  readonly test fixture type error before Vite build started.
+- `2026-06-01 14:57:51 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/stores/__tests__/editorStore.test.ts`
+  — PASS; 3 files and 12 tests passed after typing the fixture as
+  `GameEvent`.
+- `2026-06-01 14:57:51 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 14:57:51 -03:00` — `npm run build` — PASS; Vite emitted the
+  existing chunk-size warning only.
+- `2026-06-01 14:57:14 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 21 Rust tests passed.
+- `2026-06-01 14:58:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings,
+  Ninja had no work to do, and `RPGTests` passed.
+- `2026-06-01 14:58:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, loaded the town map, logged the
+  `town_theme` audio request, warned about the missing optional WAV, and
+  reported `SMOKE PASSED`.
+- `2026-06-01 15:00:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_session_pruning_preserves_protected_session -- --exact`
+  — RED; the new pruning test did not compile because
+  `prune_playtest_sessions` did not yet accept a protected session path.
+- `2026-06-01 15:00:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_session_pruning_preserves_protected_session -- --exact`
+  — PASS after preventing the just-created session root from being pruned.
+- `2026-06-01 15:01:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 22 Rust tests passed with protected-session pruning coverage.
+- `2026-06-01 15:01:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- `2026-06-01 15:02:00 -03:00` — `git diff --cached --check` — PASS.
+- Fix applied: added desktop/browser playtest session adapters, Tauri temp
+  session creation under app data, mode-specific temp `project.json` start
+  rewriting, optional `assets/` copy, five-session pruning, runtime launch
+  executable search root support, protected current-session pruning, and
+  playtest toolbar mode selection.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-21 / RT-007 — deterministic plugin command v1
 
 - `2026-06-01 14:32:31 -03:00` —

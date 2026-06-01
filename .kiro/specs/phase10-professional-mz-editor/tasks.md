@@ -115,7 +115,7 @@
 
 ## Slice 6 — Playtest And Debug Programmer Tools
 
-- [ ] FRA-22 / PT-001: add playtest session building for project-start,
+- [x] FRA-22 / PT-001: add playtest session building for project-start,
   current-map, and selected-event modes without mutating source files.
 - [ ] FRA-23 / PT-002: add a runtime log viewer with bounded native log
   reading and honest browser-mode degradation.

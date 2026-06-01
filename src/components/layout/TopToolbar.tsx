@@ -6,7 +6,6 @@ import {
   Undo2,
   Redo2,
   CheckCircle2,
-  Square,
   Upload,
   ExternalLink,
   Settings,
@@ -26,6 +25,7 @@ import {
 import { isDesktopShell } from '../../adapters/adapterFactory';
 import { SaveIndicator } from './SaveIndicator';
 import type { Screen } from '../../types/project';
+import type { PlaytestSessionMode } from '../../adapters/types';
 import { uiAssets } from '../../assets/generated/assetCatalog';
 
 export function TopToolbar() {
@@ -230,19 +230,44 @@ export function TopToolbar() {
     </>
   );
 
-  const renderPlaytestToolbar = () => (
-    <>
+  const renderPlaytestToolbar = () => {
+    const playtestModes: Array<{ mode: PlaytestSessionMode; label: string; disabled?: boolean }> = [
+      { mode: 'projectStart', label: 'Project Start' },
+      { mode: 'currentMap', label: 'Current Map' },
+      {
+        mode: 'selectedEvent',
+        label: 'Selected Event',
+        disabled: !state.selectedEvent,
+      },
+    ];
+    return (
+      <>
       <div className="flex items-center gap-2 text-[13px]">
         <span className="text-gray-800 font-medium">Playtest: &quot;{projectState.project.title}&quot;</span>
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="danger" icon={<Square size={12} />}>
-          Stop
-        </Button>
+      <div className="flex items-center gap-1 rounded-md border border-gray-200 bg-gray-50 p-0.5">
+        {playtestModes.map(option => (
+          <button
+            key={option.mode}
+            type="button"
+            disabled={option.disabled}
+            onClick={() => dispatch({ type: 'SET_PLAYTEST_MODE', mode: option.mode })}
+            className={`h-7 px-2.5 text-[11px] rounded cursor-pointer ${
+              state.playtestMode === option.mode
+                ? 'bg-white text-indigo-600 shadow-sm'
+                : option.disabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
       </div>
-    </>
-  );
+      </>
+    );
+  };
 
   const renderDatabaseToolbar = () => (
     <>

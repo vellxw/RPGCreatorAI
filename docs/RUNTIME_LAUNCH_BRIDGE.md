@@ -1,116 +1,151 @@
 # Runtime Launch Bridge
 
-## Status After Phase 5
-The `DesktopRuntimeAdapter` becomes a real implementation backed by a Tauri command that spawns the C++ runtime executable. The Phase 4 seam is replaced; the renderer-side adapter shape is unchanged.
+## Status After FRA-22
 
-## Renderer Surface (unchanged)
+The desktop playtest flow now builds a temporary project root before
+launching the native C++ runtime. The source project folder is used only as
+the trusted executable search root and as the asset source for optional copied
+assets. Runtime launch still uses `std::process::Command` directly with no
+command-line arguments and no shell interpretation.
+
+Browser mode remains honest: it can run the simulated editor preview, but it
+cannot create native playtest sessions or spawn the runtime.
+
+## Renderer Surface
 
 ```ts
 interface RuntimeLaunchAdapter {
   canLaunch(): boolean;
   getExecutablePath(): string | null;
-  launch(projectRoot: string): Promise<RuntimeLaunchResult>;
+  launch(
+    projectRoot: string,
+    options?: { executableSearchRoot?: string },
+  ): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
   getUnavailableReason(): string | null;
 }
+
+interface PlaytestSessionAdapter {
+  canCreateSession(): boolean;
+  createSession(
+    sourceRoot: string,
+    state: FullProjectState,
+    request: PlaytestSessionRequest,
+  ): Promise<PlaytestSessionResult>;
+  getUnavailableReason(): string | null;
+}
 ```
 
-In desktop mode, every method is wired to a `window.rpgBridge.runtime.*` IPC call. In browser mode, the existing `BrowserRuntimeAdapter` continues to honestly report `unavailable`.
+`projectRoot` is the folder the runtime should read from. For normal source
+launches that can be the source project. For playtest sessions it is the
+temporary session root. `executableSearchRoot` lets the shell find the runtime
+under the source repository while still launching with `current_dir` set to
+the temp session root.
+
+## Playtest Session Modes
+
+The playtest toolbar exposes three modes:
+
+| Mode | Session behavior |
+|------|------------------|
+| `projectStart` | Preserves the project's authored start map and start position. |
+| `currentMap` | Writes only the temp `data/project.json` to start on the selected editor map. If that map differs from the authored start map, the temp start position becomes `0,0,down`. |
+| `selectedEvent` | Writes only the temp `data/project.json` to start on the selected event's map and tile, facing `down`. The mode is disabled when no event is selected. |
+
+The session builder writes the in-memory project state, map JSON, items, and
+database shards into the temp root. It copies `assets/` when present so local
+runtime visual/audio references keep resolving. It does not write or back up
+files inside the source project.
+
+Sessions are stored under the app data directory:
+
+```text
+%APPDATA%\RPGCreatorAI\playtest-sessions\
+```
+
+If `%APPDATA%` is unavailable, the shell falls back to `%LOCALAPPDATA%`, then
+`$HOME/.rpgcreatorai/playtest-sessions`. The shell keeps the latest five
+`session-*` directories and prunes older sessions.
 
 ## Executable Resolution
 
-The shell searches for `rpg_creator_runtime.exe` in this exact order:
+The shell searches for `rpg_creator_runtime.exe` in this order, using
+`executableSearchRoot` when provided and `projectRoot` otherwise:
 
-1. `RPG_RUNTIME_EXE` environment variable, if set
-2. `<projectRoot>/build/rpg_creator_runtime.exe`
-3. `%LOCALAPPDATA%\RPGCreatorAI\build\rpg_creator_runtime.exe` (the Phase 4.1 default build dir)
+1. `RPG_RUNTIME_EXE` environment variable, if set to an existing file
+2. `<searchRoot>/build/rpg_creator_runtime.exe`
+3. `%LOCALAPPDATA%\RPGCreatorAI\build\rpg_creator_runtime.exe`
 4. The directory containing the Tauri shell binary
-5. Returns `Err(...)`, which makes `canLaunch()` report `false` and `getUnavailableReason()` explain why
+5. Return a failed `RuntimeLaunchResult` explaining that the runtime was not found
 
-The renderer never decides where the binary lives; that decision is the shell's.
+The renderer never constructs a shell command.
 
 ## Launch Flow
 
-```
-Playtest screen: "Open in Runtime" (enabled because canLaunch() is true)
-  -> adapter.launch(projectRoot)
-     -> window.rpgBridge.runtime.launch(projectRoot)
-        -> Rust: locate_runtime_executable() -> exe path
-        -> Rust: ensure no other runtime instance is alive
-        -> std::process::Command::new(exe)
-              .current_dir(projectRoot)
-              .spawn()
-        -> store Child in static Mutex<Option<Child>>
-        -> return RuntimeLaunchResult { success: true, pid: Some(<pid>) }
-  -> Playtest toolbar shows "Runtime: running (pid <n>)"
+```text
+Playtest screen: Open in Runtime
+  -> validate the in-memory project state
+  -> fs.createPlaytestSession(sourceRoot, state, request)
+      -> write temp data/project.json, maps, items, and database shards
+      -> copy optional source assets/
+      -> prune older temp sessions beyond five
+  -> runtime.launch(sessionRoot, { executableSearchRoot: sourceRoot })
+      -> Rust locates the runtime executable from sourceRoot/search fallbacks
+      -> Rust rejects launch if another runtime process is still alive
+      -> Command::new(exe)
+            .current_dir(sessionRoot)
+            .spawn()
+      -> shell stores the Child handle and returns the pid
 ```
 
-The runtime launches **with `current_dir` set to the project root**, so its existing `data/maps/...` lookups continue to work without any change to the C++ side. This matches the Phase 4.1 smoke run, which already proved the runtime resolves data paths correctly when launched from the repo root.
+The runtime reads `data/project.json` and relative data/assets paths from the
+temporary session root. The C++ runtime does not need command-line arguments
+or a special playtest flag.
 
 ## Status Polling
 
-`getStatus()` translates the Rust `try_wait` result:
+`getStatus()` translates Rust `try_wait` results:
 
 | Rust state | Renderer status | Notes |
 |------------|-----------------|-------|
 | No `Child` stored | `ready` | Shell present, nothing running |
 | `try_wait` returns `Ok(Some(_))` | `ready` | Runtime exited; shell clears the slot |
 | `try_wait` returns `Ok(None)` | `running` | Runtime alive |
-| `try_wait` returns `Err(_)` | `unavailable` | Process handle invalid; surfaced honestly |
-| Browser mode (no shell) | `unavailable` | Existing `BrowserRuntimeAdapter` behaviour |
+| `try_wait` returns `Err(_)` | `unavailable` | Process handle invalid |
+| Browser mode | `unavailable` | Process spawning is not exposed |
 
-The Playtest screen polls status every 1 second while a runtime is running and pushes the current status into the existing `RuntimeBridgePanel` UI element.
+The Playtest screen polls the shell status while the bridge is available.
 
 ## Stop / Kill Flow
 
-User clicks Stop, or the editor window is closing:
+When the user clicks Stop Runtime:
 
-1. `adapter.kill()` -> `runtime.kill()`
-2. The shell calls `Child::kill()` (`SIGTERM` on Unix, `TerminateProcess` on Windows).
-3. `Child::wait()` is bounded by a hard timeout (default 3 s). Beyond that, the slot is cleared regardless and the renderer shows `ready` again.
+1. `adapter.kill()` calls `runtime.kill()`.
+2. The shell calls `Child::kill()`.
+3. The shell calls `Child::wait()` and clears the stored process handle.
 
-`kill()` is idempotent: calling it when nothing is running is a no-op.
-
-## Concurrency Rules
-
-- Only one runtime instance may be alive at a time. A second `launch()` while one is running returns `RuntimeLaunchResult { success: false, error: "runtime already running" }`.
-- The renderer `DesktopRuntimeAdapter` mirrors this: its `launch()` immediately returns the error if it sees `running` from a status poll.
-- On editor window close, the shell triggers `kill()` so we never leave orphaned runtime processes.
+`kill()` is idempotent when no runtime process is stored.
 
 ## Security
 
-- The shell spawns a known executable path with **no command-line arguments**. There is no `exec(string)` and no shell interpretation. Even if someone smuggled a malicious string into the project root, it would not become a command-line argument.
-- The executable path is resolved once at launch and validated:
-  - Must exist
-  - Must be a regular file (not a symlink to outside user space)
-  - Must be executable
-- The shell does not pipe stdin from anywhere. stdout/stderr are captured to a log file under the user data dir for debugging.
+- The shell starts a resolved executable path with no command-line arguments.
+- There is no `exec(string)` and no shell interpolation.
+- Playtest mode changes are data changes written only to the temp project
+  snapshot.
+- The source project root is not modified by launch preparation.
+- Browser mode does not fake native runtime access.
 
 ## Logging
 
-Each launch creates a log under the user data dir:
+FRA-22 does not add a runtime log viewer or shell-side stdout/stderr capture.
+That is tracked by PT-002. Current validation evidence still comes from the
+existing runtime smoke scripts and process status.
 
-```
-%APPDATA%\RPGCreatorAI\runtime-logs\runtime.<ISO-timestamp>.log
-```
+## What FRA-22 Does Not Add
 
-The log captures stdout and stderr from the runtime process. The Playtest screen exposes a "Open log folder" button (gated on shell presence) that calls a small `shell.openLogsDir` IPC command (added narrowly for this purpose; not part of a generic shell-open allowlist).
-
-## Browser Fallback
-
-`window.rpgBridge` is absent in browser mode, so `BrowserRuntimeAdapter` is selected. It returns:
-- `canLaunch() = false`
-- `launch(...) = { success: false, error: "Native runtime cannot be launched from the browser..." }`
-- `getStatus() = "unavailable"`
-- `getUnavailableReason() = "Browser mode: process spawning is not exposed by Vite..."`
-
-The Playtest screen continues to display the "Editor Preview (simulated) — not the native runtime" banner. No claim is made that the SVG preview is the native runtime.
-
-## What Phase 5 Does NOT Add
-
-- No IPC from the runtime back to the editor (no breakpoints, no hot-reload, no state sync). That belongs in a later phase.
-- No embedded runtime view inside the editor window.
-- No remote runtime (`runtime` running on a different machine).
-- No multiplayer.
-- No installer-based runtime distribution; the user is still expected to build the C++ runtime via the existing Phase 4.1 scripts.
+- No runtime-to-editor IPC.
+- No embedded runtime viewport.
+- No remote runtime.
+- No automatic source project save before launch.
+- No log viewer, event trace panel, or runtime state snapshot reader.

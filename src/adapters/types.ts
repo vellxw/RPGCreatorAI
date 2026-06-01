@@ -56,12 +56,42 @@ export interface RuntimeLaunchResult {
   executablePath?: string;
 }
 
+export interface RuntimeLaunchOptions {
+  executableSearchRoot?: string;
+}
+
 export interface RuntimeLaunchAdapter {
   canLaunch(): boolean;
   getExecutablePath(): string | null;
-  launch(projectPath: string): Promise<RuntimeLaunchResult>;
+  launch(projectPath: string, options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
+  getUnavailableReason(): string | null;
+}
+
+export type PlaytestSessionMode = 'projectStart' | 'currentMap' | 'selectedEvent';
+
+export interface PlaytestSessionRequest {
+  mode: PlaytestSessionMode;
+  currentMapId?: string;
+  selectedEventMapId?: string;
+  selectedEventId?: string;
+}
+
+export interface PlaytestSessionResult {
+  success: boolean;
+  error?: string;
+  sessionRoot?: string;
+  prunedSessionRoots?: string[];
+}
+
+export interface PlaytestSessionAdapter {
+  canCreateSession(): boolean;
+  createSession(
+    sourceRoot: string,
+    state: FullProjectState,
+    request: PlaytestSessionRequest,
+  ): Promise<PlaytestSessionResult>;
   getUnavailableReason(): string | null;
 }
 

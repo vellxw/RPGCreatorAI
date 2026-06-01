@@ -136,6 +136,30 @@ pub struct OpenDialogResult {
     pub state: Option<FullProjectState>,
 }
 
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaytestSessionRequest {
+    pub mode: String,
+    #[serde(default)]
+    pub current_map_id: Option<String>,
+    #[serde(default)]
+    pub selected_event_map_id: Option<String>,
+    #[serde(default)]
+    pub selected_event_id: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaytestSessionResult {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_root: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub pruned_session_roots: Vec<String>,
+}
+
 // ------------------------------ Commands ------------------------------
 
 #[tauri::command]
@@ -326,7 +350,304 @@ pub fn fs_close_project(state: State<'_, AppState>) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+pub fn fs_create_playtest_session(
+    source_root: String,
+    project_state: FullProjectState,
+    request: PlaytestSessionRequest,
+) -> Result<PlaytestSessionResult, String> {
+    let canonical = canonicalize_inside_user_space(&source_root).map_err(|e| e.to_string())?;
+    must_contain_project_json(&canonical).map_err(|e| e.to_string())?;
+    let sessions = playtest_sessions_dir()?;
+    create_playtest_session_at(&sessions, &canonical, &project_state, request)
+}
+
 // ------------------------------ Helpers ------------------------------
+
+const MAX_PLAYTEST_SESSIONS: usize = 5;
+
+fn playtest_sessions_dir() -> Result<PathBuf, String> {
+    if let Ok(appdata) = std::env::var("APPDATA") {
+        return Ok(PathBuf::from(appdata)
+            .join("RPGCreatorAI")
+            .join("playtest-sessions"));
+    }
+    if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        return Ok(PathBuf::from(local)
+            .join("RPGCreatorAI")
+            .join("playtest-sessions"));
+    }
+    if let Ok(home) = std::env::var("HOME") {
+        return Ok(PathBuf::from(home)
+            .join(".rpgcreatorai")
+            .join("playtest-sessions"));
+    }
+    Err("no app data directory available for playtest sessions".to_string())
+}
+
+fn create_playtest_session_at(
+    sessions_base: &Path,
+    source_root: &Path,
+    project_state: &FullProjectState,
+    request: PlaytestSessionRequest,
+) -> Result<PlaytestSessionResult, String> {
+    fs::create_dir_all(sessions_base).map_err(|e| format!("mkdir playtest sessions: {e}"))?;
+    let mut project = project_state.project.clone();
+    apply_playtest_request(&mut project, project_state, &request)?;
+
+    let mut session_root = sessions_base.join(
+        chrono::Utc::now()
+            .format("session-%Y%m%dT%H%M%S%.3fZ")
+            .to_string(),
+    );
+    let mut suffix = 1;
+    while session_root.exists() {
+        session_root = sessions_base.join(format!(
+            "{}-{suffix}",
+            chrono::Utc::now().format("session-%Y%m%dT%H%M%S%.3fZ")
+        ));
+        suffix += 1;
+    }
+    fs::create_dir_all(&session_root)
+        .map_err(|e| format!("mkdir playtest session {}: {e}", session_root.display()))?;
+
+    write_project_snapshot(&session_root, &project, project_state)?;
+    copy_optional_dir(&source_root.join("assets"), &session_root.join("assets"))?;
+    let pruned = prune_playtest_sessions(sessions_base, MAX_PLAYTEST_SESSIONS, Some(&session_root))?;
+
+    Ok(PlaytestSessionResult {
+        success: true,
+        error: None,
+        session_root: Some(session_root.to_string_lossy().to_string()),
+        pruned_session_roots: pruned,
+    })
+}
+
+fn apply_playtest_request(
+    project: &mut ProjectData,
+    project_state: &FullProjectState,
+    request: &PlaytestSessionRequest,
+) -> Result<(), String> {
+    match request.mode.as_str() {
+        "projectStart" => Ok(()),
+        "currentMap" => {
+            let map_id = request
+                .current_map_id
+                .as_deref()
+                .ok_or_else(|| "currentMap playtest requires currentMapId".to_string())?;
+            if !project_state.maps.contains_key(map_id) {
+                return Err(format!("current map '{map_id}' is not loaded"));
+            }
+            let original_start = project.start_map_id.clone();
+            project.start_map_id = map_id.to_string();
+            if original_start != map_id {
+                project.start_position = StartPosition {
+                    x: 0,
+                    y: 0,
+                    direction: "down".into(),
+                };
+            }
+            Ok(())
+        }
+        "selectedEvent" => {
+            let map_id = request
+                .selected_event_map_id
+                .as_deref()
+                .or(request.current_map_id.as_deref())
+                .ok_or_else(|| "selectedEvent playtest requires selectedEventMapId".to_string())?;
+            let event_id = request
+                .selected_event_id
+                .as_deref()
+                .ok_or_else(|| "selectedEvent playtest requires selectedEventId".to_string())?;
+            let map = project_state
+                .maps
+                .get(map_id)
+                .ok_or_else(|| format!("selected event map '{map_id}' is not loaded"))?;
+            let event = find_event(map, event_id)
+                .ok_or_else(|| format!("selected event '{event_id}' was not found"))?;
+            project.start_map_id = map_id.to_string();
+            project.start_position = StartPosition {
+                x: event.0,
+                y: event.1,
+                direction: "down".into(),
+            };
+            Ok(())
+        }
+        other => Err(format!("unsupported playtest mode '{other}'")),
+    }
+}
+
+fn find_event(map: &serde_json::Value, event_id: &str) -> Option<(i64, i64)> {
+    let events = map.get("events")?.as_array()?;
+    for event in events {
+        if event.get("id").and_then(|id| id.as_str()) == Some(event_id) {
+            let x = event.get("x").and_then(|x| x.as_i64())?;
+            let y = event.get("y").and_then(|y| y.as_i64())?;
+            return Some((x, y));
+        }
+    }
+    None
+}
+
+fn write_project_snapshot(
+    session_root: &Path,
+    project: &ProjectData,
+    project_state: &FullProjectState,
+) -> Result<(), String> {
+    write_json_inside(session_root, "data/project.json", project)?;
+
+    let mut map_paths = HashSet::new();
+    for map_ref in &project.maps {
+        let path_key = map_ref.path.trim().replace('\\', "/").to_lowercase();
+        if path_key.is_empty() {
+            return Err(format!("map '{}' has an empty path", map_ref.id));
+        }
+        if !map_paths.insert(path_key) {
+            return Err(format!(
+                "duplicate map path '{}' would overwrite map data",
+                map_ref.path
+            ));
+        }
+        let map_value = project_state
+            .maps
+            .get(&map_ref.id)
+            .ok_or_else(|| format!("playtest state is missing map id '{}'", map_ref.id))?;
+        write_json_inside(session_root, &map_ref.path, map_value)?;
+    }
+
+    write_json_inside(session_root, &project.database.items, &project_state.items)?;
+
+    if let serde_json::Value::Object(map) = &project_state.databases {
+        let pairs: [(&str, Option<&String>); 18] = [
+            ("actors", project.database.actors.as_ref()),
+            ("classes", project.database.classes.as_ref()),
+            ("skills", project.database.skills.as_ref()),
+            ("weapons", project.database.weapons.as_ref()),
+            ("armors", project.database.armors.as_ref()),
+            ("states", project.database.states.as_ref()),
+            ("types", project.database.types.as_ref()),
+            ("terms", project.database.terms.as_ref()),
+            ("enemies", project.database.enemies.as_ref()),
+            ("troops", project.database.troops.as_ref()),
+            ("quests", project.database.quests.as_ref()),
+            ("shops", project.database.shops.as_ref()),
+            ("system", project.database.system.as_ref()),
+            ("switches", project.database.switches.as_ref()),
+            ("variables", project.database.variables.as_ref()),
+            ("commonEvents", project.database.common_events.as_ref()),
+            ("animations", project.database.animations.as_ref()),
+            ("tilesets", project.database.tilesets.as_ref()),
+        ];
+        for (key, maybe_rel) in pairs {
+            let Some(rel) = maybe_rel else { continue };
+            let Some(payload) = map.get(key) else {
+                continue;
+            };
+            let wrapped = if is_object_database_shard(key) {
+                let mut m = serde_json::Map::new();
+                m.insert("schemaVersion".into(), serde_json::Value::from(1));
+                if let serde_json::Value::Object(object_payload) = payload {
+                    for (k, v) in object_payload {
+                        if k == "schemaVersion" {
+                            continue;
+                        }
+                        m.insert(k.clone(), v.clone());
+                    }
+                }
+                serde_json::Value::Object(m)
+            } else {
+                serde_json::json!({ "schemaVersion": 1, key: payload })
+            };
+            write_json_inside(session_root, rel, &wrapped)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn write_json_inside<T: Serialize>(root: &Path, relative: &str, value: &T) -> Result<(), String> {
+    let target = join_inside(root, relative).map_err(|e| e.to_string())?;
+    if let Some(parent) = target.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("mkdir {}: {e}", parent.display()))?;
+    }
+    let pretty =
+        serde_json::to_string_pretty(value).map_err(|e| format!("serialise {relative}: {e}"))?;
+    serde_json::from_str::<serde_json::Value>(&pretty)
+        .map_err(|e| format!("post-serialise validation failed for {relative}: {e}"))?;
+    fs::write(&target, pretty).map_err(|e| format!("write {}: {e}", target.display()))
+}
+
+fn copy_optional_dir(source: &Path, target: &Path) -> Result<(), String> {
+    if !source.exists() {
+        return Ok(());
+    }
+    if !source.is_dir() {
+        return Ok(());
+    }
+    fs::create_dir_all(target).map_err(|e| format!("mkdir {}: {e}", target.display()))?;
+    for entry in fs::read_dir(source).map_err(|e| format!("read_dir {}: {e}", source.display()))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let file_type = entry.file_type().map_err(|e| e.to_string())?;
+        if file_type.is_symlink() {
+            continue;
+        }
+        let src = entry.path();
+        let dst = target.join(entry.file_name());
+        if file_type.is_dir() {
+            copy_optional_dir(&src, &dst)?;
+        } else if file_type.is_file() {
+            if let Some(parent) = dst.parent() {
+                fs::create_dir_all(parent)
+                    .map_err(|e| format!("mkdir {}: {e}", parent.display()))?;
+            }
+            fs::copy(&src, &dst)
+                .map_err(|e| format!("copy {} to {}: {e}", src.display(), dst.display()))?;
+        }
+    }
+    Ok(())
+}
+
+fn prune_playtest_sessions(
+    base: &Path,
+    keep: usize,
+    protected: Option<&Path>,
+) -> Result<Vec<String>, String> {
+    if !base.exists() {
+        return Ok(vec![]);
+    }
+    let mut sessions: Vec<PathBuf> = fs::read_dir(base)
+        .map_err(|e| format!("read_dir {}: {e}", base.display()))?
+        .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+        .filter(|path| {
+            path.is_dir()
+                && path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .is_some_and(|name| name.starts_with("session-"))
+        })
+        .collect();
+    sessions.sort_by(|a, b| {
+        let a_modified = fs::metadata(a).and_then(|m| m.modified()).ok();
+        let b_modified = fs::metadata(b).and_then(|m| m.modified()).ok();
+        a_modified.cmp(&b_modified).then_with(|| a.cmp(b))
+    });
+    let drop_count = sessions.len().saturating_sub(keep);
+    let mut pruned = Vec::new();
+    let mut removed = 0;
+    for path in sessions {
+        if removed >= drop_count {
+            break;
+        }
+        if protected.is_some_and(|protected| protected == path.as_path()) {
+            continue;
+        }
+        let display = path.to_string_lossy().to_string();
+        fs::remove_dir_all(&path).map_err(|e| format!("remove {}: {e}", path.display()))?;
+        pruned.push(display);
+        removed += 1;
+    }
+    Ok(pruned)
+}
 
 fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     must_contain_project_json(root)?;
@@ -412,7 +733,10 @@ fn extract_database_payload(key: &str, value: serde_json::Value) -> serde_json::
 }
 
 fn is_object_database_shard(key: &str) -> bool {
-    matches!(key, "system" | "animations" | "tilesets" | "types" | "terms")
+    matches!(
+        key,
+        "system" | "animations" | "tilesets" | "types" | "terms"
+    )
 }
 
 fn must_contain_project_json(root: &Path) -> Result<(), String> {
@@ -605,6 +929,147 @@ mod tests {
         assert!(result.maps.contains_key("town"));
         assert_eq!(result.project.maps[0].order, Some(0));
         assert_eq!(result.project.maps[0].expanded, Some(true));
+    }
+
+    fn make_playtest_project(root: &Path) {
+        make_project(root);
+        let mut project: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(root.join("data/project.json")).unwrap())
+                .unwrap();
+        project["maps"] = serde_json::json!([
+            { "id": "town", "path": "data/maps/town.json" },
+            { "id": "house", "path": "data/maps/house.json" }
+        ]);
+        fs::write(
+            root.join("data/project.json"),
+            serde_json::to_string_pretty(&project).unwrap(),
+        )
+        .unwrap();
+        let house = serde_json::json!({
+            "schemaVersion": 1, "id": "house", "name": "House",
+            "width": 2, "height": 2, "tileSize": 32,
+            "layers": [
+                { "name": "g", "type": "visual", "tiles": [1,1,1,1] },
+                { "name": "c", "type": "collision", "tiles": [0,0,0,0] }
+            ],
+            "events": [
+                { "id": "npc_1", "type": "npc", "x": 1, "y": 0, "solid": false, "trigger": "interact", "commands": [] }
+            ]
+        });
+        fs::write(
+            root.join("data/maps/house.json"),
+            serde_json::to_string_pretty(&house).unwrap(),
+        )
+        .unwrap();
+        fs::create_dir_all(root.join("assets/generated/runtime")).unwrap();
+        fs::write(root.join("assets/generated/runtime/marker.txt"), "asset").unwrap();
+    }
+
+    #[test]
+    fn playtest_current_map_creates_temp_project_without_mutating_source() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let original_project = fs::read_to_string(source_root.join("data/project.json")).unwrap();
+        let state = read_project_at(&source_root).unwrap();
+        let sessions = TempDir::new().unwrap();
+        let request = PlaytestSessionRequest {
+            mode: "currentMap".into(),
+            current_map_id: Some("house".into()),
+            selected_event_map_id: None,
+            selected_event_id: None,
+        };
+
+        let result =
+            create_playtest_session_at(sessions.path(), &source_root, &state, request).unwrap();
+
+        assert!(result.success);
+        let session_root = PathBuf::from(result.session_root.unwrap());
+        let session_project: ProjectData =
+            read_json(&session_root.join("data/project.json")).unwrap();
+        assert_eq!(session_project.start_map_id, "house");
+        assert_eq!(session_project.start_position.x, 0);
+        assert_eq!(session_project.start_position.y, 0);
+        assert_eq!(session_project.start_position.direction, "down");
+        assert!(session_root.join("data/maps/house.json").is_file());
+        assert!(session_root
+            .join("assets/generated/runtime/marker.txt")
+            .is_file());
+        assert_eq!(
+            fs::read_to_string(source_root.join("data/project.json")).unwrap(),
+            original_project
+        );
+    }
+
+    #[test]
+    fn playtest_selected_event_starts_at_event_position() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let state = read_project_at(&source_root).unwrap();
+        let sessions = TempDir::new().unwrap();
+        let request = PlaytestSessionRequest {
+            mode: "selectedEvent".into(),
+            current_map_id: Some("town".into()),
+            selected_event_map_id: Some("house".into()),
+            selected_event_id: Some("npc_1".into()),
+        };
+
+        let result =
+            create_playtest_session_at(sessions.path(), &source_root, &state, request).unwrap();
+
+        let session_root = PathBuf::from(result.session_root.unwrap());
+        let session_project: ProjectData =
+            read_json(&session_root.join("data/project.json")).unwrap();
+        assert_eq!(session_project.start_map_id, "house");
+        assert_eq!(session_project.start_position.x, 1);
+        assert_eq!(session_project.start_position.y, 0);
+        assert_eq!(session_project.start_position.direction, "down");
+    }
+
+    #[test]
+    fn playtest_session_prunes_older_sessions_beyond_five() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let state = read_project_at(&source_root).unwrap();
+        let sessions = TempDir::new().unwrap();
+        for i in 0..6 {
+            fs::create_dir_all(sessions.path().join(format!("session-old-{i}"))).unwrap();
+        }
+
+        let result = create_playtest_session_at(
+            sessions.path(),
+            &source_root,
+            &state,
+            PlaytestSessionRequest {
+                mode: "projectStart".into(),
+                current_map_id: None,
+                selected_event_map_id: None,
+                selected_event_id: None,
+            },
+        )
+        .unwrap();
+
+        assert!(result.success);
+        assert!(!result.pruned_session_roots.is_empty());
+        let remaining = fs::read_dir(sessions.path()).unwrap().count();
+        assert_eq!(remaining, 5);
+    }
+
+    #[test]
+    fn playtest_session_pruning_preserves_protected_session() {
+        let sessions = TempDir::new().unwrap();
+        let protected = sessions.path().join("session-0000");
+        let older = sessions.path().join("session-old");
+        fs::create_dir_all(&protected).unwrap();
+        fs::create_dir_all(&older).unwrap();
+
+        let pruned = prune_playtest_sessions(sessions.path(), 1, Some(&protected)).unwrap();
+
+        assert!(protected.is_dir());
+        assert!(!older.exists());
+        assert_eq!(pruned, vec![older.to_string_lossy().to_string()]);
     }
 
     #[test]

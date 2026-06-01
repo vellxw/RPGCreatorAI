@@ -255,6 +255,11 @@ Linear tracks execution status, validation evidence, commits, and push results.
 - Playtest sessions are generated as temporary project copies for project
   start, current map, and selected event modes. Source project files are never
   mutated by launch preparation.
+- The native runtime is launched with `current_dir` set to the temp session
+  root while executable lookup still uses the source project root or existing
+  runtime fallbacks. This preserves the argument-free launch bridge.
+- The shell keeps the latest five temporary playtest sessions for debugging
+  and prunes older session directories.
 - Native runtime evidence flows through bounded local files and stdout/stderr:
   logs, validation output, event trace rows, and state snapshots. Browser mode
   must label simulated or unavailable native evidence honestly.

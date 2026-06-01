@@ -16,9 +16,10 @@ import {
   Link2,
   MessageSquare,
 } from 'lucide-react';
-import { getRuntimeLaunchAdapter, getFileSystemAdapter } from '../adapters/adapterFactory';
-import { performSave } from '../stores/saveActions';
-import { animationAssets, editorAssets, eventAssets, gameAssets, uiAssets } from '../assets/generated/assetCatalog';
+import { getRuntimeLaunchAdapter, getFileSystemAdapter, getPlaytestSessionAdapter } from '../adapters/adapterFactory';
+import { useEditor } from '../stores/editorStore';
+import { validateProject } from '../validation/validateProject';
+import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
 import { isSupportedVisualTile, isVoidVisualTile, tileAssetForId } from '../visual/tileCatalog';
@@ -493,7 +494,9 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
 
 function RuntimeBridgePanel() {
   const adapter = getRuntimeLaunchAdapter();
+  const sessionAdapter = getPlaytestSessionAdapter();
   const { state: projectState, dispatch: projectDispatch } = useProjectStore();
+  const { state: editorState } = useEditor();
   const [status, setStatus] = useState<string | null>(null);
   const [runtimeStatus, setRuntimeStatus] = useState(adapter.getStatus());
 
@@ -523,15 +526,34 @@ function RuntimeBridgePanel() {
       setStatus('Open a project folder first (Project > Open).');
       return;
     }
-    if (projectState.dirty) {
-      const save = await performSave(projectState, projectDispatch);
-      if (!save.success) {
-        setStatus(`Launch blocked: ${save.errors[0] ?? 'save failed'}`);
-        return;
-      }
+    const validation = validateProject({
+      project: projectState.project,
+      maps: projectState.maps,
+      items: projectState.items,
+      databases: projectState.databases,
+    });
+    projectDispatch({ type: 'VALIDATE' });
+    if (validation.errors.length > 0) {
+      setStatus(`Launch blocked: ${validation.errors[0].message}`);
+      return;
     }
-    const result = await adapter.launch(projectRoot);
-    setStatus(result.success ? `Runtime launched (pid ${result.pid})` : `Launch failed: ${result.error}`);
+    const session = await sessionAdapter.createSession(projectRoot, {
+      project: projectState.project,
+      maps: projectState.maps,
+      items: projectState.items,
+      databases: projectState.databases,
+    }, {
+      mode: editorState.playtestMode,
+      currentMapId: editorState.selectedMapId,
+      selectedEventMapId: editorState.selectedEventMapId ?? undefined,
+      selectedEventId: editorState.selectedEvent?.id,
+    });
+    if (!session.success || !session.sessionRoot) {
+      setStatus(`Launch blocked: ${session.error ?? 'playtest session was not created'}`);
+      return;
+    }
+    const result = await adapter.launch(session.sessionRoot, { executableSearchRoot: projectRoot });
+    setStatus(result.success ? `Runtime launched (pid ${result.pid}) from ${session.sessionRoot}` : `Launch failed: ${result.error}`);
     setRuntimeStatus(adapter.getStatus());
   };
 
@@ -541,7 +563,7 @@ function RuntimeBridgePanel() {
     setRuntimeStatus(adapter.getStatus());
   };
 
-  const available = adapter.canLaunch();
+  const available = adapter.canLaunch() && sessionAdapter.canCreateSession();
 
   return (
     <div className="px-4 py-3 border-t border-gray-200 bg-white">
@@ -555,8 +577,8 @@ function RuntimeBridgePanel() {
           <span className="text-[12px] text-gray-700">
             Runtime bridge: <span className="font-mono">{runtimeStatus}</span>
           </span>
-          {!available && adapter.getUnavailableReason() && (
-            <span className="text-[11px] text-gray-500 italic">— {adapter.getUnavailableReason()}</span>
+          {!available && (adapter.getUnavailableReason() ?? sessionAdapter.getUnavailableReason()) && (
+            <span className="text-[11px] text-gray-500 italic">— {adapter.getUnavailableReason() ?? sessionAdapter.getUnavailableReason()}</span>
           )}
         </div>
         <div className="flex items-center gap-2">

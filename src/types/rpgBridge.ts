@@ -2,7 +2,14 @@
 // The Tauri Rust core provides matching #[tauri::command] handlers.
 // In browser/Vite mode `window.rpgBridge` is undefined.
 
-import type { FullProjectState, SaveResult, RuntimeStatus, RuntimeLaunchResult } from '../adapters/types';
+import type {
+  FullProjectState,
+  PlaytestSessionRequest,
+  PlaytestSessionResult,
+  SaveResult,
+  RuntimeStatus,
+  RuntimeLaunchResult,
+} from '../adapters/types';
 
 export interface OpenDialogResult {
   root: string | null;
@@ -25,9 +32,14 @@ export interface RpgBridge {
     writeProject(root: string, state: FullProjectState): Promise<SaveResult>;
     listBackups(root: string, file: string): Promise<string[]>;
     closeProject(): Promise<void>;
+    createPlaytestSession(
+      sourceRoot: string,
+      state: FullProjectState,
+      request: PlaytestSessionRequest,
+    ): Promise<PlaytestSessionResult>;
   };
   runtime: {
-    launch(projectRoot: string): Promise<RuntimeLaunchResult>;
+    launch(projectRoot: string, executableSearchRoot?: string): Promise<RuntimeLaunchResult>;
     kill(): Promise<void>;
     status(): Promise<RuntimeStatus>;
   };

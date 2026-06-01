@@ -20,6 +20,7 @@ function fakeBridge(overrides: Partial<RpgBridge['fs']> = {}): RpgBridge {
       writeProject: async () => ({ success: true }),
       listBackups: async () => [],
       closeProject: async () => undefined,
+      createPlaytestSession: async () => ({ success: false, error: 'not stubbed' }),
       ...overrides,
     },
     runtime: {

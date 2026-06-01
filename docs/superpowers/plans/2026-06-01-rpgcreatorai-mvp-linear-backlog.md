@@ -800,21 +800,21 @@ Labels: `mvp`, `phase-10`, `playtest-debug`, `desktop`, `parallel-safe`
 
 ### Steps
 
-- [ ] Add playtest modes: `projectStart`, `currentMap`, `selectedEvent`.
-- [ ] Build a temporary playtest project root under the app data directory, not inside the user's source project.
-- [ ] Copy project data and database shards into the temp root.
-- [ ] Mutate only the temp `project.json` start map/position/direction for current-map and selected-event modes.
-- [ ] Launch the runtime with `current_dir` set to the temp root, preserving the no-CLI-args security model.
-- [ ] Add cleanup policy: keep the latest temp session for debugging, remove older sessions beyond 5.
-- [ ] Surface mode selection in the playtest toolbar.
-- [ ] If no event is selected, disable selected-event mode with a clear reason.
+- [x] Add playtest modes: `projectStart`, `currentMap`, `selectedEvent`.
+- [x] Build a temporary playtest project root under the app data directory, not inside the user's source project.
+- [x] Copy project data and database shards into the temp root.
+- [x] Mutate only the temp `project.json` start map/position/direction for current-map and selected-event modes.
+- [x] Launch the runtime with `current_dir` set to the temp root, preserving the no-CLI-args security model.
+- [x] Add cleanup policy: keep the latest temp session for debugging, remove older sessions beyond 5.
+- [x] Surface mode selection in the playtest toolbar.
+- [x] If no event is selected, disable selected-event mode with a clear reason.
 
 ### Validation
 
-- [ ] Run `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`.
-- [ ] Run `npm run typecheck`.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml`.
-- [ ] Expected: all pass.
+- [x] Run `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`.
+- [x] Run `npm run typecheck`.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml`.
+- [x] Expected: all pass.
 
 ### Acceptance Criteria
 

@@ -36,7 +36,7 @@ Legend:
 | Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |
 | Local audio v1 | partial | yes | partial | yes | yes | yes | Runtime audio registry and local WAV dispatch exist; missing files/devices warn and continue. Dedicated audio authoring remains later editor work. |
 | Deterministic plugin commands | val | yes | yes | yes | yes | yes | `pluginCommand` supports scalar args, editor key/value controls, map/common-event parsing, allowlisted `debug.log`, `debug.setSwitch`, and `debug.setVariable`, plus non-fatal unknown-command warnings. |
-| Playtest session modes | partial | yes | partial | partial | partial | partial | Existing playtest flow needs project/current-map/selected-event temp sessions in FRA-22. |
+| Playtest session modes | val | yes | yes | yes | yes | yes | Desktop playtest builds temp project roots for project-start, current-map, and selected-event modes, launches with the temp root as `current_dir`, and preserves source files. |
 | Runtime logs, trace, and state snapshots | n/s | n/a | no | no | no | no | Bounded log viewer, trace output, and state inspector remain FRA-23 through FRA-25. |
 | Placeholder AI/debug UI gating | partial | n/a | partial | n/a | n/a | partial | MVP must remove or gate unavailable AI/debug actions in FRA-26. |
 | Bundled sample MVP coverage | partial | yes | n/a | partial | partial | partial | Sample exists; full MVP feature coverage remains FRA-27. |

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { editorReducer, initialEditorState } from '../editorStore';
+import type { GameEvent } from '../../types/project';
 
 describe('editorStore viewport controls', () => {
   it('starts in fit-to-view mode for scene authoring', () => {
@@ -41,5 +42,31 @@ describe('editorStore viewport controls', () => {
 
     const eventLayer = editorReducer(regionLayer, { type: 'SET_ACTIVE_LAYER', layer: 'event' });
     expect(eventLayer.brush.kind).toBe('event');
+  });
+
+  it('leaves selected-event playtest mode when the selected event is cleared', () => {
+    const event: GameEvent = {
+      id: 'npc_1',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [],
+    };
+    const selectedMode = editorReducer(
+      editorReducer(initialEditorState, { type: 'SELECT_EVENT', event, mapId: 'town' }),
+      { type: 'SET_PLAYTEST_MODE', mode: 'selectedEvent' },
+    );
+
+    const clearedByMap = editorReducer(selectedMode, { type: 'SELECT_MAP', mapId: 'house' });
+    expect(clearedByMap.playtestMode).toBe('currentMap');
+
+    const selectedAgain = editorReducer(
+      editorReducer(initialEditorState, { type: 'SELECT_EVENT', event, mapId: 'town' }),
+      { type: 'SET_PLAYTEST_MODE', mode: 'selectedEvent' },
+    );
+    const clearedByEvent = editorReducer(selectedAgain, { type: 'SELECT_EVENT', event: null, mapId: null });
+    expect(clearedByEvent.playtestMode).toBe('currentMap');
   });
 });

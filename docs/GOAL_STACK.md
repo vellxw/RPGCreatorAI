@@ -15,14 +15,9 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 4 — Database V2 closeout (FRA-6 through FRA-14): reusable editor
-  framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
-  enemies/troops/quests/shops/switches/variables/system/animations editors,
-  common-event command editing, and database reference safety.
-- Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
-  current-map, and selected-event playtest sessions, bounded native logs,
-  event trace, runtime state snapshots, and removal/gating of placeholder AI
-  debug UI.
+- Slice 6 — Playtest and debug tools (FRA-23 through FRA-26): bounded native
+  logs, event trace, runtime state snapshots, and removal/gating of
+  placeholder AI debug UI.
 - Integration QA — MVP green gate (FRA-27 through FRA-35): bundled sample
   coverage, editor-runtime roundtrip, runtime smoke expansion, canonical
   verification script, feature integration, docs closeout, final report,
@@ -30,6 +25,11 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 PT-001 (FRA-22) — desktop playtest launch now builds temporary
+  project snapshots for project-start, current-map, and selected-event modes
+  under the app data directory. Runtime launch uses the temp root as
+  `current_dir` while executable lookup remains rooted at the source project,
+  so the source project is not mutated and the bridge stays argument-free.
 - Phase 10 RT-007 (FRA-21) — deterministic plugin command v1 adds the
   `pluginCommand` data shape with safe `pluginId`, `command`, and scalar
   `args`, editor key/value controls, map/common-event C++ parsing,
