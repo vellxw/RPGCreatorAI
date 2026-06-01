@@ -2439,3 +2439,36 @@ Error: Port 1420 is already in use
 - Build/test note: CP-003 is a docs-only risk register issue, so no runtime,
   frontend, desktop, provider, or packaged build command was required.
 
+### Phase 11 FRA-39 / CP-004 — provider and legal review baseline
+
+- `2026-06-01 19:02:34 -03:00` —
+  `npm test -- --run src/stores/__tests__/providerStore.test.tsx` — RED as
+  expected; the new test found provider defaults with non-empty model strings.
+- `2026-06-01 19:03:36 -03:00` —
+  `npm test -- --run src/stores/__tests__/providerStore.test.tsx` — PASS after
+  making provider defaults disconnected, model-empty, routing-disabled, and
+  credential-free.
+- `2026-06-01 19:04:54 -03:00` —
+  `rg -n "status: 'connected'|model: '[^']+'|apiKey: '[^']+'"
+  src/stores/providerStore.ts src/stores/__tests__/providerStore.test.tsx`
+  — PASS; no matches, exit code 1 expected for no results.
+- `2026-06-01 19:04:54 -03:00` —
+  `rg -n "sk-[A-Za-z0-9]{8,}|Bearer [A-Za-z0-9_-]{16,}"
+  docs/PHASE_11_PROVIDER_LEGAL_BASELINE.md src/stores/providerStore.ts
+  src/stores/__tests__/providerStore.test.tsx` — PASS; no matches, exit code
+  1 expected for no results.
+- `2026-06-01 19:05:06 -03:00` — `npm run typecheck` — RED; the new test
+  helper needed an explicit snapshot type. Fix applied: added a named
+  `ProviderStoreSnapshot` type and return cast.
+- `2026-06-01 19:05:45 -03:00` —
+  `npm test -- --run src/stores/__tests__/providerStore.test.tsx` — PASS.
+- `2026-06-01 19:05:45 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 19:06:11 -03:00` — `git diff --check` — RED; the new provider
+  baseline doc had a blank line at EOF. Fix applied: removed the trailing
+  blank line.
+- `2026-06-01 19:06:27 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-01 19:06:27 -03:00` — repeated provider default and secret scans —
+  PASS; no connected defaults, required model defaults, non-empty API-key
+  defaults, or key-like secret tokens found in the changed provider files.
+

@@ -5,49 +5,62 @@ const defaultProviders: ProviderConfig[] = [
   {
     id: 'openai',
     name: 'OpenAI',
-    status: 'connected',
-    model: 'gpt-4o (recommended)',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'Vision', 'Image'],
-    lastTested: '2 minutes ago',
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    status: 'connected',
-    model: 'Claude 3.5 Sonnet',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'Planning'],
-    lastTested: '1 minute ago',
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
     status: 'not-connected',
     model: '',
     apiKey: '',
-    capabilities: ['Text', 'Vision', 'Image'],
+    capabilities: ['Text', 'Code', 'Vision', 'Image'],
   },
   {
-    id: 'nvidia',
-    name: 'NVIDIA',
-    status: 'connected',
-    model: 'NVIDIA Nemotron 4 340B Instruct',
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    status: 'not-connected',
+    model: '',
     apiKey: '',
-    capabilities: ['Text', 'Vision', 'Embeddings', 'Image', 'Video'],
-    lastTested: '3 minutes ago',
+    capabilities: ['Text', 'Code', 'Planning'],
+  },
+  {
+    id: 'moonshot',
+    name: 'Kimi / Moonshot',
+    status: 'not-connected',
+    model: '',
+    apiKey: '',
+    capabilities: ['Text', 'Code', 'OpenAI-compatible'],
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    status: 'not-connected',
+    model: '',
+    apiKey: '',
+    capabilities: ['Text', 'Code', 'OpenAI-compatible'],
+  },
+  {
+    id: 'minimax',
+    name: 'MiniMax',
+    status: 'not-connected',
+    model: '',
+    apiKey: '',
+    capabilities: ['Text', 'Image', 'Video', 'Audio'],
+  },
+  {
+    id: 'opencode',
+    name: 'OpenCode adapter',
+    status: 'not-connected',
+    model: '',
+    apiKey: '',
+    capabilities: ['Code', 'External tool adapter'],
   },
   {
     id: 'custom',
     name: 'Custom OpenAI-compatible endpoint',
     status: 'not-tested',
-    model: 'custom-model',
+    model: '',
     apiKey: '',
     capabilities: [],
   },
   {
     id: 'local',
-    name: 'Local Models',
+    name: 'Local gateway',
     status: 'coming-later',
     model: '',
     apiKey: '',
@@ -72,14 +85,14 @@ export interface UsageSafety {
 export function useProviderStore() {
   const [providers, setProviders] = useState<ProviderConfig[]>(defaultProviders);
   const [routing, setRouting] = useState<ProviderRouting>({
-    codeGeneration: 'Claude / GPT',
-    dialogueGeneration: 'Gemini / Claude',
-    imageGeneration: 'OpenAI Image / Gemini / NVIDIA',
-    embeddings: 'NVIDIA',
-    fallbackModel: 'Custom endpoint',
+    codeGeneration: 'disabled',
+    dialogueGeneration: 'disabled',
+    imageGeneration: 'disabled',
+    embeddings: 'disabled',
+    fallbackModel: 'disabled',
   });
   const [safety, setSafety] = useState<UsageSafety>({
-    monthlyBudget: 100,
+    monthlyBudget: 0,
     neverSendSecrets: true,
     requireConfirmBeforePush: true,
   });
@@ -88,7 +101,7 @@ export function useProviderStore() {
     setProviders(prev =>
       prev.map(p =>
         p.id === id
-          ? { ...p, status: 'connected' as const, lastTested: 'just now' }
+          ? { ...p, status: 'not-tested' as const, lastTested: 'requires explicit credential opt-in' }
           : p
       )
     );
