@@ -14,6 +14,7 @@ import type {
 import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
 import { TILE_ASSET_KEYS } from '../visual/tileCatalog';
+import { animationSheetKeys } from '../assets/generated/assetCatalog';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
@@ -41,6 +42,10 @@ const VALID_MOVEMENT_SPEEDS = new Set([
   'quadruple',
 ]);
 const VALID_MOVEMENT_ROUTE_TARGETS = ['player', 'thisEvent', 'event'];
+const VALID_ANIMATION_DIRECTIONS = new Set(['down', 'left', 'right', 'up', 'any']);
+const REQUIRED_PLAYER_ANIMATION_DIRECTIONS = ['down', 'left', 'right', 'up'] as const;
+const REQUIRED_PLAYER_ANIMATION_ACTIONS = ['idle', 'walk'] as const;
+const ANIMATION_SHEET_KEY_SET = new Set<string>(animationSheetKeys);
 const VALID_MOVEMENT_ROUTE_STEPS = new Set([
   'moveUp',
   'moveDown',
@@ -172,7 +177,10 @@ export function validateProject(state: FullProjectState): ValidationReport {
   const projectMeta = validateProjectMeta(state.project, state.maps);
   errors.push(...projectMeta.errors);
   warnings.push(...projectMeta.warnings);
-  errors.push(...validateDatabaseInternal(state.databases));
+  for (const message of validateDatabaseInternal(state.databases)) {
+    if (message.level === 'error') errors.push(message);
+    else warnings.push(message);
+  }
   errors.push(...validateItemDatabaseInternal(state.items, state.databases));
 
   const index = buildIndex(state.items, state.databases);
@@ -467,6 +475,7 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   out.push(...validateEquipmentAndStateDatabases(db));
   out.push(...validatePartyCombatDatabases(db));
   out.push(...validateSetupProgressionDatabases(db));
+  out.push(...validateAnimationDatabase(db));
 
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
@@ -607,6 +616,88 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
       });
     }
   }
+  return out;
+}
+
+function validateAnimationDatabase(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const seenSetIds = new Set<string>();
+
+  for (const set of db.animations.sets) {
+    const source = `database/animations/${set.id}`;
+    if (!set.id || set.id.trim() === '') {
+      out.push({
+        level: 'error',
+        message: 'Animation set is missing an id',
+        source: 'database/animations',
+      });
+      continue;
+    }
+    if (seenSetIds.has(set.id)) {
+      out.push({
+        level: 'error',
+        message: `Duplicate animation set id "${set.id}"`,
+        source: 'database/animations',
+      });
+    }
+    seenSetIds.add(set.id);
+
+    set.clips.forEach((clip, index) => {
+      const clipNo = index + 1;
+      const label = `Animation set "${set.id}" clip ${clipNo}`;
+      if (!clip.action || clip.action.trim() === '') {
+        out.push({ level: 'error', message: `${label} action is required`, source });
+      }
+      if (!VALID_ANIMATION_DIRECTIONS.has(clip.direction)) {
+        out.push({ level: 'error', message: `${label} has invalid direction "${clip.direction}"`, source });
+      }
+      if (!ANIMATION_SHEET_KEY_SET.has(clip.asset)) {
+        out.push({
+          level: 'error',
+          message: `${label} references unknown animation asset "${clip.asset}"`,
+          source,
+        });
+      }
+      if (!Number.isFinite(clip.frameSize.width) || clip.frameSize.width <= 0) {
+        out.push({ level: 'error', message: `${label} frameSize.width must be a positive finite number`, source });
+      }
+      if (!Number.isFinite(clip.frameSize.height) || clip.frameSize.height <= 0) {
+        out.push({ level: 'error', message: `${label} frameSize.height must be a positive finite number`, source });
+      }
+      if (!Number.isInteger(clip.frameCount) || clip.frameCount <= 0) {
+        out.push({ level: 'error', message: `${label} frameCount must be a positive integer`, source });
+      }
+      if (!Number.isFinite(clip.fps) || clip.fps <= 0) {
+        out.push({ level: 'error', message: `${label} fps must be a positive finite number`, source });
+      }
+      if (!Number.isFinite(clip.anchor.x)) {
+        out.push({ level: 'error', message: `${label} anchor.x must be finite`, source });
+      }
+      if (!Number.isFinite(clip.anchor.y)) {
+        out.push({ level: 'error', message: `${label} anchor.y must be finite`, source });
+      }
+    });
+  }
+
+  const playerSetId = db.system.playerAnimationSet || 'player_adventurer';
+  const playerSet = db.animations.sets.find(set => set.id === playerSetId);
+  if (playerSet) {
+    for (const action of REQUIRED_PLAYER_ANIMATION_ACTIONS) {
+      for (const direction of REQUIRED_PLAYER_ANIMATION_DIRECTIONS) {
+        const hasClip = playerSet.clips.some(clip =>
+          clip.action === action && (clip.direction === direction || clip.direction === 'any'),
+        );
+        if (!hasClip) {
+          out.push({
+            level: 'warning',
+            message: `Player animation set "${playerSetId}" is missing ${action}/${direction}`,
+            source: `database/animations/${playerSetId}`,
+          });
+        }
+      }
+    }
+  }
+
   return out;
 }
 

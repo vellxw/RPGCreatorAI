@@ -10,6 +10,7 @@ import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
 import { IdField } from '../components/database/DatabaseFields';
 import { ActorsEditor } from '../components/database/ActorsEditor';
+import { AnimationsEditor } from '../components/database/AnimationsEditor';
 import { ClassesEditor } from '../components/database/ClassesEditor';
 import { EquipmentEditor } from '../components/database/EquipmentEditor';
 import { EnemiesEditor } from '../components/database/EnemiesEditor';
@@ -50,7 +51,7 @@ import type {
   WeaponData,
 } from '../types/project';
 
-type DatabaseTabKey = DatabaseListKey | 'items' | 'tilesets' | 'system';
+type DatabaseTabKey = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'system';
 
 const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'actors', label: 'Actors' },
@@ -68,6 +69,7 @@ const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'switches', label: 'Switches' },
   { key: 'variables', label: 'Variables' },
   { key: 'commonEvents', label: 'Common Events' },
+  { key: 'animations', label: 'Animations' },
   { key: 'system', label: 'System' },
 ];
 
@@ -904,7 +906,7 @@ export function DatabaseScreen() {
   const [selectedId, setSelectedId] = useState<string>('');
 
   const databases = state.databases;
-  const standaloneTab = tab === 'system' || tab === 'tilesets' || tab === 'items';
+  const standaloneTab = tab === 'system' || tab === 'tilesets' || tab === 'items' || tab === 'animations';
   const entries =
     standaloneTab
       ? []
@@ -921,7 +923,7 @@ export function DatabaseScreen() {
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
     setTab(key);
-    if (key === 'system' || key === 'tilesets' || key === 'items') {
+    if (key === 'system' || key === 'tilesets' || key === 'items' || key === 'animations') {
       setSelectedId('');
       return;
     }
@@ -933,6 +935,7 @@ export function DatabaseScreen() {
     if (key === 'system') return null;
     if (key === 'items') return state.items.items.length;
     if (key === 'tilesets') return databases.tilesets.tilesets.length;
+    if (key === 'animations') return databases.animations.sets.length;
     return ((databases[key as DatabaseListKey] as unknown) as DatabaseRecord[]).length;
   };
 
@@ -990,6 +993,11 @@ export function DatabaseScreen() {
             value={databases.tilesets}
             mapUsage={mapUsage}
             onChange={tilesets => dispatch({ type: 'UPDATE_TILESET_DATABASE', tilesets })}
+          />
+        ) : tab === 'animations' ? (
+          <AnimationsEditor
+            value={databases.animations}
+            onChange={animations => dispatch({ type: 'UPDATE_ANIMATION_DATABASE', animations })}
           />
         ) : (
           selectedEntry ? (

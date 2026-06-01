@@ -360,6 +360,43 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('System defaultCharacterHeightTiles must be a positive finite number'))).toBe(true);
   });
 
+  it('rejects invalid animation clip metadata and warns on incomplete player movement clips', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          {
+            id: 'player_adventurer',
+            display: { heightTiles: 1.5 },
+            clips: [
+              {
+                action: 'idle',
+                direction: 'down',
+                asset: 'missing_sheet',
+                frameSize: { width: 0, height: Number.NaN },
+                frameCount: 0,
+                fps: -1,
+                loop: true,
+                anchor: { x: Number.NaN, y: 54 },
+              },
+            ],
+          },
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'player_adventurer' },
+    });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('clip 1 references unknown animation asset "missing_sheet"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('clip 1 frameSize.width must be a positive finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('clip 1 frameSize.height must be a positive finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('clip 1 frameCount must be a positive integer'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('clip 1 fps must be a positive finite number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('clip 1 anchor.x must be finite'))).toBe(true);
+    expect(report.warnings.some(w => w.message.includes('Player animation set "player_adventurer" is missing walk/down'))).toBe(true);
+    expect(report.warnings.some(w => w.message.includes('Player animation set "player_adventurer" is missing idle/up'))).toBe(true);
+  });
+
   it('rejects malformed types and missing required terms', () => {
     const project = projectWith({
       types: {

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { animationAssets, editorAssets, eventAssets, gameAssets, uiAssets } from '../assetCatalog';
+import {
+  animationAssets,
+  animationSheetAssets,
+  animationSheetKeys,
+  editorAssets,
+  eventAssets,
+  gameAssets,
+  uiAssets,
+} from '../assetCatalog';
 
 describe('generated asset catalog', () => {
   it('exposes the required production game assets', () => {
@@ -57,5 +65,11 @@ describe('generated asset catalog', () => {
     expect(animationAssets.playerAdventurer.death.down).toContain('player_adventurer_death_down');
     expect(animationAssets.oldMan.idle.down).toContain('npc_old_man_idle_down');
     expect(animationAssets.shopkeeper.walk.up).toContain('npc_shopkeeper_walk_up');
+  });
+
+  it('exposes flat animation sheet keys for database validation and preview selects', () => {
+    expect(animationSheetKeys).toContain('player_adventurer_idle_down');
+    expect(animationSheetKeys).toContain('npc_shopkeeper_walk_up');
+    expect(animationSheetAssets.player_adventurer_idle_down).toContain('player_adventurer_idle_down');
   });
 });

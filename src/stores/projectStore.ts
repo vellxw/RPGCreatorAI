@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import type { Dispatch } from 'react';
 import type {
   CommonEventData,
+  AnimationDatabaseData,
   DatabaseEntries,
   DatabaseListKey,
   EventCommand,
@@ -330,6 +331,10 @@ export type ProjectAction =
   | {
       type: 'UPDATE_TILESET_DATABASE';
       tilesets: TilesetDatabaseData;
+    }
+  | {
+      type: 'UPDATE_ANIMATION_DATABASE';
+      animations: AnimationDatabaseData;
     }
   | {
       type: 'UPDATE_COMMON_EVENT_COMMANDS';
@@ -1439,6 +1444,12 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'UPDATE_TILESET_DATABASE':
       return withDatabases(state, db => {
         db.tilesets = deepClone(action.tilesets);
+        return true;
+      });
+
+    case 'UPDATE_ANIMATION_DATABASE':
+      return withDatabases(state, db => {
+        db.animations = deepClone(action.animations);
         return true;
       });
 

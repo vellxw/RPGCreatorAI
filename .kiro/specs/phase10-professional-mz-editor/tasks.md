@@ -91,7 +91,7 @@
   editors with reference usage warnings and system-default validation.
 - [x] FRA-12 / DB-007: extract and reuse the command-stack editor for common
   event command editing with undo-safe reducer behavior.
-- [ ] FRA-13 / DB-008: build the animation database V2 editor with a real
+- [x] FRA-13 / DB-008: build the animation database V2 editor with a real
   sprite-sheet preview and animation validation.
 - [ ] FRA-14 / DB-009: add database delete/rename reference safety across
   project data and editor workflows.

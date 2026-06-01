@@ -1,7 +1,20 @@
 const asset = (name: string) => new URL(`./${name}.png`, import.meta.url).href;
-const animationAsset = (prefix: string, action: string, direction: string) =>
-  asset(`${prefix}_${action}_${direction}`);
 const directions = ['down', 'left', 'right', 'up'] as const;
+const playerActions = ['idle', 'walk', 'interact', 'attack', 'hurt', 'death'] as const;
+const npcActions = ['idle', 'walk'] as const;
+
+export const animationSheetKeys = [
+  ...playerActions.flatMap(action => directions.map(direction => `player_adventurer_${action}_${direction}`)),
+  ...npcActions.flatMap(action => directions.map(direction => `npc_old_man_${action}_${direction}`)),
+  ...npcActions.flatMap(action => directions.map(direction => `npc_shopkeeper_${action}_${direction}`)),
+] as const;
+
+export const animationSheetAssets = Object.fromEntries(
+  animationSheetKeys.map(key => [key, asset(key)]),
+) as Record<(typeof animationSheetKeys)[number], string>;
+
+const animationAsset = (prefix: string, action: string, direction: string) =>
+  animationSheetAssets[`${prefix}_${action}_${direction}` as keyof typeof animationSheetAssets];
 
 function animationStripSet(prefix: string, actions: readonly string[]) {
   return Object.fromEntries(
@@ -38,16 +51,9 @@ export const gameAssets = {
 } as const;
 
 export const animationAssets = {
-  playerAdventurer: animationStripSet('player_adventurer', [
-    'idle',
-    'walk',
-    'interact',
-    'attack',
-    'hurt',
-    'death',
-  ]),
-  oldMan: animationStripSet('npc_old_man', ['idle', 'walk']),
-  shopkeeper: animationStripSet('npc_shopkeeper', ['idle', 'walk']),
+  playerAdventurer: animationStripSet('player_adventurer', playerActions),
+  oldMan: animationStripSet('npc_old_man', npcActions),
+  shopkeeper: animationStripSet('npc_shopkeeper', npcActions),
 } as const;
 
 export const editorAssets = {

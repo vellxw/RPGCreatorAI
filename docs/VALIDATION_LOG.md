@@ -4,6 +4,48 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-13 / DB-008 — animation database V2 editor and preview
+
+- `2026-06-01 13:08 -03:00` —
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — RED; the new component test could not resolve `AnimationsEditor`,
+  proving the animation database editor did not exist before implementation.
+- `2026-06-01 13:08 -03:00` —
+  `npm test -- --run src/assets/generated/__tests__/assetCatalog.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — RED; the asset catalog did not expose flat animation sheet keys and
+  animation clip validation did not report malformed clip metadata.
+- `2026-06-01 13:10 -03:00` —
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — PASS (1 file, 2 tests).
+- `2026-06-01 13:10 -03:00` —
+  `npm test -- --run src/assets/generated/__tests__/assetCatalog.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 20 tests).
+- `2026-06-01 13:10 -03:00` — `npm run typecheck` — FAIL; clip direction
+  editing used the command animation direction type, which allows `current`,
+  instead of the database clip direction type, which allows `any`.
+- `2026-06-01 13:11 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  after narrowing clip direction updates to `AnimationClipData['direction']`.
+- `2026-06-01 13:11 -03:00` —
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — PASS (1 file, 2 tests) on the final focused rerun.
+- `2026-06-01 13:11 -03:00` —
+  `npm test -- --run src/assets/generated/__tests__/assetCatalog.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 20 tests) on the final required rerun.
+- `2026-06-01 13:11 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  on the final required rerun.
+- `2026-06-01 13:11 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- `2026-06-01 13:12 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and `vite build`); Vite reported the existing chunk-size warning.
+- Fix applied: added `AnimationsEditor` and `AnimationPreview`, exposed flat
+  generated animation sheet keys/URLs for validation and preview selects,
+  added the standalone Animations database tab and reducer action, and added
+  validation for clip assets, frame sizes, frame counts, FPS, anchors, and
+  missing player idle/walk directional clips.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-12 / DB-007 — common event command-stack editing
 
 - `2026-06-01 12:54 -03:00` —
