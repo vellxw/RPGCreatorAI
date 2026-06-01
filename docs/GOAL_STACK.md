@@ -15,8 +15,8 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 6 — Playtest and debug tools (FRA-25 through FRA-26): runtime state
-  snapshots and removal/gating of placeholder AI debug UI.
+- Slice 6 — Playtest and debug tools (FRA-26): removal/gating of
+  placeholder AI debug UI.
 - Integration QA — MVP green gate (FRA-27 through FRA-35): bundled sample
   coverage, editor-runtime roundtrip, runtime smoke expansion, canonical
   verification script, feature integration, docs closeout, final report,
@@ -24,6 +24,13 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 PT-004 (FRA-25) — native runtime state snapshots now write a
+  bounded local `runtime-state-snapshot.json` file next to runtime logs through
+  an atomic temp-write/replace path. The JSON includes map/player state, gold,
+  party, switches, variables, self switches, inventory, active modal state,
+  running event ids, and frame number. Tauri exposes a bounded snapshot read,
+  and the Playtest Runtime State tab renders the native snapshot while the
+  side inspector remains explicitly labeled as simulated editor state.
 - Phase 10 PT-003 (FRA-24) — event execution now emits deterministic
   `[TRACE]` stdout rows with sequence, source, map/event/common-event ids,
   command path/type, action, and result. `EventTraceBuffer` keeps an

@@ -121,7 +121,7 @@
   reading and honest browser-mode degradation.
 - [x] FRA-24 / PT-003: add deterministic event trace output and an editor trace
   panel parsed from runtime logs.
-- [ ] FRA-25 / PT-004: add a runtime state snapshot inspector backed by local,
+- [x] FRA-25 / PT-004: add a runtime state snapshot inspector backed by local,
   bounded, atomically written snapshot files.
 - [ ] FRA-26 / PT-005: remove or gate placeholder AI/debug UI so visible MVP
   actions are real local actions.

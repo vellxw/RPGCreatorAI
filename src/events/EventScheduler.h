@@ -35,6 +35,7 @@ public:
     bool hasBlockingRunner() const;
     bool ownsRunner(const EventRunner* runner) const;
     std::vector<EventRunner*> runners();
+    std::vector<std::string> runningDebugSourceIds() const;
 
 private:
     struct RunningEvent {

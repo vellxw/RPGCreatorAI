@@ -66,6 +66,7 @@ function bridge(overrides: Partial<RpgBridge['fs']>): RpgBridge {
       status: async () => 'ready' as const,
       getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
       readLogTail: async () => ({ success: false, error: 'not stubbed' }),
+      readLatestSnapshot: async () => ({ success: false, error: 'not stubbed' }),
       openLogFolder: async () => ({ success: false, error: 'not stubbed' }),
     },
     config: {

@@ -8,6 +8,7 @@ import type {
   RuntimeLogActionResult,
   RuntimeLogInfo,
   RuntimeLogTailResult,
+  RuntimeSnapshotResult,
   RuntimeStatus,
 } from './types';
 
@@ -47,6 +48,13 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
     return {
       success: false,
       error: 'Native runtime logs are unavailable in browser mode.',
+    };
+  }
+
+  async readLatestSnapshot(_maxBytes: number): Promise<RuntimeSnapshotResult> {
+    return {
+      success: false,
+      error: 'Native runtime snapshots are unavailable in browser mode.',
     };
   }
 
@@ -135,6 +143,17 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
     }
     try {
       return await window.rpgBridge!.runtime.readLogTail(maxBytes);
+    } catch (e) {
+      return { success: false, error: (e as Error).message };
+    }
+  }
+
+  async readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult> {
+    if (!this.canLaunch()) {
+      return { success: false, error: 'Desktop runtime bridge not detected.' };
+    }
+    try {
+      return await window.rpgBridge!.runtime.readLatestSnapshot(maxBytes);
     } catch (e) {
       return { success: false, error: (e as Error).message };
     }

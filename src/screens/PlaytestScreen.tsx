@@ -17,6 +17,7 @@ import { useEditor } from '../stores/editorStore';
 import { validateProject } from '../validation/validateProject';
 import { RuntimeLogPanel } from '../components/playtest/RuntimeLogPanel';
 import { EventTracePanel } from '../components/playtest/EventTracePanel';
+import { RuntimeStatePanel } from '../components/playtest/RuntimeStatePanel';
 import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
@@ -438,9 +439,12 @@ function GamePreview({
 function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytestStore>['state'] }) {
   return (
     <div className="w-[240px] flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Zap size={14} className="text-amber-500" />
-        <span className="text-[13px] font-semibold text-gray-700">Runtime State Inspector</span>
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <span className="inline-flex items-center gap-2">
+          <Zap size={14} className="text-amber-500" />
+          <span className="text-[13px] font-semibold text-gray-700">Editor State Inspector</span>
+        </span>
+        <Badge variant="muted">simulated</Badge>
       </div>
 
       <div className="space-y-4">
@@ -712,8 +716,13 @@ function LogsPanel({
   runtimeAdapter: RuntimeLaunchAdapter;
   runtimeStatus: RuntimeStatus;
 }) {
-  const [activeTab, setActiveTab] = useState<'editor' | 'runtime' | 'validation' | 'trace'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'runtime' | 'validation' | 'trace' | 'state'>('editor');
   const [runtimeLogText, setRuntimeLogText] = useState('');
+  const [runtimeSnapshotText, setRuntimeSnapshotText] = useState('');
+  const [runtimeSnapshotPath, setRuntimeSnapshotPath] = useState<string | null>(null);
+  const [runtimeSnapshotError, setRuntimeSnapshotError] = useState<string | null>(null);
+  const [runtimeSnapshotLoading, setRuntimeSnapshotLoading] = useState(false);
+  const [runtimeSnapshotTruncated, setRuntimeSnapshotTruncated] = useState(false);
   const levelColors = {
     INFO: 'text-blue-600 bg-blue-50',
     WARN: 'text-amber-600 bg-amber-50',
@@ -740,6 +749,40 @@ function LogsPanel({
     const id = window.setInterval(refreshTraceLog, 1000);
     return () => window.clearInterval(id);
   }, [refreshTraceLog, runtimeStatus]);
+
+  const refreshRuntimeSnapshot = useCallback(async () => {
+    if (!runtimeAdapter.canLaunch()) {
+      setRuntimeSnapshotText('');
+      setRuntimeSnapshotPath(null);
+      setRuntimeSnapshotError(runtimeAdapter.getUnavailableReason());
+      setRuntimeSnapshotTruncated(false);
+      return;
+    }
+    setRuntimeSnapshotLoading(true);
+    try {
+      const snapshot = await runtimeAdapter.readLatestSnapshot(128 * 1024);
+      if (!snapshot.success) {
+        setRuntimeSnapshotText('');
+        setRuntimeSnapshotPath(snapshot.path ?? null);
+        setRuntimeSnapshotError(snapshot.error ?? 'No native runtime state snapshot has been created yet.');
+        setRuntimeSnapshotTruncated(false);
+        return;
+      }
+      setRuntimeSnapshotText(snapshot.content ?? '');
+      setRuntimeSnapshotPath(snapshot.path ?? null);
+      setRuntimeSnapshotError(null);
+      setRuntimeSnapshotTruncated(!!snapshot.truncated);
+    } finally {
+      setRuntimeSnapshotLoading(false);
+    }
+  }, [runtimeAdapter]);
+
+  useEffect(() => {
+    refreshRuntimeSnapshot();
+    if (runtimeStatus !== 'running') return;
+    const id = window.setInterval(refreshRuntimeSnapshot, 1000);
+    return () => window.clearInterval(id);
+  }, [refreshRuntimeSnapshot, runtimeStatus]);
 
   return (
     <div className="h-[180px] flex-shrink-0 bg-white border-t border-gray-200 flex">
@@ -772,6 +815,12 @@ function LogsPanel({
           >
             Event Trace
           </button>
+          <button
+            onClick={() => setActiveTab('state')}
+            className={`text-[12px] pb-1 cursor-pointer ${activeTab === 'state' ? 'text-indigo-600 border-b-2 border-indigo-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Runtime State
+          </button>
           <div className="ml-auto flex items-center gap-1.5">
             <CheckCircle2 size={12} className="text-green-500" />
             <span className="text-[11px] text-green-600 font-medium">Editor preview running</span>
@@ -802,6 +851,18 @@ function LogsPanel({
             <div className="h-full px-4 py-3 text-[12px] text-gray-500">No validation errors in the current preview session.</div>
           )}
           {activeTab === 'trace' && <EventTracePanel logText={runtimeLogText} />}
+          {activeTab === 'state' && (
+            <RuntimeStatePanel
+              available={runtimeAdapter.canLaunch()}
+              unavailableReason={runtimeAdapter.getUnavailableReason()}
+              snapshotText={runtimeSnapshotText}
+              snapshotPath={runtimeSnapshotPath}
+              error={runtimeSnapshotError}
+              loading={runtimeSnapshotLoading}
+              truncated={runtimeSnapshotTruncated}
+              onRefresh={refreshRuntimeSnapshot}
+            />
+          )}
         </div>
       </div>
     </div>

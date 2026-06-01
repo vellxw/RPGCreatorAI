@@ -158,7 +158,7 @@ Each native launch creates a log file under:
 If `%APPDATA%` is unavailable, the shell uses `%LOCALAPPDATA%`, then
 `$HOME/.rpgcreatorai/runtime-logs`.
 
-The runtime bridge exposes three narrow log operations:
+The runtime bridge exposes narrow log and snapshot operations:
 
 - `runtime_latest_log`: returns the current in-memory log path, or the newest
   `runtime-*.log` file in the runtime log directory.
@@ -167,6 +167,9 @@ The runtime bridge exposes three narrow log operations:
 - `runtime_open_log_folder`: opens the allowlisted runtime log directory with
   the platform file explorer. It does not accept an arbitrary path from the
   renderer.
+- `runtime_read_latest_snapshot`: returns the latest
+  `runtime-state-snapshot.json` content, capped at 128 KiB regardless of the
+  requested value.
 
 The Playtest bottom panel has tabs for editor-preview logs, runtime logs,
 validation output, and event trace. Runtime log polling runs while the native
@@ -179,10 +182,14 @@ into bounded runtime logs, the editor parses the latest log tail directly and
 shows map-event, common-event, warning, and branch filters without adding
 runtime-to-editor IPC.
 
+Native launches set `RPG_RUNTIME_DEBUG_SNAPSHOT_PATH` to a stable file in the
+runtime log directory. The runtime writes state snapshots through a temp file
+and replace step; the editor reads the bounded latest snapshot for the
+Runtime State tab.
+
 ## What The Current Bridge Does Not Add
 
 - No runtime-to-editor IPC.
 - No embedded runtime viewport.
 - No remote runtime.
 - No automatic source project save before launch.
-- No runtime state snapshot reader.

@@ -26,6 +26,7 @@ set(PHASE2_TEST_SOURCES
     test_render_layer_roles.cpp
     test_render_snapshot_order.cpp
     test_runtime_project_validator.cpp
+    test_runtime_debug_snapshot.cpp
     test_dialogue_choices.cpp
 )
 

@@ -50,6 +50,20 @@ pub struct RuntimeLogTailResult {
 
 #[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
+pub struct RuntimeSnapshotReadResult {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    pub truncated: bool,
+    pub max_bytes: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct RuntimeLogActionResult {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -128,6 +142,10 @@ fn runtime_logs_dir() -> Result<PathBuf, String> {
     Ok(app_data_dir()?.join("runtime-logs"))
 }
 
+fn runtime_debug_snapshot_path(runtime_logs_dir: &Path) -> PathBuf {
+    runtime_logs_dir.join("runtime-state-snapshot.json")
+}
+
 fn create_runtime_log_file() -> Result<(PathBuf, fs::File), String> {
     let dir = runtime_logs_dir()?;
     fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
@@ -178,6 +196,20 @@ fn latest_runtime_log_path(state: &AppState) -> Result<PathBuf, String> {
     latest_runtime_log_in_dir(&dir).ok_or_else(|| "no runtime log has been created yet".to_string())
 }
 
+fn latest_runtime_snapshot_path(state: &AppState) -> Result<PathBuf, String> {
+    if let Some(path) = state.latest_runtime_snapshot.lock().unwrap().clone() {
+        if path.is_file() {
+            return Ok(path);
+        }
+    }
+    let path = runtime_debug_snapshot_path(&runtime_logs_dir()?);
+    if path.is_file() {
+        Ok(path)
+    } else {
+        Err("no runtime state snapshot has been created yet".to_string())
+    }
+}
+
 fn read_runtime_log_tail_at(path: &Path, max_bytes: u64) -> Result<RuntimeLogTailResult, String> {
     let max_bytes = max_bytes.min(MAX_RUNTIME_LOG_TAIL_BYTES);
     let mut file = fs::File::open(path).map_err(|e| format!("open {}: {e}", path.display()))?;
@@ -192,6 +224,32 @@ fn read_runtime_log_tail_at(path: &Path, max_bytes: u64) -> Result<RuntimeLogTai
     file.read_to_end(&mut bytes)
         .map_err(|e| format!("read {}: {e}", path.display()))?;
     Ok(RuntimeLogTailResult {
+        success: true,
+        path: Some(path.to_string_lossy().to_string()),
+        content: Some(String::from_utf8_lossy(&bytes).to_string()),
+        truncated: start > 0,
+        max_bytes: max_bytes as usize,
+        error: None,
+    })
+}
+
+fn read_runtime_snapshot_at(
+    path: &Path,
+    max_bytes: u64,
+) -> Result<RuntimeSnapshotReadResult, String> {
+    let max_bytes = max_bytes.min(MAX_RUNTIME_SNAPSHOT_BYTES);
+    let mut file = fs::File::open(path).map_err(|e| format!("open {}: {e}", path.display()))?;
+    let len = file
+        .metadata()
+        .map_err(|e| format!("metadata {}: {e}", path.display()))?
+        .len();
+    let start = len.saturating_sub(max_bytes);
+    file.seek(SeekFrom::Start(start))
+        .map_err(|e| format!("seek {}: {e}", path.display()))?;
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes)
+        .map_err(|e| format!("read {}: {e}", path.display()))?;
+    Ok(RuntimeSnapshotReadResult {
         success: true,
         path: Some(path.to_string_lossy().to_string()),
         content: Some(String::from_utf8_lossy(&bytes).to_string()),
@@ -254,6 +312,11 @@ pub fn runtime_launch(
             });
         }
     };
+    let snapshot_path = log_path
+        .parent()
+        .map(runtime_debug_snapshot_path)
+        .unwrap_or_else(|| PathBuf::from("runtime-state-snapshot.json"));
+    let _ = fs::remove_file(&snapshot_path);
     let stdout = match log_file.try_clone() {
         Ok(file) => file,
         Err(e) => {
@@ -281,6 +344,7 @@ pub fn runtime_launch(
 
     let child = match std::process::Command::new(&exe)
         .current_dir(&project_root)
+        .env("RPG_RUNTIME_DEBUG_SNAPSHOT_PATH", &snapshot_path)
         .stdout(Stdio::from(stdout))
         .stderr(Stdio::from(stderr))
         .spawn()
@@ -299,6 +363,7 @@ pub fn runtime_launch(
 
     let pid = child.id();
     *state.latest_runtime_log.lock().unwrap() = Some(log_path.clone());
+    *state.latest_runtime_snapshot.lock().unwrap() = Some(snapshot_path);
     *state.runtime_process.lock().unwrap() = Some(child);
 
     Ok(RuntimeLaunchResult {
@@ -403,6 +468,32 @@ mod tests {
         assert_eq!(result.max_bytes, MAX_RUNTIME_LOG_TAIL_BYTES as usize);
         assert!(result.content.unwrap().ends_with("TAIL"));
     }
+
+    #[test]
+    fn runtime_debug_snapshot_path_stays_in_runtime_logs_dir() {
+        let tmp = tempfile::TempDir::new().unwrap();
+
+        let path = runtime_debug_snapshot_path(tmp.path());
+
+        assert_eq!(path.parent(), Some(tmp.path()));
+        assert_eq!(path.file_name().and_then(|name| name.to_str()), Some("runtime-state-snapshot.json"));
+    }
+
+    #[test]
+    fn read_runtime_snapshot_caps_to_bounded_json_size() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let path = tmp.path().join("runtime-state-snapshot.json");
+        let mut body = vec![b'a'; (MAX_RUNTIME_SNAPSHOT_BYTES as usize) + 16];
+        body.extend_from_slice(br#"{"frameNumber":9}"#);
+        std::fs::write(&path, body).unwrap();
+
+        let result = read_runtime_snapshot_at(&path, MAX_RUNTIME_SNAPSHOT_BYTES * 2).unwrap();
+
+        assert!(result.success);
+        assert!(result.truncated);
+        assert_eq!(result.max_bytes, MAX_RUNTIME_SNAPSHOT_BYTES as usize);
+        assert!(result.content.unwrap().ends_with(r#"{"frameNumber":9}"#));
+    }
 }
 
 #[tauri::command]
@@ -451,6 +542,35 @@ pub fn runtime_read_log_tail(
 }
 
 #[tauri::command]
+pub fn runtime_read_latest_snapshot(
+    state: State<'_, AppState>,
+    max_bytes: u64,
+) -> Result<RuntimeSnapshotReadResult, String> {
+    let capped = max_bytes.min(MAX_RUNTIME_SNAPSHOT_BYTES) as usize;
+    let path = match latest_runtime_snapshot_path(&state) {
+        Ok(path) => path,
+        Err(e) => {
+            return Ok(RuntimeSnapshotReadResult {
+                success: false,
+                error: Some(e),
+                max_bytes: capped,
+                ..Default::default()
+            });
+        }
+    };
+    match read_runtime_snapshot_at(&path, max_bytes) {
+        Ok(result) => Ok(result),
+        Err(e) => Ok(RuntimeSnapshotReadResult {
+            success: false,
+            path: Some(path.to_string_lossy().to_string()),
+            error: Some(e),
+            max_bytes: capped,
+            ..Default::default()
+        }),
+    }
+}
+
+#[tauri::command]
 pub fn runtime_open_log_folder() -> Result<RuntimeLogActionResult, String> {
     let dir = runtime_logs_dir()?;
     fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
@@ -474,3 +594,4 @@ pub fn runtime_open_log_folder() -> Result<RuntimeLogActionResult, String> {
 }
 
 const MAX_RUNTIME_LOG_TAIL_BYTES: u64 = 256 * 1024;
+const MAX_RUNTIME_SNAPSHOT_BYTES: u64 = 128 * 1024;

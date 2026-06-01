@@ -15,6 +15,7 @@
 #include "database/RpgDatabases.h"
 #include "runtime/BattleSystem.h"
 #include "runtime/BattleSummarySystem.h"
+#include "runtime/RuntimeDebugSnapshot.h"
 #include "runtime/MenuSystem.h"
 #include "runtime/ShopSystem.h"
 #include "types/ProjectTypes.h"
@@ -51,6 +52,7 @@ public:
     const GameState& getGameState() const { return state; }
     const MapScene& getCurrentScene() const { return currentScene; }
     const rpg::RpgDatabases& getDatabases() const { return databases; }
+    rpg::RuntimeDebugSnapshot buildRuntimeDebugSnapshot(std::uint64_t frameNumber) const;
 
 private:
     bool loadMap(const std::string& mapId, bool clearScheduledRunners = true);

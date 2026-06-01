@@ -4,6 +4,63 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-25 / PT-004 — runtime state snapshot inspector
+
+- `2026-06-01 15:34:12 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new `tests/test_runtime_debug_snapshot.cpp` intentionally failed
+  because `runtime/RuntimeDebugSnapshot.h` did not exist.
+- `2026-06-01 15:34:12 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — RED; `RuntimeStatePanel` and `DesktopRuntimeAdapter.readLatestSnapshot`
+  did not exist yet.
+- `2026-06-01 15:35:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::runtime_debug_snapshot_path_stays_in_runtime_logs_dir -- --exact`
+  — RED; snapshot path/read helpers and size cap were not implemented.
+- `2026-06-01 15:39:12 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings and
+  `RPGTests` passed.
+- `2026-06-01 15:39:12 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::runtime_debug_snapshot_path_stays_in_runtime_logs_dir -- --exact`
+  — PASS.
+- `2026-06-01 15:39:12 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — PASS; 2 files and 9 tests passed.
+- `2026-06-01 15:40:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::read_runtime_snapshot_caps_to_bounded_json_size -- --exact`
+  — PASS.
+- `2026-06-01 15:40:30 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:41:50 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings,
+  Ninja reported no work to do, and `RPGTests` passed.
+- `2026-06-01 15:41:50 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 25 Rust tests passed.
+- `2026-06-01 15:41:50 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — PASS; 2 files and 9 tests passed on the final required rerun.
+- `2026-06-01 15:41:50 -03:00` — `npm run build` — PASS; `tsc --noEmit`
+  and Vite build completed, with the existing chunk-size warning only.
+- `2026-06-01 15:42:30 -03:00` — `npm run typecheck` — PASS on the exact
+  Linear-required frontend validation command.
+- `2026-06-01 15:42:30 -03:00` —
+  `$env:RPG_RUNTIME_DEBUG_SNAPSHOT_PATH=<temp>; powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build; ConvertFrom-Json <temp>`
+  — PASS; runtime stayed alive, smoke reported `SMOKE PASSED`, and the
+  generated snapshot parsed with `mapId=town` and `frameNumber=55`.
+- `2026-06-01 15:42:30 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied so far: added deterministic runtime snapshot JSON
+  serialization, atomic temp-write/replace helper, `Game` snapshot assembly,
+  periodic `Application` snapshot writing via
+  `RPG_RUNTIME_DEBUG_SNAPSHOT_PATH`, Tauri bounded snapshot read IPC, adapter
+  bridge methods, and the Playtest Runtime State tab with honest browser
+  unavailability.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-24 / PT-003 — deterministic event trace output
 
 - `2026-06-01 15:21:25 -03:00` —

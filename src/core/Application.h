@@ -4,6 +4,8 @@
 #include "platform/AudioSystem.h"
 #include "renderer/Renderer2D.h"
 #include "core/Game.h"
+#include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -24,12 +26,17 @@ public:
 private:
     void renderFrameOnce();           // one beginFrame/render/endFrame pair
     bool snapshot(const std::string& outputDir, const std::string& name);
+    void configureRuntimeDebugSnapshot();
+    void writeRuntimeDebugSnapshot();
 
     Window window;
     InputManager inputManager;
     rpg::AudioSystem audioSystem;
     Renderer2D renderer;
     std::unique_ptr<Game> game;
+    std::filesystem::path runtimeDebugSnapshotFile;
+    std::uint64_t runtimeDebugFrame = 0;
+    float runtimeDebugSnapshotAccumulator = 0.0f;
     
     bool isRunning = false;
 };

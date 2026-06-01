@@ -76,6 +76,15 @@ export interface RuntimeLogTailResult {
   error?: string;
 }
 
+export interface RuntimeSnapshotResult {
+  success: boolean;
+  path?: string;
+  content?: string;
+  truncated?: boolean;
+  maxBytes?: number;
+  error?: string;
+}
+
 export interface RuntimeLogActionResult {
   success: boolean;
   error?: string;
@@ -89,6 +98,7 @@ export interface RuntimeLaunchAdapter {
   kill(): Promise<void>;
   getLatestLog(): Promise<RuntimeLogInfo>;
   readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+  readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult>;
   openLogFolder(): Promise<RuntimeLogActionResult>;
   getUnavailableReason(): string | null;
 }

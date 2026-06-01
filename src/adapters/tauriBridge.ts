@@ -13,6 +13,7 @@ import type {
   RuntimeLogActionResult,
   RuntimeLogInfo,
   RuntimeLogTailResult,
+  RuntimeSnapshotResult,
 } from './types';
 
 function isTauri(): boolean {
@@ -57,6 +58,8 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
       getLatestLog: () => invoke('runtime_latest_log') as Promise<RuntimeLogInfo>,
       readLogTail: (maxBytes: number) =>
         invoke('runtime_read_log_tail', { maxBytes }) as Promise<RuntimeLogTailResult>,
+      readLatestSnapshot: (maxBytes: number) =>
+        invoke('runtime_read_latest_snapshot', { maxBytes }) as Promise<RuntimeSnapshotResult>,
       openLogFolder: () => invoke('runtime_open_log_folder') as Promise<RuntimeLogActionResult>,
     },
     config: {

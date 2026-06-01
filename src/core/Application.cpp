@@ -2,11 +2,17 @@
 #include "world/ProjectLoader.h"
 #include "core/Logger.h"
 #include "runtime/RuntimeProjectValidator.h"
+#include "runtime/RuntimeDebugSnapshot.h"
 #include <SDL.h>
 #include <algorithm>
 #include <array>
+#include <cstdlib>
 #include <filesystem>
 #include <string>
+
+namespace {
+constexpr float kRuntimeDebugSnapshotIntervalSeconds = 0.25f;
+}
 
 Application::Application() {}
 Application::~Application() {}
@@ -61,6 +67,8 @@ bool Application::initialize() {
         Logger::error("Failed to initialize game");
         return false;
     }
+    configureRuntimeDebugSnapshot();
+    writeRuntimeDebugSnapshot();
 
     isRunning = true;
     return true;
@@ -84,6 +92,12 @@ void Application::run() {
         lastTime = currentTime;
 
         game->update(inputManager, dt);
+        ++runtimeDebugFrame;
+        runtimeDebugSnapshotAccumulator += dt;
+        if (runtimeDebugSnapshotAccumulator >= kRuntimeDebugSnapshotIntervalSeconds) {
+            runtimeDebugSnapshotAccumulator = 0.0f;
+            writeRuntimeDebugSnapshot();
+        }
 
         renderer.beginFrame();
         game->render(renderer);
@@ -307,4 +321,24 @@ bool Application::runSmokeShots(const std::string& outputDir) {
 
     Logger::info("Smoke shots complete.");
     return true;
+}
+
+void Application::configureRuntimeDebugSnapshot() {
+    runtimeDebugSnapshotFile.clear();
+    runtimeDebugFrame = 0;
+    runtimeDebugSnapshotAccumulator = 0.0f;
+    if (const char* path = std::getenv("RPG_RUNTIME_DEBUG_SNAPSHOT_PATH")) {
+        if (*path) runtimeDebugSnapshotFile = path;
+    }
+}
+
+void Application::writeRuntimeDebugSnapshot() {
+    if (runtimeDebugSnapshotFile.empty() || !game) return;
+    std::string error;
+    if (!rpg::writeRuntimeDebugSnapshotAtomic(
+            runtimeDebugSnapshotFile,
+            game->buildRuntimeDebugSnapshot(runtimeDebugFrame),
+            &error)) {
+        Logger::warning("Runtime debug snapshot write failed: " + error);
+    }
 }

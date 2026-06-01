@@ -224,6 +224,14 @@ void EventRunner::traceCommandType(const std::string& commandType,
     }
 }
 
+std::string EventRunner::debugRunningSourceId() const {
+    if (!executing) return {};
+    const EventTraceSource source = activeTraceSource();
+    if (!source.commonEventId.empty()) return "common:" + source.commonEventId;
+    if (!source.eventId.empty()) return "map:" + source.mapId + ":" + source.eventId;
+    return source.sourceType;
+}
+
 void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd,
                                  const std::string& commandPath) {
     if (!cmd) return;

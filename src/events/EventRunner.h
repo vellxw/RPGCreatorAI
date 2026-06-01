@@ -96,6 +96,7 @@ public:
     void update(float dt);
     bool isRunning() const { return executing; }
     void waitForMs(int ms);
+    std::string debugRunningSourceId() const;
 
     MapTransferRequest consumeTransferRequest();
     ShopOpenRequest consumeShopRequest();

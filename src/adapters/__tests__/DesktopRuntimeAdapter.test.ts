@@ -19,6 +19,7 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
       status: async () => 'ready' as const,
       getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
       readLogTail: async () => ({ success: false, error: 'not stubbed' }),
+      readLatestSnapshot: async () => ({ success: false, error: 'not stubbed' }),
       openLogFolder: async () => ({ success: false, error: 'not stubbed' }),
       ...overrides,
     },
@@ -107,5 +108,28 @@ describe('DesktopRuntimeAdapter (Phase 5)', () => {
     await expect(a.readLatestLogTail(1024)).resolves.toMatchObject({ content: '[INFO] boot' });
     await expect(a.openLogFolder()).resolves.toMatchObject({ success: true });
     expect(calls).toEqual([1024]);
+  });
+
+  it('routes bounded runtime snapshot access through the bridge', async () => {
+    const calls: unknown[] = [];
+    window.rpgBridge = bridge({
+      readLatestSnapshot: async (maxBytes) => {
+        calls.push(maxBytes);
+        return {
+          success: true,
+          path: 'C:\\runtime-logs\\runtime-state-snapshot.json',
+          content: '{"frameNumber":1}',
+          truncated: false,
+          maxBytes,
+        };
+      },
+    });
+    const a = new DesktopRuntimeAdapter();
+
+    await expect(a.readLatestSnapshot(4096)).resolves.toMatchObject({
+      success: true,
+      content: '{"frameNumber":1}',
+    });
+    expect(calls).toEqual([4096]);
   });
 });

@@ -123,3 +123,13 @@ std::vector<EventRunner*> EventScheduler::runners() {
     }
     return out;
 }
+
+std::vector<std::string> EventScheduler::runningDebugSourceIds() const {
+    std::vector<std::string> out;
+    for (const auto& event : runningEvents) {
+        if (event.runner && event.runner->isRunning()) {
+            out.push_back(event.candidate.key);
+        }
+    }
+    return out;
+}

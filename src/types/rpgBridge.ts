@@ -12,6 +12,7 @@ import type {
   RuntimeLogActionResult,
   RuntimeLogInfo,
   RuntimeLogTailResult,
+  RuntimeSnapshotResult,
 } from '../adapters/types';
 
 export interface OpenDialogResult {
@@ -47,6 +48,7 @@ export interface RpgBridge {
     status(): Promise<RuntimeStatus>;
     getLatestLog(): Promise<RuntimeLogInfo>;
     readLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+    readLatestSnapshot(maxBytes: number): Promise<RuntimeSnapshotResult>;
     openLogFolder(): Promise<RuntimeLogActionResult>;
   };
   config: {

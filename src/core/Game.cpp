@@ -11,6 +11,7 @@
 #include <SDL.h>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 namespace {
 
@@ -1037,4 +1038,44 @@ void Game::pumpEvents(float dt) {
 bool Game::isEventRunnerRunning() const {
     return (eventRunner && eventRunner->isRunning()) ||
            (eventScheduler && eventScheduler->hasBlockingRunner());
+}
+
+rpg::RuntimeDebugSnapshot Game::buildRuntimeDebugSnapshot(std::uint64_t frameNumber) const {
+    rpg::RuntimeDebugSnapshot snapshot;
+    snapshot.frameNumber = frameNumber;
+    snapshot.mapId = state.getCurrentMapId();
+    snapshot.playerX = state.getPlayerX();
+    snapshot.playerY = state.getPlayerY();
+    snapshot.playerDirection = directionToString(state.getPlayerDirection());
+    snapshot.gold = state.getGold();
+    snapshot.party = state.getParty();
+
+    for (const auto& [key, value] : state.getSwitches()) {
+        snapshot.switches[key] = value;
+    }
+    for (const auto& [key, value] : state.getVariables()) {
+        snapshot.variables[key] = value;
+    }
+    for (const auto& [key, value] : state.getSelfSwitches()) {
+        snapshot.selfSwitches[key] = value;
+    }
+    for (const auto& [key, value] : state.getInventory()) {
+        snapshot.inventory[key] = value;
+    }
+
+    snapshot.activeDialogue = dialogue.isActive();
+    snapshot.activeMenu = menuSystem.isOpen();
+    snapshot.activeShop = shopSystem.isOpen();
+    snapshot.activeBattle = battleSummarySystem.isOpen();
+
+    if (eventRunner) {
+        const std::string id = eventRunner->debugRunningSourceId();
+        if (!id.empty()) snapshot.runningEventIds.push_back(id);
+    }
+    if (eventScheduler) {
+        auto ids = eventScheduler->runningDebugSourceIds();
+        snapshot.runningEventIds.insert(snapshot.runningEventIds.end(), ids.begin(), ids.end());
+    }
+
+    return snapshot;
 }
