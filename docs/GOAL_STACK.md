@@ -15,18 +15,29 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 4 — Database V2: remaining dedicated tilesets/items/types/terms/
-  animations editors, richer weapons/armors/states fields, and common-event
-  command editing.
-- Slice 5 — Runtime MZ foundation: runtime project validator, interactive
-  choices, movement routes, event priority/Y-sort, foreground occlusion, and
-  local audio v1.
-- Slice 6 — Playtest and programmer tools: current map/event playtest,
-  integrated logs, event trace, runtime state inspector, and deterministic
+- Slice 4 — Database V2 closeout (FRA-6 through FRA-14): reusable editor
+  framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
+  enemies/troops/quests/shops/switches/variables/system/animations editors,
+  common-event command editing, and database reference safety.
+- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): runtime project
+  validator, interactive choices UI, event-target movement routes, event
+  priority/Y-sort, foreground occlusion, local audio v1, and deterministic
   plugin-command v1.
+- Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
+  current-map, and selected-event playtest sessions, bounded native logs,
+  event trace, runtime state snapshots, and removal/gating of placeholder AI
+  debug UI.
+- Integration QA — MVP green gate (FRA-27 through FRA-35): bundled sample
+  coverage, editor-runtime roundtrip, runtime smoke expansion, canonical
+  verification script, feature integration, docs closeout, final report,
+  commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 MVP-000 (FRA-5) — repository docs now lock the remaining MVP
+  closeout scope against Linear issues FRA-6 through FRA-35, including
+  Database V2, Runtime MZ foundation, Playtest/Debug tools, Integration QA,
+  validation evidence, commit/push, and final reporting expectations.
 - Phase 10 Slice 4B — Database V2 types/terms foundation: project data now
   includes `data/database/types.json` and `data/database/terms.json`; the
   TypeScript schema, browser/export/import adapters, desktop Tauri

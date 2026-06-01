@@ -190,3 +190,59 @@ tileset database loading.
   required equipment slots, empty currency units, and missing required term
   labels. Cross-reference use of these type ids is intentionally staged for
   the richer dedicated database editors.
+
+## Phase 10 MVP Closeout Design
+
+The MVP closeout is governed by Linear issues `FRA-5` through `FRA-35` and
+the local plan in `docs/superpowers/plans/2026-06-01-rpgcreatorai-mvp-linear-backlog.md`.
+The repository docs remain the source of truth for implementation scope, while
+Linear tracks execution status, validation evidence, commits, and push results.
+
+### Database V2 Closeout
+
+- Database V2 work completes the current generic database surface by extracting
+  shared list/detail and field primitives, then layering dedicated editors on
+  top of the existing project data model.
+- Specialized editors shall preserve current database JSON shapes unless an
+  active issue explicitly calls for a schema change. Editor refactors must keep
+  reducer actions, undo/redo, dirty tracking, browser persistence, Tauri
+  persistence, and import/export behavior deterministic.
+- Reference selection and reference safety live in shared validation/indexing
+  helpers so delete and rename behavior is consistent across maps, events,
+  common events, database rows, and system defaults.
+
+### Runtime MZ Foundation
+
+- Runtime validation runs before native startup and checks data relationships
+  that would otherwise fail late in map loading, event execution, rendering,
+  audio, or save/load.
+- Choices, event-target movement routes, priority/Y-sort rendering,
+  foreground occlusion, local audio, and plugin commands are runtime features.
+  `EventRunner` may request behavior, but `Game`, `MapScene`, renderer, audio,
+  and debug systems remain responsible for their own domains.
+- Plugin command v1 is an allowlisted deterministic dispatch surface only. It
+  must not become a scripting engine, arbitrary code execution layer, network
+  hook, or AI provider integration.
+
+### Playtest And Debug Tools
+
+- Playtest sessions are generated as temporary project copies for project
+  start, current map, and selected event modes. Source project files are never
+  mutated by launch preparation.
+- Native runtime evidence flows through bounded local files and stdout/stderr:
+  logs, validation output, event trace rows, and state snapshots. Browser mode
+  must label simulated or unavailable native evidence honestly.
+- Placeholder AI/debug controls are not MVP features. Visible controls must
+  either perform real local actions or be removed/gated as future integration
+  surfaces.
+
+### Integration QA
+
+- Integration issues run sequentially after feature issues. They reconcile
+  Database V2, Runtime MZ, Playtest/Debug, sample data, scripts, smoke
+  coverage, and docs into one green MVP state.
+- The final green gate is `scripts/dev/verify.ps1` with runtime smoke and
+  editor-runtime roundtrip included by default when dependencies exist.
+- Phase 10 MVP can be marked complete only after validation evidence is logged
+  in `docs/VALIDATION_LOG.md`, docs reflect actual behavior, and the final
+  commit is pushed to the expected `origin`.

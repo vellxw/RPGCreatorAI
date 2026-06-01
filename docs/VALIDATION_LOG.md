@@ -4,6 +4,22 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-5 / MVP-000 — Phase 10 MVP scope lock
+
+- `2026-05-31 23:34 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on the touched markdown files.
+- `2026-05-31 23:34 -03:00` — `git diff --check` — PASS after adding this
+  validation-log entry; same LF-to-CRLF warnings only.
+- Change type: planning/docs-only. No configure, build, runtime smoke, or
+  test run was required by this Linear issue.
+- Fix applied: updated Phase 10 requirements/design/tasks, goal stack, and
+  RPG systems matrix so the remaining MVP work maps to Linear issues
+  FRA-6 through FRA-35 with conservative system statuses and explicit
+  non-goals.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 Slice 3B — runtime event page activation
 
 - `2026-05-20 09:43 -03:00` —

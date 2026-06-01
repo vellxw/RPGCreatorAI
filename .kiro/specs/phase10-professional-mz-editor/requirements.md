@@ -60,12 +60,60 @@ without copying proprietary assets, formats, or runtime dependencies.
     editor-side validation, C++ map/common-event parsing, and deterministic
     runtime execution for player-target routes.
 
+## Phase 10 MVP Closeout
+
+The Phase 10 MVP closeout is tracked by Linear issues `FRA-5` through
+`FRA-35` in the `RPGCreatorAI Usable MVP` project. The following outcomes
+are P0 unless explicitly marked otherwise:
+
+1. Database V2 shall expose reusable editor primitives and dedicated editors
+   for tilesets, items, weapons, armors, states, actors, classes, skills,
+   enemies, troops, quests, shops, switches, variables, system data, common
+   events, and animations.
+2. Database delete and rename actions shall surface reference safety warnings
+   before users can break maps, event commands, runtime references, or sample
+   project data.
+3. The native runtime shall validate project data before startup and fail
+   early with actionable errors instead of launching malformed projects.
+4. Runtime choices shall be visible and interactively selectable. Event
+   execution shall resume from the selected branch, not from a default-first
+   fallback.
+5. Movement routes shall support event targets in addition to the player while
+   keeping mutable runtime positions separate from authored map JSON.
+6. Runtime event rendering shall support below/same/above priority, same-layer
+   Y-sort ordering, and foreground layer occlusion.
+7. Local audio v1 shall load project-owned BGM/SFX metadata and perform
+   deterministic, local playback or explicit logged skips when audio is
+   unavailable.
+8. Deterministic plugin command v1 shall support allowlisted commands such as
+   `debug.log` without adding a scripting VM or arbitrary code execution.
+9. Playtest shall support project-start, current-map, and selected-event
+   sessions without mutating source project files.
+10. The editor shall expose bounded native runtime logs, validation output,
+    event trace output, and runtime state snapshots from the playtest surface.
+11. Placeholder AI/debug UI that advertises unavailable generation or
+    explanation features shall be removed or gated before MVP release.
+12. The bundled sample shall exercise the MVP runtime/editor feature set:
+    choices, event pages/self switches, scheduled common events, event-target
+    movement, foreground occlusion, local audio request, plugin command,
+    database references, playtest modes, and validation.
+13. The MVP green gate shall provide one canonical verification path covering
+    frontend typecheck/tests/build, C++ configure/build/tests, Rust tests,
+    Tauri content verification, runtime smoke, and editor-runtime roundtrip.
+14. MVP documentation shall describe the real local workflow for opening,
+    editing, validating, saving, playtesting, launching, debugging, and
+    smoke-testing projects.
+
 ## Non-Goals
 
 - No RPG Maker proprietary file formats or assets.
-- No general scripting/plugin execution in this slice.
+- No general scripting VM.
 - No AI runtime dependency.
+- No AI runtime provider layer.
+- No marketplace.
+- No network or cloud storage.
 - No autotile rules in Slice 2.
-- No autonomous event movement in this Slice 3D follow-up. Player-target
-  `setMovementRoute` is supported as the first deterministic movement-route
-  baseline; event-target motion remains future Runtime MZ foundation work.
+- No proprietary RPG Maker compatibility target.
+- No installer polish beyond the current Tauri debug/dev build.
+- No autonomous event movement outside deterministic event-command movement
+  routes in this MVP.

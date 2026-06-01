@@ -1,41 +1,46 @@
 # RPG Systems Matrix
 
-Status snapshot of every system targeted by Phase 6. Updated at the end of
-each slice.
+Status snapshot of every system targeted by the Phase 10 MVP closeout. The
+matrix is conservative: a row only graduates from `partial` to `impl` when
+schema, editor, and runtime support are real, and only graduates to `val`
+when the relevant validation and automated tests exist.
 
 Legend:
 
-- `n/s` — not started
-- `partial` — schema exists, partial editor or runtime
-- `impl` — schema, editor, and runtime in place
-- `val` — also covered by automated tests
+- `n/s` - not started
+- `partial` - schema exists, partial editor or runtime
+- `impl` - schema, editor, and runtime in place
+- `val` - also covered by automated tests
 
 | System | Status | Schema | Editor | Runtime | Validation | Tests | Notes |
 |--------|--------|--------|--------|---------|------------|-------|-------|
-| Project metadata | val | yes | yes | yes | yes | yes | Phase 8 adds backward-compatible visual profiles for aspect ratio, resolution, camera mode, tile size, and zoom |
-| Maps + tilesets / sprites | val | yes | yes | yes | yes | yes | Phase 8 adds full-bleed generated tiles, no-gap validation, scene templates, and widescreen visual QA |
-| Events (id, position, trigger, solid, sprite, pages) | val | yes | yes | yes | yes | yes | Phase 10 Slice 3C adds active-page autorun/parallel scheduling with separate runner contexts |
-| Event commands v0 (showText, setFlag, ifFlag, addItem, transferMap, playSound) | val | yes | yes | yes | yes | yes | Phase 1/2 |
-| Event commands v1 (choices, vars, gold, quest, shop, battle, common events, self switches) | val | yes | yes | yes | yes | yes | Phase 10 Slice 3B executes controlSelfSwitch/ifSelfSwitch |
-| Switches (typed) | val | yes | yes | yes | yes | yes | Slice 1/4 |
-| Variables (typed) | val | yes | yes | yes | yes | yes | Slice 1/4 |
-| Self switches | val | yes | yes | yes | yes | yes | Phase 10 Slice 3B adds active-page conditions plus control/branch command execution scoped by map/event |
-| Common events | val | yes | partial | yes | yes | yes | Slice 3C runs switch-conditioned autorun/parallel common events; editor command-list editing remains Slice 4 |
-| Items DB | val | yes | partial | yes | yes | yes | Phase 2 / Slice 1 |
-| Actors / party | val | yes | yes | yes | yes | yes | Slice 1/6/7 |
-| Classes | val | yes | yes | yes | yes | yes | Slice 1/7 |
-| Skills | impl | yes | yes | yes | yes | partial | Slice 1/7; active battle skill selection remains future work |
-| Equipment (stat modifiers) | impl | yes | partial | yes | yes | partial | Slice 7 (battle integration done) |
-| Enemies | val | yes | yes | yes | yes | yes | Slice 1/8 |
-| Troops | val | yes | yes | yes | yes | yes | Slice 1/8 |
-| Battle system v1 | val | yes | yes | yes | yes | yes | Slice 8 deterministic core; Phase 7 adds visible result / reward presentation |
-| Quests | val | yes | yes | yes | yes | yes | Slice 1/5; Phase 7 adds visible quest journal UI |
-| Shops | val | yes | yes | yes | yes | yes | Slice 9 data flow; Phase 7 adds real modal buy UI with gold checks |
-| Inventory + gold | val | yes | yes | yes | yes | yes | Slice 6; Phase 7 adds visible inventory UI |
-| System settings | val | yes | yes | yes | yes | yes | Slice 1/2; Phase 8 adds shared editor/runtime visual interpretation |
-| Save/load (Phase 6 v2) | val | yes | n/a | yes | yes | yes | Migrates Phase 2 saves |
-| Audio (BGM/SFX) | partial | playSound | partial | logged stub | partial | partial | Future audiovisual polish phase |
+| Project metadata | val | yes | yes | yes | yes | yes | Visual profiles, map references, and desktop persistence are covered. |
+| Maps + map tree | val | yes | yes | yes | yes | yes | Phase 10 Slice 1 map tree and map properties are implemented. |
+| Tilesets / sprites | partial | yes | partial | yes | partial | partial | Data-driven tilesets exist; dedicated tileset database editor remains FRA-8. |
+| Visual layers / foreground | partial | yes | yes | partial | yes | partial | Editor layers exist; runtime foreground occlusion remains FRA-19. |
+| Events, pages, and self switches | val | yes | yes | yes | yes | yes | Active-page selection, self switches, and scheduled events are implemented. |
+| Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; interactive choices, event-target routes, audio v1, and plugin commands remain MVP work. |
+| Runtime choices UI | partial | yes | yes | partial | yes | partial | Choice command data exists; visible runtime selection remains FRA-16. |
+| Movement routes | partial | yes | yes | partial | yes | yes | Player-target routes are implemented; event-target routes remain FRA-17. |
+| Common events | partial | yes | partial | yes | yes | yes | Runtime scheduling exists; common-event command-stack editing remains FRA-12. |
+| Database V2 shared editor framework | n/s | n/a | no | n/a | no | no | FRA-6 extracts reusable database editor primitives. |
+| Items, weapons, armors, states | partial | yes | partial | yes | partial | partial | Dedicated V2 forms and richer reference validation remain FRA-9. |
+| Actors, classes, skills, enemies, troops | partial | yes | partial | yes | partial | partial | Dedicated V2 authoring forms remain FRA-10. |
+| Quests, shops, switches, variables, system | partial | yes | partial | yes | partial | partial | Dedicated V2 setup/progression forms remain FRA-11. |
+| Types and terms | val | yes | partial | partial | yes | yes | Shards persist and validate; dedicated editor/UI consumption remains later DB work. |
+| Animations | partial | yes | partial | yes | yes | partial | Data/runtime support exists; animation editor with preview remains FRA-13. |
+| Runtime project validator | n/s | n/a | n/a | no | no | no | Pre-start validator seam remains FRA-15. |
+| Save/load | val | yes | n/a | yes | yes | yes | GameState and save migration coverage exists. |
+| Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |
+| Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |
+| Local audio v1 | partial | partial | partial | logged stub | partial | partial | `playSound` is logged/stubbed; local BGM/SFX playback remains FRA-20. |
+| Deterministic plugin commands | n/s | no | no | no | no | no | Allowlisted `debug.log` style dispatch remains FRA-21. |
+| Playtest session modes | partial | yes | partial | partial | partial | partial | Existing playtest flow needs project/current-map/selected-event temp sessions in FRA-22. |
+| Runtime logs, trace, and state snapshots | n/s | n/a | no | no | no | no | Bounded log viewer, trace output, and state inspector remain FRA-23 through FRA-25. |
+| Placeholder AI/debug UI gating | partial | n/a | partial | n/a | n/a | partial | MVP must remove or gate unavailable AI/debug actions in FRA-26. |
+| Bundled sample MVP coverage | partial | yes | n/a | partial | partial | partial | Sample exists; full MVP feature coverage remains FRA-27. |
+| Green-gate scripts and smoke | partial | n/a | n/a | partial | partial | partial | Current scripts exist; MVP full verify and expanded smoke remain FRA-28 through FRA-30 and FRA-35. |
 
-The matrix is conservative: a row only graduates from `partial` to `impl`
-when both editor and runtime support are real, and `val` requires test
-coverage of the runtime path.
+Rows marked `partial` are intentionally not promoted based on planned work.
+They should only move after the corresponding Linear issue is implemented,
+validated, documented, committed, pushed, and moved to Done.

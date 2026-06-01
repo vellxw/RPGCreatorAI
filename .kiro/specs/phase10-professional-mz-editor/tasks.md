@@ -73,13 +73,77 @@
   save/load round-trip, C++ optional path parsing, and editor validation for
   duplicate/unnamed type entries, required equipment slots, and required
   term labels.
-- [ ] Slice 4C: extract reusable Database V2 editor framework.
-- [ ] Slice 4D: dedicated Items, Types, Terms, Tilesets, and Animations
-  editors.
-- [ ] Slice 4E: richer Weapons, Armors, States, and Common Events editors
-  with complete command editing for common events.
+- [ ] FRA-6 / DB-001: extract reusable Database V2 editor framework
+  (`DatabaseLayout`, `DatabaseList`, field helpers, reference select, array
+  editor) while preserving current CRUD behavior.
+- [ ] FRA-7 / DB-002: add and validate project-owned `types` and `terms`
+  database shards. Existing implementation should be verified before marking
+  Linear Done.
+- [ ] FRA-8 / DB-003: build a dedicated tileset database editor with tile
+  metadata, asset swatches, validation, and map reference errors.
+- [ ] FRA-9 / DB-004: build item, weapon, armor, and state V2 editors with
+  domain fields, type references, numeric validation, and compatibility with
+  separated equipment shards.
+- [ ] FRA-10 / DB-005: build actor, class, skill, enemy, and troop V2 editors
+  with battle authoring fields, reference validation, and runtime test
+  coverage.
+- [ ] FRA-11 / DB-006: build quest, shop, switches, variables, and system V2
+  editors with reference usage warnings and system-default validation.
+- [ ] FRA-12 / DB-007: extract and reuse the command-stack editor for common
+  event command editing with undo-safe reducer behavior.
+- [ ] FRA-13 / DB-008: build the animation database V2 editor with a real
+  sprite-sheet preview and animation validation.
+- [ ] FRA-14 / DB-009: add database delete/rename reference safety across
+  project data and editor workflows.
 
-## Next Slices
+## Slice 5 — Runtime MZ Foundation
 
-- [ ] Slice 5: runtime MZ foundation validator and interaction upgrades.
-- [ ] Slice 6: playtest/debug programmer tools.
+- [ ] FRA-15 / RT-001: add a native runtime project validator seam that fails
+  malformed projects before startup with actionable errors.
+- [ ] FRA-16 / RT-002: implement visible, selectable runtime choices and branch
+  continuation instead of default-first-choice behavior.
+- [ ] FRA-17 / RT-003: implement event-target movement routes with runtime
+  event positions separate from authored map JSON.
+- [ ] FRA-18 / RT-004: implement event priority, Y-sort ordering, and
+  above/below rendering behavior.
+- [ ] FRA-19 / RT-005: render the foreground layer as player/event occlusion
+  without giving the renderer gameplay ownership.
+- [ ] FRA-20 / RT-006: add local audio v1 for project-owned BGM/SFX data with
+  deterministic skips when audio is unavailable.
+- [ ] FRA-21 / RT-007: add deterministic plugin command v1 through allowlisted
+  commands such as `debug.log`, without adding a scripting VM.
+
+## Slice 6 — Playtest And Debug Programmer Tools
+
+- [ ] FRA-22 / PT-001: add playtest session building for project-start,
+  current-map, and selected-event modes without mutating source files.
+- [ ] FRA-23 / PT-002: add a runtime log viewer with bounded native log
+  reading and honest browser-mode degradation.
+- [ ] FRA-24 / PT-003: add deterministic event trace output and an editor trace
+  panel parsed from runtime logs.
+- [ ] FRA-25 / PT-004: add a runtime state snapshot inspector backed by local,
+  bounded, atomically written snapshot files.
+- [ ] FRA-26 / PT-005: remove or gate placeholder AI/debug UI so visible MVP
+  actions are real local actions.
+
+## Integration QA — MVP Green Gate
+
+- [x] FRA-5 / MVP-000: lock MVP scope and Linear tracking metadata in docs.
+- [ ] FRA-27 / QA-001: expand the bundled sample to exercise MVP features and
+  validate the sample references.
+- [ ] FRA-28 / QA-002: add editor-runtime roundtrip coverage for MVP playtest
+  modes.
+- [ ] FRA-29 / QA-003: add runtime smoke coverage for choices, movement,
+  audio, foreground occlusion, and plugin-command logs.
+- [ ] FRA-30 / QA-004: create the full verification script for the MVP green
+  gate with targeted skip flags.
+- [ ] FRA-31 / INT-001: integrate Database V2 branches and run full frontend
+  validation.
+- [ ] FRA-32 / INT-002: integrate Runtime MZ foundation branches and run C++
+  validation plus runtime smoke.
+- [ ] FRA-33 / INT-003: integrate playtest/debug tooling and validate browser
+  and desktop degradation paths.
+- [ ] FRA-34 / INT-004: close MVP documentation and user workflow docs against
+  actual command names and behavior.
+- [ ] FRA-35 / INT-005: run the final MVP green gate, commit, push, and write
+  the Phase 10 MVP validation report.
