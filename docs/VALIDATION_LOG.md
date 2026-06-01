@@ -4,6 +4,42 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-18 / RT-004 — event priority and Y-sort rendering
+
+- `2026-06-01 13:55:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new render ordering tests failed because `EntityRenderSprite` did
+  not yet expose ids/render priority, `buildEntityRenderOrder` did not exist,
+  and `EventPageEvaluator` did not expose active render priority.
+- `2026-06-01 13:57:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS after adding render priority metadata, active-page priority mapping,
+  deterministic entity ordering, and renderer integration.
+- `2026-06-01 13:57:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed with new priority mapping and render-order tests.
+- `2026-06-01 13:59:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default"`
+  — PASS with existing third-party CMake policy/deprecation warnings only.
+- `2026-06-01 13:59:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — PASS; Ninja reported no work to do after the green build.
+- `2026-06-01 13:59:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 13:59:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime smoke reported `SMOKE PASSED`.
+- `2026-06-01 13:59:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added entity render priority and stable ids to render
+  snapshots, active render priority lookup through `EventPageEvaluator`,
+  deterministic below/same/above ordering with same-bucket foot-Y sorting,
+  renderer integration, and docs/status updates.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-17 / RT-003 — event-target movement routes
 
 - `2026-06-01 13:43:00 -03:00` —

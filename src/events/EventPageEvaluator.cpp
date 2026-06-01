@@ -84,6 +84,16 @@ bool activeEventBlocksMovement(const EventData& event,
     return page ? pageBlocksMovement(*page) : false;
 }
 
+std::string activeEventRenderPriority(const EventData& event,
+                                      const GameState& state,
+                                      const std::string& mapId) {
+    if (event.pages.empty()) {
+        return event.solid ? "sameAsCharacters" : "belowCharacters";
+    }
+    const EventPage* page = selectActiveEventPage(event, state, mapId);
+    return page ? page->options.priority : std::string{};
+}
+
 const std::vector<std::shared_ptr<EventCommand>>& activeEventCommands(
     const EventData& event,
     const GameState& state,

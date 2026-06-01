@@ -619,19 +619,19 @@ Labels: `mvp`, `phase-10`, `runtime-mz`, `parallel-safe`
 
 ### Steps
 
-- [ ] Add render priority to `EntityRenderSprite`: `belowCharacters`, `sameAsCharacters`, `aboveCharacters`.
-- [ ] Populate render priority from the active event page, falling back to legacy event solid/priority semantics.
-- [ ] Build three ordered buckets: below, same, above.
-- [ ] Sort the same-priority bucket by visual foot Y, then stable ID tie-breaker, with the player included in the same bucket.
-- [ ] Render below bucket before the player/same bucket, same bucket in sorted order, and above bucket after same bucket.
-- [ ] Keep event collision behavior tied to priority and `through`, not renderer assumptions.
-- [ ] Add tests proving deterministic order for player/event overlap and stable ties.
+- [x] Add render priority to `EntityRenderSprite`: `belowCharacters`, `sameAsCharacters`, `aboveCharacters`.
+- [x] Populate render priority from the active event page, falling back to legacy event solid/priority semantics.
+- [x] Build three ordered buckets: below, same, above.
+- [x] Sort the same-priority bucket by visual foot Y, then stable ID tie-breaker, with the player included in the same bucket.
+- [x] Render below bucket before the player/same bucket, same bucket in sorted order, and above bucket after same bucket.
+- [x] Keep event collision behavior tied to priority and `through`, not renderer assumptions.
+- [x] Add tests proving deterministic order for player/event overlap and stable ties.
 
 ### Validation
 
-- [ ] Run `cmake --build --preset default`.
-- [ ] Run `ctest --test-dir build --output-on-failure`.
-- [ ] Expected: render ordering tests and existing event-page tests pass.
+- [x] Run `cmake --build --preset default`.
+- [x] Run `ctest --test-dir build --output-on-failure`.
+- [x] Expected: render ordering tests and existing event-page tests pass.
 
 ### Acceptance Criteria
 

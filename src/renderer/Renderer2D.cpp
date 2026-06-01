@@ -119,10 +119,9 @@ void Renderer2D::renderEntities(const RenderEntitiesSnapshot& entities, const Ca
         fillRect(sdlRenderer, cx, cy, dotSize, dotSize, kColorPlayerEye);
     };
 
-    for (const auto& event : entities.events) {
-        drawEntity(event);
+    for (const auto& sprite : buildEntityRenderOrder(entities)) {
+        drawEntity(sprite);
     }
-    drawEntity(entities.player);
 }
 
 void Renderer2D::renderDialogue(const DialogueSystem& dialogue) {

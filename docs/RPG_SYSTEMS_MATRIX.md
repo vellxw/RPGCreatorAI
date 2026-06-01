@@ -22,6 +22,7 @@ Legend:
 | Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; audio v1 and plugin commands remain MVP work. |
 | Runtime choices UI | val | yes | yes | yes | yes | yes | `showChoices` now renders selectable runtime options and waits for confirm/cancel results. |
 | Movement routes | val | yes | yes | yes | yes | yes | Player, `thisEvent`, and named event routes execute against runtime-only event positions with wait/skippable/repeat guard coverage. |
+| Event priority / Y-sort | val | yes | yes | yes | yes | yes | Below/same/above render priority is data-driven from active pages; same-priority entities interleave with the player by foot Y and stable id tie-breaks. |
 | Common events | partial | yes | partial | yes | yes | yes | Runtime scheduling exists; common-event command-stack editing remains FRA-12. |
 | Database V2 shared editor framework | n/s | n/a | no | n/a | no | no | FRA-6 extracts reusable database editor primitives. |
 | Items, weapons, armors, states | partial | yes | partial | yes | partial | partial | Dedicated V2 forms and richer reference validation remain FRA-9. |

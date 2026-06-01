@@ -104,7 +104,7 @@
   continuation instead of default-first-choice behavior.
 - [x] FRA-17 / RT-003: implement event-target movement routes with runtime
   event positions separate from authored map JSON.
-- [ ] FRA-18 / RT-004: implement event priority, Y-sort ordering, and
+- [x] FRA-18 / RT-004: implement event priority, Y-sort ordering, and
   above/below rendering behavior.
 - [ ] FRA-19 / RT-005: render the foreground layer as player/event occlusion
   without giving the renderer gameplay ownership.

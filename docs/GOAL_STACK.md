@@ -19,10 +19,10 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
   enemies/troops/quests/shops/switches/variables/system/animations editors,
   common-event command editing, and database reference safety.
-- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): event
-  priority/Y-sort, foreground occlusion, local audio v1, and deterministic
-  plugin-command v1 after the completed runtime validator, choices UI, and
-  event-target movement-route slices.
+- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): foreground
+  occlusion, local audio v1, and deterministic plugin-command v1 after the
+  completed runtime validator, choices UI, event-target movement-route, and
+  priority/Y-sort slices.
 - Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
   current-map, and selected-event playtest sessions, bounded native logs,
   event trace, runtime state snapshots, and removal/gating of placeholder AI
@@ -40,6 +40,11 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   collision/render/event lookup, routes honor blocking, `through`,
   `skippable`, `wait`, and repeat guard behavior, and map transfers re-seed
   runtime event state from the new map.
+- Phase 10 RT-004 (FRA-18) — entity snapshots now carry explicit render
+  priority. `Game` derives event priority from active event pages with legacy
+  fallback, `Renderer2D` draws below, same, and above buckets deterministically,
+  and same-priority events interleave with the player by visual foot Y plus
+  stable id tie-breaks.
 - Phase 10 MVP-000 (FRA-5) — repository docs now lock the remaining MVP
   closeout scope against Linear issues FRA-6 through FRA-35, including
   Database V2, Runtime MZ foundation, Playtest/Debug tools, Integration QA,

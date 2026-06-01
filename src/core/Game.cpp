@@ -26,6 +26,16 @@ int movementRouteMoveStepMs(float tilesPerSecond) {
         : 125;
 }
 
+EntityRenderPriority renderPriorityFromEventPriority(const std::string& priority) {
+    if (priority == "below" || priority == "belowCharacters") {
+        return EntityRenderPriority::Below;
+    }
+    if (priority == "above" || priority == "aboveCharacters") {
+        return EntityRenderPriority::Above;
+    }
+    return EntityRenderPriority::Same;
+}
+
 } // namespace
 
 Game::Game() = default;
@@ -826,7 +836,7 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
                 : event.displayHeightTiles;
         const Vec2i eventPosition = currentScene.getRuntimeEventPosition(event.id)
                                         .value_or(Vec2i{event.x, event.y});
-        snapshot.events.push_back(buildAnimatedSprite(
+        auto sprite = buildAnimatedSprite(
             animationSet,
             fallbackAsset,
             action,
@@ -837,7 +847,11 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
             tileSize,
             displayHeightTiles,
             event.type == "npc" || !animationSet.empty(),
-            false));
+            false);
+        sprite.id = event.id;
+        sprite.renderPriority = renderPriorityFromEventPriority(
+            rpg::activeEventRenderPriority(event, state, state.getCurrentMapId()));
+        snapshot.events.push_back(std::move(sprite));
     }
 
     const bool playerManual = playerAnimation.manual;
@@ -857,6 +871,8 @@ RenderEntitiesSnapshot Game::buildRenderSnapshot() const {
         0.0f,
         true,
         true);
+    snapshot.player.id = "player";
+    snapshot.player.renderPriority = EntityRenderPriority::Same;
 
     return snapshot;
 }

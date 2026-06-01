@@ -223,6 +223,11 @@ Linear tracks execution status, validation evidence, commits, and push results.
 - Runtime validation runs before native startup and checks data relationships
   that would otherwise fail late in map loading, event execution, rendering,
   audio, or save/load.
+- Entity render snapshots carry an explicit `Below`, `Same`, or `Above`
+  priority. `Game` derives event priority from the active event page with a
+  legacy flat-event fallback, and the renderer consumes a deterministic order:
+  below-priority events, same-priority events and player sorted by visual foot
+  Y with stable id tie-breaks, then above-priority events.
 - Choices, event-target movement routes, priority/Y-sort rendering,
   foreground occlusion, local audio, and plugin commands are runtime features.
   `EventRunner` may request behavior, but `Game`, `MapScene`, renderer, audio,

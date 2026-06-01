@@ -135,3 +135,28 @@ TEST_CASE("EventPageEvaluator preserves legacy flat events") {
     CHECK(rpg::activeEventBlocksMovement(event, state, "town"));
     CHECK(rpg::activeEventCommands(event, state, "town")[0]->type == "transferMap");
 }
+
+TEST_CASE("EventPageEvaluator exposes render priority with legacy fallback") {
+    GameState state;
+    EventData event;
+    event.id = "npc";
+    event.solid = false;
+
+    CHECK(rpg::activeEventRenderPriority(event, state, "town") == "belowCharacters");
+
+    event.solid = true;
+    CHECK(rpg::activeEventRenderPriority(event, state, "town") == "sameAsCharacters");
+
+    auto below = makePage("interact", "belowCharacters");
+    auto above = makePage("interact", "aboveCharacters");
+    above.conditions = {selfSwitchCondition("A", true)};
+    event.pages = {below, above};
+
+    CHECK(rpg::activeEventRenderPriority(event, state, "town") == "belowCharacters");
+
+    state.setSelfSwitch("town", "npc", 'A', true);
+    CHECK(rpg::activeEventRenderPriority(event, state, "town") == "aboveCharacters");
+
+    event.pages[1].conditions = {selfSwitchCondition("B", true)};
+    CHECK(rpg::activeEventRenderPriority(event, state, "town") == "belowCharacters");
+}
