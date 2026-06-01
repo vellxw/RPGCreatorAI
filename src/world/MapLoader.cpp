@@ -237,6 +237,7 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
         map.id = j.at("id").get<std::string>();
         map.name = j.at("name").get<std::string>();
         map.displayName = j.value("displayName", std::string{});
+        map.bgm = j.value("bgm", std::string{});
         map.tilesetId = j.value("tilesetId", std::string{});
         map.width = j.at("width").get<int>();
         map.height = j.at("height").get<int>();

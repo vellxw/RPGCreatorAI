@@ -52,8 +52,12 @@ bool Application::initialize() {
         return false;
     }
 
+    if (!audioSystem.initialize()) {
+        Logger::warning("Audio output unavailable; continuing with silent audio requests");
+    }
+
     game = std::make_unique<Game>();
-    if (!game->initialize(window, *projectData)) {
+    if (!game->initialize(window, *projectData, &audioSystem)) {
         Logger::error("Failed to initialize game");
         return false;
     }
@@ -90,6 +94,7 @@ void Application::run() {
 }
 
 void Application::shutdown() {
+    audioSystem.shutdown();
     renderer.shutdown();
     window.shutdown();
 }

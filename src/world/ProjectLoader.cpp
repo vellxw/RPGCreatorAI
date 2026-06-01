@@ -152,6 +152,7 @@ std::optional<ProjectData> ProjectLoader::load(const std::string& path) {
         pickPath("commonEvents", project.database.commonEventsPath);
         pickPath("animations", project.database.animationsPath);
         pickPath("tilesets", project.database.tilesetsPath);
+        pickPath("audio", project.database.audioPath);
 
         if (j.contains("visualProfile") && j["visualProfile"].is_object()) {
             const auto& visual = j["visualProfile"];

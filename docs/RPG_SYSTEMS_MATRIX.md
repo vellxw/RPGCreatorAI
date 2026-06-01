@@ -34,7 +34,7 @@ Legend:
 | Save/load | val | yes | n/a | yes | yes | yes | GameState and save migration coverage exists. |
 | Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |
 | Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |
-| Local audio v1 | partial | partial | partial | logged stub | partial | partial | `playSound` is logged/stubbed; local BGM/SFX playback remains FRA-20. |
+| Local audio v1 | partial | yes | partial | yes | yes | yes | Runtime audio registry and local WAV dispatch exist; missing files/devices warn and continue. Dedicated audio authoring remains later editor work. |
 | Deterministic plugin commands | n/s | no | no | no | no | no | Allowlisted `debug.log` style dispatch remains FRA-21. |
 | Playtest session modes | partial | yes | partial | partial | partial | partial | Existing playtest flow needs project/current-map/selected-event temp sessions in FRA-22. |
 | Runtime logs, trace, and state snapshots | n/s | n/a | no | no | no | no | Bounded log viewer, trace output, and state inspector remain FRA-23 through FRA-25. |

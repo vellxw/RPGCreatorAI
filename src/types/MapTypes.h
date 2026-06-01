@@ -19,6 +19,7 @@ struct MapData {
     std::string id;
     std::string name;
     std::string displayName;
+    std::string bgm;
     std::string tilesetId;
     int width;
     int height;

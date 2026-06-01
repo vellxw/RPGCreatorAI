@@ -19,10 +19,10 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
   framework, dedicated tilesets/items/equipment/states/actors/classes/skills/
   enemies/troops/quests/shops/switches/variables/system/animations editors,
   common-event command editing, and database reference safety.
-- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): local audio v1
-  and deterministic plugin-command v1 after the completed runtime validator,
-  choices UI, event-target movement-route, priority/Y-sort, and foreground
-  occlusion slices.
+- Slice 5 — Runtime MZ foundation (FRA-15 through FRA-21): deterministic
+  plugin-command v1 after the completed runtime validator, choices UI,
+  event-target movement-route, priority/Y-sort, foreground occlusion, and
+  local audio v1 slices.
 - Slice 6 — Playtest and debug tools (FRA-22 through FRA-26): project-start,
   current-map, and selected-event playtest sessions, bounded native logs,
   event trace, runtime state snapshots, and removal/gating of placeholder AI
@@ -34,6 +34,13 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 RT-006 (FRA-20) — native runtime audio v1 now routes
+  `playSound` through `Game` instead of direct `EventRunner` logging.
+  `platform/AudioSystem` owns the SDL audio boundary, exposes an injectable
+  backend for tests, resolves deterministic local audio ids from defaults and
+  project system data, starts default/map BGM requests, plays local WAVs when
+  assets/devices exist, and logs warnings while continuing when optional audio
+  is missing or unavailable.
 - Phase 10 RT-003 (FRA-17) — native runtime movement routes now target the
   player, `thisEvent`, and named events. `MapScene` stores runtime event
   positions separately from authored map JSON, `Game` uses those positions for

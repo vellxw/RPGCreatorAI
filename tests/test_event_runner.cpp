@@ -451,6 +451,33 @@ TEST_CASE("EventRunner transferMap produces a transfer request") {
     CHECK(req2.active == false);
 }
 
+TEST_CASE("EventRunner playSound emits a sound request for Game dispatch") {
+    GameState state;
+    DialogueSystem dialogue;
+    EventRunner runner(state, dialogue);
+
+    auto sound = makeCmd("playSound");
+    sound->soundId = "chest";
+
+    auto after = makeCmd("setFlag");
+    after->flag = "after_sound";
+    after->boolValue = true;
+
+    runner.runCommandList({sound, after});
+    runner.update(0.016f);
+
+    auto req = runner.consumeSoundRequest();
+    CHECK(req.active == true);
+    CHECK(req.soundId == "chest");
+    CHECK(state.getFlag("after_sound") == false);
+
+    auto req2 = runner.consumeSoundRequest();
+    CHECK(req2.active == false);
+
+    runner.update(0.016f);
+    CHECK(state.getFlag("after_sound") == true);
+}
+
 TEST_CASE("EventRunner setMovementRoute emits a movement route request") {
     GameState state;
     DialogueSystem dialogue;

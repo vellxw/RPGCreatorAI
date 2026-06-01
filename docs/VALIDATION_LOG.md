@@ -4,6 +4,47 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-20 / RT-006 — local audio v1
+
+- `2026-06-01 14:12:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default"`
+  — RED; new audio tests failed because `platform/AudioSystem.h` did not
+  exist and `EventRunner` did not expose `consumeSoundRequest`.
+- `2026-06-01 14:18:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default"`
+  — PASS after adding `AudioSystem` and regenerating CMake so the new
+  platform source was included.
+- `2026-06-01 14:19:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && ctest --test-dir build --output-on-failure"`
+  — RED; `AudioSystem::playBgm` cleared queued audio even when no previous
+  BGM was active, producing an extra backend `stopAll()` call.
+- `2026-06-01 14:20:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS after only clearing BGM when replacing an active BGM.
+- `2026-06-01 14:20:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, logged
+  `Audio requested: town_theme -> assets/audio/town_bgm.wav`, warned about
+  the missing optional WAV, and reported `SMOKE PASSED`.
+- `2026-06-01 14:22:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS after documentation updates; CMake configured, Ninja reported no
+  work to do, and `RPGTests` passed.
+- `2026-06-01 14:22:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime smoke again logged the `town_theme` audio request, warned
+  for the missing optional WAV, and reported `SMOKE PASSED`.
+- `2026-06-01 14:22:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added `platform/AudioSystem` with an injectable backend and
+  SDL WAV playback path, deterministic audio registry defaults plus
+  system/audio database overrides, `EventRunner` sound requests consumed by
+  `Game`, startup/default-map BGM requests, optional map `bgm` parsing, and
+  missing-file/device warnings that do not abort runtime startup.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-19 / RT-005 — foreground layer occlusion
 
 - `2026-06-01 14:03:00 -03:00` —

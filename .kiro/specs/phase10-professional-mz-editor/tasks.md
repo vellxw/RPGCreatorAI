@@ -108,7 +108,7 @@
   above/below rendering behavior.
 - [x] FRA-19 / RT-005: render the foreground layer as player/event occlusion
   without giving the renderer gameplay ownership.
-- [ ] FRA-20 / RT-006: add local audio v1 for project-owned BGM/SFX data with
+- [x] FRA-20 / RT-006: add local audio v1 for project-owned BGM/SFX data with
   deterministic skips when audio is unavailable.
 - [ ] FRA-21 / RT-007: add deterministic plugin command v1 through allowlisted
   commands such as `debug.log`, without adding a scripting VM.

@@ -34,6 +34,7 @@ struct DatabaseReference {
     std::string commonEventsPath;
     std::string animationsPath;
     std::string tilesetsPath;
+    std::string audioPath;
 };
 
 struct Resolution {

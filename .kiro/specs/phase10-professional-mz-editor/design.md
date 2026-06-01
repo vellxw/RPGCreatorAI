@@ -233,6 +233,12 @@ Linear tracks execution status, validation evidence, commits, and push results.
   region layers out of the renderer, treats empty foreground as a no-op, and
   `Game` renders background, below/same entities, foreground, above entities,
   then UI overlays.
+- Local audio v1 is isolated in `platform/AudioSystem`, the explicit SDL
+  exception to the normal video/input/renderer boundary. `EventRunner` emits
+  a `SoundRequest`; `Game` consumes it, resolves project/system audio ids
+  through `AudioSystem`, and the backend plays local WAV files when both the
+  asset and audio device exist. Missing files or unavailable devices are
+  warnings, not startup or event-execution failures.
 - Choices, event-target movement routes, priority/Y-sort rendering,
   foreground occlusion, local audio, and plugin commands are runtime features.
   `EventRunner` may request behavior, but `Game`, `MapScene`, renderer, audio,

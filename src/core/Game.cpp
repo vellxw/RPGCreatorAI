@@ -7,6 +7,7 @@
 #include "save/SaveManager.h"
 #include "renderer/IRenderer.h"
 #include "renderer/SpriteCatalog.h"
+#include "platform/AudioSystem.h"
 #include <SDL.h>
 #include <algorithm>
 #include <cmath>
@@ -41,8 +42,10 @@ EntityRenderPriority renderPriorityFromEventPriority(const std::string& priority
 Game::Game() = default;
 Game::~Game() = default;
 
-bool Game::initialize(Window& window, const ProjectData& projectData) {
+bool Game::initialize(Window& window, const ProjectData& projectData,
+                      rpg::AudioSystem* audioSystemIn) {
     project = projectData;
+    audioSystem = audioSystemIn;
 
     // Cache viewport dimensions for camera centering.
     if (window.getSDLWindow()) {
@@ -71,6 +74,9 @@ bool Game::initialize(Window& window, const ProjectData& projectData) {
     // resulting empty defaults keep the runtime alive so we never crash on
     // a partially-authored project.
     databases.loadAll(project);
+    if (audioSystem) {
+        audioSystem->registerSounds(databases.system().audioRegistry);
+    }
     if (!project.database.animationsPath.empty()) {
         if (!animationDatabase.load(project.database.animationsPath)) {
             Logger::warning("Animation database failed to load: " + project.database.animationsPath);
@@ -132,6 +138,7 @@ bool Game::loadMap(const std::string& mapId, bool clearScheduledRunners) {
     if (clearScheduledRunners && eventScheduler) eventScheduler->clear();
     state.setCurrentMap(mapId);
     Logger::info("Map loaded: " + mapId);
+    requestBgmForCurrentMap();
     return true;
 }
 
@@ -426,6 +433,11 @@ bool Game::applyRunnerRequests(EventRunner& runner) {
         applyAnimationRequest(animReq);
     }
 
+    auto soundReq = runner.consumeSoundRequest();
+    if (soundReq.active) {
+        requestSound(soundReq.soundId);
+    }
+
     auto movementReq = runner.consumeMovementRouteRequest();
     if (movementReq.active) {
         const int waitMs = applyMovementRouteRequest(movementReq);
@@ -452,6 +464,27 @@ bool Game::applyRunnerRequests(EventRunner& runner) {
     }
 
     return false;
+}
+
+void Game::requestSound(const std::string& soundId) {
+    if (!audioSystem) {
+        Logger::warning("Audio requested with no AudioSystem: " + soundId);
+        return;
+    }
+    audioSystem->playSound(soundId);
+}
+
+void Game::requestBgmForCurrentMap() {
+    if (!audioSystem) return;
+
+    const std::string mapBgm = currentScene.getData().bgm;
+    const std::string bgmId =
+        !mapBgm.empty() ? mapBgm : databases.system().defaultBgm;
+    if (bgmId.empty()) {
+        audioSystem->stopBgm();
+        return;
+    }
+    audioSystem->playBgm(bgmId);
 }
 
 void Game::applyAnimationIfPending() {

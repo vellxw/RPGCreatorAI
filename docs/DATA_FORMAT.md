@@ -38,6 +38,7 @@ data/
 | `maps` | array | List of `{ id, path }`. |
 | `database.items` | string | Path to the items database. |
 | `database.animations` | string | Optional path to character animation sets. |
+| `database.audio` | string | Optional path to an audio registry shard. |
 
 `ProjectLoader` validates the file strictly; any missing or invalid
 field returns `std::nullopt` with a descriptive log line.
@@ -58,6 +59,7 @@ warnings are logged but non-fatal.
 | `schemaVersion` | int | `1`. |
 | `id` | string | Must match the id used in `project.json`. |
 | `name` | string | Display name (currently logged only). |
+| `bgm` | string | Optional BGM audio id for this map. Falls back to `database/system.json` `defaultBgm`. |
 | `width` | int | Tile columns. |
 | `height` | int | Tile rows. |
 | `tileSize` | int | Pixel size per tile (e.g. `32`). |
@@ -198,7 +200,15 @@ aspect ratio. `yOffsetPx` adjusts the bottom-center anchor in pixels.
 {
   "playerAnimationSet": "player_adventurer",
   "playerMovementSpeed": "double",
-  "defaultCharacterHeightTiles": 1.5
+  "defaultCharacterHeightTiles": 1.5,
+  "defaultBgm": "town_bgm",
+  "audio": {
+    "confirm": "assets/audio/confirm.wav",
+    "cancel": "assets/audio/cancel.wav",
+    "chest": "assets/audio/chest.wav",
+    "battle": "assets/audio/battle.wav",
+    "town_bgm": "assets/audio/town_bgm.wav"
+  }
 }
 ```
 
@@ -207,3 +217,10 @@ aspect ratio. `yOffsetPx` adjusts the bottom-center anchor in pixels.
 (`125 ms/tile`). `defaultCharacterHeightTiles` is used when an event has
 no per-event override and its animation set does not define display
 metadata.
+
+`audio` maps deterministic local sound ids to project-relative WAV paths.
+`AudioSystem` ships fallback ids for `confirm`, `cancel`, `chest`, `battle`,
+and `town_bgm`; project data can override or extend them in `system.json` or
+in an optional `database.audio` shard with `audio`, `sounds[]`, or `bgm[]`
+entries. Missing WAV files and unavailable audio devices are logged warnings,
+not validation errors.

@@ -59,7 +59,7 @@ void EventRunner::update(float dt) {
         processCommand(cmd);
         if (dialogue.isActive() || waitTimer > 0.0f || transferRequest.active ||
             shopRequest.active || battleSummaryRequest.active || animationRequest.active ||
-            movementRouteRequest.active) {
+            movementRouteRequest.active || soundRequest.active) {
             return;
         }
     }
@@ -211,7 +211,8 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd) {
         return;
     }
     if (type == "playSound") {
-        Logger::info("playSound: " + cmd->soundId);
+        soundRequest.active = true;
+        soundRequest.soundId = cmd->soundId;
         return;
     }
     if (type == "comment") {
@@ -344,5 +345,11 @@ AnimationRequest EventRunner::consumeAnimationRequest() {
 MovementRouteRequest EventRunner::consumeMovementRouteRequest() {
     MovementRouteRequest req = movementRouteRequest;
     movementRouteRequest = {};
+    return req;
+}
+
+SoundRequest EventRunner::consumeSoundRequest() {
+    SoundRequest req = soundRequest;
+    soundRequest = {};
     return req;
 }

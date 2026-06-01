@@ -21,12 +21,17 @@
 #include <string>
 #include <unordered_map>
 
+namespace rpg {
+class AudioSystem;
+}
+
 class Game {
 public:
     Game();
     ~Game();
 
-    bool initialize(Window& window, const ProjectData& projectData);
+    bool initialize(Window& window, const ProjectData& projectData,
+                    rpg::AudioSystem* audioSystem = nullptr);
     void update(const InputManager& input, float dt);
     void render(IRenderer& renderer);
 
@@ -61,6 +66,8 @@ private:
     void applyTransferIfPending();
     void applyAnimationIfPending();
     bool applyRunnerRequests(EventRunner& runner);
+    void requestSound(const std::string& soundId);
+    void requestBgmForCurrentMap();
     void applyAnimationRequest(const AnimationRequest& request);
     int applyMovementRouteRequest(const MovementRouteRequest& request);
     bool applyPlayerMovementRouteStep(const MovementRouteRequest::Step& step, bool skippable);
@@ -106,6 +113,7 @@ private:
     rpg::ShopSystem shopSystem;
     AnimationDatabase animationDatabase;
     PlayerMotion playerMotion;
+    rpg::AudioSystem* audioSystem = nullptr;
 
     struct RuntimeAnimationState {
         std::string action = "idle";

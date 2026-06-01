@@ -64,7 +64,7 @@ syncs against the new map on the next frame.
 | `addItem` | `itemId`, `amount` (int) | Increments the inventory counter for `itemId`. |
 | `transferMap` | `mapId`, `x`, `y`, `direction` | Produces a `MapTransferRequest` consumed by `Game`. The new map is loaded and the player is placed at `(x, y)` facing `direction`. |
 | `wait` | `ms` (int) | Pauses the queue for the given duration. |
-| `playSound` | `soundId` | Audio is not implemented in Phase 2; logs `[INFO] playSound: <id>`. |
+| `playSound` | `soundId` | Emits a sound request consumed by `Game`. `AudioSystem` resolves the id through project/system audio data, logs the request, plays a local WAV when the file and audio device exist, and warns/continues when optional audio is missing. |
 | `playAnimation` | `target`, optional `eventId`, `action`, `direction`, `durationMs`, `blocking`, `loop` | Emits an `AnimationRequest`. `Game` applies it to the player, the owning event, or a named event. |
 
 Any command type not listed above is logged as a warning and skipped;
@@ -83,6 +83,8 @@ encounters a blocking effect:
 - a `wait` arms an internal timer that decrements per frame,
 - a `transferMap` sets the transfer request — `Game` consumes it,
   reloads the map, and resumes the queue,
+- a `playSound` sets a sound request — `Game` consumes it and the runner
+  resumes on the next update,
 - a blocking `playAnimation` emits an animation request and arms the wait
   timer for `durationMs`.
 

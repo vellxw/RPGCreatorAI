@@ -8,6 +8,8 @@ The RPG Creator Runtime is a data-driven engine. It separates logic, rendering, 
 - **Renderer is abstracted.** `IRenderer` interface separates the logic from the rendering API.
 - **EventSystem controls flow.** Commands are executed sequentially by `EventRunner`.
 - **State lives in GameState.** All mutable data resides here, making saves trivial.
+- **Audio is isolated.** `platform/AudioSystem` is the explicit SDL audio
+  boundary; `EventRunner` emits requests and `Game` dispatches them.
 
 ## What is Engine vs Project
 **Engine:**
@@ -16,6 +18,7 @@ The RPG Creator Runtime is a data-driven engine. It separates logic, rendering, 
 - Event running (showText, transferMap, etc.)
 - Render loop
 - Input handling
+- Local WAV audio playback when project-owned assets and an audio device exist
 
 **Project:**
 - `project.json` (Entry point)

@@ -708,21 +708,21 @@ Labels: `mvp`, `phase-10`, `runtime-mz`, `parallel-safe`
 
 ### Steps
 
-- [ ] Document `platform/AudioSystem` as the explicit SDL-isolated exception for audio, matching the AGENTS SDL boundary rule.
-- [ ] Implement local WAV playback using SDL audio APIs already available through SDL2. Do not add system installs.
-- [ ] Add a small deterministic audio registry loaded from system data or a new optional audio database path. Minimum IDs: `confirm`, `cancel`, `chest`, `battle`, `town_bgm`.
-- [ ] Make `playSound` request audio playback through `Game`, not directly from `EventRunner`.
-- [ ] Add optional BGM start/stop support from `SystemData.defaultBgm` and map properties if present.
-- [ ] If an audio file is missing, log a warning and continue. Missing optional audio is not fatal.
-- [ ] Ensure tests can run without an audio device by using a null/mock backend.
-- [ ] Update docs to mark audio v1 as local, optional, and deterministic.
+- [x] Document `platform/AudioSystem` as the explicit SDL-isolated exception for audio, matching the AGENTS SDL boundary rule.
+- [x] Implement local WAV playback using SDL audio APIs already available through SDL2. Do not add system installs.
+- [x] Add a small deterministic audio registry loaded from system data or a new optional audio database path. Minimum IDs: `confirm`, `cancel`, `chest`, `battle`, `town_bgm`.
+- [x] Make `playSound` request audio playback through `Game`, not directly from `EventRunner`.
+- [x] Add optional BGM start/stop support from `SystemData.defaultBgm` and map properties if present.
+- [x] If an audio file is missing, log a warning and continue. Missing optional audio is not fatal.
+- [x] Ensure tests can run without an audio device by using a null/mock backend.
+- [x] Update docs to mark audio v1 as local, optional, and deterministic.
 
 ### Validation
 
-- [ ] Run `cmake --build --preset default`.
-- [ ] Run `ctest --test-dir build --output-on-failure`.
-- [ ] Run runtime smoke and confirm logs show audio IDs requested.
-- [ ] Expected: tests pass; missing audio files do not crash.
+- [x] Run `cmake --build --preset default`.
+- [x] Run `ctest --test-dir build --output-on-failure`.
+- [x] Run runtime smoke and confirm logs show audio IDs requested.
+- [x] Expected: tests pass; missing audio files do not crash.
 
 ### Acceptance Criteria
 

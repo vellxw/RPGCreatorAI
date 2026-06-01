@@ -60,6 +60,11 @@ struct MovementRouteRequest {
     std::vector<Step> steps;
 };
 
+struct SoundRequest {
+    bool active = false;
+    std::string soundId;
+};
+
 class EventRunner {
 public:
     EventRunner(class GameState& state, class DialogueSystem& dialogueSystem);
@@ -94,6 +99,7 @@ public:
     BattleSummaryRequest consumeBattleSummaryRequest();
     AnimationRequest consumeAnimationRequest();
     MovementRouteRequest consumeMovementRouteRequest();
+    SoundRequest consumeSoundRequest();
 
 private:
     void executeNext();
@@ -112,6 +118,7 @@ private:
     BattleSummaryRequest battleSummaryRequest;
     AnimationRequest animationRequest;
     MovementRouteRequest movementRouteRequest;
+    SoundRequest soundRequest;
     std::shared_ptr<struct EventCommand> pendingChoiceCommand;
     std::string currentOwnerMapId;
     std::string currentOwnerEventId;

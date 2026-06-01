@@ -17,6 +17,7 @@ set(PHASE2_TEST_SOURCES
     test_sprite_catalog.cpp
     test_menu_system.cpp
     test_shop_system.cpp
+    test_audio_system.cpp
     test_tileset_runtime_data.cpp
     test_event_page_evaluator.cpp
     test_event_scheduler.cpp

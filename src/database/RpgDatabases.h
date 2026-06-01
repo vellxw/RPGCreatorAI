@@ -104,6 +104,7 @@ struct SystemRecord {
     std::string playerAnimationSet;
     std::string playerMovementSpeed = "double";
     float defaultCharacterHeightTiles = 1.5f;
+    std::unordered_map<std::string, std::string> audioRegistry;
 };
 
 struct ItemRecord {

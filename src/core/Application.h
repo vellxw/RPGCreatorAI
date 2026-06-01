@@ -1,6 +1,7 @@
 #pragma once
 #include "platform/Window.h"
 #include "platform/InputManager.h"
+#include "platform/AudioSystem.h"
 #include "renderer/Renderer2D.h"
 #include "core/Game.h"
 #include <memory>
@@ -26,6 +27,7 @@ private:
 
     Window window;
     InputManager inputManager;
+    rpg::AudioSystem audioSystem;
     Renderer2D renderer;
     std::unique_ptr<Game> game;
     

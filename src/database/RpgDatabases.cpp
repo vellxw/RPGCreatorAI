@@ -27,6 +27,31 @@ static StatsCpp parseStats(const json& j) {
     return s;
 }
 
+static void parseAudioRegistry(const json& j,
+                               std::unordered_map<std::string, std::string>& out) {
+    auto put = [&](const std::string& id, const std::string& path) {
+        if (!id.empty() && !path.empty()) out[id] = path;
+    };
+
+    if (j.contains("audio") && j.at("audio").is_object()) {
+        for (const auto& [id, value] : j.at("audio").items()) {
+            if (value.is_string()) put(id, value.get<std::string>());
+        }
+    }
+
+    if (j.contains("sounds") && j.at("sounds").is_array()) {
+        for (const auto& sound : j.at("sounds")) {
+            put(sound.value("id", std::string{}), sound.value("path", std::string{}));
+        }
+    }
+
+    if (j.contains("bgm") && j.at("bgm").is_array()) {
+        for (const auto& bgm : j.at("bgm")) {
+            put(bgm.value("id", std::string{}), bgm.value("path", std::string{}));
+        }
+    }
+}
+
 static std::optional<json> readJson(const std::string& path) {
     if (path.empty()) return std::nullopt;
     auto content = FileSystem::readFile(path);
@@ -201,6 +226,10 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
         }
     }
 
+    if (auto j = readJson(project.database.audioPath)) {
+        parseAudioRegistry(*j, system_.audioRegistry);
+    }
+
     if (auto j = readJson(project.database.systemPath)) {
         const auto& sys = *j;
         for (const auto& a : sys.value("startingParty", json::array())) {
@@ -214,6 +243,7 @@ bool RpgDatabases::loadAll(const ::ProjectData& project) {
         system_.playerMovementSpeed = sys.value("playerMovementSpeed", system_.playerMovementSpeed);
         system_.defaultCharacterHeightTiles =
             sys.value("defaultCharacterHeightTiles", system_.defaultCharacterHeightTiles);
+        parseAudioRegistry(sys, system_.audioRegistry);
     }
 
     Logger::info("Databases loaded: " +
