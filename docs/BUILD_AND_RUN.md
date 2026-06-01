@@ -56,8 +56,43 @@ npm install
 npm run dev
 ```
 
+`npm run dev` starts browser mode on port 3000. Browser mode is useful for
+editing and UI checks, but it cannot spawn native processes, create native
+playtest sessions, read runtime logs, or read runtime state snapshots.
+
 The desktop dev server uses the strict Tauri port:
 
 ```bash
 npm run dev:tauri
 ```
+
+For the full desktop shell, run:
+
+```bash
+npm run desktop:dev
+```
+
+Tauri uses `npm run dev:tauri` as its `beforeDevCommand` and opens the editor
+against `http://localhost:1420`.
+
+## User workflow
+
+1. Use `npm run desktop:dev` for real filesystem persistence and native
+   runtime launch, or `npm run dev` for browser-only editing.
+2. Open a project folder or use the bundled `data/` project.
+3. Edit maps, event pages/commands, common events, and database entries.
+4. Run Validate from the toolbar; Save only writes valid project data.
+5. In Playtest, choose Project Start, Current Map, or Selected Event.
+6. Open in Runtime from desktop mode. The shell writes a temporary playtest
+   session under the app data directory and launches the native runtime with
+   that temp root as `current_dir`.
+7. Use Runtime Log, Event Trace, and Runtime State tabs for local debugging.
+
+## MVP limitations
+
+- Browser mode does not fake native filesystem/runtime capabilities.
+- Runtime data is local JSON plus committed assets; there is no cloud service,
+  marketplace, proprietary project import, scripting VM, or runtime AI
+  dependency in the MVP.
+- Audio files are optional local assets. Missing files/devices warn and
+  continue.

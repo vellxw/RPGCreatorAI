@@ -143,7 +143,7 @@
   validation plus runtime smoke.
 - [x] FRA-33 / INT-003: integrate playtest/debug tooling and validate browser
   and desktop degradation paths.
-- [ ] FRA-34 / INT-004: close MVP documentation and user workflow docs against
+- [x] FRA-34 / INT-004: close MVP documentation and user workflow docs against
   actual command names and behavior.
 - [ ] FRA-35 / INT-005: run the final MVP green gate, commit, push, and write
   the Phase 10 MVP validation report.

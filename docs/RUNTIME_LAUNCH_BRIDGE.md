@@ -22,6 +22,11 @@ branch refs remained after pruning, the PT-001 through PT-005 commits were
 already present on `main`, and the frontend, desktop, and Tauri content gates
 passed against the same tree.
 
+For the user workflow, browser mode is preview-only for native capabilities.
+Use `npm run desktop:dev` when a creator needs real filesystem save/load,
+temporary playtest session generation, native runtime launch, runtime logs,
+event trace, or runtime state snapshots.
+
 ## Renderer Surface
 
 ```ts

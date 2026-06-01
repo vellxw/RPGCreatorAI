@@ -9,9 +9,11 @@ Tauri 2.x is the default desktop shell for RPGCreatorAI. The decision rationale 
 - Rust's `std::process::Command` with structured args avoids the `spawn(string)` injection class entirely.
 - Edge WebView2 is preinstalled on Windows 10+ (no extra runtime required for end users).
 
-## Fallback: Electron
+## Fallback
 
-If a Tauri-specific blocker appears during implementation (Rust toolchain problems on the target machine, a missing native API not available through Tauri plugins, etc.), the project falls back to Electron with an equivalent allowlisted IPC layer via `contextBridge`. The fallback decision is itself documented as a task and produces the same renderer-side bridge surface.
+Tauri is the implemented shell. Electron is not part of the MVP. If a future
+phase finds a Tauri-specific blocker, any fallback must preserve the same
+allowlisted renderer bridge and document the decision before implementation.
 
 ## Required Tools
 
@@ -41,7 +43,9 @@ If a Tauri-specific blocker appears during implementation (Rust toolchain proble
 +---------------------------------------------------------------+
 ```
 
-The shell launches a single window. There are no extra background windows in Phase 5.
+The shell launches a single primary editor window. Runtime playtest launches
+spawn the separate native C++ runtime process; the runtime viewport is not
+embedded in the editor.
 
 ## IPC Surface (`window.rpgBridge`)
 
@@ -54,9 +58,14 @@ The renderer never sees a generic `invoke()` function. Instead, a thin typed wra
 | `fs` | `writeProject(root, state)` | Atomic write with backup; runs validation in renderer first |
 | `fs` | `listBackups(root, file)` | Lists `.backups/` entries for a given file |
 | `fs` | `closeProject()` | Releases the active root scope |
-| `runtime` | `launch(projectRoot)` | Spawns the C++ runtime; returns PID |
+| `fs` | `createPlaytestSession(sourceRoot, state, request)` | Writes a temporary playtest project for project-start/current-map/selected-event modes |
+| `runtime` | `launch(projectRoot, executableSearchRoot?)` | Spawns the C++ runtime; returns PID and resolved executable path |
 | `runtime` | `kill()` | Graceful kill + wait |
 | `runtime` | `status()` | `unavailable` / `ready` / `running` |
+| `runtime` | `getLatestLog()` | Returns the current or newest bounded runtime log path |
+| `runtime` | `readLogTail(maxBytes)` | Reads the latest runtime log tail, capped at 256 KiB |
+| `runtime` | `readLatestSnapshot(maxBytes)` | Reads the latest runtime state snapshot, capped at 128 KiB |
+| `runtime` | `openLogFolder()` | Opens the allowlisted runtime log folder |
 | `config` | `getRecents()` | Returns recent project roots |
 | `config` | `addRecent(root)` | Persists most recent root |
 | `shell` | `name`, `version` | Identifies the host (`tauri`/`electron`) |
@@ -70,8 +79,10 @@ The Rust side declares each handler with explicit input and output types. There 
   1. Resolve the input path with `std::fs::canonicalize` (follows symlinks).
   2. Reject paths outside `%USERPROFILE%` (Windows) or `$HOME` (macOS/Linux).
   3. For per-file ops, enforce that the resolved path is a descendant of the active project root.
-- **Strict CSP** in `tauri.conf.json`: `default-src 'self'`, `connect-src 'self' http://localhost:5173`, no remote scripts.
-- **No `shell.open`** allowlist entry — opening external URLs is not exposed in Phase 5.
+- **Strict CSP** in `tauri.conf.json`: `default-src 'self'`, local Tauri dev
+  connections on port 1420, IPC, data/blob images, and no remote scripts.
+- **No arbitrary shell execution** — the runtime bridge resolves an executable
+  path and starts it with structured process APIs, not shell interpolation.
 - **No environment-variable read leak** — the renderer cannot read arbitrary env vars; only the shell does, and only for `RPG_RUNTIME_EXE` resolution.
 - **No secrets committed** — `.env`, `*.local`, and `src-tauri/target/` remain gitignored.
 
@@ -81,7 +92,8 @@ The Rust side declares each handler with explicit input and output types. There 
 |------|---------|--------|
 | Dev (hot reload) | `npm run desktop:dev` | Window backed by Vite dev server |
 | Dev binary | `npm run desktop:build` | `<targetDir>/debug/rpgcreator.exe` |
-| Browser-only (existing) | `npm run dev` | http://localhost:5173 |
+| Browser-only | `npm run dev` | http://localhost:3000 |
+| Tauri content server | `npm run dev:tauri` | http://localhost:1420 |
 
 `<targetDir>` is `%LOCALAPPDATA%\RPGCreatorAI\tauri-target` on Windows by default, configured via `.cargo/config.toml`. This keeps Rust's heavy file-rename activity out of OneDrive's filter zone, mirroring the Phase 4.1 fix for cmake.
 
@@ -97,8 +109,12 @@ The factory in `src/adapters/adapterFactory.ts` checks this once at startup and 
 - `FileSystemAdapter` + `DesktopRuntimeAdapter` if `rpgBridge` is present
 - `BrowserMemoryAdapter` + `BrowserRuntimeAdapter` otherwise
 
-Browser-mode users see the existing Phase 4.1 experience unchanged.
+Browser-mode users get in-memory/browser-adapter editing and honest
+unavailable states for native-only capabilities.
 
 ## Update Path
 
-The shell does not include auto-update in Phase 5. A later phase will add code signing, an update server (or local file-based update channel), and store distribution metadata. Until then, dev binaries are produced by re-running `npm run desktop:build`.
+The shell does not include auto-update in the MVP. A later phase can add code
+signing, an update server or local update channel, and store distribution
+metadata. Until then, dev binaries are produced by re-running
+`npm run desktop:build`.

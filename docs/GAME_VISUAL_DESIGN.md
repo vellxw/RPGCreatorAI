@@ -352,3 +352,13 @@ Minimum acceptance bar:
 - assets are original and production surfaces do not use random emoji
 - runtime and editor preserve gameplay correctness while following this
   visual standard
+
+## 21. Phase 10 MVP workflow boundary
+
+The visual standard is implemented through local project data and committed
+assets. The editor may use development-time asset generation workflows, but a
+saved project and the native runtime must remain deterministic: no runtime AI
+service, cloud dependency, marketplace package, proprietary import pipeline,
+or scripting VM is required to render or play the MVP sample. Playtest
+launches read a temporary project snapshot; they do not mutate source project
+files.

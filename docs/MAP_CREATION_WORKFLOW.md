@@ -1,4 +1,4 @@
-# Map Creation Workflow — Phase 7
+# Map Creation Workflow — Phase 10 MVP
 
 This document describes the editor-side workflow for building a map in
 RPGCreatorAI: choosing a tool, painting tiles, toggling collisions,
@@ -7,9 +7,10 @@ user flow (what a creator sees) and the data flow (how the React /
 Vite editor talks to the project store and the Tauri filesystem
 adapter).
 
-The editor is React 19 + Vite + Tailwind. It mutates project data
-through the existing reducer in `src/stores/projectStore.ts`. Phase 7
-adds a thin history middleware on top of that reducer for undo / redo.
+The editor is React 19 + Vite + Tailwind. It mutates project data through
+`src/stores/projectStore.ts` and tracks UI authoring state through
+`src/stores/editorStore.ts`. Undo/redo is handled by the history middleware
+around reducer actions.
 
 ## Bundled MVP sample coverage
 
@@ -33,75 +34,90 @@ small, but keep it representative of the MVP runtime/editor contract:
 
 ## Goals
 
-- Let a creator paint terrain and collisions on the map canvas.
-- Let a creator place, move, duplicate, and delete events on the canvas
-  without leaving the editor.
+- Let a creator paint ground, decoration, foreground, collision, and region
+  data on the map canvas.
+- Let a creator place, move, duplicate, delete, and select events without
+  leaving the editor.
+- Let a creator edit map properties, event pages, command stacks, common
+  events, and Database V2 entries from the local editor.
 - Let a creator undo and redo any map edit with `Ctrl+Z` / `Ctrl+Y`.
-- Persist every change through the existing Save flow without changing
-  the project file format.
+- Persist every change through the Save flow and validate it against the same
+  JSON format the C++ runtime loads.
+- Let desktop users create temp playtest sessions for Project Start,
+  Current Map, and Selected Event without mutating source project files.
 
 ## Non-goals
 
-- Multi-tile brushes, autotile rules, layer blending — v1 paints a
-  single tile id at a time.
-- Drag-select / box-select — single events at a time.
-- Tile collisions stored anywhere other than the existing `collision`
-  layer (`9 = wall`, `0 = walkable`).
-- Custom tile id spaces — v1 ships a fixed integer set per layer.
-- Editor-side battle preview, troop simulator, or scripting console.
+- Autotile rules and layer blending.
+- Drag-select / box-select for multiple events.
+- Tile collisions stored outside the explicit `collision` layer
+  (`9 = wall`, `0 = walkable`).
+- Runtime scripting console, arbitrary plugin code, or AI/runtime services.
+- Cloud sync, marketplace publishing, or proprietary RPG Maker import.
 
 ## User flow
 
 1. Open the editor at the Map screen.
-2. In the Tile Palette on the left, pick a tool: Select, Paint,
-   Eraser, Collision, Event.
-3. If Paint: pick a tile id from the palette. The selected tile is
-   visually highlighted.
-4. On the canvas:
+2. In the map tree, select, create, rename, duplicate, reorder, or nest maps.
+3. In map properties, edit display name, tileset, scroll, size, viewport,
+   encounter, battleback, parallax, and start-map settings.
+4. In the Tile Palette, pick an authoring layer: Ground, Decor, Front, Pass,
+   Region, or Events.
+5. Pick a brush, fill, rectangle, eraser, or select/move tool. Brushes can be
+   visual tiles, passability cells, region ids, or event templates.
+6. On the canvas:
    - **Select** mode: click an event to inspect it; drag a selected
      event to move it; press `Delete` to delete; press `Ctrl+D` to
      duplicate.
-   - **Paint** mode: click and drag to paint the active tile across
-     ground cells.
-   - **Eraser** mode: click and drag to clear cells back to `0`.
-   - **Collision** mode: click a cell to toggle between `0` and `9`
-     on the `collision` layer; the canvas overlays a translucent
-     marker on collision cells.
-   - **Event** mode: click an empty cell to place a new event with a
+   - **Brush** mode: click and drag to paint the active brush on the active
+     layer.
+   - **Fill** mode: fill a contiguous region on the active layer.
+   - **Rectangle** mode: paint a rectangular region on the active layer.
+   - **Eraser** mode: clear cells back to `0` where the active layer allows
+     clearing.
+   - **Events** layer: click an empty cell to place a new event with a
      unique id and minimal default fields.
-5. The Save toolbar lights up because the project is dirty. Hitting
-   Save (or `Ctrl+S`) writes via `FileSystemAdapter` to disk.
-6. `Ctrl+Z` undoes the last action; `Ctrl+Y` or `Ctrl+Shift+Z` redoes.
-7. Switching maps clears the selection, but the undo stack is per
+7. Edit selected event pages and command stacks in the event inspector or
+   Events screen.
+8. The Save toolbar lights up because the project is dirty. Hitting
+   Save (or `Ctrl+S`) validates first, then writes through the active
+   adapter: Tauri filesystem in desktop mode, browser/export flow in browser
+   mode.
+9. Use Validate before runtime launch or save handoff.
+10. `Ctrl+Z` undoes the last action; `Ctrl+Y` or `Ctrl+Shift+Z` redoes.
+11. Switching maps clears the selection, but the undo stack is per
    editor session and stays alive until the editor is closed.
 
 ## Tools
 
-| Tool       | Cursor / hint            | Click action                              | Drag action                |
-|------------|--------------------------|-------------------------------------------|----------------------------|
-| Select     | crosshair                | select event under cursor                 | move selected event        |
-| Paint      | brush                    | paint active tile in active layer         | paint stroke               |
-| Eraser     | strikethrough            | clear cell to 0                           | clear stroke               |
-| Collision  | shield                   | toggle 0 ↔ 9 on `collision` layer         | toggle stroke              |
-| Event      | plus                     | place a new event on empty cell           | place stroke (one event)   |
+| Tool | Cursor / hint | Click action | Drag action |
+|------|---------------|--------------|-------------|
+| Select | move | select event under cursor | move selected event |
+| Brush | pencil | paint active brush in active layer | paint stroke |
+| Fill | bucket | flood-fill contiguous cells | n/a |
+| Rectangle | square | start rectangle | size and commit rectangle |
+| Eraser | eraser | clear active layer cell | clear stroke |
 
-The active tool, selected tile id, and active layer live in
-`EditorState` (see below). They are persisted in memory only — closing
-the editor resets them to defaults.
+The active tool, brush, brush size, playtest mode, and active layer live in
+`EditorState` (see below). They are persisted in memory only; closing the
+editor resets them to defaults.
 
 ## Layers
 
-Phase 7 v1 supports two layers, both already present in Phase 1+ map
-files:
+Phase 10 maps require these authoring layers:
 
-- `ground` — visual terrain. Tile ids: `0` empty, `1` grass-walkable,
-  `2` path, `3` water (visual; collisions are independent).
-- `collision` — gameplay. Tile ids: `0` walkable, `9` wall.
+| Layer | Type | Runtime role |
+|-------|------|--------------|
+| `ground` | visual | primary background terrain |
+| `decoration` | visual | non-blocking visual detail behind entities |
+| `foreground` | visual | occluders drawn after same-priority entities |
+| `collision` | collision | movement truth; `0` walkable, `9` blocked |
+| `region` | region | authoring metadata for region ids |
+| `event` | event authoring mode | places and edits entries in `map.events` |
 
-Painting on `ground` cannot directly mark something as a collision;
-that's a separate Collision tool that writes to the `collision` layer.
-This keeps the data model simple and matches the runtime which already
-reads the two layers independently.
+Painting visual tiles never silently changes collision. Collision and region
+layers remain gameplay/editor data; the runtime does not render them as
+visual tiles.
 
 ## State shapes
 
@@ -116,10 +132,11 @@ interface EditorState {
   zoom: number;
   saved: boolean;
 
-  // NEW
-  tool: 'select' | 'paint' | 'eraser' | 'collision' | 'event';
-  selectedTileId: number;
-  activeLayer: 'ground' | 'collision';
+  brush: BrushSelection;
+  activeLayer: 'ground' | 'decoration' | 'foreground' | 'collision' | 'region' | 'event';
+  tool: 'brush' | 'fill' | 'rectangle' | 'erase' | 'select';
+  brushSize: 1 | 2 | 3 | 5;
+  playtestMode: 'projectStart' | 'currentMap' | 'selectedEvent';
 }
 ```
 
@@ -128,9 +145,11 @@ interface EditorState {
 ```ts
 type EditorAction =
   | ...existing
-  | { type: 'SET_TOOL';           tool: EditorState['tool'] }
-  | { type: 'SET_SELECTED_TILE';  tileId: number }
-  | { type: 'SET_ACTIVE_LAYER';   layer: 'ground' | 'collision' };
+  | { type: 'SET_TOOL';          tool: EditorState['tool'] }
+  | { type: 'SET_BRUSH';         brush: BrushSelection }
+  | { type: 'SET_BRUSH_SIZE';    brushSize: EditorState['brushSize'] }
+  | { type: 'SET_ACTIVE_LAYER';  layer: EditorState['activeLayer'] }
+  | { type: 'SET_PLAYTEST_MODE'; mode: PlaytestSessionMode };
 ```
 
 ### `ProjectAction` additions (handled through the history middleware)
@@ -138,8 +157,10 @@ type EditorAction =
 ```ts
 type ProjectAction =
   | ...existing Phase 6 actions
-  | { type: 'PAINT_TILE';        mapId: string; layer: 'ground' | 'collision'; x: number; y: number; tile: number }
-  | { type: 'PAINT_TILE_STROKE'; mapId: string; layer: 'ground' | 'collision'; cells: Array<{ x: number; y: number; tile: number }> }
+  | { type: 'PAINT_TILE';        mapId: string; layerName: string; x: number; y: number; tile: number }
+  | { type: 'PAINT_TILE_STROKE'; mapId: string; layerName: string; cells: Array<{ x: number; y: number; tile: number }> }
+  | { type: 'PAINT_RECT';        mapId: string; layerName: string; x0: number; y0: number; x1: number; y1: number; tile: number }
+  | { type: 'FLOOD_FILL';        mapId: string; layerName: string; x: number; y: number; tile: number }
   | { type: 'TOGGLE_COLLISION';  mapId: string; x: number; y: number }
   | { type: 'PLACE_EVENT';       mapId: string; event: GameEvent }
   | { type: 'MOVE_EVENT';        mapId: string; eventId: string; x: number; y: number }
@@ -229,9 +250,11 @@ The action chosen depends on the active tool:
 
 | Tool       | Action                                                      |
 |------------|-------------------------------------------------------------|
-| Paint      | `PAINT_TILE_STROKE { layer: activeLayer, cells: [...] }`    |
-| Eraser     | `PAINT_TILE_STROKE { layer: activeLayer, cells: [{x,y,0}] }` |
-| Collision  | `TOGGLE_COLLISION { x, y }` (idempotent under coalescing)   |
+| Brush      | `PAINT_TILE_STROKE { layerName: activeLayer, cells: [...] }` |
+| Eraser     | `PAINT_TILE_STROKE { layerName: activeLayer, cells: [{x,y,0}] }` |
+| Fill       | `FLOOD_FILL { layerName: activeLayer, x, y, tile }` |
+| Rectangle  | `PAINT_RECT { layerName: activeLayer, x0, y0, x1, y1, tile }` |
+| Collision  | `PAINT_TILE_STROKE` on `collision` with tile `0` or `9` |
 
 ### Event tool
 

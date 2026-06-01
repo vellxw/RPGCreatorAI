@@ -24,12 +24,14 @@ Implemented foundations include:
 - React 19 + Vite editor UI
 - Tauri 2 desktop shell integration
 - native C++20 runtime built with CMake
-- data-driven maps, events, switches, variables, common events, shops, battles, and save state
+- data-driven maps, layers, event pages, switches, variables, common events, database shards, shops, battles, and save state
+- local playtest sessions for project start, current map, and selected event modes
+- bounded runtime logs, deterministic event traces, and runtime state snapshots in the Playtest screen
 - shared JSON project format between editor and runtime
 - generated runtime/editor visual assets
 - C++ runtime tests, Vitest editor tests, and validation scripts
 
-AI is not required to run the editor or runtime today. The AI layer is planned as an authoring assistant above the deterministic project format.
+AI is not required to run the editor or runtime today. The MVP does not ship a scripting VM, cloud service, marketplace, proprietary importer, or runtime AI dependency. The future AI layer is planned as an authoring assistant above the deterministic project format.
 
 ## Screenshots
 
@@ -81,9 +83,30 @@ npm install
 npm run dev
 ```
 
-Open the printed Vite URL in your browser.
+Open the printed Vite URL in your browser. `npm run dev` uses browser mode:
+edits stay in the browser adapter until exported, and native runtime launch,
+runtime logs, and runtime state snapshots are unavailable by design.
+
+For the desktop shell with real filesystem save/load and native runtime
+launch:
+
+```bash
+npm run desktop:dev
+```
+
+Tauri starts the strict dev server on `http://localhost:1420`.
 
 ## Verify The Project
+
+Canonical Windows MVP gate:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
+```
+
+This runs frontend typecheck, Vitest, frontend build, native C++
+configure/build/CTest, Tauri content verification, Rust desktop tests,
+runtime smoke, and editor-runtime roundtrip validation.
 
 Frontend and editor checks:
 
@@ -96,20 +119,31 @@ npm run build
 Windows runtime build and C++ tests:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke
 ```
 
-Full Windows runtime smoke check:
+Runtime smoke check:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
 ```
 
-Desktop content check:
+Desktop content check, with a Tauri dev server already running on port 1420:
 
 ```bash
 npm run desktop:verify-content
 ```
+
+## MVP Editor Workflow
+
+1. Open the editor in the browser for quick preview or with `npm run desktop:dev` for real filesystem/runtime integration.
+2. Open or use the sample JSON project under `data/`.
+3. Edit maps with ground, decoration, foreground, collision, region, and event authoring layers.
+4. Edit event pages, commands, common events, and database shards from the editor screens.
+5. Use Validate, then Save. Desktop mode writes through the Tauri filesystem bridge; browser mode uses the browser adapter/export path.
+6. Use Playtest mode selectors for Project Start, Current Map, or Selected Event.
+7. In desktop mode, Open in Runtime builds a temporary playtest project root and launches the native C++ runtime from that temp root. Source project files are not mutated by playtest launch.
+8. Inspect Runtime Log, Event Trace, and Runtime State in the Playtest screen. Browser mode shows honest unavailable states for native-only surfaces.
 
 ## Data Model
 

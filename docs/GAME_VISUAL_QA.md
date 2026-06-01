@@ -80,3 +80,10 @@ Required Phase 10 MVP evidence:
 The same smoke run asserts the corresponding logs for `showChoices`
 selection, event-target movement, `Audio requested: chest_open`,
 `pluginCommand debug.log`, and `Smoke shots complete`.
+
+## Phase 10 MVP documentation closeout
+
+FRA-34 aligns user-facing build/run/playtest docs with this visual evidence:
+browser mode is a simulated editor preview, desktop mode can launch the
+native runtime, and the committed Phase 10 smoke screenshots are the required
+runtime visual proof for route movement and foreground occlusion.

@@ -2361,3 +2361,15 @@ Error: Port 1420 is already in use
 - `2026-06-01 17:05:35 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-34 / INT-004 — MVP documentation and user workflow closeout
+
+- `2026-06-01 17:07:44 -03:00` — documentation audit — PASS; README,
+  build/run instructions, map workflow, editor architecture, desktop shell
+  architecture, runtime bridge, runtime launch bridge, visual docs, goal
+  stack, and systems matrix were checked against current `package.json`
+  scripts, `scripts/dev/*.ps1`, Tauri config, adapters, tests, and validated
+  MVP behavior.
+- `2026-06-01 17:11:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 17:13:05 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+

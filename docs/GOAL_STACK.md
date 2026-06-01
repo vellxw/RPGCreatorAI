@@ -15,11 +15,17 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-34 through FRA-35): docs closeout,
-  final report, commit, and push.
+- Integration QA — MVP green gate (FRA-35): final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 INT-004 (FRA-34) — MVP documentation now matches the implemented
+  local workflow: README and build docs list current commands, browser vs
+  desktop behavior, temp playtest sessions, validation gates, and explicit
+  MVP limitations; architecture/runtime bridge docs describe the Tauri bridge,
+  bounded logs/traces/snapshots, and no runtime IPC/AI/cloud/scripting
+  dependency; map/visual docs align with Phase 10 layers, playtest, and smoke
+  evidence. TypeScript typecheck passed after the documentation closeout.
 - Phase 10 INT-003 (FRA-33) — Playtest/Debug tooling integration is present on
   `main`: no local or remote `PT-*` branch refs remain after fetch/prune,
   Linear shows FRA-22 through FRA-26 Done, Slice 6 tasks are checked, and the
