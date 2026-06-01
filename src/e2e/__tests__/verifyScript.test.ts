@@ -113,4 +113,24 @@ describe('MVP verify script', () => {
     expect(packageWrapper).toContain('%*');
     expect(packageWrapper).toContain('exit /b %ERRORLEVEL%');
   });
+
+  it('keeps release version metadata aligned across npm, Tauri, and Cargo', () => {
+    const packageJson = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
+      version: string;
+    };
+    const packageLock = JSON.parse(readFileSync(join(process.cwd(), 'package-lock.json'), 'utf8')) as {
+      version: string;
+      packages: Record<string, { version?: string }>;
+    };
+    const tauriConfig = JSON.parse(readFileSync(join(process.cwd(), 'src-tauri/tauri.conf.json'), 'utf8')) as {
+      version: string;
+    };
+    const cargoToml = readFileSync(join(process.cwd(), 'src-tauri/Cargo.toml'), 'utf8');
+    const cargoVersion = cargoToml.match(/^version = "([^"]+)"$/m)?.[1];
+
+    expect(packageJson.version).toBe(tauriConfig.version);
+    expect(packageLock.version).toBe(tauriConfig.version);
+    expect(packageLock.packages['']?.version).toBe(tauriConfig.version);
+    expect(cargoVersion).toBe(tauriConfig.version);
+  });
 });

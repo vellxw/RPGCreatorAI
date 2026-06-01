@@ -2663,3 +2663,33 @@ Error: Port 1420 is already in use
 - `2026-06-01 20:02:49 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-46 / CP-011 — installer strategy and release artifact policy
+
+- `2026-06-01 20:07:15 -03:00` — `npx tauri build --help` — PASS; local Tauri
+  CLI help lists Windows bundle targets `msi` and `nsis`, plus `--no-bundle`,
+  `--no-sign`, and `--debug`.
+- `2026-06-01 20:07:34 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED as
+  expected; the new release-version metadata test found npm/package-lock at
+  `0.3.0` while Tauri/Cargo were `0.5.0`.
+- `2026-06-01 20:07:45 -03:00` — `npm version 0.5.0 --no-git-tag-version` —
+  PASS; fix applied by aligning `package.json` and `package-lock.json` without
+  creating a git tag.
+- `2026-06-01 20:07:53 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  version alignment; 1 test file and 4 tests passed.
+- `2026-06-01 20:11:46 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  documentation and task updates; 1 test file and 4 tests passed.
+- `2026-06-01 20:12:49 -03:00` — `npm run desktop:package:windows` — PASS.
+  The helper built/tested the native runtime under
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\build`, ran
+  `tauri build --debug --no-bundle`, built the frontend from `../dist`,
+  produced
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`,
+  copied `rpg_creator_runtime.exe` beside it, smoke-launched the packaged app,
+  reported `PACKAGED SMOKE PASSED`, and exited successfully. Non-fatal
+  warnings: Vite chunk-size warning, missing PkgConfig, CMake FetchContent
+  CMP0135 developer warnings, and dependency `cmake_minimum_required`
+  deprecation warnings.
+

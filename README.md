@@ -158,6 +158,8 @@ That helper builds the frontend, Tauri shell, and native runtime, copies
 `rpg_creator_runtime.exe` beside the packaged Tauri executable under
 `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, and smoke-launches the
 packaged app. It does not create an installer or require signing credentials.
+The current release artifact and future installer policy is documented in
+[Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
 
 ## MVP Editor Workflow
 

@@ -104,7 +104,13 @@ The helper builds the native runtime, runs `tauri build --debug --no-bundle`,
 sets `CARGO_TARGET_DIR` to `%LOCALAPPDATA%\RPGCreatorAI\tauri-target`, copies
 `rpg_creator_runtime.exe` next to the produced Tauri executable, and
 smoke-launches the packaged app. This prototype intentionally does not create
-an installer; installer/signing policy is handled by later release issues.
+an installer; the installer/signing policy is defined in
+`docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`.
+
+Current release metadata is aligned at version `0.5.0` across npm, Tauri, and
+Cargo. Future Windows installer work should target unsigned NSIS first, with
+MSI as a later secondary target and code signing deferred until credentials or
+certificates are explicitly provided.
 
 Fallback wrapper:
 

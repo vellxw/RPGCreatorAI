@@ -101,6 +101,10 @@ Windows prototype. The package helper sets `CARGO_TARGET_DIR` explicitly so
 Rust's heavy file-rename activity stays out of OneDrive's filter zone,
 mirroring the Phase 4.1 fix for cmake.
 
+Release artifact naming, unsigned local prototype behavior, future NSIS/MSI
+installer direction, and signing boundaries are documented in
+`docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`.
+
 ## Detection & Fallback
 
 ```ts
@@ -122,4 +126,6 @@ The shell does not include auto-update in the MVP. A later phase can add code
 signing, an update server or local update channel, and store distribution
 metadata. Until then, dev binaries are produced by re-running
 `npm run desktop:build` or the CP-010 prototype helper
-`npm run desktop:package:windows`.
+`npm run desktop:package:windows`. The CP-011 release artifact policy keeps
+normal validation on unsigned local artifacts until signing credentials are
+provided explicitly.

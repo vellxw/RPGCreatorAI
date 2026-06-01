@@ -133,6 +133,12 @@ Prototype artifacts are local developer output, not source files:
 rmdir /s /q "%LOCALAPPDATA%\RPGCreatorAI\tauri-target"
 ```
 
+CP-011 defines the release artifact policy in
+`docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`. The current shippable developer
+artifact remains the unsigned local prototype above. Future installer work
+should start with an unsigned NSIS candidate; MSI is secondary, and signing
+requires explicit external credentials/certificates.
+
 ## Cleaning up
 
 The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:
