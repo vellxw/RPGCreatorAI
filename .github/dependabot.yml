@@ -30,3 +30,7 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+    groups:
+      cargo-dependencies:
+        patterns:
+          - "*"
