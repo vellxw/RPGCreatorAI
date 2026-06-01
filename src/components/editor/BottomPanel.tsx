@@ -1,7 +1,6 @@
 import { Tabs } from '../ui/Tabs';
-import { CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ClipboardList, TerminalSquare } from 'lucide-react';
 import { useProject } from '../../stores/projectStore';
-import { editorAssets, uiAssets } from '../../assets/generated/assetCatalog';
 
 function ValidationContent() {
   const project = useProject();
@@ -44,28 +43,46 @@ function ValidationContent() {
   );
 }
 
-function AISuggestionsContent() {
-  const suggestions = [
-    { icon: editorAssets.dialogue, title: 'Generate NPC dialogue', desc: 'Create contextual conversations', color: 'bg-blue-50 text-blue-600' },
-    { icon: editorAssets.map, title: 'Improve town layout', desc: 'AI will suggest layout improvements', color: 'bg-purple-50 text-purple-600' },
-    { icon: uiAssets.questJournal, title: 'Create side quest', desc: 'Generate a new side quest idea', color: 'bg-amber-50 text-amber-600' },
-  ];
-
+function DiagnosticsContent() {
+  const project = useProject();
+  const errorCount = project.errors.length;
+  const warningCount = project.warnings.length;
+  const validationStatus =
+    errorCount > 0
+      ? `${errorCount} blocking issue${errorCount === 1 ? '' : 's'}`
+      : warningCount > 0
+        ? `${warningCount} warning${warningCount === 1 ? '' : 's'}`
+        : 'No blocking errors';
   return (
-    <div className="space-y-2">
-      <h4 className="text-[12px] font-semibold text-gray-700 mb-3">AI Suggestions</h4>
-      {suggestions.map((s, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors group">
-          <div className={`w-8 h-8 rounded-lg ${s.color} flex items-center justify-center text-sm`}>
-            <img src={s.icon} alt="" className="w-6 h-6" />
+    <div className="space-y-3">
+      <h4 className="text-[12px] font-semibold text-gray-700">MVP Diagnostics</h4>
+      <div className="space-y-2">
+        <div className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
+          {errorCount > 0 ? (
+            <AlertTriangle size={15} className="text-red-500 mt-0.5 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 size={15} className="text-green-500 mt-0.5 flex-shrink-0" />
+          )}
+          <div>
+            <p className="text-[12px] font-medium text-gray-800">Validation</p>
+            <p className="text-[11px] text-gray-500">{validationStatus}</p>
           </div>
-          <div className="flex-1">
-            <p className="text-[13px] font-medium text-gray-800">{s.title}</p>
-            <p className="text-[11px] text-gray-500">{s.desc}</p>
-          </div>
-          <ChevronRight size={14} className="text-gray-300 group-hover:text-gray-500" />
         </div>
-      ))}
+        <div className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
+          <TerminalSquare size={15} className="text-slate-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-[12px] font-medium text-gray-800">Playtest Logs</p>
+            <p className="text-[11px] text-gray-500">Runtime output appears after launching a playtest.</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
+          <ClipboardList size={15} className="text-indigo-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-[12px] font-medium text-gray-800">Runtime Debug Panels</p>
+            <p className="text-[11px] text-gray-500">Use Runtime Log, Event Trace, and Runtime State in Playtest.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -91,11 +108,6 @@ export function BottomPanel() {
               content: <ValidationContent />,
             },
             {
-              id: 'ai',
-              label: 'AI Suggestions',
-              content: <AISuggestionsContent />,
-            },
-            {
               id: 'logs',
               label: 'Playtest Logs',
               content: <p className="text-[13px] text-gray-500">Start a playtest to see logs</p>,
@@ -105,7 +117,7 @@ export function BottomPanel() {
         />
       </div>
       <div className="w-[320px] p-4">
-        <AISuggestionsContent />
+        <DiagnosticsContent />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Sparkles, FolderOpen } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import { useEditor } from '../../stores/editorStore';
 import type { Screen } from '../../types/project';
 import { editorAssets } from '../../assets/generated/assetCatalog';
@@ -17,8 +17,6 @@ const navItems: NavItem[] = [
   { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
   { id: 'dialogue', label: 'Dialogue', icon: <img src={editorAssets.dialogue} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
   { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
-  { id: 'ai-tools', label: 'AI Tools', icon: <Sparkles size={18} />, screen: 'ai-tools' },
-  { id: 'settings', label: 'Settings', icon: <img src={editorAssets.settings} alt="" className="w-[18px] h-[18px]" />, screen: 'ai-tools' },
 ];
 
 export function Sidebar() {
@@ -29,7 +27,6 @@ export function Sidebar() {
       if (item.id === 'maps' && state.activeScreen === 'editor') return true;
       if (item.id === 'events' && state.activeScreen === 'events') return true;
       if (item.id === 'database' && state.activeScreen === 'database') return true;
-      if (item.id === 'ai-tools' && state.activeScreen === 'ai-tools') return true;
     }
     return false;
   };

@@ -2087,3 +2087,35 @@ Error: Port 1420 is already in use
 - `2026-06-01 13:38:00 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-26 / PT-005 — placeholder AI/debug UI gating
+
+- `2026-06-01 15:48:30 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — RED as expected; new tests found visible bottom-panel AI suggestions,
+  `AI Tools` navigation dispatching `ai-tools`, and an actionable provider
+  screen.
+- `2026-06-01 15:50:29 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS after replacing bottom-panel suggestions with diagnostics, removing
+  primary `ai-tools` navigation/routing, and making the future AI workspace
+  read-only.
+- `2026-06-01 15:52:09 -03:00` — `npm run typecheck` — FAIL; the new test's
+  Vitest mock generic did not satisfy `React.Dispatch<EditorAction>`. Fix:
+  typed the mock as a one-argument dispatch function.
+- `2026-06-01 15:52:45 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:52:45 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS (3/3 tests).
+- `2026-06-01 15:52:45 -03:00` —
+  `npm test -- --run src/stores/__tests__/editorStore.test.ts` — PASS
+  (5/5 tests).
+- `2026-06-01 15:53:00 -03:00` — `npm run build` — PASS (`tsc --noEmit`
+  and Vite production build; existing chunk-size warning only).
+- `2026-06-01 15:53:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; CMake configure/build, CTest, and runtime smoke all passed. Smoke
+  reported `SMOKE PASSED`; existing optional missing-audio warning remained
+  non-fatal.
+- `2026-06-01 15:54:08 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

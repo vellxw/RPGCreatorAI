@@ -123,7 +123,7 @@
   panel parsed from runtime logs.
 - [x] FRA-25 / PT-004: add a runtime state snapshot inspector backed by local,
   bounded, atomically written snapshot files.
-- [ ] FRA-26 / PT-005: remove or gate placeholder AI/debug UI so visible MVP
+- [x] FRA-26 / PT-005: remove or gate placeholder AI/debug UI so visible MVP
   actions are real local actions.
 
 ## Integration QA — MVP Green Gate

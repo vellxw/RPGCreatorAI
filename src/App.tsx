@@ -4,7 +4,6 @@ import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
-import { AIToolsScreen } from './screens/AIToolsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
 import {
   ProjectContext,
@@ -113,7 +112,6 @@ export default function App() {
     editor: <MainEditorScreen />,
     events: <EventEditorScreen />,
     database: <DatabaseScreen />,
-    'ai-tools': <AIToolsScreen />,
     playtest: <PlaytestScreen />,
   };
 

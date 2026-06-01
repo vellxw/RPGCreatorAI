@@ -7,7 +7,6 @@ import {
   Redo2,
   CheckCircle2,
   Upload,
-  ExternalLink,
   Settings,
   FolderOpen,
   Clock,
@@ -214,22 +213,6 @@ export function TopToolbar() {
     </>
   );
 
-  const renderAIToolbar = () => (
-    <>
-      <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
-        <span>Settings</span>
-        <span>/</span>
-        <span className="text-gray-800 font-medium">AI Tools</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button icon={<Save size={14} />}>Save</Button>
-        <Button icon={<Play size={14} />}>Test Connections</Button>
-        <Button icon={<Settings size={14} />}>Usage Limits</Button>
-        <Button icon={<ExternalLink size={14} />}>Documentation</Button>
-      </div>
-    </>
-  );
-
   const renderPlaytestToolbar = () => {
     const playtestModes: Array<{ mode: PlaytestSessionMode; label: string; disabled?: boolean }> = [
       { mode: 'projectStart', label: 'Project Start' },
@@ -296,7 +279,6 @@ export function TopToolbar() {
     editor: renderEditorToolbar,
     events: renderEventToolbar,
     database: renderDatabaseToolbar,
-    'ai-tools': renderAIToolbar,
     playtest: renderPlaytestToolbar,
   };
 
