@@ -2,7 +2,7 @@
 //
 // Exposes a small, allowlisted IPC surface to the renderer:
 //   fs.openProjectDialog / readProject / writeProject / listBackups / closeProject / createPlaytestSession
-//   runtime.launch / kill / status
+//   runtime.launch / kill / status / latestLog / readLogTail / openLogFolder
 //   config.getRecents / addRecent
 //   shell.info
 //
@@ -33,6 +33,9 @@ pub fn run() {
             runtime_commands::runtime_launch,
             runtime_commands::runtime_kill,
             runtime_commands::runtime_status,
+            runtime_commands::runtime_latest_log,
+            runtime_commands::runtime_read_log_tail,
+            runtime_commands::runtime_open_log_folder,
             config_commands::config_get_recents,
             config_commands::config_add_recent,
         ])

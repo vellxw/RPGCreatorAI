@@ -1,6 +1,9 @@
 // Runtime IPC: launch, kill, status for the C++ rpg_creator_runtime executable.
 
-use std::path::PathBuf;
+use std::fs;
+use std::io::{Read, Seek, SeekFrom};
+use std::path::{Path, PathBuf};
+use std::process::Stdio;
 
 use serde::Serialize;
 use tauri::State;
@@ -17,6 +20,40 @@ pub struct RuntimeLaunchResult {
     pub pid: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub executable_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub log_path: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeLogInfo {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeLogTailResult {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    pub truncated: bool,
+    pub max_bytes: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeLogActionResult {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -74,6 +111,96 @@ fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
     None
 }
 
+fn app_data_dir() -> Result<PathBuf, String> {
+    if let Ok(appdata) = std::env::var("APPDATA") {
+        return Ok(PathBuf::from(appdata).join("RPGCreatorAI"));
+    }
+    if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        return Ok(PathBuf::from(local).join("RPGCreatorAI"));
+    }
+    if let Ok(home) = std::env::var("HOME") {
+        return Ok(PathBuf::from(home).join(".rpgcreatorai"));
+    }
+    Err("no app data directory available for runtime logs".to_string())
+}
+
+fn runtime_logs_dir() -> Result<PathBuf, String> {
+    Ok(app_data_dir()?.join("runtime-logs"))
+}
+
+fn create_runtime_log_file() -> Result<(PathBuf, fs::File), String> {
+    let dir = runtime_logs_dir()?;
+    fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+    let timestamp = chrono::Utc::now()
+        .format("runtime-%Y%m%dT%H%M%S%.3fZ")
+        .to_string();
+    let mut path = dir.join(format!("{timestamp}.log"));
+    let mut suffix = 1;
+    while path.exists() {
+        path = dir.join(format!("{timestamp}-{suffix}.log"));
+        suffix += 1;
+    }
+    let file = fs::OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(&path)
+        .map_err(|e| format!("create {}: {e}", path.display()))?;
+    Ok((path, file))
+}
+
+fn latest_runtime_log_in_dir(dir: &Path) -> Option<PathBuf> {
+    let mut logs: Vec<PathBuf> = fs::read_dir(dir)
+        .ok()?
+        .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+        .filter(|path| {
+            path.is_file()
+                && path
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .is_some_and(|name| name.starts_with("runtime-") && name.ends_with(".log"))
+        })
+        .collect();
+    logs.sort_by(|a, b| {
+        let a_modified = fs::metadata(a).and_then(|m| m.modified()).ok();
+        let b_modified = fs::metadata(b).and_then(|m| m.modified()).ok();
+        b_modified.cmp(&a_modified).then_with(|| b.cmp(a))
+    });
+    logs.into_iter().next()
+}
+
+fn latest_runtime_log_path(state: &AppState) -> Result<PathBuf, String> {
+    if let Some(path) = state.latest_runtime_log.lock().unwrap().clone() {
+        if path.is_file() {
+            return Ok(path);
+        }
+    }
+    let dir = runtime_logs_dir()?;
+    latest_runtime_log_in_dir(&dir).ok_or_else(|| "no runtime log has been created yet".to_string())
+}
+
+fn read_runtime_log_tail_at(path: &Path, max_bytes: u64) -> Result<RuntimeLogTailResult, String> {
+    let max_bytes = max_bytes.min(MAX_RUNTIME_LOG_TAIL_BYTES);
+    let mut file = fs::File::open(path).map_err(|e| format!("open {}: {e}", path.display()))?;
+    let len = file
+        .metadata()
+        .map_err(|e| format!("metadata {}: {e}", path.display()))?
+        .len();
+    let start = len.saturating_sub(max_bytes);
+    file.seek(SeekFrom::Start(start))
+        .map_err(|e| format!("seek {}: {e}", path.display()))?;
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes)
+        .map_err(|e| format!("read {}: {e}", path.display()))?;
+    Ok(RuntimeLogTailResult {
+        success: true,
+        path: Some(path.to_string_lossy().to_string()),
+        content: Some(String::from_utf8_lossy(&bytes).to_string()),
+        truncated: start > 0,
+        max_bytes: max_bytes as usize,
+        error: None,
+    })
+}
+
 #[tauri::command]
 pub fn runtime_launch(
     state: State<'_, AppState>,
@@ -116,8 +243,46 @@ pub fn runtime_launch(
         }
     };
 
+    let (log_path, log_file) = match create_runtime_log_file() {
+        Ok(result) => result,
+        Err(e) => {
+            return Ok(RuntimeLaunchResult {
+                success: false,
+                error: Some(e),
+                executable_path: Some(exe.to_string_lossy().to_string()),
+                ..Default::default()
+            });
+        }
+    };
+    let stdout = match log_file.try_clone() {
+        Ok(file) => file,
+        Err(e) => {
+            return Ok(RuntimeLaunchResult {
+                success: false,
+                error: Some(format!("failed to prepare runtime stdout log: {e}")),
+                executable_path: Some(exe.to_string_lossy().to_string()),
+                log_path: Some(log_path.to_string_lossy().to_string()),
+                ..Default::default()
+            });
+        }
+    };
+    let stderr = match log_file.try_clone() {
+        Ok(file) => file,
+        Err(e) => {
+            return Ok(RuntimeLaunchResult {
+                success: false,
+                error: Some(format!("failed to prepare runtime stderr log: {e}")),
+                executable_path: Some(exe.to_string_lossy().to_string()),
+                log_path: Some(log_path.to_string_lossy().to_string()),
+                ..Default::default()
+            });
+        }
+    };
+
     let child = match std::process::Command::new(&exe)
         .current_dir(&project_root)
+        .stdout(Stdio::from(stdout))
+        .stderr(Stdio::from(stderr))
         .spawn()
     {
         Ok(c) => c,
@@ -126,12 +291,14 @@ pub fn runtime_launch(
                 success: false,
                 error: Some(format!("failed to spawn runtime: {e}")),
                 executable_path: Some(exe.to_string_lossy().to_string()),
+                log_path: Some(log_path.to_string_lossy().to_string()),
                 ..Default::default()
             });
         }
     };
 
     let pid = child.id();
+    *state.latest_runtime_log.lock().unwrap() = Some(log_path.clone());
     *state.runtime_process.lock().unwrap() = Some(child);
 
     Ok(RuntimeLaunchResult {
@@ -139,6 +306,7 @@ pub fn runtime_launch(
         error: None,
         pid: Some(pid),
         executable_path: Some(exe.to_string_lossy().to_string()),
+        log_path: Some(log_path.to_string_lossy().to_string()),
     })
 }
 
@@ -219,4 +387,90 @@ mod tests {
 
         restore_runtime_env(previous);
     }
+
+    #[test]
+    fn read_runtime_log_tail_caps_to_256_kib() {
+        let tmp = tempfile::TempDir::new().unwrap();
+        let path = tmp.path().join("runtime.log");
+        let mut body = vec![b'a'; (MAX_RUNTIME_LOG_TAIL_BYTES as usize) + 16];
+        body.extend_from_slice(b"TAIL");
+        std::fs::write(&path, body).unwrap();
+
+        let result = read_runtime_log_tail_at(&path, MAX_RUNTIME_LOG_TAIL_BYTES * 2).unwrap();
+
+        assert!(result.success);
+        assert!(result.truncated);
+        assert_eq!(result.max_bytes, MAX_RUNTIME_LOG_TAIL_BYTES as usize);
+        assert!(result.content.unwrap().ends_with("TAIL"));
+    }
 }
+
+#[tauri::command]
+pub fn runtime_latest_log(state: State<'_, AppState>) -> Result<RuntimeLogInfo, String> {
+    match latest_runtime_log_path(&state) {
+        Ok(path) => Ok(RuntimeLogInfo {
+            success: true,
+            path: Some(path.to_string_lossy().to_string()),
+            error: None,
+        }),
+        Err(e) => Ok(RuntimeLogInfo {
+            success: false,
+            path: None,
+            error: Some(e),
+        }),
+    }
+}
+
+#[tauri::command]
+pub fn runtime_read_log_tail(
+    state: State<'_, AppState>,
+    max_bytes: u64,
+) -> Result<RuntimeLogTailResult, String> {
+    let capped = max_bytes.min(MAX_RUNTIME_LOG_TAIL_BYTES) as usize;
+    let path = match latest_runtime_log_path(&state) {
+        Ok(path) => path,
+        Err(e) => {
+            return Ok(RuntimeLogTailResult {
+                success: false,
+                error: Some(e),
+                max_bytes: capped,
+                ..Default::default()
+            });
+        }
+    };
+    match read_runtime_log_tail_at(&path, max_bytes) {
+        Ok(result) => Ok(result),
+        Err(e) => Ok(RuntimeLogTailResult {
+            success: false,
+            path: Some(path.to_string_lossy().to_string()),
+            error: Some(e),
+            max_bytes: capped,
+            ..Default::default()
+        }),
+    }
+}
+
+#[tauri::command]
+pub fn runtime_open_log_folder() -> Result<RuntimeLogActionResult, String> {
+    let dir = runtime_logs_dir()?;
+    fs::create_dir_all(&dir).map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+    let result = if cfg!(windows) {
+        std::process::Command::new("explorer").arg(&dir).spawn()
+    } else if cfg!(target_os = "macos") {
+        std::process::Command::new("open").arg(&dir).spawn()
+    } else {
+        std::process::Command::new("xdg-open").arg(&dir).spawn()
+    };
+    match result {
+        Ok(_) => Ok(RuntimeLogActionResult {
+            success: true,
+            error: None,
+        }),
+        Err(e) => Ok(RuntimeLogActionResult {
+            success: false,
+            error: Some(format!("failed to open {}: {e}", dir.display())),
+        }),
+    }
+}
+
+const MAX_RUNTIME_LOG_TAIL_BYTES: u64 = 256 * 1024;

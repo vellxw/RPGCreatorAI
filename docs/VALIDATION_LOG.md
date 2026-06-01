@@ -4,6 +4,59 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## Phase 10 FRA-23 / PT-002 — runtime log viewer and bounded log reading
+
+- `2026-06-01 15:07:04 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx`
+  — RED; `RuntimeLogPanel` did not exist yet.
+- `2026-06-01 15:07:04 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::read_runtime_log_tail_caps_to_256_kib -- --exact`
+  — RED; `MAX_RUNTIME_LOG_TAIL_BYTES` and `read_runtime_log_tail_at` did not
+  exist yet.
+- `2026-06-01 15:07:36 -03:00` —
+  `npm test -- --run src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — RED; `DesktopRuntimeAdapter` did not expose `getLatestLog`,
+  `readLatestLogTail`, or `openLogFolder`.
+- `2026-06-01 15:12:13 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — PASS; 2 files and 8 tests passed after adding the runtime log panel and
+  adapter bridge methods.
+- `2026-06-01 15:12:13 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests::read_runtime_log_tail_caps_to_256_kib -- --exact`
+  — PASS after adding shell-side log tail reading with a 256 KiB cap.
+- `2026-06-01 15:13:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:14:00 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 23 Rust tests passed.
+- `2026-06-01 15:14:25 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  — PASS; 2 files and 8 tests passed on the final required rerun.
+- `2026-06-01 15:14:25 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 15:14:25 -03:00` — `npm run build` — PASS; Vite emitted the
+  existing chunk-size warning only.
+- `2026-06-01 15:14:25 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 23 Rust tests passed on the final required rerun.
+- `2026-06-01 15:15:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure completed with existing third-party CMake warnings,
+  Ninja had no work to do, and `RPGTests` passed.
+- `2026-06-01 15:15:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime stayed alive, loaded the town map, logged the
+  `town_theme` audio request, warned about the missing optional WAV, and
+  reported `SMOKE PASSED`.
+- `2026-06-01 15:15:00 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+- Fix applied: added shell-side stdout/stderr log capture on runtime launch,
+  latest-log and bounded-tail IPC commands, a narrow log-folder opener,
+  runtime adapter log methods, a `RuntimeLogPanel`, Playtest bottom-panel tabs,
+  runtime-log polling while the native process is running, and honest browser
+  unavailable states.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## Phase 10 FRA-22 / PT-001 — playtest session builder
 
 - `2026-06-01 14:44:00 -03:00` —

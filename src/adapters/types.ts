@@ -54,10 +54,31 @@ export interface RuntimeLaunchResult {
   error?: string;
   pid?: number;
   executablePath?: string;
+  logPath?: string;
 }
 
 export interface RuntimeLaunchOptions {
   executableSearchRoot?: string;
+}
+
+export interface RuntimeLogInfo {
+  success: boolean;
+  path?: string;
+  error?: string;
+}
+
+export interface RuntimeLogTailResult {
+  success: boolean;
+  path?: string;
+  content?: string;
+  truncated?: boolean;
+  maxBytes?: number;
+  error?: string;
+}
+
+export interface RuntimeLogActionResult {
+  success: boolean;
+  error?: string;
 }
 
 export interface RuntimeLaunchAdapter {
@@ -66,6 +87,9 @@ export interface RuntimeLaunchAdapter {
   launch(projectPath: string, options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
+  getLatestLog(): Promise<RuntimeLogInfo>;
+  readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+  openLogFolder(): Promise<RuntimeLogActionResult>;
   getUnavailableReason(): string | null;
 }
 

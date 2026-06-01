@@ -9,6 +9,9 @@ import type {
   SaveResult,
   RuntimeStatus,
   RuntimeLaunchResult,
+  RuntimeLogActionResult,
+  RuntimeLogInfo,
+  RuntimeLogTailResult,
 } from '../adapters/types';
 
 export interface OpenDialogResult {
@@ -42,6 +45,9 @@ export interface RpgBridge {
     launch(projectRoot: string, executableSearchRoot?: string): Promise<RuntimeLaunchResult>;
     kill(): Promise<void>;
     status(): Promise<RuntimeStatus>;
+    getLatestLog(): Promise<RuntimeLogInfo>;
+    readLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+    openLogFolder(): Promise<RuntimeLogActionResult>;
   };
   config: {
     getRecents(): Promise<string[]>;

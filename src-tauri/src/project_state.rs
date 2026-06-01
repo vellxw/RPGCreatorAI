@@ -8,4 +8,5 @@ use std::sync::Mutex;
 pub struct AppState {
     pub project_root: Mutex<Option<PathBuf>>,
     pub runtime_process: Mutex<Option<std::process::Child>>,
+    pub latest_runtime_log: Mutex<Option<PathBuf>>,
 }

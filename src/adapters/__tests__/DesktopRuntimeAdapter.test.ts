@@ -17,6 +17,9 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
       launch: async () => ({ success: true, pid: 1234 }),
       kill: async () => undefined,
       status: async () => 'ready' as const,
+      getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
+      readLogTail: async () => ({ success: false, error: 'not stubbed' }),
+      openLogFolder: async () => ({ success: false, error: 'not stubbed' }),
       ...overrides,
     },
     config: {
@@ -86,5 +89,23 @@ describe('DesktopRuntimeAdapter (Phase 5)', () => {
     const a = new DesktopRuntimeAdapter();
     const s = await a.getStatusAsync();
     expect(s).toBe('running');
+  });
+
+  it('routes bounded log access through the bridge', async () => {
+    const calls: unknown[] = [];
+    window.rpgBridge = bridge({
+      getLatestLog: async () => ({ success: true, path: 'C:\\runtime.log' }),
+      readLogTail: async (maxBytes) => {
+        calls.push(maxBytes);
+        return { success: true, path: 'C:\\runtime.log', content: '[INFO] boot', truncated: false, maxBytes };
+      },
+      openLogFolder: async () => ({ success: true }),
+    });
+    const a = new DesktopRuntimeAdapter();
+
+    await expect(a.getLatestLog()).resolves.toMatchObject({ path: 'C:\\runtime.log' });
+    await expect(a.readLatestLogTail(1024)).resolves.toMatchObject({ content: '[INFO] boot' });
+    await expect(a.openLogFolder()).resolves.toMatchObject({ success: true });
+    expect(calls).toEqual([1024]);
   });
 });

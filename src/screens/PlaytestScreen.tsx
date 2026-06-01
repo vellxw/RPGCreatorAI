@@ -1,9 +1,8 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { usePlaytestStore } from '../stores/playtestStore';
 import { useProject, useProjectStore } from '../stores/projectStore';
 import { Badge } from '../components/ui/Badge';
 import {
-  ChevronRight,
   CheckCircle2,
   AlertTriangle,
   Gamepad2,
@@ -12,13 +11,11 @@ import {
   Lightbulb,
   Zap,
   ClipboardList,
-  Bot,
-  Link2,
-  MessageSquare,
 } from 'lucide-react';
 import { getRuntimeLaunchAdapter, getFileSystemAdapter, getPlaytestSessionAdapter } from '../adapters/adapterFactory';
 import { useEditor } from '../stores/editorStore';
 import { validateProject } from '../validation/validateProject';
+import { RuntimeLogPanel } from '../components/playtest/RuntimeLogPanel';
 import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
@@ -32,6 +29,7 @@ import {
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
 import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
+import type { RuntimeLaunchAdapter, RuntimeStatus } from '../adapters/types';
 
 function displayForCharacter(
   tileSize: number,
@@ -492,13 +490,20 @@ function RuntimeStateInspector({ state }: { state: ReturnType<typeof usePlaytest
   );
 }
 
-function RuntimeBridgePanel() {
-  const adapter = getRuntimeLaunchAdapter();
-  const sessionAdapter = getPlaytestSessionAdapter();
+function RuntimeBridgePanel({
+  adapter,
+  sessionAdapter,
+  runtimeStatus,
+  setRuntimeStatus,
+}: {
+  adapter: RuntimeLaunchAdapter;
+  sessionAdapter: ReturnType<typeof getPlaytestSessionAdapter>;
+  runtimeStatus: RuntimeStatus;
+  setRuntimeStatus: Dispatch<SetStateAction<RuntimeStatus>>;
+}) {
   const { state: projectState, dispatch: projectDispatch } = useProjectStore();
   const { state: editorState } = useEditor();
   const [status, setStatus] = useState<string | null>(null);
-  const [runtimeStatus, setRuntimeStatus] = useState(adapter.getStatus());
 
   // Poll status every second while the bridge is available so the UI reflects
   // the runtime exiting on its own.
@@ -617,7 +622,91 @@ function StateRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs'] }) {
+function RuntimeLogContainer({
+  adapter,
+  runtimeStatus,
+}: {
+  adapter: RuntimeLaunchAdapter;
+  runtimeStatus: RuntimeStatus;
+}) {
+  const [content, setContent] = useState('');
+  const [logPath, setLogPath] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const available = adapter.canLaunch();
+
+  const refresh = useCallback(async () => {
+    if (!available) return;
+    setLoading(true);
+    try {
+      const info = await adapter.getLatestLog();
+      if (!info.success || !info.path) {
+        setLogPath(null);
+        setContent('');
+        setTruncated(false);
+        setError(info.error ?? 'No runtime log has been created yet.');
+        return;
+      }
+      setLogPath(info.path);
+      const tail = await adapter.readLatestLogTail(256 * 1024);
+      if (!tail.success) {
+        setContent('');
+        setTruncated(false);
+        setError(tail.error ?? 'Could not read runtime log.');
+        return;
+      }
+      setContent(tail.content ?? '');
+      setTruncated(!!tail.truncated);
+      setError(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [adapter, available]);
+
+  useEffect(() => {
+    refresh();
+    if (runtimeStatus !== 'running') return;
+    const id = window.setInterval(refresh, 1000);
+    return () => window.clearInterval(id);
+  }, [refresh, runtimeStatus]);
+
+  const copyLog = useCallback(async () => {
+    if (!content) return;
+    await navigator.clipboard?.writeText(content);
+  }, [content]);
+
+  const openLogFolder = useCallback(async () => {
+    const result = await adapter.openLogFolder();
+    if (!result.success) setError(result.error ?? 'Could not open runtime log folder.');
+  }, [adapter]);
+
+  return (
+    <RuntimeLogPanel
+      available={available}
+      unavailableReason={adapter.getUnavailableReason()}
+      logPath={logPath}
+      content={content}
+      error={error}
+      truncated={truncated}
+      loading={loading}
+      onRefresh={refresh}
+      onCopy={copyLog}
+      onOpenFolder={openLogFolder}
+    />
+  );
+}
+
+function LogsPanel({
+  logs,
+  runtimeAdapter,
+  runtimeStatus,
+}: {
+  logs: ReturnType<typeof usePlaytestStore>['logs'];
+  runtimeAdapter: RuntimeLaunchAdapter;
+  runtimeStatus: RuntimeStatus;
+}) {
+  const [activeTab, setActiveTab] = useState<'editor' | 'runtime' | 'validation' | 'trace'>('editor');
   const levelColors = {
     INFO: 'text-blue-600 bg-blue-50',
     WARN: 'text-amber-600 bg-amber-50',
@@ -628,56 +717,59 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
     <div className="h-[180px] flex-shrink-0 bg-white border-t border-gray-200 flex">
       <div className="flex-1 flex flex-col">
         <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
-          <button className="text-[12px] font-medium text-indigo-600 border-b-2 border-indigo-500 pb-1 cursor-pointer">
+          <button
+            onClick={() => setActiveTab('editor')}
+            className={`text-[12px] font-medium pb-1 cursor-pointer ${activeTab === 'editor' ? 'text-indigo-600 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700'}`}
+          >
             <span className="inline-flex items-center gap-1">
               <ClipboardList size={12} />
-              Logs
+              Editor Preview
             </span>
           </button>
-          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">
+          <button
+            onClick={() => setActiveTab('runtime')}
+            className={`text-[12px] pb-1 cursor-pointer ${activeTab === 'runtime' ? 'text-indigo-600 border-b-2 border-indigo-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Runtime Log
+          </button>
+          <button
+            onClick={() => setActiveTab('validation')}
+            className={`text-[12px] pb-1 cursor-pointer ${activeTab === 'validation' ? 'text-indigo-600 border-b-2 border-indigo-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
             ✓ Validation <span className="text-[10px] bg-green-100 text-green-700 px-1 rounded">0</span>
           </button>
-          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Event Trace</button>
-          <button className="text-[12px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">AI Debug</button>
+          <button
+            onClick={() => setActiveTab('trace')}
+            className={`text-[12px] pb-1 cursor-pointer ${activeTab === 'trace' ? 'text-indigo-600 border-b-2 border-indigo-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Event Trace
+          </button>
           <div className="ml-auto flex items-center gap-1.5">
             <CheckCircle2 size={12} className="text-green-500" />
             <span className="text-[11px] text-green-600 font-medium">Editor preview running</span>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1 font-mono">
-          {logs.map((log, i) => (
-            <div key={i} className="flex items-center gap-3 text-[11px]">
-              <span className="text-gray-400 w-14">{log.timestamp}</span>
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${levelColors[log.level]}`}>
-                {log.level}
-              </span>
-              <span className="text-gray-700">{log.message}</span>
+        <div className="flex-1 min-h-0">
+          {activeTab === 'editor' && (
+            <div className="h-full overflow-y-auto px-4 py-2 space-y-1 font-mono">
+              {logs.map((log, i) => (
+                <div key={i} className="flex items-center gap-3 text-[11px]">
+                  <span className="text-gray-400 w-14">{log.timestamp}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${levelColors[log.level]}`}>
+                    {log.level}
+                  </span>
+                  <span className="text-gray-700">{log.message}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="w-[280px] border-l border-gray-200 p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Bot size={14} className="text-indigo-500" />
-          <span className="text-[13px] font-semibold text-gray-700">AI Debug Assist</span>
-          <Badge variant="info">Beta</Badge>
-        </div>
-        <div className="space-y-2">
-          {[
-            { icon: <Zap size={14} />, text: 'Explain why the player cannot move here' },
-            { icon: <Link2 size={14} />, text: 'Find broken transfer events' },
-            { icon: <MessageSquare size={14} />, text: 'Generate missing dialogue' },
-          ].map((item, i) => (
-            <button
-              key={i}
-              className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-gray-600 bg-gray-50 rounded-md hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-colors group text-left"
-            >
-              <span>{item.icon}</span>
-              <span className="flex-1">{item.text}</span>
-              <ChevronRight size={12} className="text-gray-300 group-hover:text-indigo-400" />
-            </button>
-          ))}
+          )}
+          {activeTab === 'runtime' && <RuntimeLogContainer adapter={runtimeAdapter} runtimeStatus={runtimeStatus} />}
+          {activeTab === 'validation' && (
+            <div className="h-full px-4 py-3 text-[12px] text-gray-500">No validation errors in the current preview session.</div>
+          )}
+          {activeTab === 'trace' && (
+            <div className="h-full px-4 py-3 text-[12px] text-gray-500">Event trace output is not available yet.</div>
+          )}
         </div>
       </div>
     </div>
@@ -686,6 +778,9 @@ function LogsPanel({ logs }: { logs: ReturnType<typeof usePlaytestStore>['logs']
 
 export function PlaytestScreen() {
   const project = useProject();
+  const runtimeAdapter = useMemo(() => getRuntimeLaunchAdapter(), []);
+  const playtestSessionAdapter = useMemo(() => getPlaytestSessionAdapter(), []);
+  const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatus>(runtimeAdapter.getStatus());
   const { state, logs, setPlayerPose, faceDirection, restart } = usePlaytestStore({
     currentMap: project.project.startMapId,
     playerX: project.project.startPosition.x,
@@ -835,8 +930,13 @@ export function PlaytestScreen() {
         />
         <RuntimeStateInspector state={state} />
       </div>
-      <RuntimeBridgePanel />
-      <LogsPanel logs={logs} />
+      <RuntimeBridgePanel
+        adapter={runtimeAdapter}
+        sessionAdapter={playtestSessionAdapter}
+        runtimeStatus={runtimeStatus}
+        setRuntimeStatus={setRuntimeStatus}
+      />
+      <LogsPanel logs={logs} runtimeAdapter={runtimeAdapter} runtimeStatus={runtimeStatus} />
     </div>
   );
 }

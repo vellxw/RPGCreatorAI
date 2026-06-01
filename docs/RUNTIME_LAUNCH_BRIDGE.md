@@ -1,6 +1,6 @@
 # Runtime Launch Bridge
 
-## Status After FRA-22
+## Status After FRA-23
 
 The desktop playtest flow now builds a temporary project root before
 launching the native C++ runtime. The source project folder is used only as
@@ -8,8 +8,13 @@ the trusted executable search root and as the asset source for optional copied
 assets. Runtime launch still uses `std::process::Command` directly with no
 command-line arguments and no shell interpretation.
 
+Runtime stdout/stderr are captured to bounded local log files under the app
+data directory. The editor can read the latest log tail with a hard 256 KiB
+cap.
+
 Browser mode remains honest: it can run the simulated editor preview, but it
-cannot create native playtest sessions or spawn the runtime.
+cannot create native playtest sessions, spawn the runtime, or read native
+runtime logs.
 
 ## Renderer Surface
 
@@ -23,6 +28,9 @@ interface RuntimeLaunchAdapter {
   ): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;
+  getLatestLog(): Promise<RuntimeLogInfo>;
+  readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult>;
+  openLogFolder(): Promise<RuntimeLogActionResult>;
   getUnavailableReason(): string | null;
 }
 
@@ -93,10 +101,13 @@ Playtest screen: Open in Runtime
   -> runtime.launch(sessionRoot, { executableSearchRoot: sourceRoot })
       -> Rust locates the runtime executable from sourceRoot/search fallbacks
       -> Rust rejects launch if another runtime process is still alive
+      -> Rust creates %APPDATA%/RPGCreatorAI/runtime-logs/runtime-*.log
       -> Command::new(exe)
             .current_dir(sessionRoot)
+            .stdout(log file)
+            .stderr(log file)
             .spawn()
-      -> shell stores the Child handle and returns the pid
+      -> shell stores the Child handle and latest log path, then returns the pid
 ```
 
 The runtime reads `data/project.json` and relative data/assets paths from the
@@ -138,14 +149,35 @@ When the user clicks Stop Runtime:
 
 ## Logging
 
-FRA-22 does not add a runtime log viewer or shell-side stdout/stderr capture.
-That is tracked by PT-002. Current validation evidence still comes from the
-existing runtime smoke scripts and process status.
+Each native launch creates a log file under:
 
-## What FRA-22 Does Not Add
+```text
+%APPDATA%\RPGCreatorAI\runtime-logs\
+```
+
+If `%APPDATA%` is unavailable, the shell uses `%LOCALAPPDATA%`, then
+`$HOME/.rpgcreatorai/runtime-logs`.
+
+The runtime bridge exposes three narrow log operations:
+
+- `runtime_latest_log`: returns the current in-memory log path, or the newest
+  `runtime-*.log` file in the runtime log directory.
+- `runtime_read_log_tail`: returns the last N bytes of the latest log, capped
+  at 256 KiB regardless of the requested value.
+- `runtime_open_log_folder`: opens the allowlisted runtime log directory with
+  the platform file explorer. It does not accept an arbitrary path from the
+  renderer.
+
+The Playtest bottom panel has tabs for editor-preview logs, runtime logs,
+validation output, and event trace. Runtime log polling runs while the native
+runtime is reported as running and can also be refreshed manually. Browser mode
+shows the unavailable reason and does not fabricate native log content.
+
+## What FRA-23 Does Not Add
 
 - No runtime-to-editor IPC.
 - No embedded runtime viewport.
 - No remote runtime.
 - No automatic source project save before launch.
-- No log viewer, event trace panel, or runtime state snapshot reader.
+- No event trace output.
+- No runtime state snapshot reader.

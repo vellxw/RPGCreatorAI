@@ -15,8 +15,8 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Slice 6 — Playtest and debug tools (FRA-23 through FRA-26): bounded native
-  logs, event trace, runtime state snapshots, and removal/gating of
+- Slice 6 — Playtest and debug tools (FRA-24 through FRA-26): event trace,
+  runtime state snapshots, and removal/gating of
   placeholder AI debug UI.
 - Integration QA — MVP green gate (FRA-27 through FRA-35): bundled sample
   coverage, editor-runtime roundtrip, runtime smoke expansion, canonical
@@ -25,6 +25,11 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Closed subgoals
 
+- Phase 10 PT-002 (FRA-23) — native runtime launches now capture stdout and
+  stderr into app-data runtime log files. The desktop bridge exposes only the
+  latest log path, a bounded 256 KiB tail read, and an allowlisted log-folder
+  opener. The Playtest bottom panel includes a Runtime Log tab, polls while
+  the runtime is running, and browser mode reports native logs as unavailable.
 - Phase 10 PT-001 (FRA-22) — desktop playtest launch now builds temporary
   project snapshots for project-start, current-map, and selected-event modes
   under the app data directory. Runtime launch uses the temp root as

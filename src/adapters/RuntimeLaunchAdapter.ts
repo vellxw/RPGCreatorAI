@@ -5,6 +5,9 @@ import type {
   RuntimeLaunchAdapter,
   RuntimeLaunchOptions,
   RuntimeLaunchResult,
+  RuntimeLogActionResult,
+  RuntimeLogInfo,
+  RuntimeLogTailResult,
   RuntimeStatus,
 } from './types';
 
@@ -31,6 +34,27 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
 
   async kill(): Promise<void> {
     // no-op
+  }
+
+  async getLatestLog(): Promise<RuntimeLogInfo> {
+    return {
+      success: false,
+      error: 'Native runtime logs are unavailable in browser mode.',
+    };
+  }
+
+  async readLatestLogTail(_maxBytes: number): Promise<RuntimeLogTailResult> {
+    return {
+      success: false,
+      error: 'Native runtime logs are unavailable in browser mode.',
+    };
+  }
+
+  async openLogFolder(): Promise<RuntimeLogActionResult> {
+    return {
+      success: false,
+      error: 'Native runtime log folders are unavailable in browser mode.',
+    };
   }
 
   getUnavailableReason(): string | null {
@@ -91,6 +115,39 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
       this.cachedStatus = 'ready';
     } catch {
       // swallow; status poll will reconcile
+    }
+  }
+
+  async getLatestLog(): Promise<RuntimeLogInfo> {
+    if (!this.canLaunch()) {
+      return { success: false, error: 'Desktop runtime bridge not detected.' };
+    }
+    try {
+      return await window.rpgBridge!.runtime.getLatestLog();
+    } catch (e) {
+      return { success: false, error: (e as Error).message };
+    }
+  }
+
+  async readLatestLogTail(maxBytes: number): Promise<RuntimeLogTailResult> {
+    if (!this.canLaunch()) {
+      return { success: false, error: 'Desktop runtime bridge not detected.' };
+    }
+    try {
+      return await window.rpgBridge!.runtime.readLogTail(maxBytes);
+    } catch (e) {
+      return { success: false, error: (e as Error).message };
+    }
+  }
+
+  async openLogFolder(): Promise<RuntimeLogActionResult> {
+    if (!this.canLaunch()) {
+      return { success: false, error: 'Desktop runtime bridge not detected.' };
+    }
+    try {
+      return await window.rpgBridge!.runtime.openLogFolder();
+    } catch (e) {
+      return { success: false, error: (e as Error).message };
     }
   }
 

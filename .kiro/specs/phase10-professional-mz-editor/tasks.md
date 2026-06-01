@@ -117,7 +117,7 @@
 
 - [x] FRA-22 / PT-001: add playtest session building for project-start,
   current-map, and selected-event modes without mutating source files.
-- [ ] FRA-23 / PT-002: add a runtime log viewer with bounded native log
+- [x] FRA-23 / PT-002: add a runtime log viewer with bounded native log
   reading and honest browser-mode degradation.
 - [ ] FRA-24 / PT-003: add deterministic event trace output and an editor trace
   panel parsed from runtime logs.

@@ -37,7 +37,7 @@ Legend:
 | Local audio v1 | partial | yes | partial | yes | yes | yes | Runtime audio registry and local WAV dispatch exist; missing files/devices warn and continue. Dedicated audio authoring remains later editor work. |
 | Deterministic plugin commands | val | yes | yes | yes | yes | yes | `pluginCommand` supports scalar args, editor key/value controls, map/common-event parsing, allowlisted `debug.log`, `debug.setSwitch`, and `debug.setVariable`, plus non-fatal unknown-command warnings. |
 | Playtest session modes | val | yes | yes | yes | yes | yes | Desktop playtest builds temp project roots for project-start, current-map, and selected-event modes, launches with the temp root as `current_dir`, and preserves source files. |
-| Runtime logs, trace, and state snapshots | n/s | n/a | no | no | no | no | Bounded log viewer, trace output, and state inspector remain FRA-23 through FRA-25. |
+| Runtime logs, trace, and state snapshots | partial | n/a | partial | partial | partial | partial | Bounded native runtime log capture/viewing is implemented; event trace and state snapshots remain FRA-24 and FRA-25. |
 | Placeholder AI/debug UI gating | partial | n/a | partial | n/a | n/a | partial | MVP must remove or gate unavailable AI/debug actions in FRA-26. |
 | Bundled sample MVP coverage | partial | yes | n/a | partial | partial | partial | Sample exists; full MVP feature coverage remains FRA-27. |
 | Green-gate scripts and smoke | partial | n/a | n/a | partial | partial | partial | Current scripts exist; MVP full verify and expanded smoke remain FRA-28 through FRA-30 and FRA-35. |

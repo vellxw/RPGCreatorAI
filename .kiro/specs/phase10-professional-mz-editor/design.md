@@ -263,6 +263,9 @@ Linear tracks execution status, validation evidence, commits, and push results.
 - Native runtime evidence flows through bounded local files and stdout/stderr:
   logs, validation output, event trace rows, and state snapshots. Browser mode
   must label simulated or unavailable native evidence honestly.
+- Runtime logs are captured by the Tauri shell at process launch into
+  app-data `runtime-logs` files. The renderer only receives a latest-log path
+  and a tail string capped at 256 KiB; it never requests arbitrary file reads.
 - Placeholder AI/debug controls are not MVP features. Visible controls must
   either perform real local actions or be removed/gated as future integration
   surfaces.

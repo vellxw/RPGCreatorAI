@@ -842,20 +842,20 @@ Labels: `mvp`, `phase-10`, `playtest-debug`, `desktop`, `parallel-safe`
 
 ### Steps
 
-- [ ] Add Tauri command to return the current/latest runtime log path.
-- [ ] Add Tauri command to read the last N bytes of a runtime log, with a hard max of 256 KiB.
-- [ ] Extend runtime launch adapter with `getLatestLog()` and `readLatestLogTail(maxBytes)`.
-- [ ] Replace static Playtest logs with tabs: `Editor Preview`, `Runtime Log`, `Validation`, `Event Trace`.
-- [ ] Poll runtime log tail while runtime is running and stop polling when runtime exits.
-- [ ] Add copy-log and open-log-folder buttons.
-- [ ] Keep browser mode honest: show unavailable reason and do not fake native logs.
+- [x] Add Tauri command to return the current/latest runtime log path.
+- [x] Add Tauri command to read the last N bytes of a runtime log, with a hard max of 256 KiB.
+- [x] Extend runtime launch adapter with `getLatestLog()` and `readLatestLogTail(maxBytes)`.
+- [x] Replace static Playtest logs with tabs: `Editor Preview`, `Runtime Log`, `Validation`, `Event Trace`.
+- [x] Poll runtime log tail while runtime is running and stop polling when runtime exits.
+- [x] Add copy-log and open-log-folder buttons.
+- [x] Keep browser mode honest: show unavailable reason and do not fake native logs.
 
 ### Validation
 
-- [ ] Run `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx`.
-- [ ] Run `npm run typecheck`.
-- [ ] Run `cargo test --manifest-path src-tauri/Cargo.toml`.
-- [ ] Expected: all pass.
+- [x] Run `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx`.
+- [x] Run `npm run typecheck`.
+- [x] Run `cargo test --manifest-path src-tauri/Cargo.toml`.
+- [x] Expected: all pass.
 
 ### Acceptance Criteria
 

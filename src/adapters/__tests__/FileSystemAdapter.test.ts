@@ -27,6 +27,9 @@ function fakeBridge(overrides: Partial<RpgBridge['fs']> = {}): RpgBridge {
       launch: async () => ({ success: false, error: 'not stubbed' }),
       kill: async () => undefined,
       status: async () => 'unavailable' as const,
+      getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
+      readLogTail: async () => ({ success: false, error: 'not stubbed' }),
+      openLogFolder: async () => ({ success: false, error: 'not stubbed' }),
     },
     config: {
       getRecents: async () => [],
