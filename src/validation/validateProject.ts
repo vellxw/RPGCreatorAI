@@ -466,6 +466,7 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   out.push(...validateTilesetDatabase(db));
   out.push(...validateEquipmentAndStateDatabases(db));
   out.push(...validatePartyCombatDatabases(db));
+  out.push(...validateSetupProgressionDatabases(db));
 
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
@@ -606,6 +607,115 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
       });
     }
   }
+  return out;
+}
+
+function validateSetupProgressionDatabases(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const animationSetIds = new Set(db.animations.sets.map(set => set.id));
+
+  for (const quest of db.quests) {
+    const source = `database/quests/${quest.id}`;
+    const objectiveIds = new Set<string>();
+    for (const objective of quest.objectives) {
+      if (!objective.id || objective.id.trim() === '') {
+        out.push({
+          level: 'error',
+          message: `Quest "${quest.id}" objective is missing an id`,
+          source,
+        });
+      } else if (objectiveIds.has(objective.id)) {
+        out.push({
+          level: 'error',
+          message: `Quest "${quest.id}" has duplicate objective id "${objective.id}"`,
+          source,
+        });
+      }
+      objectiveIds.add(objective.id);
+    }
+    if (!Number.isFinite(quest.rewards.gold) || quest.rewards.gold < 0) {
+      out.push({
+        level: 'error',
+        message: `Quest "${quest.id}" reward gold must be non-negative`,
+        source,
+      });
+    }
+    if (!Number.isFinite(quest.rewards.exp) || quest.rewards.exp < 0) {
+      out.push({
+        level: 'error',
+        message: `Quest "${quest.id}" reward exp must be non-negative`,
+        source,
+      });
+    }
+    for (const reward of quest.rewards.items) {
+      if (!Number.isFinite(reward.amount) || reward.amount < 1) {
+        out.push({
+          level: 'error',
+          message: `Quest "${quest.id}" rewards item amount must be at least 1`,
+          source,
+        });
+      }
+    }
+  }
+
+  for (const shop of db.shops) {
+    const source = `database/shops/${shop.id}`;
+    const seenListings = new Set<string>();
+    if (shop.listings.length === 0) {
+      out.push({
+        level: 'error',
+        message: `Shop "${shop.id}" must contain at least one listing`,
+        source,
+      });
+    }
+    for (const listing of shop.listings) {
+      if (!Number.isFinite(listing.price) || listing.price < 0) {
+        out.push({
+          level: 'error',
+          message: `Shop "${shop.id}" listing price must be non-negative`,
+          source,
+        });
+      }
+      if (seenListings.has(listing.itemId)) {
+        out.push({
+          level: 'error',
+          message: `Shop "${shop.id}" lists duplicate item "${listing.itemId}"`,
+          source,
+        });
+      }
+      seenListings.add(listing.itemId);
+    }
+  }
+
+  for (const variable of db.variables) {
+    if (!Number.isFinite(variable.initial)) {
+      out.push({
+        level: 'error',
+        message: `Variable "${variable.id}" initial value must be finite`,
+        source: `database/variables/${variable.id}`,
+      });
+    }
+  }
+
+  if (!Number.isFinite(db.system.startingGold) || db.system.startingGold < 0) {
+    out.push({
+      level: 'error',
+      message: 'System startingGold must be non-negative',
+      source: 'database/system',
+    });
+  }
+  if (
+    db.system.playerAnimationSet &&
+    animationSetIds.size > 0 &&
+    !animationSetIds.has(db.system.playerAnimationSet)
+  ) {
+    out.push({
+      level: 'error',
+      message: `System playerAnimationSet references unknown animation set "${db.system.playerAnimationSet}"`,
+      source: 'database/system',
+    });
+  }
+
   return out;
 }
 

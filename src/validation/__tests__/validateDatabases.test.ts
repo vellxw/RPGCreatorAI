@@ -302,6 +302,64 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Troop "bad_troop" references unknown enemy "missing_enemy"'))).toBe(true);
   });
 
+  it('rejects invalid quest shop variable and system numeric data', () => {
+    const project = projectWith({
+      quests: [
+        {
+          id: 'bad_quest',
+          title: 'Bad Quest',
+          summary: '',
+          objectives: [
+            { id: 'step', description: '' },
+            { id: 'step', description: '' },
+          ],
+          rewards: {
+            gold: -1,
+            exp: -2,
+            items: [{ itemId: 'missing_item', amount: 0 }],
+          },
+        },
+      ],
+      shops: [
+        {
+          id: 'bad_shop',
+          name: 'Bad Shop',
+          listings: [
+            { itemId: 'potion', price: -5 },
+            { itemId: 'potion', price: 10 },
+          ],
+        },
+      ],
+      variables: [{ id: 'bad_variable', name: 'Bad Variable', initial: Number.NaN }],
+      animations: {
+        sets: [{ id: 'player_adventurer', clips: [] }],
+      },
+      system: {
+        startingParty: ['missing_actor'],
+        startingGold: -10,
+        playerAnimationSet: 'missing_animation',
+        playerMovementSpeed: 'fast' as never,
+        defaultCharacterHeightTiles: 0,
+      },
+    });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Quest "bad_quest" has duplicate objective id "step"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Quest "bad_quest" reward gold must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Quest "bad_quest" reward exp must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Quest "bad_quest" rewards item amount must be at least 1'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Quest "bad_quest" rewards unknown item "missing_item"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Shop "bad_shop" listing price must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Shop "bad_shop" lists duplicate item "potion"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Variable "bad_variable" initial value must be finite'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('System startingGold must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('System playerAnimationSet references unknown animation set "missing_animation"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('System startingParty references unknown actor "missing_actor"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('System playerMovementSpeed "fast" is invalid'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('System defaultCharacterHeightTiles must be a positive finite number'))).toBe(true);
+  });
+
   it('rejects malformed types and missing required terms', () => {
     const project = projectWith({
       types: {

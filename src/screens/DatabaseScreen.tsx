@@ -14,11 +14,20 @@ import { ClassesEditor } from '../components/database/ClassesEditor';
 import { EquipmentEditor } from '../components/database/EquipmentEditor';
 import { EnemiesEditor } from '../components/database/EnemiesEditor';
 import { ItemsEditor } from '../components/database/ItemsEditor';
+import { QuestsEditor } from '../components/database/QuestsEditor';
+import { ShopsEditor } from '../components/database/ShopsEditor';
 import { SkillsEditor } from '../components/database/SkillsEditor';
 import { StatesEditor } from '../components/database/StatesEditor';
+import { SwitchesVariablesEditor } from '../components/database/SwitchesVariablesEditor';
+import { SystemEditor } from '../components/database/SystemEditor';
 import { TilesetEditor } from '../components/database/TilesetEditor';
 import { TroopsEditor } from '../components/database/TroopsEditor';
-import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
+import {
+  flattenCommands,
+  useProjectStore,
+  type DatabaseRecord,
+  type ProjectStoreState,
+} from '../stores/projectStore';
 import type {
   ActorData,
   ArmorData,
@@ -26,6 +35,7 @@ import type {
   CommonEventData,
   DatabaseListKey,
   EnemyData,
+  EventCommand,
   QuestData,
   ShopData,
   SkillData,
@@ -68,6 +78,63 @@ const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
   { value: 'double', label: 'Double (125 ms/tile)' },
   { value: 'quadruple', label: 'Quadruple' },
 ];
+
+interface DatabaseUsageCounts {
+  switches: Record<string, number>;
+  variables: Record<string, number>;
+}
+
+function bump(counts: Record<string, number>, id: string | undefined) {
+  if (!id) return;
+  counts[id] = (counts[id] ?? 0) + 1;
+}
+
+function countCommandUsage(command: EventCommand, usage: DatabaseUsageCounts) {
+  switch (command.type) {
+    case 'controlSwitch':
+    case 'ifSwitch':
+      bump(usage.switches, command.switchId);
+      break;
+    case 'controlVariable':
+      bump(usage.variables, command.variableId);
+      bump(usage.variables, command.sourceVariableId);
+      break;
+    case 'ifVariable':
+      bump(usage.variables, command.variableId);
+      break;
+    default:
+      break;
+  }
+}
+
+function countCommandListUsage(commands: EventCommand[], usage: DatabaseUsageCounts) {
+  for (const { command } of flattenCommands(commands)) {
+    countCommandUsage(command, usage);
+  }
+}
+
+function databaseUsageCounts(state: ProjectStoreState): DatabaseUsageCounts {
+  const usage: DatabaseUsageCounts = { switches: {}, variables: {} };
+  for (const map of Object.values(state.maps)) {
+    for (const event of map.events) {
+      countCommandListUsage(event.commands, usage);
+      for (const page of event.pages ?? []) {
+        for (const switchId of Object.keys(page.conditions.switches ?? {})) {
+          bump(usage.switches, switchId);
+        }
+        for (const variable of page.conditions.variables ?? []) {
+          bump(usage.variables, variable.variableId);
+        }
+        countCommandListUsage(page.commands, usage);
+      }
+    }
+  }
+  for (const commonEvent of state.databases.commonEvents) {
+    bump(usage.switches, commonEvent.switchId);
+    countCommandListUsage(commonEvent.commands, usage);
+  }
+  return usage;
+}
 
 interface DetailProps {
   table: DatabaseListKey;
@@ -172,13 +239,43 @@ function Detail({ table, entry }: DetailProps) {
         />
       );
     case 'quests':
-      return <QuestDetail entry={entry as unknown as QuestData} update={update} idField={idField} />;
+      return (
+        <QuestsEditor
+          entry={entry as unknown as QuestData}
+          items={state.items.items}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'shops':
-      return <ShopDetail entry={entry as unknown as ShopData} update={update} idField={idField} />;
+      return (
+        <ShopsEditor
+          entry={entry as unknown as ShopData}
+          items={state.items.items}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'switches':
-      return <SwitchDetail entry={entry as unknown as SwitchData} update={update} idField={idField} />;
+      return (
+        <SwitchesVariablesEditor
+          kind="switch"
+          entry={entry as unknown as SwitchData}
+          usageCount={databaseUsageCounts(state).switches[entry.id] ?? 0}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'variables':
-      return <VariableDetail entry={entry as unknown as VariableData} update={update} idField={idField} />;
+      return (
+        <SwitchesVariablesEditor
+          kind="variable"
+          entry={entry as unknown as VariableData}
+          usageCount={databaseUsageCounts(state).variables[entry.id] ?? 0}
+          idField={idField}
+          onChange={update}
+        />
+      );
     case 'commonEvents':
       return <CommonEventDetail entry={entry as unknown as CommonEventData} update={update} idField={idField} />;
   }
@@ -863,7 +960,12 @@ export function DatabaseScreen() {
         }
       >
         {tab === 'system' ? (
-          <SystemPanel system={databases.system} />
+          <SystemEditor
+            system={databases.system}
+            actors={databases.actors}
+            animations={databases.animations.sets}
+            onChange={changes => dispatch({ type: 'UPDATE_SYSTEM_DATA', changes })}
+          />
         ) : tab === 'items' ? (
           <ItemsEditor
             value={state.items}

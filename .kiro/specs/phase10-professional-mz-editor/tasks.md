@@ -87,7 +87,7 @@
 - [x] FRA-10 / DB-005: build actor, class, skill, enemy, and troop V2 editors
   with battle authoring fields, reference validation, and runtime test
   coverage.
-- [ ] FRA-11 / DB-006: build quest, shop, switches, variables, and system V2
+- [x] FRA-11 / DB-006: build quest, shop, switches, variables, and system V2
   editors with reference usage warnings and system-default validation.
 - [ ] FRA-12 / DB-007: extract and reuse the command-stack editor for common
   event command editing with undo-safe reducer behavior.

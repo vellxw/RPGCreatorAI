@@ -4,6 +4,44 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-11 / DB-006 — quest, shop, switch, variable, and system V2 editors
+
+- `2026-06-01 12:44 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx`
+  — RED; the new component test could not resolve `QuestsEditor`, proving
+  the focused setup/progression editors did not exist before implementation.
+- `2026-06-01 12:44 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — RED; invalid quest/shop/variable/system numeric data was not yet
+  reported.
+- `2026-06-01 12:46 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx`
+  — PASS (1 file, 4 tests).
+- `2026-06-01 12:46 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 44 tests).
+- `2026-06-01 12:47 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-06-01 12:47 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS (2 files, 44 tests) on the final required rerun.
+- `2026-06-01 12:48 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  on the final required rerun.
+- `2026-06-01 12:48 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx`
+  — PASS (1 file, 4 tests) on the final component rerun.
+- `2026-06-01 12:48 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- Fix applied: added `QuestsEditor`, `ShopsEditor`,
+  `SwitchesVariablesEditor`, and `SystemEditor`; wired them into the Database
+  screen; added switch/variable usage counting for inline reference context;
+  and added validation for duplicate quest objective ids, quest reward
+  ranges, reward item amounts, shop prices/duplicate listings, finite
+  variable initial values, non-negative starting gold, and system animation
+  references.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-10 / DB-005 — actor, class, skill, enemy, and troop V2 editors
 
 - `2026-06-01 12:34 -03:00` —
