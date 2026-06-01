@@ -2740,3 +2740,49 @@ Error: Port 1420 is already in use
 - `2026-06-01 20:24:44 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-48 / CP-013 — first-run directories and local app-data policy
+
+- `2026-06-01 20:34:49 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml config_commands::tests::config_dir_uses_local_appdata_before_home_when_appdata_is_missing -- --exact`
+  — RED as expected; the new first-run fallback test showed `config_dir`
+  used `$HOME\.rpgcreatorai` when `%APPDATA%` was absent even though
+  `%LOCALAPPDATA%` was available. Fix applied: centralized shell app-data
+  roots in `src-tauri/src/app_paths.rs` and routed config, runtime logs, and
+  playtest sessions through it.
+- `2026-06-01 20:34:49 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml app_paths config_commands::tests::config_dir_uses_local_appdata_before_home_when_appdata_is_missing -- --exact`
+  — RED; command syntax was invalid because Cargo accepts one test filter per
+  invocation. Fix applied: reran `app_paths` and the config test as separate
+  commands.
+- `2026-06-01 20:34:49 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml app_paths` — PASS; 3
+  app-path tests passed after centralizing the directory policy.
+- `2026-06-01 20:34:49 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml config_commands::tests::config_dir_uses_local_appdata_before_home_when_appdata_is_missing -- --exact`
+  — PASS after the shared path fix.
+- `2026-06-01 20:33:25 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS; 1 test
+  file and 6 tests passed, including first-run policy/script coverage.
+- `2026-06-01 20:33:25 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml` — PASS; 29 Rust desktop
+  tests passed.
+- `2026-06-01 20:34:35 -03:00` — `npm run desktop:package:windows` — PASS.
+  The helper built/tested the native runtime, rebuilt the Tauri debug
+  no-bundle package with the centralized app-path code, copied
+  `rpg_creator_runtime.exe` beside `rpgcreator-shell.exe`, smoke-launched the
+  packaged app, and reported `PACKAGED SMOKE PASSED`. Non-fatal warnings:
+  Vite chunk-size warning, missing PkgConfig, CMake FetchContent CMP0135
+  developer warnings, and dependency `cmake_minimum_required` deprecation
+  warnings.
+- `2026-06-01 20:34:49 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1`
+  — PASS; launched the packaged shell with fresh temporary `APPDATA`,
+  `LOCALAPPDATA`, and `HOME` roots and reported
+  `FIRST-RUN APP DATA SMOKE PASSED`.
+- `2026-06-01 20:35:40 -03:00` —
+  `cmd /c scripts\dev\smoke-first-run-app-data.bat` — PASS; restricted-policy
+  wrapper launched the same fresh-app-data smoke and reported
+  `FIRST-RUN APP DATA SMOKE PASSED`.
+- `2026-06-01 20:35:40 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

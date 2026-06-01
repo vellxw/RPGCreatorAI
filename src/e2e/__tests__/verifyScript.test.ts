@@ -173,4 +173,33 @@ describe('MVP verify script', () => {
     expect(brandingWrapper).toContain('verify-branding-assets.ps1');
     expect(brandingWrapper).toContain('exit /b %ERRORLEVEL%');
   });
+
+  it('documents and validates first-run app-data directories', () => {
+    const policyDoc = readFileSync(join(process.cwd(), 'docs/FIRST_RUN_APP_DATA_POLICY.md'), 'utf8');
+    const smokeScript = readFileSync(join(process.cwd(), 'scripts/dev/smoke-first-run-app-data.ps1'), 'utf8');
+    const smokeWrapper = readFileSync(join(process.cwd(), 'scripts/dev/smoke-first-run-app-data.bat'), 'utf8');
+
+    for (const expected of [
+      '%APPDATA%\\RPGCreatorAI',
+      '%LOCALAPPDATA%\\RPGCreatorAI',
+      'playtest-sessions',
+      'runtime-logs',
+      'config.json',
+      '<projectRoot>\\.backups',
+      'src-tauri/src/app_paths.rs',
+      'latest 5 sessions',
+      'latest 10 backups',
+    ]) {
+      expect(policyDoc).toContain(expected);
+    }
+
+    expect(smokeScript).toContain('FIRST-RUN APP DATA SMOKE');
+    expect(smokeScript).toContain('EnvironmentVariables');
+    expect(smokeScript).toContain('APPDATA');
+    expect(smokeScript).toContain('LOCALAPPDATA');
+    expect(smokeScript).toContain('RPGCreatorAI-first-run-');
+    expect(smokeScript).toContain('rpg_creator_runtime.exe');
+    expect(smokeWrapper).toContain('smoke-first-run-app-data.ps1');
+    expect(smokeWrapper).toContain('exit /b %ERRORLEVEL%');
+  });
 });

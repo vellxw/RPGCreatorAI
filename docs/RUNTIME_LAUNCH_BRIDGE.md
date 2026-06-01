@@ -84,7 +84,8 @@ Sessions are stored under the app data directory:
 ```
 
 If `%APPDATA%` is unavailable, the shell falls back to `%LOCALAPPDATA%`, then
-`$HOME/.rpgcreatorai/playtest-sessions`. The shell keeps the latest five
+`$HOME/.rpgcreatorai/playtest-sessions`. This shared app-data policy is
+documented in `docs/FIRST_RUN_APP_DATA_POLICY.md`. The shell keeps the latest five
 `session-*` directories and prunes older sessions.
 
 ## Executable Resolution
@@ -171,7 +172,8 @@ Each native launch creates a log file under:
 ```
 
 If `%APPDATA%` is unavailable, the shell uses `%LOCALAPPDATA%`, then
-`$HOME/.rpgcreatorai/runtime-logs`.
+`$HOME/.rpgcreatorai/runtime-logs`, matching
+`docs/FIRST_RUN_APP_DATA_POLICY.md`.
 
 The runtime bridge exposes narrow log and snapshot operations:
 

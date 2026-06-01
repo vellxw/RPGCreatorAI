@@ -8,6 +8,7 @@ use std::process::Stdio;
 use serde::Serialize;
 use tauri::State;
 
+use crate::app_paths;
 use crate::project_state::AppState;
 
 #[derive(Serialize, Default)]
@@ -125,21 +126,8 @@ fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
     None
 }
 
-fn app_data_dir() -> Result<PathBuf, String> {
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        return Ok(PathBuf::from(appdata).join("RPGCreatorAI"));
-    }
-    if let Ok(local) = std::env::var("LOCALAPPDATA") {
-        return Ok(PathBuf::from(local).join("RPGCreatorAI"));
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return Ok(PathBuf::from(home).join(".rpgcreatorai"));
-    }
-    Err("no app data directory available for runtime logs".to_string())
-}
-
 fn runtime_logs_dir() -> Result<PathBuf, String> {
-    Ok(app_data_dir()?.join("runtime-logs"))
+    app_paths::runtime_logs_dir()
 }
 
 fn runtime_debug_snapshot_path(runtime_logs_dir: &Path) -> PathBuf {

@@ -160,6 +160,8 @@ That helper builds the frontend, Tauri shell, and native runtime, copies
 packaged app. It does not create an installer or require signing credentials.
 The current release artifact and future installer policy is documented in
 [Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
+First-run directories and cleanup policy are documented in
+[First-Run App Data Policy](docs/FIRST_RUN_APP_DATA_POLICY.md).
 
 ## MVP Editor Workflow
 

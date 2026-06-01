@@ -105,6 +105,9 @@ Release artifact naming, unsigned local prototype behavior, future NSIS/MSI
 installer direction, and signing boundaries are documented in
 `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`.
 
+First-run config, runtime logs, playtest sessions, backups, and cache
+locations are documented in `docs/FIRST_RUN_APP_DATA_POLICY.md`.
+
 ## Detection & Fallback
 
 ```ts

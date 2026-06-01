@@ -9,6 +9,7 @@
 // All filesystem work is sandboxed to the active project root. The runtime
 // bridge spawns the C++ executable located via a documented search order.
 
+mod app_paths;
 mod config_commands;
 mod fs_commands;
 mod project_state;

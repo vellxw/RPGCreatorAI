@@ -27,6 +27,7 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_PLANNING_INTEGRATION_GATE.md`
 - `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`
 - `docs/RELEASE_BRANDING_ASSETS.md`
+- `docs/FIRST_RUN_APP_DATA_POLICY.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
@@ -56,12 +57,14 @@ Primary Phase 11 sources:
   charter, repo/product audit, risk register, provider/legal baseline, backlog
   source, execution protocol, validation baseline, and planning integration
   gate are versioned and aligned with Linear milestone 00.
-- Phase 11 CP-009 through CP-012 — release hardening started. Windows native
+- Phase 11 CP-009 through CP-013 — release hardening started. Windows native
   builds now default out of OneDrive, restricted-policy `.bat` wrappers exist,
   the local unsigned Tauri package prototype builds and smoke-launches with a
   colocated runtime, CP-011 defines the unsigned artifact, version naming,
   future NSIS/MSI, and signing-boundary policy, and CP-012 adds tracked
-  release branding source/icons with package metadata validation.
+  release branding source/icons with package metadata validation. CP-013
+  centralizes first-run app-data roots for config, runtime logs, and playtest
+  sessions, documents cleanup, and adds a fresh-app-data package smoke.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -122,6 +122,14 @@ Generated package artifacts live outside the repo under
 `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`. Remove that directory to
 clean the prototype output.
 
+First-run app-data behavior is documented in
+`docs/FIRST_RUN_APP_DATA_POLICY.md`. To smoke the packaged shell with fresh
+temporary `APPDATA` and `LOCALAPPDATA` roots:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
+```
+
 ## User workflow
 
 1. Use `npm run desktop:dev` for real filesystem persistence and native

@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use tauri::State;
 use tauri_plugin_dialog::DialogExt;
 
+use crate::app_paths;
 use crate::project_state::AppState;
 use crate::safe_path::{canonicalize_inside_user_space, ensure_inside, join_inside};
 
@@ -367,22 +368,8 @@ pub fn fs_create_playtest_session(
 const MAX_PLAYTEST_SESSIONS: usize = 5;
 
 fn playtest_sessions_dir() -> Result<PathBuf, String> {
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        return Ok(PathBuf::from(appdata)
-            .join("RPGCreatorAI")
-            .join("playtest-sessions"));
-    }
-    if let Ok(local) = std::env::var("LOCALAPPDATA") {
-        return Ok(PathBuf::from(local)
-            .join("RPGCreatorAI")
-            .join("playtest-sessions"));
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return Ok(PathBuf::from(home)
-            .join(".rpgcreatorai")
-            .join("playtest-sessions"));
-    }
-    Err("no app data directory available for playtest sessions".to_string())
+    app_paths::playtest_sessions_dir()
+        .map_err(|_| "no app data directory available for playtest sessions".to_string())
 }
 
 fn create_playtest_session_at(

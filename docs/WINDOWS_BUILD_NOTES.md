@@ -147,6 +147,14 @@ Branding assets for the packaged desktop shell are sourced from
 .\scripts\dev\verify-branding-assets.ps1
 ```
 
+First-run desktop state, logs, and temporary playtest sessions are documented
+in `docs/FIRST_RUN_APP_DATA_POLICY.md`. After building a packaged prototype,
+run this fresh-app-data smoke when changing shell directory policy:
+
+```powershell
+.\scripts\dev\smoke-first-run-app-data.ps1
+```
+
 ## Cleaning up
 
 The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:

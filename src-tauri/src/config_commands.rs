@@ -1,9 +1,11 @@
-// Recent-projects config persisted under %APPDATA%/RPGCreatorAI/config.json.
+// Recent-projects config persisted under the shared RPGCreatorAI app-data root.
 
 use std::fs;
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
+
+use crate::app_paths;
 
 #[derive(Default, Serialize, Deserialize)]
 struct ShellConfig {
@@ -14,14 +16,7 @@ struct ShellConfig {
 const MAX_RECENTS: usize = 8;
 
 fn config_dir() -> Option<PathBuf> {
-    // Prefer APPDATA on Windows, fall back to the home dir.
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        return Some(PathBuf::from(appdata).join("RPGCreatorAI"));
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return Some(PathBuf::from(home).join(".rpgcreatorai"));
-    }
-    None
+    app_paths::config_dir().ok()
 }
 
 fn config_path() -> Option<PathBuf> {
@@ -58,4 +53,42 @@ pub fn config_add_recent(root: String) -> Result<Vec<String>, String> {
     cfg.recents.truncate(MAX_RECENTS);
     save(&cfg)?;
     Ok(cfg.recents)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_dir_uses_local_appdata_before_home_when_appdata_is_missing() {
+        let _guard = crate::app_paths::environment_lock().lock().unwrap();
+        let previous_appdata = std::env::var_os("APPDATA");
+        let previous_local = std::env::var_os("LOCALAPPDATA");
+        let previous_home = std::env::var_os("HOME");
+        let local = tempfile::TempDir::new().unwrap();
+        let home = tempfile::TempDir::new().unwrap();
+
+        std::env::remove_var("APPDATA");
+        std::env::set_var("LOCALAPPDATA", local.path());
+        std::env::set_var("HOME", home.path());
+
+        let result = config_dir().unwrap();
+        if let Some(value) = previous_appdata {
+            std::env::set_var("APPDATA", value);
+        } else {
+            std::env::remove_var("APPDATA");
+        }
+        if let Some(value) = previous_local {
+            std::env::set_var("LOCALAPPDATA", value);
+        } else {
+            std::env::remove_var("LOCALAPPDATA");
+        }
+        if let Some(value) = previous_home {
+            std::env::set_var("HOME", value);
+        } else {
+            std::env::remove_var("HOME");
+        }
+
+        assert_eq!(result, local.path().join("RPGCreatorAI"));
+    }
 }
