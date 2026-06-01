@@ -2423,3 +2423,19 @@ Error: Port 1420 is already in use
   frontend, desktop, or packaged build commands were required before the
   dedicated CP-007 baseline gate.
 
+### Phase 11 FRA-38 / CP-003 — complete platform risk register
+
+- `2026-06-01 18:56:31 -03:00` — source review — PASS; reviewed
+  `docs/PHASE_11_PRODUCT_CHARTER.md`,
+  `docs/PHASE_11_PRODUCT_SURFACE_AUDIT.md`,
+  `docs/PHASE_10_MVP_VALIDATION_REPORT.md`, `docs/GOAL_STACK.md`, and the
+  Linear project documents for product scope, provider policy, asset audit,
+  and validation/release rules.
+- `2026-06-01 18:56:31 -03:00` — `git diff --check` — RED; the new risk
+  register had a blank line at EOF. Fix applied: removed the trailing blank
+  line.
+- `2026-06-01 18:56:45 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Build/test note: CP-003 is a docs-only risk register issue, so no runtime,
+  frontend, desktop, provider, or packaged build command was required.
+
