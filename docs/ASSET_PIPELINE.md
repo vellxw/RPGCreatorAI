@@ -1,5 +1,25 @@
 # Asset Pipeline
 
+## Release Branding Icons
+
+Release app branding is sourced from `src-tauri/icons/icon-source.svg` and
+documented in `docs/RELEASE_BRANDING_ASSETS.md`. The SVG is a locally authored
+geometric source asset; no AI image generation, stock image, external logo
+file, or untracked source is required.
+
+Regenerate the Tauri desktop/Windows icon set with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File src-tauri/scripts/generate-icons.ps1
+```
+
+Validate dimensions, Tauri metadata, and packaged executable icon extraction
+with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
+```
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development

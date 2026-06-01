@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 describe('MVP verify script', () => {
@@ -132,5 +132,45 @@ describe('MVP verify script', () => {
     expect(packageLock.version).toBe(tauriConfig.version);
     expect(packageLock.packages['']?.version).toBe(tauriConfig.version);
     expect(cargoVersion).toBe(tauriConfig.version);
+  });
+
+  it('keeps release branding assets generated from a tracked source', () => {
+    const tauriConfig = JSON.parse(readFileSync(join(process.cwd(), 'src-tauri/tauri.conf.json'), 'utf8')) as {
+      productName: string;
+      app: { windows: Array<{ title: string }> };
+      bundle: { icon: string[]; shortDescription: string; longDescription: string };
+    };
+    const brandingDoc = readFileSync(join(process.cwd(), 'docs/RELEASE_BRANDING_ASSETS.md'), 'utf8');
+    const iconGenerator = readFileSync(join(process.cwd(), 'src-tauri/scripts/generate-icons.ps1'), 'utf8');
+    const brandingVerifier = readFileSync(join(process.cwd(), 'scripts/dev/verify-branding-assets.ps1'), 'utf8');
+    const brandingWrapper = readFileSync(join(process.cwd(), 'scripts/dev/verify-branding-assets.bat'), 'utf8');
+
+    expect(tauriConfig.productName).toBe('RPGCreatorAI');
+    expect(tauriConfig.app.windows[0]?.title).toBe('RPGCreatorAI');
+    expect(tauriConfig.bundle.shortDescription).toContain('RPGCreatorAI');
+    expect(tauriConfig.bundle.longDescription).toContain('filesystem persistence');
+    expect(tauriConfig.bundle.icon).toEqual(expect.arrayContaining([
+      'icons/32x32.png',
+      'icons/64x64.png',
+      'icons/128x128.png',
+      'icons/128x128@2x.png',
+      'icons/icon.ico',
+      'icons/icon.icns',
+      'icons/icon.png',
+    ]));
+
+    for (const icon of tauriConfig.bundle.icon) {
+      expect(existsSync(join(process.cwd(), 'src-tauri', icon))).toBe(true);
+    }
+
+    expect(existsSync(join(process.cwd(), 'src-tauri/icons/icon-source.svg'))).toBe(true);
+    expect(brandingDoc).toContain('src-tauri/icons/icon-source.svg');
+    expect(brandingDoc).toContain('No AI image generation');
+    expect(iconGenerator).toContain('npx tauri icon');
+    expect(iconGenerator).toContain('icon-source.svg');
+    expect(brandingVerifier).toContain('ExtractAssociatedIcon');
+    expect(brandingVerifier).toContain('icon-source.svg');
+    expect(brandingWrapper).toContain('verify-branding-assets.ps1');
+    expect(brandingWrapper).toContain('exit /b %ERRORLEVEL%');
   });
 });

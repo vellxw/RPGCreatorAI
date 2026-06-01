@@ -139,6 +139,14 @@ artifact remains the unsigned local prototype above. Future installer work
 should start with an unsigned NSIS candidate; MSI is secondary, and signing
 requires explicit external credentials/certificates.
 
+Branding assets for the packaged desktop shell are sourced from
+`src-tauri/icons/icon-source.svg` and documented in
+`docs/RELEASE_BRANDING_ASSETS.md`. After changing icons or Tauri metadata, run:
+
+```powershell
+.\scripts\dev\verify-branding-assets.ps1
+```
+
 ## Cleaning up
 
 The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:

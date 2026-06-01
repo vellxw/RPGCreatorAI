@@ -2693,3 +2693,50 @@ Error: Port 1420 is already in use
   CMP0135 developer warnings, and dependency `cmake_minimum_required`
   deprecation warnings.
 
+### Phase 11 FRA-47 / CP-012 — app icon and release branding assets
+
+- `2026-06-01 20:18:47 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED as
+  expected; the new release-branding test failed because
+  `docs/RELEASE_BRANDING_ASSETS.md` and the tracked icon source/generation
+  scripts did not exist yet.
+- `2026-06-01 20:20:35 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File src-tauri/scripts/generate-icons.ps1`
+  — PASS; generated desktop/Windows Tauri icon files from
+  `src-tauri/icons/icon-source.svg` via local `npx tauri icon`.
+- `2026-06-01 20:21:27 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED; the
+  branding verifier was correct but the test expected a POSIX-style path
+  string in a PowerShell script. Fix applied: assert the source filename
+  instead of a platform-specific separator.
+- `2026-06-01 20:21:47 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS; 1 test
+  file and 5 tests passed.
+- `2026-06-01 20:22:05 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  — PASS; verified Tauri product/window metadata, configured icon files,
+  generated PNG dimensions, `icon.ico`, `icon.icns`, and packaged executable
+  icon extraction.
+- `2026-06-01 20:23:26 -03:00` — `npm run desktop:package:windows` — PASS.
+  The helper built/tested the native runtime, rebuilt the Tauri debug
+  no-bundle package with the new icon configuration, copied
+  `rpg_creator_runtime.exe` beside `rpgcreator-shell.exe`, smoke-launched the
+  packaged app, and reported `PACKAGED SMOKE PASSED`. Non-fatal warnings:
+  Vite chunk-size warning, missing PkgConfig, CMake FetchContent CMP0135
+  developer warnings, and dependency `cmake_minimum_required` deprecation
+  warnings.
+- `2026-06-01 20:23:46 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1 -CaptureIconPath docs/screenshots/phase11-branding/packaged-exe-icon.png`
+  — PASS; captured the executable-associated icon for visual inspection.
+  Evidence: `src-tauri/icons/icon.png` is 512x512,
+  `src-tauri/icons/32x32.png` is 32x32, and
+  `docs/screenshots/phase11-branding/packaged-exe-icon.png` is 32x32.
+- `2026-06-01 20:24:44 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  documentation/task updates; 1 test file and 5 tests passed.
+- `2026-06-01 20:24:44 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  — PASS after documentation/task updates.
+- `2026-06-01 20:24:44 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+
