@@ -9,7 +9,7 @@
 - [x] CP-005 / FRA-40: create a repo-tracked backlog source document.
 - [x] CP-006 / FRA-41: define execution protocol and branch rules.
 - [x] CP-007 / FRA-42: run and record the Phase 11 validation baseline.
-- [ ] CP-008 / FRA-43: run the planning integration gate.
+- [x] CP-008 / FRA-43: run the planning integration gate.
 
 ## Milestone Tracks
 

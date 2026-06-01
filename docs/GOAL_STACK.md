@@ -24,15 +24,13 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_PRODUCT_CHARTER.md`
 - `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
 - `docs/PHASE_11_EXECUTION_PROTOCOL.md`
+- `docs/PHASE_11_PLANNING_INTEGRATION_GATE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 CP-001 through CP-008 — planning and scope lock: product charter,
-  repo/product audit, risk register, provider/legal baseline, backlog source,
-  execution protocol, validation baseline, and planning integration gate.
 - Phase 11 Linear milestone 01 — release hardening and packaging.
 - Phase 11 Linear milestone 02 — end-to-end usability.
 - Phase 11 Linear milestone 03 — professional editor surface.
@@ -52,6 +50,10 @@ Primary Phase 11 sources:
 
 ## Closed subgoals
 
+- Phase 11 CP-001 through CP-008 — planning and scope lock completed. Product
+  charter, repo/product audit, risk register, provider/legal baseline, backlog
+  source, execution protocol, validation baseline, and planning integration
+  gate are versioned and aligned with Linear milestone 00.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

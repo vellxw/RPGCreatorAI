@@ -2556,3 +2556,37 @@ Error: Port 1420 is already in use
 - `2026-06-01 19:32:22 -03:00` — `git diff --check` after recording the
   baseline — PASS with line-ending conversion warnings only.
 
+### Phase 11 FRA-43 / CP-008 — planning integration gate
+
+- `2026-06-01 19:34:09 -03:00` — Linear milestone review — PASS; CP-001
+  through CP-007 were Done in Linear, CP-008 was In Progress for this gate,
+  and all eight issues mapped to Linear milestone `00 Planning And Scope Lock`.
+- `2026-06-01 19:37:34 -03:00` — Linear document review — PASS; reviewed
+  `Product Scope And Execution Rules`, `AI Provider Hub Policy`,
+  `Asset Generation And Audit Rubric`, and `Validation And Release Runbook`.
+  The documents align with local-first runtime boundaries, optional AI editor
+  tooling, mock-first provider validation, asset audit evidence, and final
+  validation/reporting requirements.
+- `2026-06-01 19:38:10 -03:00` — planning source existence check — PASS;
+  13 required planning sources exist, including `AGENTS.md`, the Phase 11
+  charter/audit/risk/provider/protocol docs, backlog mirror, gate report, and
+  `.kiro/specs/phase11-complete-product-platform/`.
+- `2026-06-01 19:38:10 -03:00` — backlog sequence validator — PASS;
+  `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
+  contains 128 rows, CP-001 through CP-128 and FRA-36 through FRA-163.
+- `2026-06-01 19:38:10 -03:00` — planning task validator — PASS; CP-001
+  through CP-008 are checked in
+  `.kiro/specs/phase11-complete-product-platform/tasks.md`.
+- `2026-06-01 19:38:10 -03:00` — blocker marker scan — PASS after review.
+  Matches were the risk register, stop-condition sections, historical Phase 10
+  text, and the CP-008 gate report itself; no unresolved product decision
+  blocks CP-009, and no new Linear blocker issue was required.
+- `2026-06-01 19:38:10 -03:00` — `git status --short` — PASS; only CP-008
+  planning files were modified/added, plus the pre-existing untracked
+  `docs/agent_prompts/LINEAR_MVP_CODEX_GOAL_PROMPT.md` left unstaged.
+- `2026-06-01 19:38:10 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Full `verify.ps1` note: not rerun for CP-008 because this issue changed only
+  planning documentation and task status. CP-007 immediately recorded a green
+  full canonical baseline.
+
