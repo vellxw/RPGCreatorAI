@@ -29,7 +29,7 @@ Legend:
 | Quests, shops, switches, variables, system | partial | yes | partial | yes | partial | partial | Dedicated V2 setup/progression forms remain FRA-11. |
 | Types and terms | val | yes | partial | partial | yes | yes | Shards persist and validate; dedicated editor/UI consumption remains later DB work. |
 | Animations | partial | yes | partial | yes | yes | partial | Data/runtime support exists; animation editor with preview remains FRA-13. |
-| Runtime project validator | n/s | n/a | n/a | no | no | no | Pre-start validator seam remains FRA-15. |
+| Runtime project validator | val | n/a | n/a | yes | yes | yes | Pre-start validator blocks malformed projects before `Game::initialize` with C++ tests and smoke coverage. |
 | Save/load | val | yes | n/a | yes | yes | yes | GameState and save migration coverage exists. |
 | Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |
 | Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |

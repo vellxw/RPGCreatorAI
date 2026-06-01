@@ -1,6 +1,7 @@
 #include "core/Application.h"
 #include "world/ProjectLoader.h"
 #include "core/Logger.h"
+#include "runtime/RuntimeProjectValidator.h"
 #include <SDL.h>
 #include <algorithm>
 #include <array>
@@ -11,6 +12,27 @@ Application::Application() {}
 Application::~Application() {}
 
 bool Application::initialize() {
+    rpg::RuntimeProjectValidator validator;
+    auto validation = validator.validateProjectFile("data/project.json");
+    for (const auto& message : validation.messages) {
+        const std::string formatted =
+            "Runtime project validation " +
+            std::string(message.severity == rpg::RuntimeValidationSeverity::Error
+                            ? "error"
+                            : "warning") +
+            " [" + message.source + "]: " + message.message;
+        if (message.severity == rpg::RuntimeValidationSeverity::Error) {
+            Logger::error(formatted);
+        } else {
+            Logger::warning(formatted);
+        }
+    }
+    if (validation.hasErrors()) {
+        Logger::error("Runtime project validation failed with " +
+                      std::to_string(validation.errorCount()) + " error(s).");
+        return false;
+    }
+
     auto projectData = ProjectLoader::load("data/project.json");
     if (!projectData) {
         Logger::error("Failed to load project");

@@ -42,6 +42,15 @@ data/
 `ProjectLoader` validates the file strictly; any missing or invalid
 field returns `std::nullopt` with a descriptive log line.
 
+Before `Game::initialize`, the native runtime also runs
+`RuntimeProjectValidator` against `data/project.json`. This startup gate
+loads configured map and database JSON files, rejects unsafe relative paths,
+checks required map layers and start-map placement, and validates critical
+references used by commands (`transferMap`, items, shops, troops, switches,
+variables, common events, movement-route targets, and animation actions).
+Validation errors are logged and abort startup with a non-zero process exit;
+warnings are logged but non-fatal.
+
 ## maps/*.json
 
 | Field | Type | Notes |
