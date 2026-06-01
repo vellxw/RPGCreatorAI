@@ -76,7 +76,7 @@
 - [x] FRA-6 / DB-001: extract reusable Database V2 editor framework
   (`DatabaseLayout`, `DatabaseList`, field helpers, reference select, array
   editor) while preserving current CRUD behavior.
-- [ ] FRA-7 / DB-002: add and validate project-owned `types` and `terms`
+- [x] FRA-7 / DB-002: add and validate project-owned `types` and `terms`
   database shards. Existing implementation should be verified before marking
   Linear Done.
 - [ ] FRA-8 / DB-003: build a dedicated tileset database editor with tile

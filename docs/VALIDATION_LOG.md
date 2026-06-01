@@ -4,6 +4,26 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-7 / DB-002 — types and terms database shards verification
+
+- `2026-05-31 23:48 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/adapters/__tests__/FileSystemAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (3 files, 23 tests). This verifies browser defaults, filesystem
+  adapter preservation, and malformed `types` / `terms` validation.
+- `2026-05-31 23:48 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-05-31 23:48 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml` — PASS (18 Rust tests,
+  plus empty main/doc-test targets).
+- `2026-05-31 23:49 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched markdown files.
+- Fix applied: none required; the repo already contained the `types` and
+  `terms` implementation from the earlier Phase 10 Slice 4B work. This
+  issue closeout records fresh Linear validation evidence and marks the
+  Phase 10 task checkbox complete.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-6 / DB-001 — Database V2 editor framework extraction
 
 - `2026-05-31 23:39 -03:00` —
