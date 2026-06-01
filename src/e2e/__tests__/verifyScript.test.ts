@@ -77,4 +77,40 @@ describe('MVP verify script', () => {
       configurePreset: 'windows-dev',
     }));
   });
+
+  it('keeps the Windows packaged-build prototype wired to runtime copy and smoke launch', () => {
+    const packageScript = readFileSync(join(process.cwd(), 'scripts/dev/package-windows.ps1'), 'utf8');
+    const packageWrapper = readFileSync(join(process.cwd(), 'scripts/dev/package-windows.bat'), 'utf8');
+    const packageJson = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
+      scripts: Record<string, string>;
+    };
+    const tauriConfig = JSON.parse(readFileSync(join(process.cwd(), 'src-tauri/tauri.conf.json'), 'utf8')) as {
+      build: { beforeBuildCommand: string; frontendDist: string };
+    };
+
+    expect(packageJson.scripts['desktop:package:windows']).toBe(
+      'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/package-windows.ps1',
+    );
+    expect(tauriConfig.build.beforeBuildCommand).toBe('npm run build');
+    expect(tauriConfig.build.frontendDist).toBe('../dist');
+
+    for (const expected of [
+      'CARGO_TARGET_DIR',
+      'RPGCreatorAI',
+      'tauri-target',
+      'npm run desktop:build',
+      'rpg_creator_runtime.exe',
+      'Copy-Item',
+      'Start-Process',
+      '-WindowStyle Hidden',
+      'PACKAGED SMOKE PASSED',
+    ]) {
+      expect(packageScript).toContain(expected);
+    }
+
+    expect(packageWrapper).toContain('-ExecutionPolicy Bypass');
+    expect(packageWrapper).toContain('package-windows.ps1');
+    expect(packageWrapper).toContain('%*');
+    expect(packageWrapper).toContain('exit /b %ERRORLEVEL%');
+  });
 });

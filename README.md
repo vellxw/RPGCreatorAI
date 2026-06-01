@@ -148,6 +148,17 @@ Desktop content check, with a Tauri dev server already running on port 1420:
 npm run desktop:verify-content
 ```
 
+Local unsigned Windows package prototype:
+
+```powershell
+npm run desktop:package:windows
+```
+
+That helper builds the frontend, Tauri shell, and native runtime, copies
+`rpg_creator_runtime.exe` beside the packaged Tauri executable under
+`%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, and smoke-launches the
+packaged app. It does not create an installer or require signing credentials.
+
 ## MVP Editor Workflow
 
 1. Open the editor in the browser for quick preview or with `npm run desktop:dev` for real filesystem/runtime integration.

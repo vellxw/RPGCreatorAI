@@ -93,6 +93,46 @@ If you really want an in-repo build (not recommended on OneDrive systems), point
 set BUILD_DIR=%CD%\build & build_bootstrap.bat
 ```
 
+## Packaged prototype
+
+CP-010 defines the current local packaging prototype as an unsigned Tauri
+debug no-bundle build plus a copied native runtime executable:
+
+```cmd
+scripts\dev\package-windows.bat
+```
+
+or:
+
+```powershell
+npm run desktop:package:windows
+```
+
+The helper:
+
+1. Builds/tests the C++ runtime under `%LOCALAPPDATA%\RPGCreatorAI\build`.
+2. Sets `CARGO_TARGET_DIR` to `%LOCALAPPDATA%\RPGCreatorAI\tauri-target`.
+3. Runs `npm run desktop:build`, which executes `tauri build --debug --no-bundle`
+   and uses `src-tauri/tauri.conf.json` `frontendDist = ../dist`.
+4. Copies `rpg_creator_runtime.exe` next to the produced Tauri executable so
+   the runtime bridge can resolve it from the shell binary directory.
+5. Smoke-launches the packaged executable, waits 5 seconds, and terminates it.
+
+Useful options:
+
+```powershell
+.\scripts\dev\package-windows.ps1 -SkipNativeBuild
+.\scripts\dev\package-windows.ps1 -SkipSmoke
+.\scripts\dev\package-windows.ps1 -BuildDir D:\rpg-build
+.\scripts\dev\package-windows.ps1 -CargoTargetDir D:\rpg-tauri-target
+```
+
+Prototype artifacts are local developer output, not source files:
+
+```cmd
+rmdir /s /q "%LOCALAPPDATA%\RPGCreatorAI\tauri-target"
+```
+
 ## Cleaning up
 
 The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:

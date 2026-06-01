@@ -92,6 +92,30 @@ npm run desktop:dev
 Tauri uses `npm run dev:tauri` as its `beforeDevCommand` and opens the editor
 against `http://localhost:1420`.
 
+## Packaged Windows prototype
+
+For a local unsigned packaged prototype, run:
+
+```powershell
+npm run desktop:package:windows
+```
+
+The helper builds the native runtime, runs `tauri build --debug --no-bundle`,
+sets `CARGO_TARGET_DIR` to `%LOCALAPPDATA%\RPGCreatorAI\tauri-target`, copies
+`rpg_creator_runtime.exe` next to the produced Tauri executable, and
+smoke-launches the packaged app. This prototype intentionally does not create
+an installer; installer/signing policy is handled by later release issues.
+
+Fallback wrapper:
+
+```cmd
+scripts\dev\package-windows.bat
+```
+
+Generated package artifacts live outside the repo under
+`%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`. Remove that directory to
+clean the prototype output.
+
 ## User workflow
 
 1. Use `npm run desktop:dev` for real filesystem persistence and native

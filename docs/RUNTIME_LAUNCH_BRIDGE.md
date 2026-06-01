@@ -98,6 +98,10 @@ The shell searches for `rpg_creator_runtime.exe` in this order, using
 4. The directory containing the Tauri shell binary
 5. Return a failed `RuntimeLaunchResult` explaining that the runtime was not found
 
+The CP-010 packaged Windows prototype uses option 4: the package helper copies
+`rpg_creator_runtime.exe` into the same directory as the produced Tauri
+executable after `tauri build --debug --no-bundle` completes.
+
 The renderer never constructs a shell command.
 
 ## Launch Flow

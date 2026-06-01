@@ -91,11 +91,15 @@ The Rust side declares each handler with explicit input and output types. There 
 | Mode | Command | Output |
 |------|---------|--------|
 | Dev (hot reload) | `npm run desktop:dev` | Window backed by Vite dev server |
-| Dev binary | `npm run desktop:build` | `<targetDir>/debug/rpgcreator.exe` |
+| Dev binary | `npm run desktop:build` | `<targetDir>/debug/<tauri-exe>.exe` |
+| Windows package prototype | `npm run desktop:package:windows` | `<targetDir>/debug/<tauri-exe>.exe` plus `rpg_creator_runtime.exe` copied beside it |
 | Browser-only | `npm run dev` | http://localhost:3000 |
 | Tauri content server | `npm run dev:tauri` | http://localhost:1420 |
 
-`<targetDir>` is `%LOCALAPPDATA%\RPGCreatorAI\tauri-target` on Windows by default, configured via `.cargo/config.toml`. This keeps Rust's heavy file-rename activity out of OneDrive's filter zone, mirroring the Phase 4.1 fix for cmake.
+`<targetDir>` is `%LOCALAPPDATA%\RPGCreatorAI\tauri-target` for the packaged
+Windows prototype. The package helper sets `CARGO_TARGET_DIR` explicitly so
+Rust's heavy file-rename activity stays out of OneDrive's filter zone,
+mirroring the Phase 4.1 fix for cmake.
 
 ## Detection & Fallback
 
@@ -117,4 +121,5 @@ unavailable states for native-only capabilities.
 The shell does not include auto-update in the MVP. A later phase can add code
 signing, an update server or local update channel, and store distribution
 metadata. Until then, dev binaries are produced by re-running
-`npm run desktop:build`.
+`npm run desktop:build` or the CP-010 prototype helper
+`npm run desktop:package:windows`.

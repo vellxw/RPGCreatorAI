@@ -2623,3 +2623,43 @@ Error: Port 1420 is already in use
   failed.
 - `2026-06-01 19:49:58 -03:00` — `npm run typecheck` — PASS.
 
+### Phase 11 FRA-45 / CP-010 — Windows packaged build prototype
+
+- `2026-06-01 19:55:47 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED as
+  expected; the new package prototype test failed because
+  `scripts/dev/package-windows.ps1` did not exist.
+- `2026-06-01 19:56:46 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  adding the package helper, `.bat` wrapper, and npm script; 1 test file and
+  3 tests passed.
+- `2026-06-01 19:59:11 -03:00` — `npm run desktop:package:windows` — RED;
+  `package-windows.ps1` passed `-BuildDir` to `build.ps1` through array
+  splatting in a way Windows PowerShell rejected. Fix applied: pass
+  `-BuildDir` and `-Clean` explicitly when invoking `build.ps1`.
+- `2026-06-01 19:59:29 -03:00` — `npm run desktop:package:windows` — PASS.
+  The helper built/tested the native runtime in
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\build`, ran
+  `tauri build --debug --no-bundle`, built the frontend from `../dist`,
+  produced `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`,
+  copied `rpg_creator_runtime.exe` beside it, smoke-launched the packaged app
+  for 5 seconds, reported `PACKAGED SMOKE PASSED`, and terminated the process.
+  Non-fatal warnings: Vite chunk-size warning, missing PkgConfig, CMake
+  FetchContent CMP0135 developer warnings, and dependency
+  `cmake_minimum_required` deprecation warnings.
+- `2026-06-01 20:01:03 -03:00` —
+  `cmd /c scripts\dev\package-windows.bat -SkipNativeBuild -SkipSmoke` —
+  PASS; the fallback wrapper ran the Tauri package build, copied the runtime
+  beside the packaged exe, and intentionally skipped smoke.
+- `2026-06-01 20:02:00 -03:00` — artifact check — PASS; verified
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`
+  and
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpg_creator_runtime.exe`
+  exist. `git status --ignored --short` showed repo-local `build/` and
+  `dist/` as ignored artifacts, with package output outside the repo.
+- `2026-06-01 20:02:49 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  the helper invocation fix; 1 test file and 3 tests passed.
+- `2026-06-01 20:02:49 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

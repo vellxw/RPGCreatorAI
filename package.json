@@ -40,6 +40,7 @@
     "tauri": "tauri",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build --debug --no-bundle",
+    "desktop:package:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/package-windows.ps1",
     "desktop:verify-content": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-tauri-content.ps1"
   },
   "dependencies": {
