@@ -145,5 +145,5 @@
   and desktop degradation paths.
 - [x] FRA-34 / INT-004: close MVP documentation and user workflow docs against
   actual command names and behavior.
-- [ ] FRA-35 / INT-005: run the final MVP green gate, commit, push, and write
+- [x] FRA-35 / INT-005: run the final MVP green gate, commit, push, and write
   the Phase 10 MVP validation report.

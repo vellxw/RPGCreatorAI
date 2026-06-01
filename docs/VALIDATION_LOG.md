@@ -2373,3 +2373,22 @@ Error: Port 1420 is already in use
 - `2026-06-01 17:13:05 -03:00` — `git diff --check` — PASS with
   line-ending conversion warnings only.
 
+### Phase 10 FRA-35 / INT-005 — final MVP green gate
+
+- `2026-06-01 17:15:08 -03:00` — `git status --short` and `git remote -v`
+  — PASS; only the pre-existing untracked
+  `docs/agent_prompts/LINEAR_MVP_CODEX_GOAL_PROMPT.md` was present, and
+  `origin` was `https://github.com/vellxw/RPGCreatorAI.git`.
+- `2026-06-01 17:17:10 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; gate summary reported PASS for frontend typecheck, frontend tests
+  (35 files, 212 Vitest tests), frontend build, native C++ configure/build/
+  CTest (`RPGTests` 1/1), Tauri content check, Rust desktop tests (25 tests),
+  runtime smoke, and editor-runtime roundtrip. Runtime smoke asserted MVP
+  markers and refreshed the three committed `docs/screenshots/phase10-mvp/`
+  BMP evidence files. Screenshot roundtrip hashes differed as expected:
+  baseline `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944`,
+  edited `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+  Existing Vite chunk-size, CMake FetchContent/deprecation, and optional
+  missing-audio warnings remained non-fatal.
+

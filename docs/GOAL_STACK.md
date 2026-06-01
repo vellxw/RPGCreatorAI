@@ -2,11 +2,11 @@
 
 ## Current Goal
 
-Phase 10 — Professional RPG Maker MZ-style editor adaptation — ACTIVE.
+Phase 10 — Professional RPG Maker MZ-style editor adaptation — MVP COMPLETE.
 
 ## Active Phase
 
-Phase 10 adapts the creator workflow toward a professional RPG
+Phase 10 adapted the creator workflow toward a professional RPG
 Maker MZ-style editor while keeping RPGCreatorAI local, deterministic,
 data-driven, and legally independent. The active priority is editor
 ergonomics and data shape: map tree, map properties, tilesets/layers,
@@ -15,10 +15,18 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-35): final report, commit, and push.
+- Recommended next phase — release hardening and packaging: installer/dev
+  binary packaging, onboarding polish, issue triage, and any post-MVP
+  stabilization found by real use.
 
 ## Closed subgoals
 
+- Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
+  `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
+  frontend build, native C++ configure/build/CTest, Tauri content check, Rust
+  desktop tests, runtime smoke, and editor-runtime screenshot roundtrip.
+  Phase 10 MVP validation report was written in
+  `docs/PHASE_10_MVP_VALIDATION_REPORT.md`.
 - Phase 10 INT-004 (FRA-34) — MVP documentation now matches the implemented
   local workflow: README and build docs list current commands, browser vs
   desktop behavior, temp playtest sessions, validation gates, and explicit
