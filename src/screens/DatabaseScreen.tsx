@@ -2,12 +2,14 @@
 // One tab per database; minimal CRUD with dirty tracking through the
 // existing project reducer + top toolbar Save button.
 
-import { useMemo, useState } from 'react';
-import { Plus, Copy, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input, Select } from '../components/ui/Input';
+import { DatabaseLayout } from '../components/database/DatabaseLayout';
+import { DatabaseList } from '../components/database/DatabaseList';
+import { IdField } from '../components/database/DatabaseFields';
 import { useProjectStore, type DatabaseRecord } from '../stores/projectStore';
-import { DATABASE_LIST_KEYS } from '../adapters/defaultDatabases';
 import type {
   ActorData,
   ArmorData,
@@ -54,211 +56,6 @@ const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
   { value: 'quadruple', label: 'Quadruple' },
 ];
 
-function emptyStats(): Stats {
-  return {
-    maxHp: 1,
-    maxMp: 0,
-    attack: 1,
-    defense: 1,
-    magicAttack: 1,
-    magicDefense: 1,
-    agility: 1,
-    luck: 1,
-  };
-}
-
-function makePlaceholder(table: DatabaseListKey, id: string): DatabaseRecord {
-  switch (table) {
-    case 'actors':
-      return {
-        id,
-        name: id,
-        classId: '',
-        level: 1,
-        hp: 10,
-        mp: 0,
-        baseStats: emptyStats(),
-        equipment: { weapon: null, armor: null, accessory: null },
-        skills: [],
-      } as unknown as DatabaseRecord;
-    case 'classes':
-      return {
-        id,
-        name: id,
-        growth: emptyStats(),
-        usableEquipment: ['weapon', 'armor', 'accessory'],
-        learnedSkills: [],
-      } as unknown as DatabaseRecord;
-    case 'skills':
-      return {
-        id,
-        name: id,
-        description: '',
-        mpCost: 0,
-        power: 100,
-        target: 'singleEnemy',
-      } as unknown as DatabaseRecord;
-    case 'weapons':
-      return {
-        id,
-        name: id,
-        description: '',
-        weaponTypeId: 'sword',
-        price: 0,
-        params: {},
-        animationId: '',
-        traits: [],
-      } as unknown as DatabaseRecord;
-    case 'armors':
-      return {
-        id,
-        name: id,
-        description: '',
-        armorTypeId: 'light',
-        slot: 'body',
-        price: 0,
-        params: {},
-        traits: [],
-      } as unknown as DatabaseRecord;
-    case 'states':
-      return {
-        id,
-        name: id,
-        priority: 50,
-        removeAtBattleEnd: false,
-        restriction: 'none',
-        traits: [],
-      } as unknown as DatabaseRecord;
-    case 'enemies':
-      return {
-        id,
-        name: id,
-        stats: emptyStats(),
-        exp: 1,
-        gold: 1,
-        drops: [],
-      } as unknown as DatabaseRecord;
-    case 'troops':
-      return { id, name: id, members: [] } as unknown as DatabaseRecord;
-    case 'quests':
-      return {
-        id,
-        title: id,
-        summary: '',
-        objectives: [],
-        rewards: { gold: 0, exp: 0, items: [] },
-      } as unknown as DatabaseRecord;
-    case 'shops':
-      return { id, name: id, listings: [] } as unknown as DatabaseRecord;
-    case 'switches':
-      return { id, name: id, initial: false } as unknown as DatabaseRecord;
-    case 'variables':
-      return { id, name: id, initial: 0 } as unknown as DatabaseRecord;
-    case 'commonEvents':
-      return { id, name: id, trigger: 'manual', switchId: '', commands: [] } as unknown as DatabaseRecord;
-  }
-}
-
-function uniqueId(existing: Set<string>, base: string): string {
-  let id = base;
-  let i = 1;
-  while (existing.has(id)) {
-    i += 1;
-    id = `${base}_${i}`;
-  }
-  return id;
-}
-
-interface ListSidebarProps {
-  table: DatabaseListKey;
-  entries: DatabaseRecord[];
-  selectedId: string | null;
-  onSelect(id: string): void;
-}
-
-function ListSidebar({ table, entries, selectedId, onSelect }: ListSidebarProps) {
-  const { dispatch } = useProjectStore();
-  const ids = useMemo(() => new Set(entries.map(e => e.id)), [entries]);
-
-  const addEntry = () => {
-    const baseId = `${table.replace(/s$/, '')}_${entries.length + 1}`;
-    const id = uniqueId(ids, baseId);
-    const entry = makePlaceholder(table, id);
-    dispatch({ type: 'ADD_DATABASE_ENTRY', table, entry });
-    onSelect(id);
-  };
-
-  const duplicateEntry = (sourceId: string) => {
-    const src = entries.find(e => e.id === sourceId);
-    if (!src) return;
-    const newId = uniqueId(ids, `${sourceId}_copy`);
-    const next: DatabaseRecord = JSON.parse(JSON.stringify(src));
-    next.id = newId;
-    dispatch({ type: 'ADD_DATABASE_ENTRY', table, entry: next });
-    onSelect(newId);
-  };
-
-  const removeEntry = (id: string) => {
-    if (!confirm(`Delete ${table.slice(0, -1)} "${id}"?`)) return;
-    dispatch({ type: 'REMOVE_DATABASE_ENTRY', table, id });
-    if (selectedId === id) {
-      const next = entries.find(e => e.id !== id);
-      onSelect(next ? next.id : '');
-    }
-  };
-
-  return (
-    <div className="w-[220px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
-      <div className="p-3 border-b border-gray-200">
-        <Button size="sm" icon={<Plus size={12} />} onClick={addEntry}>
-          New {table.slice(0, -1)}
-        </Button>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {entries.length === 0 ? (
-          <p className="p-3 text-[12px] text-gray-400">No entries yet.</p>
-        ) : (
-          entries.map(entry => (
-            <div
-              key={entry.id}
-              className={`flex items-center gap-1 px-3 py-1.5 cursor-pointer hover:bg-gray-50 ${
-                selectedId === entry.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700'
-              }`}
-              onClick={() => onSelect(entry.id)}
-            >
-              <span className="truncate text-[13px] flex-1" title={entry.id}>
-                {(entry as { name?: string; title?: string }).name ??
-                  (entry as { title?: string }).title ??
-                  entry.id}
-              </span>
-              <button
-                title="Duplicate"
-                className="text-gray-400 hover:text-indigo-600 cursor-pointer"
-                onClick={e => {
-                  e.stopPropagation();
-                  duplicateEntry(entry.id);
-                }}
-              >
-                <Copy size={12} />
-              </button>
-              <button
-                title="Delete"
-                className="text-gray-400 hover:text-red-500 cursor-pointer"
-                onClick={e => {
-                  e.stopPropagation();
-                  removeEntry(entry.id);
-                }}
-              >
-                <Trash2 size={12} />
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
 interface DetailProps {
   table: DatabaseListKey;
   entry: DatabaseRecord;
@@ -277,10 +74,10 @@ function Detail({ table, entry }: DetailProps) {
   };
 
   const idField = (
-    <Input
+    <IdField
       label="ID"
       value={entry.id}
-      onChange={e => renameId(e.target.value)}
+      onChange={renameId}
     />
   );
 
@@ -930,6 +727,7 @@ export function DatabaseScreen() {
       : ((databases[tab] as unknown) as DatabaseRecord[]);
 
   const selectedEntry = entries.find(e => e.id === selectedId) ?? entries[0];
+  const activeTabLabel = TAB_ORDER.find(t => t.key === tab)?.label ?? 'Database';
 
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseListKey | 'system') => {
@@ -965,32 +763,29 @@ export function DatabaseScreen() {
         ))}
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {tab === 'system' ? (
-          <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-            <h2 className="text-[14px] font-semibold mb-3 text-gray-800">System</h2>
-            <SystemPanel system={databases.system} />
-          </div>
-        ) : (
-          <>
-            <ListSidebar
+      <DatabaseLayout
+        title={activeTabLabel}
+        sidebar={
+          tab === 'system' ? undefined : (
+            <DatabaseList
               table={tab as DatabaseListKey}
               entries={entries}
               selectedId={selectedEntry?.id ?? null}
               onSelect={setSelectedId}
             />
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-              {selectedEntry ? (
-                <Detail table={tab as DatabaseListKey} entry={selectedEntry} />
-              ) : (
-                <p className="text-[13px] text-gray-400">No entries — add one to begin.</p>
-              )}
-            </div>
-          </>
+          )
+        }
+      >
+        {tab === 'system' ? (
+          <SystemPanel system={databases.system} />
+        ) : (
+          selectedEntry ? (
+            <Detail table={tab as DatabaseListKey} entry={selectedEntry} />
+          ) : (
+            <p className="text-[13px] text-gray-400">No entries — add one to begin.</p>
+          )
         )}
-      </div>
-      {/* hint that DATABASE_LIST_KEYS stays referenced */}
-      <span className="hidden">{DATABASE_LIST_KEYS.length}</span>
+      </DatabaseLayout>
     </div>
   );
 }

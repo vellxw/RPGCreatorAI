@@ -73,7 +73,7 @@
   save/load round-trip, C++ optional path parsing, and editor validation for
   duplicate/unnamed type entries, required equipment slots, and required
   term labels.
-- [ ] FRA-6 / DB-001: extract reusable Database V2 editor framework
+- [x] FRA-6 / DB-001: extract reusable Database V2 editor framework
   (`DatabaseLayout`, `DatabaseList`, field helpers, reference select, array
   editor) while preserving current CRUD behavior.
 - [ ] FRA-7 / DB-002: add and validate project-owned `types` and `terms`

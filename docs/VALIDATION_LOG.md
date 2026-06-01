@@ -4,6 +4,37 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+## FRA-6 / DB-001 — Database V2 editor framework extraction
+
+- `2026-05-31 23:39 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseFields.test.tsx`
+  — RED; new test could not resolve `DatabaseFields`, confirming the
+  framework components did not exist before implementation.
+- `2026-05-31 23:43 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseFields.test.tsx`
+  — PASS (3/3 tests) after adding shared scalar fields, reference select,
+  and array field editing primitives.
+- `2026-05-31 23:43 -03:00` —
+  `npm test -- --run src/stores/__tests__/databaseReducer.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (2 files, 19 tests).
+- `2026-05-31 23:43 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`).
+- `2026-05-31 23:43 -03:00` — `git diff --check` — PASS; warnings only
+  about Git normalizing LF to CRLF on touched files.
+- `2026-05-31 23:45 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseFields.test.tsx src/stores/__tests__/databaseReducer.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS (3 files, 22 tests) on the combined focused frontend validation.
+- `2026-05-31 23:45 -03:00` — `npm run typecheck` — PASS (`tsc --noEmit`)
+  on the final pre-commit rerun.
+- `2026-05-31 23:45 -03:00` — `git diff --check` — PASS after the final
+  validation-log update; LF-to-CRLF warnings only.
+- Fix applied: extracted `DatabaseLayout`, `DatabaseList`,
+  `DatabaseFields`, `ReferenceSelect`, and `ArrayFieldEditor`, then rewired
+  `DatabaseScreen` to delegate generic list/detail behavior without changing
+  database JSON shapes.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ## FRA-5 / MVP-000 — Phase 10 MVP scope lock
 
 - `2026-05-31 23:34 -03:00` — `git diff --check` — PASS; warnings only
