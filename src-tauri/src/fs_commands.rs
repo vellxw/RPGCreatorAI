@@ -56,6 +56,12 @@ pub struct DatabaseRefs {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub skills: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weapons: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub armors: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub states: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub enemies: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub troops: Option<String>,
@@ -216,10 +222,13 @@ pub fn fs_write_project(
     // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
     // so old runtime/editor pipelines keep parsing them.
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 13] = [
+        let pairs: [(&str, Option<&String>); 16] = [
             ("actors", project_state.project.database.actors.as_ref()),
             ("classes", project_state.project.database.classes.as_ref()),
             ("skills", project_state.project.database.skills.as_ref()),
+            ("weapons", project_state.project.database.weapons.as_ref()),
+            ("armors", project_state.project.database.armors.as_ref()),
+            ("states", project_state.project.database.states.as_ref()),
             ("enemies", project_state.project.database.enemies.as_ref()),
             ("troops", project_state.project.database.troops.as_ref()),
             ("quests", project_state.project.database.quests.as_ref()),
@@ -337,10 +346,13 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     // and the file exists on disk. Missing files are tolerated and surface as
     // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
     let mut databases = serde_json::Map::new();
-    let pairs: [(&str, Option<&String>); 13] = [
+    let pairs: [(&str, Option<&String>); 16] = [
         ("actors", project.database.actors.as_ref()),
         ("classes", project.database.classes.as_ref()),
         ("skills", project.database.skills.as_ref()),
+        ("weapons", project.database.weapons.as_ref()),
+        ("armors", project.database.armors.as_ref()),
+        ("states", project.database.states.as_ref()),
         ("enemies", project.database.enemies.as_ref()),
         ("troops", project.database.troops.as_ref()),
         ("quests", project.database.quests.as_ref()),
@@ -606,6 +618,9 @@ mod tests {
                 actors: None,
                 classes: None,
                 skills: None,
+                weapons: None,
+                armors: None,
+                states: None,
                 enemies: None,
                 troops: None,
                 quests: None,
@@ -725,6 +740,9 @@ mod tests {
             "database": {
                 "items": "data/database/items.json",
                 "actors": "data/database/actors.json",
+                "weapons": "data/database/weapons.json",
+                "armors": "data/database/armors.json",
+                "states": "data/database/states.json",
                 "system": "data/database/system.json",
                 "switches": "data/database/switches.json",
                 "animations": "data/database/animations.json"
@@ -760,6 +778,21 @@ mod tests {
         )
         .unwrap();
         fs::write(
+            root.join("data/database/weapons.json"),
+            r#"{"schemaVersion":1,"weapons":[{"id":"iron_sword","name":"Iron Sword"}]}"#,
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/armors.json"),
+            r#"{"schemaVersion":1,"armors":[{"id":"leather_armor","name":"Leather Armor"}]}"#,
+        )
+        .unwrap();
+        fs::write(
+            root.join("data/database/states.json"),
+            r#"{"schemaVersion":1,"states":[{"id":"poison","name":"Poison"}]}"#,
+        )
+        .unwrap();
+        fs::write(
             root.join("data/database/system.json"),
             r#"{"schemaVersion":1,"startingParty":["arc"],"startingGold":50}"#,
         )
@@ -785,6 +818,9 @@ mod tests {
         let result = read_project_at(&root).unwrap();
         let dbs = result.databases.as_object().unwrap();
         assert!(dbs.contains_key("actors"));
+        assert!(dbs.contains_key("weapons"));
+        assert!(dbs.contains_key("armors"));
+        assert!(dbs.contains_key("states"));
         assert!(dbs.contains_key("system"));
         assert!(dbs.contains_key("switches"));
         assert!(dbs.contains_key("animations"));
@@ -792,6 +828,12 @@ mod tests {
         let actors = dbs.get("actors").unwrap().as_array().unwrap();
         assert_eq!(actors.len(), 1);
         assert_eq!(actors[0].get("id").unwrap(), "arc");
+        let weapons = dbs.get("weapons").unwrap().as_array().unwrap();
+        assert_eq!(weapons[0].get("id").unwrap(), "iron_sword");
+        let armors = dbs.get("armors").unwrap().as_array().unwrap();
+        assert_eq!(armors[0].get("id").unwrap(), "leather_armor");
+        let states = dbs.get("states").unwrap().as_array().unwrap();
+        assert_eq!(states[0].get("id").unwrap(), "poison");
         // system should be unwrapped to the bare object
         let system = dbs.get("system").unwrap().as_object().unwrap();
         assert_eq!(system.get("startingGold").unwrap(), 50);
@@ -827,10 +869,13 @@ mod tests {
         // Re-implement what fs_write_project does for databases inline so we
         // don't need a State<AppState>.
         if let serde_json::Value::Object(map) = &state.databases {
-            let pairs: [(&str, Option<&String>); 13] = [
+            let pairs: [(&str, Option<&String>); 16] = [
                 ("actors", state.project.database.actors.as_ref()),
                 ("classes", state.project.database.classes.as_ref()),
                 ("skills", state.project.database.skills.as_ref()),
+                ("weapons", state.project.database.weapons.as_ref()),
+                ("armors", state.project.database.armors.as_ref()),
+                ("states", state.project.database.states.as_ref()),
                 ("enemies", state.project.database.enemies.as_ref()),
                 ("troops", state.project.database.troops.as_ref()),
                 ("quests", state.project.database.quests.as_ref()),
