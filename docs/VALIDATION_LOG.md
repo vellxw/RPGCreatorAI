@@ -2516,3 +2516,43 @@ Error: Port 1420 is already in use
   runtime, frontend, desktop, provider, or packaged build command was
   required.
 
+### Phase 11 FRA-42 / CP-007 — validation baseline
+
+- `2026-06-01 19:27:12 -03:00` — `git status --short` — PASS for a baseline
+  preflight with one pre-existing untracked file intentionally left unstaged:
+  `docs/agent_prompts/LINEAR_MVP_CODEX_GOAL_PROMPT.md`.
+- `2026-06-01 19:27:12 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS, exit code 0.
+  - Frontend typecheck: PASS (`tsc --noEmit`).
+  - Frontend tests: PASS; Vitest reported 36 test files and 213 tests passed.
+  - Frontend build: PASS; Vite built successfully and emitted the existing
+    warning that one chunk is larger than 500 kB after minification.
+  - Native configure/build/test: PASS; CMake configured and generated into
+    `C:\Users\franc\AppData\Local\RPGCreatorAI\build`, Ninja reported no work
+    to do, and CTest reported 1/1 tests passed. Non-fatal warnings: missing
+    PkgConfig, CMake FetchContent CMP0135 developer warnings, and dependency
+    `cmake_minimum_required` deprecation warnings.
+  - Tauri content check: PASS; `http://127.0.0.1:1420/` served the
+    RPGCreatorAI editor.
+  - Rust desktop tests: PASS; Cargo reported 25 passed, 0 failed.
+  - Runtime smoke: PASS; launch smoke kept the runtime process alive for 3 s,
+    feature smoke generated screenshots under `docs/screenshots/phase10-mvp`,
+    and the script reported `SMOKE PASSED`. Non-fatal environment warnings:
+    WASAPI audio endpoint unavailable and missing sample audio files
+    `assets/audio/town_bgm.wav` and `assets/audio/chest.wav`; runtime continued
+    with silent audio requests.
+  - Editor/runtime roundtrip: PASS; baseline screenshot hash
+    `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944`,
+    edited screenshot hash
+    `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`, and
+    runtime loaded edited data from the temporary project copy.
+  - Gate summary: PASS for FRONTEND TYPECHECK, FRONTEND TESTS, FRONTEND BUILD,
+    NATIVE CONFIGURE BUILD TEST, TAURI CONTENT CHECK, RUST DESKTOP TESTS,
+    RUNTIME SMOKE, and EDITOR RUNTIME ROUNDTRIP.
+- `2026-06-01 19:31:04 -03:00` — post-run `git status --short` — PASS; no
+  tracked source or screenshot content changed from the validation run, and the
+  same pre-existing untracked prompt file remained unstaged.
+- `2026-06-01 19:32:22 -03:00` — `git diff --check` after recording the
+  baseline — PASS with line-ending conversion warnings only.
+
