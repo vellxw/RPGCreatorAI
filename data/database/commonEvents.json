@@ -6,7 +6,30 @@
       "name": "Save Reminder",
       "trigger": "manual",
       "commands": [
-        { "type": "showText", "text": "Press F5 to save your game." }
+        {
+          "type": "showText",
+          "text": "Press F5 to save your game."
+        }
+      ]
+    },
+    {
+      "id": "mvp_debug_ping",
+      "name": "MVP Debug Ping",
+      "trigger": "parallel",
+      "switchId": "mvp_debug_enabled",
+      "commands": [
+        {
+          "type": "pluginCommand",
+          "pluginId": "debug",
+          "command": "log",
+          "args": {
+            "message": "MVP gated common event tick"
+          }
+        },
+        {
+          "type": "wait",
+          "ms": 1000
+        }
       ]
     }
   ]

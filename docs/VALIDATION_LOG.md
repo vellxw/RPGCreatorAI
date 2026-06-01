@@ -2119,3 +2119,39 @@ Error: Port 1420 is already in use
 - `2026-06-01 15:54:08 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 10 FRA-27 / QA-001 — bundled sample MVP coverage
+
+- `2026-06-01 15:58:28 -03:00` —
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts`
+  — RED as expected; new fixture coverage found missing `controlSelfSwitch`,
+  self-switch pages, gated common-event coverage, and foreground occlusion.
+- `2026-06-01 15:59:30 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — RED; initial C++ coverage used a complex doctest `CHECK(a || b)`. Fix:
+  split the condition into a named boolean assertion.
+- `2026-06-01 16:00:10 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — RED as expected; sample maps still lacked foreground occlusion and the
+  `route_coach` event required by the new loader test.
+- `2026-06-01 16:01:45 -03:00` —
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 40 Vitest tests passed after expanding the bundled sample.
+- `2026-06-01 16:02:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; `RPGTests` passed.
+- `2026-06-01 16:04:07 -03:00` —
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 2 files and 40 tests passed.
+- `2026-06-01 16:04:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 16:04:40 -03:00` — `npm run build` — PASS; Vite build
+  completed with the existing chunk-size warning only.
+- `2026-06-01 16:05:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; Ninja reported no work to do and `RPGTests` passed.
+- `2026-06-01 16:05:20 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; configure/build/CTest/runtime smoke completed, with existing
+  non-fatal dependency warnings and optional missing-audio warning only.
+- `2026-06-01 16:05:34 -03:00` — `git diff --check` — PASS with
+  line-ending conversion warnings only.
+

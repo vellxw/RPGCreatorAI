@@ -2217,9 +2217,9 @@
         0,
         0,
         0,
-        0,
-        0,
-        0,
+        5,
+        5,
+        5,
         0,
         0,
         0,
@@ -4694,7 +4694,7 @@
               "prompt": "Â¿Le ayudas?",
               "choices": [
                 {
-                  "label": "SÃ­, te ayudarÃ©",
+                  "label": "Si, te ayudo",
                   "commands": [
                     {
                       "type": "showText",
@@ -4717,7 +4717,7 @@
                   ]
                 },
                 {
-                  "label": "Mejor no",
+                  "label": "Ahora no",
                   "commands": [
                     {
                       "type": "showText",
@@ -4894,6 +4894,71 @@
           "x": 20,
           "y": 19,
           "direction": "up"
+        }
+      ]
+    },
+    {
+      "id": "patrol_crate",
+      "type": "object",
+      "x": 12,
+      "y": 14,
+      "solid": true,
+      "sprite": "chest_closed",
+      "trigger": "interact",
+      "commands": [
+        {
+          "type": "showText",
+          "text": "A route target crate used by the MVP sample."
+        }
+      ]
+    },
+    {
+      "id": "route_coach",
+      "type": "npc",
+      "x": 14,
+      "y": 14,
+      "solid": true,
+      "sprite": "npc_old_man",
+      "animationSet": "npc_old_man",
+      "trigger": "interact",
+      "commands": [
+        {
+          "type": "showText",
+          "speaker": "Route Coach",
+          "text": "Watch the crate move one step and return."
+        },
+        {
+          "type": "setMovementRoute",
+          "target": "event",
+          "eventId": "patrol_crate",
+          "repeat": false,
+          "skippable": true,
+          "wait": true,
+          "steps": [
+            {
+              "type": "moveRight"
+            },
+            {
+              "type": "wait",
+              "ms": 125
+            },
+            {
+              "type": "moveLeft"
+            }
+          ]
+        },
+        {
+          "type": "pluginCommand",
+          "pluginId": "debug",
+          "command": "log",
+          "args": {
+            "message": "MVP sample event route executed"
+          }
+        },
+        {
+          "type": "controlSwitch",
+          "switchId": "mvp_debug_enabled",
+          "value": true
         }
       ]
     }

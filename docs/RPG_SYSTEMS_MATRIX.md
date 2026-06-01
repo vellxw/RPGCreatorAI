@@ -39,7 +39,7 @@ Legend:
 | Playtest session modes | val | yes | yes | yes | yes | yes | Desktop playtest builds temp project roots for project-start, current-map, and selected-event modes, launches with the temp root as `current_dir`, and preserves source files. |
 | Runtime logs, trace, and state snapshots | val | n/a | yes | yes | yes | yes | Bounded native runtime logs, deterministic `[TRACE]` event rows, and local runtime state snapshots are implemented, tested, and exposed in Playtest without runtime-editor IPC. |
 | Placeholder AI/debug UI gating | val | n/a | yes | n/a | yes | yes | Bottom-panel generation prompts are removed, primary navigation no longer exposes `AI Tools`, the future workspace is read-only, and automated UI gating coverage locks the MVP surface to validation, logs, traces, and state. |
-| Bundled sample MVP coverage | partial | yes | n/a | partial | partial | partial | Sample exists; full MVP feature coverage remains FRA-27. |
+| Bundled sample MVP coverage | val | yes | n/a | yes | yes | yes | Sample covers choices, self-switch pages, a switch-gated common event, event-target movement, `playSound`, `pluginCommand debug.log`, foreground occlusion, and validation/loader tests. |
 | Green-gate scripts and smoke | partial | n/a | n/a | partial | partial | partial | Current scripts exist; MVP full verify and expanded smoke remain FRA-28 through FRA-30 and FRA-35. |
 
 Rows marked `partial` are intentionally not promoted based on planned work.

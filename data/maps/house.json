@@ -4706,6 +4706,11 @@
               "soundId": "chest_open"
             },
             {
+              "type": "controlSelfSwitch",
+              "switchId": "A",
+              "value": true
+            },
+            {
               "type": "controlSwitch",
               "switchId": "chest_001_opened",
               "value": true
@@ -4736,6 +4741,130 @@
             {
               "type": "showText",
               "text": "El cofre esta vacio."
+            }
+          ]
+        }
+      ],
+      "pages": [
+        {
+          "id": "closed",
+          "name": "Closed",
+          "conditions": {},
+          "graphic": {
+            "sprite": "chest_closed"
+          },
+          "movement": {
+            "type": "fixed",
+            "speed": "normal"
+          },
+          "options": {
+            "walking": false,
+            "stepping": false,
+            "directionFix": false,
+            "through": false
+          },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            {
+              "type": "ifSwitch",
+              "switchId": "chest_001_opened",
+              "equals": false,
+              "then": [
+                {
+                  "type": "showText",
+                  "text": "Encontraste una pocion."
+                },
+                {
+                  "type": "addItem",
+                  "itemId": "potion",
+                  "amount": 1
+                },
+                {
+                  "type": "playSound",
+                  "soundId": "chest_open"
+                },
+                {
+                  "type": "controlSelfSwitch",
+                  "switchId": "A",
+                  "value": true
+                },
+                {
+                  "type": "controlSwitch",
+                  "switchId": "chest_001_opened",
+                  "value": true
+                },
+                {
+                  "type": "ifVariable",
+                  "variableId": "lost_chest_progress",
+                  "op": "lt",
+                  "value": 1,
+                  "then": [
+                    {
+                      "type": "controlVariable",
+                      "variableId": "lost_chest_progress",
+                      "op": "set",
+                      "value": 1
+                    }
+                  ],
+                  "else": []
+                },
+                {
+                  "type": "updateQuestObjective",
+                  "questId": "lost_chest",
+                  "objectiveId": "open_chest",
+                  "state": "done"
+                }
+              ],
+              "else": [
+                {
+                  "type": "showText",
+                  "text": "El cofre esta vacio."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "opened",
+          "name": "Opened",
+          "conditions": {
+            "selfSwitches": {
+              "A": true
+            }
+          },
+          "graphic": {
+            "sprite": "chest_closed"
+          },
+          "movement": {
+            "type": "fixed",
+            "speed": "normal"
+          },
+          "options": {
+            "walking": false,
+            "stepping": false,
+            "directionFix": false,
+            "through": false
+          },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            {
+              "type": "ifSelfSwitch",
+              "switchId": "A",
+              "equals": true,
+              "then": [
+                {
+                  "type": "showText",
+                  "text": "El cofre esta vacio."
+                }
+              ],
+              "else": [
+                {
+                  "type": "showText",
+                  "text": "El cofre parece cerrado."
+                }
+              ]
             }
           ]
         }

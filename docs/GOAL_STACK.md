@@ -15,13 +15,16 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-27 through FRA-35): bundled sample
-  coverage, editor-runtime roundtrip, runtime smoke expansion, canonical
-  verification script, feature integration, docs closeout, final report,
-  commit, and push.
+- Integration QA — MVP green gate (FRA-28 through FRA-35): editor-runtime
+  roundtrip, runtime smoke expansion, canonical verification script, feature
+  integration, docs closeout, final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 QA-001 (FRA-27) — bundled sample now exercises MVP feature
+  coverage: choices, self-switch pages, a switch-gated parallel common event,
+  event-target movement routes, `playSound`, `pluginCommand debug.log`,
+  foreground occlusion, and TypeScript/C++ fixture coverage.
 - Phase 10 PT-005 (FRA-26) — placeholder AI/debug UI is gated for MVP:
   clickable bottom-panel generation suggestions were replaced by real
   diagnostics, the `ai-tools` route was removed from primary navigation and

@@ -129,7 +129,7 @@
 ## Integration QA — MVP Green Gate
 
 - [x] FRA-5 / MVP-000: lock MVP scope and Linear tracking metadata in docs.
-- [ ] FRA-27 / QA-001: expand the bundled sample to exercise MVP features and
+- [x] FRA-27 / QA-001: expand the bundled sample to exercise MVP features and
   validate the sample references.
 - [ ] FRA-28 / QA-002: add editor-runtime roundtrip coverage for MVP playtest
   modes.

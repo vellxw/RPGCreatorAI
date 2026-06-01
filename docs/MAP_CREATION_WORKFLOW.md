@@ -11,6 +11,26 @@ The editor is React 19 + Vite + Tailwind. It mutates project data
 through the existing reducer in `src/stores/projectStore.ts`. Phase 7
 adds a thin history middleware on top of that reducer for undo / redo.
 
+## Bundled MVP sample coverage
+
+The bundled project under `data/` is also a Phase 10 QA fixture. Keep it
+small, but keep it representative of the MVP runtime/editor contract:
+
+- `data/maps/town.json` includes the `old_man` choice event with two
+  meaningful branches, plus `route_coach` driving an event-target movement
+  route for `patrol_crate` and a deterministic `debug.log` plugin command.
+- `data/maps/town.json` includes non-zero foreground tree tiles so visual
+  QA and loaders exercise foreground occlusion separately from collision.
+- `data/maps/house.json` includes `chest_001`, which plays a local sound,
+  updates quest state, sets self switch `A`, and exposes a self-switch-gated
+  opened page guarded by `ifSelfSwitch`.
+- `data/database/switches.json` and `data/database/commonEvents.json`
+  include `mvp_debug_enabled` and `mvp_debug_ping`, a switch-gated parallel
+  common event that executes an allowlisted `debug.log` command.
+- `src/validation/__tests__/bundledSample.test.ts` and
+  `tests/test_map_loader.cpp` assert this command surface so the fixture
+  cannot silently shrink below MVP coverage.
+
 ## Goals
 
 - Let a creator paint terrain and collisions on the map canvas.

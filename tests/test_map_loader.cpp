@@ -1,7 +1,9 @@
 #include <doctest/doctest.h>
 #include "world/MapLoader.h"
+#include <algorithm>
 #include <fstream>
 #include <cstdio>
+#include <functional>
 
 namespace {
 
@@ -13,6 +15,40 @@ std::string writeTemp(const std::string& name, const std::string& content) {
 }
 
 void rm(const std::string& p) { std::remove(p.c_str()); }
+
+bool hasCommand(
+    const std::vector<std::shared_ptr<EventCommand>>& commands,
+    const std::function<bool(const EventCommand&)>& pred
+) {
+    for (const auto& command : commands) {
+        if (!command) continue;
+        if (pred(*command)) return true;
+        if (hasCommand(command->thenCommands, pred)) return true;
+        if (hasCommand(command->elseCommands, pred)) return true;
+        if (hasCommand(command->victoryBranch, pred)) return true;
+        if (hasCommand(command->defeatBranch, pred)) return true;
+        for (const auto& choice : command->choices) {
+            if (hasCommand(choice.commands, pred)) return true;
+        }
+    }
+    return false;
+}
+
+bool hasCommand(const EventData& event, const std::function<bool(const EventCommand&)>& pred) {
+    if (hasCommand(event.commands, pred)) return true;
+    for (const auto& page : event.pages) {
+        if (hasCommand(page.commands, pred)) return true;
+    }
+    return false;
+}
+
+bool hasNonZeroForeground(const MapData& map) {
+    for (const auto& layer : map.layers) {
+        if (layer.role != "foreground" && layer.name != "foreground") continue;
+        return std::any_of(layer.tiles.begin(), layer.tiles.end(), [](int tile) { return tile != 0; });
+    }
+    return false;
+}
 
 } // namespace
 
@@ -46,6 +82,49 @@ TEST_CASE("MapLoader loads house.json with chest and door") {
     }
     CHECK(chest);
     CHECK(door);
+}
+
+TEST_CASE("Bundled sample maps include Phase 10 MVP command and visual coverage") {
+    auto town = MapLoader::load("data/maps/town.json");
+    auto house = MapLoader::load("data/maps/house.json");
+    REQUIRE(town.has_value());
+    REQUIRE(house.has_value());
+
+    const bool hasForegroundOcclusion = hasNonZeroForeground(*town) || hasNonZeroForeground(*house);
+    CHECK(hasForegroundOcclusion);
+
+    auto routeCoach = std::find_if(town->events.begin(), town->events.end(), [](const EventData& e) {
+        return e.id == "route_coach";
+    });
+    REQUIRE(routeCoach != town->events.end());
+    CHECK(hasCommand(*routeCoach, [](const EventCommand& command) {
+        return command.type == "setMovementRoute" &&
+               command.movementRouteTarget == "event" &&
+               command.movementRouteEventId == "patrol_crate" &&
+               command.movementRouteSteps.size() >= 2;
+    }));
+    CHECK(hasCommand(*routeCoach, [](const EventCommand& command) {
+        return command.type == "pluginCommand" &&
+               command.pluginId == "debug" &&
+               command.pluginCommand == "log";
+    }));
+
+    auto chest = std::find_if(house->events.begin(), house->events.end(), [](const EventData& e) {
+        return e.id == "chest_001";
+    });
+    REQUIRE(chest != house->events.end());
+    REQUIRE(chest->pages.size() >= 2);
+    CHECK(hasCommand(*chest, [](const EventCommand& command) {
+        return command.type == "controlSelfSwitch" && command.switchId == "A" && command.boolValue;
+    }));
+    CHECK(hasCommand(*chest, [](const EventCommand& command) {
+        return command.type == "ifSelfSwitch" && command.switchId == "A";
+    }));
+    CHECK(std::any_of(chest->pages.begin(), chest->pages.end(), [](const EventPage& page) {
+        return std::any_of(page.conditions.begin(), page.conditions.end(), [](const EventPageCondition& condition) {
+            return condition.type == "selfSwitch" && condition.id == "A" && condition.boolValue;
+        });
+    }));
 }
 
 TEST_CASE("MapLoader returns nullopt for non-existent file") {
