@@ -23,6 +23,7 @@ Primary Phase 11 sources:
 
 - `docs/PHASE_11_PRODUCT_CHARTER.md`
 - `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
+- `docs/PHASE_11_EXECUTION_PROTOCOL.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules

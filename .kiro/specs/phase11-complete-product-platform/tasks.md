@@ -7,7 +7,7 @@
 - [x] CP-003 / FRA-38: create the complete-platform risk register.
 - [x] CP-004 / FRA-39: record provider and legal review baseline.
 - [x] CP-005 / FRA-40: create a repo-tracked backlog source document.
-- [ ] CP-006 / FRA-41: define execution protocol and branch rules.
+- [x] CP-006 / FRA-41: define execution protocol and branch rules.
 - [ ] CP-007 / FRA-42: run and record the Phase 11 validation baseline.
 - [ ] CP-008 / FRA-43: run the planning integration gate.
 

@@ -2494,3 +2494,25 @@ Error: Port 1420 is already in use
 - Build/test note: CP-005 is a docs-only backlog source issue, so no runtime,
   frontend, desktop, provider, or packaged build command was required.
 
+### Phase 11 FRA-41 / CP-006 — execution protocol and branch rules
+
+- `2026-06-01 19:21:09 -03:00` — source review — PASS; reviewed
+  `AGENTS.md`, `docs/GOAL_STACK.md`, `docs/PHASE_11_PRODUCT_CHARTER.md`,
+  `docs/PHASE_11_PRODUCT_SURFACE_AUDIT.md`,
+  `docs/PHASE_11_RISK_REGISTER.md`, and
+  `docs/PHASE_11_PROVIDER_LEGAL_BASELINE.md` for branch, validation, stop,
+  docs, and AI/provider constraints.
+- `2026-06-01 19:21:09 -03:00` —
+  `rg -n "AGENTS.md|origin/main|verify.ps1|credentials|OAuth|admin|remote origin|runtime.*AI|git diff --cached --check|git status --short|docs/VALIDATION_LOG.md|CP-008|CP-128" docs/PHASE_11_EXECUTION_PROTOCOL.md`
+  — PASS; the protocol covers source precedence, push target, validation
+  gates, credential stops, runtime AI isolation, staging checks, validation
+  log updates, and final gate ordering.
+- `2026-06-01 19:21:09 -03:00` — `git diff --check` — RED; the new execution
+  protocol had a blank line at EOF. Fix applied: removed the trailing blank
+  line.
+- `2026-06-01 19:24:16 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Build/test note: CP-006 is a docs-only execution protocol issue, so no
+  runtime, frontend, desktop, provider, or packaged build command was
+  required.
+
