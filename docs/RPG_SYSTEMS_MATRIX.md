@@ -16,20 +16,20 @@ Legend:
 |--------|--------|--------|--------|---------|------------|-------|-------|
 | Project metadata | val | yes | yes | yes | yes | yes | Visual profiles, map references, and desktop persistence are covered. |
 | Maps + map tree | val | yes | yes | yes | yes | yes | Phase 10 Slice 1 map tree and map properties are implemented. |
-| Tilesets / sprites | partial | yes | partial | yes | partial | partial | Data-driven tilesets exist; dedicated tileset database editor remains FRA-8. |
+| Tilesets / sprites | val | yes | yes | yes | yes | yes | Dedicated tileset database editor, tile metadata, map reference validation, and tests are integrated. |
 | Visual layers / foreground | val | yes | yes | yes | yes | yes | Runtime renders background visual roles, below/same entities, foreground occluders, above entities, then overlays; collision/region stay non-rendered. |
 | Events, pages, and self switches | val | yes | yes | yes | yes | yes | Active-page selection, self switches, and scheduled events are implemented. |
 | Event commands baseline | partial | yes | yes | partial | yes | partial | Many commands are covered; remaining gaps are richer authoring/debug integration rather than the RT-007 command surface. |
 | Runtime choices UI | val | yes | yes | yes | yes | yes | `showChoices` now renders selectable runtime options and waits for confirm/cancel results. |
 | Movement routes | val | yes | yes | yes | yes | yes | Player, `thisEvent`, and named event routes execute against runtime-only event positions with wait/skippable/repeat guard coverage. |
 | Event priority / Y-sort | val | yes | yes | yes | yes | yes | Below/same/above render priority is data-driven from active pages; same-priority entities interleave with the player by foot Y and stable id tie-breaks. |
-| Common events | partial | yes | partial | yes | yes | yes | Runtime scheduling exists; common-event command-stack editing remains FRA-12. |
-| Database V2 shared editor framework | n/s | n/a | no | n/a | no | no | FRA-6 extracts reusable database editor primitives. |
-| Items, weapons, armors, states | partial | yes | partial | yes | partial | partial | Dedicated V2 forms and richer reference validation remain FRA-9. |
-| Actors, classes, skills, enemies, troops | partial | yes | partial | yes | partial | partial | Dedicated V2 authoring forms remain FRA-10. |
-| Quests, shops, switches, variables, system | partial | yes | partial | yes | partial | partial | Dedicated V2 setup/progression forms remain FRA-11. |
-| Types and terms | val | yes | partial | partial | yes | yes | Shards persist and validate; dedicated editor/UI consumption remains later DB work. |
-| Animations | partial | yes | partial | yes | yes | partial | Data/runtime support exists; animation editor with preview remains FRA-13. |
+| Common events | val | yes | yes | yes | yes | yes | Common events reuse the command-stack editor and runtime scheduling remains covered. |
+| Database V2 shared editor framework | val | n/a | yes | n/a | yes | yes | Reusable database layout, list, field, reference-select, and array editor primitives are integrated with tests. |
+| Items, weapons, armors, states | val | yes | yes | yes | yes | yes | Dedicated V2 forms, type references, numeric validation, and separated equipment shard compatibility are integrated. |
+| Actors, classes, skills, enemies, troops | val | yes | yes | yes | yes | yes | Dedicated party/combat V2 forms, reference validation, and tests are integrated. |
+| Quests, shops, switches, variables, system | val | yes | yes | yes | yes | yes | Dedicated setup/progression V2 forms, usage warnings, system defaults, and reference validation are integrated. |
+| Types and terms | val | yes | yes | partial | yes | yes | Shards persist, validate, and are consumed by V2 editors for typed references and default labels. |
+| Animations | val | yes | yes | yes | yes | yes | Animation database editor, sprite-sheet preview, runtime data, validation, and tests are integrated. |
 | Runtime project validator | val | n/a | n/a | yes | yes | yes | Pre-start validator blocks malformed projects before `Game::initialize` with C++ tests and smoke coverage. |
 | Save/load | val | yes | n/a | yes | yes | yes | GameState and save migration coverage exists. |
 | Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |

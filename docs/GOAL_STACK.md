@@ -15,11 +15,19 @@ tooling. `docs/GAME_VISUAL_DESIGN.md` remains the visual source of truth.
 
 ## Open subgoals (top of stack first)
 
-- Integration QA — MVP green gate (FRA-31 through FRA-35): feature
-  integration, docs closeout, final report, commit, and push.
+- Integration QA — MVP green gate (FRA-32 through FRA-35): runtime/playtest
+  feature integration, docs closeout, final report, commit, and push.
 
 ## Closed subgoals
 
+- Phase 10 INT-001 (FRA-31) — Database V2 integration is present on `main`:
+  there are no remaining local or remote `DB-*` branch refs after
+  fetch/prune, Linear shows FRA-6 through FRA-14 Done, Slice 4 tasks are
+  checked, and the integrated code includes the shared database framework,
+  dedicated tileset/item/equipment/state/party/combat/setup/progression/
+  animation editors, common-event command editing, and reference safety.
+  Frontend typecheck, full Vitest, frontend build, and Rust desktop tests
+  passed against the integrated state.
 - Phase 10 QA-004 (FRA-30) — `scripts/dev/verify.ps1` is now the canonical
   MVP green gate. It runs frontend typecheck, Vitest, frontend build, native
   C++ configure/build/CTest, Tauri content verification, Rust desktop tests,

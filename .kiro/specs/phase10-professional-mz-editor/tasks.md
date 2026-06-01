@@ -137,7 +137,7 @@
   audio, foreground occlusion, and plugin-command logs.
 - [x] FRA-30 / QA-004: create the full verification script for the MVP green
   gate with targeted skip flags.
-- [ ] FRA-31 / INT-001: integrate Database V2 branches and run full frontend
+- [x] FRA-31 / INT-001: integrate Database V2 branches and run full frontend
   validation.
 - [ ] FRA-32 / INT-002: integrate Runtime MZ foundation branches and run C++
   validation plus runtime smoke.

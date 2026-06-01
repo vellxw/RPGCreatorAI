@@ -2291,3 +2291,20 @@ Error: Port 1420 is already in use
 - `2026-06-01 16:42:35 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 10 FRA-31 / INT-001 — Database V2 integration validation
+
+- `2026-06-01 16:45:45 -03:00` — `git fetch --all --prune` — PASS; no
+  local or remote `DB-*` branches existed after pruning. Linear showed
+  FRA-6 through FRA-14 already Done, and the corresponding Database V2 commits
+  were present on `main`.
+- `2026-06-01 16:47:05 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 16:47:32 -03:00` — `npm test` — PASS; 35 files and 212
+  Vitest tests passed.
+- `2026-06-01 16:48:05 -03:00` — `npm run build` — PASS; Vite build
+  completed with the existing chunk-size warning only.
+- `2026-06-01 16:48:45 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 25 Rust desktop tests passed plus empty binary/doc test suites.
+- `2026-06-01 16:49:35 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+
