@@ -9,12 +9,14 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
+import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import {
   defaultProviderConfigs,
   providerStatusFor,
   providerWithEnabled,
   type ProviderStoreValue,
 } from '../stores/providerStore';
+import { useAiRequestQueue, type AiRequestQueueState } from '../stores/aiRequestQueueStore';
 import type { ProviderConfig } from '../types/project';
 import {
   getCredentialStoreAdapter,
@@ -27,6 +29,11 @@ interface SettingsScreenProps {
   providerStore?: Pick<ProviderStoreValue, 'providers' | 'setProviders'>;
   initialProviders?: ProviderConfig[];
   credentialStore?: CredentialStoreAdapter;
+  aiQueueStore?: {
+    queue: AiRequestQueueState;
+    cancel: (jobId: string) => void;
+    retry: (jobId: string) => void;
+  };
 }
 
 function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
@@ -58,7 +65,7 @@ function capabilityClass(provider: ProviderConfig): string {
   return 'border-gray-200 bg-gray-50 text-gray-500';
 }
 
-export function SettingsScreen({ providerStore, initialProviders, credentialStore }: SettingsScreenProps) {
+export function SettingsScreen({ providerStore, initialProviders, credentialStore, aiQueueStore }: SettingsScreenProps) {
   const [localProviders, setLocalProviders] = useState<ProviderConfig[]>(() =>
     cloneProviders(initialProviders ?? defaultProviderConfigs),
   );
@@ -71,6 +78,8 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
   const [credentialStatuses, setCredentialStatuses] = useState<Record<string, CredentialStatus>>({});
   const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
   const [credentialFeedback, setCredentialFeedback] = useState<Record<string, string>>({});
+  const internalAiQueue = useAiRequestQueue();
+  const activeAiQueue = aiQueueStore ?? internalAiQueue;
 
   useEffect(() => {
     let cancelled = false;
@@ -349,6 +358,12 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                 <li>Native runtime stays provider-independent.</li>
               </ul>
             </div>
+
+            <AIRequestQueuePanel
+              queue={activeAiQueue.queue}
+              onCancel={activeAiQueue.cancel}
+              onRetry={activeAiQueue.retry}
+            />
           </aside>
         </div>
       </div>

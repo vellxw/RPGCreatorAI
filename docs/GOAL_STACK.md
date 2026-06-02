@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-059 next).
+- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-060 next).
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
@@ -393,6 +393,13 @@ Primary Phase 11 sources:
   redaction helpers cover renderer/Rust feedback, provider ids are path-safe,
   and project JSON plus the native runtime remain credential-free. Evidence is
   recorded in `docs/PHASE_11_CREDENTIAL_STORAGE_POLICY.md`.
+- Phase 11 CP-059 — AI request queue and cancellation completed. The editor now
+  has a bounded, persisted AI request queue model with queued/running/
+  cancelled/failed/succeeded states, progress, cancellation, retry, restart
+  recovery, idempotency keys, and write-intent guards that avoid duplicate
+  destructive writes on retry. Settings exposes a compact queue status panel
+  without adding live provider calls or generation actions. Evidence is
+  recorded in `docs/PHASE_11_AI_REQUEST_QUEUE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

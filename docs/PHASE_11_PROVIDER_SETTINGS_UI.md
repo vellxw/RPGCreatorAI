@@ -16,6 +16,9 @@ or any native runtime dependency.
 - CP-058 adds a desktop-only password field for explicitly saving a provider
   credential through the Tauri credential bridge. The raw value is cleared
   after the write attempt and is never returned by the bridge.
+- CP-059 adds an editor-only AI request queue status panel for progress,
+  cancellation, retry, and failure visibility. It does not start provider
+  requests or expose generation actions.
 - Project JSON still stores no provider credentials.
 - Generation/test/connect actions remain absent from this screen until later
   provider hub issues add real capability gates and offline contracts.

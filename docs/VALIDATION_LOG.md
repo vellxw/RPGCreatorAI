@@ -4,6 +4,43 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-94 / CP-059 — AI request queue and cancellation
+
+- `2026-06-02 12:58:22 -03:00` —
+  `npm test -- --run src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx`
+  — RED as expected before implementation; `aiRequestQueueStore` and
+  `AIRequestQueuePanel` modules did not exist.
+- `2026-06-02 13:01:20 -03:00` —
+  `npm test -- --run src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx`
+  — FAIL after first implementation; reducer returned `queue-full` before
+  duplicate active idempotency detection. Fix applied: duplicate/write-intent
+  guards now run before queue-capacity rejection.
+- `2026-06-02 13:01:50 -03:00` —
+  `npm test -- --run src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx`
+  — PASS; 2 focused files and 7 tests passed.
+- `2026-06-02 13:02:07 -03:00` —
+  `npm test -- --run src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 4 focused files and 14 tests passed.
+- `2026-06-02 13:02:45 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:04:50 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:05:08 -03:00` — `npm test -- --run` — PASS; 67
+  Vitest files and 367 tests passed.
+- `2026-06-02 13:06:00 -03:00` — `npm run build` — PASS; Vite
+  transformed 1935 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 13:08:06 -03:00` —
+  Playwright CLI smoke with refs against `npm run dev` at
+  `http://127.0.0.1:5173/` — PASS; entered the bundled sample, opened
+  Settings, verified `AI Request Queue`, `No AI work is running`, `0 active`,
+  and confirmed no live generation/connect/test action was exposed. The dev
+  server was stopped afterward and generated Playwright artifacts were removed.
+- Fix applied: added bounded editor-only AI queue state, retry/cancel
+  transitions, restart recovery, idempotency and write-intent guards, Settings
+  queue status UI, and docs for the non-live provider boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-93 / CP-058 — credential storage policy and implementation
 
 - `2026-06-02 12:21:17 -03:00` —

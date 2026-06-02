@@ -60,8 +60,9 @@ Checked on 2026-06-01:
 - Provider credentials must never be stored in project JSON, committed repo
   files, docs, screenshots, validation logs, runtime logs, or generated
   manifests.
-- Before CP-058 chooses a desktop-safe credential policy, provider credentials
-  are considered unavailable.
+- Desktop Settings may store user-entered provider credentials only through
+  the CP-058 DPAPI app-data credential bridge. Browser mode treats credential
+  storage as unavailable.
 - Environment variables may be used only for explicit local diagnostics and
   must be redacted from logs.
 - Provider settings may store provider IDs, display names, base URLs,
@@ -138,6 +139,9 @@ Generated output must never be silently imported into accepted project data.
 - PASS: CP-058 implements Windows v1 desktop credential storage using DPAPI
   blobs under app data, returns metadata only, redacts renderer/Rust feedback,
   and keeps project JSON and the native runtime credential-free.
+- PASS: CP-059 adds an editor-only request queue with cancellation, retry,
+  restart recovery, and write-intent guards. Queue validation uses mocks and
+  fixtures only; no live provider call is required or performed.
 - OPEN: Provider Hub implementation issues must still add provider metadata,
   mock contract tests, opt-in UX, cost/rate-limit/error states, and live
   diagnostic gates.
