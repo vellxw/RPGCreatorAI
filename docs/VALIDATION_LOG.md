@@ -4,6 +4,36 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-68 / CP-033 — runtime command gap audit
+
+- `2026-06-02 03:41:00 -03:00` — static inspection of
+  `src/types/project.ts`, `src/components/events/CommandStackEditor.tsx`,
+  `src/components/events/CommandEditor.tsx`,
+  `src/validation/validateProject.ts`, `src/validation/validateMap.ts`,
+  `src/types/EventTypes.h`, `src/world/MapLoader.cpp`,
+  `src/database/RpgDatabases.cpp`, `src/events/EventRunner.cpp`,
+  `src/events/EventRunner.h`, `src/core/Game.cpp`,
+  `src/runtime/RuntimeProjectValidator.cpp`, and focused command/runtime tests
+  — PASS; all 29 authored v1 commands are present across schema, editor UI,
+  parser structs/parsers, EventRunner dispatch, and current-scope evidence.
+  Remaining gaps are product-depth roadmap items around battle, audio,
+  deterministic plugin commands, movement-route breadth, diagnostics, and
+  native unknown-command validator parity.
+- `2026-06-02 03:41:35 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateProject.test.ts src/validation/__tests__/validateMap.test.ts`
+  — PASS; 3 focused files and 41 Vitest tests passed.
+- `2026-06-02 03:42:14 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 03:42:14 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; Ninja reported no work to do, then CTest passed `RPGTests`
+  1/1 in 1.06s.
+- Fix applied: documented the runtime command support matrix and mapped
+  remaining command-depth gaps to existing milestone 04 Linear issues
+  CP-034 through CP-040.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-67 / CP-032 — professional editor surface integration gate
 
 - `2026-06-02 02:58:52 -03:00` —

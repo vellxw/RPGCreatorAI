@@ -41,6 +41,14 @@
   - [x] CP-031 / FRA-66: polish database navigation and large-list safety.
   - [x] CP-032 / FRA-67: run the professional editor surface integration gate.
 - [ ] 04 Runtime Feature Completeness.
+  - [x] CP-033 / FRA-68: audit runtime command support gaps.
+  - [ ] CP-034 / FRA-69: polish runtime menu flow.
+  - [ ] CP-035 / FRA-70: close battle authoring runtime gaps.
+  - [ ] CP-036 / FRA-71: implement audio authoring runtime v1.
+  - [ ] CP-037 / FRA-72: implement deterministic plugin command registry v2.
+  - [ ] CP-038 / FRA-73: polish save/load UX and runtime slots.
+  - [ ] CP-039 / FRA-74: add runtime diagnostics and developer overlay.
+  - [ ] CP-040 / FRA-75: run the runtime feature completeness integration gate.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.
 - [ ] 07 AI Provider Hub Foundation.

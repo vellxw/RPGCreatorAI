@@ -185,6 +185,14 @@ Primary Phase 11 sources:
   controls smaller than 20 px. Evidence is recorded in
   `docs/PHASE_11_EDITOR_SURFACE_INTEGRATION_GATE.md` and
   `docs/screenshots/phase11-cp032/`.
+- Phase 11 CP-033 — runtime command gap audit completed. The command matrix
+  confirms all 29 authored v1 event commands have schema, editor UI,
+  validation/parser support, native EventRunner dispatch, and focused evidence
+  for the current scope. Remaining gaps are product-depth items around battle,
+  audio, plugin-command registry, movement-route breadth, diagnostics, and
+  native unknown-command validator parity, all mapped to existing milestone 04
+  issues CP-034 through CP-040. Evidence is recorded in
+  `docs/PHASE_11_RUNTIME_COMMAND_GAP_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
