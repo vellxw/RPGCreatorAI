@@ -52,6 +52,7 @@ export interface MapData {
   name: string;
   displayName?: string;
   tilesetId?: string;
+  bgm?: string;
   scrollType?: MapScrollType;
   battleback?: string;
   encounterSteps?: number;
@@ -646,6 +647,7 @@ export interface SystemData {
   startingParty: string[];
   startingGold: number;
   defaultBgm?: string;
+  audio?: Record<string, string>;
   windowTint?: string;
   battleBackground?: string;
   playerAnimationSet?: string;

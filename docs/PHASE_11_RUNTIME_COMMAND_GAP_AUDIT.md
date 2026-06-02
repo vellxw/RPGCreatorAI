@@ -15,8 +15,8 @@ The remaining gaps are product-depth gaps, not parser/schema holes:
 - battle commands run through the deterministic battle runner and summary.
   CP-035 closed the hidden stat/reference assumptions and now rejects
   `canEscape=true` by validation until interactive escape exists;
-- audio commands cover local sound-effect dispatch, but not full BGM/BGS/ME
-  authoring controls;
+- audio commands now use CP-036 local audio authoring for editable WAV ids,
+  default/map BGM, command refs, and warning-only missing optional files;
 - plugin commands are intentionally limited to deterministic debug built-ins;
 - movement routes cover deterministic move, turn, and wait steps, but not the
   wider RPG Maker route-command catalog;
@@ -76,7 +76,7 @@ Legend:
 | `transferMap` | Yes | Yes | Map, bounds, direction refs | Yes | Emits transfer request; `Game` loads map and positions player. | `test_event_runner.cpp`, scheduler tests | Full |
 | `setPlayerPosition` | Yes | Yes | Map, bounds, direction refs | Yes | Uses same transfer request path as `transferMap`. | Parser and validator coverage | Partial |
 | `wait` | Yes | Yes | Non-negative finite ms | Yes | Pauses command runner for duration. | `test_event_runner.cpp`, scheduler/trace tests | Full |
-| `playSound` | Yes | Yes | Known type | Yes | Emits sound request; `Game` dispatches to local audio registry. | `test_event_runner.cpp`, audio tests | Partial |
+| `playSound` | Yes | Yes | Audio id reference and path policy | Yes | Emits sound request; `Game` dispatches to the local audio registry, warns and continues for missing optional WAV files. | `test_event_runner.cpp`, audio tests, runtime validator tests | Full |
 | `pluginCommand` | Yes | Yes | Safe identifiers and scalar args | Yes | Runs deterministic `debug.*` built-ins; unknown commands warn and continue. | `test_event_runner.cpp`, validator tests | Partial |
 | `comment` | Yes | Yes | Known type | Yes | Ignored by runtime by design. | Page evaluator/parser coverage | Intentional no-op |
 | `callCommonEvent` | Yes | Yes | Common event reference | Yes | Resolves and queues common-event commands through injected resolver. | `test_event_runner.cpp`, scheduler tests | Full |
@@ -100,9 +100,11 @@ Legend:
    future game-over/defeat presentation beyond deterministic branches.
 
 2. Audio command breadth (`playSound`) - high user impact, low/medium risk.
-   The current command is SFX-only. CP-036 should define local-first BGM/BGS/ME
-   support, volume/pitch/pan/fade scope, and offline validation without live
-   provider or network dependencies.
+   CP-036 closes the local-first v1 authoring gap by making audio ids and
+   project-relative WAV paths editable in `system.audio`, validating
+   default/map BGM and `playSound` references, and keeping missing optional
+   files warning-only. Future BGS/ME, volume, pitch, pan, fade, and import
+   workflows remain later asset/audio-depth work.
 
 3. Deterministic plugin registry (`pluginCommand`) - high risk if expanded
    casually. CP-037 should keep plugin commands registry-based, local,
@@ -134,8 +136,9 @@ Legend:
 - CP-035 / FRA-70: closed v1 battle authoring runtime gaps for
   `startBattle` stat resolution, battle database validation, rewards, and
   explicit unsupported escape policy.
-- CP-036 / FRA-71: expand local audio authoring/runtime from SFX dispatch to
-  the agreed v1 audio command set.
+- CP-036 / FRA-71: completed local audio authoring/runtime v1 for editable
+  WAV ids, default/map BGM refs, `playSound` refs, and warning-only missing
+  optional files.
 - CP-037 / FRA-72: replace ad hoc debug plugin handling with a deterministic
   plugin command registry contract.
 - CP-039 / FRA-74: expose command-level diagnostics for unsupported,

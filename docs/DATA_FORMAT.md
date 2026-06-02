@@ -225,8 +225,10 @@ aspect ratio. `yOffsetPx` adjusts the bottom-center anchor in pixels.
     "confirm": "assets/audio/confirm.wav",
     "cancel": "assets/audio/cancel.wav",
     "chest": "assets/audio/chest.wav",
+    "chest_open": "assets/audio/chest.wav",
     "battle": "assets/audio/battle.wav",
-    "town_bgm": "assets/audio/town_bgm.wav"
+    "town_bgm": "assets/audio/town_bgm.wav",
+    "town_theme": "assets/audio/town_bgm.wav"
   }
 }
 ```
@@ -237,9 +239,10 @@ aspect ratio. `yOffsetPx` adjusts the bottom-center anchor in pixels.
 no per-event override and its animation set does not define display
 metadata.
 
-`audio` maps deterministic local sound ids to project-relative WAV paths.
-`AudioSystem` ships fallback ids for `confirm`, `cancel`, `chest`, `battle`,
-and `town_bgm`; project data can override or extend them in `system.json` or
-in an optional `database.audio` shard with `audio`, `sounds[]`, or `bgm[]`
-entries. Missing WAV files and unavailable audio devices are logged warnings,
-not validation errors.
+`audio` maps deterministic local sound ids to project-relative WAV paths. The
+System database editor exposes these pairs directly. Default/map BGM and
+`playSound.soundId` must reference one of these ids or a built-in fallback id.
+Project data can override or extend the registry in `system.json` or in an
+optional `database.audio` shard with `audio`, `sounds[]`, or `bgm[]` entries.
+Audio paths must be local project-relative `.wav` paths. Missing WAV files and
+unavailable audio devices are logged warnings, not validation errors.

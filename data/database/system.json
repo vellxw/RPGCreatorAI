@@ -3,6 +3,15 @@
   "startingParty": ["arc"],
   "startingGold": 50,
   "defaultBgm": "town_theme",
+  "audio": {
+    "confirm": "assets/audio/confirm.wav",
+    "cancel": "assets/audio/cancel.wav",
+    "chest": "assets/audio/chest.wav",
+    "chest_open": "assets/audio/chest.wav",
+    "battle": "assets/audio/battle.wav",
+    "town_bgm": "assets/audio/town_bgm.wav",
+    "town_theme": "assets/audio/town_bgm.wav"
+  },
   "windowTint": "indigo",
   "battleBackground": "grass_field",
   "playerAnimationSet": "player_adventurer",

@@ -3,6 +3,7 @@
 // type with a focused inline form.
 
 import { useProjectStore } from '../../stores/projectStore';
+import { audioOptions } from '../../audio/audioRegistry';
 import type {
   AddGoldCommand,
   AddItemCommand,
@@ -280,9 +281,15 @@ function TransferMapEditor({
 }
 
 function PlaySoundEditor({ command, onChange }: { command: PlaySoundCommand; onChange: (n: PlaySoundCommand) => void }) {
+  const { state } = useProjectStore();
+  const options = audioOptions(state.databases.system.audio);
+  if (command.soundId && !options.some(option => option.value === command.soundId)) {
+    options.push({ value: command.soundId, label: `${command.soundId} (unknown)` });
+  }
+
   return (
     <Field label="Sound ID">
-      {input({ value: command.soundId, onChange: e => onChange({ ...command, soundId: e.target.value }) })}
+      {select(command.soundId, [{ value: '', label: '(none)' }, ...options], soundId => onChange({ ...command, soundId }))}
     </Field>
   );
 }

@@ -224,6 +224,10 @@ describe('setup and progression database editors', () => {
       playerMovementSpeed: 'double',
       defaultCharacterHeightTiles: 1.5,
       defaultBgm: 'town_theme',
+      audio: {
+        town_theme: 'assets/audio/town_bgm.wav',
+        chest_open: 'assets/audio/chest.wav',
+      },
       windowTint: 'indigo',
       battleBackground: 'grass_field',
     };
@@ -241,6 +245,22 @@ describe('setup and progression database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({ playerMovementSpeed: 'normal' });
     changeText(input(view.container, 'Default character height (tiles)'), '1.75');
     expect(onChange).toHaveBeenLastCalledWith({ defaultCharacterHeightTiles: 1.75 });
+    changeSelect(select(view.container, 'Default BGM'), 'chest_open');
+    expect(onChange).toHaveBeenLastCalledWith({ defaultBgm: 'chest_open' });
+    changeText(input(view.container, 'Audio path 1'), 'assets/audio/town_alt.wav');
+    expect(onChange).toHaveBeenLastCalledWith({
+      audio: {
+        town_theme: 'assets/audio/town_alt.wav',
+        chest_open: 'assets/audio/chest.wav',
+      },
+    });
+    changeText(input(view.container, 'Audio ID 2'), 'door_open');
+    expect(onChange).toHaveBeenLastCalledWith({
+      audio: {
+        town_theme: 'assets/audio/town_bgm.wav',
+        door_open: 'assets/audio/chest.wav',
+      },
+    });
 
     view.unmount();
   });

@@ -3,6 +3,7 @@
 // new fields are added to the schema between releases.
 
 import type { DatabaseEntries, DatabaseListKey } from '../types/project';
+import { DEFAULT_AUDIO_REGISTRY } from '../audio/audioRegistry';
 
 const TYPE_TABLE_KEYS = [
   'weaponTypes',
@@ -156,6 +157,7 @@ export function emptyDatabases(): DatabaseEntries {
     system: {
       startingParty: [],
       startingGold: 0,
+      audio: { ...DEFAULT_AUDIO_REGISTRY },
       playerMovementSpeed: 'double',
       defaultCharacterHeightTiles: 1.5,
     },
@@ -193,6 +195,14 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
     }
   }
   if (input.system && typeof input.system === 'object') {
+    const systemAudio =
+      input.system.audio && typeof input.system.audio === 'object'
+        ? Object.fromEntries(
+            Object.entries(input.system.audio).filter(
+              ([, value]) => typeof value === 'string',
+            ) as Array<[string, string]>,
+          )
+        : base.system.audio;
     merged.system = {
       startingParty: Array.isArray(input.system.startingParty)
         ? [...input.system.startingParty]
@@ -200,6 +210,7 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
       startingGold:
         typeof input.system.startingGold === 'number' ? input.system.startingGold : base.system.startingGold,
       defaultBgm: input.system.defaultBgm,
+      audio: systemAudio ? { ...systemAudio } : undefined,
       windowTint: input.system.windowTint,
       battleBackground: input.system.battleBackground,
       playerAnimationSet: input.system.playerAnimationSet,

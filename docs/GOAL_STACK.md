@@ -210,6 +210,12 @@ Primary Phase 11 sources:
   explicitly blocked by editor/runtime validation until interactive escape is
   implemented. Evidence is recorded in
   `docs/PHASE_11_BATTLE_RUNTIME_GAP_CLOSURE.md`.
+- Phase 11 CP-036 — audio authoring runtime v1 completed. `system.audio`
+  now stores editable local WAV ids and paths, System/Map/Event editors expose
+  common audio references without JSON editing, frontend and native validators
+  check unknown ids plus unsafe or unsupported audio paths, and the native
+  validator warns rather than blocks when optional local WAV files are absent.
+  Evidence is recorded in `docs/PHASE_11_AUDIO_AUTHORING_RUNTIME_V1.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

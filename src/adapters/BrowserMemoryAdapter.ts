@@ -114,10 +114,19 @@ function seedFromBundle(): FullProjectState {
 }
 
 function extractSystem(json: Record<string, unknown>): SystemData {
+  const audio =
+    json.audio && typeof json.audio === 'object'
+      ? Object.fromEntries(
+          Object.entries(json.audio as Record<string, unknown>).filter(
+            ([, value]) => typeof value === 'string',
+          ) as Array<[string, string]>,
+        )
+      : undefined;
   return {
     startingParty: Array.isArray(json.startingParty) ? (json.startingParty as string[]) : [],
     startingGold: typeof json.startingGold === 'number' ? (json.startingGold as number) : 0,
     defaultBgm: typeof json.defaultBgm === 'string' ? (json.defaultBgm as string) : undefined,
+    audio,
     windowTint: typeof json.windowTint === 'string' ? (json.windowTint as string) : undefined,
     battleBackground:
       typeof json.battleBackground === 'string' ? (json.battleBackground as string) : undefined,

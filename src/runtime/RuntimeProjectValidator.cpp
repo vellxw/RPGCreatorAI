@@ -5,6 +5,7 @@
 #include "world/ProjectLoader.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -44,6 +45,8 @@ struct DatabaseIndex {
     IdSet tilesets;
     IdSet animations;
     IdSet animationActions;
+    IdSet audioIds;
+    std::unordered_map<std::string, std::string> audioPaths;
     std::unordered_map<std::string, IdSet> questObjectives;
     std::string configuredPlayerAnimationSet;
 };
@@ -201,6 +204,42 @@ bool isAllowedMovementRouteStep(const std::string& value) {
            value == "wait";
 }
 
+bool isSafeAudioId(const std::string& value) {
+    if (value.empty()) return false;
+    const auto isAlpha = [](unsigned char ch) { return std::isalpha(ch) != 0; };
+    const auto isAllowed = [](unsigned char ch) {
+        return std::isalnum(ch) != 0 || ch == '_' || ch == '-';
+    };
+    if (!isAlpha(static_cast<unsigned char>(value.front()))) return false;
+    if (value.size() > 64) return false;
+    return std::all_of(value.begin(), value.end(), [&](char ch) {
+        return isAllowed(static_cast<unsigned char>(ch));
+    });
+}
+
+bool hasWavExtension(const std::string& value) {
+    std::string extension = fs::path(value).extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    return extension == ".wav";
+}
+
+void seedDefaultAudioRegistry(DatabaseIndex& db) {
+    const std::vector<std::pair<std::string, std::string>> defaults = {
+        {"confirm", "assets/audio/confirm.wav"},
+        {"cancel", "assets/audio/cancel.wav"},
+        {"chest", "assets/audio/chest.wav"},
+        {"chest_open", "assets/audio/chest.wav"},
+        {"battle", "assets/audio/battle.wav"},
+        {"town_bgm", "assets/audio/town_bgm.wav"},
+        {"town_theme", "assets/audio/town_bgm.wav"},
+    };
+    for (const auto& [id, path] : defaults) {
+        db.audioIds.insert(id);
+        db.audioPaths.try_emplace(id, path);
+    }
+}
+
 void validateCommandArray(const json& commands,
                           const std::string& source,
                           const DatabaseIndex& db,
@@ -298,6 +337,8 @@ void validateCommand(const json& command,
             addError(report, source, "Command references unknown variable \"" +
                                  sourceVariableId + "\"");
         }
+    } else if (type == "playSound") {
+        requireId(report, db.audioIds, stringField(command, "soundId"), source, "audio id");
     } else if (type == "callCommonEvent") {
         requireId(report, db.commonEvents, stringField(command, "commonEventId"), source,
                   "common event");
@@ -500,6 +541,93 @@ void collectDatabaseIds(const std::unordered_map<std::string, json>& databases,
     if (systemIt != databases.end()) {
         db.configuredPlayerAnimationSet =
             stringField(systemIt->second, "playerAnimationSet");
+    }
+}
+
+void collectAudioRegistryFromJson(const json& root,
+                                  const std::string& source,
+                                  const fs::path& projectRoot,
+                                  DatabaseIndex& db,
+                                  rpg::RuntimeValidationReport& report) {
+    auto registerAudio = [&](const std::string& id,
+                             const std::string& path,
+                             const std::string& entrySource) {
+        if (id.empty() && path.empty()) return;
+        if (!isSafeAudioId(id)) {
+            addError(report, entrySource, "Audio asset \"" + id + "\" has invalid id");
+        }
+        if (path.empty()) {
+            addError(report, entrySource, "Audio asset \"" + id + "\" path is required");
+            return;
+        }
+
+        db.audioIds.insert(id);
+        db.audioPaths[id] = path;
+
+        if (!isSafeProjectRelativePath(path)) {
+            addError(report, entrySource,
+                     "Audio asset \"" + id + "\" uses unsafe project-relative path \"" +
+                         path + "\"");
+            return;
+        }
+        if (!hasWavExtension(path)) {
+            addError(report, entrySource,
+                     "Audio asset \"" + id + "\" must use a .wav file");
+        }
+
+        const fs::path resolvedPath = resolveDeclaredPath(projectRoot, path);
+        std::error_code ec;
+        if (!fs::exists(resolvedPath, ec)) {
+            addWarning(report, entrySource,
+                       "Audio asset \"" + id + "\" file not found: " + path);
+        }
+    };
+
+    auto audioIt = root.find("audio");
+    if (audioIt != root.end() && audioIt->is_object()) {
+        for (const auto& [id, value] : audioIt->items()) {
+            if (!value.is_string()) {
+                addError(report, source + "/audio/" + id,
+                         "Audio asset \"" + id + "\" path must be a string");
+                continue;
+            }
+            registerAudio(id, value.get<std::string>(), source + "/audio/" + id);
+        }
+    }
+
+    auto registerArray = [&](const char* key) {
+        const json* entries = arrayField(root, key);
+        if (!entries) return;
+        int index = 0;
+        for (const auto& entry : *entries) {
+            registerAudio(stringField(entry, "id"),
+                          stringField(entry, "path"),
+                          source + "/" + key + "/" + std::to_string(index));
+            ++index;
+        }
+    };
+    registerArray("sounds");
+    registerArray("bgm");
+}
+
+void collectAndValidateAudio(const std::unordered_map<std::string, json>& databases,
+                             const fs::path& projectRoot,
+                             DatabaseIndex& db,
+                             rpg::RuntimeValidationReport& report) {
+    seedDefaultAudioRegistry(db);
+    auto audioIt = databases.find("audio");
+    if (audioIt != databases.end()) {
+        collectAudioRegistryFromJson(audioIt->second, "database/audio", projectRoot, db, report);
+    }
+    auto systemIt = databases.find("system");
+    if (systemIt != databases.end()) {
+        collectAudioRegistryFromJson(systemIt->second, "database/system", projectRoot, db, report);
+        const std::string defaultBgm = stringField(systemIt->second, "defaultBgm");
+        if (!defaultBgm.empty() && !containsId(db.audioIds, defaultBgm)) {
+            addError(report, "database/system/defaultBgm",
+                     "System defaultBgm references unknown audio id \"" +
+                         defaultBgm + "\"");
+        }
     }
 }
 
@@ -852,6 +980,11 @@ void validateMapJson(const LoadedMap& loaded,
                                   "\" references unknown tileset \"" +
                                   map.tilesetId + "\"");
     }
+    if (!map.bgm.empty() && !containsId(db.audioIds, map.bgm)) {
+        addError(report, mapSource, "Map \"" + map.id +
+                                  "\" references unknown BGM audio id \"" +
+                                  map.bgm + "\"");
+    }
 
     if (map.id == project.startMapId) {
         const int x = project.startPosition.pos.x;
@@ -1013,6 +1146,7 @@ RuntimeValidationReport RuntimeProjectValidator::validateProjectFile(
         loadDatabaseShards(*projectJson, projectRoot, report);
     DatabaseIndex db;
     collectDatabaseIds(databaseJsons, db, report);
+    collectAndValidateAudio(databaseJsons, projectRoot, db, report);
     validateDatabaseReferences(databaseJsons, db, report);
 
     std::unordered_map<std::string, MapRuntimeIndex> maps;

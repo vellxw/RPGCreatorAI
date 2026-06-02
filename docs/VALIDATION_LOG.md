@@ -4,6 +4,61 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-71 / CP-036 — audio authoring runtime v1
+
+- `2026-06-02 04:41:13 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — RED as expected after adding audio authoring coverage; System editor
+  coverage failed because Default BGM was still free text with no audio-id
+  select, and validation coverage failed because authored audio refs and
+  unsafe/unsupported audio paths were not checked.
+- `2026-06-02 04:41:13 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED with a fixture issue first; the new audio-validator test omitted the
+  required `database.items` path. Fix applied: added an empty items shard so
+  the test isolated audio behavior.
+- `2026-06-02 04:44:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after fixture correction; the runtime validator accepted
+  unsupported audio paths, unknown `playSound` ids, and missing optional WAV
+  files without producing the expected errors/warnings.
+- `2026-06-02 04:51:11 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS; 2 Vitest files and 21 focused tests passed after adding
+  `system.audio`, System editor audio rows, Default BGM select, and frontend
+  audio validation.
+- `2026-06-02 04:51:11 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; `RPGTests` passed 1/1 after the native runtime project validator
+  started validating audio ids/paths and warning for missing optional WAVs.
+- `2026-06-02 04:52:00 -03:00` — `npm run typecheck` — PASS after adding
+  `SystemData.audio`, `MapData.bgm`, audio registry helpers, and editor
+  controls.
+- `2026-06-02 04:54:47 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 04:54:47 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SetupProgressionEditors.test.tsx src/components/editor/__tests__/MapPropertiesPanel.test.tsx src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 5 focused frontend/UI/validation files and 64 tests passed.
+- `2026-06-02 04:54:47 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure regenerated the build tree, Ninja reported no work to do,
+  and CTest passed `RPGTests` 1/1 in 0.91s. CMake emitted known third-party
+  FetchContent/deprecation warnings only.
+- `2026-06-02 04:55:35 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir build/runtime_smoke_cp036`
+  — PASS; runtime launch and feature smoke completed with `SMOKE PASSED`,
+  stdout included `Audio requested: town_theme -> assets/audio/town_bgm.wav`
+  and `Audio requested: chest_open -> assets/audio/chest.wav`, and screenshots
+  were written under ignored `build/`. Non-fatal stderr warnings were the
+  expected audio-validator missing-WAV warnings plus the known missing WASAPI
+  endpoint/sample audio warnings.
+- Fix applied: local audio ids and WAV paths are now editable in the System
+  database, Default BGM/map BGM/`playSound` references use known ids,
+  frontend/native validators reject unsafe or unsupported audio config, and
+  missing optional local WAV files remain warning-only.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-70 / CP-035 — battle authoring runtime gap closure
 
 - `2026-06-02 04:18:00 -03:00` —

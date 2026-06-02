@@ -537,6 +537,37 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     ).toBe(true);
   });
 
+  it('validates authored audio registry and audio command references', () => {
+    const baseSystem = mergeDatabases(undefined).system;
+    const project = projectWith({
+      system: {
+        ...baseSystem,
+        defaultBgm: 'missing_bgm',
+        audio: {
+          ui_confirm: 'assets/audio/confirm.wav',
+          bad_ext: 'assets/audio/effect.ogg',
+          unsafe: '../outside.wav',
+        },
+      },
+    });
+    project.maps.town.events.push({
+      id: 'evt',
+      type: 'object',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      commands: [{ type: 'playSound', soundId: 'missing_sfx' }],
+    });
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('System defaultBgm references unknown audio id "missing_bgm"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Audio asset "bad_ext" must use a .wav file'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Audio asset "unsafe" uses unsafe project-relative path'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('playSound references unknown audio id "missing_sfx"'))).toBe(true);
+  });
+
   it('accepts valid quest objective references', () => {
     const project = projectWith({
       quests: [

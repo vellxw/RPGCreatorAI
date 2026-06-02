@@ -15,6 +15,7 @@ import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
 import { TILE_ASSET_KEYS } from '../visual/tileCatalog';
 import { animationSheetKeys } from '../assets/generated/assetCatalog';
+import { DEFAULT_AUDIO_REGISTRY, mergeAudioRegistry } from '../audio/audioRegistry';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
@@ -120,6 +121,7 @@ const VALID_COMMAND_TYPES = new Set([
 const SAFE_PLUGIN_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const SAFE_PLUGIN_COMMAND = /^[A-Za-z][A-Za-z0-9_.-]{0,127}$/;
 const SAFE_PLUGIN_ARG_KEY = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const SAFE_AUDIO_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const CODE_LIKE_PLUGIN_TEXT =
   /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
@@ -143,6 +145,7 @@ interface RefIndex {
   questObjectives: Map<string, Set<string>>;
   animationClips: Map<string, Set<string>>;
   tilesetIds: Set<string>;
+  audioIds: Set<string>;
   playerAnimationSet: string;
 }
 
@@ -173,6 +176,7 @@ function buildIndex(items: ItemDatabase, db: DatabaseEntries): RefIndex {
     questObjectives,
     animationClips,
     tilesetIds: new Set(db.tilesets.tilesets.map(tileset => tileset.id)),
+    audioIds: new Set(Object.keys(mergeAudioRegistry(db.system.audio))),
     playerAnimationSet: db.system.playerAnimationSet || 'player_adventurer',
   };
 }
@@ -204,6 +208,13 @@ export function validateProject(state: FullProjectState): ValidationReport {
         level: 'error',
         message: `Map "${map.id}" references unknown tileset "${map.tilesetId}"`,
         source: `${map.id}/tilesetId`,
+      });
+    }
+    if (map.bgm && !index.audioIds.has(map.bgm)) {
+      errors.push({
+        level: 'error',
+        message: `Map "${map.id}" references unknown BGM audio id "${map.bgm}"`,
+        source: `${map.id}/bgm`,
       });
     }
     errors.push(...validateUniqueEventIds(map));
@@ -364,6 +375,65 @@ export function validateUniqueEventIds(map: MapData): ValidationMessage[] {
   return out;
 }
 
+function isSafeProjectRelativePath(value: string): boolean {
+  const normalized = value.replace(/\\/g, '/').trim();
+  if (!normalized) return false;
+  if (/^[A-Za-z]:\//.test(normalized)) return false;
+  if (normalized.startsWith('/') || normalized.startsWith('//')) return false;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(normalized)) return false;
+  return !normalized.split('/').some(part => part === '..');
+}
+
+function validateAudioRegistry(db: DatabaseEntries): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const registry = db.system.audio ?? {};
+  const knownAudioIds = new Set(Object.keys(DEFAULT_AUDIO_REGISTRY));
+
+  for (const [id, path] of Object.entries(registry)) {
+    if (!SAFE_AUDIO_IDENTIFIER.test(id)) {
+      out.push({
+        level: 'error',
+        message: `Audio asset "${id}" has invalid id`,
+        source: `database/system/audio/${id}`,
+      });
+    }
+    knownAudioIds.add(id);
+
+    if (typeof path !== 'string' || path.trim() === '') {
+      out.push({
+        level: 'error',
+        message: `Audio asset "${id}" path is required`,
+        source: `database/system/audio/${id}`,
+      });
+      continue;
+    }
+    if (!isSafeProjectRelativePath(path)) {
+      out.push({
+        level: 'error',
+        message: `Audio asset "${id}" uses unsafe project-relative path "${path}"`,
+        source: `database/system/audio/${id}`,
+      });
+    }
+    if (!path.toLowerCase().endsWith('.wav')) {
+      out.push({
+        level: 'error',
+        message: `Audio asset "${id}" must use a .wav file`,
+        source: `database/system/audio/${id}`,
+      });
+    }
+  }
+
+  if (db.system.defaultBgm && !knownAudioIds.has(db.system.defaultBgm)) {
+    out.push({
+      level: 'error',
+      message: `System defaultBgm references unknown audio id "${db.system.defaultBgm}"`,
+      source: 'database/system/defaultBgm',
+    });
+  }
+
+  return out;
+}
+
 function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const seen = new Set<string>();
@@ -441,6 +511,7 @@ function validateStatParams(
 
 function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   const out: ValidationMessage[] = [];
+  out.push(...validateAudioRegistry(db));
   const tables: Array<[string, Array<{ id: string }>]> = [
     ['actors', db.actors],
     ['classes', db.classes],
@@ -1398,6 +1469,9 @@ function validateSingleCommand(
     }
     case 'openShop':
       if (!index.shopIds.has(cmd.shopId)) err(`openShop references unknown shop "${cmd.shopId}"`);
+      break;
+    case 'playSound':
+      if (!index.audioIds.has(cmd.soundId)) err(`playSound references unknown audio id "${cmd.soundId}"`);
       break;
     case 'startBattle':
       if (!index.troopIds.has(cmd.troopId)) err(`startBattle references unknown troop "${cmd.troopId}"`);

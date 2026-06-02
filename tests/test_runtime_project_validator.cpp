@@ -223,6 +223,73 @@ TEST_CASE("RuntimeProjectValidator reports structural map and critical command r
     fs::remove_all(root);
 }
 
+TEST_CASE("RuntimeProjectValidator validates authored audio registry and missing optional files") {
+    const fs::path root = makeFixtureRoot("audio_registry");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "bgm": "missing_bgm",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": [
+                {
+                    "id": "speaker",
+                    "type": "object",
+                    "x": 0,
+                    "y": 0,
+                    "trigger": "interact",
+                    "commands": [
+                        { "type": "playSound", "soundId": "known_sfx" },
+                        { "type": "playSound", "soundId": "unknown_sfx" }
+                    ]
+                }
+            ]
+        })",
+        R"({
+            "items": "database/items.json",
+            "system": "database/system.json"
+        })");
+    writeFile(root / "database" / "items.json", R"({
+        "schemaVersion": 1,
+        "items": []
+    })");
+    writeFile(root / "database" / "system.json", R"({
+        "schemaVersion": 1,
+        "defaultBgm": "missing_bgm",
+        "audio": {
+            "missing_bgm": "assets/audio/missing.wav",
+            "known_sfx": "assets/audio/effect.wav",
+            "bad_ext": "assets/audio/effect.ogg",
+            "unsafe": "../outside.wav"
+        }
+    })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Audio asset \"bad_ext\" must use a .wav file"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Audio asset \"unsafe\" uses unsafe project-relative path"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "unknown audio id \"unknown_sfx\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Warning,
+                     "Audio asset \"missing_bgm\" file not found"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Warning,
+                     "Audio asset \"known_sfx\" file not found"));
+
+    fs::remove_all(root);
+}
+
 TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime") {
     const fs::path root = makeFixtureRoot("battle_database");
     writeMinimalProject(

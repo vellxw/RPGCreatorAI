@@ -492,6 +492,7 @@ function createAuthoringMap(
     name,
     displayName: name,
     tilesetId: 'sample-town',
+    bgm: '',
     scrollType: 'none',
     battleback: '',
     encounterSteps: 30,
@@ -539,6 +540,9 @@ function normalizeMapPropertyChanges(
   }
   if (next.battleback !== undefined) {
     next.battleback = next.battleback.trim();
+  }
+  if (next.bgm !== undefined) {
+    next.bgm = next.bgm.trim();
   }
   if (next.parallax !== undefined) {
     next.parallax = normalizeMapParallax(next.parallax);

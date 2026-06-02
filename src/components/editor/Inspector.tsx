@@ -19,6 +19,7 @@ import { normalizeVisualProfile } from '../../visual/visualProfile';
 import { getVisibleTileSpan } from '../../visual/viewport';
 import { getTileset, listTilesetTiles } from '../../visual/tileCatalog';
 import { EmptyState } from '../ui/EmptyState';
+import { audioOptions } from '../../audio/audioRegistry';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -339,6 +340,10 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
     ? [{ value: missingTilesetId, label: `Missing: ${missingTilesetId}` }, ...baseTilesetOptions]
     : baseTilesetOptions;
   const selectedTileset = getTileset(map.tilesetId);
+  const bgmOptions = audioOptions(projectState.databases.system.audio);
+  if (map.bgm && !bgmOptions.some(option => option.value === map.bgm)) {
+    bgmOptions.push({ value: map.bgm, label: `${map.bgm} (unknown)` });
+  }
   const parallax = toEditableParallax(map.parallax);
   const isStartMap = projectState.project.startMapId === map.id;
   const startPosition = clampStartPositionForMap(map, projectState.project.startPosition);
@@ -517,6 +522,12 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
               label="Battleback"
               value={map.battleback ?? ''}
               onChange={e => updateMap({ battleback: e.target.value })}
+            />
+            <Select
+              label="BGM"
+              value={map.bgm ?? ''}
+              options={[{ value: '', label: '(default)' }, ...bgmOptions]}
+              onChange={value => updateMap({ bgm: value || undefined })}
             />
           </div>
         </div>

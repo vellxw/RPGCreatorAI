@@ -34,7 +34,7 @@ Legend:
 | Save/load | val | yes | n/a | yes | yes | yes | GameState and save migration coverage exists. |
 | Battle system v1 | val | yes | partial | yes | yes | yes | Deterministic runtime is covered; richer database authoring remains DB V2 work. |
 | Inventory + gold | val | yes | partial | yes | yes | yes | Runtime/menu paths exist; dedicated item/system editors remain DB V2 work. |
-| Local audio v1 | partial | yes | partial | yes | yes | yes | Runtime audio registry and local WAV dispatch exist and are covered by FRA-32 smoke; missing files/devices warn and continue. Dedicated audio authoring remains later editor work. |
+| Local audio v1 | val | yes | yes | yes | yes | yes | `system.audio` ids/paths, Default BGM, map BGM, and `playSound` references are editable and validated; runtime local WAV dispatch warns and continues when optional files/devices are missing. |
 | Deterministic plugin commands | val | yes | yes | yes | yes | yes | `pluginCommand` supports scalar args, editor key/value controls, map/common-event parsing, allowlisted `debug.log`, `debug.setSwitch`, and `debug.setVariable`, plus non-fatal unknown-command warnings. |
 | Playtest session modes | val | yes | yes | yes | yes | yes | Desktop playtest builds temp project roots for project-start, current-map, and selected-event modes, launches with the temp root as `current_dir`, and preserves source files. |
 | Runtime logs, trace, and state snapshots | val | n/a | yes | yes | yes | yes | Bounded native runtime logs, deterministic `[TRACE]` event rows, and local runtime state snapshots are implemented, tested, and exposed in Playtest without runtime-editor IPC. |

@@ -57,6 +57,10 @@
 - The MVP runtime smoke path verifies choice confirmation, event-target
   movement, a local `chest_open` audio request, foreground occlusion, and
   `pluginCommand debug.log` output together.
+- Audio ids and local `.wav` paths are authored in `database/system.json`
+  through the System editor. Map BGM and `playSound` event commands select
+  from those ids. Missing optional files or unavailable audio devices warn and
+  continue silently.
 
 ## Save / Load
 
