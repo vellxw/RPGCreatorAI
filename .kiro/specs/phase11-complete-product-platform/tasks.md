@@ -26,6 +26,7 @@
   - [x] CP-017 / FRA-52: complete open and create project startup flow.
   - [x] CP-018 / FRA-53: polish save and validation user flow.
   - [x] CP-019 / FRA-54: polish project-start playtest launch flow.
+  - [x] CP-020 / FRA-55: polish current-map playtest launch flow.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

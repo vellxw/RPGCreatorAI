@@ -75,7 +75,7 @@ The playtest toolbar exposes three modes:
 | Mode | Session behavior |
 |------|------------------|
 | `projectStart` | Preserves the project's authored start map and start position. |
-| `currentMap` | Writes only the temp `data/project.json` to start on the selected editor map. If that map differs from the authored start map, the temp start position becomes `0,0,down`. |
+| `currentMap` | Writes only the temp `data/project.json` to start on the selected editor map. If that map differs from the authored start map, the temp start position becomes `0,0,down`. If it is already the authored start map, the authored start position is preserved. |
 | `selectedEvent` | Writes only the temp `data/project.json` to start on the selected event's map and tile, facing `down`. The mode is disabled when no event is selected. |
 
 The session builder writes the in-memory project state, map JSON, items, and
@@ -90,6 +90,11 @@ session preparation, validation-blocked launch, shell launch failure, runtime
 stopped, and successful runtime launch. Successful launches include the temp
 session root and direct guidance to the Runtime Log, Event Trace, and Runtime
 State tabs so the diagnostics path is visible immediately after launch.
+
+Current Map launch requests are built before the desktop adapter call. If the
+selected editor map is stale or missing from loaded project data, the toolbar
+disables Current Map and the runtime bridge reports a blocked launch instead
+of asking the session builder to infer a fallback map.
 
 Sessions are stored under the app data directory:
 

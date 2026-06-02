@@ -96,6 +96,12 @@ Primary Phase 11 sources:
   browser mode honest, points successful launches to Runtime Log/Event Trace/
   Runtime State diagnostics, and has explicit frontend plus Rust coverage that
   project-start temp sessions preserve source project data.
+- Phase 11 CP-020 — current-map playtest launch flow completed. Current Map
+  launch requests are now built from one tested helper, stale selected-map
+  states are blocked before the desktop session adapter, the playtest toolbar
+  disables Current Map when the selected map is not loaded, and launch feedback
+  explains whether the runtime will use the authored start position or the
+  temporary `0,0,down` map-iteration spawn.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

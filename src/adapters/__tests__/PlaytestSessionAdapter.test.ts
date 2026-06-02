@@ -154,6 +154,35 @@ describe('PlaytestSessionAdapter', () => {
     ]);
   });
 
+  it('routes current-map session creation with the selected map id only', async () => {
+    const calls: unknown[] = [];
+    window.rpgBridge = bridge({
+      createPlaytestSession: async (sourceRoot, state, request) => {
+        calls.push({ sourceRoot, state, request });
+        return { success: true, sessionRoot: 'C:\\appdata\\RPGCreatorAI\\playtest-sessions\\session-current-map' };
+      },
+    });
+
+    const adapter = new DesktopPlaytestSessionAdapter();
+    const state = makeState();
+    const result = await adapter.createSession('C:\\source-project', state, {
+      mode: 'currentMap',
+      currentMapId: 'house',
+    });
+
+    expect(result.success).toBe(true);
+    expect(calls).toEqual([
+      {
+        sourceRoot: 'C:\\source-project',
+        state,
+        request: {
+          mode: 'currentMap',
+          currentMapId: 'house',
+        },
+      },
+    ]);
+  });
+
   it('reports unavailable in browser mode without fabricating a temp path', async () => {
     const adapter = new BrowserPlaytestSessionAdapter();
     const result = await adapter.createSession('C:\\source-project', makeState(), {

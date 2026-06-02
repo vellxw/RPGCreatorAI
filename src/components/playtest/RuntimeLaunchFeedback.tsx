@@ -1,5 +1,4 @@
 import { AlertTriangle, CheckCircle2, Info, Loader2, XCircle } from 'lucide-react';
-import type { PlaytestSessionMode } from '../../adapters/types';
 
 export type RuntimeLaunchFeedbackTone = 'info' | 'loading' | 'success' | 'warning' | 'error';
 
@@ -33,18 +32,6 @@ const toneStyles: Record<RuntimeLaunchFeedbackTone, { box: string; icon: string 
     icon: 'text-red-600',
   },
 };
-
-export function playtestModeLabel(mode: PlaytestSessionMode): string {
-  switch (mode) {
-    case 'currentMap':
-      return 'Current Map';
-    case 'selectedEvent':
-      return 'Selected Event';
-    case 'projectStart':
-    default:
-      return 'Project Start';
-  }
-}
 
 function iconFor(tone: RuntimeLaunchFeedbackTone) {
   if (tone === 'loading') return Loader2;

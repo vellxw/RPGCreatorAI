@@ -59,13 +59,15 @@ interface RuntimeLaunchAdapter {
 ## Playtest Launch Flow
 
 1. The user selects Project Start, Current Map, or Selected Event in Playtest.
-2. The mode-specific Launch button validates the in-memory project state.
-3. Desktop mode calls `fs.createPlaytestSession(sourceRoot, state, request)`.
-4. The shell writes a temporary project root under the app data directory,
+2. The mode-specific Launch button builds a checked playtest request. Current
+   Map is blocked before the adapter if the selected map is not loaded.
+3. The launch flow validates the in-memory project state.
+4. Desktop mode calls `fs.createPlaytestSession(sourceRoot, state, request)`.
+5. The shell writes a temporary project root under the app data directory,
    copies optional source assets, and prunes older session folders.
-5. Desktop mode calls `runtime.launch(sessionRoot, { executableSearchRoot:
+6. Desktop mode calls `runtime.launch(sessionRoot, { executableSearchRoot:
    sourceRoot })`.
-6. The shell locates `rpg_creator_runtime.exe`, starts it with `current_dir`
+7. The shell locates `rpg_creator_runtime.exe`, starts it with `current_dir`
    set to the temp session root, captures stdout/stderr to a runtime log, and
    returns the PID.
 

@@ -301,7 +301,7 @@ export function TopToolbar() {
   const renderPlaytestToolbar = () => {
     const playtestModes: Array<{ mode: PlaytestSessionMode; label: string; disabled?: boolean }> = [
       { mode: 'projectStart', label: 'Project Start' },
-      { mode: 'currentMap', label: 'Current Map' },
+      { mode: 'currentMap', label: 'Current Map', disabled: !projectState.maps[state.selectedMapId] },
       {
         mode: 'selectedEvent',
         label: 'Selected Event',

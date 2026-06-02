@@ -20,7 +20,6 @@ import { EventTracePanel } from '../components/playtest/EventTracePanel';
 import { RuntimeStatePanel } from '../components/playtest/RuntimeStatePanel';
 import {
   RuntimeLaunchFeedback,
-  playtestModeLabel,
   type RuntimeLaunchFeedbackState,
 } from '../components/playtest/RuntimeLaunchFeedback';
 import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
@@ -35,6 +34,8 @@ import {
   movementSpeedToTilesPerSecond,
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
+import { buildPlaytestLaunchPlan } from '../playtest/playtestLaunchRequest';
+import { playtestModeLabel } from '../playtest/playtestMode';
 import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
 import type { RuntimeLaunchAdapter, RuntimeStatus } from '../adapters/types';
 
@@ -548,17 +549,32 @@ function RuntimeBridgePanel({
       });
       return;
     }
-    setIsLaunching(true);
-    setFeedback({
-      tone: 'loading',
-      title: `Preparing ${modeLabel} playtest`,
-      detail: 'Validating project data and writing a temporary playtest session.',
-    });
-    const validation = validateProject({
+    const fullProjectState = {
       project: projectState.project,
       maps: projectState.maps,
       items: projectState.items,
       databases: projectState.databases,
+    };
+    const launchPlan = buildPlaytestLaunchPlan(editorState, fullProjectState);
+    if (launchPlan.blocker || !launchPlan.request) {
+      setFeedback({
+        tone: 'error',
+        title: `${modeLabel} launch blocked`,
+        detail: launchPlan.blocker ?? 'The playtest launch request could not be built.',
+      });
+      return;
+    }
+    setIsLaunching(true);
+    setFeedback({
+      tone: 'loading',
+      title: `Preparing ${modeLabel} playtest`,
+      detail: `Validating project data and writing a temporary playtest session for ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`,
+    });
+    const validation = validateProject({
+      project: fullProjectState.project,
+      maps: fullProjectState.maps,
+      items: fullProjectState.items,
+      databases: fullProjectState.databases,
     });
     projectDispatch({ type: 'VALIDATE' });
     if (validation.errors.length > 0) {
@@ -571,17 +587,7 @@ function RuntimeBridgePanel({
       return;
     }
     try {
-      const session = await sessionAdapter.createSession(projectRoot, {
-        project: projectState.project,
-        maps: projectState.maps,
-        items: projectState.items,
-        databases: projectState.databases,
-      }, {
-        mode: editorState.playtestMode,
-        currentMapId: editorState.selectedMapId,
-        selectedEventMapId: editorState.selectedEventMapId ?? undefined,
-        selectedEventId: editorState.selectedEvent?.id,
-      });
+      const session = await sessionAdapter.createSession(projectRoot, fullProjectState, launchPlan.request);
       if (!session.success || !session.sessionRoot) {
         setFeedback({
           tone: 'error',
@@ -596,8 +602,8 @@ function RuntimeBridgePanel({
           tone: 'success',
           title: `${modeLabel} runtime launched`,
           detail: result.pid
-            ? `PID ${result.pid} is running from a temporary playtest session.`
-            : 'The runtime accepted the temporary playtest session.',
+            ? `PID ${result.pid} is running on ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`
+            : `The runtime accepted ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`,
           sessionRoot: session.sessionRoot,
           diagnosticsHint: 'Use Runtime Log, Event Trace, and Runtime State for launch output.',
         });

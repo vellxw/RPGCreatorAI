@@ -3151,3 +3151,39 @@ Error: Port 1420 is already in use
 - `2026-06-01 22:40:55 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-55 / CP-020 — current-map playtest launch flow
+
+- `2026-06-01 22:47:15 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts`
+  — RED as expected; the current-map launch request helper did not exist yet.
+  Fix applied: added `buildPlaytestLaunchPlan`, current-map stale-map blocking,
+  target/spawn descriptions, and Playtest screen integration.
+- `2026-06-01 22:48:21 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts`
+  — PASS; 2 focused files and 7 tests passed.
+- `2026-06-01 22:49:13 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx`
+  — PASS after moving mode labels out of the UI component; 3 files and 11
+  tests passed.
+- `2026-06-01 22:50:19 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/components/layout/__tests__/TopToolbarPlaytestModes.test.tsx`
+  — PASS; 4 focused files and 12 tests passed, including stale selected-map
+  Current Map toolbar blocking.
+- `2026-06-01 22:51:12 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:52:21 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/components/layout/__tests__/TopToolbarPlaytestModes.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after docs/task updates; 5 related files and 21 tests passed.
+- `2026-06-01 22:52:21 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_current_map_creates_temp_project_without_mutating_source -- --exact`
+  — PASS; 1 Rust current-map temp-session guardrail passed.
+- `2026-06-01 22:52:21 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:52:21 -03:00` — `npm run build` — PASS; 1916 modules
+  transformed, build completed in 11.39s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 22:53:45 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
+  controlled server was stopped afterward.
+- `2026-06-01 22:53:45 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+
