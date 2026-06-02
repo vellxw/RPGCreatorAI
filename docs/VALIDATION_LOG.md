@@ -2933,3 +2933,42 @@ Error: Port 1420 is already in use
   diagnostics test, focused Vitest diagnostics tests, frontend typecheck, and
   reported `RUNTIME DIAGNOSTICS VERIFY PASSED`.
 
+### Phase 11 FRA-51 / CP-016 — packaging integration gate
+
+- `2026-06-01 21:27:29 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; canonical local gate completed frontend typecheck, 36 Vitest files
+  and 222 tests, frontend build, native C++ configure/build/CTest with 1/1
+  tests, Tauri content check, 30 Rust desktop tests, runtime smoke, and
+  editor-runtime screenshot roundtrip. Gate summary reported
+  `=== ALL PASSED ===`.
+- `2026-06-01 21:27:29 -03:00` — `npm run desktop:package:windows` — PASS;
+  package prototype built/tested the native runtime, ran Tauri debug
+  no-bundle build, copied `rpg_creator_runtime.exe` beside
+  `rpgcreator-shell.exe`, smoke-launched the packaged app, and reported
+  `PACKAGED SMOKE PASSED` plus
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- `2026-06-01 21:27:29 -03:00` —
+  package artifact existence check — PASS; both
+  `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe` and
+  `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpg_creator_runtime.exe`
+  exist.
+- `2026-06-01 21:27:29 -03:00` —
+  `git status --short --ignored` — PASS for staging policy review; only the
+  pre-existing untracked
+  `docs/agent_prompts/LINEAR_MVP_CODEX_GOAL_PROMPT.md` was visible as
+  untracked, while `.vscode/`, `build/`, `dist/`, `node_modules/`,
+  `saves/slot_1.json`, and `src-tauri/gen/` were ignored local outputs and
+  not staged.
+- `2026-06-01 21:27:29 -03:00` —
+  docs command alignment scan — PASS; `docs/BUILD_AND_RUN.md`,
+  `docs/WINDOWS_BUILD_NOTES.md`, and
+  `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md` contain the validated canonical
+  gate, package command, package success markers, `%LOCALAPPDATA%` output
+  locations, artifact non-staging rules, and signing/credential boundaries.
+- `2026-06-01 21:29:22 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS after
+  integration report/task/log updates; 1 test file and 8 tests passed.
+- `2026-06-01 21:29:22 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

@@ -13,7 +13,7 @@
 
 ## Milestone Tracks
 
-- [ ] 01 Release Hardening And Packaging.
+- [x] 01 Release Hardening And Packaging.
   - [x] CP-009 / FRA-44: make Windows development builds reliable.
   - [x] CP-010 / FRA-45: prototype the Windows packaged build.
   - [x] CP-011 / FRA-46: define installer strategy and release artifact policy.
@@ -21,7 +21,7 @@
   - [x] CP-013 / FRA-48: define first-run directories and local app-data policy.
   - [x] CP-014 / FRA-49: define crash log and diagnostics location.
   - [x] CP-015 / FRA-50: refresh build, run, and packaging docs.
-  - [ ] CP-016 / FRA-51: run the packaging integration gate.
+  - [x] CP-016 / FRA-51: run the packaging integration gate.
 - [ ] 02 End-To-End Usability.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
