@@ -3356,3 +3356,35 @@ Error: Port 1420 is already in use
   controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
   — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
   controlled server was stopped afterward, leaving port 1420 clear.
+
+### Phase 11 FRA-60 / CP-025 — primary navigation polish
+
+- `2026-06-02 00:12:00 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — FAIL before implementation; the new route-visibility coverage detected
+  placeholder sidebar destinations (`Project`, `Dialogue`, `Assets`), no
+  Playtest sidebar destination, and fake Events breadcrumbs without real
+  navigation.
+- `2026-06-02 00:21:31 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — PASS; 1 focused file and 2 tests passed after exposing only implemented
+  workspaces, adding Playtest navigation, removing the inert settings control,
+  and making Events breadcrumbs real buttons.
+- `2026-06-02 00:21:31 -03:00` — `npm test` — PASS; 50 test files and 271
+  Vitest tests passed.
+- `2026-06-02 00:21:31 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 00:21:31 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 11.79s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 00:20:00 -03:00` —
+  controlled `npm run dev` plus Chrome DevTools screenshot review — PASS;
+  Maps, Events, and Playtest were reachable from the polished navigation,
+  unfinished `Project`, `Dialogue`, `Assets`, and AI surfaces were absent from
+  primary navigation, Events breadcrumbs returned to Maps through a real
+  button, current-page console had no app/runtime errors, and inspected
+  network requests were normal Vite/editor asset loads with 200/304 statuses.
+  Chrome still reports existing form label/id accessibility issues for later
+  audit work. Screenshots written:
+  `docs/screenshots/phase11-cp025/primary-navigation-maps.png`,
+  `docs/screenshots/phase11-cp025/primary-navigation-events.png`, and
+  `docs/screenshots/phase11-cp025/primary-navigation-playtest.png`.

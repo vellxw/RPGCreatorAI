@@ -7,7 +7,6 @@ import {
   Redo2,
   CheckCircle2,
   Upload,
-  Settings,
   FolderOpen,
   Clock,
 } from 'lucide-react';
@@ -261,14 +260,31 @@ export function TopToolbar() {
     </>
   );
 
-  const renderEventToolbar = () => (
-    <>
+  const renderEventToolbar = () => {
+    const mapId = state.selectedEventMapId ?? state.selectedMapId;
+    const map = projectState.maps[mapId];
+    const mapLabel = map?.displayName ?? map?.name ?? mapId;
+
+    return (
+      <>
       <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
-        <span className="hover:text-indigo-600 cursor-pointer">Maps</span>
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'editor' })}
+          className="text-gray-500 hover:text-indigo-600 cursor-pointer"
+        >
+          Maps
+        </button>
         <span>/</span>
-        <span className="hover:text-indigo-600 cursor-pointer">Town</span>
+        <span>{mapLabel}</span>
         <span>/</span>
-        <span className="hover:text-indigo-600 cursor-pointer">Events</span>
+        <button
+          type="button"
+          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'events' })}
+          className="text-gray-500 hover:text-indigo-600 cursor-pointer"
+        >
+          Events
+        </button>
         <span>/</span>
         <span className="text-gray-800 font-medium">{state.selectedEvent?.id || 'Select event'}</span>
       </div>
@@ -295,8 +311,9 @@ export function TopToolbar() {
           Validate
         </Button>
       </div>
-    </>
-  );
+      </>
+    );
+  };
 
   const renderPlaytestToolbar = () => {
     const playtestModes: Array<{ mode: PlaytestSessionMode; label: string; disabled?: boolean }> = [
@@ -396,9 +413,6 @@ export function TopToolbar() {
         )}
       </div>
       <div className="flex items-center gap-4">{toolbarContent[state.activeScreen]()}</div>
-      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200">
-        <Settings size={14} className="text-gray-500" />
-      </div>
 
       {/* hidden file input for import */}
       <input

@@ -1,4 +1,4 @@
-import { FolderOpen } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useEditor } from '../../stores/editorStore';
 import type { Screen } from '../../types/project';
 import { editorAssets } from '../../assets/generated/assetCatalog';
@@ -11,12 +11,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'project', label: 'Project', icon: <FolderOpen size={18} />, screen: 'editor' },
   { id: 'maps', label: 'Maps', icon: <img src={editorAssets.map} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
   { id: 'events', label: 'Events', icon: <img src={editorAssets.event} alt="" className="w-[18px] h-[18px]" />, screen: 'events' },
   { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
-  { id: 'dialogue', label: 'Dialogue', icon: <img src={editorAssets.dialogue} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
-  { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
+  { id: 'playtest', label: 'Playtest', icon: <Play size={18} />, screen: 'playtest' },
 ];
 
 export function Sidebar() {
@@ -37,6 +35,7 @@ export function Sidebar() {
         <button
           key={item.id}
           onClick={() => item.screen && dispatch({ type: 'SET_SCREEN', screen: item.screen })}
+          aria-current={isActive(item) ? 'page' : undefined}
           className={`w-[72px] flex flex-col items-center gap-1 py-2.5 px-2 rounded-lg transition-colors cursor-pointer ${
             isActive(item)
               ? 'bg-indigo-50 text-indigo-600'

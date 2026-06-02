@@ -127,6 +127,14 @@ Primary Phase 11 sources:
   `dev:tauri` server. Evidence is recorded in
   `docs/PHASE_11_END_TO_END_USABILITY_GATE.md` and
   `docs/screenshots/phase11-cp024/`.
+- Phase 11 CP-025 — primary navigation polish completed. The sidebar now
+  exposes only implemented workspaces (`Maps`, `Events`, `Database`, and
+  `Playtest`), hidden/future `Project`, `Dialogue`, `Assets`, and AI surfaces
+  remain out of primary navigation, active workspace buttons expose
+  `aria-current`, the inert top-toolbar settings control was removed, and
+  Events breadcrumbs now navigate through real buttons instead of fake
+  clickable text. Evidence is recorded in
+  `docs/screenshots/phase11-cp025/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
