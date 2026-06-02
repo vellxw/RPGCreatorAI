@@ -4,6 +4,15 @@
 
 import { useProjectStore } from '../../stores/projectStore';
 import { audioOptions } from '../../audio/audioRegistry';
+import {
+  PLUGIN_COMMAND_REGISTRY,
+  createPluginCommand,
+  findPluginCommandDefinition,
+  pluginCommandKey,
+  pluginCommandOptions,
+  type PluginCommandArgDefinition,
+  type PluginCommandDefinition,
+} from '../../plugins/pluginCommandRegistry';
 import type {
   AddGoldCommand,
   AddItemCommand,
@@ -295,6 +304,10 @@ function PlaySoundEditor({ command, onChange }: { command: PlaySoundCommand; onC
 }
 
 function PluginCommandEditor({ command, onChange }: { command: PluginCommand; onChange: (n: PluginCommand) => void }) {
+  const registeredDefinition = findPluginCommandDefinition(command.pluginId, command.command);
+  const selectedRegistryKey = registeredDefinition
+    ? pluginCommandKey(command.pluginId, command.command)
+    : '__custom';
   const entries = Object.entries(command.args ?? {});
   const withEntries = (nextEntries: Array<[string, PluginCommandArg]>) => {
     onChange({
@@ -311,13 +324,45 @@ function PluginCommandEditor({ command, onChange }: { command: PluginCommand; on
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-2 gap-2">
-        <Field label="Plugin ID">
-          {input({ value: command.pluginId, onChange: e => onChange({ ...command, pluginId: e.target.value }) })}
+        <Field label="Registered Command">
+          <select
+            aria-label="Registered Command"
+            className="w-full px-2 py-1 text-[12px] border border-gray-200 rounded"
+            value={selectedRegistryKey}
+            onChange={e => {
+              if (e.target.value === '__custom') return;
+              const next = PLUGIN_COMMAND_REGISTRY.find(def =>
+                pluginCommandKey(def.pluginId, def.command) === e.target.value,
+              );
+              if (next) onChange(createPluginCommand(next));
+            }}
+          >
+            <option value="__custom">Custom local command</option>
+            {pluginCommandOptions().map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </Field>
-        <Field label="Command">
-          {input({ value: command.command, onChange: e => onChange({ ...command, command: e.target.value }) })}
-        </Field>
+        {registeredDefinition && (
+          <Field label="Registry Key">
+            {input({ value: pluginCommandKey(command.pluginId, command.command), disabled: true })}
+          </Field>
+        )}
       </div>
+      {!registeredDefinition && (
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Plugin ID">
+            {input({ value: command.pluginId, onChange: e => onChange({ ...command, pluginId: e.target.value }) })}
+          </Field>
+          <Field label="Command">
+            {input({ value: command.command, onChange: e => onChange({ ...command, command: e.target.value }) })}
+          </Field>
+        </div>
+      )}
+      {registeredDefinition && (
+        <RegisteredPluginArgs definition={registeredDefinition} command={command} onChange={onChange} />
+      )}
+      {!registeredDefinition && (
       <div className="space-y-1.5">
         {entries.map(([key, value], index) => (
           <div key={`${key}-${index}`} className="grid grid-cols-[1fr_92px_1.2fr_auto] gap-2 items-end">
@@ -352,7 +397,99 @@ function PluginCommandEditor({ command, onChange }: { command: PluginCommand; on
           Add arg
         </button>
       </div>
+      )}
     </div>
+  );
+}
+
+function RegisteredPluginArgs({
+  definition,
+  command,
+  onChange,
+}: {
+  definition: PluginCommandDefinition;
+  command: PluginCommand;
+  onChange: (n: PluginCommand) => void;
+}) {
+  const updateArg = (arg: PluginCommandArgDefinition, value: PluginCommandArg) => {
+    onChange({ ...command, args: { ...(command.args ?? {}), [arg.key]: value } });
+  };
+
+  return (
+    <div className="space-y-1.5">
+      {definition.args.map(arg => (
+        <Field key={arg.key} label={arg.label}>
+          <RegisteredPluginArgInput
+            arg={arg}
+            value={(command.args ?? {})[arg.key] ?? arg.defaultValue}
+            onChange={next => updateArg(arg, next)}
+          />
+        </Field>
+      ))}
+    </div>
+  );
+}
+
+function RegisteredPluginArgInput({
+  arg,
+  value,
+  onChange,
+}: {
+  arg: PluginCommandArgDefinition;
+  value: PluginCommandArg;
+  onChange(next: PluginCommandArg): void;
+}) {
+  const { state } = useProjectStore();
+
+  if (arg.reference === 'switch') {
+    return referenceSelect(
+      typeof value === 'string' ? value : '',
+      state.databases.switches.map(s => ({ value: s.id, label: s.name })),
+      '(no switches defined)',
+      onChange,
+    );
+  }
+  if (arg.reference === 'variable') {
+    return referenceSelect(
+      typeof value === 'string' ? value : '',
+      state.databases.variables.map(v => ({ value: v.id, label: v.name })),
+      '(no variables defined)',
+      onChange,
+    );
+  }
+  if (arg.kind === 'boolean') {
+    return select(value === true ? 'true' : 'false', [
+      { value: 'true', label: 'True' },
+      { value: 'false', label: 'False' },
+    ], next => onChange(next === 'true'));
+  }
+  if (arg.kind === 'number') {
+    return input({ type: 'number', value: typeof value === 'number' ? value : 0, onChange: e => onChange(Number(e.target.value)) });
+  }
+  if (arg.kind === 'null') {
+    return input({ value: 'null', disabled: true });
+  }
+  return input({ value: typeof value === 'string' ? value : '', onChange: e => onChange(e.target.value) });
+}
+
+function referenceSelect(
+  value: string,
+  options: Array<{ value: string; label: string }>,
+  emptyLabel: string,
+  onChange: (next: string) => void,
+) {
+  return (
+    <select
+      className="w-full px-2 py-1 text-[12px] border border-gray-200 rounded"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+    >
+      {options.length === 0 && <option value="">{emptyLabel}</option>}
+      {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+      {!options.some(option => option.value === value) && value && (
+        <option value={value}>{value} (unknown)</option>
+      )}
+    </select>
   );
 }
 

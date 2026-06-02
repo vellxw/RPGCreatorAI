@@ -143,6 +143,37 @@ static char selfSwitchLetter(const std::string& id) {
         : static_cast<char>(std::toupper(static_cast<unsigned char>(id.front())));
 }
 
+enum class PluginCommandHandler {
+    DebugLog,
+    DebugSetSwitch,
+    DebugSetVariable,
+};
+
+struct PluginCommandRegistryEntry {
+    const char* pluginId;
+    const char* command;
+    PluginCommandHandler handler;
+};
+
+static const std::vector<PluginCommandRegistryEntry>& pluginCommandRegistry() {
+    static const std::vector<PluginCommandRegistryEntry> registry = {
+        {"debug", "log", PluginCommandHandler::DebugLog},
+        {"debug", "setSwitch", PluginCommandHandler::DebugSetSwitch},
+        {"debug", "setVariable", PluginCommandHandler::DebugSetVariable},
+    };
+    return registry;
+}
+
+static const PluginCommandRegistryEntry* findPluginCommandRegistryEntry(
+    const std::string& pluginId,
+    const std::string& command) {
+    const auto& registry = pluginCommandRegistry();
+    const auto it = std::find_if(registry.begin(), registry.end(), [&](const auto& entry) {
+        return pluginId == entry.pluginId && command == entry.command;
+    });
+    return it == registry.end() ? nullptr : &(*it);
+}
+
 static const EventCommand::PluginArg* findPluginArg(const EventCommand& cmd,
                                                     const std::string& key) {
     auto it = cmd.pluginArgs.find(key);
@@ -386,36 +417,40 @@ void EventRunner::processCommand(const std::shared_ptr<EventCommand>& cmd,
     }
     if (type == "pluginCommand") {
         const std::string fullCommand = cmd->pluginId + "." + cmd->pluginCommand;
+        const auto* registryEntry =
+            findPluginCommandRegistryEntry(cmd->pluginId, cmd->pluginCommand);
 
-        if (fullCommand == "debug.log") {
-            const auto message = pluginStringArg(*cmd, "message");
-            Logger::info(message ? "pluginCommand debug.log: " + *message
-                                 : "pluginCommand debug.log");
-            return;
-        }
-
-        if (fullCommand == "debug.setSwitch") {
-            const auto switchId = pluginStringArg(*cmd, "switchId");
-            const auto value = pluginBoolArg(*cmd, "value");
-            if (!switchId || switchId->empty() || !value) {
-                Logger::warning("pluginCommand debug.setSwitch missing switchId or value");
-                traceCommand(cmd.get(), commandPath, "warning", "debug.setSwitch missing switchId or value");
+        if (registryEntry) {
+            switch (registryEntry->handler) {
+            case PluginCommandHandler::DebugLog: {
+                const auto message = pluginStringArg(*cmd, "message");
+                Logger::info(message ? "pluginCommand debug.log: " + *message
+                                     : "pluginCommand debug.log");
                 return;
             }
-            gameState.setSwitch(*switchId, *value);
-            return;
-        }
-
-        if (fullCommand == "debug.setVariable") {
-            const auto variableId = pluginStringArg(*cmd, "variableId");
-            const auto value = pluginNumberArg(*cmd, "value");
-            if (!variableId || variableId->empty() || !value) {
-                Logger::warning("pluginCommand debug.setVariable missing variableId or value");
-                traceCommand(cmd.get(), commandPath, "warning", "debug.setVariable missing variableId or value");
+            case PluginCommandHandler::DebugSetSwitch: {
+                const auto switchId = pluginStringArg(*cmd, "switchId");
+                const auto value = pluginBoolArg(*cmd, "value");
+                if (!switchId || switchId->empty() || !value) {
+                    Logger::warning("pluginCommand debug.setSwitch missing switchId or value");
+                    traceCommand(cmd.get(), commandPath, "warning", "debug.setSwitch missing switchId or value");
+                    return;
+                }
+                gameState.setSwitch(*switchId, *value);
                 return;
             }
-            gameState.setVariable(*variableId, static_cast<int>(*value));
-            return;
+            case PluginCommandHandler::DebugSetVariable: {
+                const auto variableId = pluginStringArg(*cmd, "variableId");
+                const auto value = pluginNumberArg(*cmd, "value");
+                if (!variableId || variableId->empty() || !value) {
+                    Logger::warning("pluginCommand debug.setVariable missing variableId or value");
+                    traceCommand(cmd.get(), commandPath, "warning", "debug.setVariable missing variableId or value");
+                    return;
+                }
+                gameState.setVariable(*variableId, static_cast<int>(*value));
+                return;
+            }
+            }
         }
 
         Logger::warning("pluginCommand: unsupported command '" + fullCommand + "'");

@@ -505,6 +505,55 @@ describe('validateProject', () => {
     expect(report.errors).toEqual([]);
   });
 
+  it('validates typed registered pluginCommand args and references', () => {
+    const event: GameEvent = {
+      id: 'plugin_host',
+      type: 'npc',
+      x: 1,
+      y: 1,
+      solid: false,
+      trigger: 'interact',
+      commands: [
+        {
+          type: 'pluginCommand',
+          pluginId: 'debug',
+          command: 'setSwitch',
+          args: {
+            switchId: 'missing_switch',
+            value: 'true',
+          },
+        } as unknown as EventCommand,
+        {
+          type: 'pluginCommand',
+          pluginId: 'debug',
+          command: 'setVariable',
+          args: {
+            variableId: 'score',
+            value: '42',
+          },
+        } as unknown as EventCommand,
+        {
+          type: 'pluginCommand',
+          pluginId: 'customLocal',
+          command: 'unknownCommand',
+          args: {
+            payload: 'deterministic scalar',
+          },
+        },
+      ],
+    };
+    const project = makeProject({ town: makeMap({ events: [event] }) });
+    project.databases.switches = [{ id: 'story_ready', name: 'Story Ready', initial: false }];
+    project.databases.variables = [{ id: 'score', name: 'Score', initial: 0 }];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('pluginCommand debug.setSwitch arg "switchId" references unknown switch "missing_switch"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('pluginCommand debug.setSwitch arg "value" must be boolean'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('pluginCommand debug.setVariable arg "value" must be number'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('customLocal.unknownCommand'))).toBe(false);
+  });
+
   it('rejects unsafe pluginCommand identifiers, code strings, and nested args', () => {
     const event: GameEvent = {
       id: 'plugin_host',

@@ -4010,3 +4010,41 @@ Error: Port 1420 is already in use
 - `2026-06-02 01:26:50 -03:00` — `npm run build` — PASS after documentation
   updates; 1917 modules transformed, build completed in 8.89s, and Vite
   emitted only the documented non-fatal chunk-size warning.
+
+### Phase 11 FRA-72 / CP-037 — deterministic plugin command registry v2
+
+- `2026-06-02 05:04:20 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  — RED as expected; new coverage failed because the editor did not expose a
+  registered plugin-command selector and TypeScript validation did not enforce
+  typed registered args or switch/variable references.
+- `2026-06-02 05:04:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected; new native runtime validator coverage failed because
+  registered `pluginCommand` metadata was not validated.
+- `2026-06-02 05:12:34 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  — PASS; 2 focused files and 42 tests passed after adding the TypeScript
+  plugin command registry, editor discovery/defaults, and typed validation.
+- `2026-06-02 05:11:01 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; `RPGTests` passed after adding native registered plugin-command
+  metadata validation and C++ registry dispatch.
+- `2026-06-02 05:15:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 05:15:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure/build completed and `RPGTests` passed 1/1. CMake emitted
+  only known third-party policy/deprecation warnings.
+- `2026-06-02 05:16:59 -03:00` — `npm test` — PASS; 56 test files and
+  313 Vitest tests passed.
+- `2026-06-02 05:16:59 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1919 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 05:16:59 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir build/runtime_smoke_cp037`
+  — PASS; `SMOKE PASSED`, screenshots written to `build/runtime_smoke_cp037`,
+  and runtime logs included `pluginCommand debug.log` from both map event and
+  common event paths. Warnings were limited to known optional missing local WAV
+  files and unavailable audio endpoint fallback.
+- `2026-06-02 05:17:53 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.

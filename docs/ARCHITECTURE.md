@@ -11,8 +11,9 @@ The RPG Creator Runtime is a data-driven engine. It separates logic, rendering, 
 - **Audio is isolated.** `platform/AudioSystem` is the explicit SDL audio
   boundary; `EventRunner` emits requests and `Game` dispatches them.
 - **Plugin commands are deterministic dispatch.** `pluginCommand` data is
-  matched against allowlisted registry keys such as `debug.log`; it is not a
-  scripting VM and never evaluates project-authored code.
+  matched against typed allowlisted registry keys such as `debug.log`; it is
+  not a scripting VM and never evaluates project-authored code. Unknown safe
+  keys are non-fatal extension points, not executable hooks.
 - **AI is editor/tooling-only.** The native runtime does not depend on AI
   providers, network access, cloud services, or provider credentials.
 

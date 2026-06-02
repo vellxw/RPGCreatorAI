@@ -3,12 +3,21 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommandStackEditor } from '../CommandStackEditor';
 import type { EventCommand } from '../../../types/project';
+import {
+  ProjectContext,
+  initialProjectStoreState,
+  type ProjectStoreState,
+} from '../../../stores/projectStore';
 
-function render(ui: React.ReactNode) {
+function render(ui: React.ReactNode, state: ProjectStoreState = initialProjectStoreState) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(ui));
+  act(() => root.render(
+    <ProjectContext.Provider value={{ state, dispatch: vi.fn() }}>
+      {ui}
+    </ProjectContext.Provider>,
+  ));
   return {
     container,
     unmount() {
@@ -31,6 +40,14 @@ function checkboxByDescription(container: HTMLElement, text: string): HTMLInputE
     input.getAttribute('aria-label')?.includes(text),
   );
   if (!(found instanceof HTMLInputElement)) throw new Error(`Missing command checkbox: ${text}`);
+  return found;
+}
+
+function buttonByText(container: HTMLElement, text: string): HTMLButtonElement {
+  const found = Array.from(container.querySelectorAll('button')).find(button =>
+    button.textContent?.includes(text),
+  );
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button containing: ${text}`);
   return found;
 }
 
@@ -118,6 +135,37 @@ describe('CommandStackEditor', () => {
         pluginId: 'debug',
         command: 'log',
         args: { message: 'New plugin command' },
+      },
+    ]);
+  });
+
+  it('discovers registered plugin commands and applies typed defaults', () => {
+    const onCommandsChange = vi.fn();
+    const view = render(
+      <CommandStackEditor
+        commands={[
+          {
+            type: 'pluginCommand',
+            pluginId: 'debug',
+            command: 'log',
+            args: { message: 'New plugin command' },
+          },
+        ]}
+        mapIds={['town']}
+        itemIds={['potion']}
+        onCommandsChange={onCommandsChange}
+      />,
+    );
+
+    click(buttonByText(view.container, 'debug.log'));
+    changeSelect(selectByLabel(view.container, 'Debug Set Switch'), 'debug.setSwitch');
+
+    expect(onCommandsChange).toHaveBeenLastCalledWith([
+      {
+        type: 'pluginCommand',
+        pluginId: 'debug',
+        command: 'setSwitch',
+        args: { switchId: '', value: true },
       },
     ]);
   });

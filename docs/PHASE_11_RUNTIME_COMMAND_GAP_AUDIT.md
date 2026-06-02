@@ -77,7 +77,7 @@ Legend:
 | `setPlayerPosition` | Yes | Yes | Map, bounds, direction refs | Yes | Uses same transfer request path as `transferMap`. | Parser and validator coverage | Partial |
 | `wait` | Yes | Yes | Non-negative finite ms | Yes | Pauses command runner for duration. | `test_event_runner.cpp`, scheduler/trace tests | Full |
 | `playSound` | Yes | Yes | Audio id reference and path policy | Yes | Emits sound request; `Game` dispatches to the local audio registry, warns and continues for missing optional WAV files. | `test_event_runner.cpp`, audio tests, runtime validator tests | Full |
-| `pluginCommand` | Yes | Yes | Safe identifiers and scalar args | Yes | Runs deterministic `debug.*` built-ins; unknown commands warn and continue. | `test_event_runner.cpp`, validator tests | Partial |
+| `pluginCommand` | Yes | Yes | Safe identifiers, scalar args, registered arg types, and switch/variable refs | Yes | Runs deterministic typed-registry `debug.*` built-ins; unknown safe commands warn and continue. | `test_event_runner.cpp`, TS validator tests, runtime validator tests | Full |
 | `comment` | Yes | Yes | Known type | Yes | Ignored by runtime by design. | Page evaluator/parser coverage | Intentional no-op |
 | `callCommonEvent` | Yes | Yes | Common event reference | Yes | Resolves and queues common-event commands through injected resolver. | `test_event_runner.cpp`, scheduler tests | Full |
 | `startQuest` | Yes | Yes | Quest reference | Yes | Starts quest state and initializes objectives from resolver. | `test_event_runner.cpp`, state tests | Full |
@@ -106,10 +106,12 @@ Legend:
    files warning-only. Future BGS/ME, volume, pitch, pan, fade, and import
    workflows remain later asset/audio-depth work.
 
-3. Deterministic plugin registry (`pluginCommand`) - high risk if expanded
-   casually. CP-037 should keep plugin commands registry-based, local,
-   deterministic, allowlisted, and serializable. Unknown commands should remain
-   non-fatal but diagnosable.
+3. Deterministic plugin registry (`pluginCommand`) - CP-037 closes the v2
+   registry gap. The editor now discovers registered `debug.*` keys and applies
+   typed defaults, TypeScript and native validators enforce registered arg
+   types plus switch/variable references, and `EventRunner` dispatches through
+   a fixed local registry. Unknown safe commands remain non-fatal and
+   diagnosable.
 
 4. Movement route breadth (`setMovementRoute`) - medium/high user impact,
    medium risk. The current route step set is deterministic and tested but
@@ -139,8 +141,9 @@ Legend:
 - CP-036 / FRA-71: completed local audio authoring/runtime v1 for editable
   WAV ids, default/map BGM refs, `playSound` refs, and warning-only missing
   optional files.
-- CP-037 / FRA-72: replace ad hoc debug plugin handling with a deterministic
-  plugin command registry contract.
+- CP-037 / FRA-72: completed deterministic plugin command registry v2 for
+  typed editor discovery, TS/native validation, and fixed C++ registry
+  dispatch without scripting.
 - CP-039 / FRA-74: expose command-level diagnostics for unsupported,
   unhandled, or degraded runtime command paths.
 - CP-040 / FRA-75: run the runtime feature completeness gate and close any

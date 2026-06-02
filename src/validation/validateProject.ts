@@ -16,6 +16,11 @@ import { validateMap } from './validateMap';
 import { TILE_ASSET_KEYS } from '../visual/tileCatalog';
 import { animationSheetKeys } from '../assets/generated/assetCatalog';
 import { DEFAULT_AUDIO_REGISTRY, mergeAudioRegistry } from '../audio/audioRegistry';
+import {
+  findPluginCommandDefinition,
+  pluginCommandKey,
+  type PluginCommandArgDefinition,
+} from '../plugins/pluginCommandRegistry';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
@@ -1510,7 +1515,7 @@ function validateSingleCommand(
       break;
     }
     case 'pluginCommand':
-      validatePluginCommand(cmd, err);
+      validatePluginCommand(cmd, index, err);
       break;
     case 'setMovementRoute': {
       if (!VALID_MOVEMENT_ROUTE_TARGETS.includes(cmd.target)) {
@@ -1548,7 +1553,7 @@ function validateSingleCommand(
   return out;
 }
 
-function validatePluginCommand(cmd: EventCommand, err: (msg: string) => void): void {
+function validatePluginCommand(cmd: EventCommand, index: RefIndex, err: (msg: string) => void): void {
   if (cmd.type !== 'pluginCommand') return;
 
   if (!SAFE_PLUGIN_IDENTIFIER.test(cmd.pluginId)) {
@@ -1576,6 +1581,8 @@ function validatePluginCommand(cmd: EventCommand, err: (msg: string) => void): v
       err(`pluginCommand arg "${key}" contains code-like text`);
     }
   }
+
+  validateRegisteredPluginCommandArgs(cmd, args as Record<string, unknown>, index, err);
 }
 
 function isPluginScalarArg(value: unknown): value is string | number | boolean | null {
@@ -1585,6 +1592,49 @@ function isPluginScalarArg(value: unknown): value is string | number | boolean |
     typeof value === 'boolean' ||
     (typeof value === 'number' && Number.isFinite(value))
   );
+}
+
+function validateRegisteredPluginCommandArgs(
+  cmd: EventCommand,
+  args: Record<string, unknown>,
+  index: RefIndex,
+  err: (msg: string) => void,
+): void {
+  if (cmd.type !== 'pluginCommand') return;
+  const definition = findPluginCommandDefinition(cmd.pluginId, cmd.command);
+  if (!definition) return;
+
+  const commandKey = pluginCommandKey(cmd.pluginId, cmd.command);
+  for (const arg of definition.args) {
+    const value = args[arg.key];
+    if (arg.required && isMissingRequiredPluginArg(arg, value)) {
+      err(`pluginCommand ${commandKey} missing required arg "${arg.key}"`);
+      continue;
+    }
+    if (value === undefined || value === null) continue;
+    if (!matchesPluginArgKind(value, arg.kind)) {
+      err(`pluginCommand ${commandKey} arg "${arg.key}" must be ${arg.kind}`);
+      continue;
+    }
+    if (arg.reference === 'switch' && typeof value === 'string' && !index.switchIds.has(value)) {
+      err(`pluginCommand ${commandKey} arg "${arg.key}" references unknown switch "${value}"`);
+    }
+    if (arg.reference === 'variable' && typeof value === 'string' && !index.variableIds.has(value)) {
+      err(`pluginCommand ${commandKey} arg "${arg.key}" references unknown variable "${value}"`);
+    }
+  }
+}
+
+function isMissingRequiredPluginArg(arg: PluginCommandArgDefinition, value: unknown): boolean {
+  return value === undefined || value === null || (arg.kind === 'string' && value === '');
+}
+
+function matchesPluginArgKind(value: unknown, kind: PluginCommandArgDefinition['kind']): boolean {
+  if (kind === 'null') return value === null;
+  if (kind === 'string') return typeof value === 'string';
+  if (kind === 'boolean') return typeof value === 'boolean';
+  if (kind === 'number') return typeof value === 'number' && Number.isFinite(value);
+  return false;
 }
 
 // ---- Backwards-compatible exports used by older callers / tests. ---------

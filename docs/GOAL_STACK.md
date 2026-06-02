@@ -307,6 +307,12 @@ Primary Phase 11 sources:
   allowlisted runtime dispatch for `debug.log`, `debug.setSwitch`, and
   `debug.setVariable`, plus non-fatal warnings for unknown commands. This is
   registry dispatch only, not scripting or arbitrary code execution.
+- Phase 11 CP-037 (FRA-72) — deterministic plugin command registry v2 replaces
+  the ad hoc debug command path with typed registry metadata. The editor offers
+  registered `debug.log`, `debug.setSwitch`, and `debug.setVariable` commands
+  with typed defaults, TypeScript and native validators enforce registered
+  arg types plus switch/variable references, and `EventRunner` dispatches via
+  a fixed local registry while unknown safe commands remain non-fatal.
 - Phase 10 RT-006 (FRA-20) — native runtime audio v1 now routes
   `playSound` through `Game` instead of direct `EventRunner` logging.
   `platform/AudioSystem` owns the SDL audio boundary, exposes an injectable

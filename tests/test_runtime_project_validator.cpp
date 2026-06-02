@@ -427,3 +427,77 @@ TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime")
 
     fs::remove_all(root);
 }
+
+TEST_CASE("RuntimeProjectValidator validates registered plugin command metadata") {
+    const fs::path root = makeFixtureRoot("plugin_registry");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": [
+                {
+                    "id": "plugin_host",
+                    "type": "npc",
+                    "x": 0,
+                    "y": 0,
+                    "trigger": "interact",
+                    "commands": [
+                        {
+                            "type": "pluginCommand",
+                            "pluginId": "debug",
+                            "command": "setSwitch",
+                            "args": { "switchId": "missing_switch", "value": "true" }
+                        },
+                        {
+                            "type": "pluginCommand",
+                            "pluginId": "debug",
+                            "command": "setVariable",
+                            "args": { "variableId": "score", "value": "42" }
+                        },
+                        {
+                            "type": "pluginCommand",
+                            "pluginId": "customLocal",
+                            "command": "unknownCommand",
+                            "args": { "payload": "deterministic scalar" }
+                        }
+                    ]
+                }
+            ]
+        })",
+        R"({
+            "items": "database/items.json",
+            "switches": "database/switches.json",
+            "variables": "database/variables.json"
+        })");
+
+    writeFile(root / "database" / "items.json",
+              R"({ "schemaVersion": 1, "items": [] })");
+    writeFile(root / "database" / "switches.json",
+              R"({ "schemaVersion": 1, "switches": [{ "id": "story_ready", "name": "Story Ready", "initial": false }] })");
+    writeFile(root / "database" / "variables.json",
+              R"({ "schemaVersion": 1, "variables": [{ "id": "score", "name": "Score", "initial": 0 }] })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "pluginCommand debug.setSwitch arg \"switchId\" references unknown switch \"missing_switch\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "pluginCommand debug.setSwitch arg \"value\" must be boolean"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "pluginCommand debug.setVariable arg \"value\" must be number"));
+    CHECK_FALSE(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                           "customLocal.unknownCommand"));
+
+    fs::remove_all(root);
+}

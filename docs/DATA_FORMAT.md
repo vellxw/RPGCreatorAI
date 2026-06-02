@@ -142,8 +142,19 @@ See [`EVENT_SYSTEM.md`](EVENT_SYSTEM.md) for the supported command set.
 
 `pluginId`, `command`, and arg keys must be safe identifiers. `args` may only
 contain string, number, boolean, or null values; nested objects, arrays, and
-code-like strings are rejected by editor validation and ignored by runtime
-parsers if encountered.
+code-like strings are rejected by editor/native validation and ignored by
+runtime parsers if encountered. Registered built-ins are data-only dispatch
+keys, not script hooks:
+
+| Registry key | Required typed args |
+|--------------|---------------------|
+| `debug.log` | optional `message: string` |
+| `debug.setSwitch` | `switchId: string`, `value: boolean` |
+| `debug.setVariable` | `variableId: string`, `value: number` |
+
+The editor uses this registry for command discovery and defaults. Unknown
+safe keys remain serializable and non-fatal so future deterministic commands
+can be introduced without breaking older projects.
 
 ## database/commonEvents.json
 

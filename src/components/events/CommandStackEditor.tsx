@@ -34,6 +34,7 @@ import {
   resolveCommandRangeSelection,
   sameCommandPath,
 } from '../../utils/commandSelection';
+import { defaultPluginCommand } from '../../plugins/pluginCommandRegistry';
 import type { EventCommand } from '../../types/project';
 
 export interface CommandStackOperations {
@@ -94,12 +95,7 @@ export function makePlaceholderCommand(type: EventCommand['type']): EventCommand
     case 'playSound':
       return { type: 'playSound', soundId: '' };
     case 'pluginCommand':
-      return {
-        type: 'pluginCommand',
-        pluginId: 'debug',
-        command: 'log',
-        args: { message: 'New plugin command' },
-      };
+      return defaultPluginCommand();
     case 'comment':
       return { type: 'comment', text: '' };
     case 'callCommonEvent':

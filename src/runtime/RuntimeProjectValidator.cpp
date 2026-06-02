@@ -217,6 +217,206 @@ bool isSafeAudioId(const std::string& value) {
     });
 }
 
+bool isSafePluginIdentifier(const std::string& value, std::size_t maxLength, bool allowDot) {
+    if (value.empty() || value.size() > maxLength) return false;
+    const auto isAlpha = [](unsigned char ch) { return std::isalpha(ch) != 0; };
+    const auto isAllowed = [&](unsigned char ch) {
+        return std::isalnum(ch) != 0 || ch == '_' || ch == '-' ||
+               (allowDot && ch == '.');
+    };
+    if (!isAlpha(static_cast<unsigned char>(value.front()))) return false;
+    return std::all_of(value.begin(), value.end(), [&](char ch) {
+        return isAllowed(static_cast<unsigned char>(ch));
+    });
+}
+
+bool containsCodeLikePluginText(const std::string& value) {
+    std::string lower = value;
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    return value.find("=>") != std::string::npos ||
+           lower.find("function") != std::string::npos ||
+           lower.find("eval(") != std::string::npos ||
+           lower.find("import(") != std::string::npos ||
+           lower.find("require(") != std::string::npos ||
+           lower.find("new function") != std::string::npos ||
+           lower.find("<script") != std::string::npos;
+}
+
+enum class PluginArgKind {
+    String,
+    Number,
+    Boolean,
+    Null,
+};
+
+enum class PluginArgReference {
+    None,
+    Switch,
+    Variable,
+};
+
+struct PluginCommandArgMetadata {
+    const char* key;
+    PluginArgKind kind;
+    bool required;
+    PluginArgReference reference;
+};
+
+struct PluginCommandMetadata {
+    const char* pluginId;
+    const char* command;
+    std::vector<PluginCommandArgMetadata> args;
+};
+
+const std::vector<PluginCommandMetadata>& pluginCommandMetadataRegistry() {
+    static const std::vector<PluginCommandMetadata> registry = {
+        {
+            "debug",
+            "log",
+            {
+                {"message", PluginArgKind::String, false, PluginArgReference::None},
+            },
+        },
+        {
+            "debug",
+            "setSwitch",
+            {
+                {"switchId", PluginArgKind::String, true, PluginArgReference::Switch},
+                {"value", PluginArgKind::Boolean, true, PluginArgReference::None},
+            },
+        },
+        {
+            "debug",
+            "setVariable",
+            {
+                {"variableId", PluginArgKind::String, true, PluginArgReference::Variable},
+                {"value", PluginArgKind::Number, true, PluginArgReference::None},
+            },
+        },
+    };
+    return registry;
+}
+
+const PluginCommandMetadata* findPluginCommandMetadata(const std::string& pluginId,
+                                                       const std::string& command) {
+    const auto& registry = pluginCommandMetadataRegistry();
+    const auto it = std::find_if(registry.begin(), registry.end(), [&](const auto& entry) {
+        return pluginId == entry.pluginId && command == entry.command;
+    });
+    return it == registry.end() ? nullptr : &(*it);
+}
+
+const char* pluginArgKindName(PluginArgKind kind) {
+    switch (kind) {
+    case PluginArgKind::String: return "string";
+    case PluginArgKind::Number: return "number";
+    case PluginArgKind::Boolean: return "boolean";
+    case PluginArgKind::Null: return "null";
+    }
+    return "scalar";
+}
+
+bool isPluginScalarArg(const json& value) {
+    return value.is_null() || value.is_string() || value.is_boolean() ||
+           value.is_number();
+}
+
+bool matchesPluginArgKind(const json& value, PluginArgKind kind) {
+    switch (kind) {
+    case PluginArgKind::String: return value.is_string();
+    case PluginArgKind::Number: return value.is_number();
+    case PluginArgKind::Boolean: return value.is_boolean();
+    case PluginArgKind::Null: return value.is_null();
+    }
+    return false;
+}
+
+bool isMissingRequiredPluginArg(const json& args, const PluginCommandArgMetadata& arg) {
+    auto it = args.find(arg.key);
+    if (it == args.end() || it->is_null()) return true;
+    return arg.kind == PluginArgKind::String && it->is_string() &&
+           it->get<std::string>().empty();
+}
+
+void validatePluginCommandJson(const json& command,
+                               const std::string& source,
+                               const DatabaseIndex& db,
+                               rpg::RuntimeValidationReport& report) {
+    const std::string pluginId = stringField(command, "pluginId");
+    const std::string pluginCommand = stringField(command, "command");
+    const std::string fullCommand = pluginId + "." + pluginCommand;
+
+    if (!isSafePluginIdentifier(pluginId, 64, false)) {
+        addError(report, source,
+                 "pluginCommand pluginId \"" + pluginId +
+                     "\" is not a safe identifier");
+    }
+    if (!isSafePluginIdentifier(pluginCommand, 128, true)) {
+        addError(report, source,
+                 "pluginCommand command \"" + pluginCommand +
+                     "\" is not a safe identifier");
+    }
+
+    auto argsIt = command.find("args");
+    if (argsIt == command.end() || !argsIt->is_object() || argsIt->is_array()) {
+        addError(report, source, "pluginCommand args must be an object of scalar values");
+        return;
+    }
+
+    for (const auto& [key, value] : argsIt->items()) {
+        if (!isSafePluginIdentifier(key, 64, false)) {
+            addError(report, source,
+                     "pluginCommand arg \"" + key + "\" is not a safe identifier");
+        }
+        if (!isPluginScalarArg(value)) {
+            addError(report, source,
+                     "pluginCommand arg \"" + key + "\" must be a scalar");
+            continue;
+        }
+        if (value.is_string() && containsCodeLikePluginText(value.get<std::string>())) {
+            addError(report, source,
+                     "pluginCommand arg \"" + key + "\" contains code-like text");
+        }
+    }
+
+    const auto* metadata = findPluginCommandMetadata(pluginId, pluginCommand);
+    if (!metadata) return;
+
+    for (const auto& arg : metadata->args) {
+        auto argIt = argsIt->find(arg.key);
+        if (arg.required && isMissingRequiredPluginArg(*argsIt, arg)) {
+            addError(report, source,
+                     "pluginCommand " + fullCommand + " missing required arg \"" +
+                         arg.key + "\"");
+            continue;
+        }
+        if (argIt == argsIt->end() || argIt->is_null()) continue;
+        if (!matchesPluginArgKind(*argIt, arg.kind)) {
+            addError(report, source,
+                     "pluginCommand " + fullCommand + " arg \"" + arg.key +
+                         "\" must be " + pluginArgKindName(arg.kind));
+            continue;
+        }
+        if (arg.reference == PluginArgReference::Switch && argIt->is_string()) {
+            const std::string switchId = argIt->get<std::string>();
+            if (!containsId(db.switches, switchId)) {
+                addError(report, source,
+                         "pluginCommand " + fullCommand + " arg \"" + arg.key +
+                             "\" references unknown switch \"" + switchId + "\"");
+            }
+        }
+        if (arg.reference == PluginArgReference::Variable && argIt->is_string()) {
+            const std::string variableId = argIt->get<std::string>();
+            if (!containsId(db.variables, variableId)) {
+                addError(report, source,
+                         "pluginCommand " + fullCommand + " arg \"" + arg.key +
+                             "\" references unknown variable \"" + variableId + "\"");
+            }
+        }
+    }
+}
+
 bool hasWavExtension(const std::string& value) {
     std::string extension = fs::path(value).extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(),
@@ -339,6 +539,8 @@ void validateCommand(const json& command,
         }
     } else if (type == "playSound") {
         requireId(report, db.audioIds, stringField(command, "soundId"), source, "audio id");
+    } else if (type == "pluginCommand") {
+        validatePluginCommandJson(command, source, db, report);
     } else if (type == "callCommonEvent") {
         requireId(report, db.commonEvents, stringField(command, "commonEventId"), source,
                   "common event");
