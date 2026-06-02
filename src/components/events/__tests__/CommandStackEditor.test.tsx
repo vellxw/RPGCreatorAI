@@ -51,6 +51,10 @@ function buttonByText(container: HTMLElement, text: string): HTMLButtonElement {
   return found;
 }
 
+function optionLabels(select: HTMLSelectElement): string[] {
+  return Array.from(select.options).map(option => option.textContent ?? '');
+}
+
 function click(element: Element, init: MouseEventInit = {}) {
   act(() => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true, ...init }));
@@ -240,6 +244,69 @@ describe('CommandStackEditor', () => {
       { type: 'showText', text: 'Keep' },
       { type: 'showText', text: 'Tail' },
     ]);
+  });
+
+  it('appends commands into empty common event branches', () => {
+    const commands: EventCommand[] = [
+      {
+        type: 'ifSwitch',
+        switchId: 'story_ready',
+        equals: true,
+        then: [{ type: 'showText', text: 'Already here' }],
+        else: [],
+      },
+    ];
+    const onCommandsChange = vi.fn();
+    const view = render(
+      <CommandStackEditor
+        commands={commands}
+        mapIds={['town']}
+        itemIds={['potion']}
+        onCommandsChange={onCommandsChange}
+      />,
+    );
+
+    click(buttonByText(view.container, 'Else'));
+    changeSelect(selectByLabel(view.container, 'Show Text'), 'showText');
+
+    expect(onCommandsChange).toHaveBeenLastCalledWith([
+      {
+        type: 'ifSwitch',
+        switchId: 'story_ready',
+        equals: true,
+        then: [{ type: 'showText', text: 'Already here' }],
+        else: [{ type: 'showText', text: 'New dialogue' }],
+      },
+    ]);
+  });
+
+  it('excludes the owning common event from call-common-event choices', () => {
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      databases: {
+        ...initialProjectStoreState.databases,
+        commonEvents: [
+          { id: 'ce_intro', name: 'Intro', trigger: 'manual', commands: [] },
+          { id: 'ce_reward', name: 'Reward', trigger: 'manual', commands: [] },
+        ],
+      },
+    };
+    const view = render(
+      <CommandStackEditor
+        commands={[{ type: 'callCommonEvent', commonEventId: 'ce_reward' }]}
+        mapIds={['town']}
+        itemIds={['potion']}
+        ownerCommonEventId="ce_intro"
+        onCommandsChange={vi.fn()}
+      />,
+      state,
+    );
+
+    click(checkboxByDescription(view.container, 'ce_reward'));
+    const commonEventSelect = selectByLabel(view.container, 'Reward');
+
+    expect(optionLabels(commonEventSelect)).toContain('Reward');
+    expect(optionLabels(commonEventSelect)).not.toContain('Intro');
   });
 
   it('edits movement route wait steps with named controls while preserving step order', () => {

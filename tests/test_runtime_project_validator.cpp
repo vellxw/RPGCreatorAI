@@ -223,6 +223,52 @@ TEST_CASE("RuntimeProjectValidator reports structural map and critical command r
     fs::remove_all(root);
 }
 
+TEST_CASE("RuntimeProjectValidator rejects direct common event self calls") {
+    const fs::path root = makeFixtureRoot("common_event_self_call");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": []
+        })",
+        R"({
+            "items": "database/items.json",
+            "commonEvents": "database/commonEvents.json"
+        })");
+    writeFile(root / "database" / "items.json", R"({ "schemaVersion": 1, "items": [] })");
+    writeFile(root / "database" / "commonEvents.json", R"({
+        "schemaVersion": 1,
+        "commonEvents": [
+            {
+                "id": "ce_loop",
+                "name": "Loop",
+                "trigger": "manual",
+                "commands": [
+                    { "type": "callCommonEvent", "commonEventId": "ce_loop" }
+                ]
+            }
+        ]
+    })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "common event cannot call itself \"ce_loop\""));
+
+    fs::remove_all(root);
+}
+
 TEST_CASE("RuntimeProjectValidator validates authored audio registry and missing optional files") {
     const fs::path root = makeFixtureRoot("audio_registry");
     writeMinimalProject(

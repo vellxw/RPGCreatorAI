@@ -69,7 +69,7 @@ Legend:
 | `system` | Yes | Yes | Yes | Starting gold, party refs, animation/audio refs | `RpgDatabases`, validator refs | Starting party/gold, BGM/audio, animation defaults | Full | CP-045 |
 | `switches` | Yes | Yes | Yes | Duplicate ids, command/page refs | Runtime validator indexes ids | Runtime commands store values dynamically; `initial` is not seeded | Partial | CP-045/046 |
 | `variables` | Yes | Yes | Yes | Duplicate ids, finite initial, command/page refs | Runtime validator indexes ids | Runtime commands store values dynamically; `initial` is not seeded | Partial | CP-045/046 |
-| `commonEvents` | Yes | Yes | Yes | Trigger/switch/command refs | `RpgDatabases` parses commands; validator walks commands | Scheduler and `callCommonEvent` | Full | CP-046 |
+| `commonEvents` | Yes | Yes | Yes | Trigger/switch/command refs, direct self-call rejection | `RpgDatabases` parses commands; validator walks commands and rejects direct self-calls | Scheduler and `callCommonEvent` | Full | CP-046 completed for authoring polish |
 | `animations` | Yes | Yes | Yes | Clip shape, generated asset refs, player coverage warnings | `AnimationDatabase`, validator indexes ids/actions | Player/event animation lookup and rendering | Full | CP-049+ for asset depth |
 | `tilesets` | Yes | Yes | Yes | Tile ids, assets, groups, passability, priority | `RpgDatabases`, validator refs | Map rendering/passability metadata | Full | CP-049+ for asset depth |
 | `audio` | Yes after CP-041 | Optional legacy/separate shard | Rust bridge preserves after CP-041 | Paths covered through system/audio registry rules when merged by authoring flow | `ProjectLoader`, `RpgDatabases`, runtime validator | Optional local audio registry | Partial | CP-052 for import workflow |
@@ -121,7 +121,10 @@ Legend:
   remain editor/validation data; system default validation now covers duplicate
   starting-party actors, empty party-with-actors, and missing animation-set
   defaults.
-- CP-046 / FRA-81: common-event authoring parity and scheduler validation.
+- CP-046 / FRA-81: common-event authoring polish completed. Owner-aware
+  `callCommonEvent` editing now prevents accidental direct self-calls, empty
+  branch append behavior is covered, and TypeScript/native validators reject
+  direct common-event self-calls.
 - CP-047 / FRA-82: reference repair tools for broken database/map/event refs.
 - CP-048 / FRA-83: database/system completeness integration gate.
 - CP-049 through CP-052: asset catalog/import ownership for richer animation,

@@ -285,6 +285,14 @@ Primary Phase 11 sources:
   defaults. Types and terms remain editor/validation data; the native runtime
   remains independent of editor-only labels. Evidence is recorded in
   `docs/PHASE_11_SYSTEM_TYPES_TERMS_POLISH.md`.
+- Phase 11 CP-046 — common event authoring polish completed. The shared
+  command stack now receives common-event owner context, `callCommonEvent`
+  target editing excludes the owning common event while preserving existing
+  self/unknown references for repair, empty-branch append behavior is covered
+  for reusable common-event stacks, and both TypeScript and native pre-launch
+  validation now reject direct common-event self-calls. Full multi-event cycle
+  detection remains future reference-analysis depth. Evidence is recorded in
+  `docs/PHASE_11_COMMON_EVENT_AUTHORING_POLISH.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

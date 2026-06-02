@@ -4388,3 +4388,41 @@ Error: Port 1420 is already in use
   `close` — PASS; Types showed every type table, Terms showed required
   terminology groups, System showed `Starting gold (G)` and starting-party
   actor selects, and the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-81 / CP-046 — common event authoring polish
+
+- `2026-06-02 07:58:52 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  — FAIL as expected during TDD red step; the common-event target selector
+  still listed the owning common event and TypeScript validation did not reject
+  direct common-event self-calls.
+- `2026-06-02 07:59:34 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — FAIL as expected during TDD red step; native `RPGTests` did not report the
+  new direct common-event self-call fixture.
+- `2026-06-02 08:02:28 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  — PASS after passing common-event owner context through the command stack,
+  filtering self-call targets, and adding TS self-call validation; 2 focused
+  files and 45 Vitest tests passed.
+- `2026-06-02 08:02:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS after adding native direct self-call validation; native
+  configure/build/test completed and `RPGTests` passed 1/1 with known
+  third-party CMake warnings only.
+- `2026-06-02 08:03:42 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 08:04:40 -03:00` — `npm test -- --run` — PASS; full frontend
+  Vitest suite passed with 57 files and 322 tests.
+- `2026-06-02 08:05:21 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1922 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 08:07:34 -03:00` —
+  Browser smoke with Playwright CLI commands:
+  `open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Database')"`,
+  `click "button[aria-label='Open Common Events database tab']"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS; Common Events showed trigger, condition switch, and shared
+  command-stack controls, and the console reported 0 errors and 0 warnings.

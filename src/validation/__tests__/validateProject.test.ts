@@ -476,6 +476,33 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.source === 'commonEvent/ce_bad_branch' && e.message.includes('targets unknown map "missing_map"'))).toBe(true);
   });
 
+  it('rejects direct common event self calls', () => {
+    const project = makeProject({ town: makeMap() });
+    project.databases.commonEvents = [
+      {
+        id: 'ce_loop',
+        name: 'Loop',
+        trigger: 'manual',
+        commands: [{ type: 'callCommonEvent', commonEventId: 'ce_loop' }],
+      },
+      {
+        id: 'ce_reward',
+        name: 'Reward',
+        trigger: 'manual',
+        commands: [],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(
+      report.errors.some(e =>
+        e.source === 'commonEvent/ce_loop' &&
+        e.message.includes('callCommonEvent cannot call its own common event "ce_loop"'),
+      ),
+    ).toBe(true);
+  });
+
   it('accepts deterministic pluginCommand commands with scalar args', () => {
     const event: GameEvent = {
       id: 'plugin_host',

@@ -56,14 +56,21 @@ interface Props {
   command: EventCommand;
   mapIds: string[];
   itemIds: string[];
+  ownerCommonEventId?: string;
   onChange(next: EventCommand): void;
   onRemove(): void;
 }
 
-export function CommandEditor({ command, mapIds, itemIds, onChange, onRemove }: Props) {
+export function CommandEditor({ command, mapIds, itemIds, ownerCommonEventId, onChange, onRemove }: Props) {
   return (
     <div className="space-y-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
-      <Body command={command} mapIds={mapIds} itemIds={itemIds} onChange={onChange} />
+      <Body
+        command={command}
+        mapIds={mapIds}
+        itemIds={itemIds}
+        ownerCommonEventId={ownerCommonEventId}
+        onChange={onChange}
+      />
       <div className="flex justify-end">
         <button
           type="button"
@@ -81,11 +88,13 @@ function Body({
   command,
   mapIds,
   itemIds,
+  ownerCommonEventId,
   onChange,
 }: {
   command: EventCommand;
   mapIds: string[];
   itemIds: string[];
+  ownerCommonEventId?: string;
   onChange(next: EventCommand): void;
 }) {
   switch (command.type) {
@@ -124,7 +133,7 @@ function Body({
     case 'comment':
       return <CommentEditor command={command} onChange={onChange} />;
     case 'callCommonEvent':
-      return <CallCommonEventEditor command={command} onChange={onChange} />;
+      return <CallCommonEventEditor command={command} ownerCommonEventId={ownerCommonEventId} onChange={onChange} />;
     case 'startQuest':
     case 'completeQuest':
       return <QuestEditor command={command} onChange={onChange} />;
@@ -741,9 +750,24 @@ function CommentEditor({ command, onChange }: { command: CommentCommand; onChang
   );
 }
 
-function CallCommonEventEditor({ command, onChange }: { command: CallCommonEventCommand; onChange: (n: CallCommonEventCommand) => void }) {
+function CallCommonEventEditor({
+  command,
+  ownerCommonEventId,
+  onChange,
+}: {
+  command: CallCommonEventCommand;
+  ownerCommonEventId?: string;
+  onChange: (n: CallCommonEventCommand) => void;
+}) {
   const { state } = useProjectStore();
   const ces = state.databases.commonEvents;
+  const selectableCommonEvents = ownerCommonEventId
+    ? ces.filter(ce => ce.id !== ownerCommonEventId)
+    : ces;
+  const currentCommonEvent = ces.find(ce => ce.id === command.commonEventId);
+  const hasCurrent =
+    command.commonEventId === '' ||
+    selectableCommonEvents.some(ce => ce.id === command.commonEventId);
   return (
     <Field label="Common Event">
       <select
@@ -751,8 +775,15 @@ function CallCommonEventEditor({ command, onChange }: { command: CallCommonEvent
         value={command.commonEventId}
         onChange={e => onChange({ ...command, commonEventId: e.target.value })}
       >
-        {ces.length === 0 && <option value="">(no common events)</option>}
-        {ces.map(ce => <option key={ce.id} value={ce.id}>{ce.name}</option>)}
+        {selectableCommonEvents.length === 0 && <option value="">(no common events)</option>}
+        {selectableCommonEvents.map(ce => <option key={ce.id} value={ce.id}>{ce.name || ce.id}</option>)}
+        {!hasCurrent && command.commonEventId && (
+          <option value={command.commonEventId}>
+            {currentCommonEvent
+              ? `${currentCommonEvent.name || currentCommonEvent.id} (self reference)`
+              : `${command.commonEventId} (unknown)`}
+          </option>
+        )}
       </select>
     </Field>
   );

@@ -516,6 +516,7 @@ void validateCommandArray(const json& commands,
                           const std::unordered_map<std::string, MapRuntimeIndex>& maps,
                           const std::string& currentMapId,
                           const std::string& currentEventId,
+                          const std::string& currentCommonEventId,
                           rpg::RuntimeValidationReport& report);
 
 void validateQuestObjective(rpg::RuntimeValidationReport& report,
@@ -578,6 +579,7 @@ void validateCommand(const json& command,
                      const std::unordered_map<std::string, MapRuntimeIndex>& maps,
                      const std::string& currentMapId,
                      const std::string& currentEventId,
+                     const std::string& currentCommonEventId,
                      rpg::RuntimeValidationReport& report) {
     if (!command.is_object()) {
         addError(report, source, "Event command must be an object");
@@ -612,8 +614,12 @@ void validateCommand(const json& command,
     } else if (type == "pluginCommand") {
         validatePluginCommandJson(command, source, db, report);
     } else if (type == "callCommonEvent") {
-        requireId(report, db.commonEvents, stringField(command, "commonEventId"), source,
-                  "common event");
+        const std::string commonEventId = stringField(command, "commonEventId");
+        requireId(report, db.commonEvents, commonEventId, source, "common event");
+        if (!currentCommonEventId.empty() && commonEventId == currentCommonEventId) {
+            addError(report, source,
+                     "Command common event cannot call itself \"" + commonEventId + "\"");
+        }
     } else if (type == "openShop") {
         requireId(report, db.shops, stringField(command, "shopId"), source, "shop");
     } else if (type == "startBattle") {
@@ -698,7 +704,8 @@ void validateCommand(const json& command,
                 if (nested) {
                     validateCommandArray(*nested,
                                          source + "/choices/" + std::to_string(index),
-                                         db, maps, currentMapId, currentEventId, report);
+                                         db, maps, currentMapId, currentEventId,
+                                         currentCommonEventId, report);
                 }
                 ++index;
             }
@@ -712,7 +719,8 @@ void validateCommand(const json& command,
         const json* branch = arrayField(command, key.c_str());
         if (branch) {
             validateCommandArray(*branch, source + "/" + key, db, maps,
-                                 currentMapId, currentEventId, report);
+                                 currentMapId, currentEventId,
+                                 currentCommonEventId, report);
         }
     }
 }
@@ -723,6 +731,7 @@ void validateCommandArray(const json& commands,
                           const std::unordered_map<std::string, MapRuntimeIndex>& maps,
                           const std::string& currentMapId,
                           const std::string& currentEventId,
+                          const std::string& currentCommonEventId,
                           rpg::RuntimeValidationReport& report) {
     if (!commands.is_array()) {
         addError(report, source, "Event commands must be an array");
@@ -732,7 +741,8 @@ void validateCommandArray(const json& commands,
     int index = 0;
     for (const auto& command : commands) {
         validateCommand(command, source + "/" + std::to_string(index),
-                        db, maps, currentMapId, currentEventId, report);
+                        db, maps, currentMapId, currentEventId,
+                        currentCommonEventId, report);
         ++index;
     }
 }
@@ -1192,7 +1202,7 @@ void validateCommonEventCommands(const std::unordered_map<std::string, json>& da
         if (commands) {
             validateCommandArray(*commands,
                                  "database/commonEvents/" + id + "/commands",
-                                 db, maps, std::string{}, std::string{}, report);
+                                 db, maps, std::string{}, std::string{}, id, report);
         }
     }
 }
@@ -1398,7 +1408,8 @@ void validateMapJson(const LoadedMap& loaded,
         const json* commands = arrayField(event, "commands");
         if (commands) {
             validateCommandArray(*commands, eventSource + "/commands",
-                                 db, maps, loaded.ref.id, eventId, report);
+                                 db, maps, loaded.ref.id, eventId,
+                                 std::string{}, report);
         }
 
         const json* pages = arrayField(event, "pages");
@@ -1450,7 +1461,8 @@ void validateMapJson(const LoadedMap& loaded,
                 const json* pageCommands = arrayField(page, "commands");
                 if (pageCommands) {
                     validateCommandArray(*pageCommands, pageSource + "/commands",
-                                         db, maps, loaded.ref.id, eventId, report);
+                                         db, maps, loaded.ref.id, eventId,
+                                         std::string{}, report);
                 }
 
                 ++pageIndex;

@@ -52,6 +52,7 @@ interface CommandStackEditorProps {
   itemIds: string[];
   title?: string;
   subtitle?: string;
+  ownerCommonEventId?: string;
   operations?: Partial<CommandStackOperations>;
   onCommandsChange?: (commands: EventCommand[]) => void;
 }
@@ -576,6 +577,7 @@ export function CommandStackEditor({
   itemIds,
   title = 'Event Commands',
   subtitle = 'Executed top to bottom.',
+  ownerCommonEventId,
   operations,
   onCommandsChange,
 }: CommandStackEditorProps) {
@@ -844,6 +846,7 @@ export function CommandStackEditor({
               command={selectedCommand}
               mapIds={mapIds}
               itemIds={itemIds}
+              ownerCommonEventId={ownerCommonEventId}
               onChange={updateSelected}
               onRemove={removeSelected}
             />

@@ -1516,6 +1516,8 @@ function validateSingleCommand(
     case 'callCommonEvent':
       if (!index.commonEventIds.has(cmd.commonEventId))
         err(`callCommonEvent references unknown common event "${cmd.commonEventId}"`);
+      else if (source.startsWith('commonEvent/') && cmd.commonEventId === ownerLabel)
+        err(`callCommonEvent cannot call its own common event "${cmd.commonEventId}"`);
       break;
     case 'startQuest':
     case 'completeQuest':

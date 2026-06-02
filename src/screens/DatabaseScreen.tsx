@@ -852,6 +852,7 @@ function CommonEventDetail({
           commands={entry.commands}
           mapIds={Object.keys(state.maps)}
           itemIds={state.items.items.map(item => item.id)}
+          ownerCommonEventId={entry.id}
           onCommandsChange={commands =>
             dispatch({ type: 'UPDATE_COMMON_EVENT_COMMANDS', commonEventId: entry.id, commands })
           }
