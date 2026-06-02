@@ -4586,3 +4586,47 @@ Error: Port 1420 is already in use
   screenshot evidence was saved to
   `docs/screenshots/phase11-cp050/image-import-browser-unavailable.png`, and
   the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-86 / CP-051 — spritesheet import workflow
+
+- `2026-06-02 09:45:04 -03:00` —
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/AnimationPreview.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — FAIL as expected during TDD red step; the Animations editor had no
+  spritesheet import panel, the preview could not resolve imported
+  spritesheet URLs, and validation rejected catalog spritesheet clip assets.
+- `2026-06-02 09:45:04 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_spritesheet_asset_file -- --nocapture`
+  — FAIL as expected during TDD red step; `SpritesheetImportMetadata` and
+  `import_spritesheet_asset_file` did not exist yet.
+- `2026-06-02 09:51:44 -03:00` —
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/AnimationPreview.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS after adding the metadata-first import UI, imported preview URL
+  support, catalog spritesheet validation, and animation database linking; 3
+  focused files and 28 Vitest tests passed.
+- `2026-06-02 09:51:44 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_spritesheet_asset_file -- --nocapture`
+  — PASS after adding safe spritesheet copy, duplicate filename/id handling,
+  and frame metadata serialization; 1 filtered Rust test passed.
+- `2026-06-02 09:52:30 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 09:52:52 -03:00` — `npm test -- --run` — PASS; full frontend
+  Vitest suite passed with 60 files and 337 tests.
+- `2026-06-02 09:52:52 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; Rust desktop tests
+  passed 36/36.
+- `2026-06-02 09:54:00 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1927 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 09:56:00 -03:00` —
+  Browser smoke with Chrome DevTools MCP:
+  navigate selected page to `http://127.0.0.1:5177/`,
+  click `Use My First RPG`,
+  click `Database`,
+  click `Open Animations database tab`,
+  click `Import spritesheet`,
+  click `Accept spritesheet import`,
+  list console `error`/`warn` messages — PASS; Animations showed the
+  metadata form and `Spritesheet metadata preview`, browser mode reported
+  `Spritesheet import is available after opening a desktop project folder.`,
+  screenshot evidence was saved to
+  `docs/screenshots/phase11-cp051/spritesheet-import-browser-unavailable.png`,
+  and the console reported 0 errors and 0 warnings.

@@ -28,6 +28,7 @@ pub fn run() {
             fs_commands::fs_open_project_dialog,
             fs_commands::fs_create_project_dialog,
             fs_commands::fs_import_image_asset_dialog,
+            fs_commands::fs_import_spritesheet_asset_dialog,
             fs_commands::fs_read_project,
             fs_commands::fs_write_project,
             fs_commands::fs_list_backups,

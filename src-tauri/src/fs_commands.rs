@@ -149,6 +149,41 @@ pub struct ImageImportResult {
     pub asset: Option<ImportedImageAsset>,
 }
 
+#[derive(Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct SpritesheetImportMetadata {
+    pub id_base: String,
+    pub name: String,
+    pub frame_width: u32,
+    pub frame_height: u32,
+    pub frame_count: u32,
+}
+
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportedSpritesheetAsset {
+    pub id: String,
+    pub name: String,
+    pub kind: String,
+    pub path: String,
+    pub source: String,
+    pub tags: Vec<String>,
+    pub frame_width: u32,
+    pub frame_height: u32,
+    pub frames: u32,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct SpritesheetImportResult {
+    pub success: bool,
+    pub cancelled: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset: Option<ImportedSpritesheetAsset>,
+}
+
 #[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveResult {
@@ -284,6 +319,50 @@ pub fn fs_import_image_asset_dialog(
             asset: Some(asset),
         }),
         Err(error) => Ok(ImageImportResult {
+            success: false,
+            cancelled: false,
+            error: Some(error),
+            asset: None,
+        }),
+    }
+}
+
+#[tauri::command]
+pub fn fs_import_spritesheet_asset_dialog(
+    app: tauri::AppHandle,
+    root: String,
+    existing_asset_ids: Vec<String>,
+    metadata: SpritesheetImportMetadata,
+) -> Result<SpritesheetImportResult, String> {
+    let canonical = canonicalize_inside_user_space(&root).map_err(|e| e.to_string())?;
+    must_contain_project_json(&canonical).map_err(|e| e.to_string())?;
+
+    let Some(source) = app
+        .dialog()
+        .file()
+        .add_filter("Spritesheet images", &["png", "jpg", "jpeg", "bmp", "webp"])
+        .blocking_pick_file()
+    else {
+        return Ok(SpritesheetImportResult {
+            success: false,
+            cancelled: true,
+            error: None,
+            asset: None,
+        });
+    };
+
+    match source
+        .into_path()
+        .map_err(|e| e.to_string())
+        .and_then(|path| import_spritesheet_asset_file(&canonical, &path, &existing_asset_ids, metadata))
+    {
+        Ok(asset) => Ok(SpritesheetImportResult {
+            success: true,
+            cancelled: false,
+            error: None,
+            asset: Some(asset),
+        }),
+        Err(error) => Ok(SpritesheetImportResult {
             success: false,
             cancelled: false,
             error: Some(error),
@@ -668,6 +747,7 @@ fn write_project_snapshot(
 }
 
 const IMAGE_IMPORT_DIR: &str = "assets/imported/images";
+const SPRITESHEET_IMPORT_DIR: &str = "assets/imported/spritesheets";
 const ALLOWED_IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "bmp", "webp"];
 
 fn import_image_asset_file(
@@ -735,6 +815,94 @@ fn import_image_asset_file(
         path: relative_path,
         source: "imported".into(),
         tags: vec!["imported".into(), "image".into()],
+    })
+}
+
+fn import_spritesheet_asset_file(
+    root: &Path,
+    source: &Path,
+    existing_asset_ids: &[String],
+    metadata: SpritesheetImportMetadata,
+) -> Result<ImportedSpritesheetAsset, String> {
+    if metadata.id_base.trim().is_empty() {
+        return Err("Spritesheet asset id is required.".into());
+    }
+    if metadata.name.trim().is_empty() {
+        return Err("Spritesheet asset name is required.".into());
+    }
+    if metadata.frame_width == 0 {
+        return Err("Spritesheet frame width must be a positive integer.".into());
+    }
+    if metadata.frame_height == 0 {
+        return Err("Spritesheet frame height must be a positive integer.".into());
+    }
+    if metadata.frame_count == 0 {
+        return Err("Spritesheet frame count must be a positive integer.".into());
+    }
+
+    let source = source
+        .canonicalize()
+        .map_err(|e| format!("source spritesheet {}: {e}", source.display()))?;
+    let file_metadata = fs::metadata(&source)
+        .map_err(|e| format!("source spritesheet {}: {e}", source.display()))?;
+    if !file_metadata.is_file() {
+        return Err(format!("source spritesheet {} is not a file", source.display()));
+    }
+
+    let extension = source
+        .extension()
+        .and_then(|value| value.to_str())
+        .map(|value| value.to_ascii_lowercase())
+        .unwrap_or_default();
+    if !ALLOWED_IMAGE_EXTENSIONS.contains(&extension.as_str()) {
+        return Err(format!("Unsupported spritesheet type \".{}\".", extension));
+    }
+
+    let raw_stem = source
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .unwrap_or("spritesheet");
+    let file_stem = slugify(raw_stem, '-');
+    let id_base = slugify(&metadata.id_base, '_');
+    let asset_id = unique_asset_id(&id_base, existing_asset_ids);
+
+    let import_dir = root.join(SPRITESHEET_IMPORT_DIR);
+    fs::create_dir_all(&import_dir).map_err(|e| format!("mkdir {}: {e}", import_dir.display()))?;
+
+    let mut suffix = 1usize;
+    let (relative_path, destination) = loop {
+        let candidate_name = if suffix == 1 {
+            format!("{file_stem}.{extension}")
+        } else {
+            format!("{file_stem}-{suffix}.{extension}")
+        };
+        let relative_path = format!("{SPRITESHEET_IMPORT_DIR}/{candidate_name}");
+        let destination = join_inside(root, &relative_path).map_err(|e| e.to_string())?;
+        ensure_inside(root, &destination).map_err(|e| e.to_string())?;
+        if !destination.exists() {
+            break (relative_path, destination);
+        }
+        suffix += 1;
+    };
+
+    fs::copy(&source, &destination).map_err(|e| {
+        format!(
+            "copy spritesheet {} to {}: {e}",
+            source.display(),
+            destination.display()
+        )
+    })?;
+
+    Ok(ImportedSpritesheetAsset {
+        id: asset_id,
+        name: metadata.name.trim().to_string(),
+        kind: "spritesheet".into(),
+        path: relative_path,
+        source: "imported".into(),
+        tags: vec!["imported".into(), "spritesheet".into()],
+        frame_width: metadata.frame_width,
+        frame_height: metadata.frame_height,
+        frames: metadata.frame_count,
     })
 }
 
@@ -1479,6 +1647,56 @@ mod tests {
 
         assert!(result.unwrap_err().contains("Unsupported image type"));
         assert!(!root.join("assets/imported/images/notes.txt").exists());
+    }
+
+    #[test]
+    fn import_spritesheet_asset_file_generates_frame_metadata_without_overwrite() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("Hero Run Sheet.PNG");
+        fs::write(&source, b"spritesheet fixture").unwrap();
+        fs::create_dir_all(root.join("assets/imported/spritesheets")).unwrap();
+        fs::write(
+            root.join("assets/imported/spritesheets/hero-run-sheet.png"),
+            b"existing",
+        )
+        .unwrap();
+
+        let imported = import_spritesheet_asset_file(
+            &root,
+            &source,
+            &["hero_run_sheet".into()],
+            SpritesheetImportMetadata {
+                id_base: "hero_run_sheet".into(),
+                name: "Hero Run Sheet".into(),
+                frame_width: 64,
+                frame_height: 64,
+                frame_count: 6,
+            },
+        )
+        .unwrap();
+
+        assert_eq!(imported.id, "hero_run_sheet_2");
+        assert_eq!(imported.name, "Hero Run Sheet");
+        assert_eq!(imported.kind, "spritesheet");
+        assert_eq!(imported.source, "imported");
+        assert_eq!(
+            imported.path,
+            "assets/imported/spritesheets/hero-run-sheet-2.png"
+        );
+        assert_eq!(imported.tags, vec!["imported", "spritesheet"]);
+        assert_eq!(imported.frame_width, 64);
+        assert_eq!(imported.frame_height, 64);
+        assert_eq!(imported.frames, 6);
+        assert_eq!(
+            fs::read(root.join("assets/imported/spritesheets/hero-run-sheet.png")).unwrap(),
+            b"existing"
+        );
+        assert_eq!(
+            fs::read(root.join("assets/imported/spritesheets/hero-run-sheet-2.png")).unwrap(),
+            b"spritesheet fixture"
+        );
     }
 
     #[test]

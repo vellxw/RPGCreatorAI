@@ -1,10 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Copy, Plus, Trash2 } from 'lucide-react';
+import { Copy, Plus, Trash2, Upload } from 'lucide-react';
 import { animationSheetKeys } from '../../assets/generated/assetCatalog';
+import {
+  importSpritesheetAsset,
+  type SpritesheetImportRunner,
+} from '../../adapters/spritesheetImport';
 import type {
   AnimationClipData,
   AnimationDatabaseData,
   AnimationSetData,
+  AssetCatalogEntry,
   Direction,
 } from '../../types/project';
 import { Button } from '../ui/Button';
@@ -16,8 +21,29 @@ const DIRECTIONS: Array<Direction | 'any'> = ['down', 'left', 'right', 'up', 'an
 
 interface AnimationsEditorProps {
   value: AnimationDatabaseData;
+  assets?: AssetCatalogEntry[];
+  assetPreviewUrls?: Record<string, string>;
+  spritesheetImporter?: SpritesheetImportRunner;
   referenceSources?: Record<string, string[]>;
+  onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(value: AnimationDatabaseData): void;
+}
+
+interface SpritesheetDraft {
+  setId: string;
+  name: string;
+  action: string;
+  direction: Direction | 'any';
+  frameWidth: number;
+  frameHeight: number;
+  frameCount: number;
+  fps: number;
+  loop: boolean;
+  anchorX: number;
+  anchorY: number;
+  displayHeightTiles: number;
+  displayWidthTiles: number;
+  displayYOffsetPx: number;
 }
 
 function uniqueId(existing: Set<string>, base: string): string {
@@ -28,6 +54,15 @@ function uniqueId(existing: Set<string>, base: string): string {
     id = `${base}_${index}`;
   }
   return id;
+}
+
+function slugId(input: string, fallback: string): string {
+  const normalized = input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return normalized || fallback;
 }
 
 function cloneSet(set: AnimationSetData): AnimationSetData {
@@ -55,10 +90,95 @@ function defaultSet(id: string): AnimationSetData {
   };
 }
 
-export function AnimationsEditor({ value, referenceSources = {}, onChange }: AnimationsEditorProps) {
+function defaultSpritesheetDraft(index: number): SpritesheetDraft {
+  return {
+    setId: `spritesheet_${index}`,
+    name: `Spritesheet ${index}`,
+    action: 'idle',
+    direction: 'down',
+    frameWidth: 64,
+    frameHeight: 64,
+    frameCount: 4,
+    fps: 8,
+    loop: true,
+    anchorX: 32,
+    anchorY: 54,
+    displayHeightTiles: 1.5,
+    displayWidthTiles: 1,
+    displayYOffsetPx: 0,
+  };
+}
+
+function validateSpritesheetDraft(draft: SpritesheetDraft): string | null {
+  if (!draft.setId.trim()) return 'Animation set ID is required.';
+  if (!draft.name.trim()) return 'Spritesheet name is required.';
+  if (!draft.action.trim()) return 'Action is required.';
+  if (!Number.isFinite(draft.frameWidth) || draft.frameWidth <= 0) return 'Frame width must be a positive number.';
+  if (!Number.isFinite(draft.frameHeight) || draft.frameHeight <= 0) return 'Frame height must be a positive number.';
+  if (!Number.isInteger(draft.frameCount) || draft.frameCount <= 0) return 'Frame count must be a positive integer.';
+  if (!Number.isFinite(draft.fps) || draft.fps <= 0) return 'FPS must be a positive number.';
+  if (!Number.isFinite(draft.anchorX)) return 'Anchor X must be finite.';
+  if (!Number.isFinite(draft.anchorY)) return 'Anchor Y must be finite.';
+  if (!Number.isFinite(draft.displayHeightTiles) || draft.displayHeightTiles <= 0) {
+    return 'Display height tiles must be a positive number.';
+  }
+  if (!Number.isFinite(draft.displayWidthTiles) || draft.displayWidthTiles <= 0) {
+    return 'Display width tiles must be a positive number.';
+  }
+  if (!Number.isFinite(draft.displayYOffsetPx)) return 'Display Y offset must be finite.';
+  return null;
+}
+
+function SpritesheetMetadataPreview({ draft }: { draft: SpritesheetDraft }) {
+  const frames = Math.max(1, Math.min(12, Math.trunc(draft.frameCount || 1)));
+  return (
+    <div className="rounded border border-gray-200 bg-white p-3">
+      <div
+        aria-label="Spritesheet metadata preview"
+        role="img"
+        className="grid h-20 overflow-hidden rounded bg-gray-100"
+        style={{ gridTemplateColumns: `repeat(${frames}, minmax(24px, 1fr))` }}
+      >
+        {Array.from({ length: frames }, (_, index) => (
+          <div
+            key={index}
+            className="relative border-r border-white/80 last:border-r-0"
+          >
+            <div
+              className="absolute bottom-1 h-px bg-indigo-500/70"
+              style={{ left: 0, right: 0 }}
+            />
+            <div
+              className="absolute top-0 bottom-0 w-px bg-indigo-500/70"
+              style={{
+                left: `${Math.max(0, Math.min(100, (draft.anchorX / Math.max(1, draft.frameWidth)) * 100))}%`,
+              }}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-gray-500">
+        {draft.action}/{draft.direction} · {draft.frameWidth}x{draft.frameHeight} · {draft.frameCount} frames @ {draft.fps} fps
+      </p>
+    </div>
+  );
+}
+
+export function AnimationsEditor({
+  value,
+  assets = [],
+  assetPreviewUrls = {},
+  spritesheetImporter = importSpritesheetAsset,
+  referenceSources = {},
+  onAssetImported,
+  onChange,
+}: AnimationsEditorProps) {
   const [selectedId, setSelectedId] = useState(value.sets[0]?.id ?? '');
   const [selectedClipIndex, setSelectedClipIndex] = useState(0);
   const [query, setQuery] = useState('');
+  const [spritesheetDraft, setSpritesheetDraft] = useState<SpritesheetDraft | null>(null);
+  const [spritesheetImporting, setSpritesheetImporting] = useState(false);
+  const [spritesheetStatus, setSpritesheetStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const selected = value.sets.find(set => set.id === selectedId) ?? value.sets[0] ?? null;
   const selectedClip = selected?.clips[selectedClipIndex] ?? selected?.clips[0] ?? null;
   const ids = useMemo(() => new Set(value.sets.map(set => set.id)), [value.sets]);
@@ -78,6 +198,79 @@ export function AnimationsEditor({ value, referenceSources = {}, onChange }: Ani
   );
 
   const emitSets = (sets: AnimationSetData[]) => onChange({ ...value, sets });
+  const openSpritesheetImport = () => {
+    setSpritesheetDraft(defaultSpritesheetDraft(value.sets.length + 1));
+    setSpritesheetStatus(null);
+  };
+  const updateSpritesheetDraft = (changes: Partial<SpritesheetDraft>) => {
+    setSpritesheetDraft(current => current ? { ...current, ...changes } : current);
+  };
+  const acceptSpritesheetImport = async () => {
+    if (!spritesheetDraft) return;
+    const validationError = validateSpritesheetDraft(spritesheetDraft);
+    if (validationError) {
+      setSpritesheetStatus({ tone: 'error', text: validationError });
+      return;
+    }
+
+    setSpritesheetImporting(true);
+    setSpritesheetStatus(null);
+    try {
+      const result = await spritesheetImporter(
+        assets.map(asset => asset.id),
+        {
+          idBase: slugId(spritesheetDraft.name, 'spritesheet'),
+          name: spritesheetDraft.name.trim(),
+          frameWidth: spritesheetDraft.frameWidth,
+          frameHeight: spritesheetDraft.frameHeight,
+          frameCount: spritesheetDraft.frameCount,
+        },
+      );
+      if (result.cancelled) return;
+      if (!result.success || !result.asset) {
+        setSpritesheetStatus({ tone: 'error', text: result.error ?? 'Spritesheet import failed.' });
+        return;
+      }
+
+      onAssetImported?.(result.asset);
+      const nextSetId = uniqueId(ids, slugId(spritesheetDraft.setId, `spritesheet_${value.sets.length + 1}`));
+      const nextSet: AnimationSetData = {
+        id: nextSetId,
+        display: {
+          heightTiles: spritesheetDraft.displayHeightTiles,
+          widthTiles: spritesheetDraft.displayWidthTiles,
+          yOffsetPx: spritesheetDraft.displayYOffsetPx,
+        },
+        clips: [
+          {
+            action: spritesheetDraft.action.trim(),
+            direction: spritesheetDraft.direction,
+            asset: result.asset.id,
+            frameSize: {
+              width: spritesheetDraft.frameWidth,
+              height: spritesheetDraft.frameHeight,
+            },
+            frameCount: spritesheetDraft.frameCount,
+            fps: spritesheetDraft.fps,
+            loop: spritesheetDraft.loop,
+            anchor: {
+              x: spritesheetDraft.anchorX,
+              y: spritesheetDraft.anchorY,
+            },
+          },
+        ],
+      };
+      emitSets([...value.sets, nextSet]);
+      setSelectedId(nextSet.id);
+      setSelectedClipIndex(0);
+      setSpritesheetDraft(null);
+      setSpritesheetStatus({ tone: 'success', text: `Imported ${result.asset.name}` });
+    } catch (error) {
+      setSpritesheetStatus({ tone: 'error', text: (error as Error).message });
+    } finally {
+      setSpritesheetImporting(false);
+    }
+  };
   const updateSelected = (changes: Partial<AnimationSetData>) => {
     if (!selected) return;
     emitSets(value.sets.map(set => (
@@ -150,8 +343,77 @@ export function AnimationsEditor({ value, referenceSources = {}, onChange }: Ani
     setSelectedClipIndex(Math.max(0, Math.min(index, clips.length - 1)));
   };
 
-  const assetOptions = animationSheetKeys.map(key => ({ value: key, label: key }));
+  const assetOptions = [
+    ...animationSheetKeys.map(key => ({ value: key, label: key })),
+    ...assets
+      .filter(asset => asset.kind === 'spritesheet')
+      .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` })),
+  ];
   const directionOptions = DIRECTIONS.map(direction => ({ value: direction, label: direction }));
+  const importControls = (
+    <>
+      {spritesheetStatus && (
+        <div
+          className={`rounded-md border px-3 py-2 text-[12px] ${
+            spritesheetStatus.tone === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {spritesheetStatus.text}
+        </div>
+      )}
+      {spritesheetDraft && (
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-[12px] font-semibold text-gray-700">Spritesheet import</p>
+            <Button
+              size="sm"
+              aria-label="Cancel spritesheet import"
+              onClick={() => setSpritesheetDraft(null)}
+            >
+              Cancel
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <TextField label="Spritesheet set ID" value={spritesheetDraft.setId} onChange={setId => updateSpritesheetDraft({ setId })} />
+            <TextField label="Spritesheet name" value={spritesheetDraft.name} onChange={name => updateSpritesheetDraft({ name })} />
+            <TextField label="Spritesheet action" value={spritesheetDraft.action} onChange={action => updateSpritesheetDraft({ action })} />
+            <SelectField
+              label="Spritesheet direction"
+              value={spritesheetDraft.direction}
+              options={directionOptions}
+              onChange={direction => updateSpritesheetDraft({ direction: direction as Direction | 'any' })}
+            />
+            <NumberField label="Spritesheet frame width" value={spritesheetDraft.frameWidth} min={1} onChange={frameWidth => updateSpritesheetDraft({ frameWidth })} />
+            <NumberField label="Spritesheet frame height" value={spritesheetDraft.frameHeight} min={1} onChange={frameHeight => updateSpritesheetDraft({ frameHeight })} />
+            <NumberField label="Spritesheet frame count" value={spritesheetDraft.frameCount} min={1} onChange={frameCount => updateSpritesheetDraft({ frameCount })} />
+            <NumberField label="Spritesheet FPS" value={spritesheetDraft.fps} min={1} onChange={fps => updateSpritesheetDraft({ fps })} />
+            <NumberField label="Spritesheet anchor X" value={spritesheetDraft.anchorX} onChange={anchorX => updateSpritesheetDraft({ anchorX })} />
+            <NumberField label="Spritesheet anchor Y" value={spritesheetDraft.anchorY} onChange={anchorY => updateSpritesheetDraft({ anchorY })} />
+            <NumberField label="Spritesheet display height tiles" value={spritesheetDraft.displayHeightTiles} min={0.1} step={0.1} onChange={displayHeightTiles => updateSpritesheetDraft({ displayHeightTiles })} />
+            <NumberField label="Spritesheet display width tiles" value={spritesheetDraft.displayWidthTiles} min={0.1} step={0.1} onChange={displayWidthTiles => updateSpritesheetDraft({ displayWidthTiles })} />
+            <NumberField label="Spritesheet display Y offset px" value={spritesheetDraft.displayYOffsetPx} onChange={displayYOffsetPx => updateSpritesheetDraft({ displayYOffsetPx })} />
+            <CheckboxField label="Spritesheet loop" checked={spritesheetDraft.loop} onChange={loop => updateSpritesheetDraft({ loop })} />
+          </div>
+          <div className="mt-3">
+            <SpritesheetMetadataPreview draft={spritesheetDraft} />
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button
+              size="sm"
+              icon={<Upload size={12} />}
+              aria-label="Accept spritesheet import"
+              disabled={spritesheetImporting}
+              onClick={acceptSpritesheetImport}
+            >
+              Accept spritesheet import
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 
   if (value.sets.length === 0 || !selected) {
     return (
@@ -160,9 +422,15 @@ export function AnimationsEditor({ value, referenceSources = {}, onChange }: Ani
           title="No animation sets yet"
           detail="Add an animation set to define character display size, clips, frame timing, and anchors."
         />
-        <Button size="sm" icon={<Plus size={12} />} aria-label="Add animation set" onClick={addSet}>
-          Add animation set
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" icon={<Plus size={12} />} aria-label="Add animation set" onClick={addSet}>
+            Add animation set
+          </Button>
+          <Button size="sm" icon={<Upload size={12} />} aria-label="Import spritesheet" onClick={openSpritesheetImport}>
+            Import spritesheet
+          </Button>
+        </div>
+        {importControls}
       </div>
     );
   }
@@ -171,9 +439,14 @@ export function AnimationsEditor({ value, referenceSources = {}, onChange }: Ani
     <div className="grid max-w-6xl grid-cols-[minmax(180px,240px)_minmax(420px,1fr)] gap-4">
       <div className="border border-gray-200 bg-white">
         <div className="border-b border-gray-200 p-3">
-          <Button size="sm" icon={<Plus size={12} />} aria-label="Add animation set" onClick={addSet}>
-            Add animation set
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" icon={<Plus size={12} />} aria-label="Add animation set" onClick={addSet}>
+              Add animation set
+            </Button>
+            <Button size="sm" icon={<Upload size={12} />} aria-label="Import spritesheet" onClick={openSpritesheetImport}>
+              Import spritesheet
+            </Button>
+          </div>
         </div>
         <div className="space-y-2 border-b border-gray-100 p-3">
           <input
@@ -290,7 +563,9 @@ export function AnimationsEditor({ value, referenceSources = {}, onChange }: Ani
           </div>
         </div>
 
-        <AnimationPreview clip={selectedClip} display={selected.display} />
+        {importControls}
+
+        <AnimationPreview clip={selectedClip} display={selected.display} assetPreviewUrls={assetPreviewUrls} />
 
         <div className="flex items-center justify-between">
           <p className="text-[12px] font-semibold text-gray-600">Clips</p>

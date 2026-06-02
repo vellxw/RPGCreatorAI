@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-051 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-052 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -325,6 +325,16 @@ Primary Phase 11 sources:
   add runtime, AI, network, or provider dependencies. Evidence is recorded in
   `docs/PHASE_11_IMAGE_IMPORT_WORKFLOW.md` and
   `docs/screenshots/phase11-cp050/`.
+- Phase 11 CP-051 — spritesheet import workflow completed. The Animations
+  database can open a metadata-first import panel, preview frame/action/
+  direction/anchor/FPS/loop/display settings before file selection, import
+  local spritesheets into `assets/imported/spritesheets/` without overwriting
+  existing files, add a `spritesheet` catalog entry with frame metadata, and
+  create a linked animation set/clip without JSON editing. Validation accepts
+  catalog spritesheet clip assets, rejects non-spritesheet catalog refs, and
+  checks clip frame metadata against catalog metadata. Evidence is recorded in
+  `docs/PHASE_11_SPRITESHEET_IMPORT_WORKFLOW.md` and
+  `docs/screenshots/phase11-cp051/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

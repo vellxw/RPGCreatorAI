@@ -29,6 +29,21 @@ export interface ImageImportResult {
   asset?: AssetCatalogEntry;
 }
 
+export interface SpritesheetImportMetadata {
+  idBase: string;
+  name: string;
+  frameWidth: number;
+  frameHeight: number;
+  frameCount: number;
+}
+
+export interface SpritesheetImportResult {
+  success: boolean;
+  cancelled?: boolean;
+  error?: string;
+  asset?: AssetCatalogEntry;
+}
+
 export interface FullProjectState {
   project: ProjectData;
   maps: Record<string, MapData>;

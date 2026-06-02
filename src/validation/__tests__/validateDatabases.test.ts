@@ -198,6 +198,91 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('State "bad_state" has duplicate trait "poisoned"'))).toBe(true);
   });
 
+  it('accepts animation clips that reference spritesheet catalog entries', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          {
+            id: 'hero_run',
+            display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+            clips: [
+              {
+                action: 'run',
+                direction: 'right',
+                asset: 'hero_run_sheet',
+                frameSize: { width: 64, height: 64 },
+                frameCount: 6,
+                fps: 10,
+                loop: true,
+                anchor: { x: 32, y: 54 },
+              },
+            ],
+          },
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'hero_run' },
+    });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_run_sheet',
+          name: 'Hero Run Sheet',
+          kind: 'spritesheet',
+          path: 'assets/imported/spritesheets/hero-run-sheet.png',
+          source: 'imported',
+          frameWidth: 64,
+          frameHeight: 64,
+          frames: 6,
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('unknown animation asset "hero_run_sheet"'))).toBe(false);
+  });
+
+  it('rejects animation clips that reference non-spritesheet catalog entries', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          {
+            id: 'hero_run',
+            clips: [
+              {
+                action: 'run',
+                direction: 'right',
+                asset: 'hero_portrait',
+                frameSize: { width: 64, height: 64 },
+                frameCount: 6,
+                fps: 10,
+                loop: true,
+                anchor: { x: 32, y: 54 },
+              },
+            ],
+          },
+        ],
+      },
+    });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_portrait',
+          name: 'Hero Portrait',
+          kind: 'image',
+          path: 'assets/imported/images/hero.png',
+          source: 'imported',
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('unknown animation asset "hero_portrait"'))).toBe(true);
+  });
+
   it('rejects invalid party and combat references and numeric ranges', () => {
     const project = projectWith({
       types: {

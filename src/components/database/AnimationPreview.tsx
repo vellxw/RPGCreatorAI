@@ -5,9 +5,10 @@ import type { AnimationClipData, AnimationSetDisplayData } from '../../types/pro
 interface AnimationPreviewProps {
   clip: AnimationClipData | null;
   display?: AnimationSetDisplayData;
+  assetPreviewUrls?: Record<string, string>;
 }
 
-export function AnimationPreview({ clip, display }: AnimationPreviewProps) {
+export function AnimationPreview({ clip, display, assetPreviewUrls = {} }: AnimationPreviewProps) {
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export function AnimationPreview({ clip, display }: AnimationPreviewProps) {
     );
   }
 
-  const href = animationSheetAssets[clip.asset as keyof typeof animationSheetAssets];
+  const href = animationSheetAssets[clip.asset as keyof typeof animationSheetAssets] ?? assetPreviewUrls[clip.asset];
   const frameWidth = Math.max(1, clip.frameSize.width);
   const frameHeight = Math.max(1, clip.frameSize.height);
   const frameCount = Math.max(1, clip.frameCount);

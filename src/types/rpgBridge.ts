@@ -5,6 +5,8 @@
 import type {
   FullProjectState,
   ImageImportResult,
+  SpritesheetImportMetadata,
+  SpritesheetImportResult,
   PlaytestSessionRequest,
   PlaytestSessionResult,
   SaveResult,
@@ -40,6 +42,11 @@ export interface RpgBridge {
     readProject(root: string): Promise<FullProjectState>;
     writeProject(root: string, state: FullProjectState): Promise<SaveResult>;
     importImageAsset(root: string, existingAssetIds: string[]): Promise<ImageImportResult>;
+    importSpritesheetAsset(
+      root: string,
+      existingAssetIds: string[],
+      metadata: SpritesheetImportMetadata,
+    ): Promise<SpritesheetImportResult>;
     listBackups(root: string, file: string): Promise<string[]>;
     closeProject(): Promise<void>;
     createPlaytestSession(

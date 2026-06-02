@@ -57,6 +57,7 @@ function bridge(overrides: Partial<RpgBridge['fs']>): RpgBridge {
       readProject: async () => { throw new Error('not stubbed'); },
       writeProject: async () => ({ success: true }),
       importImageAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
+      importSpritesheetAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
       listBackups: async () => [],
       closeProject: async () => undefined,
       createPlaytestSession: async () => ({ success: false, error: 'not stubbed' }),

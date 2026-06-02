@@ -1122,7 +1122,9 @@ export function DatabaseScreen() {
         ) : tab === 'animations' ? (
           <AnimationsEditor
             value={databases.animations}
+            assets={state.assets.assets}
             referenceSources={standaloneReferenceSources.animations}
+            onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
             onChange={animations => dispatch({ type: 'UPDATE_ANIMATION_DATABASE', animations })}
           />
         ) : (

@@ -1,6 +1,7 @@
 // Cross-project validation that spans maps, items, and the Phase 6 databases.
 
 import type {
+  AssetCatalogData,
   AssetKind,
   AssetSource,
   CommonEventData,
@@ -198,7 +199,7 @@ export function validateProject(state: FullProjectState): ValidationReport {
   const projectMeta = validateProjectMeta(state.project, state.maps);
   errors.push(...projectMeta.errors);
   warnings.push(...projectMeta.warnings);
-  for (const message of validateDatabaseInternal(state.databases)) {
+  for (const message of validateDatabaseInternal(state.databases, state.assets)) {
     if (message.level === 'error') errors.push(message);
     else warnings.push(message);
   }
@@ -642,7 +643,7 @@ function validateTraitList(
   return out;
 }
 
-function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
+function validateDatabaseInternal(db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   out.push(...validateAudioRegistry(db));
   const tables: Array<[string, Array<{ id: string }>]> = [
@@ -686,7 +687,7 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   out.push(...validateEquipmentAndStateDatabases(db));
   out.push(...validatePartyCombatDatabases(db));
   out.push(...validateSetupProgressionDatabases(db));
-  out.push(...validateAnimationDatabase(db));
+  out.push(...validateAnimationDatabase(db, assets));
 
   for (const tableName of TYPE_TABLES) {
     const seen = new Set<string>();
@@ -830,9 +831,17 @@ function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   return out;
 }
 
-function validateAnimationDatabase(db: DatabaseEntries): ValidationMessage[] {
+function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const seenSetIds = new Set<string>();
+  const validAnimationAssets = new Set<string>(ANIMATION_SHEET_KEY_SET);
+  const catalogSpritesheets = new Map<string, NonNullable<AssetCatalogData['assets'][number]>>();
+  for (const asset of assets?.assets ?? []) {
+    if (asset.kind === 'spritesheet') {
+      validAnimationAssets.add(asset.id);
+      catalogSpritesheets.set(asset.id, asset);
+    }
+  }
 
   for (const set of db.animations.sets) {
     const source = `database/animations/${set.id}`;
@@ -862,21 +871,40 @@ function validateAnimationDatabase(db: DatabaseEntries): ValidationMessage[] {
       if (!VALID_ANIMATION_DIRECTIONS.has(clip.direction)) {
         out.push({ level: 'error', message: `${label} has invalid direction "${clip.direction}"`, source });
       }
-      if (!ANIMATION_SHEET_KEY_SET.has(clip.asset)) {
+      if (!validAnimationAssets.has(clip.asset)) {
         out.push({
           level: 'error',
           message: `${label} references unknown animation asset "${clip.asset}"`,
           source,
         });
       }
+      const catalogAsset = catalogSpritesheets.get(clip.asset);
       if (!Number.isFinite(clip.frameSize.width) || clip.frameSize.width <= 0) {
         out.push({ level: 'error', message: `${label} frameSize.width must be a positive finite number`, source });
+      } else if (catalogAsset?.frameWidth !== undefined && clip.frameSize.width !== catalogAsset.frameWidth) {
+        out.push({
+          level: 'error',
+          message: `${label} frameSize.width must match spritesheet asset "${clip.asset}" frameWidth ${catalogAsset.frameWidth}`,
+          source,
+        });
       }
       if (!Number.isFinite(clip.frameSize.height) || clip.frameSize.height <= 0) {
         out.push({ level: 'error', message: `${label} frameSize.height must be a positive finite number`, source });
+      } else if (catalogAsset?.frameHeight !== undefined && clip.frameSize.height !== catalogAsset.frameHeight) {
+        out.push({
+          level: 'error',
+          message: `${label} frameSize.height must match spritesheet asset "${clip.asset}" frameHeight ${catalogAsset.frameHeight}`,
+          source,
+        });
       }
       if (!Number.isInteger(clip.frameCount) || clip.frameCount <= 0) {
         out.push({ level: 'error', message: `${label} frameCount must be a positive integer`, source });
+      } else if (catalogAsset?.frames !== undefined && clip.frameCount > catalogAsset.frames) {
+        out.push({
+          level: 'error',
+          message: `${label} frameCount must not exceed spritesheet asset "${clip.asset}" frame count ${catalogAsset.frames}`,
+          source,
+        });
       }
       if (!Number.isFinite(clip.fps) || clip.fps <= 0) {
         out.push({ level: 'error', message: `${label} fps must be a positive finite number`, source });

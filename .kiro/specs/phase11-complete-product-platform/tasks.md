@@ -61,6 +61,7 @@
 - [ ] 06 Asset Library And Import Pipeline.
   - [x] CP-049 / FRA-84: implement Asset Catalog V2.
   - [x] CP-050 / FRA-85: implement image import workflow.
+  - [x] CP-051 / FRA-86: implement spritesheet import workflow.
 - [ ] 07 AI Provider Hub Foundation.
 - [ ] 08 GPT Image 2 Asset Pipeline.
 - [ ] 09 AI Characters And Animations.

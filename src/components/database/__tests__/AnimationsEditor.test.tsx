@@ -2,7 +2,8 @@ import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnimationsEditor } from '../AnimationsEditor';
-import type { AnimationDatabaseData } from '../../../types/project';
+import type { AnimationDatabaseData, AssetCatalogEntry } from '../../../types/project';
+import type { SpritesheetImportRunner } from '../../../adapters/spritesheetImport';
 
 function render(ui: React.ReactNode) {
   const container = document.createElement('div');
@@ -34,6 +35,14 @@ function click(container: HTMLElement, label: string) {
   const found = container.querySelector(`button[aria-label="${label}"]`);
   if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
   act(() => found.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+}
+
+async function clickAsync(container: HTMLElement, label: string) {
+  const found = container.querySelector(`button[aria-label="${label}"]`);
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  await act(async () => {
+    found.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
 }
 
 function changeText(el: HTMLInputElement, value: string) {
@@ -188,6 +197,102 @@ describe('AnimationsEditor', () => {
 
     expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/system/playerAnimationSet'));
     expect(onChange).not.toHaveBeenCalled();
+
+    view.unmount();
+  });
+
+  it('imports a spritesheet into the asset catalog and animation database', async () => {
+    const importedAsset: AssetCatalogEntry = {
+      id: 'hero_run_sheet',
+      name: 'Hero Run Sheet',
+      kind: 'spritesheet',
+      path: 'assets/imported/spritesheets/hero-run-sheet.png',
+      source: 'imported',
+      tags: ['imported', 'spritesheet'],
+      frameWidth: 64,
+      frameHeight: 64,
+      frames: 6,
+    };
+    const spritesheetImporter: SpritesheetImportRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      asset: importedAsset,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={{ sets: [] }}
+        assets={[]}
+        spritesheetImporter={spritesheetImporter}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    click(view.container, 'Import spritesheet');
+    expect(view.container.querySelector('[aria-label="Spritesheet metadata preview"]')).not.toBeNull();
+    changeText(input(view.container, 'Spritesheet set ID'), 'hero_run');
+    changeText(input(view.container, 'Spritesheet name'), 'Hero Run Sheet');
+    changeText(input(view.container, 'Spritesheet action'), 'run');
+    changeSelect(select(view.container, 'Spritesheet direction'), 'right');
+    changeText(input(view.container, 'Spritesheet frame count'), '6');
+    changeText(input(view.container, 'Spritesheet FPS'), '10');
+
+    await clickAsync(view.container, 'Accept spritesheet import');
+
+    expect(spritesheetImporter).toHaveBeenCalledWith([], {
+      idBase: 'hero_run_sheet',
+      name: 'Hero Run Sheet',
+      frameWidth: 64,
+      frameHeight: 64,
+      frameCount: 6,
+    });
+    expect(onAssetImported).toHaveBeenCalledWith(importedAsset);
+    expect(onChange).toHaveBeenLastCalledWith({
+      sets: [
+        {
+          id: 'hero_run',
+          display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+          clips: [
+            {
+              action: 'run',
+              direction: 'right',
+              asset: 'hero_run_sheet',
+              frameSize: { width: 64, height: 64 },
+              frameCount: 6,
+              fps: 10,
+              loop: true,
+              anchor: { x: 32, y: 54 },
+            },
+          ],
+        },
+      ],
+    });
+    expect(view.container.textContent).toContain('Imported Hero Run Sheet');
+
+    view.unmount();
+  });
+
+  it('validates spritesheet metadata before opening the file picker', async () => {
+    const spritesheetImporter: SpritesheetImportRunner = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={database}
+        assets={[]}
+        spritesheetImporter={spritesheetImporter}
+        onAssetImported={vi.fn()}
+        onChange={vi.fn()}
+      />,
+    );
+
+    click(view.container, 'Import spritesheet');
+    changeText(input(view.container, 'Spritesheet frame count'), '0');
+
+    await clickAsync(view.container, 'Accept spritesheet import');
+
+    expect(spritesheetImporter).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Frame count must be a positive integer.');
 
     view.unmount();
   });
