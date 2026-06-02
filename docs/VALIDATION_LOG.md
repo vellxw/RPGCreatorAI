@@ -4,6 +4,72 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-66 / CP-031 — database navigation and large-list polish
+
+- `2026-06-02 02:35:18 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/validation/__tests__/referenceIndex.test.ts`
+  — RED as expected; new `DatabaseList` workflow coverage failed because
+  standard database lists lacked search/count state, hidden-selection feedback,
+  stable select/delete action names, and visible reference-impact badges.
+- `2026-06-02 02:36:49 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 3 focused files and 6 tests passed after adding standard database
+  list filtering, hidden-selection feedback, no-match state, named actions,
+  and reference impact before destructive deletes.
+- `2026-06-02 02:38:39 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/referenceIndex.test.ts`
+  — RED as expected; standalone item and animation list coverage failed
+  because those tabs lacked search/count state and did not surface or block
+  referenced destructive deletes.
+- `2026-06-02 02:40:40 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 5 focused files and 15 tests passed after adding item/animation
+  filtering, hidden-selection feedback, reference badges, blocked deletes, and
+  Database-screen reference source propagation.
+- `2026-06-02 02:41:10 -03:00` — `npm run typecheck` — PASS after adding
+  reference source props and Database screen reference summaries.
+- `2026-06-02 02:46:04 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseEmptyStates.test.tsx`
+  — RED as expected; tab-strip coverage failed because the Database tab row
+  lacked a stable navigation label and per-tab action names.
+- `2026-06-02 02:46:46 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseEmptyStates.test.tsx`
+  — PASS; 1 focused file and 3 tests passed after naming the Database tab
+  strip, adding tab action labels, preserving `aria-current`, and making the
+  tab buttons non-compressing inside horizontal overflow.
+- `2026-06-02 02:47:22 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/referenceIndex.test.ts`
+  — PASS after tab-strip polish; 5 focused files and 16 tests passed.
+- `2026-06-02 02:47:47 -03:00` — `npm test` — PASS; 56 test files and 305
+  Vitest tests passed.
+- `2026-06-02 02:48:30 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 02:49:10 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 8.95s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 02:52:30 -03:00` —
+  controlled `npm run dev` plus local Chrome headless CDP Database smoke —
+  PASS; the bundled sample opened, Database loaded, the tab strip exposed
+  `Database tables` and `Open System database tab`, actors/items/animations
+  exposed search/count controls, and reference badges were present for those
+  surfaces. An earlier smoke rerun hit a CDP `Inspected target navigated or
+  closed` harness failure; the final run created an explicit `/json/new` page
+  target and passed. Screenshots and smoke text written:
+  `docs/screenshots/phase11-cp031/database-actor-filter.png`,
+  `docs/screenshots/phase11-cp031/database-item-filter.png`,
+  `docs/screenshots/phase11-cp031/database-animation-filter.png`, and
+  `docs/screenshots/phase11-cp031/database-navigation-smoke-text.txt`.
+  Controlled Chrome/CDP and Vite processes were stopped afterward, leaving
+  ports 9227 and 3000 clear.
+- `2026-06-02 02:53:15 -03:00` — `git diff --check` — PASS after final
+  documentation updates with line-ending conversion warnings only.
+- Fix applied: Database record lists now remain searchable and scannable at
+  larger sizes, icon-only actions expose stable names, filtered selections are
+  explained, and destructive deletes surface reference impact before mutating
+  standard records, items, or animation sets.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-65 / CP-030 — event editor surface polish
 
 - `2026-06-02 01:53:31 -03:00` —

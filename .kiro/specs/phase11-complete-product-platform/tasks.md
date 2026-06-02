@@ -38,6 +38,7 @@
   - [x] CP-028 / FRA-63: polish tile palette and brush workflow.
   - [x] CP-029 / FRA-64: polish layer workflow safety and overlays.
   - [x] CP-030 / FRA-65: polish event editor surface and command editing.
+  - [x] CP-031 / FRA-66: polish database navigation and large-list safety.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

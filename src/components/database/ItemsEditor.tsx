@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
@@ -25,6 +25,7 @@ import type {
 interface ItemsEditorProps {
   value: ItemDatabase;
   types: TypesDatabaseData;
+  referenceSources?: Record<string, string[]>;
   onChange(value: ItemDatabase): void;
 }
 
@@ -61,11 +62,26 @@ function createItem(items: ItemData[], category: string): ItemData {
   };
 }
 
-export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
+export function ItemsEditor({ value, types, referenceSources = {}, onChange }: ItemsEditorProps) {
   const [selectedId, setSelectedId] = useState(value.items[0]?.id ?? '');
+  const [query, setQuery] = useState('');
   const categoryOptions = namedTypeOptions(types.itemCategories, FALLBACK_ITEM_CATEGORIES);
   const slotOptions = namedTypeOptions(types.equipmentSlots, FALLBACK_EQUIPMENT_SLOTS);
   const selected = value.items.find(item => item.id === selectedId) ?? value.items[0] ?? null;
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredItems = useMemo(
+    () => (
+      normalizedQuery
+        ? value.items.filter(item => `${item.id} ${item.name} ${item.description}`.toLowerCase().includes(normalizedQuery))
+        : value.items
+    ),
+    [normalizedQuery, value.items],
+  );
+  const selectedHidden = Boolean(
+    normalizedQuery &&
+    selected &&
+    !filteredItems.some(item => item.id === selected.id),
+  );
 
   const replaceItems = (items: ItemData[]) => onChange({ items });
   const updateSelected = (changes: Partial<ItemData>) => {
@@ -94,6 +110,14 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
 
   const removeSelected = () => {
     if (!selected) return;
+    const refs = referenceSources[selected.id] ?? [];
+    if (refs.length > 0) {
+      const listed = refs.slice(0, 8).map(source => `- ${source}`).join('\n');
+      const remaining = refs.length > 8 ? `\n...and ${refs.length - 8} more.` : '';
+      alert(`Cannot delete item "${selected.id}" because it is still referenced:\n${listed}${remaining}`);
+      return;
+    }
+    if (!confirm(`Delete item "${selected.id}"?`)) return;
     const next = value.items.filter(item => item.id !== selected.id);
     replaceItems(next);
     setSelectedId(next[0]?.id ?? '');
@@ -128,6 +152,33 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
             Add
           </Button>
         </div>
+        <div className="space-y-2 border-b border-gray-100 p-2">
+          <input
+            aria-label="Search items"
+            className="w-full rounded border border-gray-200 px-2 py-1.5 text-[12px] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            placeholder="Search items..."
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+          />
+          <div className="flex items-center justify-between gap-2 text-[11px] text-gray-500">
+            <span>Showing {filteredItems.length} of {value.items.length} items</span>
+            {normalizedQuery && (
+              <button
+                type="button"
+                aria-label="Clear item search"
+                className="text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                onClick={() => setQuery('')}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {selectedHidden && selected && (
+            <div className="rounded border border-amber-100 bg-amber-50 px-2 py-1 text-[11px] text-amber-700">
+              Selected {selected.id} is hidden by this filter.
+            </div>
+          )}
+        </div>
         <div className="max-h-[520px] overflow-auto">
           {value.items.length === 0 ? (
             <div className="p-3">
@@ -137,11 +188,22 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
                 detail="Use Add to define consumables, key items, and equipment references for events and shops."
               />
             </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="p-3">
+              <EmptyState
+                compact
+                title={`No items match "${query.trim()}"`}
+                detail="Clear the search or add a new item."
+              />
+            </div>
           ) : (
-            value.items.map(item => (
+            filteredItems.map(item => {
+              const refCount = referenceSources[item.id]?.length ?? 0;
+              return (
               <button
                 key={item.id}
                 type="button"
+                aria-label={`Select item ${item.id}`}
                 onClick={() => setSelectedId(item.id)}
                 className={`w-full text-left px-3 py-2 border-b border-gray-100 transition-colors ${
                   selected?.id === item.id
@@ -149,10 +211,18 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <span className="block text-[13px] font-medium truncate">{item.name || item.id}</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="block min-w-0 flex-1 truncate text-[13px] font-medium">{item.name || item.id}</span>
+                  {refCount > 0 && (
+                    <span className="flex-shrink-0 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                      {refCount} ref{refCount === 1 ? '' : 's'}
+                    </span>
+                  )}
+                </span>
                 <span className="block text-[11px] font-mono text-gray-400 truncate">{item.id}</span>
               </button>
-            ))
+            );
+            })
           )}
         </div>
       </div>
@@ -163,7 +233,17 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
             <Button size="sm" icon={<Copy size={12} />} onClick={duplicateItem}>
               Duplicate
             </Button>
-            <Button size="sm" variant="danger" icon={<Trash2 size={12} />} onClick={removeSelected}>
+            <Button
+              size="sm"
+              variant="danger"
+              icon={<Trash2 size={12} />}
+              aria-label={
+                (referenceSources[selected.id]?.length ?? 0) > 0
+                  ? `Delete item ${selected.id} blocked by ${referenceSources[selected.id].length} reference${referenceSources[selected.id].length === 1 ? '' : 's'}`
+                  : `Delete item ${selected.id}`
+              }
+              onClick={removeSelected}
+            >
               Delete
             </Button>
           </div>

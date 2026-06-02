@@ -80,6 +80,8 @@ const database: AnimationDatabaseData = {
 describe('AnimationsEditor', () => {
   beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('alert', vi.fn());
+    vi.stubGlobal('confirm', vi.fn(() => true));
   });
 
   afterEach(() => {
@@ -128,7 +130,6 @@ describe('AnimationsEditor', () => {
   });
 
   it('adds, duplicates, renames, and deletes animation sets without JSON editing', () => {
-    vi.stubGlobal('confirm', () => true);
     const onChange = vi.fn();
     const view = render(<AnimationsEditor value={database} onChange={onChange} />);
 
@@ -143,5 +144,49 @@ describe('AnimationsEditor', () => {
 
     click(view.container, 'Delete animation set player_adventurer');
     expect(onChange).toHaveBeenLastCalledWith({ sets: [] });
+  });
+
+  it('filters animation sets and keeps hidden selection understandable', () => {
+    const value: AnimationDatabaseData = {
+      sets: Array.from({ length: 24 }, (_, index) => ({
+        ...database.sets[0],
+        id: `animation_${String(index + 1).padStart(2, '0')}`,
+      })),
+    };
+    const view = render(<AnimationsEditor value={value} onChange={vi.fn()} />);
+
+    expect(view.container.textContent).toContain('Showing 24 of 24 animation sets');
+
+    changeText(input(view.container, 'Search animation sets'), 'animation_21');
+
+    expect(view.container.textContent).toContain('Showing 1 of 24 animation sets');
+    expect(view.container.textContent).toContain('Selected animation_01 is hidden by this filter.');
+    click(view.container, 'Select animation set animation_21');
+    expect(view.container.textContent).toContain('animation_21');
+
+    changeText(input(view.container, 'Search animation sets'), 'missing');
+    expect(view.container.textContent).toContain('No animation sets match "missing"');
+
+    view.unmount();
+  });
+
+  it('blocks animation set deletes when references are present', () => {
+    const onChange = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={database}
+        referenceSources={{ player_adventurer: ['database/system/playerAnimationSet'] }}
+        onChange={onChange}
+      />,
+    );
+
+    expect(view.container.textContent).toContain('1 ref');
+
+    click(view.container, 'Delete animation set player_adventurer blocked by 1 reference');
+
+    expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/system/playerAnimationSet'));
+    expect(onChange).not.toHaveBeenCalled();
+
+    view.unmount();
   });
 });

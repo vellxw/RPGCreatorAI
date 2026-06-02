@@ -44,4 +44,13 @@ describe('database empty states', () => {
     expect(html).toContain('No actors selected');
     expect(html).toContain('Create an actor from the list to edit stats');
   });
+
+  it('names every database tab in the horizontally scrollable tab strip', () => {
+    const html = renderWithProject(<DatabaseScreen />, initialProjectStoreState);
+
+    expect(html).toContain('aria-label="Database tables"');
+    expect(html).toContain('aria-label="Open Actors database tab"');
+    expect(html).toContain('aria-label="Open Common Events database tab"');
+    expect(html).toContain('aria-label="Open System database tab"');
+  });
 });

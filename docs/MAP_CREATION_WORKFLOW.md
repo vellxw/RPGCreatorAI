@@ -134,6 +134,22 @@ targets, multi-select/range deletion preserves branch boundaries, and movement
 route commands expose named per-step controls for type, wait duration, moving
 steps up/down, removal, and adding new route steps.
 
+## Database screen
+
+The Database workspace is optimized for growing project data. Standard record
+tabs expose a searchable side list with visible/total counts, stable select,
+duplicate, and delete action names, and an explicit warning when the currently
+selected record is hidden by the active filter. Empty filtered results explain
+that the search can be cleared instead of implying the table itself is empty.
+
+Database deletes are reference-aware. Standard record deletes remain blocked
+when the reference index finds dependent maps, events, common events, actors,
+shops, quests, or system settings, and the blocked delete alert lists the
+first impacted reference paths. Items and animation sets receive the same
+reference summary and blocked-delete behavior from the Database screen's
+shared reference index. Tilesets continue to show map usage directly in the
+tileset editor before destructive actions.
+
 ## Tools
 
 The tile palette is the primary repeated-authoring surface. It keeps

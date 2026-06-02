@@ -33,6 +33,12 @@ function select(container: HTMLElement, label: string): HTMLSelectElement {
   return found;
 }
 
+function button(container: HTMLElement, label: string): HTMLButtonElement {
+  const found = container.querySelector(`button[aria-label="${label}"]`);
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  return found;
+}
+
 function changeText(el: HTMLInputElement, value: string) {
   act(() => {
     const valueSetter = Object.getOwnPropertyDescriptor(el, 'value')?.set;
@@ -56,6 +62,8 @@ function changeSelect(el: HTMLSelectElement, value: string) {
 describe('item, equipment, and state database editors', () => {
   beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('alert', vi.fn());
+    vi.stubGlobal('confirm', vi.fn(() => true));
   });
 
   afterEach(() => {
@@ -111,6 +119,74 @@ describe('item, equipment, and state database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({
       items: [expect.objectContaining({ modifiers: expect.objectContaining({ attack: 3 }) })],
     });
+
+    view.unmount();
+  });
+
+  it('filters large item lists without losing explicit selection', () => {
+    const value: ItemDatabase = {
+      items: Array.from({ length: 32 }, (_, index) => {
+        const n = String(index + 1).padStart(2, '0');
+        return {
+          id: `item_${n}`,
+          name: `Item ${n}`,
+          description: '',
+          type: 'consumable',
+        };
+      }),
+    };
+    const view = render(
+      <ItemsEditor value={value} types={mergeDatabases(undefined).types} onChange={vi.fn()} />,
+    );
+
+    expect(view.container.textContent).toContain('Showing 32 of 32 items');
+
+    changeText(input(view.container, 'Search items'), 'Item 29');
+
+    expect(view.container.textContent).toContain('Showing 1 of 32 items');
+    expect(button(view.container, 'Select item item_29')).toBeTruthy();
+    expect(view.container.textContent).toContain('Selected item_01 is hidden by this filter.');
+
+    changeText(input(view.container, 'Search items'), 'missing');
+    expect(view.container.textContent).toContain('No items match "missing"');
+
+    act(() => {
+      button(view.container, 'Clear item search').click();
+    });
+    expect(view.container.textContent).toContain('Showing 32 of 32 items');
+
+    view.unmount();
+  });
+
+  it('blocks item deletes when references are present', () => {
+    const onChange = vi.fn();
+    const value: ItemDatabase = {
+      items: [
+        {
+          id: 'potion',
+          name: 'Potion',
+          description: '',
+          type: 'consumable',
+        },
+      ],
+    };
+    const view = render(
+      <ItemsEditor
+        value={value}
+        types={mergeDatabases(undefined).types}
+        referenceSources={{ potion: ['database/shops/general_store/listings/potion'] }}
+        onChange={onChange}
+      />,
+    );
+
+    expect(view.container.textContent).toContain('1 ref');
+
+    act(() => {
+      button(view.container, 'Delete item potion blocked by 1 reference').click();
+    });
+
+    expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/shops/general_store/listings/potion'));
+    expect(onChange).not.toHaveBeenCalled();
 
     view.unmount();
   });

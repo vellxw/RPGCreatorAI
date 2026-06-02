@@ -2,7 +2,7 @@
 // One tab per database; minimal CRUD with dirty tracking through the
 // existing project reducer + top toolbar Save button.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -31,7 +31,7 @@ import {
   type DatabaseRecord,
   type ProjectStoreState,
 } from '../stores/projectStore';
-import { findReferences } from '../validation/referenceIndex';
+import { findReferences, listReferences } from '../validation/referenceIndex';
 import type {
   ActorData,
   ArmorData,
@@ -999,6 +999,23 @@ export function DatabaseScreen() {
     acc[map.tilesetId] = [...(acc[map.tilesetId] ?? []), map.name || map.id];
     return acc;
   }, {});
+  const standaloneReferenceSources = useMemo(() => {
+    const sources: { items: Record<string, string[]>; animations: Record<string, string[]> } = {
+      items: {},
+      animations: {},
+    };
+    for (const ref of listReferences({
+      project: state.project,
+      maps: state.maps,
+      items: state.items,
+      databases: state.databases,
+    })) {
+      if (ref.table === 'items' || ref.table === 'animations') {
+        sources[ref.table][ref.id] = [...(sources[ref.table][ref.id] ?? []), ref.source];
+      }
+    }
+    return sources;
+  }, [state.databases, state.items, state.maps, state.project]);
 
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
@@ -1021,12 +1038,17 @@ export function DatabaseScreen() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex items-center border-b border-gray-200 px-4 gap-1 bg-white">
+      <div
+        aria-label="Database tables"
+        className="flex items-center border-b border-gray-200 px-4 gap-1 bg-white overflow-x-auto"
+      >
         {TAB_ORDER.map(t => (
           <button
             key={t.key}
+            aria-current={tab === t.key ? 'page' : undefined}
+            aria-label={`Open ${t.label} database tab`}
             onClick={() => ensureSelection(t.key)}
-            className={`px-3 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
+            className={`flex-shrink-0 px-3 py-2 text-[13px] font-medium border-b-2 transition-colors cursor-pointer ${
               tab === t.key
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -1066,6 +1088,7 @@ export function DatabaseScreen() {
           <ItemsEditor
             value={state.items}
             types={databases.types}
+            referenceSources={standaloneReferenceSources.items}
             onChange={items => dispatch({ type: 'UPDATE_ITEM_DATABASE', items })}
           />
         ) : tab === 'tilesets' ? (
@@ -1077,6 +1100,7 @@ export function DatabaseScreen() {
         ) : tab === 'animations' ? (
           <AnimationsEditor
             value={databases.animations}
+            referenceSources={standaloneReferenceSources.animations}
             onChange={animations => dispatch({ type: 'UPDATE_ANIMATION_DATABASE', animations })}
           />
         ) : (

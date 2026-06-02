@@ -16,6 +16,7 @@ const DIRECTIONS: Array<Direction | 'any'> = ['down', 'left', 'right', 'up', 'an
 
 interface AnimationsEditorProps {
   value: AnimationDatabaseData;
+  referenceSources?: Record<string, string[]>;
   onChange(value: AnimationDatabaseData): void;
 }
 
@@ -54,12 +55,27 @@ function defaultSet(id: string): AnimationSetData {
   };
 }
 
-export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
+export function AnimationsEditor({ value, referenceSources = {}, onChange }: AnimationsEditorProps) {
   const [selectedId, setSelectedId] = useState(value.sets[0]?.id ?? '');
   const [selectedClipIndex, setSelectedClipIndex] = useState(0);
+  const [query, setQuery] = useState('');
   const selected = value.sets.find(set => set.id === selectedId) ?? value.sets[0] ?? null;
   const selectedClip = selected?.clips[selectedClipIndex] ?? selected?.clips[0] ?? null;
   const ids = useMemo(() => new Set(value.sets.map(set => set.id)), [value.sets]);
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredSets = useMemo(
+    () => (
+      normalizedQuery
+        ? value.sets.filter(set => set.id.toLowerCase().includes(normalizedQuery))
+        : value.sets
+    ),
+    [normalizedQuery, value.sets],
+  );
+  const selectedHidden = Boolean(
+    normalizedQuery &&
+    selected &&
+    !filteredSets.some(set => set.id === selected.id),
+  );
 
   const emitSets = (sets: AnimationSetData[]) => onChange({ ...value, sets });
   const updateSelected = (changes: Partial<AnimationSetData>) => {
@@ -99,6 +115,13 @@ export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
 
   const deleteSet = () => {
     if (!selected) return;
+    const refs = referenceSources[selected.id] ?? [];
+    if (refs.length > 0) {
+      const listed = refs.slice(0, 8).map(source => `- ${source}`).join('\n');
+      const remaining = refs.length > 8 ? `\n...and ${refs.length - 8} more.` : '';
+      alert(`Cannot delete animation set "${selected.id}" because it is still referenced:\n${listed}${remaining}`);
+      return;
+    }
     if (!confirm(`Delete animation set "${selected.id}"?`)) return;
     const next = value.sets.filter(set => set.id !== selected.id);
     emitSets(next);
@@ -152,11 +175,49 @@ export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
             Add animation set
           </Button>
         </div>
+        <div className="space-y-2 border-b border-gray-100 p-3">
+          <input
+            aria-label="Search animation sets"
+            className="w-full rounded border border-gray-200 px-2 py-1.5 text-[12px] focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            placeholder="Search animation sets..."
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+          />
+          <div className="flex items-center justify-between gap-2 text-[11px] text-gray-500">
+            <span>Showing {filteredSets.length} of {value.sets.length} animation sets</span>
+            {normalizedQuery && (
+              <button
+                type="button"
+                aria-label="Clear animation set search"
+                className="text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                onClick={() => setQuery('')}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {selectedHidden && selected && (
+            <div className="rounded border border-amber-100 bg-amber-50 px-2 py-1 text-[11px] text-amber-700">
+              Selected {selected.id} is hidden by this filter.
+            </div>
+          )}
+        </div>
         <div className="max-h-[620px] overflow-y-auto">
-          {value.sets.map(set => (
+          {filteredSets.length === 0 ? (
+            <div className="p-3">
+              <EmptyState
+                compact
+                title={`No animation sets match "${query.trim()}"`}
+                detail="Clear the search or add a new animation set."
+              />
+            </div>
+          ) : filteredSets.map(set => {
+            const refCount = referenceSources[set.id]?.length ?? 0;
+            return (
             <button
               key={set.id}
               type="button"
+              aria-label={`Select animation set ${set.id}`}
               className={`block w-full px-3 py-2 text-left text-[13px] hover:bg-gray-50 ${
                 selected.id === set.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700'
               }`}
@@ -165,10 +226,18 @@ export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
                 setSelectedClipIndex(0);
               }}
             >
-              <span className="block truncate font-medium">{set.id}</span>
+              <span className="flex items-center gap-1.5">
+                <span className="block min-w-0 flex-1 truncate font-medium">{set.id}</span>
+                {refCount > 0 && (
+                  <span className="flex-shrink-0 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
+                    {refCount} ref{refCount === 1 ? '' : 's'}
+                  </span>
+                )}
+              </span>
               <span className="block truncate text-[11px] text-gray-400">{set.clips.length} clips</span>
             </button>
-          ))}
+          );
+          })}
         </div>
       </div>
 
@@ -209,7 +278,11 @@ export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
               size="sm"
               variant="danger"
               icon={<Trash2 size={12} />}
-              aria-label={`Delete animation set ${selected.id}`}
+              aria-label={
+                (referenceSources[selected.id]?.length ?? 0) > 0
+                  ? `Delete animation set ${selected.id} blocked by ${referenceSources[selected.id].length} reference${referenceSources[selected.id].length === 1 ? '' : 's'}`
+                  : `Delete animation set ${selected.id}`
+              }
               onClick={deleteSet}
             >
               Delete

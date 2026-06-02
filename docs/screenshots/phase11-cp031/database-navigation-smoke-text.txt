@@ -1,0 +1,15 @@
+{
+  "opened": true,
+  "databaseOpened": true,
+  "tabStripNamed": true,
+  "systemTabNamed": true,
+  "actorHasSearch": true,
+  "actorHasCount": true,
+  "actorHasRef": true,
+  "itemHasSearch": true,
+  "itemHasCount": true,
+  "itemHasRef": true,
+  "animationHasSearch": true,
+  "animationHasCount": true,
+  "animationHasRef": true
+}

@@ -170,6 +170,12 @@ Primary Phase 11 sources:
   scoped to the selected page id, preserves page-one legacy command mirroring,
   and makes movement-route step controls addressable and readable. Evidence is
   recorded in `docs/screenshots/phase11-cp030/`.
+- Phase 11 CP-031 — database navigation and large-list polish completed. The
+  Database workspace now filters large record lists, keeps hidden selected
+  records understandable while searching, gives icon-only list actions stable
+  names, and surfaces reference impact before destructive deletes for standard
+  database records, items, and animation sets. Evidence is recorded in
+  `docs/screenshots/phase11-cp031/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
