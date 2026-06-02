@@ -41,4 +41,6 @@ TEST_CASE("SpriteCatalog builds runtime bmp paths") {
           "assets/generated/runtime/player_adventurer.bmp");
     CHECK(SpriteCatalog::runtimePathFor("player_adventurer_walk_down") ==
           "assets/generated/runtime/player_adventurer_walk_down.bmp");
+    CHECK(SpriteCatalog::runtimePathFor("hero_walk_normalized") ==
+          "assets/generated/runtime/hero_walk_normalized.bmp");
 }

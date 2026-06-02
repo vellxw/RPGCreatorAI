@@ -14,6 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = Path("data/assets/catalog.json")
 MANIFEST_PATH = Path("data/assets/runtime-manifest.json")
 RUNTIME_DIR = Path("assets/generated/runtime")
+NORMALIZED_ANIMATION_MANIFEST_DIR = Path("assets/generated/source/phase11_animation_normalization")
+NORMALIZED_ANIMATION_PIPELINE = "rpgcreatorai-animation-strip-normalization-v1"
 TRANSPARENCY_KEY = "#ff00ff"
 MAGENTA = (255, 0, 255)
 VISUAL_KINDS = {"image", "spritesheet", "tileset", "generated"}
@@ -96,6 +98,42 @@ def visual_manifest_entry(asset: dict[str, Any], runtime_path: Path, width: int,
     return entry
 
 
+def normalized_animation_manifest_entry(
+    manifest: dict[str, Any],
+    manifest_path: Path,
+    source_path: str,
+    runtime_path: Path,
+    width: int,
+    height: int,
+) -> dict[str, Any]:
+    frame_size = manifest.get("frameSize", {})
+    entry = {
+        "id": str(manifest.get("id", "")).strip(),
+        "name": manifest.get("name"),
+        "kind": "spritesheet",
+        "source": "generated",
+        "sourcePath": source_path,
+        "sourceNormalizationManifest": project_relative(manifest_path),
+        "sourceAssetId": manifest.get("sourceAssetId"),
+        "sourceConceptId": manifest.get("sourceConceptId"),
+        "runtimeKey": str(manifest.get("id", "")).strip(),
+        "runtimePath": project_relative(runtime_path),
+        "runtimeFormat": "bmp",
+        "width": width,
+        "height": height,
+        "transparencyKey": TRANSPARENCY_KEY,
+        "frameWidth": frame_size.get("width"),
+        "frameHeight": frame_size.get("height"),
+        "frames": manifest.get("frameCount"),
+        "action": manifest.get("action"),
+        "direction": manifest.get("direction"),
+        "fps": manifest.get("fps"),
+        "loop": manifest.get("loop"),
+        "anchor": manifest.get("anchor"),
+    }
+    return {key: value for key, value in entry.items() if value is not None}
+
+
 def audio_manifest_entry(asset: dict[str, Any]) -> dict[str, Any]:
     source_path = str(asset.get("path", "")).replace("\\", "/").strip()
     return {
@@ -120,10 +158,83 @@ def write_runtime_bmp(source: Path, target: Path) -> tuple[int, int]:
         return rgba.size
 
 
+def load_normalized_animation_manifests(project_root: Path, result: RuntimeAssetExportResult) -> list[tuple[Path, dict[str, Any]]]:
+    manifest_dir = project_root / NORMALIZED_ANIMATION_MANIFEST_DIR
+    if not manifest_dir.is_dir():
+        return []
+
+    manifests: list[tuple[Path, dict[str, Any]]] = []
+    for path in sorted(manifest_dir.glob("*.json")):
+        relative = path.relative_to(project_root)
+        try:
+            manifest = load_json(path)
+        except Exception as exc:
+            result.messages.append(f"Could not read normalized animation manifest {relative.as_posix()}: {exc}")
+            continue
+        if manifest.get("schemaVersion") != 1:
+            result.messages.append(f"Normalized animation manifest {relative.as_posix()} schemaVersion must be 1")
+            continue
+        if manifest.get("pipeline") != NORMALIZED_ANIMATION_PIPELINE:
+            result.messages.append(
+                f"Normalized animation manifest {relative.as_posix()} pipeline must be {NORMALIZED_ANIMATION_PIPELINE}"
+            )
+            continue
+        manifests.append((relative, manifest))
+    return manifests
+
+
+def export_normalized_animation_manifests(
+    project_root: Path,
+    result: RuntimeAssetExportResult,
+    exported_ids: set[str],
+) -> list[dict[str, Any]]:
+    manifest_assets: list[dict[str, Any]] = []
+    for relative_manifest_path, manifest in load_normalized_animation_manifests(project_root, result):
+        output_id = str(manifest.get("id", "")).strip()
+        if not output_id:
+            result.messages.append(f"Normalized animation manifest {relative_manifest_path.as_posix()} is missing id")
+            continue
+        if output_id in exported_ids:
+            continue
+        if not validate_runtime_key(output_id, output_id, result):
+            continue
+
+        outputs = manifest.get("outputs")
+        if not isinstance(outputs, dict):
+            result.messages.append(f"Normalized animation manifest {relative_manifest_path.as_posix()} outputs must be an object")
+            continue
+        source_path = str(outputs.get("webPng", "")).replace("\\", "/").strip()
+        if not source_path or not is_safe_project_relative_path(source_path):
+            result.messages.append(
+                f"Normalized animation manifest {relative_manifest_path.as_posix()} has unsafe or empty webPng output: {source_path}"
+            )
+            continue
+        source = project_root / source_path
+        if source.suffix.lower() not in IMAGE_EXTENSIONS:
+            result.messages.append(f"Normalized animation {output_id} has unsupported runtime image extension: {source_path}")
+            continue
+        if not source.is_file():
+            result.messages.append(f"Normalized animation {output_id} source file not found: {source_path}")
+            continue
+
+        runtime_path = RUNTIME_DIR / f"{output_id}.bmp"
+        try:
+            width, height = write_runtime_bmp(source, project_root / runtime_path)
+        except Exception as exc:
+            result.messages.append(f"Normalized animation {output_id} export failed: {exc}")
+            continue
+        manifest_assets.append(
+            normalized_animation_manifest_entry(manifest, relative_manifest_path, source_path, runtime_path, width, height)
+        )
+        exported_ids.add(output_id)
+    return manifest_assets
+
+
 def export_runtime_assets(project_root: str | Path = REPO_ROOT) -> RuntimeAssetExportResult:
     root = Path(project_root)
     result = RuntimeAssetExportResult()
     manifest_assets: list[dict[str, Any]] = []
+    exported_ids: set[str] = set()
 
     try:
         assets = load_catalog(root)
@@ -170,6 +281,9 @@ def export_runtime_assets(project_root: str | Path = REPO_ROOT) -> RuntimeAssetE
             result.messages.append(f"Asset {asset_id} export failed: {exc}")
             continue
         manifest_assets.append(visual_manifest_entry(asset, runtime_path, width, height))
+        exported_ids.add(asset_id)
+
+    manifest_assets.extend(export_normalized_animation_manifests(root, result, exported_ids))
 
     manifest = {
         "schemaVersion": 1,

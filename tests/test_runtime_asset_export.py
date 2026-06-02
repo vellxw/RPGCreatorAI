@@ -44,6 +44,50 @@ class RuntimeAssetExportTests(unittest.TestCase):
         image.putpixel((1, 1), (0, 0, 0, 0))
         image.save(path)
 
+    def write_animation_strip(self, relative_path: str) -> None:
+        path = self.root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        image = Image.new("RGBA", (64 * 4, 64), (0, 0, 0, 0))
+        for frame in range(4):
+            for x in range(frame * 64 + 24, frame * 64 + 42):
+                for y in range(18, 56):
+                    image.putpixel((x, y), (45 + frame * 20, 120, 210, 255))
+        image.save(path)
+
+    def write_normalization_manifest(self, output_id: str, strip_path: str) -> None:
+        manifest_path = self.root / "assets/generated/source/phase11_animation_normalization" / f"{output_id}.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "schemaVersion": 1,
+                    "pipeline": "rpgcreatorai-animation-strip-normalization-v1",
+                    "id": output_id,
+                    "name": "Hero Walk Normalized",
+                    "action": "walk",
+                    "direction": "down",
+                    "sourcePath": "assets/generated/source/raw/hero-walk-raw.png",
+                    "sourceAssetId": "hero_walk_candidate",
+                    "sourceConceptId": "hero_concept",
+                    "frameSize": {"width": 64, "height": 64},
+                    "sourceFrameSize": {"width": 96, "height": 80},
+                    "frameCount": 4,
+                    "fps": 8,
+                    "loop": True,
+                    "anchor": {"x": 32, "y": 56},
+                    "outputs": {
+                        "webPng": strip_path,
+                        "editorPng": f"src/assets/generated/{output_id}.png",
+                        "runtimeBmp": f"assets/generated/runtime/{output_id}.bmp",
+                    },
+                    "sourceFrames": [],
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
     def test_exports_visual_assets_to_runtime_bmp_manifest(self) -> None:
         self.write_rgba("assets/imported/images/hero.png")
         self.write_rgba("assets/imported/spritesheets/hero-run.png")
@@ -110,6 +154,43 @@ class RuntimeAssetExportTests(unittest.TestCase):
         self.assertEqual(by_id["forest_pack"]["runtimePath"], "assets/generated/runtime/forest_pack.bmp")
         self.assertEqual(by_id["town_loop"]["runtimeFormat"], "wav")
         self.assertEqual(by_id["town_loop"]["runtimePath"], "assets/imported/audio/town-loop.wav")
+
+    def test_exports_normalized_generated_animation_strips_to_runtime_bmp_manifest(self) -> None:
+        self.write_catalog([])
+        self.write_animation_strip("assets/generated/web/hero_walk_normalized.png")
+        self.write_normalization_manifest("hero_walk_normalized", "assets/generated/web/hero_walk_normalized.png")
+
+        module = load_export_module()
+        result = module.export_runtime_assets(self.root)
+
+        self.assertTrue(result.ok, result.messages)
+        runtime_bmp = self.root / "assets/generated/runtime/hero_walk_normalized.bmp"
+        self.assertTrue(runtime_bmp.is_file())
+        with Image.open(runtime_bmp) as image:
+            bmp = image.convert("RGB")
+            self.assertEqual(bmp.size, (64 * 4, 64))
+            self.assertEqual(bmp.getpixel((0, 0)), (255, 0, 255))
+
+        manifest = json.loads((self.root / "data" / "assets" / "runtime-manifest.json").read_text(encoding="utf-8"))
+        by_id = {entry["id"]: entry for entry in manifest["assets"]}
+        entry = by_id["hero_walk_normalized"]
+        self.assertEqual(entry["kind"], "spritesheet")
+        self.assertEqual(entry["source"], "generated")
+        self.assertEqual(entry["sourcePath"], "assets/generated/web/hero_walk_normalized.png")
+        self.assertEqual(entry["runtimePath"], "assets/generated/runtime/hero_walk_normalized.bmp")
+        self.assertEqual(entry["runtimeKey"], "hero_walk_normalized")
+        self.assertEqual(entry["runtimeFormat"], "bmp")
+        self.assertEqual(entry["frameWidth"], 64)
+        self.assertEqual(entry["frameHeight"], 64)
+        self.assertEqual(entry["frames"], 4)
+        self.assertEqual(
+            entry["sourceNormalizationManifest"],
+            "assets/generated/source/phase11_animation_normalization/hero_walk_normalized.json",
+        )
+        self.assertEqual(entry["action"], "walk")
+        self.assertEqual(entry["direction"], "down")
+        self.assertEqual(entry["fps"], 8)
+        self.assertEqual(entry["loop"], True)
 
     def test_validation_reports_missing_runtime_outputs(self) -> None:
         self.write_catalog(

@@ -5796,3 +5796,36 @@ Error: Port 1420 is already in use
 - `2026-06-02 19:30:00 -03:00` -
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\generate_animation_preview.py scripts\dev\generate-animation-preview.ps1 scripts\dev\generate-animation-preview.bat tests\test_animation_preview_generation.py assets\generated\source\phase11_animation_normalization\player_adventurer_walk_down.json assets\generated\source\phase11_animation_previews\player_adventurer_walk_down.json`
   - PASS for CP-077 scope; no matches.
+
+### Phase 11 FRA-113 / CP-078 - runtime BMP export for generated characters
+
+- `2026-06-02 19:39:00 -03:00` -
+  `python -m unittest tests.test_runtime_asset_export`
+  - FAIL as expected during TDD red step; a CP-075 normalization manifest with
+  `assets/generated/web/hero_walk_normalized.png` did not produce
+  `assets/generated/runtime/hero_walk_normalized.bmp`.
+- `2026-06-02 19:42:00 -03:00` -
+  `python -m unittest tests.test_runtime_asset_export`
+  - PASS after extending `export_runtime_assets.py` to consume normalized
+  generated animation manifests and write runtime BMP outputs plus manifest
+  entries; 3 tests passed.
+- `2026-06-02 19:43:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1`
+  - PASS; repo runtime export completed and updated
+  `data/assets/runtime-manifest.json` with `player_adventurer_walk_down`.
+- `2026-06-02 19:43:00 -03:00` -
+  `python -m unittest tests.test_runtime_asset_export tests.test_animation_preview_generation tests.test_animation_strip_normalization tests.test_visual_assets`
+  - PASS; runtime export plus adjacent asset pipeline tests passed with
+  10 tests.
+- `2026-06-02 19:44:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  - PASS; checked-in runtime manifest and referenced outputs validated.
+- `2026-06-02 19:44:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke`
+  - PASS; native configure/build/CTest passed with the updated SpriteCatalog
+  runtime path test. Frontend, desktop, smoke, and roundtrip gates were
+  intentionally skipped for this runtime-export-focused validation. Existing
+  non-fatal CMake/dependency warnings remained.
+- `2026-06-02 19:45:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\export_runtime_assets.py tests\test_runtime_asset_export.py tests\test_sprite_catalog.cpp data\assets\runtime-manifest.json`
+  - PASS for CP-078 scope; no matches.

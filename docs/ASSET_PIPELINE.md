@@ -151,6 +151,32 @@ duration, output paths, and `runtimeDependency: false`. The sample
 Detailed CP-077 evidence is recorded in
 `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`.
 
+## Phase 11 Runtime BMP Export For Generated Characters
+
+CP-078 extends the runtime exporter so accepted/generated character animation
+strips can enter the native runtime path convention. In addition to catalog
+assets, `scripts/dev/export_runtime_assets.py` now reads CP-075 normalization
+manifests from:
+
+```text
+assets/generated/source/phase11_animation_normalization/*.json
+```
+
+For each manifest with a local `outputs.webPng`, the exporter writes:
+
+```text
+assets/generated/runtime/{id}.bmp
+```
+
+using `#ff00ff` as the runtime transparency key, then records a generated
+spritesheet entry in `data/assets/runtime-manifest.json` with the source
+normalization manifest, source asset/concept ids, frame metadata, action,
+direction, FPS, loop, anchor, runtime key, and runtime path. The runtime path
+matches `SpriteCatalog::runtimePathFor(id)`.
+
+Detailed CP-078 evidence is recorded in
+`docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development

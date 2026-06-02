@@ -43,13 +43,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`
 - `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`
 - `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`
+- `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-078 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-079 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -541,6 +542,13 @@ Primary Phase 11 sources:
   that previews stay outside runtime dependency paths, and checked-in visual QA
   evidence for `player_adventurer_walk_down`. Evidence is recorded in
   `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`.
+- Phase 11 CP-078 — runtime BMP export for generated characters completed.
+  The runtime asset exporter now reads CP-075 normalization manifests, converts
+  normalized character strips to `assets/generated/runtime/{id}.bmp` with the
+  runtime transparency key, records generated-character metadata in
+  `data/assets/runtime-manifest.json`, and preserves the native
+  `SpriteCatalog::runtimePathFor` convention. Evidence is recorded in
+  `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
