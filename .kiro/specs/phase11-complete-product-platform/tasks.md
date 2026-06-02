@@ -24,6 +24,7 @@
   - [x] CP-016 / FRA-51: run the packaging integration gate.
 - [ ] 02 End-To-End Usability.
   - [x] CP-017 / FRA-52: complete open and create project startup flow.
+  - [x] CP-018 / FRA-53: polish save and validation user flow.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

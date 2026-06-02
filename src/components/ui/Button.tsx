@@ -8,7 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ variant = 'default', size = 'md', children, icon, className = '', ...props }: ButtonProps) {
-  const base = 'inline-flex items-center gap-1.5 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-400 disabled:opacity-50 cursor-pointer';
+  const base = 'inline-flex items-center gap-1.5 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer';
   const sizes = {
     sm: 'px-2.5 py-1 text-[12px]',
     md: 'px-3.5 py-1.5 text-[13px]',

@@ -46,16 +46,20 @@ User edits field
 
 User clicks Save
   → run validation(state)
-  → if errors: block, show in panel
+  → dispatch VALIDATE so the panel shows the current errors/warnings
+  → if errors: block before adapter write, keep dirty=true, show recovery feedback
   → if valid: adapter.save*(data)
-  → on success: dirty=false, show "saved"
-  → on failure: show error, keep dirty=true
+  → on success: dirty=false, record lastSavedAt, show persistent save feedback
+  → on failure: show retry guidance, keep dirty=true
 ```
 
 ## Dirty Tracking
 - Every mutation action sets `dirty = true`
-- Save success sets `dirty = false`
-- Toolbar indicator: green "All changes saved" / orange "Unsaved changes"
+- Save success sets `dirty = false` and records `lastSavedAt`
+- Toolbar indicator: green saved, amber unsaved/warnings, red validation
+  blocked, and blue saving-in-progress states
+- Save remains available for repeated editing and validation; it is disabled
+  only while a save write is already in progress
 - `beforeunload` warns if dirty
 
 ## Backup Strategy (FileSystemAdapter)
@@ -102,8 +106,12 @@ Warnings (non-blocking):
 - `projectStore.ts` is now a `useReducer`-backed store with actions: `LOAD_PROJECT`, `UPDATE_PROJECT_META`, `UPDATE_EVENT`, `RENAME_EVENT`, `UPDATE_COMMAND`, `ADD_COMMAND`, `REMOVE_COMMAND`, `MARK_SAVED`, `VALIDATE`
 - Every mutation sets `dirty = true`. `MARK_SAVED` clears it
 - The Inspector and the Event Editor both dispatch real mutation actions; field edits update the underlying data model immediately
-- Save flow: `performSave()` validates first, blocks on errors, then calls `adapter.saveAll()` and dispatches `MARK_SAVED`
-- Toolbar `SaveIndicator` shows green/amber/red based on dirty + validation state
+- Save flow: `performSave()` validates first, blocks on errors before any
+  adapter write, then calls `adapter.saveAll()` and dispatches `MARK_SAVED`
+  with an explicit timestamp on success
+- Toolbar `SaveIndicator` shows saved, dirty, warning, validation-blocked,
+  and saving-in-progress states. Save/Validate feedback stays visible below
+  the toolbar without blocking continued editing
 - Browser `beforeunload` warns on unsaved changes
 - New "Import" button accepts a JSON file and rehydrates the project state
 

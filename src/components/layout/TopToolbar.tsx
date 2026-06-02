@@ -26,12 +26,21 @@ import { SaveIndicator } from './SaveIndicator';
 import type { Screen } from '../../types/project';
 import type { PlaytestSessionMode } from '../../adapters/types';
 import { uiAssets } from '../../assets/generated/assetCatalog';
+import { validateProject } from '../../validation/validateProject';
+
+type SaveFeedback = {
+  tone: 'success' | 'warning' | 'danger';
+  title: string;
+  detail: string;
+};
 
 export function TopToolbar() {
   const { state, dispatch } = useEditor();
   const { state: projectState, dispatch: projectDispatch } = useProjectStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [saveFeedback, setSaveFeedback] = useState<SaveFeedback | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [recents, setRecents] = useState<string[]>([]);
   const [recentsOpen, setRecentsOpen] = useState(false);
   const desktop = isDesktopShell();
@@ -70,16 +79,69 @@ export function TopToolbar() {
   };
 
   const handleSave = async () => {
-    const outcome = await performSave(projectState, projectDispatch, { exportAfterSave: false });
-    if (!outcome.success) {
-      showStatus(`Save blocked: ${outcome.errors[0] ?? 'validation error'}`);
+    if (isSaving) return;
+    setStatusMessage(null);
+    setIsSaving(true);
+    try {
+      const outcome = await performSave(projectState, projectDispatch, { exportAfterSave: false });
+      if (!outcome.success && outcome.blockedByValidation) {
+        setSaveFeedback({
+          tone: 'danger',
+          title: `Save blocked by ${outcome.validationErrorCount} validation error${outcome.validationErrorCount === 1 ? '' : 's'}`,
+          detail: `${outcome.errors[0] ?? 'Fix the validation error.'} ${outcome.recovery}`,
+        });
+        return;
+      }
+      if (!outcome.success) {
+        setSaveFeedback({
+          tone: 'danger',
+          title: 'Save failed',
+          detail: `${outcome.errors[0] ?? 'Unknown write error'}. ${outcome.recovery}`,
+        });
+        return;
+      }
+      setSaveFeedback({
+        tone: outcome.validationWarningCount > 0 ? 'warning' : 'success',
+        title: outcome.exported
+          ? 'Saved in memory and exported'
+          : `Saved via ${outcome.adapterName}`,
+        detail: outcome.recovery,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleValidate = () => {
+    const report = validateProject({
+      project: projectState.project,
+      maps: projectState.maps,
+      items: projectState.items,
+      databases: projectState.databases,
+    });
+    projectDispatch({ type: 'VALIDATE' });
+    setStatusMessage(null);
+    if (report.errors.length > 0) {
+      setSaveFeedback({
+        tone: 'danger',
+        title: `Validation found ${report.errors.length} blocking error${report.errors.length === 1 ? '' : 's'}`,
+        detail: 'Fix the blocking items in Validation, then Save again.',
+      });
       return;
     }
-    showStatus(
-      outcome.exported
-        ? 'Saved (in-memory) and exported to file'
-        : `Saved via ${outcome.adapterName}`,
-    );
+    if (report.warnings.length > 0) {
+      setSaveFeedback({
+        tone: 'warning',
+        title: `Validation found ${report.warnings.length} warning${report.warnings.length === 1 ? '' : 's'}`,
+        detail: 'Warnings are review items and do not block Save.',
+      });
+      return;
+    }
+    setSaveFeedback({
+      tone: 'success',
+      title: 'Validation passed',
+      detail: 'Save will re-check before writing project files.',
+    });
   };
 
   const handleExport = async () => {
@@ -131,7 +193,12 @@ export function TopToolbar() {
           <Redo2 size={16} />
         </button>
       </div>
-      <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
+      <SaveIndicator
+        dirty={projectState.dirty}
+        errorCount={projectState.errors.length}
+        warningCount={projectState.warnings.length}
+        saving={isSaving}
+      />
       <div className="flex items-center gap-2">
         {desktop && (
           <>
@@ -167,8 +234,16 @@ export function TopToolbar() {
             </div>
           </>
         )}
-        <Button icon={<Save size={14} />} onClick={handleSave}>
+        <Button
+          icon={<Save size={14} />}
+          onClick={handleSave}
+          disabled={isSaving}
+          title={isSaving ? 'Save is already writing project data' : 'Validate and save project data'}
+        >
           Save
+        </Button>
+        <Button icon={<CheckCircle2 size={14} />} onClick={handleValidate}>
+          Validate
         </Button>
         <Button
           icon={<Play size={14} />}
@@ -197,15 +272,25 @@ export function TopToolbar() {
         <span>/</span>
         <span className="text-gray-800 font-medium">{state.selectedEvent?.id || 'Select event'}</span>
       </div>
-      <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
+      <SaveIndicator
+        dirty={projectState.dirty}
+        errorCount={projectState.errors.length}
+        warningCount={projectState.warnings.length}
+        saving={isSaving}
+      />
       <div className="flex items-center gap-2">
-        <Button icon={<Save size={14} />} onClick={handleSave}>
+        <Button
+          icon={<Save size={14} />}
+          onClick={handleSave}
+          disabled={isSaving}
+          title={isSaving ? 'Save is already writing project data' : 'Validate and save project data'}
+        >
           Save
         </Button>
         <Button
           variant="primary"
           icon={<CheckCircle2 size={14} />}
-          onClick={() => projectDispatch({ type: 'VALIDATE' })}
+          onClick={handleValidate}
         >
           Validate
         </Button>
@@ -259,15 +344,25 @@ export function TopToolbar() {
         <span>/</span>
         <span className="text-gray-800 font-medium">Database</span>
       </div>
-      <SaveIndicator dirty={projectState.dirty} errorCount={projectState.errors.length} />
+      <SaveIndicator
+        dirty={projectState.dirty}
+        errorCount={projectState.errors.length}
+        warningCount={projectState.warnings.length}
+        saving={isSaving}
+      />
       <div className="flex items-center gap-2">
-        <Button icon={<Save size={14} />} onClick={handleSave}>
+        <Button
+          icon={<Save size={14} />}
+          onClick={handleSave}
+          disabled={isSaving}
+          title={isSaving ? 'Save is already writing project data' : 'Validate and save project data'}
+        >
           Save
         </Button>
         <Button
           variant="primary"
           icon={<CheckCircle2 size={14} />}
-          onClick={() => projectDispatch({ type: 'VALIDATE' })}
+          onClick={handleValidate}
         >
           Validate
         </Button>
@@ -318,6 +413,22 @@ export function TopToolbar() {
       {statusMessage && (
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-1.5 bg-gray-900 text-white text-[12px] rounded-md shadow-lg z-50">
           {statusMessage}
+        </div>
+      )}
+      {saveFeedback && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[min(680px,calc(100vw-32px))] rounded-md border px-3 py-2 text-[12px] shadow-lg z-50 ${
+            saveFeedback.tone === 'success'
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : saveFeedback.tone === 'warning'
+                ? 'border-amber-200 bg-amber-50 text-amber-900'
+                : 'border-red-200 bg-red-50 text-red-800'
+          }`}
+        >
+          <p className="font-semibold">{saveFeedback.title}</p>
+          <p>{saveFeedback.detail}</p>
         </div>
       )}
     </header>

@@ -18,6 +18,11 @@ export interface SaveOutcome {
   errors: string[];
   warnings: string[];
   adapterName: string;
+  blockedByValidation: boolean;
+  validationErrorCount: number;
+  validationWarningCount: number;
+  recovery: string;
+  savedAt?: string;
 }
 
 export async function performSave(
@@ -43,6 +48,10 @@ export async function performSave(
       errors: report.errors.map(e => e.message),
       warnings: report.warnings.map(w => w.message),
       adapterName: adapter.getCapabilities().adapterName,
+      blockedByValidation: true,
+      validationErrorCount: report.errors.length,
+      validationWarningCount: report.warnings.length,
+      recovery: 'Open Validation, fix the blocking errors, then Save again.',
     };
   }
 
@@ -54,10 +63,15 @@ export async function performSave(
       errors: [result.error ?? 'Unknown save error'],
       warnings: report.warnings.map(w => w.message),
       adapterName: adapter.getCapabilities().adapterName,
+      blockedByValidation: false,
+      validationErrorCount: 0,
+      validationWarningCount: report.warnings.length,
+      recovery: 'Project data was not marked saved. Resolve the write problem and Save again.',
     };
   }
 
-  dispatch({ type: 'MARK_SAVED' });
+  const savedAt = new Date().toISOString();
+  dispatch({ type: 'MARK_SAVED', at: savedAt });
 
   // In browser mode the save is in-memory only; offer a download as a backstop.
   let exported = false;
@@ -72,6 +86,14 @@ export async function performSave(
     errors: [],
     warnings: report.warnings.map(w => w.message),
     adapterName: adapter.getCapabilities().adapterName,
+    blockedByValidation: false,
+    validationErrorCount: 0,
+    validationWarningCount: report.warnings.length,
+    recovery:
+      report.warnings.length > 0
+        ? 'Warnings remain visible in Validation, but they did not block Save.'
+        : 'Project passed validation and was saved.',
+    savedAt,
   };
 }
 

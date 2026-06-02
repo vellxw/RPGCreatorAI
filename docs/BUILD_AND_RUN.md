@@ -186,7 +186,9 @@ Diagnostics and failed-launch troubleshooting are documented in
    in-memory project that must be exported as a bundle to persist outside the
    browser session.
 3. Edit maps, event pages/commands, common events, and database entries.
-4. Run Validate from the toolbar; Save only writes valid project data.
+4. Run Validate from the toolbar for immediate feedback. Save always validates
+   again before writing, blocks on errors, keeps dirty state on write failure,
+   and leaves visible recovery feedback below the toolbar.
 5. In Playtest, choose Project Start, Current Map, or Selected Event.
 6. Open in Runtime from desktop mode. The shell writes a temporary playtest
    session under the app data directory and launches the native runtime with

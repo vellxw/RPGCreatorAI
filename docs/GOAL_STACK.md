@@ -84,6 +84,12 @@ Primary Phase 11 sources:
   memory-backed until export; invalid folder errors are surfaced as actionable
   user messages; and focused frontend, Rust, build, desktop content, and
   Playwright startup/create smoke checks validated the flow.
+- Phase 11 CP-018 — save and validation user flow completed. Save now reports
+  validation-blocked, adapter-failure, warning, success, and saving states with
+  persistent non-blocking toolbar feedback; the editor toolbar exposes
+  Validate directly; `performSave()` returns recovery context and timestamps
+  successful saves; and the validation panel explains whether Save is blocked
+  or allowed and how to recover.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

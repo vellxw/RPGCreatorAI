@@ -3044,3 +3044,45 @@ Error: Port 1420 is already in use
 - `2026-06-01 22:00:43 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-53 / CP-018 — save and validation user flow polish
+
+- `2026-06-01 22:07:54 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/components/layout/__tests__/SaveIndicator.test.tsx src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — RED as expected; the tests required save outcomes with validation-blocked
+  context, richer save indicator states, and validation-panel recovery copy
+  that did not exist yet.
+- `2026-06-01 22:09:43 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/components/layout/__tests__/SaveIndicator.test.tsx src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — PASS after adding save recovery metadata, explicit saved timestamps,
+  warning/saving indicator states, and validation recovery copy.
+- `2026-06-01 22:12:20 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — RED as expected; the editor toolbar did not expose a Validate button.
+  Fix applied: added a shared Validate handler and button to the editor
+  toolbar, with persistent feedback for pass/warn/error validation states.
+- `2026-06-01 22:13:12 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — PASS; toolbar Save shows validation-blocked and adapter-failure feedback,
+  and Validate runs without marking the project saved.
+- `2026-06-01 22:15:32 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/components/layout/__tests__/SaveIndicator.test.tsx src/components/editor/__tests__/BottomPanelValidation.test.tsx src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — PASS after docs/task updates; 4 focused files and 13 tests passed.
+- `2026-06-01 22:15:58 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/__tests__/AppStartup.test.tsx src/stores/__tests__/saveActions.test.ts src/components/layout/__tests__/SaveIndicator.test.tsx src/components/editor/__tests__/BottomPanelValidation.test.tsx src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — PASS; 7 related files and 63 tests passed.
+- `2026-06-01 22:20:43 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:20:43 -03:00` — `npm run build` — PASS; 1913 modules
+  transformed, build completed in 8.24s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 22:20:43 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content` —
+  PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-06-01 22:20:43 -03:00` —
+  Playwright CLI smoke against `npm run dev` on `http://127.0.0.1:3000/` —
+  PASS after rerunning Save with stable snapshot refs; editor toolbar exposed
+  Validate, Validate feedback reported `Validation passed`, Save feedback
+  reported `Saved via BrowserMemoryAdapter`, and screenshots showed no toolbar
+  overlap.
+- `2026-06-01 22:20:43 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

@@ -12,8 +12,8 @@ function ValidationContent() {
       <div className="flex items-start gap-2.5">
         <CheckCircle2 size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-[13px] font-medium text-gray-800">Map has no blocking errors</p>
-          <p className="text-[12px] text-gray-500">Great job! Your project is valid and ready for playtesting.</p>
+          <p className="text-[13px] font-medium text-gray-800">Project passes validation</p>
+          <p className="text-[12px] text-gray-500">Save will still re-check before writing project files.</p>
         </div>
       </div>
     );
@@ -21,6 +21,17 @@ function ValidationContent() {
 
   return (
     <div className="space-y-3">
+      {errors.length > 0 ? (
+        <div className="rounded-md border border-red-100 bg-red-50 px-3 py-2">
+          <p className="text-[12px] font-semibold text-red-800">Save is blocked</p>
+          <p className="text-[12px] text-red-700">Fix the blocking items below, then Save again.</p>
+        </div>
+      ) : (
+        <div className="rounded-md border border-amber-100 bg-amber-50 px-3 py-2">
+          <p className="text-[12px] font-semibold text-amber-800">Save is allowed</p>
+          <p className="text-[12px] text-amber-700">Warnings are review items. Save will still validate before writing.</p>
+        </div>
+      )}
       {errors.map((msg, i) => (
         <div key={`e${i}`} className="flex items-start gap-2.5">
           <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
@@ -90,6 +101,8 @@ function DiagnosticsContent() {
 export function BottomPanel() {
   const project = useProject();
   const errorCount = project.errors.length;
+  const warningCount = project.warnings.length;
+  const validationBadge = errorCount > 0 ? errorCount : warningCount;
 
   return (
     <div className="h-[200px] flex-shrink-0 bg-white border-t border-gray-200 flex">
@@ -104,7 +117,7 @@ export function BottomPanel() {
             {
               id: 'validation',
               label: 'Validation',
-              badge: errorCount,
+              badge: validationBadge,
               content: <ValidationContent />,
             },
             {

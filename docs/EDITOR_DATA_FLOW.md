@@ -24,13 +24,13 @@ Screen component
   → renders UI from real data
 ```
 
-## Edit Flow (MVP)
+## Edit Flow
 ```
 User edits field in Inspector
   → local component state updates
-  → dispatch MARK_DIRTY to editor store
+  → dispatch projectStore mutation action
+  → projectStore updates the authored JSON model
   → "unsaved changes" indicator shown
-  → Save button → MARK_SAVED (state only for MVP)
 ```
 
 ## Selection Flow
@@ -43,21 +43,23 @@ User clicks event on MapCanvas
 
 ## Validation Flow
 ```
-validateMap(map, allMapIds)
-  → checks layer dimensions
-  → validates each event:
-    → has id
-    → position within bounds
-    → valid trigger type
-    → known command types
-    → transfer targets exist
-  → returns ValidationMessage[]
-  → displayed in BottomPanel / ValidationPanel
+User clicks Validate
+  → validateProject(full project state)
+  → dispatch VALIDATE
+  → persistent toolbar feedback summarizes pass/warn/error state
+  → BottomPanel / Validation lists recovery details
+
+User clicks Save
+  → validateProject(full project state)
+  → dispatch VALIDATE
+  → if errors: no adapter write, dirty stays true, feedback says Save blocked
+  → if valid: adapter.saveAll(full project state)
+  → on adapter success: dispatch MARK_SAVED with timestamp
+  → on adapter failure: dirty stays true, feedback says Save again after fixing write issue
 ```
 
-## Persistence (Future)
-Current MVP: data is read-only from static imports.
-Future: ProjectDataAdapter with:
-- FileSystemAdapter (Electron/Tauri)
-- BrowserMemoryAdapter (dev/demo)
-- JsonExportAdapter (download as file)
+## Persistence
+`ProjectDataAdapter` keeps the UI independent from storage:
+- `FileSystemAdapter` writes desktop project files through Tauri.
+- `BrowserMemoryAdapter` saves to in-memory browser state.
+- JSON import/export provides project bundle transfer in browser mode.
