@@ -1,5 +1,5 @@
 # scripts/dev/verify.ps1
-# Canonical MVP green gate. Runs frontend, native runtime, desktop/Tauri,
+# Canonical local green gate. Runs frontend, native runtime, desktop/Tauri,
 # smoke, and editor-runtime roundtrip validation unless a targeted skip flag
 # is provided.
 

@@ -31,6 +31,22 @@ function Read-ShortLog {
     return (Get-Content $Path -Tail 80 -ErrorAction SilentlyContinue) -join [Environment]::NewLine
 }
 
+function Get-Sha256FileHash {
+    param([string]$Path)
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        try {
+            $bytes = $sha.ComputeHash($stream)
+            return ([System.BitConverter]::ToString($bytes) -replace '-', '').ToUpperInvariant()
+        } finally {
+            $sha.Dispose()
+        }
+    } finally {
+        $stream.Dispose()
+    }
+}
+
 function Test-TauriContentQuietly {
     & (Join-Path $PSScriptRoot 'verify-tauri-content.ps1') -Port 1420 -TimeoutSeconds 2 *> $null
     return $LASTEXITCODE -eq 0
@@ -160,8 +176,8 @@ function Invoke-RuntimeScreenshotRoundtrip {
 
         $baselineShot = Join-Path $baselineShots '01-town-initial.bmp'
         $editedShot = Join-Path $editedShots '01-town-initial.bmp'
-        $baselineHash = (Get-FileHash $baselineShot -Algorithm SHA256).Hash
-        $editedHash = (Get-FileHash $editedShot -Algorithm SHA256).Hash
+        $baselineHash = Get-Sha256FileHash $baselineShot
+        $editedHash = Get-Sha256FileHash $editedShot
 
         if ($baselineHash -eq $editedHash) {
             throw 'Runtime round-trip failed: edited town screenshot hash matched baseline.'

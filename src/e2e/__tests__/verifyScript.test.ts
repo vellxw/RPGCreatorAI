@@ -91,6 +91,9 @@ describe('MVP verify script', () => {
     expect(packageJson.scripts['desktop:package:windows']).toBe(
       'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/package-windows.ps1',
     );
+    expect(packageJson.scripts['verify:windows']).toBe(
+      'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1',
+    );
     expect(tauriConfig.build.beforeBuildCommand).toBe('npm run build');
     expect(tauriConfig.build.frontendDist).toBe('../dist');
 
@@ -231,5 +234,42 @@ describe('MVP verify script', () => {
     expect(verifyDiagnostics).toContain('npm run typecheck');
     expect(verifyDiagnosticsWrapper).toContain('verify-diagnostics.ps1');
     expect(verifyDiagnosticsWrapper).toContain('exit /b %ERRORLEVEL%');
+  });
+
+  it('keeps build, run, packaging, and architecture docs aligned with Phase 11 commands', () => {
+    const readme = readFileSync(join(process.cwd(), 'README.md'), 'utf8');
+    const buildRun = readFileSync(join(process.cwd(), 'docs/BUILD_AND_RUN.md'), 'utf8');
+    const windowsNotes = readFileSync(join(process.cwd(), 'docs/WINDOWS_BUILD_NOTES.md'), 'utf8');
+    const architecture = readFileSync(join(process.cwd(), 'docs/ARCHITECTURE.md'), 'utf8');
+    const verifyScript = readFileSync(join(process.cwd(), 'scripts/dev/verify.ps1'), 'utf8');
+
+    for (const expected of [
+      'Canonical Windows local gate',
+      'npm run verify:windows',
+      '=== ALL PASSED ===',
+      'PACKAGED SMOKE PASSED',
+      'RUNTIME DIAGNOSTICS VERIFY PASSED',
+      'Known nonfatal warnings',
+      'Current Editor Workflow',
+    ]) {
+      expect(readme + buildRun).toContain(expected);
+    }
+
+    for (const expected of [
+      'scripts\\dev\\package-windows.bat',
+      'docs/DIAGNOSTICS.md',
+      'Known nonfatal warnings',
+      'BRANDING ASSETS PASSED',
+      'FIRST-RUN APP DATA SMOKE PASSED',
+    ]) {
+      expect(buildRun + windowsNotes).toContain(expected);
+    }
+
+    expect(architecture).toContain('Editor, Desktop Shell, And Runtime Boundary');
+    expect(architecture).toContain('Browser editor (`npm run dev`)');
+    expect(architecture).toContain('runtime diagnostics');
+    expect(verifyScript).toContain('Canonical local green gate');
+    expect(readme + buildRun + windowsNotes).not.toContain('Canonical MVP');
+    expect(readme + buildRun).not.toContain('MVP limitations');
   });
 });

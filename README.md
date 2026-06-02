@@ -31,7 +31,10 @@ Implemented foundations include:
 - generated runtime/editor visual assets
 - C++ runtime tests, Vitest editor tests, and validation scripts
 
-AI is not required to run the editor or runtime today. The MVP does not ship a scripting VM, cloud service, marketplace, proprietary importer, or runtime AI dependency. The future AI layer is planned as an authoring assistant above the deterministic project format.
+AI is not required to run the editor or runtime today. The current product
+does not ship a scripting VM, cloud service, marketplace, proprietary importer,
+or runtime AI dependency. The future AI layer is planned as an authoring
+assistant above the deterministic project format.
 
 ## Screenshots
 
@@ -98,7 +101,7 @@ Tauri starts the strict dev server on `http://localhost:1420`.
 
 ## Verify The Project
 
-Canonical Windows MVP gate:
+Canonical Windows local gate:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
@@ -106,7 +109,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
 
 This runs frontend typecheck, Vitest, frontend build, native C++
 configure/build/CTest, Tauri content verification, Rust desktop tests,
-runtime smoke, and editor-runtime roundtrip validation.
+runtime smoke, and editor-runtime roundtrip validation. A successful run ends
+with `=== ALL PASSED ===`.
+
+NPM alias:
+
+```powershell
+npm run verify:windows
+```
+
+Known nonfatal warnings in the current Windows environment include the Vite
+chunk-size warning, CMake FetchContent CMP0135 developer warnings, dependency
+`cmake_minimum_required` deprecation warnings, missing PkgConfig, missing
+optional sample audio files, and WASAPI/audio-device warnings during runtime
+smoke. These are expected only when the command still reports PASS.
 
 Frontend and editor checks:
 
@@ -142,6 +158,12 @@ Runtime smoke check:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
 ```
 
+Runtime diagnostics check:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1
+```
+
 Desktop content check, with a Tauri dev server already running on port 1420:
 
 ```bash
@@ -157,7 +179,9 @@ npm run desktop:package:windows
 That helper builds the frontend, Tauri shell, and native runtime, copies
 `rpg_creator_runtime.exe` beside the packaged Tauri executable under
 `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, and smoke-launches the
-packaged app. It does not create an installer or require signing credentials.
+packaged app. A successful run prints `PACKAGED SMOKE PASSED` and
+`=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. It does not create an installer or
+require signing credentials.
 The current release artifact and future installer policy is documented in
 [Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
 First-run directories and cleanup policy are documented in
@@ -165,7 +189,7 @@ First-run directories and cleanup policy are documented in
 diagnostic folders, log caps, and failed-launch troubleshooting are documented
 in [Diagnostics And Logs](docs/DIAGNOSTICS.md).
 
-## MVP Editor Workflow
+## Current Editor Workflow
 
 1. Open the editor in the browser for quick preview or with `npm run desktop:dev` for real filesystem/runtime integration.
 2. Open or use the sample JSON project under `data/`.

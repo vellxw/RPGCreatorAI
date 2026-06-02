@@ -4,7 +4,7 @@
 On Windows, build the C++ runtime **outside** the OneDrive-synced repo path. The provided scripts already do this by default.
 
 ```cmd
-:: Canonical MVP green gate
+:: Canonical local green gate
 scripts\dev\verify.bat
 
 :: Native configure/build/CTest only
@@ -12,10 +12,17 @@ scripts\dev\build.bat
 
 :: Focused frontend Vitest plus CTest against the existing native build
 scripts\dev\test.bat
+
+:: Unsigned packaged desktop prototype plus smoke launch
+scripts\dev\package-windows.bat
 ```
 
 The verifier defaults the native build directory to
 `%LOCALAPPDATA%\RPGCreatorAI\build`.
+
+Successful full verification ends with `=== ALL PASSED ===`. The package
+helper ends with `PACKAGED SMOKE PASSED` and
+`=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
 
 ## Why
 The repository on this machine lives under `C:\Users\<user>\OneDrive\Escritorio\RPGCreatorAI`. OneDrive's filter driver intermittently locks files inside `build/_deps/` while CMake's `FetchContent` is performing rename steps (e.g. `json-populate1234/json` -> `json-src`). The symptom is:
@@ -155,6 +162,14 @@ run this fresh-app-data smoke when changing shell directory policy:
 .\scripts\dev\smoke-first-run-app-data.ps1
 ```
 
+Runtime diagnostics and failed-launch support steps are documented in
+`docs/DIAGNOSTICS.md`. After changing runtime log, snapshot, or diagnostics
+bridge behavior, run:
+
+```powershell
+.\scripts\dev\verify-diagnostics.ps1
+```
+
 ## Cleaning up
 
 The build dir lives outside the repo, so `git clean` won't touch it. Remove it explicitly when needed:
@@ -174,9 +189,9 @@ rmdir /s /q "%LOCALAPPDATA%\RPGCreatorAI\build"
 
 The scripts auto-discover all three.
 
-## Canonical gate
+## Canonical Local Gate
 
-`scripts\dev\verify.ps1` is the source-of-truth MVP validation command. By
+`scripts\dev\verify.ps1` is the source-of-truth local validation command. By
 default it runs:
 
 - frontend typecheck
@@ -189,6 +204,19 @@ default it runs:
 - editor-runtime roundtrip validation
 
 Each gate prints its own header and the script ends with a gate summary.
+
+## Known nonfatal warnings
+
+These warnings are expected in the current Windows setup only when the command
+still prints its success marker:
+
+- Vite can warn that one built chunk is larger than 500 kB.
+- CMake can print FetchContent CMP0135 developer warnings.
+- Dependency `cmake_minimum_required` deprecation warnings can appear while
+  configuring bundled third-party projects.
+- PkgConfig can be missing during SDL/CMake configuration.
+- Runtime smoke can warn about missing optional sample WAV files or an
+  unavailable WASAPI/audio endpoint; the runtime continues silently.
 
 ## Frontend
 
@@ -203,4 +231,4 @@ npm test
 
 ## Runtime smoke
 
-`scripts\dev\smoke-runtime.ps1` accepts `-BuildDir` and now defaults to the same `%LOCALAPPDATA%\RPGCreatorAI\build` location. It launches the runtime from the repo root so `data/` paths resolve correctly, captures stdout/stderr, runs the deterministic `--smoke-shots` feature path into `docs\screenshots\phase10-mvp`, and fails on any `[ERROR]` lines or missing MVP smoke markers.
+`scripts\dev\smoke-runtime.ps1` accepts `-BuildDir` and now defaults to the same `%LOCALAPPDATA%\RPGCreatorAI\build` location. It launches the runtime from the repo root so `data/` paths resolve correctly, captures stdout/stderr, runs the deterministic `--smoke-shots` feature path into `docs\screenshots\phase10-mvp`, and fails on any `[ERROR]` lines or missing feature-smoke markers.

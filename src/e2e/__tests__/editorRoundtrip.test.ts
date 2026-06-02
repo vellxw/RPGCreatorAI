@@ -153,7 +153,7 @@ describe('editor roundtrip', () => {
     delete window.rpgBridge;
   });
 
-  it('keeps the editor-runtime roundtrip script wired to every MVP gate', () => {
+  it('keeps the editor-runtime roundtrip script wired to every current gate', () => {
     const script = readFileSync(join(process.cwd(), 'scripts/dev/verify-editor-runtime-roundtrip.ps1'), 'utf8');
     const wrapper = readFileSync(join(process.cwd(), 'scripts/dev/verify-editor-runtime-roundtrip.bat'), 'utf8');
 
@@ -170,10 +170,12 @@ describe('editor roundtrip', () => {
       'cargo test --manifest-path src-tauri/Cargo.toml',
       'verify.ps1',
       'smoke-runtime.ps1',
+      'Get-Sha256FileHash',
     ]) {
       expect(script).toContain(expected);
     }
 
+    expect(script).not.toContain('Get-FileHash');
     expect(wrapper).toContain('-ExecutionPolicy Bypass');
     expect(wrapper).toContain('verify-editor-runtime-roundtrip.ps1');
     expect(wrapper).toContain('%*');

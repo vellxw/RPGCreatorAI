@@ -2840,3 +2840,96 @@ Error: Port 1420 is already in use
 - `2026-06-01 20:35:40 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-50 / CP-015 — build, run, and packaging docs refresh
+
+- `2026-06-01 21:18:25 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS; 1 test
+  file and 8 tests passed after adding documentation alignment coverage for
+  the current Phase 11 command set.
+- `2026-06-01 21:18:25 -03:00` — `npm install` — PASS; dependencies were
+  already up to date, 159 packages audited, 0 vulnerabilities.
+- `2026-06-01 21:18:25 -03:00` —
+  `cmd /c "cmake --preset windows-dev && cmake --build --preset windows-dev && ctest --preset windows-dev"`
+  — PASS; native configure/build/CTest completed with 1/1 CTest tests passed.
+  Non-fatal warnings matched the docs: missing PkgConfig plus CMake
+  FetchContent CMP0135/deprecation warnings.
+- `2026-06-01 21:18:25 -03:00` — `npm run verify:windows` — RED; the
+  canonical gate reached the editor/runtime roundtrip and failed because this
+  Windows PowerShell host did not provide `Get-FileHash`. Fix applied:
+  `scripts/dev/verify-editor-runtime-roundtrip.ps1` now computes SHA-256 via
+  .NET `System.Security.Cryptography.SHA256`, and the e2e coverage asserts the
+  helper is used instead of `Get-FileHash`.
+- `2026-06-01 21:18:25 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts src/e2e/__tests__/verifyScript.test.ts`
+  — PASS; 2 test files and 12 tests passed after the roundtrip hash helper
+  fix.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1`
+  — PASS; frontend roundtrip tests, Tauri content check, Rust desktop tests,
+  native build/test, runtime smoke, and screenshot hash roundtrip completed
+  with `=== ALL PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` — `npm run verify:windows` — PASS; canonical
+  local gate completed frontend typecheck, full Vitest, frontend build, native
+  C++ configure/build/CTest, Tauri content check, Rust desktop tests, runtime
+  smoke, and editor-runtime roundtrip with `=== ALL PASSED ===`. Known
+  non-fatal warnings matched the refreshed docs: Vite chunk-size warning,
+  CMake/PkgConfig warnings, and optional runtime sample-audio/WASAPI warnings.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS; native configure/build/CTest completed and reported
+  `=== ALL PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1`
+  — PASS; Vitest reported 36 files and 222 tests passed, then CTest reported
+  1/1 tests passed with `=== TESTS PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`
+  — PASS; native runtime smoke reported `SMOKE PASSED` with the documented
+  optional audio warning.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1`
+  — PASS; diagnostics contract reported `RUNTIME DIAGNOSTICS VERIFY PASSED`.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  — PASS; release branding verifier reported `BRANDING ASSETS PASSED`.
+- `2026-06-01 21:18:25 -03:00` — `npm run desktop:package:windows` — PASS;
+  package prototype built the Tauri debug no-bundle shell, copied the native
+  runtime beside the shell, smoke-launched the packaged app, and reported
+  `PACKAGED SMOKE PASSED` plus
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1`
+  — PASS; fresh app-data package smoke reported
+  `FIRST-RUN APP DATA SMOKE PASSED`.
+- `2026-06-01 21:18:25 -03:00` —
+  `cmd /c scripts\dev\verify.bat -SkipFrontend -SkipDesktop -SkipSmoke` —
+  PASS; wrapper invoked the PowerShell gate, native configure/build/test
+  passed, and the gate printed `=== ALL PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` —
+  `cmd /c scripts\dev\test.bat -SkipFrontend` — PASS; CTest reported 1/1
+  tests passed and the wrapper printed `=== TESTS PASSED ===`.
+- `2026-06-01 21:18:25 -03:00` —
+  `cmd /c scripts\dev\verify-branding-assets.bat` — PASS; wrapper reported
+  `BRANDING ASSETS PASSED`.
+- `2026-06-01 21:18:25 -03:00` —
+  `cmd /c scripts\dev\package-windows.bat -SkipNativeBuild -SkipSmoke` —
+  PASS; package helper completed the debug no-bundle build, copied the runtime,
+  intentionally skipped smoke, and reported
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- `2026-06-01 21:19:35 -03:00` —
+  `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after documentation/task/log updates; 2 test files and 12 tests
+  passed.
+- `2026-06-01 21:19:35 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-01 21:21:24 -03:00` — `cmd /c scripts\dev\build.bat` — PASS;
+  wrapper invoked the PowerShell build helper, native configure/build/CTest
+  passed, and the gate printed `=== ALL PASSED ===`.
+- `2026-06-01 21:21:24 -03:00` — `cmd /c scripts\dev\smoke-runtime.bat` —
+  PASS; wrapper launched the deterministic runtime smoke and reported
+  `SMOKE PASSED` with documented optional audio warnings.
+- `2026-06-01 21:21:24 -03:00` —
+  `cmd /c scripts\dev\verify-diagnostics.bat` — PASS; wrapper ran the Rust
+  diagnostics test, focused Vitest diagnostics tests, frontend typecheck, and
+  reported `RUNTIME DIAGNOSTICS VERIFY PASSED`.
+

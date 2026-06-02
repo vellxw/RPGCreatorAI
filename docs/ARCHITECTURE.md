@@ -13,6 +13,34 @@ The RPG Creator Runtime is a data-driven engine. It separates logic, rendering, 
 - **Plugin commands are deterministic dispatch.** `pluginCommand` data is
   matched against allowlisted registry keys such as `debug.log`; it is not a
   scripting VM and never evaluates project-authored code.
+- **AI is editor/tooling-only.** The native runtime does not depend on AI
+  providers, network access, cloud services, or provider credentials.
+
+## Editor, Desktop Shell, And Runtime Boundary
+
+RPGCreatorAI currently has three runtime contexts:
+
+- Browser editor (`npm run dev`): React/Vite UI only. It can edit through the
+  browser adapter, but it cannot spawn native processes, create desktop
+  playtest sessions, or read native runtime diagnostics.
+- Desktop shell (`npm run desktop:dev`): Tauri hosts the same React editor and
+  exposes a narrow IPC surface for project filesystem access, temporary
+  playtest session creation, runtime launch/kill/status, runtime diagnostics,
+  and recent-project config.
+- Native C++ runtime (`rpg_creator_runtime.exe`): reads project JSON from its
+  current directory, executes deterministic engine systems, and writes local
+  stdout/stderr diagnostics when launched by the desktop shell.
+
+Desktop playtest writes temporary session roots under the app-data directory
+and launches the native runtime with that session as `current_dir`; source
+project files are not mutated by playtest launch. Runtime logs and snapshots
+live under the shared diagnostics folder documented in `docs/DIAGNOSTICS.md`.
+
+The current Windows packaged prototype is an unsigned Tauri debug no-bundle
+build with `rpg_creator_runtime.exe` copied beside the produced shell
+executable. Packaging policy and commands are documented in
+`docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`, `docs/BUILD_AND_RUN.md`, and
+`docs/WINDOWS_BUILD_NOTES.md`.
 
 ## What is Engine vs Project
 **Engine:**

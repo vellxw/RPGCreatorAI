@@ -58,7 +58,7 @@ Primary Phase 11 sources:
   charter, repo/product audit, risk register, provider/legal baseline, backlog
   source, execution protocol, validation baseline, and planning integration
   gate are versioned and aligned with Linear milestone 00.
-- Phase 11 CP-009 through CP-014 — release hardening started. Windows native
+- Phase 11 CP-009 through CP-015 — release hardening started. Windows native
   builds now default out of OneDrive, restricted-policy `.bat` wrappers exist,
   the local unsigned Tauri package prototype builds and smoke-launches with a
   colocated runtime, CP-011 defines the unsigned artifact, version naming,
@@ -68,7 +68,11 @@ Primary Phase 11 sources:
   sessions, documents cleanup, and adds a fresh-app-data package smoke. CP-014
   exposes a stable runtime diagnostics query, displays the diagnostics folder
   in Playtest before the first log exists, and documents failed-startup and
-  failed-runtime-launch support paths.
+  failed-runtime-launch support paths. CP-015 refreshes README, build/run,
+  Windows build, runtime bridge, and architecture docs so the documented
+  developer, desktop, packaging, smoke, diagnostics, branding, and first-run
+  commands match the current Phase 11 behavior, including known non-fatal
+  warnings and browser-only limitations.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

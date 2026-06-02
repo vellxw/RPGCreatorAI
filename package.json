@@ -33,6 +33,7 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm test && npm run build",
+    "verify:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1",
     "verify:mvp:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1",
     "verify:runtime:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke -SkipFrontend -SkipDesktop",
     "test": "vitest run",

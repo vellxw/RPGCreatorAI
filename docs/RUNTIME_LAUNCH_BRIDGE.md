@@ -1,6 +1,6 @@
 # Runtime Launch Bridge
 
-## Status After FRA-33
+## Current Status After CP-014
 
 The desktop playtest flow now builds a temporary project root before
 launching the native C++ runtime. The source project folder is used only as
@@ -19,10 +19,12 @@ Browser mode remains honest: it can run the simulated editor preview, but it
 cannot create native playtest sessions, spawn the runtime, or read native
 runtime logs or state snapshots.
 
-FRA-33 validated the integrated Playtest/Debug surface together: no `PT-*`
-branch refs remained after pruning, the PT-001 through PT-005 commits were
-already present on `main`, and the frontend, desktop, and Tauri content gates
-passed against the same tree.
+Phase 11 packaging uses the current unsigned Tauri debug no-bundle prototype:
+`npm run desktop:package:windows` builds the frontend shell, copies
+`rpg_creator_runtime.exe` beside the produced desktop executable, and
+smoke-launches the packaged app. Build, package, diagnostics, and first-run
+commands are documented in `docs/BUILD_AND_RUN.md` and
+`docs/WINDOWS_BUILD_NOTES.md`.
 
 For the user workflow, browser mode is preview-only for native capabilities.
 Use `npm run desktop:dev` when a creator needs real filesystem save/load,

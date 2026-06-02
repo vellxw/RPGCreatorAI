@@ -7,7 +7,7 @@
 - Visual Studio Build Tools or Visual Studio with the C++ workload.
 - CMake and Ninja.
 
-## Canonical MVP verification
+## Canonical Local Verification
 
 Run the full local green gate from the repository root:
 
@@ -19,6 +19,13 @@ This command runs frontend typecheck, Vitest, frontend build, native C++
 configure/build/CTest, Tauri content verification, Rust desktop tests,
 runtime smoke, and editor-runtime roundtrip validation. The native build
 defaults to `%LOCALAPPDATA%\RPGCreatorAI\build` to avoid OneDrive file locks.
+A successful run ends with `=== ALL PASSED ===`.
+
+NPM alias:
+
+```powershell
+npm run verify:windows
+```
 
 Targeted skip flags for local diagnosis:
 
@@ -50,6 +57,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps
 
 # Runtime diagnostics entry point and no-log failure-path coverage.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1
+
+# Release branding metadata/icon checks.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
 ```
 
 Equivalent `.bat` wrappers are available when direct PowerShell script
@@ -60,7 +70,32 @@ scripts\dev\build.bat
 scripts\dev\test.bat
 scripts\dev\smoke-runtime.bat
 scripts\dev\verify-diagnostics.bat
+scripts\dev\verify-branding-assets.bat
 ```
+
+Expected success markers:
+
+| Command | Success marker |
+| --- | --- |
+| `scripts/dev/verify.ps1` | `=== ALL PASSED ===` |
+| `scripts/dev/build.ps1` | native CTest reports `100% tests passed` |
+| `scripts/dev/test.ps1` | `=== TESTS PASSED ===` |
+| `scripts/dev/smoke-runtime.ps1` | `SMOKE PASSED` |
+| `scripts/dev/verify-diagnostics.ps1` | `RUNTIME DIAGNOSTICS VERIFY PASSED` |
+| `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
+| `npm run desktop:package:windows` | `PACKAGED SMOKE PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
+| `scripts/dev/smoke-first-run-app-data.ps1` | `FIRST-RUN APP DATA SMOKE PASSED` |
+
+Known nonfatal warnings in the current Windows environment:
+
+- Vite can warn that one built chunk is larger than 500 kB.
+- CMake can print FetchContent CMP0135 developer warnings and dependency
+  `cmake_minimum_required` deprecation warnings.
+- PkgConfig can be missing during SDL/CMake configuration.
+- Runtime smoke can warn about a missing WASAPI/audio endpoint and missing
+  optional sample WAV files.
+
+Treat those as nonfatal only when the command still prints its success marker.
 
 For manual CMake diagnosis on Windows, prefer the out-of-OneDrive preset:
 
@@ -70,7 +105,7 @@ cmake --build --preset windows-dev
 ctest --preset windows-dev
 ```
 
-## Development server
+## Development Server
 
 ```bash
 npm install
@@ -79,7 +114,8 @@ npm run dev
 
 `npm run dev` starts browser mode on port 3000. Browser mode is useful for
 editing and UI checks, but it cannot spawn native processes, create native
-playtest sessions, read runtime logs, or read runtime state snapshots.
+playtest sessions, read runtime logs, or read runtime state snapshots. This is
+an interactive long-running server command; stop it with `Ctrl+C`.
 
 The desktop dev server uses the strict Tauri port:
 
@@ -94,7 +130,9 @@ npm run desktop:dev
 ```
 
 Tauri uses `npm run dev:tauri` as its `beforeDevCommand` and opens the editor
-against `http://localhost:1420`.
+against `http://localhost:1420`. This is also an interactive long-running
+command. Noninteractive content verification is covered by `verify.ps1` and
+`npm run desktop:verify-content`.
 
 ## Packaged Windows prototype
 
@@ -107,8 +145,9 @@ npm run desktop:package:windows
 The helper builds the native runtime, runs `tauri build --debug --no-bundle`,
 sets `CARGO_TARGET_DIR` to `%LOCALAPPDATA%\RPGCreatorAI\tauri-target`, copies
 `rpg_creator_runtime.exe` next to the produced Tauri executable, and
-smoke-launches the packaged app. This prototype intentionally does not create
-an installer; the installer/signing policy is defined in
+smoke-launches the packaged app. A successful run prints `PACKAGED SMOKE
+PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. This prototype
+intentionally does not create an installer; the installer/signing policy is defined in
 `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`.
 
 Current release metadata is aligned at version `0.5.0` across npm, Tauri, and
@@ -134,6 +173,9 @@ temporary `APPDATA` and `LOCALAPPDATA` roots:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
 ```
 
+Diagnostics and failed-launch troubleshooting are documented in
+`docs/DIAGNOSTICS.md`.
+
 ## User workflow
 
 1. Use `npm run desktop:dev` for real filesystem persistence and native
@@ -149,11 +191,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-
    Diagnostics folders and failed-launch troubleshooting are documented in
    `docs/DIAGNOSTICS.md`.
 
-## MVP limitations
+## Current Limitations
 
 - Browser mode does not fake native filesystem/runtime capabilities.
 - Runtime data is local JSON plus committed assets; there is no cloud service,
   marketplace, proprietary project import, scripting VM, or runtime AI
-  dependency in the MVP.
+  dependency.
 - Audio files are optional local assets. Missing files/devices warn and
   continue.
