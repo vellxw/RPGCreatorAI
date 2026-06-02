@@ -11,6 +11,7 @@ import {
 import { Badge } from '../components/ui/Badge';
 import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import { ProviderCapabilityGatesPanel } from '../components/ai/ProviderCapabilityGatesPanel';
+import { ProviderCostBudgetPanel } from '../components/ai/ProviderCostBudgetPanel';
 import {
   defaultProviderConfigs,
   providerStatusFor,
@@ -349,6 +350,8 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
             </div>
 
             <ProviderCapabilityGatesPanel providers={providers.map(providerWithCredentialStatus)} />
+
+            <ProviderCostBudgetPanel providers={providers.map(providerWithCredentialStatus)} />
 
             <div className="rounded-md border border-gray-200 bg-white p-4">
               <div className="mb-3 flex items-center gap-2">

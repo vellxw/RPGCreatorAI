@@ -25,6 +25,29 @@ function statusLabel(job: AiRequestJob): string {
   return job.state.charAt(0).toUpperCase() + job.state.slice(1);
 }
 
+function costLabel(job: AiRequestJob): string | null {
+  if (!job.cost) return null;
+  if (job.cost.availability === 'free') return 'Cost: free/offline';
+  if (job.cost.availability === 'estimated') {
+    const estimate = job.cost.estimatedUsd;
+    return estimate !== undefined ? `Estimated cost: $${estimate.toFixed(2)}` : 'Estimated cost unavailable';
+  }
+  return 'Cost: unknown';
+}
+
+function rateLimitLabel(job: AiRequestJob): string | null {
+  if (!job.rateLimit) return null;
+  if (job.rateLimit.status === 'rate-limited') {
+    return job.rateLimit.retryAfterSeconds !== undefined
+      ? `Rate limited; retry after ${job.rateLimit.retryAfterSeconds}s`
+      : 'Rate limited; wait for provider retry guidance';
+  }
+  if (job.rateLimit.status === 'quota-exceeded') return 'Quota exceeded';
+  if (job.rateLimit.status === 'not-applicable') return 'No remote rate limit';
+  if (job.rateLimit.status === 'provider-managed') return 'Provider-managed limits';
+  return 'Rate limits unknown';
+}
+
 export function AIRequestQueuePanel({ queue, onCancel, onRetry }: AIRequestQueuePanelProps) {
   const summary = selectAiRequestQueueSummary(queue);
 
@@ -110,6 +133,18 @@ export function AIRequestQueuePanel({ queue, onCancel, onRetry }: AIRequestQueue
                 <p className={`mt-2 text-[11px] leading-4 ${job.error ? 'text-red-700' : 'text-gray-500'}`}>
                   {job.error ?? job.resultSummary ?? job.message}
                 </p>
+              )}
+              {(costLabel(job) || rateLimitLabel(job) || job.budgetConfirmation?.status === 'required') && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {costLabel(job) && <Badge variant="muted">{costLabel(job)}</Badge>}
+                  {rateLimitLabel(job) && <Badge variant={job.rateLimit?.status === 'quota-exceeded' ? 'error' : 'muted'}>{rateLimitLabel(job)}</Badge>}
+                  {job.budgetConfirmation?.status === 'required' && (
+                    <Badge variant="warning">Budget confirmation required</Badge>
+                  )}
+                </div>
+              )}
+              {job.rateLimit?.retryGuidance && (
+                <p className="mt-1 text-[10px] leading-4 text-gray-400">{job.rateLimit.retryGuidance}</p>
               )}
               {job.writeIntentId && (
                 <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-gray-400">

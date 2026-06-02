@@ -15,6 +15,8 @@ dependency, credential read, project mutation, or native runtime dependency.
 - supported operation ids:
   `text.generate`, `image.generate`, `image.edit`, `vision.analyze`,
   `code.assist`, `audio.generate`, and `video.generate`
+- cost availability, paid-work confirmation policy, and provider-managed
+  rate-limit/quota recovery guidance added by CP-062
 - model-list policy; CP-061 adds model capability descriptors and workflow
   gates on top of this provider-level metadata
 - optional base URL metadata for OpenAI-compatible providers
@@ -36,7 +38,9 @@ validate the adapter shape offline.
 Requests carry an id, provider id, operation id, created timestamp, optional
 model id, prompt, and structured input. Responses use one shared shape for
 `succeeded`, `failed`, and `cancelled` outcomes, with optional output and usage
-metadata.
+metadata. CP-062 adds optional structured failure metadata so rate-limit,
+quota, budget, unsupported-operation, provider-error, and cancellation states
+can carry retry guidance without parsing display copy.
 
 ## Mock Adapter
 
@@ -48,6 +52,7 @@ deterministic, local, and fixture-only:
 - returns deterministic text and usage metadata
 - returns structured cancellation when an `AbortSignal` is already aborted
 - returns structured failure for unsupported operations
+- returns deterministic fixture failures for rate-limit and quota states
 
 ## Settings Boundary
 

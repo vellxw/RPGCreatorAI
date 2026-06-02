@@ -75,4 +75,31 @@ describe('mockProviderAdapter', () => {
     });
     expect(result.output).toBeUndefined();
   });
+
+  it('reports fixture rate-limit and quota failures with retry guidance', async () => {
+    const adapter = createMockProviderAdapter();
+
+    await expect(adapter.execute(textRequest({
+      id: 'rate-limit-1',
+      input: { fixtureFailure: 'rate-limit', retryAfterSeconds: 90 },
+    }))).resolves.toMatchObject({
+      status: 'failed',
+      failure: {
+        kind: 'rate-limit',
+        retryAfterSeconds: 90,
+        retryGuidance: 'Wait 90 seconds before retrying this provider request.',
+      },
+    });
+
+    await expect(adapter.execute(textRequest({
+      id: 'quota-1',
+      input: { fixtureFailure: 'quota-exceeded' },
+    }))).resolves.toMatchObject({
+      status: 'failed',
+      failure: {
+        kind: 'quota-exceeded',
+        retryGuidance: 'Review provider quota or budget settings before retrying.',
+      },
+    });
+  });
 });

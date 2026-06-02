@@ -28,11 +28,36 @@ export interface ProviderCredentialMetadata {
   envVar?: string;
 }
 
+export type ProviderCostEstimateAvailability = 'free' | 'estimated' | 'unknown';
+export type ProviderCostConfirmationPolicy =
+  | 'none'
+  | 'confirm-paid-session'
+  | 'confirm-expensive-session';
+
+export interface ProviderCostMetadata {
+  estimateAvailability: ProviderCostEstimateAvailability;
+  paidOperations: boolean;
+  confirmationPolicy: ProviderCostConfirmationPolicy;
+  currency?: 'USD';
+  expensiveJobThresholdUsd?: number;
+  detail?: string;
+}
+
+export type ProviderRateLimitStatus = 'not-applicable' | 'provider-managed' | 'unknown';
+
+export interface ProviderRateLimitMetadata {
+  status: ProviderRateLimitStatus;
+  retryGuidance: string;
+  quotaGuidance?: string;
+}
+
 export interface ProviderMetadata {
   id: string;
   name: string;
   adapterKind: ProviderAdapterKind;
   credential: ProviderCredentialMetadata;
+  cost: ProviderCostMetadata;
+  rateLimit: ProviderRateLimitMetadata;
   operations: ProviderOperation[];
   capabilityLabels?: string[];
   models: ProviderModelDescriptor[];
@@ -53,12 +78,40 @@ const operationLabels: Record<ProviderOperation, string> = {
   'video.generate': 'Video generation',
 };
 
+const paidUnknownCost: ProviderCostMetadata = {
+  estimateAvailability: 'unknown',
+  paidOperations: true,
+  confirmationPolicy: 'confirm-paid-session',
+  currency: 'USD',
+  detail: 'Exact pricing is not stored in this local registry.',
+};
+
+const freeOfflineCost: ProviderCostMetadata = {
+  estimateAvailability: 'free',
+  paidOperations: false,
+  confirmationPolicy: 'none',
+  detail: 'Offline mock provider does not call paid services.',
+};
+
+const providerManagedRateLimit: ProviderRateLimitMetadata = {
+  status: 'provider-managed',
+  retryGuidance: 'Retry only after provider guidance or a returned retry-after interval.',
+  quotaGuidance: 'Review provider dashboard quota and local budget settings before retrying.',
+};
+
+const noRemoteRateLimit: ProviderRateLimitMetadata = {
+  status: 'not-applicable',
+  retryGuidance: 'No remote provider retry window applies to offline mock requests.',
+};
+
 export const defaultProviderRegistry: ProviderMetadata[] = [
   {
     id: 'openai',
     name: 'OpenAI',
     adapterKind: 'official-api',
     credential: { required: true, envVar: 'OPENAI_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'image.generate', 'image.edit', 'vision.analyze'],
     models: [],
     modelSelection: 'user-selected',
@@ -68,6 +121,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'Anthropic Claude',
     adapterKind: 'official-api',
     credential: { required: true, envVar: 'ANTHROPIC_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'code.assist'],
     capabilityLabels: ['Text generation', 'Code assistance', 'Planning'],
     models: [],
@@ -78,6 +133,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'Kimi / Moonshot',
     adapterKind: 'openai-compatible',
     credential: { required: true, envVar: 'MOONSHOT_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'code.assist'],
     capabilityLabels: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
     models: [],
@@ -89,6 +146,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'DeepSeek',
     adapterKind: 'openai-compatible',
     credential: { required: true, envVar: 'DEEPSEEK_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'code.assist'],
     capabilityLabels: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
     models: [],
@@ -99,6 +158,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'MiniMax',
     adapterKind: 'official-api',
     credential: { required: true, envVar: 'MINIMAX_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'image.generate', 'video.generate', 'audio.generate'],
     models: [],
     modelSelection: 'user-selected',
@@ -108,6 +169,16 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'OpenCode adapter',
     adapterKind: 'external-tool',
     credential: { required: false },
+    cost: {
+      estimateAvailability: 'unknown',
+      paidOperations: false,
+      confirmationPolicy: 'none',
+      detail: 'External tool cost is outside the provider registry.',
+    },
+    rateLimit: {
+      status: 'unknown',
+      retryGuidance: 'Review the external tool output before retrying.',
+    },
     operations: ['code.assist'],
     capabilityLabels: ['Code assistance', 'External tool adapter'],
     models: [],
@@ -118,6 +189,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'Custom OpenAI-compatible endpoint',
     adapterKind: 'openai-compatible',
     credential: { required: true, envVar: 'CUSTOM_OPENAI_API_KEY' },
+    cost: paidUnknownCost,
+    rateLimit: providerManagedRateLimit,
     operations: ['text.generate'],
     capabilityLabels: ['Text generation', 'OpenAI-compatible endpoint'],
     models: [],
@@ -129,6 +202,8 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     name: 'Local gateway',
     adapterKind: 'mock-local',
     credential: { required: false },
+    cost: freeOfflineCost,
+    rateLimit: noRemoteRateLimit,
     operations: ['text.generate'],
     capabilityLabels: ['Offline mock contracts'],
     models: [
@@ -170,5 +245,9 @@ export function providerConfigsFromRegistry(
     credentialEnvVar: provider.credential.envVar,
     credentialState: provider.credential.required ? 'missing' : 'not-required',
     capabilities: providerCapabilityLabels(provider),
+    costEstimateAvailability: provider.cost.estimateAvailability,
+    rateLimitStatus: provider.rateLimit.status,
+    requiresPaidJobConfirmation: provider.cost.confirmationPolicy !== 'none',
+    expensiveJobThresholdUsd: provider.cost.expensiveJobThresholdUsd,
   }));
 }

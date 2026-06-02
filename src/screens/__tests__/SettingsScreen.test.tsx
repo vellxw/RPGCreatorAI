@@ -100,6 +100,9 @@ describe('SettingsScreen provider settings', () => {
     expect(text).toContain('Configured');
     expect(model?.value).toBe('gpt-image-2');
     expect(text).toContain('Image editing');
+    expect(text).toContain('Cost & Budget');
+    expect(text).toContain('Cost unknown');
+    expect(text).toContain('Confirm paid work per session');
     const credential = view.container.querySelector<HTMLInputElement>('input[type="password"]');
     expect(credential?.value).toBe('');
 

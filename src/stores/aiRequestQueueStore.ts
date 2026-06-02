@@ -1,6 +1,32 @@
 import { useEffect, useReducer } from 'react';
 
 export type AiRequestJobState = 'queued' | 'running' | 'cancelled' | 'failed' | 'succeeded';
+export type AiRequestCostAvailability = 'free' | 'estimated' | 'unknown';
+export type AiRequestRateLimitStatus =
+  | 'not-applicable'
+  | 'provider-managed'
+  | 'unknown'
+  | 'rate-limited'
+  | 'quota-exceeded';
+
+export interface AiRequestCostState {
+  availability: AiRequestCostAvailability;
+  estimatedUsd?: number;
+  currency?: 'USD';
+  confirmationThresholdUsd?: number;
+}
+
+export interface AiRequestBudgetConfirmation {
+  status: 'not-required' | 'required' | 'confirmed';
+  scope: 'session';
+  confirmedAt?: string;
+}
+
+export interface AiRequestRateLimitState {
+  status: AiRequestRateLimitStatus;
+  retryAfterSeconds?: number;
+  retryGuidance?: string;
+}
 
 export interface AiRequestJob {
   id: string;
@@ -20,6 +46,9 @@ export interface AiRequestJob {
   message?: string;
   error?: string;
   resultSummary?: string;
+  cost?: AiRequestCostState;
+  budgetConfirmation?: AiRequestBudgetConfirmation;
+  rateLimit?: AiRequestRateLimitState;
 }
 
 export interface AiRequestQueueState {
@@ -31,7 +60,8 @@ export interface AiRequestQueueState {
 export type AiRequestQueueRejectReason =
   | 'queue-full'
   | 'duplicate-active-idempotency-key'
-  | 'duplicate-succeeded-write-intent';
+  | 'duplicate-succeeded-write-intent'
+  | 'budget-confirmation-required';
 
 export type AiRequestQueueAction =
   | { type: 'enqueue'; job: AiRequestJob }
@@ -85,6 +115,44 @@ function normalizeJob(job: AiRequestJob, fallbackNow: string): AiRequestJob {
     maxRetries: Math.max(0, Math.floor(job.maxRetries || 0)),
     createdAt: job.createdAt || fallbackNow,
     updatedAt: job.updatedAt || fallbackNow,
+    cost: normalizeCost(job.cost),
+    budgetConfirmation: normalizeBudgetConfirmation(job.budgetConfirmation),
+    rateLimit: normalizeRateLimit(job.rateLimit),
+  };
+}
+
+function normalizeCost(cost: AiRequestJob['cost']): AiRequestJob['cost'] {
+  if (!cost) return undefined;
+  return {
+    ...cost,
+    estimatedUsd: typeof cost.estimatedUsd === 'number' && Number.isFinite(cost.estimatedUsd)
+      ? Math.max(0, cost.estimatedUsd)
+      : undefined,
+    confirmationThresholdUsd:
+      typeof cost.confirmationThresholdUsd === 'number' && Number.isFinite(cost.confirmationThresholdUsd)
+        ? Math.max(0, cost.confirmationThresholdUsd)
+        : undefined,
+  };
+}
+
+function normalizeBudgetConfirmation(
+  confirmation: AiRequestJob['budgetConfirmation'],
+): AiRequestJob['budgetConfirmation'] {
+  if (!confirmation) return undefined;
+  return {
+    ...confirmation,
+    scope: 'session',
+  };
+}
+
+function normalizeRateLimit(rateLimit: AiRequestJob['rateLimit']): AiRequestJob['rateLimit'] {
+  if (!rateLimit) return undefined;
+  return {
+    ...rateLimit,
+    retryAfterSeconds:
+      typeof rateLimit.retryAfterSeconds === 'number' && Number.isFinite(rateLimit.retryAfterSeconds)
+        ? Math.max(0, Math.round(rateLimit.retryAfterSeconds))
+        : undefined,
   };
 }
 
@@ -129,6 +197,26 @@ export function canRetryAiJob(job: AiRequestJob): boolean {
   return (job.state === 'failed' || job.state === 'cancelled') && job.attempt - 1 < job.maxRetries;
 }
 
+export function requiresAiJobBudgetConfirmation(job: AiRequestJob): boolean {
+  if (job.budgetConfirmation?.status !== 'required') return false;
+  if (job.cost?.availability === 'unknown') return true;
+  if (job.cost?.availability !== 'estimated') return false;
+  const estimate = job.cost.estimatedUsd ?? 0;
+  const threshold = job.cost.confirmationThresholdUsd ?? Number.POSITIVE_INFINITY;
+  return estimate >= threshold;
+}
+
+export function confirmAiJobBudget(job: AiRequestJob, confirmedAt: string): AiRequestJob {
+  return {
+    ...job,
+    budgetConfirmation: {
+      status: 'confirmed',
+      scope: 'session',
+      confirmedAt,
+    },
+  };
+}
+
 export function restoreAiRequestQueueSnapshot(
   jobs: AiRequestJob[],
   options: CreateQueueOptions = {},
@@ -159,6 +247,7 @@ export function aiRequestQueueReducer(
   switch (action.type) {
     case 'enqueue': {
       const job = normalizeJob(action.job, now);
+      if (requiresAiJobBudgetConfirmation(job)) return reject(state, job.id, 'budget-confirmation-required');
       if (hasActiveDuplicate(state, job)) return reject(state, job.id, 'duplicate-active-idempotency-key');
       if (hasSucceededWriteIntent(state, job)) return reject(state, job.id, 'duplicate-succeeded-write-intent');
       if (state.jobs.length >= state.maxJobs) return reject(state, job.id, 'queue-full');

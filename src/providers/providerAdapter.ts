@@ -1,6 +1,20 @@
 import type { ProviderMetadata, ProviderModelDescriptor, ProviderOperation } from './providerRegistry';
 
 export type ProviderRequestStatus = 'succeeded' | 'failed' | 'cancelled';
+export type ProviderFailureKind =
+  | 'rate-limit'
+  | 'quota-exceeded'
+  | 'budget-exceeded'
+  | 'unsupported-operation'
+  | 'provider-error'
+  | 'cancelled';
+
+export interface ProviderAdapterFailure {
+  kind: ProviderFailureKind;
+  message: string;
+  retryAfterSeconds?: number;
+  retryGuidance?: string;
+}
 
 export interface ProviderUsageEstimate {
   inputTokens?: number;
@@ -33,6 +47,7 @@ export interface ProviderAdapterResponse {
   };
   usage?: ProviderUsageEstimate;
   error?: string;
+  failure?: ProviderAdapterFailure;
 }
 
 export interface ProviderAdapterExecuteOptions {

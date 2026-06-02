@@ -795,6 +795,10 @@ export interface ProviderConfig {
   credentialEnvVar?: string;
   credentialState: 'missing' | 'configured' | 'not-required';
   capabilities: string[];
+  costEstimateAvailability?: 'free' | 'estimated' | 'unknown';
+  rateLimitStatus?: 'not-applicable' | 'provider-managed' | 'unknown';
+  requiresPaidJobConfirmation?: boolean;
+  expensiveJobThresholdUsd?: number;
   notes?: string;
   lastChecked?: string;
 }

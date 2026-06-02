@@ -11,6 +11,9 @@ affect the native runtime.
   `queued`, `running`, `cancelled`, `failed`, and `succeeded`.
 - Jobs include progress, attempts, max retries, provider/capability metadata,
   optional idempotency keys, and optional write-intent ids.
+- Jobs may also carry optional cost, rate-limit, and budget-confirmation
+  state. Expensive estimated-cost jobs that require session confirmation are
+  rejected before enqueueing until confirmed.
 - The queue is bounded to 12 jobs by default and rejects overflow.
 - Duplicate active idempotency keys are rejected to avoid duplicate in-flight
   work.
@@ -28,9 +31,10 @@ active, failed, cancelled, and completed queue state, progress bars,
 cancellation for queued/running jobs, and retry for failed/cancelled jobs when
 attempts remain.
 
-The panel intentionally has no generate/connect/test-provider action. Future
-provider and asset/content issues can enqueue jobs through this boundary after
-their mocked contracts and capability gates exist.
+CP-062 adds job-level cost/rate-limit/budget status chips for future provider
+workflows. The panel intentionally has no generate/connect/test-provider
+action. Future provider and asset/content issues can enqueue jobs through this
+boundary after their mocked contracts and capability gates exist.
 
 ## Validation
 
@@ -38,7 +42,7 @@ Normal validation stays offline:
 
 - queue transition tests cover bounded enqueue, duplicate active idempotency
   keys, running/progress/failure/retry/cancel/success transitions, restart
-  recovery, and summary counts.
+  recovery, budget-confirmation rejection, and summary counts.
 - UI tests cover the empty state, running cancellation, failure copy, and retry
   affordance.
 - Settings regression coverage confirms the queue panel does not reintroduce

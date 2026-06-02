@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   aiRequestQueueReducer,
+  confirmAiJobBudget,
   createAiRequestQueueState,
+  requiresAiJobBudgetConfirmation,
   restoreAiRequestQueueSnapshot,
   selectAiRequestQueueSummary,
   type AiRequestJob,
@@ -112,6 +114,43 @@ describe('aiRequestQueueStore', () => {
       failed: 1,
       succeeded: 0,
       cancelled: 0,
+    });
+  });
+
+  it('requires per-session confirmation before enqueueing expensive estimated-cost jobs', () => {
+    const expensiveJob = queuedJob({
+      id: 'expensive-image-job',
+      capability: 'image',
+      cost: {
+        availability: 'estimated',
+        estimatedUsd: 2.25,
+        currency: 'USD',
+        confirmationThresholdUsd: 1,
+      },
+      budgetConfirmation: {
+        status: 'required',
+        scope: 'session',
+      },
+    });
+    let state = createAiRequestQueueState({ now: () => '2026-06-02T12:00:00.000Z' });
+
+    expect(requiresAiJobBudgetConfirmation(expensiveJob)).toBe(true);
+
+    state = aiRequestQueueReducer(state, { type: 'enqueue', job: expensiveJob });
+    expect(state.jobs).toHaveLength(0);
+    expect(state.rejected).toEqual([
+      { jobId: 'expensive-image-job', reason: 'budget-confirmation-required' },
+    ]);
+
+    const confirmed = confirmAiJobBudget(expensiveJob, '2026-06-02T12:00:01.000Z');
+    state = aiRequestQueueReducer(state, { type: 'enqueue', job: confirmed });
+
+    expect(state.jobs[0]).toMatchObject({
+      id: 'expensive-image-job',
+      budgetConfirmation: {
+        status: 'confirmed',
+        confirmedAt: '2026-06-02T12:00:01.000Z',
+      },
     });
   });
 });

@@ -4,6 +4,63 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-97 / CP-062 — cost, rate-limit, and budget states
+
+- `2026-06-02 13:36:32 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/mockProviderAdapter.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — RED as expected before implementation; `providerCostBudget` and
+  `ProviderCostBudgetPanel` modules did not exist, the mock adapter ignored
+  fixture rate-limit failures, Settings had no cost/budget panel, and the
+  queue had no budget-confirmation helpers.
+- `2026-06-02 13:39:59 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/mockProviderAdapter.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 5 focused files and 17 tests passed after adding provider
+  cost/rate-limit metadata, the Settings cost/budget panel, mock
+  rate-limit/quota fixture failures, and queue budget-confirmation rejection.
+- `2026-06-02 13:40:19 -03:00` — `npm run typecheck` — FAIL;
+  TypeScript reported duplicate `scope` assignment in
+  `normalizeBudgetConfirmation`. Fix applied: spread confirmation first and
+  then pin the normalized scope to `session`.
+- `2026-06-02 13:40:58 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:43:20 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 8 focused regression files and 24 tests passed.
+- `2026-06-02 13:43:35 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:43:35 -03:00` — `npm test -- --run` — PASS; 73
+  Vitest files and 384 tests passed.
+- `2026-06-02 13:44:28 -03:00` — `npm run build` — PASS; Vite
+  transformed 1940 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 13:47:55 -03:00` — Playwright CLI Settings smoke against
+  `npm run dev` at `http://127.0.0.1:3000/` — FAIL; the new panel showed
+  unknown cost and rate-limit state but hid `Confirm paid work per session`
+  while providers were still disabled. Fix applied: cost/budget metadata now
+  shows paid-work confirmation policy before provider setup, while execution
+  readiness remains a separate state.
+- `2026-06-02 13:48:20 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 3 focused files and 7 tests passed after the budget-policy display
+  fix.
+- `2026-06-02 13:49:08 -03:00` — Playwright CLI Settings smoke against
+  `npm run dev` at `http://127.0.0.1:3000/` — PASS; opened the bundled
+  sample, navigated to Settings, and verified `Cost & Budget`, `Cost unknown`,
+  `Provider-managed limits`, `Confirm paid work per session`, `Free/offline`,
+  and no live generate/connect/test-provider action.
+- `2026-06-02 13:50:53 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:50:53 -03:00` — `npm test -- --run` — PASS; 73
+  Vitest files and 384 tests passed after the smoke-driven budget-policy
+  display fix.
+- `2026-06-02 13:51:42 -03:00` — `npm run build` — PASS; Vite
+  transformed 1940 modules and emitted the known non-fatal chunk-size
+  warning.
+- Fix applied: added editor-side cost/rate-limit metadata, structured
+  provider failure guidance, mock quota/rate-limit fixture failures, queue
+  budget-confirmation guards, read-only Settings cost/budget UI, and docs for
+  the no-live-provider boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-96 / CP-061 — model capability registry
 
 - `2026-06-02 13:22:42 -03:00` —

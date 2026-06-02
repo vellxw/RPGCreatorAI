@@ -1,5 +1,6 @@
 import type {
   ProviderAdapter,
+  ProviderAdapterFailure,
   ProviderAdapterExecuteOptions,
   ProviderAdapterRequest,
   ProviderAdapterResponse,
@@ -18,14 +19,67 @@ function countPromptTokens(prompt: string): number {
 }
 
 function cancelledResponse(request: ProviderAdapterRequest): ProviderAdapterResponse {
+  const failure: ProviderAdapterFailure = {
+    kind: 'cancelled',
+    message: 'Request cancelled before execution.',
+    retryGuidance: 'Queue a new request after confirming the editor work is still needed.',
+  };
   return {
     id: request.id,
     operation: request.operation,
     providerId: request.providerId,
     modelId: request.modelId,
     status: 'cancelled',
-    error: 'Request cancelled before execution.',
+    error: failure.message,
+    failure,
   };
+}
+
+function fixtureFailureResponse(request: ProviderAdapterRequest): ProviderAdapterResponse | null {
+  const fixtureFailure = request.input?.fixtureFailure;
+  if (fixtureFailure === 'rate-limit') {
+    const rawRetryAfter = request.input?.retryAfterSeconds;
+    const retryAfterSeconds = typeof rawRetryAfter === 'number' && Number.isFinite(rawRetryAfter)
+      ? Math.max(0, Math.round(rawRetryAfter))
+      : undefined;
+    const retryGuidance = retryAfterSeconds !== undefined
+      ? `Wait ${retryAfterSeconds} seconds before retrying this provider request.`
+      : 'Wait for provider retry guidance before retrying this provider request.';
+    const failure: ProviderAdapterFailure = {
+      kind: 'rate-limit',
+      message: 'Mock provider rate limit reached.',
+      retryAfterSeconds,
+      retryGuidance,
+    };
+    return {
+      id: request.id,
+      operation: request.operation,
+      providerId: request.providerId,
+      modelId: request.modelId,
+      status: 'failed',
+      error: failure.message,
+      failure,
+    };
+  }
+
+  if (fixtureFailure === 'quota-exceeded') {
+    const failure: ProviderAdapterFailure = {
+      kind: 'quota-exceeded',
+      message: 'Mock provider quota exceeded.',
+      retryGuidance: 'Review provider quota or budget settings before retrying.',
+    };
+    return {
+      id: request.id,
+      operation: request.operation,
+      providerId: request.providerId,
+      modelId: request.modelId,
+      status: 'failed',
+      error: failure.message,
+      failure,
+    };
+  }
+
+  return null;
 }
 
 export function createMockProviderAdapter(): ProviderAdapter {
@@ -57,24 +111,40 @@ class MockProviderAdapter implements ProviderAdapter {
     if (options.signal?.aborted) {
       return cancelledResponse(request);
     }
+    const fixtureFailure = fixtureFailureResponse(request);
+    if (fixtureFailure) {
+      return fixtureFailure;
+    }
     if (!this.metadata.operations.includes(request.operation)) {
+      const failure: ProviderAdapterFailure = {
+        kind: 'unsupported-operation',
+        message: `Mock provider does not support ${request.operation}.`,
+        retryGuidance: 'Select a provider/model that declares this capability before retrying.',
+      };
       return {
         id: request.id,
         operation: request.operation,
         providerId: request.providerId,
         modelId: request.modelId,
         status: 'failed',
-        error: `Mock provider does not support ${request.operation}.`,
+        error: failure.message,
+        failure,
       };
     }
     if (request.operation !== 'text.generate') {
+      const failure: ProviderAdapterFailure = {
+        kind: 'unsupported-operation',
+        message: `Mock provider does not support ${request.operation}.`,
+        retryGuidance: 'Select a provider/model that declares this capability before retrying.',
+      };
       return {
         id: request.id,
         operation: request.operation,
         providerId: request.providerId,
         modelId: request.modelId,
         status: 'failed',
-        error: `Mock provider does not support ${request.operation}.`,
+        error: failure.message,
+        failure,
       };
     }
 
