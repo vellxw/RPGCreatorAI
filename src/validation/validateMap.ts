@@ -61,8 +61,17 @@ const SAFE_PLUGIN_ARG_KEY = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const CODE_LIKE_PLUGIN_TEXT =
   /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
-export function validateMap(map: MapData, allMapIds: string[]): ValidationMessage[] {
+export interface MapValidationOptions {
+  isSupportedVisualTile?(tileId: number, tilesetId: string | undefined): boolean;
+}
+
+export function validateMap(
+  map: MapData,
+  allMapIds: string[],
+  options: MapValidationOptions = {},
+): ValidationMessage[] {
   const messages: ValidationMessage[] = [];
+  const supportsVisualTile = options.isSupportedVisualTile ?? isSupportedVisualTile;
 
   if (map.scrollType !== undefined && !VALID_SCROLL_TYPES.includes(map.scrollType)) {
     messages.push({
@@ -131,7 +140,7 @@ export function validateMap(map: MapData, allMapIds: string[]): ValidationMessag
         });
       }
 
-      const unsupported = [...new Set(layer.tiles.filter(tile => !isSupportedVisualTile(tile, map.tilesetId)))];
+      const unsupported = [...new Set(layer.tiles.filter(tile => !supportsVisualTile(tile, map.tilesetId)))];
       for (const tileId of unsupported) {
         messages.push({
           level: 'error',

@@ -12,11 +12,12 @@ import type {
   MapData,
   ProjectData,
   Stats,
+  TilesetDatabaseData,
   ValidationMessage,
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
 import { validateMap } from './validateMap';
-import { TILE_ASSET_KEYS } from '../visual/tileCatalog';
+import { isSupportedVisualTile, TILE_ASSET_KEYS } from '../visual/tileCatalog';
 import { animationSheetKeys } from '../assets/generated/assetCatalog';
 import { DEFAULT_AUDIO_REGISTRY, mergeAudioRegistry } from '../audio/audioRegistry';
 import {
@@ -192,6 +193,27 @@ function buildIndex(items: ItemDatabase, db: DatabaseEntries): RefIndex {
   };
 }
 
+function createProjectVisualTileSupport(tilesetDatabase: TilesetDatabaseData) {
+  const visualTileIdsByTileset = new Map<string, Set<number>>();
+  for (const tileset of tilesetDatabase.tilesets) {
+    visualTileIdsByTileset.set(
+      tileset.id,
+      new Set(
+        tileset.tiles
+          .filter(tile => tile.group !== 'Region' && tile.group !== 'Collision')
+          .map(tile => tile.id),
+      ),
+    );
+  }
+
+  return (tileId: number, tilesetId: string | undefined): boolean => {
+    if (tilesetId && visualTileIdsByTileset.has(tilesetId)) {
+      return visualTileIdsByTileset.get(tilesetId)?.has(tileId) ?? false;
+    }
+    return isSupportedVisualTile(tileId, tilesetId);
+  };
+}
+
 export function validateProject(state: FullProjectState): ValidationReport {
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
@@ -210,7 +232,9 @@ export function validateProject(state: FullProjectState): ValidationReport {
   const mapIds = Object.keys(state.maps);
 
   for (const [, map] of Object.entries(state.maps)) {
-    const mapMessages = validateMap(map, mapIds);
+    const mapMessages = validateMap(map, mapIds, {
+      isSupportedVisualTile: createProjectVisualTileSupport(state.databases.tilesets),
+    });
     for (const m of mapMessages) {
       if (m.level === 'error') errors.push(m);
       else if (m.level === 'warning') warnings.push(m);
@@ -683,7 +707,7 @@ function validateDatabaseInternal(db: DatabaseEntries, assets?: AssetCatalogData
     }
   }
 
-  out.push(...validateTilesetDatabase(db));
+  out.push(...validateTilesetDatabase(db, assets));
   out.push(...validateEquipmentAndStateDatabases(db));
   out.push(...validatePartyCombatDatabases(db));
   out.push(...validateSetupProgressionDatabases(db));
@@ -1331,9 +1355,14 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
   return out;
 }
 
-function validateTilesetDatabase(db: DatabaseEntries): ValidationMessage[] {
+function validateTilesetDatabase(db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const seenTilesets = new Set<string>();
+  const importedTilesetAssetIds = new Set(
+    (assets?.assets ?? [])
+      .filter(asset => asset.kind === 'tileset')
+      .map(asset => asset.id),
+  );
 
   for (const tileset of db.tilesets.tilesets) {
     if (!tileset.id || tileset.id.trim() === '') {
@@ -1395,7 +1424,7 @@ function validateTilesetDatabase(db: DatabaseEntries): ValidationMessage[] {
           source,
         });
       }
-      if (!TILE_ASSET_KEYS.has(tile.asset)) {
+      if (!TILE_ASSET_KEYS.has(tile.asset) && !importedTilesetAssetIds.has(tile.asset)) {
         out.push({
           level: 'error',
           message: `Tile "${tile.id}" in tileset "${tileset.id}" references unknown tile asset "${tile.asset}"`,

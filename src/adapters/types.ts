@@ -57,6 +57,21 @@ export interface AudioImportResult {
   asset?: AssetCatalogEntry;
 }
 
+export interface TilesetImportMetadata {
+  idBase: string;
+  name: string;
+  tileSize: number;
+  columns: number;
+  tileCount: number;
+}
+
+export interface TilesetImportResult {
+  success: boolean;
+  cancelled?: boolean;
+  error?: string;
+  asset?: AssetCatalogEntry;
+}
+
 export interface FullProjectState {
   project: ProjectData;
   maps: Record<string, MapData>;

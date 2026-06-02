@@ -9,6 +9,8 @@ import type {
   ImageImportResult,
   SpritesheetImportMetadata,
   SpritesheetImportResult,
+  TilesetImportMetadata,
+  TilesetImportResult,
   PlaytestSessionRequest,
   PlaytestSessionResult,
   SaveResult,
@@ -54,6 +56,11 @@ export interface RpgBridge {
       existingAssetIds: string[],
       metadata: AudioImportMetadata,
     ): Promise<AudioImportResult>;
+    importTilesetAsset(
+      root: string,
+      existingAssetIds: string[],
+      metadata: TilesetImportMetadata,
+    ): Promise<TilesetImportResult>;
     listBackups(root: string, file: string): Promise<string[]>;
     closeProject(): Promise<void>;
     createPlaytestSession(

@@ -1116,7 +1116,9 @@ export function DatabaseScreen() {
         ) : tab === 'tilesets' ? (
           <TilesetEditor
             value={databases.tilesets}
+            assets={state.assets.assets}
             mapUsage={mapUsage}
+            onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
             onChange={tilesets => dispatch({ type: 'UPDATE_TILESET_DATABASE', tilesets })}
           />
         ) : tab === 'animations' ? (

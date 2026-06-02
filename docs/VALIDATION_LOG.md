@@ -4,6 +4,59 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-88 / CP-053 — tileset import workflow
+
+- `2026-06-02 10:32:17 -03:00` —
+  `npm test -- --run src/components/database/__tests__/TilesetEditor.test.tsx src/adapters/__tests__/tilesetImport.test.ts src/validation/__tests__/validateProject.test.ts`
+  — RED as expected after adding tileset import coverage. The adapter test
+  could not resolve `src/adapters/tilesetImport.ts`, the Tileset editor had
+  no `Import tileset` controls, validation rejected catalog `tileset` assets
+  as unknown tile assets, and map validation still checked custom map tiles
+  only against the static bundled tile catalog.
+- `2026-06-02 10:32:17 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_tileset_asset_file -- --nocapture`
+  — RED as expected after adding Rust import helper coverage. The shell did
+  not yet define `TilesetImportMetadata` or `import_tileset_asset_file`.
+- `2026-06-02 10:40:21 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_tileset_asset_file -- --nocapture`
+  — PASS; 2 focused Rust helper tests passed for safe tileset image copy,
+  duplicate filename/id handling, metadata-derived dimensions, invalid
+  metadata rejection, and unsupported extension rejection.
+- `2026-06-02 10:41:02 -03:00` —
+  `npm test -- --run src/components/database/__tests__/TilesetEditor.test.tsx src/adapters/__tests__/tilesetImport.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 3 focused files and 45 tests passed after adding the metadata-first
+  import UI, bridge adapter, project catalog dispatch, catalog `tileset`
+  validation, and project-database visual tile id checks.
+- `2026-06-02 10:43:53 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 10:43:53 -03:00` — `npm test -- --run` — PASS; 62 Vitest files
+  and 347 tests passed.
+- `2026-06-02 10:43:53 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 40 Rust desktop
+  tests passed.
+- `2026-06-02 10:45:00 -03:00` — `npm run build` — PASS; Vite transformed
+  1929 modules and emitted the known non-fatal chunk-size warning.
+- `2026-06-02 10:45:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; CMake/Ninja reported no work to do for the runtime, and CTest
+  passed `RPGTests` 1/1.
+- `2026-06-02 10:47:30 -03:00` — Browser smoke via Chrome DevTools — PASS:
+  Vite `http://127.0.0.1:5177/` -> `Use My First RPG` -> `Database` ->
+  `Open Tilesets database tab` -> `Import tileset` -> `Accept tileset
+  import`; browser mode displayed `Tileset import is available after opening
+  a desktop project folder.`, the metadata preview stayed visible, screenshot
+  evidence was saved to
+  `docs/screenshots/phase11-cp053/tileset-import-browser-unavailable.png`,
+  and console had no errors or warnings.
+- Fix applied: tileset import now copies allowed image files into
+  `assets/imported/tilesets/`, returns a catalog `tileset` asset, creates
+  A/B/Region/Collision metadata from editor fields, routes through the Tauri
+  bridge, validates imported assets without accepting arbitrary image refs,
+  and validates map visual tile ids against the active project tileset
+  database.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-87 / CP-052 — audio import workflow
 
 - `2026-06-02 10:10:11 -03:00` —

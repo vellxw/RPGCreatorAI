@@ -23,6 +23,17 @@ function makeMap(overrides: Partial<MapData> = {}): MapData {
   };
 }
 
+function makeAuthoringLayers(width = 4, height = 4, visualTile = 1) {
+  const size = width * height;
+  return [
+    { name: 'ground', type: 'visual' as const, role: 'ground' as const, tiles: new Array(size).fill(visualTile) },
+    { name: 'decoration', type: 'visual' as const, role: 'decoration' as const, tiles: new Array(size).fill(0) },
+    { name: 'foreground', type: 'visual' as const, role: 'foreground' as const, tiles: new Array(size).fill(0) },
+    { name: 'collision', type: 'collision' as const, role: 'collision' as const, tiles: new Array(size).fill(0) },
+    { name: 'region', type: 'region' as const, role: 'region' as const, tiles: new Array(size).fill(0) },
+  ];
+}
+
 function makeProject(maps: Record<string, MapData>): FullProjectState {
   return {
     project: {
@@ -314,6 +325,81 @@ describe('validateProject', () => {
     const project = makeProject({ town: makeMap({ tilesetId: 'missing-tileset' }) });
     const report = validateProject(project);
     expect(report.errors.some(e => e.message.includes('unknown tileset "missing-tileset"'))).toBe(true);
+  });
+
+  it('accepts imported tileset assets and map layers that use project database tile ids', () => {
+    const map = makeMap({
+      tilesetId: 'forest_tiles',
+      layers: makeAuthoringLayers(4, 4, 11),
+    });
+    const project = makeProject({ town: map });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'forest_pack',
+          name: 'Forest Pack',
+          kind: 'tileset',
+          path: 'assets/imported/tilesets/forest-pack.png',
+          source: 'imported',
+          tags: ['imported', 'tileset'],
+        },
+      ],
+    };
+    project.databases.tilesets.tilesets = [
+      {
+        id: 'forest_tiles',
+        name: 'Forest Tiles',
+        tileSize: 32,
+        tiles: [
+          { id: 0, name: 'Tile 0', asset: 'forest_pack', group: 'A', passability: 'passable', priority: 0 },
+          { id: 11, name: 'Canopy', asset: 'forest_pack', group: 'B', passability: 'blocked', priority: 1 },
+          { id: 1000, name: 'Region 1', asset: 'forest_pack', group: 'Region', passability: 'passable', terrainTag: 'region_1' },
+          { id: 2000, name: 'Collision Block', asset: 'forest_pack', group: 'Collision', passability: 'blocked', terrainTag: 'collision' },
+        ],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors).toEqual([]);
+  });
+
+  it('flags unsupported map tile ids against imported project tilesets', () => {
+    const map = makeMap({
+      tilesetId: 'forest_tiles',
+      layers: makeAuthoringLayers(4, 4, 99),
+    });
+    const project = makeProject({ town: map });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'forest_pack',
+          name: 'Forest Pack',
+          kind: 'tileset',
+          path: 'assets/imported/tilesets/forest-pack.png',
+          source: 'imported',
+          tags: ['imported', 'tileset'],
+        },
+      ],
+    };
+    project.databases.tilesets.tilesets = [
+      {
+        id: 'forest_tiles',
+        name: 'Forest Tiles',
+        tileSize: 32,
+        tiles: [
+          { id: 0, name: 'Tile 0', asset: 'forest_pack', group: 'A', passability: 'passable', priority: 0 },
+          { id: 11, name: 'Canopy', asset: 'forest_pack', group: 'B', passability: 'blocked', priority: 1 },
+        ],
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('unsupported visual tile id "99"'))).toBe(true);
+    expect(report.errors.some(e => e.source === 'database/tilesets/forest_tiles/tiles/11')).toBe(false);
   });
 
   it('flags invalid map metadata settings', () => {

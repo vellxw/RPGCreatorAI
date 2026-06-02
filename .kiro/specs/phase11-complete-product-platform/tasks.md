@@ -63,6 +63,7 @@
   - [x] CP-050 / FRA-85: implement image import workflow.
   - [x] CP-051 / FRA-86: implement spritesheet import workflow.
   - [x] CP-052 / FRA-87: implement audio import workflow.
+  - [x] CP-053 / FRA-88: implement tileset import workflow.
 - [ ] 07 AI Provider Hub Foundation.
 - [ ] 08 GPT Image 2 Asset Pipeline.
 - [ ] 09 AI Characters And Animations.

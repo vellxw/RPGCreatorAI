@@ -2,7 +2,8 @@ import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TilesetEditor } from '../TilesetEditor';
-import type { TilesetDatabaseData } from '../../../types/project';
+import type { AssetCatalogEntry, TilesetDatabaseData } from '../../../types/project';
+import type { TilesetImportRunner } from '../../../adapters/tilesetImport';
 
 function makeDatabase(): TilesetDatabaseData {
   return {
@@ -69,6 +70,13 @@ function button(container: HTMLElement, label: string): HTMLButtonElement {
   const found = container.querySelector(`button[aria-label="${label}"]`);
   if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
   return found;
+}
+
+async function clickAsync(container: HTMLElement, label: string) {
+  const found = button(container, label);
+  await act(async () => {
+    found.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
 }
 
 function changeText(el: HTMLInputElement, value: string) {
@@ -208,6 +216,102 @@ describe('TilesetEditor', () => {
       expect.stringContaining('sample-town'),
     );
     expect(onChange).toHaveBeenLastCalledWith({ tilesets: [] });
+
+    view.unmount();
+  });
+
+  it('imports a tileset asset and generates role metadata before use', async () => {
+    const importedAsset: AssetCatalogEntry = {
+      id: 'forest_pack',
+      name: 'Forest Pack',
+      kind: 'tileset',
+      path: 'assets/imported/tilesets/forest-pack.png',
+      source: 'imported',
+      tags: ['imported', 'tileset'],
+      width: 256,
+      height: 256,
+    };
+    const tilesetImporter: TilesetImportRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      asset: importedAsset,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const view = render(
+      <TilesetEditor
+        value={{ tilesets: [] }}
+        assets={[]}
+        tilesetImporter={tilesetImporter}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    act(() => button(view.container, 'Import tileset').click());
+    expect(view.container.querySelector('[aria-label="Tileset metadata preview"]')).not.toBeNull();
+
+    changeText(input(view.container, 'Tileset import ID'), 'forest_tiles');
+    changeText(input(view.container, 'Tileset import name'), 'Forest Pack');
+    changeText(input(view.container, 'Tileset import tile size'), '16');
+    changeText(input(view.container, 'Tileset import columns'), '8');
+    changeText(input(view.container, 'Tileset import tile count'), '12');
+    changeSelect(select(view.container, 'Tileset import default passability'), 'blocked');
+    changeText(input(view.container, 'Tileset import foreground start tile'), '8');
+    changeText(input(view.container, 'Tileset import region marker count'), '2');
+
+    await clickAsync(view.container, 'Accept tileset import');
+
+    expect(tilesetImporter).toHaveBeenCalledWith([], {
+      idBase: 'forest_pack',
+      name: 'Forest Pack',
+      tileSize: 16,
+      columns: 8,
+      tileCount: 12,
+    });
+    expect(onAssetImported).toHaveBeenCalledWith(importedAsset);
+    expect(onChange).toHaveBeenLastCalledWith({
+      tilesets: [
+        expect.objectContaining({
+          id: 'forest_tiles',
+          name: 'Forest Pack',
+          tileSize: 16,
+          tiles: expect.arrayContaining([
+            expect.objectContaining({ id: 0, name: 'Tile 0', asset: 'forest_pack', group: 'A', passability: 'blocked', priority: 0 }),
+            expect.objectContaining({ id: 7, group: 'A', priority: 0 }),
+            expect.objectContaining({ id: 8, group: 'B', priority: 1 }),
+            expect.objectContaining({ id: 11, group: 'B', priority: 1 }),
+            expect.objectContaining({ id: 1000, name: 'Region 1', group: 'Region', passability: 'passable', terrainTag: 'region_1' }),
+            expect.objectContaining({ id: 1001, name: 'Region 2', group: 'Region', passability: 'passable', terrainTag: 'region_2' }),
+            expect.objectContaining({ id: 2000, name: 'Collision Block', group: 'Collision', passability: 'blocked', terrainTag: 'collision' }),
+          ]),
+        }),
+      ],
+    });
+    expect(view.container.textContent).toContain('Imported Forest Pack');
+
+    view.unmount();
+  });
+
+  it('validates tileset import metadata before opening the file picker', async () => {
+    const tilesetImporter: TilesetImportRunner = vi.fn();
+    const view = render(
+      <TilesetEditor
+        value={makeDatabase()}
+        assets={[]}
+        tilesetImporter={tilesetImporter}
+        onAssetImported={vi.fn()}
+        onChange={vi.fn()}
+      />,
+    );
+
+    act(() => button(view.container, 'Import tileset').click());
+    changeText(input(view.container, 'Tileset import tile count'), '0');
+
+    await clickAsync(view.container, 'Accept tileset import');
+
+    expect(tilesetImporter).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Tile count must be a positive integer.');
 
     view.unmount();
   });

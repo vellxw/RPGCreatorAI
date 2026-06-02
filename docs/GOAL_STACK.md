@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-053 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-054 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -344,6 +344,16 @@ Primary Phase 11 sources:
   validator coverage confirms imported WAV refs are requestable and safe.
   Evidence is recorded in `docs/PHASE_11_AUDIO_IMPORT_WORKFLOW.md` and
   `docs/screenshots/phase11-cp052/`.
+- Phase 11 CP-053 — tileset import workflow completed. The Tilesets database
+  can open a metadata-first import panel, preview tile size/columns/count,
+  foreground split, default passability, and region marker metadata before
+  file selection, import local tileset images into `assets/imported/tilesets/`
+  without overwriting existing files, add a catalog `tileset` entry, and
+  create linked A/B/Region/Collision tile metadata without JSON editing.
+  Project validation now accepts imported `tileset` catalog assets and checks
+  visual layer tile ids against the active project tileset database.
+  Evidence is recorded in `docs/PHASE_11_TILESET_IMPORT_WORKFLOW.md` and
+  `docs/screenshots/phase11-cp053/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -186,6 +186,40 @@ pub struct SpritesheetImportResult {
 
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct TilesetImportMetadata {
+    pub id_base: String,
+    pub name: String,
+    pub tile_size: u32,
+    pub columns: u32,
+    pub tile_count: u32,
+}
+
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportedTilesetAsset {
+    pub id: String,
+    pub name: String,
+    pub kind: String,
+    pub path: String,
+    pub source: String,
+    pub tags: Vec<String>,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct TilesetImportResult {
+    pub success: bool,
+    pub cancelled: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset: Option<ImportedTilesetAsset>,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct AudioImportMetadata {
     pub usage: String,
 }
@@ -391,6 +425,50 @@ pub fn fs_import_spritesheet_asset_dialog(
             asset: Some(asset),
         }),
         Err(error) => Ok(SpritesheetImportResult {
+            success: false,
+            cancelled: false,
+            error: Some(error),
+            asset: None,
+        }),
+    }
+}
+
+#[tauri::command]
+pub fn fs_import_tileset_asset_dialog(
+    app: tauri::AppHandle,
+    root: String,
+    existing_asset_ids: Vec<String>,
+    metadata: TilesetImportMetadata,
+) -> Result<TilesetImportResult, String> {
+    let canonical = canonicalize_inside_user_space(&root).map_err(|e| e.to_string())?;
+    must_contain_project_json(&canonical).map_err(|e| e.to_string())?;
+
+    let Some(source) = app
+        .dialog()
+        .file()
+        .add_filter("Tileset images", &["png", "jpg", "jpeg", "bmp", "webp"])
+        .blocking_pick_file()
+    else {
+        return Ok(TilesetImportResult {
+            success: false,
+            cancelled: true,
+            error: None,
+            asset: None,
+        });
+    };
+
+    match source
+        .into_path()
+        .map_err(|e| e.to_string())
+        .and_then(|path| import_tileset_asset_file(&canonical, &path, &existing_asset_ids, metadata))
+    {
+        Ok(asset) => Ok(TilesetImportResult {
+            success: true,
+            cancelled: false,
+            error: None,
+            asset: Some(asset),
+        }),
+        Err(error) => Ok(TilesetImportResult {
             success: false,
             cancelled: false,
             error: Some(error),
@@ -820,6 +898,7 @@ fn write_project_snapshot(
 
 const IMAGE_IMPORT_DIR: &str = "assets/imported/images";
 const SPRITESHEET_IMPORT_DIR: &str = "assets/imported/spritesheets";
+const TILESET_IMPORT_DIR: &str = "assets/imported/tilesets";
 const AUDIO_IMPORT_DIR: &str = "assets/imported/audio";
 const ALLOWED_IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "bmp", "webp"];
 const ALLOWED_AUDIO_EXTENSIONS: &[&str] = &["wav"];
@@ -977,6 +1056,96 @@ fn import_spritesheet_asset_file(
         frame_width: metadata.frame_width,
         frame_height: metadata.frame_height,
         frames: metadata.frame_count,
+    })
+}
+
+fn import_tileset_asset_file(
+    root: &Path,
+    source: &Path,
+    existing_asset_ids: &[String],
+    metadata: TilesetImportMetadata,
+) -> Result<ImportedTilesetAsset, String> {
+    if metadata.id_base.trim().is_empty() {
+        return Err("Tileset asset id is required.".into());
+    }
+    if metadata.name.trim().is_empty() {
+        return Err("Tileset asset name is required.".into());
+    }
+    if metadata.tile_size == 0 {
+        return Err("Tileset tile size must be a positive integer.".into());
+    }
+    if metadata.columns == 0 {
+        return Err("Tileset column count must be a positive integer.".into());
+    }
+    if metadata.tile_count == 0 {
+        return Err("Tileset tile count must be a positive integer.".into());
+    }
+
+    let source = source
+        .canonicalize()
+        .map_err(|e| format!("source tileset {}: {e}", source.display()))?;
+    let file_metadata =
+        fs::metadata(&source).map_err(|e| format!("source tileset {}: {e}", source.display()))?;
+    if !file_metadata.is_file() {
+        return Err(format!("source tileset {} is not a file", source.display()));
+    }
+
+    let extension = source
+        .extension()
+        .and_then(|value| value.to_str())
+        .map(|value| value.to_ascii_lowercase())
+        .unwrap_or_default();
+    if !ALLOWED_IMAGE_EXTENSIONS.contains(&extension.as_str()) {
+        return Err(format!("Unsupported tileset type \".{}\".", extension));
+    }
+
+    let raw_stem = source
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .unwrap_or("tileset");
+    let file_stem = slugify(raw_stem, '-');
+    let id_base = slugify(&metadata.id_base, '_');
+    let asset_id = unique_asset_id(&id_base, existing_asset_ids);
+    let rows = metadata.tile_count.div_ceil(metadata.columns);
+    let width = metadata.tile_size.saturating_mul(metadata.columns);
+    let height = metadata.tile_size.saturating_mul(rows);
+
+    let import_dir = root.join(TILESET_IMPORT_DIR);
+    fs::create_dir_all(&import_dir).map_err(|e| format!("mkdir {}: {e}", import_dir.display()))?;
+
+    let mut suffix = 1usize;
+    let (relative_path, destination) = loop {
+        let candidate_name = if suffix == 1 {
+            format!("{file_stem}.{extension}")
+        } else {
+            format!("{file_stem}-{suffix}.{extension}")
+        };
+        let relative_path = format!("{TILESET_IMPORT_DIR}/{candidate_name}");
+        let destination = join_inside(root, &relative_path).map_err(|e| e.to_string())?;
+        ensure_inside(root, &destination).map_err(|e| e.to_string())?;
+        if !destination.exists() {
+            break (relative_path, destination);
+        }
+        suffix += 1;
+    };
+
+    fs::copy(&source, &destination).map_err(|e| {
+        format!(
+            "copy tileset {} to {}: {e}",
+            source.display(),
+            destination.display()
+        )
+    })?;
+
+    Ok(ImportedTilesetAsset {
+        id: asset_id,
+        name: metadata.name.trim().to_string(),
+        kind: "tileset".into(),
+        path: relative_path,
+        source: "imported".into(),
+        tags: vec!["imported".into(), "tileset".into()],
+        width,
+        height,
     })
 }
 
@@ -1846,6 +2015,86 @@ mod tests {
             fs::read(root.join("assets/imported/spritesheets/hero-run-sheet-2.png")).unwrap(),
             b"spritesheet fixture"
         );
+    }
+
+    #[test]
+    fn import_tileset_asset_file_generates_tileset_metadata_without_overwrite() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("Forest Pack.PNG");
+        fs::write(&source, b"tileset fixture").unwrap();
+        fs::create_dir_all(root.join("assets/imported/tilesets")).unwrap();
+        fs::write(root.join("assets/imported/tilesets/forest-pack.png"), b"existing").unwrap();
+
+        let imported = import_tileset_asset_file(
+            &root,
+            &source,
+            &["forest_pack".into()],
+            TilesetImportMetadata {
+                id_base: "forest_pack".into(),
+                name: "Forest Pack".into(),
+                tile_size: 32,
+                columns: 8,
+                tile_count: 64,
+            },
+        )
+        .unwrap();
+
+        assert_eq!(imported.id, "forest_pack_2");
+        assert_eq!(imported.name, "Forest Pack");
+        assert_eq!(imported.kind, "tileset");
+        assert_eq!(imported.source, "imported");
+        assert_eq!(imported.path, "assets/imported/tilesets/forest-pack-2.png");
+        assert_eq!(imported.tags, vec!["imported", "tileset"]);
+        assert_eq!(imported.width, 256);
+        assert_eq!(imported.height, 256);
+        assert_eq!(
+            fs::read(root.join("assets/imported/tilesets/forest-pack.png")).unwrap(),
+            b"existing"
+        );
+        assert_eq!(
+            fs::read(root.join("assets/imported/tilesets/forest-pack-2.png")).unwrap(),
+            b"tileset fixture"
+        );
+    }
+
+    #[test]
+    fn import_tileset_asset_file_rejects_invalid_metadata_and_extensions() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("forest.txt");
+        fs::write(&source, b"not an image").unwrap();
+
+        let bad_metadata = import_tileset_asset_file(
+            &root,
+            &source,
+            &[],
+            TilesetImportMetadata {
+                id_base: "forest_pack".into(),
+                name: "Forest Pack".into(),
+                tile_size: 0,
+                columns: 8,
+                tile_count: 64,
+            },
+        );
+        assert!(bad_metadata.unwrap_err().contains("Tileset tile size"));
+
+        let bad_extension = import_tileset_asset_file(
+            &root,
+            &source,
+            &[],
+            TilesetImportMetadata {
+                id_base: "forest_pack".into(),
+                name: "Forest Pack".into(),
+                tile_size: 32,
+                columns: 8,
+                tile_count: 64,
+            },
+        );
+        assert!(bad_extension.unwrap_err().contains("Unsupported tileset type"));
+        assert!(!root.join("assets/imported/tilesets/forest.txt").exists());
     }
 
     #[test]

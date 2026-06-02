@@ -20,6 +20,8 @@ import type {
   ImageImportResult,
   SpritesheetImportMetadata,
   SpritesheetImportResult,
+  TilesetImportMetadata,
+  TilesetImportResult,
 } from './types';
 
 function isTauri(): boolean {
@@ -55,6 +57,12 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
           existingAssetIds,
           metadata,
         }) as Promise<AudioImportResult>,
+      importTilesetAsset: (root: string, existingAssetIds: string[], metadata: TilesetImportMetadata) =>
+        invoke('fs_import_tileset_asset_dialog', {
+          root,
+          existingAssetIds,
+          metadata,
+        }) as Promise<TilesetImportResult>,
       listBackups: (root: string, file: string) =>
         invoke('fs_list_backups', { root, file }) as Promise<string[]>,
       closeProject: () => invoke('fs_close_project') as Promise<void>,
