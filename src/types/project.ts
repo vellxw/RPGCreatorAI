@@ -143,6 +143,7 @@ export interface GeneratedAssetMetadata {
   referenceAssetIds?: string[];
   editMode?: 'edit' | 'variation';
   visualQa?: GeneratedImageVisualQaResult;
+  spriteSheet?: GeneratedSpriteSheetMetadata;
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
   visualContextVersion?: string;
@@ -176,6 +177,19 @@ export interface GeneratedImageVisualQaResult {
   tags: string[];
   rejectionReason?: string;
   unresolvedWarnings: GeneratedImageVisualQaCheckId[];
+}
+
+export interface GeneratedSpriteSheetMetadata {
+  frameWidth: number;
+  frameHeight: number;
+  frameCount: number;
+  action: string;
+  direction: Direction | 'any';
+  frameLayout: 'horizontal-strip';
+  transparentBackgroundRequired: boolean;
+  animationSetId?: string;
+  fps?: number;
+  anchor?: { x: number; y: number };
 }
 
 export interface AssetCatalogEntry {

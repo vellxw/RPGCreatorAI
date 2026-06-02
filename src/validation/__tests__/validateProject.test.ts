@@ -268,6 +268,63 @@ describe('validateProject', () => {
     expect(report.errors).toEqual([]);
   });
 
+  it('accepts reviewed generated spritesheets only when animation frame metadata matches', () => {
+    const project = makeProject({ town: makeMap() });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'arc_idle_sheet',
+          name: 'Arc Idle Sheet',
+          kind: 'spritesheet',
+          path: 'assets/generated/spritesheets/arc_idle_sheet.png',
+          source: 'generated',
+          tags: ['generated', 'spritesheet', 'character-spritesheet', 'reviewed', 'qa-reviewed'],
+          width: 256,
+          height: 64,
+          frameWidth: 64,
+          frameHeight: 64,
+          frames: 4,
+          generated: {
+            promptTemplateId: 'character-spritesheet-v1',
+            promptTemplateKind: 'spritesheet',
+            operation: 'image.generate',
+            sourceAssetId: 'arc_concept',
+          },
+        },
+      ],
+    };
+    project.databases.animations = {
+      sets: [
+        {
+          id: 'arc_sprite',
+          display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+          clips: [
+            {
+              action: 'idle',
+              direction: 'down',
+              asset: 'arc_idle_sheet',
+              frameSize: { width: 64, height: 64 },
+              frameCount: 4,
+              fps: 8,
+              loop: true,
+              anchor: { x: 32, y: 54 },
+            },
+          ],
+        },
+      ],
+    };
+
+    const validReport = validateProject(project);
+    expect(validReport.errors).toEqual([]);
+
+    project.databases.animations.sets[0].clips[0].frameSize.width = 32;
+    const invalidReport = validateProject(project);
+    expect(invalidReport.errors.some(error =>
+      error.message.includes('frameSize.width must match spritesheet asset "arc_idle_sheet" frameWidth 64'),
+    )).toBe(true);
+  });
+
   it('flags playAnimation commands that target missing events or clips', () => {
     const event: GameEvent = {
       id: 'director',

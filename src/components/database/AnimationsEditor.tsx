@@ -5,6 +5,7 @@ import {
   importSpritesheetAsset,
   type SpritesheetImportRunner,
 } from '../../adapters/spritesheetImport';
+import type { SpriteSheetGenerationRunner } from '../../providers/spriteSheetGenerationWorkflow';
 import type {
   AnimationClipData,
   AnimationDatabaseData,
@@ -16,6 +17,7 @@ import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import { CheckboxField, IdField, NumberField, SelectField, TextField } from './DatabaseFields';
 import { AnimationPreview } from './AnimationPreview';
+import { SpriteSheetGenerationPanel } from './SpriteSheetGenerationPanel';
 
 const DIRECTIONS: Array<Direction | 'any'> = ['down', 'left', 'right', 'up', 'any'];
 
@@ -24,6 +26,7 @@ interface AnimationsEditorProps {
   assets?: AssetCatalogEntry[];
   assetPreviewUrls?: Record<string, string>;
   spritesheetImporter?: SpritesheetImportRunner;
+  spriteSheetGenerator?: SpriteSheetGenerationRunner;
   referenceSources?: Record<string, string[]>;
   onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(value: AnimationDatabaseData): void;
@@ -169,6 +172,7 @@ export function AnimationsEditor({
   assets = [],
   assetPreviewUrls = {},
   spritesheetImporter = importSpritesheetAsset,
+  spriteSheetGenerator,
   referenceSources = {},
   onAssetImported,
   onChange,
@@ -350,6 +354,19 @@ export function AnimationsEditor({
       .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` })),
   ];
   const directionOptions = DIRECTIONS.map(direction => ({ value: direction, label: direction }));
+  const generatedSpriteSheetControls = (
+    <SpriteSheetGenerationPanel
+      assets={assets}
+      existingAnimationSetIds={value.sets.map(set => set.id)}
+      spriteSheetGenerator={spriteSheetGenerator}
+      onAssetAccepted={(asset, animationSet) => {
+        onAssetImported?.(asset);
+        emitSets([...value.sets, animationSet]);
+        setSelectedId(animationSet.id);
+        setSelectedClipIndex(0);
+      }}
+    />
+  );
   const importControls = (
     <>
       {spritesheetStatus && (
@@ -431,6 +448,7 @@ export function AnimationsEditor({
           </Button>
         </div>
         {importControls}
+        {generatedSpriteSheetControls}
       </div>
     );
   }
@@ -564,6 +582,7 @@ export function AnimationsEditor({
         </div>
 
         {importControls}
+        {generatedSpriteSheetControls}
 
         <AnimationPreview clip={selectedClip} display={selected.display} assetPreviewUrls={assetPreviewUrls} />
 

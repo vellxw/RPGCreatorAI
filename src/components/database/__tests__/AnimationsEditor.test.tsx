@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnimationsEditor } from '../AnimationsEditor';
 import type { AnimationDatabaseData, AssetCatalogEntry } from '../../../types/project';
 import type { SpritesheetImportRunner } from '../../../adapters/spritesheetImport';
+import type {
+  SpriteSheetGenerationCandidate,
+  SpriteSheetGenerationRunner,
+} from '../../../providers/spriteSheetGenerationWorkflow';
 
 function render(ui: React.ReactNode) {
   const container = document.createElement('div');
@@ -84,6 +88,24 @@ const database: AnimationDatabaseData = {
       ],
     },
   ],
+};
+
+const sourceConceptAsset: AssetCatalogEntry = {
+  id: 'arc_concept',
+  name: 'Arc Concept',
+  kind: 'image',
+  path: 'assets/generated/concepts/arc_concept.png',
+  source: 'generated',
+  tags: ['generated', 'character-concept', 'reviewed'],
+  width: 1024,
+  height: 1536,
+  generated: {
+    promptTemplateId: 'character-concept-v1',
+    promptTemplateKind: 'concept',
+    ownerKind: 'actor',
+    ownerId: 'arc',
+    ownerName: 'Arc',
+  },
 };
 
 describe('AnimationsEditor', () => {
@@ -293,6 +315,125 @@ describe('AnimationsEditor', () => {
 
     expect(spritesheetImporter).not.toHaveBeenCalled();
     expect(view.container.textContent).toContain('Frame count must be a positive integer.');
+
+    view.unmount();
+  });
+
+  it('generates a spritesheet candidate and inserts it into animations only after QA acceptance', async () => {
+    const candidate: SpriteSheetGenerationCandidate = {
+      id: 'sprite-gen-arc',
+      reviewState: 'pending',
+      owner: { kind: 'actor', id: 'arc', name: 'Arc' },
+      sourceConceptAsset,
+      referenceAssets: [],
+      asset: {
+        id: 'arc_idle_sheet',
+        name: 'Arc Idle Sheet',
+        kind: 'spritesheet',
+        path: 'assets/generated/spritesheets/arc_idle_sheet.png',
+        source: 'generated',
+        tags: ['generated', 'spritesheet', 'character-spritesheet', 'actor', 'idle', 'down', 'ai-draft', 'pending-review'],
+        width: 256,
+        height: 64,
+        frameWidth: 64,
+        frameHeight: 64,
+        frames: 4,
+        generated: {
+          promptTemplateId: 'character-spritesheet-v1',
+          promptTemplateKind: 'spritesheet',
+          providerId: 'local',
+          modelId: 'offline-image-mock',
+          operation: 'image.generate',
+          ownerKind: 'actor',
+          ownerId: 'arc',
+          ownerName: 'Arc',
+          sourceAssetId: 'arc_concept',
+          sourceAssetPath: 'assets/generated/concepts/arc_concept.png',
+          spriteSheet: {
+            frameWidth: 64,
+            frameHeight: 64,
+            frameCount: 4,
+            action: 'idle',
+            direction: 'down',
+            frameLayout: 'horizontal-strip',
+            transparentBackgroundRequired: true,
+          },
+        },
+      },
+      animationSet: {
+        id: 'arc_idle',
+        display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+        clips: [
+          {
+            action: 'idle',
+            direction: 'down',
+            asset: 'arc_idle_sheet',
+            frameSize: { width: 64, height: 64 },
+            frameCount: 4,
+            fps: 8,
+            loop: true,
+            anchor: { x: 32, y: 54 },
+          },
+        ],
+      },
+      qaPreview: {
+        assetRef: 'mock://generated/sprite-gen-arc.png',
+        width: 256,
+        height: 64,
+        frameWidth: 64,
+        frameHeight: 64,
+        frameCount: 4,
+        frameLayout: 'horizontal-strip',
+        transparentBackgroundRequired: true,
+        providerFixture: 'offline-image',
+      },
+    };
+    const spriteSheetGenerator: SpriteSheetGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={{ sets: [] }}
+        assets={[sourceConceptAsset]}
+        spriteSheetGenerator={spriteSheetGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    click(view.container, 'Generate sprite sheet');
+    expect(view.container.querySelector('[aria-label="Sprite sheet generation metadata preview"]')).not.toBeNull();
+    expect(select(view.container, 'Sprite sheet source concept').value).toBe('arc_concept');
+    changeText(input(view.container, 'Sprite sheet set ID'), 'arc_idle');
+    changeText(input(view.container, 'Sprite sheet name'), 'Arc Idle Sheet');
+    changeText(input(view.container, 'Sprite sheet action'), 'idle');
+    changeSelect(select(view.container, 'Sprite sheet direction'), 'down');
+
+    await clickAsync(view.container, 'Run sprite sheet generation');
+
+    expect(spriteSheetGenerator).toHaveBeenCalledWith(['arc_concept'], [], expect.objectContaining({
+      animationSetId: 'arc_idle',
+      name: 'Arc Idle Sheet',
+      action: 'idle',
+      direction: 'down',
+      sourceConceptAsset,
+    }));
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(view.container.querySelector('[aria-label="Generated sprite sheet review"]')).not.toBeNull();
+    expect(view.container.textContent).toContain('Visual QA checklist');
+
+    await clickAsync(view.container, 'Accept generated sprite sheet');
+
+    expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'arc_idle_sheet',
+      kind: 'spritesheet',
+      tags: expect.arrayContaining(['reviewed', 'qa-reviewed']),
+    }));
+    expect(onChange).toHaveBeenLastCalledWith({ sets: [candidate.animationSet] });
 
     view.unmount();
   });

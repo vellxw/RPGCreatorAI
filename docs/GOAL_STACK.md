@@ -39,13 +39,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`
 - `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`
 - `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`
+- `docs/PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-074 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-075 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -509,6 +510,14 @@ Primary Phase 11 sources:
   explicit `conceptAssetId` assignment only after acceptance. Validation and
   reference indexing now cover actor/event concept asset references. Evidence
   is recorded in `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`.
+- Phase 11 CP-074 — sprite sheet generation pipeline completed. The
+  Animations editor now exposes reviewed sprite sheet generation from optional
+  character concepts through the local offline image mock, versioned
+  `character-spritesheet-v1` prompt template, pending generated `spritesheet`
+  assets, frame/metadata validation, visual QA, source concept provenance, and
+  insertion of the accepted asset plus animation set only after review.
+  Evidence is recorded in
+  `docs/PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

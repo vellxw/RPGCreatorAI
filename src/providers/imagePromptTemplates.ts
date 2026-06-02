@@ -4,7 +4,7 @@ import type {
   ProviderImageStyle,
 } from '../types/project';
 
-export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'concept' | 'edit' | 'ui-panel' | 'reference';
+export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'concept' | 'spritesheet' | 'edit' | 'ui-panel' | 'reference';
 
 export interface ImagePromptTemplate {
   id: string;
@@ -148,6 +148,28 @@ export const imagePromptTemplates: ImagePromptTemplate[] = [
     legalConstraints: [
       'Do not copy actors, celebrities, proprietary characters, or recognizable franchise costumes.',
       'Do not claim legal clearance, identity rights, or compatibility with third-party character packs.',
+    ],
+  },
+  {
+    id: 'character-spritesheet-v1',
+    version: 1,
+    kind: 'spritesheet',
+    label: 'Character sprite sheet',
+    requiredInputs: ['subject', 'useCase', 'palette', 'styleNotes'],
+    purpose: 'Generate reviewable character sprite sheet candidates for animation database clips.',
+    outputGuidance: [
+      'Return a single horizontal strip where every frame has the same pixel dimensions.',
+      'Keep the character on a transparent-looking or clean isolated background suitable for runtime sprite extraction.',
+      'Preserve frame boundaries, consistent scale, feet anchor, direction, pose spacing, and readable silhouette across frames.',
+    ],
+    styleConstraints: [
+      'original RPGCreatorAI sprite direction only',
+      'pixel-clean frame boundaries with no merged or cropped frames',
+      'consistent character scale, anchor, and costume readability',
+    ],
+    legalConstraints: [
+      'Do not copy proprietary sprites, characters, animation sheets, costumes, or franchise-specific poses.',
+      'Do not claim compatibility with third-party sprite packs or animation templates.',
     ],
   },
   {

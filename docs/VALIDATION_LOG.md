@@ -5657,3 +5657,61 @@ Error: Port 1420 is already in use
   confirm `Event character concept generation` and
   `Generate event character concept` - PASS; the console reported 0
   warnings/errors.
+
+### Phase 11 FRA-109 / CP-074 - sprite sheet generation pipeline
+
+- `2026-06-02 18:33:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL as expected during TDD red step; the sprite sheet workflow module did
+  not exist, `character-spritesheet-v1` was missing, and Animations had no
+  `Generate sprite sheet` action.
+- `2026-06-02 18:42:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL after first implementation; the UI test queried visible text for
+  `Generated sprite sheet review`, but the review region exposed that string
+  through `aria-label`. Fix applied: query the labelled region instead.
+- `2026-06-02 18:44:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL after the review query fix; the UI fixture candidate omitted
+  `referenceAssets`, and approval cloned that list. Fix applied: include an
+  empty fixture reference asset list.
+- `2026-06-02 18:46:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS after the fixture fixes; 4 focused files and 58 Vitest tests passed.
+- `2026-06-02 18:47:00 -03:00` - `npm run typecheck` - FAIL; the invalid
+  spritesheet fixture spread an optional manifest into required fields. Fix
+  applied: assert the test fixture manifest with
+  `candidate.asset.generated!.spriteSheet!`.
+- `2026-06-02 18:48:00 -03:00` - `npm run typecheck` - PASS after the
+  invalid-fixture manifest typing fix.
+- `2026-06-02 18:48:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS; focused CP-074 suite passed 4 files and 58 tests.
+- `2026-06-02 18:49:00 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 84 files and 447 tests.
+- `2026-06-02 18:50:00 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1957 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 18:51:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\spriteSheetGenerationWorkflow.ts src\providers\__tests__\spriteSheetGenerationWorkflow.test.ts src\components\database\SpriteSheetGenerationPanel.tsx src\components\database\AnimationsEditor.tsx src\components\database\__tests__\AnimationsEditor.test.tsx src\providers\imagePromptTemplates.ts src\providers\__tests__\imagePromptTemplates.test.ts src\types\project.ts src\validation\__tests__\validateProject.test.ts`
+  - PASS for CP-074 scope; matches were only test assertions that generated
+  requests do not contain `apiKey`, `https://api`, or `sk-`.
+- `2026-06-02 18:56:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  open Database,
+  generate and accept `Arc Concept (arc_concept)` as a reviewed source
+  concept,
+  open Animations,
+  confirm `Sprite sheet generation`,
+  click `Generate sprite sheet`,
+  confirm `Arc Concept (arc_concept)` and
+  `Sprite sheet generation metadata preview`,
+  click `Run sprite sheet generation`,
+  confirm `Generated sprite sheet review` and `Visual QA checklist`,
+  click `Accept generated sprite sheet`,
+  confirm `arc_sprite` and `Arc Sprite Sheet (arc_sprite_sheet)`,
+  click `Validate`,
+  confirm toolbar feedback reports `Validation passed` - PASS; the console
+  reported 0 warnings/errors.
