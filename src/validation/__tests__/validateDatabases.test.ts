@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateProject } from '../validateProject';
 import type { FullProjectState } from '../../adapters/types';
-import type { AssetCatalogEntry, MapData } from '../../types/project';
+import type { AnimationSetData, AssetCatalogEntry, Direction, MapData } from '../../types/project';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function makeMap(): MapData {
@@ -34,6 +34,45 @@ function projectWith(databases: Partial<FullProjectState['databases']>): FullPro
     items: { items: [{ id: 'potion', name: 'P', description: '', type: 'consumable' }] },
     databases: mergeDatabases(databases),
     assets: { schemaVersion: 1, assets: [] },
+  };
+}
+
+const coverageDirections: Direction[] = ['down', 'left', 'right', 'up'];
+const playerCoverageActions = ['idle', 'walk', 'interact', 'attack', 'hurt', 'death'];
+const npcCoverageActions = ['idle', 'walk'];
+const enemyCoverageActions = ['idle', 'attack', 'hurt', 'death'];
+
+function knownAnimationAsset(action: string, direction: Direction | 'any'): string {
+  const assetDirection = direction === 'any' ? 'down' : direction;
+  return `player_adventurer_${action}_${assetDirection}`;
+}
+
+function animationClip(action: string, direction: Direction | 'any', asset = knownAnimationAsset(action, direction)) {
+  return {
+    action,
+    direction,
+    asset,
+    frameSize: { width: 64, height: 64 },
+    frameCount: 4,
+    fps: action === 'idle' ? 4 : 8,
+    loop: action === 'idle' || action === 'walk',
+    anchor: { x: 32, y: 54 },
+  };
+}
+
+function directionalAnimationSet(id: string, actions: string[]): AnimationSetData {
+  return {
+    id,
+    display: { heightTiles: 1.5 },
+    clips: actions.flatMap(action => coverageDirections.map(direction => animationClip(action, direction))),
+  };
+}
+
+function anyDirectionAnimationSet(id: string, actions: string[]): AnimationSetData {
+  return {
+    id,
+    display: { heightTiles: 1.5 },
+    clips: actions.map(action => animationClip(action, 'any')),
   };
 }
 
@@ -487,6 +526,95 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('clip 1 anchor.x must be finite'))).toBe(true);
     expect(report.warnings.some(w => w.message.includes('Player animation set "player_adventurer" is missing walk/down'))).toBe(true);
     expect(report.warnings.some(w => w.message.includes('Player animation set "player_adventurer" is missing idle/up'))).toBe(true);
+  });
+
+  it('accepts complete player, NPC, and enemy generated character animation coverage', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          directionalAnimationSet('player_adventurer', playerCoverageActions),
+          directionalAnimationSet('npc_guard', npcCoverageActions),
+          anyDirectionAnimationSet('enemy_slime', enemyCoverageActions),
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'player_adventurer' },
+    });
+
+    const report = validateProject(project);
+
+    expect(report.errors).toEqual([]);
+    expect(report.warnings.some(w => w.message.includes('animation set') && w.message.includes('missing'))).toBe(false);
+  });
+
+  it('surfaces missing player, NPC, and enemy animation action direction coverage before shipping', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          {
+            id: 'player_adventurer',
+            display: { heightTiles: 1.5 },
+            clips: [animationClip('idle', 'down')],
+          },
+          {
+            id: 'npc_guard',
+            display: { heightTiles: 1.5 },
+            clips: [animationClip('idle', 'down')],
+          },
+          {
+            id: 'enemy_slime',
+            display: { heightTiles: 1.5 },
+            clips: [animationClip('idle', 'any')],
+          },
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'player_adventurer' },
+    });
+
+    const report = validateProject(project);
+    const warningText = report.warnings.map(w => w.message);
+
+    expect(warningText).toContain('Player animation set "player_adventurer" is missing interact/down');
+    expect(warningText).toContain('NPC animation set "npc_guard" is missing walk/up');
+    expect(warningText).toContain('Enemy animation set "enemy_slime" is missing attack/down');
+  });
+
+  it('rejects spritesheet clips with malformed sheet dimensions or runtime-incompatible output metadata', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          directionalAnimationSet('player_adventurer', playerCoverageActions),
+          {
+            id: 'custom_sheet_test',
+            clips: [animationClip('idle', 'down', 'hero_bad_sheet')],
+          },
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'player_adventurer' },
+    });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_bad_sheet',
+          name: 'Hero Bad Sheet',
+          kind: 'spritesheet',
+          path: 'assets/generated/web/hero-bad-sheet.png',
+          source: 'generated',
+          width: 255,
+          height: 63,
+          frameWidth: 64,
+          frameHeight: 64,
+          frames: 4,
+          runtimeCompatible: false,
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('spritesheet asset "hero_bad_sheet" width must equal frameWidth * frames (256)'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('spritesheet asset "hero_bad_sheet" height must equal frameHeight 64'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('uses runtime-incompatible spritesheet asset "hero_bad_sheet"'))).toBe(true);
   });
 
   it('rejects malformed types and missing required terms', () => {

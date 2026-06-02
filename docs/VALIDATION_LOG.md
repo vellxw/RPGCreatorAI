@@ -5737,3 +5737,32 @@ Error: Port 1420 is already in use
 - `2026-06-02 19:08:00 -03:00` -
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\normalize_animation_strip.py scripts\dev\normalize-animation-strip.ps1 scripts\dev\normalize-animation-strip.bat tests\test_animation_strip_normalization.py docs\PHASE_11_ANIMATION_STRIP_NORMALIZATION.md docs\ASSET_PIPELINE.md`
   - PASS for CP-075 scope; no matches.
+
+### Phase 11 FRA-111 / CP-076 - direction and action coverage validator
+
+- `2026-06-02 19:15:10 -03:00` -
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  - FAIL as expected during TDD red step; the validator did not require player
+  `interact` coverage, did not classify NPC/enemy animation-set coverage, and
+  did not reject malformed/runtime-incompatible spritesheet metadata.
+- `2026-06-02 19:17:32 -03:00` -
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  - PASS after adding player/NPC/enemy coverage policy, `any` direction
+  coverage, spritesheet sheet-dimension checks, runtime-compatible clip checks,
+  and complete/incomplete fixtures; 25 tests passed.
+- `2026-06-02 19:17:49 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 19:17:49 -03:00` -
+  `npm test -- --run src/validation/__tests__/validateProject.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/assets/generated/__tests__/assetCatalog.test.ts`
+  - PASS; nearby validation/editor/asset suites passed 3 files and 55 tests.
+- `2026-06-02 19:18:28 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 84 files and 450 tests.
+- `2026-06-02 19:18:28 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1957 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 19:20:00 -03:00` -
+  `ctest --test-dir $env:LOCALAPPDATA\RPGCreatorAI\build --output-on-failure`
+  - PASS; existing native `RPGTests` target passed 1/1. No native runtime
+  loader paths changed for CP-076.
+- `2026-06-02 19:20:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\validation\validateProject.ts src\validation\__tests__\validateDatabases.test.ts`
+  - PASS for CP-076 scope; no matches.

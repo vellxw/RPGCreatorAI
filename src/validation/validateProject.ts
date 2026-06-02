@@ -53,8 +53,10 @@ const VALID_MOVEMENT_SPEEDS = new Set([
 ]);
 const VALID_MOVEMENT_ROUTE_TARGETS = ['player', 'thisEvent', 'event'];
 const VALID_ANIMATION_DIRECTIONS = new Set(['down', 'left', 'right', 'up', 'any']);
-const REQUIRED_PLAYER_ANIMATION_DIRECTIONS = ['down', 'left', 'right', 'up'] as const;
-const REQUIRED_PLAYER_ANIMATION_ACTIONS = ['idle', 'walk'] as const;
+const REQUIRED_CHARACTER_ANIMATION_DIRECTIONS = ['down', 'left', 'right', 'up'] as const;
+const REQUIRED_PLAYER_ANIMATION_ACTIONS = ['idle', 'walk', 'interact', 'attack', 'hurt', 'death'] as const;
+const REQUIRED_NPC_ANIMATION_ACTIONS = ['idle', 'walk'] as const;
+const REQUIRED_ENEMY_ANIMATION_ACTIONS = ['idle', 'attack', 'hurt', 'death'] as const;
 const ANIMATION_SHEET_KEY_SET = new Set<string>(animationSheetKeys);
 const VALID_MOVEMENT_ROUTE_STEPS = new Set([
   'moveUp',
@@ -134,6 +136,7 @@ const SAFE_AUDIO_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const SAFE_ASSET_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,127}$/;
 const VALID_ASSET_KINDS = new Set<AssetKind>(['image', 'spritesheet', 'tileset', 'audio', 'generated']);
 const VALID_ASSET_SOURCES = new Set<AssetSource>(['local', 'generated', 'imported']);
+const RUNTIME_IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.webp']);
 const CODE_LIKE_PLUGIN_TEXT =
   /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
@@ -584,8 +587,107 @@ function validateAssetCatalog(state: FullProjectState): ValidationMessage[] {
         });
       }
     }
+
+    if (asset.kind === 'spritesheet') {
+      const frameWidth = asset.frameWidth;
+      const frameHeight = asset.frameHeight;
+      const frames = asset.frames;
+      if (
+        asset.width !== undefined &&
+        Number.isFinite(asset.width) &&
+        Number.isFinite(frameWidth) &&
+        Number.isFinite(frames) &&
+        frameWidth !== undefined &&
+        frames !== undefined &&
+        asset.width !== frameWidth * frames
+      ) {
+        out.push({
+          level: 'error',
+          message: `spritesheet asset "${id}" width must equal frameWidth * frames (${frameWidth * frames})`,
+          source,
+        });
+      }
+      if (
+        asset.height !== undefined &&
+        Number.isFinite(asset.height) &&
+        Number.isFinite(frameHeight) &&
+        frameHeight !== undefined &&
+        asset.height !== frameHeight
+      ) {
+        out.push({
+          level: 'error',
+          message: `spritesheet asset "${id}" height must equal frameHeight ${frameHeight}`,
+          source,
+        });
+      }
+    }
   }
 
+  return out;
+}
+
+type AnimationSetForValidation = DatabaseEntries['animations']['sets'][number];
+
+interface AnimationCoverageRule {
+  label: 'Player' | 'NPC' | 'Enemy';
+  actions: readonly string[];
+  directions: readonly string[];
+}
+
+function coverageRuleForAnimationSet(setId: string, playerSetId: string): AnimationCoverageRule | null {
+  if (setId === playerSetId) {
+    return {
+      label: 'Player',
+      actions: REQUIRED_PLAYER_ANIMATION_ACTIONS,
+      directions: REQUIRED_CHARACTER_ANIMATION_DIRECTIONS,
+    };
+  }
+  if (/^npc(?:[_-]|$)/i.test(setId)) {
+    return {
+      label: 'NPC',
+      actions: REQUIRED_NPC_ANIMATION_ACTIONS,
+      directions: REQUIRED_CHARACTER_ANIMATION_DIRECTIONS,
+    };
+  }
+  if (/^enemy(?:[_-]|$)/i.test(setId)) {
+    return {
+      label: 'Enemy',
+      actions: REQUIRED_ENEMY_ANIMATION_ACTIONS,
+      directions: REQUIRED_CHARACTER_ANIMATION_DIRECTIONS,
+    };
+  }
+  return null;
+}
+
+function animationSetHasCoverageClip(
+  set: AnimationSetForValidation,
+  action: string,
+  direction: string,
+): boolean {
+  return set.clips.some(clip =>
+    clip.action === action && (clip.direction === direction || clip.direction === 'any'),
+  );
+}
+
+function validateAnimationCoverage(
+  set: AnimationSetForValidation,
+  playerSetId: string,
+): ValidationMessage[] {
+  const rule = coverageRuleForAnimationSet(set.id, playerSetId);
+  if (!rule) return [];
+
+  const out: ValidationMessage[] = [];
+  for (const action of rule.actions) {
+    for (const direction of rule.directions) {
+      if (!animationSetHasCoverageClip(set, action, direction)) {
+        out.push({
+          level: 'warning',
+          message: `${rule.label} animation set "${set.id}" is missing ${action}/${direction}`,
+          source: `database/animations/${set.id}`,
+        });
+      }
+    }
+  }
   return out;
 }
 
@@ -1014,6 +1116,25 @@ function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogDat
         });
       }
       const catalogAsset = catalogSpritesheets.get(clip.asset);
+      if (catalogAsset?.runtimeCompatible === false) {
+        out.push({
+          level: 'error',
+          message: `${label} uses runtime-incompatible spritesheet asset "${clip.asset}"`,
+          source,
+        });
+      }
+      if (catalogAsset) {
+        const extension = catalogAsset.path.includes('.')
+          ? catalogAsset.path.slice(catalogAsset.path.lastIndexOf('.')).toLowerCase()
+          : '';
+        if (!RUNTIME_IMAGE_EXTENSIONS.has(extension)) {
+          out.push({
+            level: 'error',
+            message: `${label} uses spritesheet asset "${clip.asset}" with runtime-incompatible extension "${extension || '(none)'}"`,
+            source,
+          });
+        }
+      }
       if (!Number.isFinite(clip.frameSize.width) || clip.frameSize.width <= 0) {
         out.push({ level: 'error', message: `${label} frameSize.width must be a positive finite number`, source });
       } else if (catalogAsset?.frameWidth !== undefined && clip.frameSize.width !== catalogAsset.frameWidth) {
@@ -1051,25 +1172,8 @@ function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogDat
         out.push({ level: 'error', message: `${label} anchor.y must be finite`, source });
       }
     });
-  }
 
-  const playerSetId = db.system.playerAnimationSet || 'player_adventurer';
-  const playerSet = db.animations.sets.find(set => set.id === playerSetId);
-  if (playerSet) {
-    for (const action of REQUIRED_PLAYER_ANIMATION_ACTIONS) {
-      for (const direction of REQUIRED_PLAYER_ANIMATION_DIRECTIONS) {
-        const hasClip = playerSet.clips.some(clip =>
-          clip.action === action && (clip.direction === direction || clip.direction === 'any'),
-        );
-        if (!hasClip) {
-          out.push({
-            level: 'warning',
-            message: `Player animation set "${playerSetId}" is missing ${action}/${direction}`,
-            source: `database/animations/${playerSetId}`,
-          });
-        }
-      }
-    }
+    out.push(...validateAnimationCoverage(set, db.system.playerAnimationSet || 'player_adventurer'));
   }
 
   return out;

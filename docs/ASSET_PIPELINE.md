@@ -103,6 +103,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animat
 Detailed CP-075 evidence is recorded in
 `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`.
 
+## Phase 11 Animation Coverage Validation
+
+CP-076 extends project validation so character animation sets cannot silently
+ship with missing required coverage. The editor validation gate now checks:
+
+- the configured player animation set has `idle`, `walk`, `interact`,
+  `attack`, `hurt`, and `death` for all four directions
+- NPC-style animation set ids (`npc_` or `npc-`) have `idle` and `walk` for
+  all four directions
+- enemy-style animation set ids (`enemy_` or `enemy-`) have `idle`, `attack`,
+  `hurt`, and `death` for all four directions
+- `any` direction clips satisfy each required action for every direction
+- spritesheet assets used by clips have runtime-compatible metadata and output
+  dimensions when catalog width/height/frame metadata is present
+
+Coverage gaps are warnings in the validation panel; malformed spritesheet
+metadata and runtime-incompatible referenced assets are errors. Detailed
+CP-076 evidence is recorded in
+`docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development

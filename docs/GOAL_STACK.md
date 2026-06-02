@@ -41,13 +41,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`
 - `docs/PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md`
 - `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`
+- `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-076 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-077 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -526,6 +527,13 @@ Primary Phase 11 sources:
   pipeline enforces safe paths, frame size/count, anchor, FPS, loop,
   transparency, non-empty frames, shared scale, and output validation. Evidence
   is recorded in `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`.
+- Phase 11 CP-076 — direction and action coverage validator completed.
+  Project validation now checks full player coverage, NPC idle/walk coverage,
+  enemy combat coverage, `any` direction fallback coverage, and
+  runtime-compatible spritesheet output metadata before save/playtest. Coverage
+  gaps surface as warnings; malformed spritesheet metadata and incompatible
+  referenced outputs are errors. Evidence is recorded in
+  `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
