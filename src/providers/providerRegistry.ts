@@ -113,7 +113,13 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     cost: paidUnknownCost,
     rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'image.generate', 'image.edit', 'vision.analyze'],
-    models: [],
+    models: [
+      {
+        id: 'gpt-image-2',
+        label: 'GPT Image 2',
+        operations: ['image.generate', 'image.edit'],
+      },
+    ],
     modelSelection: 'user-selected',
   },
   {
@@ -204,13 +210,18 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     credential: { required: false },
     cost: freeOfflineCost,
     rateLimit: noRemoteRateLimit,
-    operations: ['text.generate'],
+    operations: ['text.generate', 'image.generate'],
     capabilityLabels: ['Offline mock contracts'],
     models: [
       {
         id: 'offline-mock',
         label: 'Offline mock',
         operations: ['text.generate'],
+      },
+      {
+        id: 'offline-image-mock',
+        label: 'Offline image mock',
+        operations: ['image.generate'],
       },
     ],
     modelSelection: 'registry',

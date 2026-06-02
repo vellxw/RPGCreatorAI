@@ -17,10 +17,16 @@ project JSON, or affect the native runtime.
   image edit, animation draft, and code/tooling gates
 - helpers to find model descriptors and resolve workflow availability
 
-The default registry includes only the offline mock model used by local tests.
+The default registry includes:
+
+- OpenAI `gpt-image-2` image, image-edit, and vision capability metadata added
+  by CP-065.
+- Local `offline-mock` text fixture metadata.
+- Local `offline-image-mock` image fixture metadata.
+
 Unknown real-provider model ids remain unavailable until explicit capability
-data exists. This keeps provider/model behavior data-driven and avoids
-promoting current vendor model ids into product requirements.
+data exists. This keeps provider/model behavior data-driven and avoids making
+current vendor model ids required product defaults.
 
 ## UI Gating
 
@@ -37,6 +43,7 @@ action should be enabled, disabled, or routed to a different configured model.
 Focused tests cover:
 
 - offline mock model capability descriptors and limits
+- GPT Image 2 and offline image fixture capability descriptors and limits
 - unknown real-provider model ids staying unavailable
 - data-driven workflow gates with injected custom model descriptors
 - read-only Settings gate UI for ready and unavailable states

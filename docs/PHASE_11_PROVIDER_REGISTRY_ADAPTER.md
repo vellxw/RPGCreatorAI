@@ -23,9 +23,11 @@ dependency, credential read, project mutation, or native runtime dependency.
 
 Real provider model ids are not required product defaults. Most real providers
 use `modelSelection: user-selected`; CP-061 stores model capability data
-separately so capabilities can change without rewriting provider screens. The
-local mock provider has a fixture model descriptor so contract tests can
-validate the adapter shape offline.
+separately so capabilities can change without rewriting provider screens.
+CP-065 records the current OpenAI image model option `gpt-image-2` as
+configurable metadata without pre-filling provider configs. The local mock
+provider has separate text and image fixture model descriptors so contract
+tests can validate adapter shapes offline.
 
 ## Adapter Contract
 
@@ -47,9 +49,11 @@ can carry retry guidance without parsing display copy.
 `src/providers/mockProviderAdapter.ts` is the first implementation. It is
 deterministic, local, and fixture-only:
 
-- lists the local mock model
-- supports `text.generate`
+- lists the local mock text and image models
+- supports `text.generate` and deterministic offline `image.generate` fixtures
 - returns deterministic text and usage metadata
+- returns deterministic mock image asset refs and image usage metadata for
+  `offline-image-mock`
 - returns structured cancellation when an `AbortSignal` is already aborted
 - returns structured failure for unsupported operations
 - returns deterministic fixture failures for rate-limit and quota states

@@ -28,6 +28,7 @@ describe('mocked provider contract suite', () => {
   it('declares every required offline fixture without live provider metadata', () => {
     expect(mockProviderContractFixtures.map(fixture => fixture.id)).toEqual([
       'success',
+      'image-success',
       'malformed-response',
       'provider-error',
       'rate-limit',
@@ -37,7 +38,7 @@ describe('mocked provider contract suite', () => {
 
     for (const fixture of mockProviderContractFixtures) {
       expect(fixture.request.providerId).toBe('local');
-      expect(fixture.request.modelId).toBe('offline-mock');
+      expect(fixture.request.modelId).toMatch(/^offline-(image-)?mock$/);
       expect(JSON.stringify(fixture)).not.toMatch(/apiKey|OPENAI_API_KEY|ANTHROPIC_API_KEY|https:\/\/api\./i);
     }
   });
@@ -93,6 +94,7 @@ describe('mocked provider contract suite', () => {
 
     expect(results.map(result => [result.fixtureId, result.response.status, result.response.failure?.kind ?? 'none'])).toEqual([
       ['success', 'succeeded', 'none'],
+      ['image-success', 'succeeded', 'none'],
       ['malformed-response', 'failed', 'provider-error'],
       ['provider-error', 'failed', 'provider-error'],
       ['rate-limit', 'failed', 'rate-limit'],
@@ -100,6 +102,9 @@ describe('mocked provider contract suite', () => {
       ['cancellation', 'cancelled', 'cancelled'],
     ]);
     expect(results.find(result => result.fixtureId === 'success')?.response.output?.text).toContain('Offline mock response');
+    expect(results.find(result => result.fixtureId === 'image-success')?.response.output?.assetRefs).toEqual([
+      'mock://generated/mock-contract-image-success.png',
+    ]);
     expect(results.find(result => result.fixtureId === 'rate-limit')?.response.failure?.retryGuidance).toContain('Wait');
     expect(results.find(result => result.fixtureId === 'timeout')?.response.failure?.retryGuidance).toContain('Retry after');
     expect(results.every(result => result.serializedRequest.includes('"providerId":"local"'))).toBe(true);

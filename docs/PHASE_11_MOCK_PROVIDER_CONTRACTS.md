@@ -9,14 +9,16 @@ provider credentials, paid APIs, project mutation, or native runtime support.
 `src/providers/mockProviderContract.ts` defines the required fixture set:
 
 - `success`
+- `image-success`
 - `malformed-response`
 - `provider-error`
 - `rate-limit`
 - `timeout`
 - `cancellation`
 
-All fixtures target the local `offline-mock` provider and model. They contain
-no API keys, provider base URLs, or live endpoint metadata.
+All fixtures target the local provider. Text fixtures use `offline-mock`;
+image fixtures use `offline-image-mock`. They contain no API keys, provider
+base URLs, or live endpoint metadata.
 
 ## Serialization And Normalization
 
@@ -30,6 +32,9 @@ no API keys, provider base URLs, or live endpoint metadata.
 
 The mock provider adapter uses these normalization helpers for fixture-driven
 failures, so adapter tests and contract tests share one response shape.
+CP-065 also adds a deterministic offline `image.generate` success fixture with
+mock asset refs and usage metadata; it does not create files or mutate project
+data.
 
 ## Provider Readiness
 

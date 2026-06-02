@@ -59,6 +59,20 @@ export const providerWorkflowDefinitions: ProviderWorkflowDefinition[] = [
 
 export const defaultModelCapabilityRegistry: ModelCapabilityDescriptor[] = [
   {
+    providerId: 'openai',
+    modelId: 'gpt-image-2',
+    label: 'GPT Image 2',
+    capabilities: ['image', 'image-edit', 'vision'],
+    operations: ['image.generate', 'image.edit'],
+    limits: {
+      inputFileTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      outputFileTypes: ['image/png', 'image/webp', 'image/jpeg'],
+      maxImages: 1,
+      supportsStreaming: false,
+    },
+    contextHints: ['OpenAI image model settings are configurable and require credentials before use'],
+  },
+  {
     providerId: 'local',
     modelId: 'offline-mock',
     label: 'Offline mock',
@@ -73,6 +87,20 @@ export const defaultModelCapabilityRegistry: ModelCapabilityDescriptor[] = [
       outputFileTypes: [],
     },
     contextHints: ['Offline fixture responses only'],
+  },
+  {
+    providerId: 'local',
+    modelId: 'offline-image-mock',
+    label: 'Offline image mock',
+    capabilities: ['image'],
+    operations: ['image.generate'],
+    limits: {
+      inputFileTypes: [],
+      outputFileTypes: ['image/png'],
+      maxImages: 1,
+      supportsStreaming: false,
+    },
+    contextHints: ['Offline image fixture responses only'],
   },
 ];
 

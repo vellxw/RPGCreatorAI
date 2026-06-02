@@ -12,6 +12,13 @@ import { Badge } from '../components/ui/Badge';
 import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import { ProviderCapabilityGatesPanel } from '../components/ai/ProviderCapabilityGatesPanel';
 import { ProviderCostBudgetPanel } from '../components/ai/ProviderCostBudgetPanel';
+import { getProviderMetadata } from '../providers/providerRegistry';
+import {
+  defaultOpenAiImageGenerationSettings,
+  imageGenerationReadiness,
+  normalizeImageGenerationSettings,
+  openAiImageGenerationOptions,
+} from '../providers/providerImageGenerationSettings';
 import {
   defaultProviderConfigs,
   providerStatusFor,
@@ -19,7 +26,7 @@ import {
   type ProviderStoreValue,
 } from '../stores/providerStore';
 import { useAiRequestQueue, type AiRequestQueueState } from '../stores/aiRequestQueueStore';
-import type { ProviderConfig } from '../types/project';
+import type { ProviderConfig, ProviderImageGenerationSettings } from '../types/project';
 import {
   getCredentialStoreAdapter,
   type CredentialStoreAdapter,
@@ -42,6 +49,7 @@ function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
   return providers.map(provider => ({
     ...provider,
     capabilities: [...provider.capabilities],
+    imageSettings: provider.imageSettings ? { ...provider.imageSettings } : undefined,
   }));
 }
 
@@ -133,7 +141,25 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
     updateProvider(id, provider => ({
       ...provider,
       model: model.trim(),
+      imageSettings: provider.imageSettings
+        ? normalizeImageGenerationSettings({ ...provider.imageSettings, modelId: model.trim() })
+        : provider.imageSettings,
       status: providerStatusFor(provider),
+    }));
+  };
+
+  const updateImageSetting = (
+    id: string,
+    key: keyof ProviderImageGenerationSettings,
+    value: string,
+  ) => {
+    updateProvider(id, provider => ({
+      ...provider,
+      imageSettings: normalizeImageGenerationSettings({
+        ...provider.imageSettings,
+        modelId: provider.model.trim() || provider.imageSettings?.modelId || defaultOpenAiImageGenerationSettings.modelId,
+        [key]: value,
+      }),
     }));
   };
 
@@ -206,6 +232,13 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                 const credentialStatus = credentialStatuses[provider.id];
                 const credentialUnavailable = !activeCredentialStore.isAvailable();
                 const credentialValue = credentialInputs[provider.id] ?? '';
+                const providerMetadata = getProviderMetadata(provider.id);
+                const supportsImageGeneration = providerMetadata?.operations.includes('image.generate') ?? false;
+                const imageSettings = normalizeImageGenerationSettings({
+                  ...provider.imageSettings,
+                  modelId: provider.model.trim() || provider.imageSettings?.modelId || defaultOpenAiImageGenerationSettings.modelId,
+                });
+                const imageReadiness = imageGenerationReadiness(provider);
                 return (
                   <article key={provider.id} className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -272,6 +305,70 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                         />
                       </label>
                     </div>
+
+                    {supportsImageGeneration && (
+                      <div className="mt-3 border-t border-gray-100 pt-3">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <div className="text-[11px] font-semibold uppercase text-gray-500">Image Model Settings</div>
+                            <div className="mt-0.5 text-[11px] text-gray-500">
+                              GPT Image 2 defaults stay editor-only and require capability plus credential readiness.
+                            </div>
+                          </div>
+                          <Badge variant={imageReadiness.canGenerate ? 'success' : 'muted'} dot>
+                            {imageReadiness.canGenerate ? 'Ready for image generation' : imageReadiness.reason}
+                          </Badge>
+                        </div>
+                        <div className="grid gap-2 md:grid-cols-3">
+                          <label className="block">
+                            <span className="mb-1 block text-[11px] font-semibold uppercase text-gray-500">Quality</span>
+                            <select
+                              aria-label={`Image quality for ${provider.name}`}
+                              value={imageSettings.quality}
+                              disabled={!provider.enabled}
+                              onChange={event => updateImageSetting(provider.id, 'quality', event.target.value)}
+                              className="h-8 w-full rounded-md border border-gray-200 bg-white px-2 text-[12px] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
+                            >
+                              {openAiImageGenerationOptions.qualities.map(quality => (
+                                <option key={quality} value={quality}>{quality}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="block">
+                            <span className="mb-1 block text-[11px] font-semibold uppercase text-gray-500">Size</span>
+                            <select
+                              aria-label={`Image size for ${provider.name}`}
+                              value={imageSettings.size}
+                              disabled={!provider.enabled}
+                              onChange={event => updateImageSetting(provider.id, 'size', event.target.value)}
+                              className="h-8 w-full rounded-md border border-gray-200 bg-white px-2 text-[12px] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
+                            >
+                              {openAiImageGenerationOptions.sizes.map(size => (
+                                <option key={size} value={size}>{size}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="block">
+                            <span className="mb-1 block text-[11px] font-semibold uppercase text-gray-500">Style guidance</span>
+                            <select
+                              aria-label={`Style guidance for ${provider.name}`}
+                              value={imageSettings.style}
+                              disabled={!provider.enabled}
+                              onChange={event => updateImageSetting(provider.id, 'style', event.target.value)}
+                              className="h-8 w-full rounded-md border border-gray-200 bg-white px-2 text-[12px] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
+                            >
+                              {openAiImageGenerationOptions.styles.map(style => (
+                                <option key={style} value={style}>{style}</option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                        <p className="mt-2 text-[11px] leading-4 text-gray-500">
+                          Prompt-only style guidance; current GPT Image API payload uses model, quality, size,
+                          output format, background, and moderation settings.
+                        </p>
+                      </div>
+                    )}
                     {provider.credentialEnvVar && (
                       <div className="mt-3 rounded-md border border-gray-100 bg-gray-50 p-3">
                         <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto_auto]">

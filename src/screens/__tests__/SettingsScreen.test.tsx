@@ -103,11 +103,51 @@ describe('SettingsScreen provider settings', () => {
     expect(text).toContain('Cost & Budget');
     expect(text).toContain('Cost unknown');
     expect(text).toContain('Confirm paid work per session');
+    expect(text).toContain('Image Model Settings');
+    expect(text).toContain('GPT Image 2');
+    expect(text).toContain('Style guidance');
+    expect(text).toContain('Prompt-only');
     const credential = view.container.querySelector<HTMLInputElement>('input[type="password"]');
     expect(credential?.value).toBe('');
 
     const buttons = Array.from(view.container.querySelectorAll('button'));
     expect(buttons.map(button => button.textContent ?? '').join(' ')).not.toMatch(/Generate|Test Connection|Connect/i);
+
+    view.unmount();
+  });
+
+  it('lets configured image providers adjust offline-safe image generation settings', () => {
+    const view = renderSettings([
+      {
+        ...disabledOpenAi,
+        enabled: true,
+        status: 'configured',
+        credentialState: 'configured',
+        model: 'gpt-image-2',
+      },
+    ]);
+
+    const quality = view.container.querySelector<HTMLSelectElement>('select[aria-label="Image quality for OpenAI"]');
+    const size = view.container.querySelector<HTMLSelectElement>('select[aria-label="Image size for OpenAI"]');
+    const style = view.container.querySelector<HTMLSelectElement>('select[aria-label="Style guidance for OpenAI"]');
+
+    expect(quality?.value).toBe('auto');
+    expect(size?.value).toBe('auto');
+    expect(style?.value).toBe('project-default');
+
+    act(() => {
+      quality!.value = 'high';
+      quality!.dispatchEvent(new Event('change', { bubbles: true }));
+      size!.value = '1024x1024';
+      size!.dispatchEvent(new Event('change', { bubbles: true }));
+      style!.value = 'pixel-art';
+      style!.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(quality?.value).toBe('high');
+    expect(size?.value).toBe('1024x1024');
+    expect(style?.value).toBe('pixel-art');
+    expect(view.container.textContent).toContain('Ready for image generation');
 
     view.unmount();
   });

@@ -799,8 +799,41 @@ export interface ProviderConfig {
   rateLimitStatus?: 'not-applicable' | 'provider-managed' | 'unknown';
   requiresPaidJobConfirmation?: boolean;
   expensiveJobThresholdUsd?: number;
+  imageSettings?: ProviderImageGenerationSettings;
   notes?: string;
   lastChecked?: string;
+}
+
+export type ProviderImageQuality = 'auto' | 'low' | 'medium' | 'high';
+export type ProviderImageSize =
+  | 'auto'
+  | '1024x1024'
+  | '1024x1536'
+  | '1536x1024'
+  | '2048x2048'
+  | '2048x1152'
+  | '3840x2160'
+  | '2160x3840';
+export type ProviderImageOutputFormat = 'png' | 'webp' | 'jpeg';
+export type ProviderImageBackground = 'auto' | 'opaque';
+export type ProviderImageModeration = 'auto' | 'low';
+export type ProviderImageStyle =
+  | 'project-default'
+  | 'pixel-art'
+  | 'painted'
+  | 'clean-ui';
+
+export interface ProviderImageGenerationSettings {
+  modelId: string;
+  quality: ProviderImageQuality;
+  size: ProviderImageSize;
+  style: ProviderImageStyle;
+  outputFormat: ProviderImageOutputFormat;
+  outputCompression?: number;
+  background: ProviderImageBackground;
+  moderation: ProviderImageModeration;
+  styleIsApiParameter: boolean;
+  docsCheckedAt: string;
 }
 
 export interface PlaytestState {

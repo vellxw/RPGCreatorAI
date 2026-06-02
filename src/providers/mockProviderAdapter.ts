@@ -61,6 +61,36 @@ function fixtureFailureResponse(request: ProviderAdapterRequest): ProviderAdapte
   return null;
 }
 
+function imageFixtureResponse(request: ProviderAdapterRequest): ProviderAdapterResponse {
+  const input = request.input ?? {};
+  const outputFormat = typeof input.outputFormat === 'string' ? input.outputFormat : 'png';
+  const size = typeof input.size === 'string' ? input.size : '1024x1024';
+  const quality = typeof input.quality === 'string' ? input.quality : 'low';
+  const prompt = request.prompt ?? '';
+  return {
+    id: request.id,
+    operation: request.operation,
+    providerId: request.providerId,
+    modelId: request.modelId ?? 'offline-image-mock',
+    status: 'succeeded',
+    output: {
+      assetRefs: [`mock://generated/${request.id}.${outputFormat}`],
+      data: {
+        mimeType: `image/${outputFormat === 'jpg' ? 'jpeg' : outputFormat}`,
+        revisedPrompt: prompt,
+        fixture: 'offline-image',
+        size,
+        quality,
+      },
+    },
+    usage: {
+      inputTokens: countPromptTokens(prompt),
+      imageCount: 1,
+      outputTokens: 196,
+    },
+  };
+}
+
 export function createMockProviderAdapter(): ProviderAdapter {
   const metadata = getProviderMetadata('local');
   if (!metadata) {
@@ -110,6 +140,26 @@ class MockProviderAdapter implements ProviderAdapter {
         failure,
       };
     }
+    if (request.operation === 'image.generate') {
+      if (request.modelId && request.modelId !== 'offline-image-mock') {
+        const failure: ProviderAdapterFailure = {
+          kind: 'unsupported-operation',
+          message: `Mock model ${request.modelId} does not support image.generate.`,
+          retryGuidance: 'Select offline-image-mock for offline image fixture validation.',
+        };
+        return {
+          id: request.id,
+          operation: request.operation,
+          providerId: request.providerId,
+          modelId: request.modelId,
+          status: 'failed',
+          error: failure.message,
+          failure,
+        };
+      }
+      return imageFixtureResponse(request);
+    }
+
     if (request.operation !== 'text.generate') {
       const failure: ProviderAdapterFailure = {
         kind: 'unsupported-operation',

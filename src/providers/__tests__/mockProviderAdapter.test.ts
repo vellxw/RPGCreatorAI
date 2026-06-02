@@ -18,12 +18,17 @@ describe('mockProviderAdapter', () => {
   it('discovers capabilities and models without live provider calls', async () => {
     const adapter = createMockProviderAdapter();
 
-    await expect(adapter.discoverCapabilities()).resolves.toEqual(['text.generate']);
+    await expect(adapter.discoverCapabilities()).resolves.toEqual(['text.generate', 'image.generate']);
     await expect(adapter.listModels()).resolves.toEqual([
       {
         id: 'offline-mock',
         label: 'Offline mock',
         operations: ['text.generate'],
+      },
+      {
+        id: 'offline-image-mock',
+        label: 'Offline image mock',
+        operations: ['image.generate'],
       },
     ]);
   });
@@ -65,15 +70,53 @@ describe('mockProviderAdapter', () => {
   it('rejects unsupported operations without mutating project data', async () => {
     const adapter = createMockProviderAdapter();
     const result = await adapter.execute(textRequest({
-      operation: 'image.generate',
-      prompt: 'Create a tileset.',
+      operation: 'image.edit',
+      prompt: 'Edit a tileset.',
     }));
 
     expect(result).toMatchObject({
       status: 'failed',
-      error: 'Mock provider does not support image.generate.',
+      error: 'Mock provider does not support image.edit.',
     });
     expect(result.output).toBeUndefined();
+  });
+
+  it('returns deterministic image fixture responses without live provider calls', async () => {
+    const adapter = createMockProviderAdapter();
+    const result = await adapter.execute(textRequest({
+      id: 'image-request-1',
+      operation: 'image.generate',
+      modelId: 'offline-image-mock',
+      prompt: 'Create a 16 color town icon.',
+      input: {
+        quality: 'low',
+        size: '1024x1024',
+        outputFormat: 'png',
+      },
+    }));
+
+    expect(result).toEqual({
+      id: 'image-request-1',
+      operation: 'image.generate',
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      status: 'succeeded',
+      output: {
+        assetRefs: ['mock://generated/image-request-1.png'],
+        data: {
+          mimeType: 'image/png',
+          revisedPrompt: 'Create a 16 color town icon.',
+          fixture: 'offline-image',
+          size: '1024x1024',
+          quality: 'low',
+        },
+      },
+      usage: {
+        inputTokens: 7,
+        imageCount: 1,
+        outputTokens: 196,
+      },
+    });
   });
 
   it('reports fixture rate-limit and quota failures with retry guidance', async () => {

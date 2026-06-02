@@ -77,6 +77,14 @@
   - [x] CP-063 / FRA-98: add mocked provider contract test suite.
   - [x] CP-064 / FRA-99: run the AI Provider Hub foundation integration gate.
 - [ ] 08 GPT Image 2 Asset Pipeline.
+  - [x] CP-065 / FRA-100: add GPT Image model configuration.
+  - [ ] CP-066 / FRA-101: create image prompt template library.
+  - [ ] CP-067 / FRA-102: implement AI tileset generation workflow.
+  - [ ] CP-068 / FRA-103: implement AI item icon generation workflow.
+  - [ ] CP-069 / FRA-104: implement AI portrait generation workflow.
+  - [ ] CP-070 / FRA-105: implement image edit and variation workflow.
+  - [ ] CP-071 / FRA-106: add generated image visual QA scoring.
+  - [ ] CP-072 / FRA-107: run the GPT Image asset pipeline integration gate.
 - [ ] 09 AI Characters And Animations.
 - [ ] 10 AI Game Content Pipelines.
 - [ ] 11 Multi-Provider Integrations.

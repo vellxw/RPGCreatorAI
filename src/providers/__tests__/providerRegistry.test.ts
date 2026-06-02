@@ -26,6 +26,23 @@ describe('providerRegistry', () => {
     expect(getProviderMetadata('local')?.credential.required).toBe(false);
   });
 
+  it('declares documented image model options without making them required defaults', () => {
+    const openai = getProviderMetadata('openai');
+    const local = getProviderMetadata('local');
+
+    expect(openai?.modelSelection).toBe('user-selected');
+    expect(openai?.models).toContainEqual({
+      id: 'gpt-image-2',
+      label: 'GPT Image 2',
+      operations: ['image.generate', 'image.edit'],
+    });
+    expect(local?.models).toContainEqual({
+      id: 'offline-image-mock',
+      label: 'Offline image mock',
+      operations: ['image.generate'],
+    });
+  });
+
   it('derives settings provider configs from registry metadata', () => {
     const configs = providerConfigsFromRegistry(defaultProviderRegistry);
     const openai = configs.find(provider => provider.id === 'openai');
@@ -40,6 +57,7 @@ describe('providerRegistry', () => {
     });
     expect(openai?.capabilities).toContain('Text generation');
     expect(openai?.capabilities).toContain('Image editing');
+    expect(openai?.model).toBe('');
     expect(local).toMatchObject({
       name: 'Local gateway',
       credentialState: 'not-required',

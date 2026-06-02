@@ -5,6 +5,7 @@ import { serializeProviderRequest } from './providerResponseNormalization';
 
 export type MockProviderContractFixtureId =
   | 'success'
+  | 'image-success'
   | 'malformed-response'
   | 'provider-error'
   | 'rate-limit'
@@ -33,13 +34,17 @@ export interface ProviderContractReadiness {
 function contractRequest(
   id: MockProviderContractFixtureId,
   input: Record<string, unknown> = {},
+  operation: ProviderAdapterRequest['operation'] = 'text.generate',
+  modelId = 'offline-mock',
 ): ProviderAdapterRequest {
   return {
     id: `mock-contract-${id}`,
-    operation: 'text.generate',
+    operation,
     providerId: 'local',
-    modelId: 'offline-mock',
-    prompt: 'Draft a deterministic innkeeper line.',
+    modelId,
+    prompt: operation === 'image.generate'
+      ? 'Create a deterministic RPG icon fixture.'
+      : 'Draft a deterministic innkeeper line.',
     createdAt: '2026-06-02T14:00:00.000Z',
     input,
   };
@@ -50,6 +55,15 @@ export const mockProviderContractFixtures: MockProviderContractFixture[] = [
     id: 'success',
     description: 'Successful deterministic text generation fixture.',
     request: contractRequest('success'),
+  },
+  {
+    id: 'image-success',
+    description: 'Successful deterministic image generation fixture.',
+    request: contractRequest('image-success', {
+      quality: 'low',
+      size: '1024x1024',
+      outputFormat: 'png',
+    }, 'image.generate', 'offline-image-mock'),
   },
   {
     id: 'malformed-response',

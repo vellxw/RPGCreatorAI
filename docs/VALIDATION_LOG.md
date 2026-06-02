@@ -4,6 +4,48 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-100 / CP-065 — GPT Image model configuration
+
+- `2026-06-02 14:30:55 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerImageGenerationSettings.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — RED as expected before implementation; the image settings module, GPT
+  Image 2 model descriptors, offline image mock fixture, and Settings image
+  model controls were missing.
+- `2026-06-02 14:33:46 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerImageGenerationSettings.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 6 focused files and 29 tests passed after adding configurable
+  `gpt-image-2` metadata, image settings normalization/readiness, Settings
+  controls, and deterministic offline `image.generate` fixtures.
+- `2026-06-02 14:34:20 -03:00` — `npm run typecheck` — FAIL;
+  TypeScript reported the Settings image-setting key type as `never`.
+  Fix applied: use the concrete `ProviderImageGenerationSettings` key type.
+- `2026-06-02 14:34:38 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 14:34:38 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerImageGenerationSettings.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 6 focused files and 29 tests passed after the type fix.
+- `2026-06-02 14:39:14 -03:00` —
+  `npm run typecheck; npm test -- --run; npm run build` — PASS;
+  typecheck passed, 75 Vitest files and 398 tests passed, and Vite
+  transformed 1941 modules with the known non-fatal chunk-size warning.
+- `2026-06-02 14:40:40 -03:00` —
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers src\screens\SettingsScreen.tsx src\types\project.ts docs\PHASE_11_GPT_IMAGE_MODEL_CONFIGURATION.md`
+  — PASS for CP-065 scope; findings were existing credential redaction
+  handling, existing Moonshot metadata, redaction tests, and documentation.
+  No new live provider call site or secret value was found.
+- `2026-06-02 14:47:24 -03:00` — Playwright CLI Settings smoke against
+  `npm run dev -- --host 127.0.0.1 --port 3002` — PASS; opened the bundled
+  sample, navigated to Settings, verified `Provider Settings`,
+  `Image Model Settings`, `GPT Image 2`, prompt-only style guidance,
+  `Capability Gates`, and no live generate/connect/test-provider action.
+  Playwright console reported 0 errors and 0 warnings; browser verbose DOM
+  password-field messages were non-fatal.
+- Fix applied: added editor-side GPT Image model settings data, model
+  capability descriptors, safe Settings controls, and offline image mock
+  fixtures. No live provider call was made.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-99 / CP-064 — AI Provider Hub foundation integration gate
 
 - `2026-06-02 14:06:49 -03:00` —

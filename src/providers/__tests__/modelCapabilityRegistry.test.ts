@@ -37,6 +37,42 @@ describe('modelCapabilityRegistry', () => {
     expect(modelSupportsCapability(descriptor!, 'image')).toBe(false);
   });
 
+  it('defines GPT Image 2 capabilities from current OpenAI image docs', () => {
+    const descriptor = getModelCapabilityDescriptor('openai', 'gpt-image-2');
+
+    expect(descriptor).toMatchObject({
+      providerId: 'openai',
+      modelId: 'gpt-image-2',
+      label: 'GPT Image 2',
+      capabilities: ['image', 'image-edit', 'vision'],
+      operations: ['image.generate', 'image.edit'],
+      limits: {
+        inputFileTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        outputFileTypes: ['image/png', 'image/webp', 'image/jpeg'],
+        maxImages: 1,
+        supportsStreaming: false,
+      },
+    });
+    expect(modelSupportsCapability(descriptor!, 'image')).toBe(true);
+    expect(modelSupportsCapability(descriptor!, 'image-edit')).toBe(true);
+    expect(modelSupportsCapability(descriptor!, 'video')).toBe(false);
+  });
+
+  it('defines a separate offline image mock capability fixture', () => {
+    const descriptor = getModelCapabilityDescriptor('local', 'offline-image-mock');
+
+    expect(descriptor).toMatchObject({
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      capabilities: ['image'],
+      operations: ['image.generate'],
+      limits: {
+        maxImages: 1,
+        outputFileTypes: ['image/png'],
+      },
+    });
+  });
+
   it('keeps unknown real-provider models unavailable until capability data exists', () => {
     expect(getModelCapabilityDescriptor('openai', 'user-entered-model')).toBeUndefined();
   });

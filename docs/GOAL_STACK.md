@@ -30,13 +30,14 @@ Primary Phase 11 sources:
 - `docs/FIRST_RUN_APP_DATA_POLICY.md`
 - `docs/DIAGNOSTICS.md`
 - `docs/PHASE_11_PACKAGING_INTEGRATION_GATE.md`
+- `docs/PHASE_11_GPT_IMAGE_MODEL_CONFIGURATION.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-065 next).
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-066 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -435,6 +436,14 @@ Primary Phase 11 sources:
   while the native runtime remains independent of AI, providers, network,
   cloud, credentials, and live APIs. Evidence is recorded in
   `docs/PHASE_11_AI_PROVIDER_HUB_FOUNDATION_GATE.md`.
+- Phase 11 CP-065 — GPT Image model configuration completed. OpenAI
+  `gpt-image-2` is recorded as configurable provider/model metadata, image
+  settings normalize quality, size, output format, background, moderation, and
+  prompt-only style guidance, Settings exposes those controls without live
+  provider actions, and the local mock adapter/contract suite now covers
+  deterministic offline `image.generate` responses through
+  `offline-image-mock`. Evidence is recorded in
+  `docs/PHASE_11_GPT_IMAGE_MODEL_CONFIGURATION.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
