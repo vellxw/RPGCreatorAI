@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TilesetEditor } from '../TilesetEditor';
 import type { AssetCatalogEntry, TilesetDatabaseData } from '../../../types/project';
 import type { TilesetImportRunner } from '../../../adapters/tilesetImport';
+import type {
+  TilesetGenerationCandidate,
+  TilesetGenerationRunner,
+} from '../../../providers/tilesetGenerationWorkflow';
 
 function makeDatabase(): TilesetDatabaseData {
   return {
@@ -312,6 +316,108 @@ describe('TilesetEditor', () => {
 
     expect(tilesetImporter).not.toHaveBeenCalled();
     expect(view.container.textContent).toContain('Tile count must be a positive integer.');
+
+    view.unmount();
+  });
+
+  it('generates a tileset draft and requires review before adding it to project data', async () => {
+    const generatedAsset: AssetCatalogEntry = {
+      id: 'forest_draft',
+      name: 'Forest Draft',
+      kind: 'tileset',
+      path: 'assets/generated/tilesets/forest_draft.png',
+      source: 'generated',
+      tags: ['generated', 'tileset', 'ai-draft', 'pending-review'],
+      width: 256,
+      height: 256,
+      generated: {
+        prompt: 'offline tileset prompt',
+        tool: 'ai-tileset-generation-workflow',
+        createdAt: '2026-06-02T18:16:00.000Z',
+        promptTemplateId: 'tileset-rpg-map-v1',
+        promptTemplateVersion: 1,
+        promptTemplateKind: 'tileset',
+        providerId: 'local',
+        modelId: 'offline-image-mock',
+      },
+    };
+    const generatedCandidate: TilesetGenerationCandidate = {
+      id: 'tileset-gen-ui',
+      reviewState: 'pending',
+      asset: generatedAsset,
+      tileset: {
+        id: 'forest_tiles',
+        name: 'Forest Draft',
+        tileSize: 32,
+        tiles: [
+          { id: 0, name: 'Tile 0', asset: 'forest_draft', group: 'A', passability: 'passable', priority: 0 },
+          { id: 2000, name: 'Collision Block', asset: 'forest_draft', group: 'Collision', passability: 'blocked', terrainTag: 'collision', priority: 0 },
+        ],
+      },
+      qaPreview: {
+        assetRef: 'mock://generated/tileset-gen-ui.png',
+        width: 256,
+        height: 256,
+        tileSize: 32,
+        columns: 8,
+        rows: 8,
+        tileCount: 64,
+        providerFixture: 'offline-image',
+      },
+    };
+    const tilesetGenerator: TilesetGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate: generatedCandidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const view = render(
+      <TilesetEditor
+        value={{ tilesets: [] }}
+        assets={[]}
+        tilesetGenerator={tilesetGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    act(() => button(view.container, 'Generate draft tileset').click());
+    expect(view.container.querySelector('[aria-label="Tileset generation metadata preview"]')).not.toBeNull();
+
+    changeText(input(view.container, 'Tileset generation ID'), 'forest_tiles');
+    changeText(input(view.container, 'Tileset generation name'), 'Forest Draft');
+    changeText(input(view.container, 'Tileset generation subject'), 'moss forest floor and canopy');
+
+    await clickAsync(view.container, 'Run tileset generation');
+
+    expect(tilesetGenerator).toHaveBeenCalledWith([], [], expect.objectContaining({
+      tilesetId: 'forest_tiles',
+      name: 'Forest Draft',
+      promptInputs: expect.objectContaining({
+        subject: 'moss forest floor and canopy',
+      }),
+    }));
+    expect(view.container.querySelector('[aria-label="Generated tileset draft review"]')).not.toBeNull();
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+
+    await clickAsync(view.container, 'Accept generated tileset');
+
+    expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'forest_draft',
+      source: 'generated',
+      tags: expect.arrayContaining(['reviewed']),
+    }));
+    expect(onChange).toHaveBeenLastCalledWith({
+      tilesets: [
+        expect.objectContaining({
+          id: 'forest_tiles',
+          tiles: expect.arrayContaining([
+            expect.objectContaining({ asset: 'forest_draft' }),
+          ]),
+        }),
+      ],
+    });
 
     view.unmount();
   });

@@ -4,6 +4,71 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-102 / CP-067 — AI tileset generation workflow
+
+- Timestamp not captured —
+  `npm test -- --run src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/components/database/__tests__/TilesetEditor.test.tsx`
+  — RED as expected before implementation; `tilesetGenerationWorkflow` did
+  not exist and the Tilesets editor had no `Generate draft tileset` action.
+- Timestamp not captured —
+  `npm test -- --run src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/components/database/__tests__/TilesetEditor.test.tsx`
+  — PASS after adding the offline tileset generation workflow and Tilesets UI;
+  2 files and 9 tests passed.
+- Timestamp not captured — `npm run typecheck` — FAIL after first
+  implementation; TypeScript rejected prompt inputs as not structurally
+  assignable to `Record<string, unknown>` and widened test fixture literals.
+  Fix applied: spread prompt inputs into a plain record and type the candidate
+  fixture as `TilesetGenerationCandidate`.
+- Timestamp not captured — `npm run typecheck` — PASS.
+- Timestamp not captured —
+  `npm test -- --run src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/components/database/__tests__/TilesetEditor.test.tsx src/adapters/__tests__/tilesetImport.test.ts src/validation/__tests__/validateProject.test.ts src/stores/__tests__/assetCatalogReducer.test.ts`
+  — PASS; 5 focused files and 52 tests passed.
+- Timestamp not captured — `npm test -- --run` — PASS; 77 Vitest files and
+  408 tests passed before the browser-smoke toolbar validation fix.
+- Timestamp not captured — `npm run build` — PASS; Vite transformed 1945
+  modules with the known non-fatal chunk-size warning.
+- Timestamp not captured — Chrome DevTools MCP browser smoke against
+  `npm run dev -- --host 127.0.0.1 --port 3003` — FAIL during validation
+  feedback after accepting the generated tileset; the asset catalog contained
+  the generated tileset asset, but toolbar feedback still reported 65 unknown
+  tile asset references. Root cause: `TopToolbar.handleValidate()` called
+  `validateProject()` without `projectState.assets`.
+- `2026-06-02 15:30:19 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — RED as expected; the regression fixture reported `Validation found 1
+  blocking error` when the asset catalog was required.
+- `2026-06-02 15:30:41 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx`
+  — PASS after passing `assets: projectState.assets` into toolbar validation;
+  1 file and 4 tests passed.
+- Timestamp not captured — Chrome DevTools MCP browser smoke rerun against
+  `npm run dev -- --host 127.0.0.1 --port 3003` — PASS; bundled sample opened,
+  Database -> Tilesets generated an offline draft, pending review appeared
+  without project mutation, accepting added `Generated Tileset 3`, and
+  `Validate` reported `Validation passed`. XHR/fetch/WebSocket/EventSource
+  requests were empty. Console reported only existing accessibility issues
+  for dense form labels/ids, with no runtime errors or warnings.
+- `2026-06-02 15:34:32 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 15:34:32 -03:00` —
+  `npm test -- --run src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/components/database/__tests__/TilesetEditor.test.tsx src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx src/adapters/__tests__/tilesetImport.test.ts src/validation/__tests__/validateProject.test.ts src/stores/__tests__/assetCatalogReducer.test.ts`
+  — PASS; 6 focused files and 56 tests passed.
+- `2026-06-02 15:34:32 -03:00` —
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\tilesetGenerationWorkflow.ts src\providers\__tests__\tilesetGenerationWorkflow.test.ts src\components\database\TilesetEditor.tsx src\components\database\__tests__\TilesetEditor.test.tsx src\components\layout\TopToolbar.tsx src\components\layout\__tests__\TopToolbarSaveFlow.test.tsx`
+  — PASS for CP-067 scope; the only finding was a test assertion checking no
+  `apiKey`, `https://api`, or `sk-` in generated requests.
+- `2026-06-02 15:34:59 -03:00` — `npm test -- --run` — PASS; 77 Vitest files
+  and 409 tests passed.
+- `2026-06-02 15:34:59 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1945 modules transformed, with the known
+  non-fatal chunk-size warning.
+- Fix applied: added offline prompt-driven tileset generation candidates,
+  review-gated approval, generated tileset asset/catalog metadata, Tilesets UI
+  controls, generated tileset validation, toolbar asset-aware validation
+  feedback, and documentation. No live provider call was made.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-101 / CP-066 — image prompt template library
 
 - `2026-06-02 14:55:35 -03:00` —

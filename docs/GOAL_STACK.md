@@ -32,13 +32,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_PACKAGING_INTEGRATION_GATE.md`
 - `docs/PHASE_11_GPT_IMAGE_MODEL_CONFIGURATION.md`
 - `docs/PHASE_11_IMAGE_PROMPT_TEMPLATE_LIBRARY.md`
+- `docs/PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-067 next).
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-068 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -451,6 +452,14 @@ Primary Phase 11 sources:
   context from `docs/GAME_VISUAL_DESIGN.md`, rejects proprietary style copying
   requests, and can emit an auditable generated-asset provenance manifest.
   Evidence is recorded in `docs/PHASE_11_IMAGE_PROMPT_TEMPLATE_LIBRARY.md`.
+- Phase 11 CP-067 — AI tileset generation workflow completed. The Tilesets
+  database now has a metadata-first generated-draft workflow that renders the
+  versioned tileset prompt template through the local offline mock provider,
+  creates a pending review candidate, validates dimensions and tile metadata,
+  and only adds the generated asset plus tileset database records after user
+  acceptance. Toolbar validation now includes the asset catalog so generated
+  tileset asset references validate correctly. Evidence is recorded in
+  `docs/PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

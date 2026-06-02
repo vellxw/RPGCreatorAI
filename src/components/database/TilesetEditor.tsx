@@ -1,9 +1,18 @@
 import { useMemo, useState } from 'react';
-import { Copy, Plus, Trash2, Upload } from 'lucide-react';
+import { Copy, Plus, Sparkles, Trash2, Upload } from 'lucide-react';
 import {
   importTilesetAsset,
   type TilesetImportRunner,
 } from '../../adapters/tilesetImport';
+import {
+  approveTilesetGenerationCandidate,
+  defaultTilesetGenerationDraft,
+  generateTilesetDraft,
+  validateTilesetGenerationDraft,
+  type TilesetGenerationCandidate,
+  type TilesetGenerationDraft,
+  type TilesetGenerationRunner,
+} from '../../providers/tilesetGenerationWorkflow';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import {
@@ -34,6 +43,7 @@ interface TilesetEditorProps {
   value: TilesetDatabaseData;
   assets?: AssetCatalogEntry[];
   tilesetImporter?: TilesetImportRunner;
+  tilesetGenerator?: TilesetGenerationRunner;
   mapUsage?: Record<string, string[]>;
   onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(value: TilesetDatabaseData): void;
@@ -202,6 +212,7 @@ export function TilesetEditor({
   value,
   assets = [],
   tilesetImporter = importTilesetAsset,
+  tilesetGenerator = generateTilesetDraft,
   mapUsage = {},
   onAssetImported,
   onChange,
@@ -211,6 +222,10 @@ export function TilesetEditor({
   const [tilesetDraft, setTilesetDraft] = useState<TilesetImportDraft | null>(null);
   const [tilesetImporting, setTilesetImporting] = useState(false);
   const [tilesetStatus, setTilesetStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [generationDraft, setGenerationDraft] = useState<TilesetGenerationDraft | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generationCandidate, setGenerationCandidate] = useState<TilesetGenerationCandidate | null>(null);
+  const [generationStatus, setGenerationStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const selected = value.tilesets.find(tileset => tileset.id === selectedId) ?? value.tilesets[0];
   const selectedUsage = selected ? mapUsage[selected.id] ?? [] : [];
   const ids = useMemo(() => new Set(value.tilesets.map(tileset => tileset.id)), [value.tilesets]);
@@ -224,6 +239,22 @@ export function TilesetEditor({
 
   const updateTilesetDraft = (changes: Partial<TilesetImportDraft>) => {
     setTilesetDraft(current => current ? { ...current, ...changes } : current);
+  };
+
+  const openTilesetGeneration = () => {
+    setGenerationDraft(defaultTilesetGenerationDraft(value.tilesets.length + 1));
+    setGenerationCandidate(null);
+    setGenerationStatus(null);
+  };
+
+  const updateGenerationDraft = (changes: Partial<Omit<TilesetGenerationDraft, 'promptInputs'>>) => {
+    setGenerationDraft(current => current ? { ...current, ...changes } : current);
+  };
+
+  const updateGenerationPrompt = (changes: Partial<TilesetGenerationDraft['promptInputs']>) => {
+    setGenerationDraft(current => current
+      ? { ...current, promptInputs: { ...current.promptInputs, ...changes } }
+      : current);
   };
 
   const acceptTilesetImport = async () => {
@@ -265,6 +296,55 @@ export function TilesetEditor({
       setTilesetStatus({ tone: 'error', text: (error as Error).message });
     } finally {
       setTilesetImporting(false);
+    }
+  };
+
+  const runTilesetGeneration = async () => {
+    if (!generationDraft) return;
+    const validationErrors = validateTilesetGenerationDraft(generationDraft);
+    if (validationErrors.length > 0) {
+      setGenerationStatus({ tone: 'error', text: validationErrors[0] });
+      return;
+    }
+
+    setGenerating(true);
+    setGenerationStatus(null);
+    setGenerationCandidate(null);
+    try {
+      const result = await tilesetGenerator(
+        assets.map(asset => asset.id),
+        value.tilesets.map(tileset => tileset.id),
+        generationDraft,
+      );
+      if (result.cancelled) return;
+      if (!result.success || !result.candidate) {
+        setGenerationStatus({ tone: 'error', text: result.error ?? 'Tileset generation failed.' });
+        return;
+      }
+      setGenerationCandidate(result.candidate);
+      setGenerationStatus({ tone: 'success', text: 'Generated draft ready for review.' });
+    } catch (error) {
+      setGenerationStatus({ tone: 'error', text: (error as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const acceptGeneratedTileset = () => {
+    if (!generationCandidate) return;
+    try {
+      const approved = approveTilesetGenerationCandidate(generationCandidate, {
+        reviewedAt: new Date().toISOString(),
+      });
+      onAssetImported?.(approved.asset);
+      emitTilesets([...value.tilesets, approved.tileset]);
+      setSelectedId(approved.tileset.id);
+      setActiveGroup('A');
+      setGenerationDraft(null);
+      setGenerationCandidate(null);
+      setGenerationStatus({ tone: 'success', text: `Accepted generated tileset ${approved.tileset.name}` });
+    } catch (error) {
+      setGenerationStatus({ tone: 'error', text: (error as Error).message });
     }
   };
 
@@ -394,6 +474,100 @@ export function TilesetEditor({
       )}
     </>
   );
+  const generationControls = (
+    <>
+      {generationStatus && (
+        <div
+          className={`rounded-md border px-3 py-2 text-[12px] ${
+            generationStatus.tone === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {generationStatus.text}
+        </div>
+      )}
+      {generationDraft && (
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-[12px] font-semibold text-gray-700">Tileset generation</p>
+            <Button
+              size="sm"
+              aria-label="Cancel tileset generation"
+              onClick={() => {
+                setGenerationDraft(null);
+                setGenerationCandidate(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <TextField label="Tileset generation ID" value={generationDraft.tilesetId} onChange={tilesetId => updateGenerationDraft({ tilesetId })} />
+            <TextField label="Tileset generation name" value={generationDraft.name} onChange={name => updateGenerationDraft({ name })} />
+            <NumberField label="Tileset generation tile size" value={generationDraft.tileSize} min={1} onChange={tileSize => updateGenerationDraft({ tileSize })} />
+            <NumberField label="Tileset generation columns" value={generationDraft.columns} min={1} onChange={columns => updateGenerationDraft({ columns })} />
+            <NumberField label="Tileset generation tile count" value={generationDraft.tileCount} min={1} onChange={tileCount => updateGenerationDraft({ tileCount })} />
+            <SelectField
+              label="Tileset generation default passability"
+              value={generationDraft.defaultPassability}
+              options={PASSABILITY_OPTIONS}
+              onChange={defaultPassability => updateGenerationDraft({ defaultPassability: defaultPassability as TilePassability })}
+            />
+            <NumberField label="Tileset generation foreground start tile" value={generationDraft.foregroundStartTile} min={0} onChange={foregroundStartTile => updateGenerationDraft({ foregroundStartTile })} />
+            <NumberField label="Tileset generation region marker count" value={generationDraft.regionMarkerCount} min={0} onChange={regionMarkerCount => updateGenerationDraft({ regionMarkerCount })} />
+            <TextField label="Tileset generation subject" value={generationDraft.promptInputs.subject} onChange={subject => updateGenerationPrompt({ subject })} />
+            <TextField label="Tileset generation use case" value={generationDraft.promptInputs.useCase} onChange={useCase => updateGenerationPrompt({ useCase })} />
+            <TextField label="Tileset generation palette" value={generationDraft.promptInputs.palette} onChange={palette => updateGenerationPrompt({ palette })} />
+            <TextField label="Tileset generation style notes" value={generationDraft.promptInputs.styleNotes} onChange={styleNotes => updateGenerationPrompt({ styleNotes })} />
+          </div>
+          <div className="mt-3" aria-label="Tileset generation metadata preview">
+            <TilesetMetadataPreview draft={generationDraft} />
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button
+              size="sm"
+              icon={<Sparkles size={12} />}
+              aria-label="Run tileset generation"
+              disabled={generating}
+              onClick={runTilesetGeneration}
+            >
+              Run tileset generation
+            </Button>
+          </div>
+        </div>
+      )}
+      {generationCandidate && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-3" aria-label="Generated tileset draft review">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[12px] font-semibold text-amber-900">{generationCandidate.asset.name}</p>
+              <p className="mt-1 text-[11px] text-amber-800">
+                Pending review · {generationCandidate.qaPreview.width} x {generationCandidate.qaPreview.height}px · {generationCandidate.qaPreview.tileSize}px tiles · {generationCandidate.qaPreview.assetRef}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                aria-label="Discard generated tileset"
+                onClick={() => setGenerationCandidate(null)}
+              >
+                Discard
+              </Button>
+              <Button
+                size="sm"
+                icon={<Sparkles size={12} />}
+                aria-label="Accept generated tileset"
+                onClick={acceptGeneratedTileset}
+              >
+                Accept generated tileset
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 
   if (value.tilesets.length === 0 || !selected) {
     return (
@@ -409,8 +583,12 @@ export function TilesetEditor({
           <Button size="sm" icon={<Upload size={12} />} aria-label="Import tileset" onClick={openTilesetImport}>
             Import tileset
           </Button>
+          <Button size="sm" icon={<Sparkles size={12} />} aria-label="Generate draft tileset" onClick={openTilesetGeneration}>
+            Generate draft
+          </Button>
         </div>
         {importControls}
+        {generationControls}
       </div>
     );
   }
@@ -427,6 +605,9 @@ export function TilesetEditor({
             </Button>
             <Button size="sm" icon={<Upload size={12} />} aria-label="Import tileset" onClick={openTilesetImport}>
               Import tileset
+            </Button>
+            <Button size="sm" icon={<Sparkles size={12} />} aria-label="Generate draft tileset" onClick={openTilesetGeneration}>
+              Generate draft
             </Button>
           </div>
         </div>
@@ -482,6 +663,7 @@ export function TilesetEditor({
         )}
 
         {importControls}
+        {generationControls}
 
         <div className="flex flex-wrap gap-1">
           {TILE_GROUPS.map(group => (

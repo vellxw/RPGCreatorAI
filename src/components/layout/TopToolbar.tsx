@@ -117,6 +117,7 @@ export function TopToolbar() {
       maps: projectState.maps,
       items: projectState.items,
       databases: projectState.databases,
+      assets: projectState.assets,
     });
     projectDispatch({ type: 'VALIDATE' });
     setStatusMessage(null);

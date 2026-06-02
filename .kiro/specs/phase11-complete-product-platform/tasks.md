@@ -79,7 +79,7 @@
 - [ ] 08 GPT Image 2 Asset Pipeline.
   - [x] CP-065 / FRA-100: add GPT Image model configuration.
   - [x] CP-066 / FRA-101: create image prompt template library.
-  - [ ] CP-067 / FRA-102: implement AI tileset generation workflow.
+  - [x] CP-067 / FRA-102: implement AI tileset generation workflow.
   - [ ] CP-068 / FRA-103: implement AI item icon generation workflow.
   - [ ] CP-069 / FRA-104: implement AI portrait generation workflow.
   - [ ] CP-070 / FRA-105: implement image edit and variation workflow.

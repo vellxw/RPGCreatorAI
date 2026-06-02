@@ -24,6 +24,10 @@ optional visual/audio/generated metadata.
 CP-066 extends generated metadata with prompt template id/version/kind,
 sanitized prompt inputs, provider/model ids, image settings, rendered prompt,
 and visual context source/version for auditable AI asset candidates.
+CP-067 adds generated tileset draft candidates that enter the catalog only
+after explicit review. Accepted generated tilesets use `kind: "tileset"` and
+`source: "generated"` with reviewed prompt provenance; rejected or pending
+drafts do not mutate the project asset catalog.
 
 Supported `kind` values:
 
@@ -88,6 +92,7 @@ TypeScript validation now reports:
 
 ## Known Limits
 
-CP-049 does not implement import UI, file picking, generated-asset job
-history, provider calls, or runtime asset dependency changes. Those remain
-owned by later milestone 06 and AI-provider issues.
+CP-049 does not implement generated-asset job history, provider calls, or
+runtime asset dependency changes. CP-067 adds a tileset-specific generated
+draft review path, but it still uses offline fixtures for normal validation
+and does not add native runtime provider dependencies.

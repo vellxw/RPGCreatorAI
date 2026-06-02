@@ -11,8 +11,9 @@ for tilesets, item icons, character portraits, runtime UI panels, and visual
 reference boards.
 
 This issue does not add live provider calls, image generation buttons, asset
-file writes, network access, or native runtime dependencies. It prepares prompt
-and provenance infrastructure for CP-067 and later workflow issues.
+file writes, network access, or native runtime dependencies. CP-067 now uses
+the tileset template through an offline generated-draft workflow; later image
+workflow issues reuse the same prompt and provenance infrastructure.
 
 ## Template Library
 
@@ -112,6 +113,6 @@ or live endpoint is present.
 
 ## Next
 
-CP-067 can use these templates to drive the AI tileset generation workflow.
-That workflow should still route through provider capability gates and offline
-fixtures for normal validation.
+CP-067 uses the tileset template to drive the offline AI tileset generation
+workflow. CP-068 can reuse this prompt/provenance path for item icon drafts,
+still routing normal validation through mocks and fixtures.

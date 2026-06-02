@@ -129,4 +129,65 @@ describe('TopToolbar save flow feedback', () => {
 
     view.unmount();
   });
+
+  it('includes the asset catalog when reporting validation feedback', async () => {
+    const baseState = await loadedProjectState();
+    const withGeneratedTilesetAsset = projectReducer(baseState, {
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: {
+        id: 'generated_toolbar_tiles',
+        name: 'Generated Toolbar Tiles',
+        kind: 'tileset',
+        path: 'assets/generated/tilesets/generated_toolbar_tiles.png',
+        source: 'generated',
+        width: 32,
+        height: 32,
+        generated: {
+          prompt: 'offline toolbar validation fixture',
+          tool: 'ai-tileset-generation-workflow',
+          createdAt: '2026-06-02T18:30:00.000Z',
+          promptTemplateId: 'tileset-rpg-map-v1',
+          promptTemplateVersion: 1,
+          promptTemplateKind: 'tileset',
+          providerId: 'local',
+          modelId: 'offline-image-mock',
+        },
+      },
+    });
+    const dirtyState = projectReducer(withGeneratedTilesetAsset, {
+      type: 'UPDATE_TILESET_DATABASE',
+      tilesets: {
+        tilesets: [
+          ...withGeneratedTilesetAsset.databases.tilesets.tilesets,
+          {
+            id: 'generated-toolbar-tiles',
+            name: 'Generated Toolbar Tiles',
+            tileSize: 32,
+            tiles: [
+              {
+                id: 0,
+                name: 'Tile 0',
+                asset: 'generated_toolbar_tiles',
+                group: 'A',
+                passability: 'passable',
+                priority: 0,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    const view = renderToolbar(dirtyState);
+
+    clickButton(view.container, 'Validate');
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(view.container.textContent).toContain('Validation passed');
+    expect(view.container.textContent).not.toContain('blocking error');
+    expect(view.projectDispatch).toHaveBeenCalledWith({ type: 'VALIDATE' });
+
+    view.unmount();
+  });
 });
