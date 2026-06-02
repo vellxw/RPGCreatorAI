@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-052 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-053 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -335,6 +335,15 @@ Primary Phase 11 sources:
   checks clip frame metadata against catalog metadata. Evidence is recorded in
   `docs/PHASE_11_SPRITESHEET_IMPORT_WORKFLOW.md` and
   `docs/screenshots/phase11-cp051/`.
+- Phase 11 CP-052 — audio import workflow completed. The Assets workspace can
+  import local `.wav` files in desktop mode, tag them as BGM or SFX, copy them
+  into `assets/imported/audio/` without mutating external sources, add an
+  `audio` catalog entry, and register the imported id/path in `system.audio`
+  so System default BGM, map BGM, and event `playSound` selectors can use it.
+  Browser mode reports import as unavailable honestly, and native mock/runtime
+  validator coverage confirms imported WAV refs are requestable and safe.
+  Evidence is recorded in `docs/PHASE_11_AUDIO_IMPORT_WORKFLOW.md` and
+  `docs/screenshots/phase11-cp052/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -8,9 +8,14 @@ import {
   type ProjectAction,
   type ProjectStoreState,
 } from '../../stores/projectStore';
+import type { AudioImportRunner } from '../../adapters/audioImport';
 import type { ImageImportRunner } from '../../adapters/assetImport';
 
-function renderAssetsScreen(projectState: ProjectStoreState, imageImporter?: ImageImportRunner) {
+function renderAssetsScreen(
+  projectState: ProjectStoreState,
+  imageImporter?: ImageImportRunner,
+  audioImporter?: AudioImportRunner,
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   let root: Root;
@@ -20,7 +25,7 @@ function renderAssetsScreen(projectState: ProjectStoreState, imageImporter?: Ima
     root = createRoot(container);
     root.render(
       <ProjectContext.Provider value={{ state: projectState, dispatch }}>
-        <AssetsScreen imageImporter={imageImporter} />
+        <AssetsScreen imageImporter={imageImporter} audioImporter={audioImporter} />
       </ProjectContext.Provider>,
     );
   });
@@ -133,6 +138,74 @@ describe('AssetsScreen', () => {
     view.unmount();
   });
 
+  it('imports audio into the asset catalog and system audio registry', async () => {
+    const audioImporter: AudioImportRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      asset: {
+        id: 'town_loop',
+        name: 'Town Loop',
+        kind: 'audio' as const,
+        path: 'assets/imported/audio/town-loop.wav',
+        source: 'imported' as const,
+        tags: ['imported', 'audio', 'bgm'],
+      },
+    }));
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      databases: {
+        ...initialProjectStoreState.databases,
+        system: {
+          ...initialProjectStoreState.databases.system,
+          audio: {
+            door_open: 'assets/audio/door.wav',
+          },
+        },
+      },
+    };
+    const view = renderAssetsScreen(state, undefined, audioImporter);
+
+    const usage = view.container.querySelector('select[aria-label="Audio usage"]') as HTMLSelectElement;
+    expect(usage).toBeDefined();
+    act(() => {
+      usage.value = 'bgm';
+      usage.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    const button = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Import Audio'),
+    );
+    expect(button).toBeDefined();
+
+    await act(async () => {
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(audioImporter).toHaveBeenCalledWith(expect.arrayContaining(['confirm', 'door_open']), { usage: 'bgm' });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: {
+        id: 'town_loop',
+        name: 'Town Loop',
+        kind: 'audio',
+        path: 'assets/imported/audio/town-loop.wav',
+        source: 'imported',
+        tags: ['imported', 'audio', 'bgm'],
+      },
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_SYSTEM_DATA',
+      changes: {
+        audio: {
+          door_open: 'assets/audio/door.wav',
+          town_loop: 'assets/imported/audio/town-loop.wav',
+        },
+      },
+    });
+    expect(view.container.textContent).toContain('Imported audio Town Loop');
+
+    view.unmount();
+  });
+
   it('shows image import failures without mutating the catalog', async () => {
     const imageImporter: ImageImportRunner = vi.fn(async () => ({
       success: false,
@@ -150,6 +223,27 @@ describe('AssetsScreen', () => {
 
     expect(view.dispatch).not.toHaveBeenCalled();
     expect(view.container.textContent).toContain('Unsupported image type ".txt".');
+
+    view.unmount();
+  });
+
+  it('shows audio import failures without mutating the catalog', async () => {
+    const audioImporter: AudioImportRunner = vi.fn(async () => ({
+      success: false,
+      cancelled: false,
+      error: 'Unsupported audio type ".mp3".',
+    }));
+    const view = renderAssetsScreen(initialProjectStoreState, undefined, audioImporter);
+    const button = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Import Audio'),
+    );
+
+    await act(async () => {
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.dispatch).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Unsupported audio type ".mp3".');
 
     view.unmount();
   });

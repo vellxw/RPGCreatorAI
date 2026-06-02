@@ -102,6 +102,38 @@ TEST_CASE("AudioSystem requests registered SFX and BGM through backend") {
     removeTempFile(bgmPath);
 }
 
+TEST_CASE("AudioSystem requests imported audio ids through the mock backend") {
+    const std::string sfxPath = writeTempFile("door_chime_imported.wav", "fake wav bytes");
+    const std::string bgmPath = writeTempFile("town_loop_imported.wav", "fake wav bytes");
+
+    auto backend = std::make_unique<FakeAudioBackend>();
+    auto* backendPtr = backend.get();
+    rpg::AudioSystem audio(std::move(backend));
+
+    CHECK(audio.initialize({
+        {"door_chime", sfxPath},
+        {"town_loop", bgmPath},
+    }));
+
+    const auto sfx = audio.playSound("door_chime");
+    const auto bgm = audio.playBgm("town_loop");
+
+    CHECK(sfx.requested);
+    CHECK(sfx.played);
+    CHECK(sfx.path == sfxPath);
+    CHECK(bgm.requested);
+    CHECK(bgm.played);
+    CHECK(bgm.path == bgmPath);
+    REQUIRE(backendPtr->playCalls.size() == 2);
+    CHECK(backendPtr->playCalls[0].path == sfxPath);
+    CHECK(backendPtr->playCalls[0].loop == false);
+    CHECK(backendPtr->playCalls[1].path == bgmPath);
+    CHECK(backendPtr->playCalls[1].loop == true);
+
+    removeTempFile(sfxPath);
+    removeTempFile(bgmPath);
+}
+
 TEST_CASE("AudioSystem tolerates missing files and unavailable audio backend") {
     auto backend = std::make_unique<FakeAudioBackend>();
     auto* backendPtr = backend.get();

@@ -44,6 +44,19 @@ export interface SpritesheetImportResult {
   asset?: AssetCatalogEntry;
 }
 
+export type AudioImportUsage = 'bgm' | 'sfx';
+
+export interface AudioImportMetadata {
+  usage: AudioImportUsage;
+}
+
+export interface AudioImportResult {
+  success: boolean;
+  cancelled?: boolean;
+  error?: string;
+  asset?: AssetCatalogEntry;
+}
+
 export interface FullProjectState {
   project: ProjectData;
   maps: Record<string, MapData>;

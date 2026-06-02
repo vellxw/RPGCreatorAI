@@ -336,6 +336,66 @@ TEST_CASE("RuntimeProjectValidator validates authored audio registry and missing
     fs::remove_all(root);
 }
 
+TEST_CASE("RuntimeProjectValidator accepts imported WAV audio references") {
+    const fs::path root = makeFixtureRoot("imported_audio_registry");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "bgm": "town_loop",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": [
+                {
+                    "id": "speaker",
+                    "type": "object",
+                    "x": 0,
+                    "y": 0,
+                    "trigger": "interact",
+                    "commands": [
+                        { "type": "playSound", "soundId": "door_chime" }
+                    ]
+                }
+            ]
+        })",
+        R"({
+            "items": "database/items.json",
+            "system": "database/system.json"
+        })");
+    writeFile(root / "database" / "items.json", R"({
+        "schemaVersion": 1,
+        "items": []
+    })");
+    writeFile(root / "database" / "system.json", R"({
+        "schemaVersion": 1,
+        "defaultBgm": "town_loop",
+        "audio": {
+            "town_loop": "assets/imported/audio/town-loop.wav",
+            "door_chime": "assets/imported/audio/door-chime.wav"
+        }
+    })");
+    writeFile(root / "assets" / "imported" / "audio" / "town-loop.wav", "fake wav bytes");
+    writeFile(root / "assets" / "imported" / "audio" / "door-chime.wav", "fake wav bytes");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK_FALSE(report.hasErrors());
+    CHECK_FALSE(hasMessage(report, rpg::RuntimeValidationSeverity::Warning,
+                           "Audio asset \"town_loop\" file not found"));
+    CHECK_FALSE(hasMessage(report, rpg::RuntimeValidationSeverity::Warning,
+                           "Audio asset \"door_chime\" file not found"));
+
+    fs::remove_all(root);
+}
+
 TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime") {
     const fs::path root = makeFixtureRoot("battle_database");
     writeMinimalProject(

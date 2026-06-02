@@ -5,7 +5,10 @@ import { Input, Select } from '../components/ui/Input';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { useProjectStore } from '../stores/projectStore';
+import { mergeAudioRegistry } from '../audio/audioRegistry';
+import { importAudioAsset, type AudioImportRunner } from '../adapters/audioImport';
 import { importImageAsset, type ImageImportRunner } from '../adapters/assetImport';
+import type { AudioImportUsage } from '../adapters/types';
 import type { AssetCatalogEntry, AssetKind } from '../types/project';
 
 const KIND_OPTIONS: Array<{ value: AssetKind | 'all'; label: string }> = [
@@ -92,13 +95,22 @@ function DetailRow({ label, value }: { label: string; value: string | number | u
   );
 }
 
-export function AssetsScreen({ imageImporter = importImageAsset }: { imageImporter?: ImageImportRunner }) {
+interface AssetsScreenProps {
+  imageImporter?: ImageImportRunner;
+  audioImporter?: AudioImportRunner;
+}
+
+export function AssetsScreen({
+  imageImporter = importImageAsset,
+  audioImporter = importAudioAsset,
+}: AssetsScreenProps) {
   const { state, dispatch } = useProjectStore();
   const catalog = state.assets;
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<AssetKind | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string>('');
   const [importing, setImporting] = useState(false);
+  const [audioUsage, setAudioUsage] = useState<AudioImportUsage>('sfx');
   const [importStatus, setImportStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
 
   const filteredAssets = useMemo(
@@ -120,6 +132,41 @@ export function AssetsScreen({ imageImporter = importImageAsset }: { imageImport
       dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset: result.asset });
       setSelectedId(result.asset.id);
       setImportStatus({ tone: 'success', text: `Imported ${result.asset.name}` });
+    } catch (error) {
+      setImportStatus({ tone: 'error', text: (error as Error).message });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleImportAudio = async () => {
+    setImporting(true);
+    setImportStatus(null);
+    try {
+      const existingIds = Array.from(
+        new Set([
+          ...catalog.assets.map(asset => asset.id),
+          ...Object.keys(mergeAudioRegistry(state.databases.system.audio)),
+        ]),
+      );
+      const result = await audioImporter(existingIds, { usage: audioUsage });
+      if (result.cancelled) return;
+      if (!result.success || !result.asset) {
+        setImportStatus({ tone: 'error', text: result.error ?? 'Audio import failed.' });
+        return;
+      }
+      dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset: result.asset });
+      dispatch({
+        type: 'UPDATE_SYSTEM_DATA',
+        changes: {
+          audio: {
+            ...(state.databases.system.audio ?? {}),
+            [result.asset.id]: result.asset.path,
+          },
+        },
+      });
+      setSelectedId(result.asset.id);
+      setImportStatus({ tone: 'success', text: `Imported audio ${result.asset.name}` });
     } catch (error) {
       setImportStatus({ tone: 'error', text: (error as Error).message });
     } finally {
@@ -161,6 +208,24 @@ export function AssetsScreen({ imageImporter = importImageAsset }: { imageImport
             title={importing ? 'Image import is already running' : 'Import a project-owned image asset'}
           >
             Import Image
+          </Button>
+          <Select
+            label="Audio usage"
+            value={audioUsage}
+            options={[
+              { value: 'sfx', label: 'SFX' },
+              { value: 'bgm', label: 'BGM' },
+            ]}
+            onChange={value => setAudioUsage(value as AudioImportUsage)}
+            ariaLabel="Audio usage"
+          />
+          <Button
+            icon={<Music size={14} />}
+            onClick={handleImportAudio}
+            disabled={importing}
+            title={importing ? 'Audio import is already running' : 'Import a project-owned WAV audio asset'}
+          >
+            Import Audio
           </Button>
         </div>
         {importStatus && (

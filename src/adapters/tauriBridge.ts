@@ -15,6 +15,8 @@ import type {
   RuntimeLogInfo,
   RuntimeLogTailResult,
   RuntimeSnapshotResult,
+  AudioImportMetadata,
+  AudioImportResult,
   ImageImportResult,
   SpritesheetImportMetadata,
   SpritesheetImportResult,
@@ -47,6 +49,12 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
           existingAssetIds,
           metadata,
         }) as Promise<SpritesheetImportResult>,
+      importAudioAsset: (root: string, existingAssetIds: string[], metadata: AudioImportMetadata) =>
+        invoke('fs_import_audio_asset_dialog', {
+          root,
+          existingAssetIds,
+          metadata,
+        }) as Promise<AudioImportResult>,
       listBackups: (root: string, file: string) =>
         invoke('fs_list_backups', { root, file }) as Promise<string[]>,
       closeProject: () => invoke('fs_close_project') as Promise<void>,

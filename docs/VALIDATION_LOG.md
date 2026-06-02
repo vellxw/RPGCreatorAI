@@ -4,6 +4,68 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-87 / CP-052 — audio import workflow
+
+- `2026-06-02 10:10:11 -03:00` —
+  `npm test -- --run src/screens/__tests__/AssetsScreen.test.tsx src/adapters/__tests__/audioImport.test.ts`
+  — RED as expected after adding audio import coverage. The adapter test
+  could not resolve `src/adapters/audioImport.ts`, and the Assets screen tests
+  failed because `Audio usage` / `Import Audio` controls and browser fallback
+  did not exist yet.
+- `2026-06-02 10:10:11 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_audio_asset_file -- --nocapture`
+  — RED as expected after adding Rust import helper coverage. The shell did
+  not yet define `AudioImportMetadata` or `import_audio_asset_file`.
+- `2026-06-02 10:10:11 -03:00` —
+  `ctest --test-dir build --output-on-failure -R RPGTests` — PASS against the
+  previously built runtime; this confirmed the new C++ imported-audio
+  assertions were compatible with existing runtime behavior but did not
+  validate the edited test binary until the later rebuild.
+- `2026-06-02 10:12:04 -03:00` —
+  `npm test -- --run src/screens/__tests__/AssetsScreen.test.tsx src/adapters/__tests__/audioImport.test.ts`
+  — PASS; 2 focused files and 7 tests passed after adding `audioImport`,
+  bridge wiring, audio usage UI, catalog dispatch, and `system.audio`
+  registration.
+- `2026-06-02 10:12:04 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_audio_asset_file -- --nocapture`
+  — PASS; 2 focused Rust helper tests passed for `.wav` copy/tagging,
+  duplicate filename/id handling, unsupported extension rejection, and invalid
+  usage rejection.
+- `2026-06-02 10:12:04 -03:00` —
+  `ctest --test-dir build --output-on-failure -R RPGTests` — PASS against the
+  existing build before native rebuild.
+- `2026-06-02 10:12:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 10:13:40 -03:00` — `npm test -- --run` — PASS; 61 Vitest files
+  and 341 tests passed.
+- `2026-06-02 10:13:40 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 38 Rust tests
+  passed.
+- `2026-06-02 10:13:40 -03:00` — `npm run build` — PASS; Vite transformed
+  1928 modules and emitted the known non-fatal chunk-size warning.
+- `2026-06-02 10:13:40 -03:00` — `cmake --build build --config Debug` —
+  FAIL due to running MSVC outside `VsDevCmd.bat`; `cl.exe` could not find
+  standard headers such as `string`, `memory`, `filesystem`, and `cstdint`.
+  Fix applied: use the repo-standard native validation path that calls
+  `VsDevCmd.bat` before CMake/Ninja.
+- `2026-06-02 10:14:40 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; native runtime rebuilt the edited audio/runtime-validator tests,
+  linked `rpg_tests.exe`, and CTest passed `RPGTests` 1/1. Existing doctest
+  MSVC warning C5285 remained non-fatal.
+- `2026-06-02 10:15:29 -03:00` — Browser smoke via Chrome DevTools — PASS:
+  Vite `http://127.0.0.1:5177/` -> `Use My First RPG` -> `Assets` -> set
+  `Audio usage` to `BGM` -> `Import Audio`; browser mode displayed `Audio
+  import is available after opening a desktop project folder.`, screenshot was
+  saved to `docs/screenshots/phase11-cp052/audio-import-browser-unavailable.png`,
+  and console had no errors or warnings.
+- Fix applied: `.wav` audio import now copies into `assets/imported/audio/`,
+  returns a catalog `audio` asset tagged with BGM/SFX usage, registers imported
+  ids in `system.audio`, routes through the Tauri bridge, rejects unsupported
+  files/usages, and keeps runtime audio optional with mock/validator coverage.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-71 / CP-036 — audio authoring runtime v1
 
 - `2026-06-02 04:41:13 -03:00` —

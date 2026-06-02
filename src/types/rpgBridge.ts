@@ -4,6 +4,8 @@
 
 import type {
   FullProjectState,
+  AudioImportMetadata,
+  AudioImportResult,
   ImageImportResult,
   SpritesheetImportMetadata,
   SpritesheetImportResult,
@@ -47,6 +49,11 @@ export interface RpgBridge {
       existingAssetIds: string[],
       metadata: SpritesheetImportMetadata,
     ): Promise<SpritesheetImportResult>;
+    importAudioAsset(
+      root: string,
+      existingAssetIds: string[],
+      metadata: AudioImportMetadata,
+    ): Promise<AudioImportResult>;
     listBackups(root: string, file: string): Promise<string[]>;
     closeProject(): Promise<void>;
     createPlaytestSession(

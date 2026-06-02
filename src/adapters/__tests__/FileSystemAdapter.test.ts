@@ -21,6 +21,7 @@ function fakeBridge(overrides: Partial<RpgBridge['fs']> = {}): RpgBridge {
       writeProject: async () => ({ success: true }),
       importImageAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
       importSpritesheetAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
+      importAudioAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
       listBackups: async () => [],
       closeProject: async () => undefined,
       createPlaytestSession: async () => ({ success: false, error: 'not stubbed' }),
