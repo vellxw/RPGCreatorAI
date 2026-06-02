@@ -5715,3 +5715,25 @@ Error: Port 1420 is already in use
   click `Validate`,
   confirm toolbar feedback reports `Validation passed` - PASS; the console
   reported 0 warnings/errors.
+
+### Phase 11 FRA-110 / CP-075 - animation strip normalization
+
+- `2026-06-02 19:02:00 -03:00` -
+  `python -m unittest tests.test_animation_strip_normalization`
+  - FAIL as expected during TDD red step; the fixture tests could not import
+  `scripts/dev/normalize_animation_strip.py` because the normalizer did not
+  exist.
+- `2026-06-02 19:05:00 -03:00` -
+  `python -m unittest tests.test_animation_strip_normalization`
+  - PASS after adding the deterministic normalization script, manifest writer,
+  output validator, and wrappers; 3 tests passed.
+- `2026-06-02 19:07:00 -03:00` -
+  `python -m unittest tests.test_animation_strip_normalization tests.test_runtime_asset_export tests.test_visual_assets`
+  - PASS; CP-075 focused tests plus adjacent asset pipeline tests passed with
+  6 tests.
+- `2026-06-02 19:07:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1 --help`
+  - PASS; the PowerShell wrapper invoked argparse help successfully.
+- `2026-06-02 19:08:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\normalize_animation_strip.py scripts\dev\normalize-animation-strip.ps1 scripts\dev\normalize-animation-strip.bat tests\test_animation_strip_normalization.py docs\PHASE_11_ANIMATION_STRIP_NORMALIZATION.md docs\ASSET_PIPELINE.md`
+  - PASS for CP-075 scope; no matches.

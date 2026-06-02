@@ -66,6 +66,43 @@ The manifest is deterministic and contains no timestamp.
 Milestone 06 integration evidence is recorded in
 `docs/PHASE_11_ASSET_LIBRARY_INTEGRATION_GATE.md`.
 
+## Phase 11 Animation Strip Normalization
+
+CP-075 adds a deterministic local normalizer for generated or imported raw
+character strips:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1
+```
+
+Restricted-policy equivalent:
+
+```bat
+scripts\dev\normalize-animation-strip.bat
+```
+
+The normalizer reads one project-relative horizontal source strip, enforces
+frame width, frame height, frame count, FPS, loop, anchor, transparency, and
+non-empty frame rules, then writes runtime/editor-ready outputs:
+
+- `assets/generated/web/{outputId}.png`
+- `src/assets/generated/{outputId}.png`
+- `assets/generated/runtime/{outputId}.bmp`
+- `assets/generated/source/phase11_animation_normalization/{outputId}.json`
+
+The manifest is deterministic and stores source-to-output traceability,
+optional source asset/concept ids, source slot bounds, normalized bounds,
+shared scale, anchor, action, direction, FPS, loop, and output paths.
+
+Validate an existing normalized strip manifest without rewriting outputs:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1 --validate-manifest assets/generated/source/phase11_animation_normalization/{outputId}.json
+```
+
+Detailed CP-075 evidence is recorded in
+`docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development
