@@ -134,6 +134,12 @@ against `http://localhost:1420`. This is also an interactive long-running
 command. Noninteractive content verification is covered by `verify.ps1` and
 `npm run desktop:verify-content`.
 
+When `npm run desktop:verify-content` is run by itself, start
+`npm run dev:tauri` first in another terminal or controlled process; the
+content check only verifies an already-running `http://127.0.0.1:1420/`
+server. The full `scripts/dev/verify.ps1` gate manages that temporary server
+automatically when no correct 1420 server is already running.
+
 ## Packaged Windows prototype
 
 For a local unsigned packaged prototype, run:

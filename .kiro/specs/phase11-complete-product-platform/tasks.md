@@ -30,6 +30,7 @@
   - [x] CP-021 / FRA-56: polish selected-event playtest launch flow.
   - [x] CP-022 / FRA-57: improve recoverable error states and user-safe failure copy.
   - [x] CP-023 / FRA-58: add professional empty states and first-time guidance.
+  - [x] CP-024 / FRA-59: run the end-to-end usability integration gate.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

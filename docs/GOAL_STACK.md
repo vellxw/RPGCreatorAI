@@ -36,7 +36,6 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 02 — end-to-end usability.
 - Phase 11 Linear milestone 03 — professional editor surface.
 - Phase 11 Linear milestone 04 — runtime feature completeness.
 - Phase 11 Linear milestone 05 — database/system completeness.
@@ -120,6 +119,14 @@ Primary Phase 11 sources:
   event-trace, and runtime-state first-use states without marketing filler or
   unimplemented AI actions. Screenshot evidence is recorded under
   `docs/screenshots/phase11-cp023/`.
+- Phase 11 CP-024 — end-to-end usability integration gate completed. The full
+  canonical `scripts/dev/verify.ps1` gate passed, browser smoke covered
+  create/edit/validate/save and playtest diagnostics honesty, selected-event
+  mode was verified after explicit event selection, diagnostics verification
+  passed, and standalone Tauri content smoke passed with a controlled
+  `dev:tauri` server. Evidence is recorded in
+  `docs/PHASE_11_END_TO_END_USABILITY_GATE.md` and
+  `docs/screenshots/phase11-cp024/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

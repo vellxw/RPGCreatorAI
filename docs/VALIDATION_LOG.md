@@ -3312,3 +3312,47 @@ Error: Port 1420 is already in use
   non-fatal chunk-size warning.
 - `2026-06-01 23:49:00 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
+
+### Phase 11 FRA-59 / CP-024 — end-to-end usability integration gate
+
+- `2026-06-01 23:54:44 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; canonical gate printed `=== ALL PASSED ===`. Gate summary passed
+  frontend typecheck, 49 Vitest files / 269 tests, frontend build with 1917
+  modules and only the documented Vite chunk-size warning, native C++
+  configure/build/CTest with 1/1 tests, Tauri content check, 33 Rust desktop
+  tests, runtime smoke with `SMOKE PASSED`, and editor/runtime screenshot
+  roundtrip with distinct baseline and edited hashes.
+- `2026-06-02 00:01:00 -03:00` —
+  controlled `npm run dev` plus Chrome DevTools browser smoke — PASS; startup
+  showed import/create/bundled-sample options and browser persistence honesty,
+  browser project creation opened the editor, map name edit marked the project
+  dirty, Validate reported `Validation passed`, Save reported
+  `Saved via BrowserMemoryAdapter`, and the controlled server was stopped
+  afterward, leaving port 3000 clear.
+- `2026-06-02 00:02:00 -03:00` — Chrome DevTools playtest browser smoke —
+  PASS; bundled sample loaded, `old_man` was explicitly selected in Events,
+  Maps inspector showed the selected event, Playtest enabled Selected Event
+  mode, `Launch Selected Event` remained disabled only because browser mode
+  cannot spawn the native runtime, and Runtime Log/Event Trace/Runtime State
+  panels reported honest browser-mode unavailable/empty states.
+  Screenshots written:
+  `docs/screenshots/phase11-cp024/browser-create-edit-validate-save.png`,
+  `docs/screenshots/phase11-cp024/browser-playtest-selected-event-unavailable.png`,
+  and `docs/screenshots/phase11-cp024/browser-playtest-diagnostics.png`.
+  Current-page console had no React/app runtime errors; Chrome reported
+  existing form label/id accessibility issues for later audit work.
+- `2026-06-02 00:03:30 -03:00` — `npm run desktop:verify-content` — FAIL;
+  standalone check could not reach `http://127.0.0.1:1420/` because no Tauri
+  dev server was running. Fix applied: document that the standalone command
+  requires an existing `npm run dev:tauri` server, while `verify.ps1` manages
+  that server automatically.
+- `2026-06-02 00:03:45 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1`
+  — PASS; runtime diagnostics safe failure path passed, focused diagnostics
+  UI/adapter tests passed with 2 files / 12 tests, and frontend typecheck
+  passed.
+- `2026-06-02 00:04:40 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
+  controlled server was stopped afterward, leaving port 1420 clear.
