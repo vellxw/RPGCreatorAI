@@ -1,0 +1,44 @@
+{
+  "url": "http://127.0.0.1:3000",
+  "viewport": "1440x1000",
+  "collisionState": {
+    "collisionPassabilityCount": 214,
+    "collisionManualCount": 122,
+    "bottomText": "X: - Y: - · Brush collision · Frame 1280×720",
+    "hasBrushCollision": true
+  },
+  "regionState": {
+    "regionOverlayCount": 1,
+    "bottomText": "X: - Y: - · Brush region · Frame 1280×720",
+    "hasBrushRegion": true,
+    "clickInfo": {
+      "tx": 0,
+      "ty": 0,
+      "clientX": 613.75,
+      "clientY": 386.6005434782609,
+      "rect": {
+        "left": 380,
+        "top": 208.953125,
+        "width": 748,
+        "height": 430.09375
+      },
+      "viewBox": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 736
+      }
+    }
+  },
+  "lockedState": {
+    "bottomText": "X: - Y: - · Region layer locked · Frame 1280×720",
+    "hasRegionLockedStatus": true,
+    "hasRegionPaletteWarning": true
+  },
+  "visualReview": "Screenshots inspected: collision overlay remains readable over authored tiles, region overlay shows a readable numbered blue cell, and locked state is visible in both palette warning and canvas status.",
+  "files": [
+    "layer-collision-overlay.png",
+    "layer-region-overlay.png",
+    "layer-locked-status.png"
+  ]
+}

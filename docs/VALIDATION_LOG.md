@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-64 / CP-029 — layer workflow polish
+
+- `2026-06-02 01:34:09 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — RED as expected; new layer workflow coverage failed because hidden-layer
+  painting still mutated map data, foreground visual layers rendered before
+  events, collision/region overlays lacked stable editor-only tags, and the
+  canvas status did not explain a locked active layer.
+- `2026-06-02 01:34:39 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — PASS; 2 focused files and 54 tests passed after rejecting hidden layers
+  in map paint reducers, drawing foreground visual layers after events, tagging
+  collision/passability/region overlays, and surfacing active-layer blocked
+  status in the canvas chrome.
+- `2026-06-02 01:35:25 -03:00` — `npm test` — PASS; 54 test files and 293
+  Vitest tests passed.
+- `2026-06-02 01:35:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 01:36:10 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 8.79s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 01:43:48 -03:00` —
+  controlled `npm run dev` plus local Chrome headless CDP screenshot
+  comparison — PASS; bundled sample opened, the collision layer showed
+  distinct passability and manual-wall overlays, a region cell was painted
+  through the UI and showed a readable numbered region overlay, and locking the
+  active Region layer showed both palette warning and canvas blocked status.
+  Initial smoke-script attempts failed before final evidence because one CDP
+  state expression used an invalid regex and one region click selected a
+  12px icon SVG instead of the map SVG; the script was corrected to use simple
+  status extraction and select the map canvas by large `viewBox`. Screenshots
+  and smoke text written:
+  `docs/screenshots/phase11-cp029/layer-collision-overlay.png`,
+  `docs/screenshots/phase11-cp029/layer-region-overlay.png`,
+  `docs/screenshots/phase11-cp029/layer-locked-status.png`, and
+  `docs/screenshots/phase11-cp029/layer-smoke-text.txt`. Controlled
+  Chrome/CDP and Vite processes were stopped afterward, leaving ports 9223 and
+  3000 clear.
+- `2026-06-02 01:45:23 -03:00` — `npm test` — PASS after documentation
+  updates; 54 test files and 293 Vitest tests passed.
+- `2026-06-02 01:45:35 -03:00` — `npm run typecheck` — PASS after
+  documentation updates.
+- `2026-06-02 01:46:05 -03:00` — `npm run build` — PASS after documentation
+  updates; 1917 modules transformed, build completed in 8.70s, and Vite
+  emitted only the documented non-fatal chunk-size warning.
+- `2026-06-02 01:46:06 -03:00` — `git diff --check` — PASS after
+  documentation updates with line-ending conversion warnings only.
+- Fix applied: layer mutation guards now reject locked and hidden layers,
+  no-op map writes preserve clean/history state, the canvas renders background
+  visuals, events, then foreground visuals, and editor-only overlays/status
+  expose stable safety/readability signals.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-49 / CP-014 — crash log and diagnostics location
 
 - `2026-06-01 20:42:16 -03:00` —

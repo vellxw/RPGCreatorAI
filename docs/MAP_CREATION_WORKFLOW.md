@@ -130,9 +130,11 @@ state so keyboard and assistive workflows match the visual state.
 If a map references a missing tileset, visual tile brushes are unavailable
 and the palette explains the missing tileset id instead of presenting an
 empty visual palette without context. If the active layer is locked or hidden,
-the palette shows a warning before painting. Locked-layer paint attempts are
-also reducer no-ops: they do not mutate data, dirty the project, or append
-history entries.
+the palette shows a warning before painting. Locked-layer and hidden-layer
+paint attempts are reducer no-ops across brush, rectangle, and fill actions:
+they do not mutate data, dirty the project, or append history entries. The
+canvas bottom status mirrors the same blocked state so invisible edits cannot
+be made silently.
 
 | Tool | Cursor / hint | Click action | Drag action |
 |------|---------------|--------------|-------------|
@@ -161,7 +163,12 @@ Phase 10 maps require these authoring layers:
 
 Painting visual tiles never silently changes collision. Collision and region
 layers remain gameplay/editor data; the runtime does not render them as
-visual tiles.
+visual tiles. In the editor canvas, foreground visual layers render after
+events so the authoring preview matches runtime foreground occlusion.
+Collision passability, manually painted collision walls, and region ids are
+drawn as editor-only overlays with distinct tags and styling; they remain
+separate from authored visual tiles and are used only to make passability and
+region metadata readable while editing.
 
 ## State shapes
 

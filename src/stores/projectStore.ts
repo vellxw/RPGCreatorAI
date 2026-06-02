@@ -379,7 +379,7 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
 
 function findEditableLayer(map: MapData, layerName: string) {
   const layer = map.layers.find(l => l.name === layerName);
-  if (!layer || layer.locked) return null;
+  if (!layer || layer.locked || layer.visible === false) return null;
   return layer;
 }
 

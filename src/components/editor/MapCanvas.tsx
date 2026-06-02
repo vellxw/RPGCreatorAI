@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProject, useProjectStore } from '../../stores/projectStore';
-import type { EventType, GameEvent } from '../../types/project';
+import type { EventType, GameEvent, MapLayer } from '../../types/project';
 import { ZoomIn, ZoomOut, Maximize2, Map as MapIcon } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 import { EmptyState } from '../ui/EmptyState';
@@ -17,6 +17,19 @@ import {
   tileAssetForId,
   tilePassabilityForId,
 } from '../../visual/tileCatalog';
+
+const LAYER_STATUS_LABELS: Record<string, string> = {
+  ground: 'Ground',
+  decoration: 'Decor',
+  foreground: 'Front',
+  collision: 'Pass',
+  region: 'Region',
+  event: 'Events',
+};
+
+function visualLayerRole(layer: MapLayer): string {
+  return layer.role ?? layer.name;
+}
 
 export function MapCanvas() {
   const { state, dispatch } = useEditor();
@@ -47,8 +60,19 @@ export function MapCanvas() {
   const tileSize = map.tileSize || profile.tileSize;
   const groundLayer = map.layers.find(l => l.name === 'ground');
   const visualLayers = map.layers.filter(l => l.type === 'visual' && l.visible !== false);
+  const backgroundVisualLayers = visualLayers.filter(layer => visualLayerRole(layer) !== 'foreground');
+  const foregroundVisualLayers = visualLayers.filter(layer => visualLayerRole(layer) === 'foreground');
   const collisionLayer = map.layers.find(l => l.type === 'collision');
   const regionLayer = map.layers.find(l => l.type === 'region');
+  const activeMapLayer = state.activeLayer === 'event'
+    ? null
+    : map.layers.find(layer => layer.name === state.activeLayer);
+  const activeLayerBlocked = activeMapLayer?.locked === true || activeMapLayer?.visible === false;
+  const activeLayerStatus = activeMapLayer?.locked
+    ? `${LAYER_STATUS_LABELS[state.activeLayer] ?? state.activeLayer} layer locked`
+    : activeMapLayer?.visible === false
+      ? `${LAYER_STATUS_LABELS[state.activeLayer] ?? state.activeLayer} layer hidden`
+      : null;
   const freshSelectedEvent = state.selectedEvent
     ? map.events.find(event => event.id === state.selectedEvent?.id) ?? null
     : null;
@@ -130,6 +154,7 @@ export function MapCanvas() {
           : 9;
 
   const paintBrushAt = (x: number, y: number) => {
+    if (activeLayerBlocked) return;
     if (state.activeLayer === 'event') return;
     const radius = Math.floor(state.brushSize / 2);
     for (let yy = y - radius; yy <= y + radius; yy += 1) {
@@ -183,6 +208,8 @@ export function MapCanvas() {
       dispatch({ type: 'SELECT_EVENT', event: null, mapId: null });
       return;
     }
+
+    if (activeLayerBlocked) return;
 
     if (state.activeLayer === 'event') {
       if (state.tool === 'brush' && state.brush.kind === 'event') {
@@ -264,6 +291,67 @@ export function MapCanvas() {
     }
   };
 
+  const renderVisualLayer = (layer: MapLayer) => {
+    const role = visualLayerRole(layer);
+    return (
+      <g
+        key={layer.name}
+        data-layer-name={layer.name}
+        data-layer-role={role}
+        pointerEvents={role === 'foreground' ? 'none' : undefined}
+      >
+        {layer.tiles.map((tile, i) => {
+          const x = (i % map.width) * tileSize;
+          const y = Math.floor(i / map.width) * tileSize;
+          if (tile === 0 && role !== 'ground') return null;
+          if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile, map.tilesetId)) {
+            return (
+              <g key={`${layer.name}-${i}`}>
+                <rect x={x} y={y} width={tileSize} height={tileSize} fill="#2a1026" />
+                <rect
+                  x={x}
+                  y={y}
+                  width={tileSize}
+                  height={tileSize}
+                  fill="url(#void-checker)"
+                  opacity="0.75"
+                />
+                <line
+                  x1={x + 4}
+                  y1={y + 4}
+                  x2={x + tileSize - 4}
+                  y2={y + tileSize - 4}
+                  stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
+                  strokeWidth="3"
+                />
+                <line
+                  x1={x + tileSize - 4}
+                  y1={y + 4}
+                  x2={x + 4}
+                  y2={y + tileSize - 4}
+                  stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
+                  strokeWidth="3"
+                />
+              </g>
+            );
+          }
+          return (
+            <image
+              key={`${layer.name}-${i}`}
+              x={x}
+              y={y}
+              width={tileSize}
+              height={tileSize}
+              href={tileAssetForId(map.tilesetId, tile)}
+              opacity={role === 'foreground' ? 0.9 : 1}
+              style={{ imageRendering: 'pixelated' }}
+            />
+          );
+        })}
+      </g>
+    );
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-gray-100 overflow-hidden relative">
       {/* Canvas area */}
@@ -293,55 +381,8 @@ export function MapCanvas() {
             </defs>
 
             <g transform={`translate(${stageOffsetX} ${stageOffsetY})`}>
-              {/* Tiles */}
-              {visualLayers.map(layer => layer.tiles.map((tile, i) => {
-                const x = (i % map.width) * tileSize;
-                const y = Math.floor(i / map.width) * tileSize;
-                if (tile === 0 && layer.name !== 'ground') return null;
-                if (isVoidVisualTile(tile) || !isSupportedVisualTile(tile, map.tilesetId)) {
-                  return (
-                    <g key={`${layer.name}-${i}`}>
-                      <rect x={x} y={y} width={tileSize} height={tileSize} fill="#2a1026" />
-                      <rect
-                        x={x}
-                        y={y}
-                        width={tileSize}
-                        height={tileSize}
-                        fill="url(#void-checker)"
-                        opacity="0.75"
-                      />
-                      <line
-                        x1={x + 4}
-                        y1={y + 4}
-                        x2={x + tileSize - 4}
-                        y2={y + tileSize - 4}
-                        stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
-                        strokeWidth="3"
-                      />
-                      <line
-                        x1={x + tileSize - 4}
-                        y1={y + 4}
-                        x2={x + 4}
-                        y2={y + tileSize - 4}
-                        stroke={isVoidVisualTile(tile) ? '#f472b6' : '#ef4444'}
-                        strokeWidth="3"
-                      />
-                    </g>
-                  );
-                }
-                return (
-                  <image
-                    key={`${layer.name}-${i}`}
-                    x={x}
-                    y={y}
-                    width={tileSize}
-                    height={tileSize}
-                    href={tileAssetForId(map.tilesetId, tile)}
-                    opacity={layer.name === 'foreground' ? 0.92 : 1}
-                    style={{ imageRendering: 'pixelated' }}
-                  />
-                );
-              }))}
+              {/* Background visual layers */}
+              {backgroundVisualLayers.map(renderVisualLayer)}
               {state.activeLayer === 'collision' && groundLayer && groundLayer.tiles.map((tile, i) => {
                 if (tilePassabilityForId(map.tilesetId, tile) !== 'blocked') return null;
                 const x = (i % map.width) * tileSize;
@@ -349,6 +390,7 @@ export function MapCanvas() {
                 return (
                   <rect
                     key={`passability-${i}`}
+                    data-layer-overlay="collision-passability"
                     x={x + 3}
                     y={y + 3}
                     width={tileSize - 6}
@@ -367,6 +409,7 @@ export function MapCanvas() {
                 return (
                   <image
                     key={`collision-${i}`}
+                    data-layer-overlay="collision-manual"
                     x={x}
                     y={y}
                     width={tileSize}
@@ -382,7 +425,7 @@ export function MapCanvas() {
                 const x = (i % map.width) * tileSize;
                 const y = Math.floor(i / map.width) * tileSize;
                 return (
-                  <g key={`region-${i}`}>
+                  <g key={`region-${i}`} data-layer-overlay="region">
                     <rect x={x + 2} y={y + 2} width={tileSize - 4} height={tileSize - 4} fill="#0ea5e9" opacity="0.28" />
                     <text x={x + tileSize / 2} y={y + tileSize / 2 + 4} textAnchor="middle" fontSize="12" fill="#075985" fontWeight="700">
                       {tile}
@@ -446,6 +489,7 @@ export function MapCanvas() {
                 return (
                   <g
                     key={event.id}
+                    data-event-id={event.id}
                     onClick={() => handleEventClick(event)}
                     onPointerDown={e => startEventDrag(event, e)}
                     className="cursor-pointer"
@@ -474,6 +518,9 @@ export function MapCanvas() {
                   </g>
                 );
               })}
+
+              {/* Foreground visual layers */}
+              {foregroundVisualLayers.map(renderVisualLayer)}
             </g>
 
             <rect
@@ -526,11 +573,12 @@ export function MapCanvas() {
         </span>
         <span className="text-[11px] text-gray-400">·</span>
         <span className="text-[12px] text-gray-600">
-          {state.interactionMode === 'select'
-            ? 'Move events'
-            : state.activeLayer === 'event' && state.brush.kind === 'event'
-              ? `Place ${state.brush.label}`
-              : `${state.tool[0].toUpperCase()}${state.tool.slice(1)} ${state.activeLayer}`}
+          {activeLayerStatus ??
+            (state.interactionMode === 'select'
+              ? 'Move events'
+              : state.activeLayer === 'event' && state.brush.kind === 'event'
+                ? `Place ${state.brush.label}`
+                : `${state.tool[0].toUpperCase()}${state.tool.slice(1)} ${state.activeLayer}`)}
         </span>
         <span className="text-[11px] text-gray-400">·</span>
         <span className="text-[12px] text-gray-600">

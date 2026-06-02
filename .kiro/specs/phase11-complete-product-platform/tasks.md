@@ -36,6 +36,7 @@
   - [x] CP-026 / FRA-61: polish map tree workflow reliability.
   - [x] CP-027 / FRA-62: polish map properties editing and validation.
   - [x] CP-028 / FRA-63: polish tile palette and brush workflow.
+  - [x] CP-029 / FRA-64: polish layer workflow safety and overlays.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

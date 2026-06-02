@@ -758,6 +758,63 @@ describe('projectReducer', () => {
     expect(attemptedPaint.history).toHaveLength(cleanLocked.history.length);
   });
 
+  it('paint rectangle and fill reject locked layers without dirty or history churn', () => {
+    const locked = projectReducer(loadedState(), {
+      type: 'UPDATE_MAP_LAYER_META',
+      mapId: 'town',
+      layerName: 'ground',
+      changes: { locked: true },
+    });
+    const cleanLocked = projectReducer(locked, { type: 'MARK_SAVED', at: '2026-06-02T04:00:00.000Z' });
+
+    const rectangle = projectReducer(cleanLocked, {
+      type: 'PAINT_RECT',
+      mapId: 'town',
+      layerName: 'ground',
+      x1: 0,
+      y1: 0,
+      x2: 2,
+      y2: 2,
+      tile: 2,
+    });
+    const fill = projectReducer(cleanLocked, {
+      type: 'FLOOD_FILL',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 2,
+    });
+
+    expect(rectangle).toBe(cleanLocked);
+    expect(fill).toBe(cleanLocked);
+    expect(rectangle.dirty).toBe(false);
+    expect(fill.history).toHaveLength(cleanLocked.history.length);
+  });
+
+  it('painting a hidden layer is rejected so invisible edits cannot be made silently', () => {
+    const hidden = projectReducer(loadedState(), {
+      type: 'UPDATE_MAP_LAYER_META',
+      mapId: 'town',
+      layerName: 'ground',
+      changes: { visible: false },
+    });
+    const cleanHidden = projectReducer(hidden, { type: 'MARK_SAVED', at: '2026-06-02T04:00:00.000Z' });
+
+    const attemptedPaint = projectReducer(cleanHidden, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 2,
+    });
+
+    expect(attemptedPaint).toBe(cleanHidden);
+    expect(attemptedPaint.dirty).toBe(false);
+    expect(attemptedPaint.history).toHaveLength(cleanHidden.history.length);
+  });
+
   it('UPDATE_MAP_LAYER_META changes visibility and lock state with undo support', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

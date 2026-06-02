@@ -157,6 +157,13 @@ Primary Phase 11 sources:
   layers before painting, and reducer no-op map mutations no longer dirty the
   project or add history. Evidence is recorded in
   `docs/screenshots/phase11-cp028/`.
+- Phase 11 CP-029 — layer workflow polish completed. Locked and hidden
+  layers now reject brush, rectangle, and fill mutations without dirtying the
+  project or adding history; the canvas mirrors the blocked state in its
+  bottom status; visual foreground layers render after events to match runtime
+  occlusion; and collision, passability, and region overlays are tagged and
+  visually distinct from authored tiles. Evidence is recorded in
+  `docs/screenshots/phase11-cp029/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
