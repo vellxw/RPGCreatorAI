@@ -16,6 +16,7 @@ import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
 import { PortraitGenerationPanel } from '../components/database/PortraitGenerationPanel';
+import { CharacterConceptGenerationPanel } from '../components/database/CharacterConceptGenerationPanel';
 import { validateEvent } from '../validation/validateMap';
 import type {
   EventPage,
@@ -650,6 +651,12 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
           options={activePortraitAssetOptions}
           onChange={v => update({ portraitAssetId: v || undefined })}
         />
+        <Select
+          label="Concept asset"
+          value={event.conceptAssetId ?? ''}
+          options={activePortraitAssetOptions}
+          onChange={v => update({ conceptAssetId: v || undefined })}
+        />
         <PortraitGenerationPanel
           ownerKind="event"
           ownerId={event.id}
@@ -659,6 +666,17 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
           onAssetAccepted={(asset, portraitAssetId) => {
             dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset });
             update({ portraitAssetId });
+          }}
+        />
+        <CharacterConceptGenerationPanel
+          ownerKind="event"
+          ownerId={event.id}
+          ownerName={event.id}
+          description={`${event.type} event at (${event.x}, ${event.y})`}
+          assets={project.assets.assets}
+          onAssetAccepted={(asset, conceptAssetId) => {
+            dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset });
+            update({ conceptAssetId });
           }}
         />
         <Input

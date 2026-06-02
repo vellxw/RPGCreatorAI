@@ -341,4 +341,36 @@ describe('EventEditorScreen surface polish', () => {
 
     view.unmount();
   });
+
+  it('generates an event character concept candidate and does not overwrite portrait until accepted', async () => {
+    const view = renderScreen(event({ portraitAssetId: 'existing_portrait' }));
+
+    await clickAsync(buttonByAria(view.container, 'Generate event character concept'));
+    expect(view.container.querySelector('[aria-label="Event character concept generation metadata preview"]')).not.toBeNull();
+    await clickAsync(buttonByAria(view.container, 'Run event character concept generation'));
+
+    expect(view.container.querySelector('[aria-label="Generated event character concept review"]')).not.toBeNull();
+    expect(view.projectDispatch.mock.calls.some(([action]) =>
+      action.type === 'UPDATE_EVENT' && ('conceptAssetId' in action.changes || 'portraitAssetId' in action.changes)
+    )).toBe(false);
+
+    await clickAsync(buttonByAria(view.container, 'Accept generated event character concept'));
+
+    expect(view.projectDispatch).toHaveBeenCalledWith({
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: expect.objectContaining({
+        id: 'npc_1_concept',
+        source: 'generated',
+        tags: expect.arrayContaining(['reviewed', 'qa-reviewed']),
+      }),
+    });
+    expect(view.projectDispatch).toHaveBeenLastCalledWith({
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'npc_1',
+      changes: { conceptAssetId: 'npc_1_concept' },
+    });
+
+    view.unmount();
+  });
 });

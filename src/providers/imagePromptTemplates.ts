@@ -4,7 +4,7 @@ import type {
   ProviderImageStyle,
 } from '../types/project';
 
-export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'edit' | 'ui-panel' | 'reference';
+export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'concept' | 'edit' | 'ui-panel' | 'reference';
 
 export interface ImagePromptTemplate {
   id: string;
@@ -126,6 +126,28 @@ export const imagePromptTemplates: ImagePromptTemplate[] = [
     legalConstraints: [
       'Do not copy actors, celebrities, proprietary characters, or studio-specific likenesses.',
       'Do not claim legal clearance or identity rights.',
+    ],
+  },
+  {
+    id: 'character-concept-v1',
+    version: 1,
+    kind: 'concept',
+    label: 'Character concept',
+    requiredInputs: ['subject', 'useCase', 'palette', 'styleNotes'],
+    purpose: 'Generate full-character concept candidates for portrait, sprite, and animation direction.',
+    outputGuidance: [
+      'Return a readable full-body or three-quarter character concept suitable for later portrait and sprite derivation.',
+      'Show silhouette, clothing, color blocking, and key props without adding unrelated background clutter.',
+      'Keep pose and proportions useful for RPG sprite planning and animation notes.',
+    ],
+    styleConstraints: [
+      'original RPGCreatorAI character concept direction only',
+      'clear full-character silhouette and readable costume layers',
+      'story-RPG design language with restrained detail',
+    ],
+    legalConstraints: [
+      'Do not copy actors, celebrities, proprietary characters, or recognizable franchise costumes.',
+      'Do not claim legal clearance, identity rights, or compatibility with third-party character packs.',
     ],
   },
   {

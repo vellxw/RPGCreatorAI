@@ -2,9 +2,11 @@ import type { ReactNode } from 'react';
 import { NumberField, TextField } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
 import { PortraitGenerationPanel } from './PortraitGenerationPanel';
+import { CharacterConceptGenerationPanel } from './CharacterConceptGenerationPanel';
 import { ReferenceChecklist, StatGrid } from './partyCombatFields';
 import type { ActorData, AssetCatalogEntry, ClassData, EquipmentSlot, ItemData, SkillData } from '../../types/project';
 import type { PortraitGenerationRunner } from '../../providers/portraitGenerationWorkflow';
+import type { CharacterConceptGenerationRunner } from '../../providers/characterConceptGenerationWorkflow';
 
 interface ActorsEditorProps {
   entry: ActorData;
@@ -13,6 +15,7 @@ interface ActorsEditorProps {
   items: ItemData[];
   assets?: AssetCatalogEntry[];
   portraitGenerator?: PortraitGenerationRunner;
+  characterConceptGenerator?: CharacterConceptGenerationRunner;
   idField: ReactNode;
   onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(changes: Partial<ActorData>): void;
@@ -27,6 +30,7 @@ export function ActorsEditor({
   items,
   assets = [],
   portraitGenerator,
+  characterConceptGenerator,
   idField,
   onAssetImported,
   onChange,
@@ -37,6 +41,7 @@ export function ActorsEditor({
   const portraitAssetOptions = assets
     .filter(asset => asset.kind === 'image' || asset.kind === 'generated')
     .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` }));
+  const conceptAssetOptions = portraitAssetOptions;
 
   const updateEquipment = (slot: EquipmentSlot, itemId: string) => {
     onChange({
@@ -58,6 +63,13 @@ export function ActorsEditor({
         emptyLabel="(none)"
         onChange={portraitAssetId => onChange({ portraitAssetId: portraitAssetId || undefined })}
       />
+      <ReferenceSelect
+        label="Actor concept asset"
+        value={entry.conceptAssetId ?? ''}
+        options={conceptAssetOptions}
+        emptyLabel="(none)"
+        onChange={conceptAssetId => onChange({ conceptAssetId: conceptAssetId || undefined })}
+      />
       <PortraitGenerationPanel
         ownerKind="actor"
         ownerId={entry.id}
@@ -68,6 +80,18 @@ export function ActorsEditor({
         onAssetAccepted={(asset, portraitAssetId) => {
           onAssetImported?.(asset);
           onChange({ portraitAssetId });
+        }}
+      />
+      <CharacterConceptGenerationPanel
+        ownerKind="actor"
+        ownerId={entry.id}
+        ownerName={entry.name}
+        description={`Actor ${entry.name || entry.id}, level ${entry.level}`}
+        assets={assets}
+        characterConceptGenerator={characterConceptGenerator}
+        onAssetAccepted={(asset, conceptAssetId) => {
+          onAssetImported?.(asset);
+          onChange({ conceptAssetId });
         }}
       />
       <div className="grid grid-cols-2 gap-3">

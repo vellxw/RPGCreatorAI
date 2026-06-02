@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findReferences, listBrokenReferences } from '../referenceIndex';
+import { findReferences, listBrokenReferences, renameReferences } from '../referenceIndex';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 import type { FullProjectState } from '../../adapters/types';
 import type { EventCommand, MapData } from '../../types/project';
@@ -162,8 +162,37 @@ describe('referenceIndex', () => {
           path: 'assets/imported/audio/town-loop.wav',
           source: 'imported',
         },
+        {
+          id: 'arc_concept',
+          name: 'Arc Concept',
+          kind: 'image',
+          path: 'assets/generated/concepts/arc_concept.png',
+          source: 'generated',
+        },
+        {
+          id: 'elder_concept',
+          name: 'Elder Concept',
+          kind: 'image',
+          path: 'assets/generated/concepts/elder_concept.png',
+          source: 'generated',
+        },
       ],
     };
+    project.maps.town.events[0].conceptAssetId = 'elder_concept';
+    project.databases.actors = [
+      {
+        id: 'arc',
+        name: 'Arc',
+        classId: 'hero',
+        conceptAssetId: 'arc_concept',
+        level: 1,
+        hp: 120,
+        mp: 35,
+        baseStats: { maxHp: 120, maxMp: 35, attack: 12, defense: 8, magicAttack: 5, magicDefense: 7, agility: 9, luck: 4 },
+        equipment: {},
+        skills: [],
+      },
+    ];
     project.databases.animations.sets = [
       {
         id: 'hero',
@@ -210,6 +239,16 @@ describe('referenceIndex', () => {
     expect(findReferences(project, { table: 'assets', id: 'town_loop' }).map(ref => ref.source)).toContain(
       'database/system/audio/town_loop',
     );
+    expect(findReferences(project, { table: 'assets', id: 'arc_concept' }).map(ref => ref.source)).toContain(
+      'database/actors/arc/conceptAssetId',
+    );
+    expect(findReferences(project, { table: 'assets', id: 'elder_concept' }).map(ref => ref.source)).toContain(
+      'maps/town/events/event_1/conceptAssetId',
+    );
+    renameReferences(project, 'assets', 'arc_concept', 'hero_run_sheet');
+    renameReferences(project, 'assets', 'elder_concept', 'forest_pack');
+    expect(project.databases.actors[0].conceptAssetId).toBe('hero_run_sheet');
+    expect(project.maps.town.events[0].conceptAssetId).toBe('forest_pack');
     expect(listBrokenReferences(project).some(ref => ref.reference.table === 'assets' && ref.reference.id === 'grass')).toBe(false);
   });
 

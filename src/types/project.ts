@@ -134,6 +134,9 @@ export interface GeneratedAssetMetadata {
   providerId?: string;
   modelId?: string;
   operation?: string;
+  ownerKind?: string;
+  ownerId?: string;
+  ownerName?: string;
   sourceAssetId?: string;
   sourceAssetPath?: string;
   maskAssetId?: string;
@@ -210,6 +213,7 @@ export interface GameEvent {
   sprite?: string;
   animationSet?: string;
   portraitAssetId?: string;
+  conceptAssetId?: string;
   displayHeightTiles?: number;
   trigger: TriggerType;
   commands: EventCommand[];
@@ -655,6 +659,7 @@ export interface ActorData {
   name: string;
   classId: string;
   portraitAssetId?: string;
+  conceptAssetId?: string;
   level: number;
   hp: number;
   mp: number;

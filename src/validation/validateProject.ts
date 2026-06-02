@@ -261,6 +261,13 @@ export function validateProject(state: FullProjectState): ValidationReport {
         event.portraitAssetId,
         state.assets,
       ));
+      errors.push(...validateImageAssetReference(
+        `Event "${event.id}"`,
+        'character concept',
+        `maps/${map.id}/events/${event.id}/conceptAssetId`,
+        event.conceptAssetId,
+        state.assets,
+      ));
     }
     errors.push(...validateUniqueEventIds(map));
     errors.push(...validateCommandsInMap(map, mapIds, index));
@@ -1258,6 +1265,13 @@ function validatePartyCombatDatabases(db: DatabaseEntries, assets?: AssetCatalog
       'portrait',
       `${source}/portraitAssetId`,
       actor.portraitAssetId,
+      assets,
+    ));
+    out.push(...validateImageAssetReference(
+      `Actor "${actor.id}"`,
+      'character concept',
+      `${source}/conceptAssetId`,
+      actor.conceptAssetId,
       assets,
     ));
     out.push(...validateNonNegativeStats(`Actor "${actor.id}"`, source, 'baseStats', actor.baseStats));

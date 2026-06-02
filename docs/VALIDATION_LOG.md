@@ -5601,3 +5601,59 @@ Error: Port 1420 is already in use
   confirm `6 cataloged assets` and generated metadata,
   click `Validate` - PASS; toolbar feedback reported `Validation passed` and
   the console reported 0 warnings/errors.
+
+### Phase 11 FRA-108 / CP-073 - character concept generator
+
+- `2026-06-02 18:05:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/characterConceptGenerationWorkflow.test.ts src/components/database/__tests__/PartyCombatEditors.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL as expected during TDD red step; the character concept workflow
+  module did not exist, actor/event concept generation buttons were absent,
+  and validation did not catch `conceptAssetId` references.
+- `2026-06-02 18:12:41 -03:00` -
+  `npm test -- --run src/providers/__tests__/characterConceptGenerationWorkflow.test.ts src/components/database/__tests__/PartyCombatEditors.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS after adding the offline character concept workflow, actor/event
+  review-gated UI, catalog assignment, and actor/event `conceptAssetId`
+  validation; 4 focused files and 60 Vitest tests passed.
+- `2026-06-02 18:12:41 -03:00` - `npm run typecheck` - FAIL; the new
+  workflow treated `ProviderAdapterResponse.error` as an object. Fix applied:
+  read `response.failure?.message`, then the string `response.error`, then the
+  fallback message.
+- `2026-06-02 18:12:41 -03:00` - `npm run typecheck` - PASS after the
+  provider response error handling fix.
+- `2026-06-02 18:14:01 -03:00` -
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts`
+  - PASS after adding actor/event concept asset reference and rename coverage;
+  1 file and 5 tests passed.
+- `2026-06-02 18:14:13 -03:00` -
+  `npm test -- --run src/providers/__tests__/characterConceptGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/components/database/__tests__/PartyCombatEditors.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/validation/__tests__/validateProject.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  - PASS; expanded CP-073 focused suite passed 6 files and 70 tests.
+- `2026-06-02 18:14:13 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 18:14:38 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 83 files and 442 tests.
+- `2026-06-02 18:14:38 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1955 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 18:18:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\characterConceptGenerationWorkflow.ts src\providers\__tests__\characterConceptGenerationWorkflow.test.ts src\components\database\CharacterConceptGenerationPanel.tsx src\components\database\ActorsEditor.tsx src\screens\EventEditorScreen.tsx src\components\database\__tests__\PartyCombatEditors.test.tsx src\screens\__tests__\EventEditorSurface.test.tsx src\validation\validateProject.ts src\validation\referenceIndex.ts src\types\project.ts src\providers\imagePromptTemplates.ts src\providers\__tests__\imagePromptTemplates.test.ts`
+  - PASS for CP-073 scope; matches were only test assertions that generated
+  requests do not contain `apiKey`, `https://api`, or `sk-`.
+- `2026-06-02 18:17:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  open Database,
+  confirm `Actor concept asset` and `Generate actor character concept`,
+  click `Generate actor character concept`,
+  click `Run actor character concept generation`,
+  confirm `Generated actor character concept review` and
+  `Visual QA checklist`,
+  confirm `Actor concept asset` remains `(none)` while the candidate is
+  pending,
+  click `Accept generated actor character concept`,
+  confirm `Arc Concept (arc_concept)` is selected,
+  click `Validate`,
+  confirm toolbar feedback reports `Validation passed`,
+  open Events,
+  confirm `Event character concept generation` and
+  `Generate event character concept` - PASS; the console reported 0
+  warnings/errors.

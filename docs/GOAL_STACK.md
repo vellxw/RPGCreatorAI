@@ -38,13 +38,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`
 - `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`
 - `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`
+- `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-073 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-074 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -501,6 +502,13 @@ Primary Phase 11 sources:
   remains usable without OpenAI credentials or live actions, and milestone 08
   is ready for the AI character/animation work in milestone 09. Evidence is
   recorded in `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`.
+- Phase 11 CP-073 — character concept generator completed. Actor and event
+  editors now expose reviewed character concept generation through the local
+  offline image mock, versioned `character-concept-v1` prompt template,
+  pending generated asset candidates, visual QA review, owner provenance, and
+  explicit `conceptAssetId` assignment only after acceptance. Validation and
+  reference indexing now cover actor/event concept asset references. Evidence
+  is recorded in `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
