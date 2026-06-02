@@ -3481,3 +3481,49 @@ Error: Port 1420 is already in use
 - `2026-06-02 01:02:45 -03:00` — `npm run build` — PASS after documentation
   updates; 1917 modules transformed, build completed in 9.51s, and Vite
   emitted only the documented non-fatal chunk-size warning.
+
+### Phase 11 FRA-63 / CP-028 — tile palette and brush workflow polish
+
+- `2026-06-02 01:08:43 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/TilePaletteWorkflow.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — RED as expected; focused coverage failed because the tile search field
+  lacked an accessible label, brush controls exposed duplicate/inert Brush
+  affordances, tile buttons could not be selected by accessible name, missing
+  tilesets were silent in the palette, locked active layers were not explained,
+  and painting a locked layer dirtied the project and added history even when
+  no map data changed.
+- `2026-06-02 01:10:21 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/TilePaletteWorkflow.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — PASS; 2 focused files and 53 tests passed after labelling controls,
+  removing the unimplemented pipette, adding palette warnings and brush
+  metadata, and making no-op map mutations preserve clean/history state.
+- `2026-06-02 01:10:34 -03:00` — `npm test` — PASS; 53 test files and 288
+  Vitest tests passed.
+- `2026-06-02 01:11:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 01:11:20 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-02 01:12:10 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 9.87s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 01:22:30 -03:00` —
+  controlled `npm run dev` plus Chrome/CDP headless screenshot smoke — PASS;
+  bundled sample opened, the palette showed selected tile metadata,
+  accessible brush/tile/search controls, project validation stayed passing,
+  and locking the Ground layer surfaced the `Ground layer is locked` warning.
+  Chrome DevTools screenshot capture timed out twice, so the screenshot
+  evidence was generated through local Chrome headless CDP against the same
+  dev server. Screenshots and smoke text written:
+  `docs/screenshots/phase11-cp028/tile-palette-accessible-controls.png`,
+  `docs/screenshots/phase11-cp028/tile-palette-locked-layer-warning.png`, and
+  `docs/screenshots/phase11-cp028/tile-palette-smoke-text.txt`. Controlled
+  Chrome/CDP and Vite processes were stopped afterward, leaving ports 9223 and
+  3000 clear.
+- `2026-06-02 01:25:00 -03:00` — `npm test` — PASS after documentation
+  updates; 53 test files and 288 Vitest tests passed.
+- `2026-06-02 01:26:00 -03:00` — `npm run typecheck` — PASS after
+  documentation updates.
+- `2026-06-02 01:26:00 -03:00` — `git diff --check` — PASS after
+  documentation updates with line-ending conversion warnings only.
+- `2026-06-02 01:26:50 -03:00` — `npm run build` — PASS after documentation
+  updates; 1917 modules transformed, build completed in 8.89s, and Vite
+  emitted only the documented non-fatal chunk-size warning.

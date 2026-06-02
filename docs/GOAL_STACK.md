@@ -150,6 +150,13 @@ Primary Phase 11 sources:
   start map, normalizes saved map metadata, and validates invalid scroll,
   encounter-step, and parallax-scroll values before save/playtest handoff.
   Evidence is recorded in `docs/screenshots/phase11-cp027/`.
+- Phase 11 CP-028 — tile palette and brush workflow polish completed. The
+  tile palette now labels search, tool, layer, and tile buttons for keyboard
+  and screen-reader use, removes the unimplemented pipette control, shows the
+  selected brush metadata, explains missing tilesets and locked/hidden active
+  layers before painting, and reducer no-op map mutations no longer dirty the
+  project or add history. Evidence is recorded in
+  `docs/screenshots/phase11-cp028/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

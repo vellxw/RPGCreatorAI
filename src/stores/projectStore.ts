@@ -369,6 +369,7 @@ function withMap(state: ProjectStoreState, mapId: string, mut: (map: MapData) =>
   if (!map) return state;
   const cloned = deepClone(map);
   mut(cloned);
+  if (JSON.stringify(cloned) === JSON.stringify(map)) return state;
   return {
     ...state,
     dirty: true,

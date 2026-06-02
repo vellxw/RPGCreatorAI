@@ -35,6 +35,7 @@
   - [x] CP-025 / FRA-60: polish primary navigation and route visibility.
   - [x] CP-026 / FRA-61: polish map tree workflow reliability.
   - [x] CP-027 / FRA-62: polish map properties editing and validation.
+  - [x] CP-028 / FRA-63: polish tile palette and brush workflow.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

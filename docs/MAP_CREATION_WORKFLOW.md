@@ -115,6 +115,25 @@ non-finite parallax scroll values before save or playtest handoff.
 
 ## Tools
 
+The tile palette is the primary repeated-authoring surface. It keeps
+implemented controls only: brush, fill, rectangle, erase, and select/move
+events. The previously visible pipette icon is intentionally absent until
+tile sampling is implemented, so every tool button performs the action it
+advertises.
+
+The selected brush preview shows the brush label and metadata. Visual tile
+brushes show tile id, tileset group, and passability; collision, region, and
+event brushes show their authoring type. Tile buttons, layer controls, brush
+size buttons, and the tile search field expose accessible names and pressed
+state so keyboard and assistive workflows match the visual state.
+
+If a map references a missing tileset, visual tile brushes are unavailable
+and the palette explains the missing tileset id instead of presenting an
+empty visual palette without context. If the active layer is locked or hidden,
+the palette shows a warning before painting. Locked-layer paint attempts are
+also reducer no-ops: they do not mutate data, dirty the project, or append
+history entries.
+
 | Tool | Cursor / hint | Click action | Drag action |
 |------|---------------|--------------|-------------|
 | Select | move | select event under cursor | move selected event |

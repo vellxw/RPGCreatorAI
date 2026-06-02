@@ -1,0 +1,132 @@
+RPGCreatorAI
+My First RPG
+Unsaved changes - Save will validate first
+Save
+Validate
+Playtest
+Export
+Import
+Maps
+Events
+Database
+Playtest
+GD
+Creator
+Map Tree
+Town
+Start
+House
+Tile Palette
+Ground
+Decor
+Front
+Pass
+Region
+Events
+Selected
+grass
+Tile 1 · A · passable
+Ground layer is locked
+Unlock it before painting on this layer.
+Brush size
+1×1
+2×2
+3×3
+5×5
+Tiles A
+Tiles B
+Regions
+Passability
+Events
+Scene Templates
+16:9 story room
+16:9
+16:9 town street
+16:9
+16:9 forest clearing
+16:9
+16:9 snowy village
+16:9
+Square room
+1:1
+Small interior
+custom
+Cave / battle approach
+16:9
+P
+GAME VIEWPORT · 16:9
+X: - Y: -
+·
+Brush ground
+·
+Frame 1280×720
+58%
+Fit
+100%
+Map Settings
+Town
+General
+Name
+Display Name
+Tileset
+Sample Town
+Interior
+Scroll
+No loop
+Vertical loop
+Horizontal loop
+Both axes
+Map Size
+Width
+Height
+Apply resize
+Fit viewport
+Viewport Preset
+16:9
+4:3
+1:1
+
+Current frame: 1280×720
+
+Tileset Metadata
+Tiles: 8
+Tile size: 32
+Encounters
+Encounter Steps
+Battleback
+Parallax
+Image
+Loop X
+Loop Y
+Scroll X
+Scroll Y
+Start
+X
+Y
+Direction
+Down
+Up
+Left
+Right
+Start map
+Output
+Validation
+Playtest Logs
+
+Project passes validation
+
+Save will still re-check before writing project files.
+
+MVP Diagnostics
+
+Validation
+
+No blocking errors
+
+Playtest Logs
+
+Runtime output appears after launching a playtest.
+
+Runtime Debug Panels
+
+Use Runtime Log, Event Trace, and Runtime State in Playtest.

@@ -734,6 +734,30 @@ describe('projectReducer', () => {
     expect(s3.maps.town.layers[0].tiles[0]).toBe(1);
   });
 
+  it('PAINT_TILE on a locked layer does not dirty or create history when nothing changes', () => {
+    const s1 = loadedState();
+    const locked = projectReducer(s1, {
+      type: 'UPDATE_MAP_LAYER_META',
+      mapId: 'town',
+      layerName: 'ground',
+      changes: { locked: true },
+    });
+    const cleanLocked = projectReducer(locked, { type: 'MARK_SAVED', at: '2026-06-02T04:00:00.000Z' });
+
+    const attemptedPaint = projectReducer(cleanLocked, {
+      type: 'PAINT_TILE',
+      mapId: 'town',
+      layerName: 'ground',
+      x: 0,
+      y: 0,
+      tile: 2,
+    });
+
+    expect(attemptedPaint).toBe(cleanLocked);
+    expect(attemptedPaint.dirty).toBe(false);
+    expect(attemptedPaint.history).toHaveLength(cleanLocked.history.length);
+  });
+
   it('UPDATE_MAP_LAYER_META changes visibility and lock state with undo support', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {
