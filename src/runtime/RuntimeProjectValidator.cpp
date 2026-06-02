@@ -1,5 +1,6 @@
 #include "runtime/RuntimeProjectValidator.h"
 
+#include "renderer/SpriteCatalog.h"
 #include "types/ProjectTypes.h"
 #include "world/MapLoader.h"
 #include "world/ProjectLoader.h"
@@ -48,6 +49,7 @@ struct DatabaseIndex {
     IdSet animationActions;
     IdSet audioIds;
     std::unordered_map<std::string, std::string> audioPaths;
+    std::unordered_map<std::string, std::string> runtimeAssetSources;
     std::unordered_map<std::string, IdSet> questObjectives;
     std::string configuredPlayerAnimationSet;
 };
@@ -494,6 +496,25 @@ bool hasWavExtension(const std::string& value) {
     return extension == ".wav";
 }
 
+bool hasBmpExtension(const std::string& value) {
+    std::string extension = fs::path(value).extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    return extension == ".bmp";
+}
+
+bool isSafeRuntimeAssetKey(const std::string& value) {
+    if (value.empty() || value.size() > 128) return false;
+    const auto isAlpha = [](unsigned char ch) { return std::isalpha(ch) != 0; };
+    const auto isAllowed = [](unsigned char ch) {
+        return std::isalnum(ch) != 0 || ch == '_' || ch == '-';
+    };
+    if (!isAlpha(static_cast<unsigned char>(value.front()))) return false;
+    return std::all_of(value.begin(), value.end(), [&](char ch) {
+        return isAllowed(static_cast<unsigned char>(ch));
+    });
+}
+
 void seedDefaultAudioRegistry(DatabaseIndex& db) {
     const std::vector<std::pair<std::string, std::string>> defaults = {
         {"confirm", "assets/audio/confirm.wav"},
@@ -789,11 +810,20 @@ void collectDatabaseIds(const std::unordered_map<std::string, json>& databases,
 
                 const json* clips = arrayField(set, "clips");
                 if (!clips) continue;
+                int clipIndex = 0;
                 for (const auto& clip : *clips) {
                     const std::string action = stringField(clip, "action");
                     if (!action.empty()) {
                         db.animationActions.insert(action);
                     }
+                    const std::string assetKey = stringField(clip, "asset");
+                    if (!assetKey.empty()) {
+                        db.runtimeAssetSources.try_emplace(
+                            assetKey,
+                            "database/animations/" + setId + "/clips/" +
+                                std::to_string(clipIndex) + "/asset");
+                    }
+                    ++clipIndex;
                 }
             }
         }
@@ -909,6 +939,39 @@ void collectAndValidateAudio(const std::unordered_map<std::string, json>& databa
             addError(report, "database/system/defaultBgm",
                      "System defaultBgm references unknown audio id \"" +
                          defaultBgm + "\"");
+        }
+    }
+}
+
+void validateRuntimeVisualAssets(const fs::path& projectRoot,
+                                 const DatabaseIndex& db,
+                                 rpg::RuntimeValidationReport& report) {
+    for (const auto& [assetKey, source] : db.runtimeAssetSources) {
+        if (!isSafeRuntimeAssetKey(assetKey)) {
+            addError(report, source,
+                     "Runtime asset \"" + assetKey + "\" uses an unsafe runtime key");
+            continue;
+        }
+
+        const std::string runtimePath = SpriteCatalog::runtimePathFor(assetKey);
+        if (!isSafeProjectRelativePath(runtimePath)) {
+            addError(report, source,
+                     "Runtime asset \"" + assetKey +
+                         "\" uses unsafe project-relative path \"" + runtimePath + "\"");
+            continue;
+        }
+        if (!hasBmpExtension(runtimePath)) {
+            addError(report, source,
+                     "Runtime asset \"" + assetKey + "\" must resolve to a .bmp file");
+            continue;
+        }
+
+        const fs::path resolvedPath = resolveDeclaredPath(projectRoot, runtimePath);
+        std::error_code ec;
+        if (!fs::exists(resolvedPath, ec)) {
+            addWarning(report, source,
+                       "Runtime asset \"" + assetKey + "\" file not found: " +
+                           runtimePath);
         }
     }
 }
@@ -1517,6 +1580,7 @@ RuntimeValidationReport RuntimeProjectValidator::validateProjectFile(
     DatabaseIndex db;
     collectDatabaseIds(databaseJsons, db, report);
     collectAndValidateAudio(databaseJsons, projectRoot, db, report);
+    validateRuntimeVisualAssets(projectRoot, db, report);
     validateDatabaseReferences(databaseJsons, db, report);
 
     std::unordered_map<std::string, MapRuntimeIndex> maps;

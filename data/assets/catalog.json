@@ -36,7 +36,7 @@
       "id": "town_theme",
       "name": "Town Theme",
       "kind": "audio",
-      "path": "assets/audio/town.wav",
+      "path": "assets/audio/town_bgm.wav",
       "source": "local",
       "tags": ["bgm", "audio"]
     },

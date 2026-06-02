@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "pipeline": "rpgcreatorai-runtime-asset-export-v1",
+  "outputRoot": "assets/generated/runtime",
+  "rules": {
+    "visualRuntimeDir": "assets/generated/runtime",
+    "visualRuntimeFormat": "bmp",
+    "audioRuntimeFormat": "wav"
+  },
+  "transparencyKey": "#ff00ff",
+  "assets": [
+    {
+      "id": "player_adventurer_sheet",
+      "name": "Player Adventurer Sheet",
+      "kind": "spritesheet",
+      "source": "generated",
+      "sourcePath": "assets/generated/web/player_adventurer.png",
+      "runtimeKey": "player_adventurer",
+      "runtimePath": "assets/generated/runtime/player_adventurer.bmp",
+      "runtimeFormat": "bmp",
+      "width": 64,
+      "height": 64,
+      "transparencyKey": "#ff00ff",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 6
+    },
+    {
+      "id": "sample_town_tiles",
+      "name": "Sample Town Tiles",
+      "kind": "tileset",
+      "source": "generated",
+      "sourcePath": "assets/generated/source/game_atlas.png",
+      "runtimeKey": "sample_town_tiles",
+      "runtimePath": "assets/generated/runtime/sample_town_tiles.bmp",
+      "runtimeFormat": "bmp",
+      "width": 1254,
+      "height": 1254,
+      "transparencyKey": "#ff00ff"
+    },
+    {
+      "id": "shopkeeper_portrait",
+      "name": "Shopkeeper Portrait",
+      "kind": "image",
+      "source": "generated",
+      "sourcePath": "assets/generated/web/npc_shopkeeper.png",
+      "runtimeKey": "npc_shopkeeper",
+      "runtimePath": "assets/generated/runtime/npc_shopkeeper.bmp",
+      "runtimeFormat": "bmp",
+      "width": 64,
+      "height": 64,
+      "transparencyKey": "#ff00ff"
+    },
+    {
+      "id": "town_theme",
+      "name": "Town Theme",
+      "kind": "audio",
+      "source": "local",
+      "sourcePath": "assets/audio/town_bgm.wav",
+      "runtimeKey": "town_theme",
+      "runtimePath": "assets/audio/town_bgm.wav",
+      "runtimeFormat": "wav"
+    },
+    {
+      "id": "forest_concept_generated",
+      "name": "Forest Concept Generated",
+      "kind": "generated",
+      "source": "generated",
+      "sourcePath": "assets/generated/web/tile_tree.png",
+      "runtimeKey": "tile_tree",
+      "runtimePath": "assets/generated/runtime/tile_tree.bmp",
+      "runtimeFormat": "bmp",
+      "width": 64,
+      "height": 64,
+      "transparencyKey": "#ff00ff"
+    }
+  ]
+}

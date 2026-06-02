@@ -4,6 +4,71 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-90 / CP-055 — asset optimization and runtime export
+
+- `timestamp unavailable after context compaction` —
+  `python -m unittest tests.test_runtime_asset_export` — RED as expected
+  before implementation; the test module could not load
+  `scripts/dev/export_runtime_assets.py`.
+- `timestamp unavailable after context compaction` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding native coverage; the validator did not warn
+  when an animation clip referenced a missing runtime BMP output.
+- `2026-06-02 11:27:00 -03:00 (logged after run)` —
+  `python -m unittest tests.test_runtime_asset_export` — FAIL; Python 3.14
+  `dataclass` decoration failed when the fixture loaded the script through
+  `importlib.exec_module` without registering the module in `sys.modules`.
+  Fix applied: replace the unnecessary dataclass with a small result class.
+- `2026-06-02 11:27:32 -03:00` —
+  `python -m unittest tests.test_runtime_asset_export` — PASS; 2 pipeline
+  tests passed for RGBA-to-BMP export, magenta transparency, manifest
+  traceability, WAV runtime preservation, and missing-output validation.
+- `2026-06-02 11:28:12 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1`
+  — PASS; wrote runtime-ready BMP outputs and
+  `data/assets/runtime-manifest.json`, then validated generated outputs.
+- `2026-06-02 11:29:47 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; CMake/Ninja rebuilt the runtime validator and CTest passed
+  `RPGTests` 1/1.
+- Fix applied: added deterministic runtime asset export/validation scripts,
+  sample local WAV fixtures, a checked-in runtime manifest, generated runtime
+  BMP output for the cataloged tileset source, and native runtime warnings for
+  missing animation clip BMPs.
+- `2026-06-02 11:35:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 11:36:27 -03:00` — `npm test -- --run` — PASS; 62 Vitest
+  files and 351 tests passed.
+- `2026-06-02 11:36:58 -03:00` — `npm run build` — PASS; Vite transformed
+  1929 modules and emitted the known non-fatal chunk-size warning.
+- `2026-06-02 11:37:05 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 40 Rust desktop
+  tests passed.
+- `2026-06-02 11:37:16 -03:00` —
+  `python -m unittest tests.test_runtime_asset_export` — PASS; 2 tests
+  passed.
+- `2026-06-02 11:37:16 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  — PASS; runtime asset export validation passed against the checked-in
+  manifest and outputs.
+- `2026-06-02 11:37:32 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; Ninja reported no work to do and CTest passed `RPGTests` 1/1.
+- `2026-06-02 11:37:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build`
+  — PASS; runtime launch and feature smoke completed, screenshots were
+  written under `docs/screenshots/phase10-mvp`, and stdout included
+  `Audio requested: town_theme -> assets/audio/town_bgm.wav` plus
+  `Audio requested: chest_open -> assets/audio/chest.wav`. The environment
+  still reported no available audio output device, so audio requests were
+  silent as designed.
+- `2026-06-02 11:39:20 -03:00` —
+  `cmd /c scripts\dev\export-runtime-assets.bat --validate-only` — PASS;
+  runtime asset export validation passed through the restricted-policy
+  wrapper equivalent.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-89 / CP-054 — asset metadata editor
 
 - `timestamp unavailable after context compaction` —

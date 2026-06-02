@@ -396,6 +396,72 @@ TEST_CASE("RuntimeProjectValidator accepts imported WAV audio references") {
     fs::remove_all(root);
 }
 
+TEST_CASE("RuntimeProjectValidator warns when animation runtime BMP output is missing") {
+    const fs::path root = makeFixtureRoot("missing_animation_runtime_asset");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": [
+                {
+                    "id": "runner",
+                    "type": "npc",
+                    "x": 0,
+                    "y": 0,
+                    "trigger": "interact",
+                    "animationSet": "hero",
+                    "commands": []
+                }
+            ]
+        })",
+        R"({
+            "items": "database/items.json",
+            "animations": "database/animations.json"
+        })");
+    writeFile(root / "database" / "items.json", R"({
+        "schemaVersion": 1,
+        "items": []
+    })");
+    writeFile(root / "database" / "animations.json", R"({
+        "schemaVersion": 1,
+        "sets": [
+            {
+                "id": "hero",
+                "clips": [
+                    {
+                        "action": "idle",
+                        "direction": "down",
+                        "asset": "hero_run_sheet",
+                        "frameSize": { "width": 64, "height": 64 },
+                        "frameCount": 4,
+                        "fps": 8,
+                        "loop": true,
+                        "anchor": { "x": 32, "y": 54 }
+                    }
+                ]
+            }
+        ]
+    })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK_FALSE(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Warning,
+                     "Runtime asset \"hero_run_sheet\" file not found"));
+
+    fs::remove_all(root);
+}
+
 TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime") {
     const fs::path root = makeFixtureRoot("battle_database");
     writeMinimalProject(

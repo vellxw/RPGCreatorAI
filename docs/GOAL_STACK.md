@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-055 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-056 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -364,6 +364,15 @@ Primary Phase 11 sources:
   static generated tile keys as broken asset refs. Evidence is recorded in
   `docs/PHASE_11_ASSET_METADATA_EDITOR.md` and
   `docs/screenshots/phase11-cp054/`.
+- Phase 11 CP-055 — asset optimization and runtime export completed.
+  `scripts/dev/export_runtime_assets.py` and its PowerShell/BAT wrappers now
+  convert cataloged visual assets into deterministic runtime BMP outputs with
+  magenta transparency, preserve local WAV assets as runtime-ready audio,
+  write `data/assets/runtime-manifest.json`, and validate missing runtime
+  outputs. The native runtime validator now warns before launch when
+  animation clip BMP outputs are absent while keeping runtime fallback
+  behavior non-fatal. Evidence is recorded in
+  `docs/PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
