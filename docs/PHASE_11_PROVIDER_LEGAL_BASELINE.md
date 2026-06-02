@@ -142,6 +142,10 @@ Generated output must never be silently imported into accepted project data.
 - PASS: CP-059 adds an editor-only request queue with cancellation, retry,
   restart recovery, and write-intent guards. Queue validation uses mocks and
   fixtures only; no live provider call is required or performed.
+- PASS: CP-060 defines the provider registry and adapter interface as
+  editor-side TypeScript contracts, derives Settings provider defaults from
+  registry metadata, and adds only a deterministic mock local adapter for
+  contract tests. Real provider adapters remain future opt-in work.
 - OPEN: Provider Hub implementation issues must still add provider metadata,
   mock contract tests, opt-in UX, cost/rate-limit/error states, and live
   diagnostic gates.

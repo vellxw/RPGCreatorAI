@@ -4,6 +4,35 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-95 / CP-060 — provider registry and adapter interface
+
+- `2026-06-02 13:13:02 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts`
+  — RED as expected before implementation; `providerRegistry` and
+  `mockProviderAdapter` modules did not exist.
+- `2026-06-02 13:14:27 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 4 focused files and 12 tests passed after adding registry metadata,
+  adapter request/response contracts, deterministic mock adapter, and
+  registry-derived provider defaults.
+- `2026-06-02 13:14:50 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:16:44 -03:00` —
+  `npm test -- --run src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 4 focused files and 12 tests passed after preserving historical
+  Settings capability labels as registry metadata.
+- `2026-06-02 13:17:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:17:18 -03:00` — `npm test -- --run` — PASS; 69
+  Vitest files and 374 tests passed.
+- `2026-06-02 13:18:05 -03:00` — `npm run build` — PASS; Vite
+  transformed 1936 modules and emitted the known non-fatal chunk-size
+  warning.
+- Fix applied: added editor-side provider operation metadata, model-list
+  policy, adapter contract, mock local provider implementation, and docs for
+  the no-live-provider boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-94 / CP-059 — AI request queue and cancellation
 
 - `2026-06-02 12:58:22 -03:00` —

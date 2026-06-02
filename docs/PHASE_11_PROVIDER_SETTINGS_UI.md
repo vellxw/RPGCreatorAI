@@ -39,6 +39,11 @@ availability metadata and desktop-safe local storage through the Tauri bridge;
 the raw credential value is never stored in project data or returned to the
 renderer after a save attempt.
 
+CP-060 moves default provider metadata into the editor-side provider registry.
+Settings still renders the same disabled/no-secret defaults, but provider ids,
+credential requirements, supported operations, and capability labels now come
+from registry data instead of a duplicated settings-only list.
+
 ## Runtime Boundary
 
 The native runtime remains independent of provider settings, AI providers,

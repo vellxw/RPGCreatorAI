@@ -1,86 +1,8 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { ProviderConfig } from '../types/project';
+import { providerConfigsFromRegistry } from '../providers/providerRegistry';
 
-export const defaultProviderConfigs: ProviderConfig[] = [
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'OPENAI_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'Image generation', 'Image editing', 'Vision analysis'],
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'ANTHROPIC_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'Code assistance', 'Planning'],
-  },
-  {
-    id: 'moonshot',
-    name: 'Kimi / Moonshot',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'MOONSHOT_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
-  },
-  {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'DEEPSEEK_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
-  },
-  {
-    id: 'minimax',
-    name: 'MiniMax',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'MINIMAX_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'Image generation', 'Video generation', 'Audio generation'],
-  },
-  {
-    id: 'opencode',
-    name: 'OpenCode adapter',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialState: 'not-required',
-    capabilities: ['Code assistance', 'External tool adapter'],
-  },
-  {
-    id: 'custom',
-    name: 'Custom OpenAI-compatible endpoint',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialEnvVar: 'CUSTOM_OPENAI_API_KEY',
-    credentialState: 'missing',
-    capabilities: ['Text generation', 'OpenAI-compatible endpoint'],
-  },
-  {
-    id: 'local',
-    name: 'Local gateway',
-    enabled: false,
-    status: 'disabled',
-    model: '',
-    credentialState: 'not-required',
-    capabilities: ['Offline mock contracts'],
-  },
-];
+export const defaultProviderConfigs: ProviderConfig[] = providerConfigsFromRegistry();
 
 export interface ProviderRouting {
   codeGeneration: string;
