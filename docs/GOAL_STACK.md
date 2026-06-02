@@ -45,13 +45,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`
 - `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`
 - `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`
+- `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-080 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-081 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -558,6 +559,14 @@ Primary Phase 11 sources:
   rejected generated animation assets in runtime-critical player slots.
   Evidence is recorded in
   `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`.
+- Phase 11 CP-080 — AI character animation integration gate completed.
+  The mock-backed character/animation pipeline is now validated end to end:
+  reviewed character concepts, source-linked sprite sheet generation,
+  animation QA, visual QA, project validation, editor preview rendering,
+  normalized preview/export fixtures, runtime BMP manifest validation, and
+  native runtime fixture path tests all pass without live provider calls.
+  Evidence is recorded in
+  `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

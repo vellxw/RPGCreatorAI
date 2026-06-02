@@ -5868,3 +5868,41 @@ Error: Port 1420 is already in use
   `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
   - PASS; TypeScript passed and focused CP-079 suites passed 3 files and 39
   tests.
+
+### Phase 11 FRA-115 / CP-080 - AI character animation integration gate
+
+- `2026-06-02 20:15:00 -03:00` -
+  `npm test -- --run src/components/database/__tests__/CharacterAnimationPipelineIntegration.test.tsx`
+  - FAIL as expected during TDD red step; no matching integration gate test
+  existed yet.
+- `2026-06-02 20:16:50 -03:00` -
+  `npm test -- --run src/components/database/__tests__/CharacterAnimationPipelineIntegration.test.tsx`
+  - PASS after adding the gate test; 1 file and 1 test passed. The test
+  composes mock concept generation, source-linked sprite sheet generation,
+  animation QA, visual QA, project validation, editor preview rendering,
+  runtime manifest lookup, runtime BMP existence, and no-live-provider
+  assertions.
+- `2026-06-02 20:17:24 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 20:17:24 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 85 files and 454 tests.
+- `2026-06-02 20:17:24 -03:00` -
+  `python -m unittest tests.test_animation_strip_normalization tests.test_animation_preview_generation tests.test_runtime_asset_export tests.test_visual_assets`
+  - PASS; pipeline fixture tests passed 10 tests.
+- `2026-06-02 20:18:20 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1958 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 20:18:20 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  - PASS; runtime asset export validation passed.
+- `2026-06-02 20:18:20 -03:00` -
+  `ctest --test-dir $env:LOCALAPPDATA\RPGCreatorAI\build --output-on-failure`
+  - PASS; native `RPGTests` passed 1/1.
+- `2026-06-02 20:19:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\components\database\__tests__\CharacterAnimationPipelineIntegration.test.tsx docs\PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md src\providers\generatedAnimationQa.ts`
+  - PASS for CP-080 scope; matches were limited to test assertions and
+  documented scan commands, with no live-call implementation or secrets added.
+- `2026-06-02 20:20:57 -03:00` - pre-commit focused rerun:
+  `npm run typecheck` and
+  `npm test -- --run src/components/database/__tests__/CharacterAnimationPipelineIntegration.test.tsx`
+  - PASS; TypeScript passed and the CP-080 integration gate test passed 1
+  file and 1 test.

@@ -177,6 +177,27 @@ matches `SpriteCatalog::runtimePathFor(id)`.
 Detailed CP-078 evidence is recorded in
 `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`.
 
+## Phase 11 Character Animation Integration Gate
+
+CP-080 validates the AI character/animation pipeline as one local-first
+workflow:
+
+1. reviewed `character-concept-v1` mock generation
+2. `character-spritesheet-v1` mock generation from the reviewed concept
+3. explicit character animation QA metadata
+4. visual QA metadata
+5. project validation for accepted generated spritesheet assets
+6. editor `AnimationPreview` rendering through a preview URL
+7. normalized preview/export fixtures for `player_adventurer_walk_down`
+8. runtime BMP manifest validation and native `SpriteCatalog` path tests
+
+Normal validation remains mock-backed and offline. Runtime export is a
+deterministic asset pipeline step; the native runtime continues to load local
+data and BMP assets only.
+
+Detailed CP-080 evidence is recorded in
+`docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development
