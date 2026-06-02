@@ -190,13 +190,15 @@ void Game::update(const InputManager& input, float dt) {
         menuSystem.consumeAction();
         switch (menuAction) {
             case rpg::MenuSystem::Action::Save: {
-                bool ok = saveGame(menuSlot, false);
-                menuSystem.notifySaveResult(ok, menuSlot);
+                std::string detail;
+                bool ok = saveGame(menuSlot, false, &detail);
+                menuSystem.notifySaveResult(ok, menuSlot, detail);
                 break;
             }
             case rpg::MenuSystem::Action::Load: {
-                bool ok = loadGameFromDisk(menuSlot, false);
-                menuSystem.notifyLoadResult(ok, menuSlot);
+                std::string detail;
+                bool ok = loadGameFromDisk(menuSlot, false, &detail);
+                menuSystem.notifyLoadResult(ok, menuSlot, detail);
                 break;
             }
             case rpg::MenuSystem::Action::Close:
@@ -804,28 +806,42 @@ std::string Game::slotIdFor(int slotIndex) {
     return "slot_" + std::to_string(slotIndex);
 }
 
-bool Game::saveGame(int slotIndex, bool showDialogueFeedback) {
-    bool ok = SaveManager::save(slotIdFor(slotIndex), state);
+bool Game::saveGame(int slotIndex, bool showDialogueFeedback, std::string* detailOut) {
+    auto result = SaveManager::saveDetailed(slotIdFor(slotIndex), state);
+    bool ok = result.ok;
+    if (detailOut) {
+        *detailOut = ok ? std::string{} : result.error;
+    }
     if (showDialogueFeedback) {
         dialogue.showText("", ok ? "Partida guardada." : "Error al guardar.");
     }
     return ok;
 }
 
-bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback) {
-    auto loaded = SaveManager::load(slotIdFor(slotIndex));
-    if (!loaded) {
-        if (showDialogueFeedback) dialogue.showText("", "No hay partida guardada.");
+bool Game::loadGameFromDisk(int slotIndex, bool showDialogueFeedback, std::string* detailOut) {
+    auto result = SaveManager::loadDetailed(slotIdFor(slotIndex));
+    if (!result.ok()) {
+        if (detailOut) *detailOut = result.error;
+        if (showDialogueFeedback) {
+            dialogue.showText(
+                "",
+                result.status == SaveManager::LoadStatus::Missing
+                    ? "No hay partida guardada."
+                    : "Error al cargar partida.");
+        }
         return false;
     }
-    state = *loaded;
+    state = *result.state;
     if (!loadMap(state.getCurrentMapId())) {
-        Logger::error("Loaded save references unknown map: " + state.getCurrentMapId());
+        std::string error = "Loaded save references unknown map: " + state.getCurrentMapId();
+        Logger::error(error);
+        if (detailOut) *detailOut = error;
         if (showDialogueFeedback) dialogue.showText("", "Error al cargar mapa.");
         return false;
     }
     playerMotion.snapToTile(state.getPlayerX(), state.getPlayerY(), currentScene.getTileSize());
     updateCamera();
+    if (detailOut) detailOut->clear();
     if (showDialogueFeedback) dialogue.showText("", "Partida cargada.");
     return true;
 }

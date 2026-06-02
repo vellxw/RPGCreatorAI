@@ -515,7 +515,7 @@ void Renderer2D::renderMenu(const rpg::MenuSystem::ViewModel& vm) {
             bool isLoad = (vm.screen == rpg::MenuSystem::Screen::Load);
             for (const auto& s : vm.slots) {
                 rows.push_back(s.summary);
-                enabled.push_back(isLoad ? s.exists : true);
+                enabled.push_back(isLoad ? s.loadable : true);
             }
             if (rows.empty()) {
                 rows.push_back("(no slots configured)");

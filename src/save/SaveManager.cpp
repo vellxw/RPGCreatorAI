@@ -4,16 +4,99 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <filesystem>
+#include <unordered_map>
 
 using json = nlohmann::json;
+
+namespace {
+
+constexpr int kCurrentSaveSchemaVersion = 2;
+
+struct SaveEnvelopeValidation {
+    SaveManager::LoadStatus status = SaveManager::LoadStatus::Loaded;
+    std::string error;
+};
+
+SaveEnvelopeValidation validateSaveEnvelope(const json& j) {
+    int schemaVersion = 1;
+    if (j.contains("schemaVersion")) {
+        if (!j.at("schemaVersion").is_number_integer()) {
+            return {SaveManager::LoadStatus::Invalid,
+                    "Save file schemaVersion must be an integer"};
+        }
+        schemaVersion = j.at("schemaVersion").get<int>();
+    }
+    if (schemaVersion < 1) {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file schemaVersion must be at least 1"};
+    }
+    if (schemaVersion > kCurrentSaveSchemaVersion) {
+        return {SaveManager::LoadStatus::UnsupportedVersion,
+                "Save file uses unsupported schemaVersion " +
+                    std::to_string(schemaVersion)};
+    }
+
+    if (!j.contains("currentMapId") || !j.at("currentMapId").is_string() ||
+        j.at("currentMapId").get<std::string>().empty()) {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file missing currentMapId"};
+    }
+    if (!j.contains("player") || !j.at("player").is_object()) {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file missing player object"};
+    }
+    const auto& player = j.at("player");
+    if (!player.contains("x") || !player.at("x").is_number_integer() ||
+        !player.contains("y") || !player.at("y").is_number_integer()) {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file player position must include integer x/y"};
+    }
+    if (!player.contains("direction") || !player.at("direction").is_string()) {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file player direction must be a string"};
+    }
+    const std::string direction = player.at("direction").get<std::string>();
+    if (direction != "up" && direction != "down" &&
+        direction != "left" && direction != "right") {
+        return {SaveManager::LoadStatus::Invalid,
+                "Save file player direction is unsupported: " + direction};
+    }
+
+    return {};
+}
+
+void fillMtime(SaveManager::SlotMetadata& metadata, const std::string& path) {
+    try {
+        const auto ftime = std::filesystem::last_write_time(path);
+        const auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+            ftime - std::filesystem::file_time_type::clock::now() +
+            std::chrono::system_clock::now());
+        metadata.mtimeUnix =
+            std::chrono::duration_cast<std::chrono::seconds>(sctp.time_since_epoch()).count();
+    } catch (const std::filesystem::filesystem_error&) {
+        metadata.mtimeUnix = 0;
+    }
+}
+
+SaveManager::LoadResult makeLoadFailure(SaveManager::LoadStatus status,
+                                        const std::string& path,
+                                        const std::string& error) {
+    SaveManager::LoadResult result;
+    result.status = status;
+    result.path = path;
+    result.error = error;
+    return result;
+}
+
+} // namespace
 
 std::string SaveManager::getSavePath(const std::string& slotId) {
     return "saves/" + slotId + ".json";
 }
 
-bool SaveManager::save(const std::string& slotId, const GameState& state) {
+SaveManager::SaveResult SaveManager::saveDetailed(const std::string& slotId, const GameState& state) {
     json j;
-    j["schemaVersion"] = 2;
+    j["schemaVersion"] = kCurrentSaveSchemaVersion;
     j["currentMapId"] = state.getCurrentMapId();
     j["player"]["x"] = state.getPlayerX();
     j["player"]["y"] = state.getPlayerY();
@@ -38,25 +121,40 @@ bool SaveManager::save(const std::string& slotId, const GameState& state) {
     j["quests"] = std::move(questsJson);
 
     std::string path = getSavePath(slotId);
+    SaveResult result;
+    result.path = path;
     if (FileSystem::writeFile(path, j.dump(2))) {
         Logger::info("Game saved to " + path);
-        return true;
+        result.ok = true;
+        return result;
     }
 
-    Logger::error("Failed to save game to " + path);
-    return false;
+    result.error = "Failed to write save file: " + path;
+    Logger::error(result.error);
+    return result;
 }
 
-std::optional<GameState> SaveManager::load(const std::string& slotId) {
+bool SaveManager::save(const std::string& slotId, const GameState& state) {
+    return saveDetailed(slotId, state).ok;
+}
+
+SaveManager::LoadResult SaveManager::loadDetailed(const std::string& slotId) {
     std::string path = getSavePath(slotId);
     auto content = FileSystem::readFile(path);
     if (!content) {
-        Logger::warning("No save found at " + path);
-        return std::nullopt;
+        const std::string error = "No save found at " + path;
+        Logger::warning(error);
+        return makeLoadFailure(LoadStatus::Missing, path, error);
     }
 
     try {
         json j = json::parse(*content);
+        auto validation = validateSaveEnvelope(j);
+        if (validation.status != LoadStatus::Loaded) {
+            Logger::error(validation.error + " in " + path);
+            return makeLoadFailure(validation.status, path, validation.error);
+        }
+
         GameState state;
 
         state.setCurrentMap(j.at("currentMapId").get<std::string>());
@@ -123,11 +221,20 @@ std::optional<GameState> SaveManager::load(const std::string& slotId) {
         }
 
         Logger::info("Game loaded from " + path);
-        return state;
+        LoadResult result;
+        result.status = LoadStatus::Loaded;
+        result.path = path;
+        result.state = std::move(state);
+        return result;
     } catch (const json::exception& e) {
-        Logger::error(std::string("Error parsing save file: ") + e.what());
-        return std::nullopt;
+        const std::string error = "Invalid save JSON: " + std::string(e.what());
+        Logger::error(error + " in " + path);
+        return makeLoadFailure(LoadStatus::Invalid, path, error);
     }
+}
+
+std::optional<GameState> SaveManager::load(const std::string& slotId) {
+    return loadDetailed(slotId).state;
 }
 
 bool SaveManager::hasSave(const std::string& slotId) {
@@ -154,28 +261,30 @@ std::vector<SaveManager::SlotMetadata> SaveManager::listSlots(int maxSlots) {
             continue;
         }
 
+        metadata.exists = true;
+        fillMtime(metadata, path);
+
         try {
             const json j = json::parse(*content);
-            metadata.exists = true;
+            auto validation = validateSaveEnvelope(j);
+            if (validation.status != LoadStatus::Loaded) {
+                metadata.corrupt = true;
+                metadata.detail = validation.error;
+                slots.push_back(std::move(metadata));
+                continue;
+            }
+
+            metadata.loadable = true;
             metadata.mapId = j.value("currentMapId", std::string{});
             metadata.gold = j.value("gold", 0);
             if (j.contains("party") && j.at("party").is_array()) {
                 metadata.party = j.at("party").get<std::vector<std::string>>();
             }
-        } catch (const json::exception&) {
+        } catch (const json::exception& e) {
+            metadata.corrupt = true;
+            metadata.detail = "Invalid save JSON: " + std::string(e.what());
             slots.push_back(std::move(metadata));
             continue;
-        }
-
-        try {
-            const auto ftime = std::filesystem::last_write_time(path);
-            const auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-                ftime - std::filesystem::file_time_type::clock::now() +
-                std::chrono::system_clock::now());
-            metadata.mtimeUnix =
-                std::chrono::duration_cast<std::chrono::seconds>(sctp.time_since_epoch()).count();
-        } catch (const std::filesystem::filesystem_error&) {
-            metadata.mtimeUnix = 0;
         }
 
         slots.push_back(std::move(metadata));

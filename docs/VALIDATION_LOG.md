@@ -4048,3 +4048,28 @@ Error: Port 1420 is already in use
   files and unavailable audio endpoint fallback.
 - `2026-06-02 05:17:53 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
+
+### Phase 11 FRA-73 / CP-038 — save/load UX and runtime slot polish
+
+- `2026-06-02 05:24:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected; new save/load coverage failed to compile because
+  `SaveManager::loadDetailed`, detailed load statuses, and corrupt/loadable
+  slot metadata did not exist yet.
+- `2026-06-02 05:27:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; `RPGTests` passed after adding detailed save/load results, save
+  envelope validation, corrupt/future slot metadata, load blocking, and menu
+  feedback coverage.
+- `2026-06-02 05:30:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure/build completed and `RPGTests` passed 1/1. CMake emitted
+  only known third-party policy/deprecation warnings.
+- `2026-06-02 05:30:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir build/runtime_smoke_cp038`
+  — PASS; `SMOKE PASSED`, screenshots written to `build/runtime_smoke_cp038`,
+  and logs included `Game saved to saves/slot_1.json`, `Game loaded from
+  saves/slot_1.json`, save/load feedback screenshots, and expected optional
+  missing-audio/device warnings only.
+- `2026-06-02 05:30:39 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.

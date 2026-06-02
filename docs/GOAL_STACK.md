@@ -216,6 +216,14 @@ Primary Phase 11 sources:
   check unknown ids plus unsafe or unsupported audio paths, and the native
   validator warns rather than blocks when optional local WAV files are absent.
   Evidence is recorded in `docs/PHASE_11_AUDIO_AUTHORING_RUNTIME_V1.md`.
+- Phase 11 CP-038 — save/load UX and runtime slot polish completed.
+  `SaveManager` now exposes detailed save/load results while preserving the
+  legacy bool/optional API, validates save envelopes for supported
+  `schemaVersion`, map id, player position, and direction, and reports empty,
+  corrupt, or future-version slots as distinct states. The runtime menu marks
+  corrupt/future slots as existing but not loadable, blocks load actions for
+  them, and surfaces actionable feedback without moving gameplay rules into
+  persistence.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

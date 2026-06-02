@@ -89,11 +89,14 @@ public:
     struct SlotRow {
         int index = 1;                 // 1-based for display
         bool exists = false;
+        bool loadable = false;
+        bool corrupt = false;
         std::string mapId;
         int gold = 0;
         std::vector<std::string> party;
         long long mtimeUnix = 0;
         std::string summary;           // pre-formatted for the renderer
+        std::string detail;
     };
 
     struct ViewModel {
@@ -131,8 +134,8 @@ public:
 
     // Tells the menu the most recent Save/Load attempt finished, so it can
     // show a toast and close itself.
-    void notifySaveResult(bool ok, int slotIndex);
-    void notifyLoadResult(bool ok, int slotIndex);
+    void notifySaveResult(bool ok, int slotIndex, const std::string& detail = {});
+    void notifyLoadResult(bool ok, int slotIndex, const std::string& detail = {});
 
     ViewModel snapshot(const GameState& state, const RpgDatabases& dbs) const;
 
@@ -150,6 +153,7 @@ private:
     int rootItemCount() const { return 6; } // Inventory/Party/Quests/Save/Load/Close
     int subItemCount(const GameState& state, const RpgDatabases& dbs) const;
     int saveSlotCount() const { return 3; }
+    SlotRow slotRowForIndex(int slotIndex) const;
     void clearMessage() { message_.reset(); messageTtl_ = 0.0f; }
 
     Screen screen_ = Screen::Closed;

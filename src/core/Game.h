@@ -94,8 +94,12 @@ private:
                                            bool useCharacterDisplayDefault,
                                            bool showDirectionDot) const;
     void updateCamera();
-    bool saveGame(int slotIndex = 1, bool showDialogueFeedback = true);
-    bool loadGameFromDisk(int slotIndex = 1, bool showDialogueFeedback = true);
+    bool saveGame(int slotIndex = 1,
+                  bool showDialogueFeedback = true,
+                  std::string* detailOut = nullptr);
+    bool loadGameFromDisk(int slotIndex = 1,
+                          bool showDialogueFeedback = true,
+                          std::string* detailOut = nullptr);
     void hookEventRunnerResolvers();
     void configureEventRunner(EventRunner& runner);
 

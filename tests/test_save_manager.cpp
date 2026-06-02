@@ -10,6 +10,8 @@ namespace {
 
 constexpr const char* kSlot = "test_phase6_slot";
 constexpr const char* kLegacySlot = "test_phase2_legacy_slot";
+constexpr const char* kCorruptSlot = "test_corrupt_slot";
+constexpr const char* kFutureSlot = "test_future_slot";
 
 std::optional<std::string> readExisting(const std::string& path) {
     std::ifstream in(path);
@@ -96,6 +98,46 @@ TEST_CASE("SaveManager::load returns nullopt for missing slot") {
     CHECK_FALSE(loaded.has_value());
 }
 
+TEST_CASE("SaveManager::loadDetailed reports missing, corrupt, and future-version slots") {
+    const std::string corruptPath = std::string("saves/") + kCorruptSlot + ".json";
+    const std::string futurePath = std::string("saves/") + kFutureSlot + ".json";
+    const auto corruptBefore = readExisting(corruptPath);
+    const auto futureBefore = readExisting(futurePath);
+
+    restoreFile(corruptPath, std::nullopt);
+    restoreFile(futurePath, std::nullopt);
+
+    auto missing = SaveManager::loadDetailed("definitely_does_not_exist_slot");
+    CHECK(missing.status == SaveManager::LoadStatus::Missing);
+    CHECK_FALSE(missing.state.has_value());
+    CHECK(missing.error.find("No save found") != std::string::npos);
+
+    {
+        std::ofstream out(corruptPath);
+        out << "{ this is not json";
+    }
+    auto corrupt = SaveManager::loadDetailed(kCorruptSlot);
+    CHECK(corrupt.status == SaveManager::LoadStatus::Invalid);
+    CHECK_FALSE(corrupt.state.has_value());
+    CHECK(corrupt.error.find("Invalid save JSON") != std::string::npos);
+
+    {
+        std::ofstream out(futurePath);
+        out << R"({
+            "schemaVersion": 99,
+            "currentMapId": "town",
+            "player": { "x": 0, "y": 0, "direction": "down" }
+        })";
+    }
+    auto future = SaveManager::loadDetailed(kFutureSlot);
+    CHECK(future.status == SaveManager::LoadStatus::UnsupportedVersion);
+    CHECK_FALSE(future.state.has_value());
+    CHECK(future.error.find("unsupported schemaVersion 99") != std::string::npos);
+
+    restoreFile(corruptPath, corruptBefore);
+    restoreFile(futurePath, futureBefore);
+}
+
 TEST_CASE("SaveManager::listSlots reports empty and populated slot metadata") {
     const std::string slot1Path = "saves/slot_1.json";
     const std::string slot2Path = "saves/slot_2.json";
@@ -125,4 +167,23 @@ TEST_CASE("SaveManager::listSlots reports empty and populated slot metadata") {
 
     restoreFile(slot1Path, slot1Before);
     restoreFile(slot2Path, slot2Before);
+}
+
+TEST_CASE("SaveManager::listSlots reports corrupt slots as existing but not loadable") {
+    const std::string slot1Path = "saves/slot_1.json";
+    const auto slot1Before = readExisting(slot1Path);
+    {
+        std::ofstream out(slot1Path);
+        out << R"({ "schemaVersion": 2, "player": { "x": 0, "y": 0, "direction": "down" } })";
+    }
+
+    const auto slots = SaveManager::listSlots(1);
+    REQUIRE(slots.size() == 1);
+    CHECK(slots[0].exists);
+    CHECK_FALSE(slots[0].loadable);
+    CHECK(slots[0].corrupt);
+    CHECK(slots[0].detail.find("currentMapId") != std::string::npos);
+    CHECK(slots[0].mtimeUnix > 0);
+
+    restoreFile(slot1Path, slot1Before);
 }

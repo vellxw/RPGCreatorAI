@@ -70,9 +70,15 @@
   `saves/slot_1.json`, `saves/slot_2.json`, and `saves/slot_3.json`.
 - Empty load slots are disabled visually. Confirming one leaves the game
   state unchanged and shows `Slot N is empty`.
+- Corrupt or unsupported save slots are shown as existing but not loadable.
+  Confirming one leaves game state unchanged and reports why the slot cannot
+  be loaded, such as invalid JSON, missing required save fields, or a future
+  unsupported `schemaVersion`.
 - Save data: current map id, player x/y/direction, flags, switches,
   variables, self switches, inventory, gold, party, actor HP, and quests.
-- Loading restores the saved state and reloads the current map.
+- Loading restores the saved state and reloads the current map. If the saved
+  map no longer exists, the load attempt fails and reports the map reference
+  problem rather than mutating the visible runtime scene.
 
 ## Runtime Menus
 

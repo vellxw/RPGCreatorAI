@@ -51,14 +51,28 @@ MenuSystem::SlotRow makeSlotRow(const SaveManager::SlotMetadata& metadata) {
     MenuSystem::SlotRow row;
     row.index = metadata.index;
     row.exists = metadata.exists;
+    row.loadable = metadata.loadable;
+    row.corrupt = metadata.corrupt;
     row.mapId = metadata.mapId;
     row.gold = metadata.gold;
     row.party = metadata.party;
     row.mtimeUnix = metadata.mtimeUnix;
+    row.detail = metadata.detail;
 
     if (!row.exists) {
         row.exists = false;
+        row.loadable = false;
         row.summary = "Slot " + std::to_string(row.index) + "   Empty";
+        return row;
+    }
+
+    if (!row.loadable) {
+        std::ostringstream oss;
+        oss << "Slot " << row.index << "   "
+            << (row.corrupt ? "Corrupt" : "Unavailable");
+        auto dateStr = formatMtime(row.mtimeUnix);
+        if (!dateStr.empty()) oss << "   " << dateStr;
+        row.summary = oss.str();
         return row;
     }
 
@@ -101,19 +115,23 @@ MenuSystem::Action MenuSystem::consumeAction() {
     return a;
 }
 
-void MenuSystem::notifySaveResult(bool ok, int slotIndex) {
+void MenuSystem::notifySaveResult(bool ok, int slotIndex, const std::string& detail) {
     if (ok) {
         message_ = "Saved to slot " + std::to_string(slotIndex);
     } else {
-        message_ = "Save to slot " + std::to_string(slotIndex) + " failed";
+        message_ = detail.empty()
+            ? "Save to slot " + std::to_string(slotIndex) + " failed"
+            : detail;
     }
 }
 
-void MenuSystem::notifyLoadResult(bool ok, int slotIndex) {
+void MenuSystem::notifyLoadResult(bool ok, int slotIndex, const std::string& detail) {
     if (ok) {
         message_ = "Loaded slot " + std::to_string(slotIndex);
     } else {
-        message_ = "Load from slot " + std::to_string(slotIndex) + " failed";
+        message_ = detail.empty()
+            ? "Load from slot " + std::to_string(slotIndex) + " failed"
+            : detail;
     }
 }
 
@@ -219,7 +237,7 @@ bool MenuSystem::handleInput(const InputManager& input) {
             if (input.isJustPressed(KeyButton::Confirm)) {
                 int slotIdx = selectionIndex_ + 1; // 1-based on disk
                 std::string slotId = "slot_" + std::to_string(slotIdx);
-                if (FileSystem::exists("saves/" + slotId + ".json")) {
+                if (SaveManager::hasSave(slotId)) {
                     overwriteConfirmActive_ = true;
                     overwriteConfirmSlotIndex_ = slotIdx;
                 } else {
@@ -251,12 +269,19 @@ bool MenuSystem::handleInput(const InputManager& input) {
             }
             if (input.isJustPressed(KeyButton::Confirm)) {
                 int slotIdx = selectionIndex_ + 1;
-                std::string slotId = "slot_" + std::to_string(slotIdx);
-                if (FileSystem::exists("saves/" + slotId + ".json")) {
+                const SlotRow slot = slotRowForIndex(slotIdx);
+                if (slot.loadable) {
                     pendingAction_ = Action::Load;
                     pendingActionSlot_ = slotIdx;
                 } else {
-                    message_ = "Slot " + std::to_string(slotIdx) + " is empty";
+                    if (!slot.exists) {
+                        message_ = "Slot " + std::to_string(slotIdx) + " is empty";
+                    } else if (!slot.detail.empty()) {
+                        message_ = "Slot " + std::to_string(slotIdx) +
+                                   " cannot be loaded: " + slot.detail;
+                    } else {
+                        message_ = "Slot " + std::to_string(slotIdx) + " cannot be loaded";
+                    }
                 }
                 return true;
             }
@@ -282,6 +307,21 @@ int MenuSystem::subItemCount(const GameState& state, const RpgDatabases& dbs) co
     }
     (void)dbs;
     return 0;
+}
+
+MenuSystem::SlotRow MenuSystem::slotRowForIndex(int slotIndex) const {
+    if (slotIndex <= 0) return {};
+    if (useSlotsOverride_) {
+        auto it = std::find_if(slotsOverride_.begin(), slotsOverride_.end(),
+                               [&](const SlotRow& row) { return row.index == slotIndex; });
+        if (it != slotsOverride_.end()) return *it;
+        return {};
+    }
+
+    for (const auto& metadata : SaveManager::listSlots(saveSlotCount())) {
+        if (metadata.index == slotIndex) return makeSlotRow(metadata);
+    }
+    return {};
 }
 
 MenuSystem::ViewModel MenuSystem::snapshot(const GameState& state, const RpgDatabases& dbs) const {

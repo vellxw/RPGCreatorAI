@@ -155,3 +155,39 @@ TEST_CASE("MenuSystem load screen reports empty disabled slots") {
     REQUIRE(vm.message.has_value());
     CHECK(*vm.message == "Slot 1 is empty");
 }
+
+TEST_CASE("MenuSystem load screen blocks corrupt slots with actionable feedback") {
+    const std::string slotPath = "saves/slot_1.json";
+    ScopedFileRestore slotGuard(slotPath);
+    {
+        std::ofstream out(slotPath);
+        out << "{ bad save";
+    }
+
+    rpg::MenuSystem menu;
+    InputManager input;
+    std::array<unsigned char, SDL_NUM_SCANCODES> keys{};
+
+    menu.open();
+    menu.setSelectionForTest(4);
+    tap(input, keys, SDL_SCANCODE_RETURN);
+    CHECK(menu.handleInput(input));
+    REQUIRE(menu.current() == rpg::MenuSystem::Screen::Load);
+
+    GameState state;
+    rpg::RpgDatabases dbs;
+    auto before = menu.snapshot(state, dbs);
+    REQUIRE(before.slots.size() >= 1);
+    CHECK(before.slots[0].exists);
+    CHECK_FALSE(before.slots[0].loadable);
+    CHECK(before.slots[0].corrupt);
+    CHECK(before.slots[0].summary.find("Corrupt") != std::string::npos);
+
+    tap(input, keys, SDL_SCANCODE_RETURN);
+    CHECK(menu.handleInput(input));
+    CHECK(menu.pendingAction() == rpg::MenuSystem::Action::None);
+
+    const auto after = menu.snapshot(state, dbs);
+    REQUIRE(after.message.has_value());
+    CHECK(after.message->find("Slot 1 cannot be loaded") != std::string::npos);
+}
