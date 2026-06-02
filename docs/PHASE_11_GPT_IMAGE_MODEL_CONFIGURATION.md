@@ -128,6 +128,6 @@ The console reported 0 errors and 0 warnings.
 
 ## Next
 
-CP-066 can build the image prompt template library on top of this foundation.
-It should consume the prompt-only style guidance and keep normal validation
-offline with mocks and fixtures.
+CP-066 built the image prompt template library on top of this foundation.
+CP-067 can now use those templates for the AI tileset generation workflow
+while keeping normal validation offline with mocks and fixtures.

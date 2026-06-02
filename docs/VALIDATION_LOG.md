@@ -4,6 +4,37 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-101 / CP-066 — image prompt template library
+
+- `2026-06-02 14:55:35 -03:00` —
+  `npm test -- --run src/providers/__tests__/imagePromptTemplates.test.ts`
+  — RED as expected before implementation; `imagePromptTemplates` did not
+  exist.
+- `2026-06-02 14:57:01 -03:00` —
+  `npm test -- --run src/providers/__tests__/imagePromptTemplates.test.ts`
+  — FAIL after first implementation pass; rendered prompts included the visual
+  context but did not contain the exact required original-asset wording. Fix
+  applied: make the binding visual rule explicitly mention both original
+  assets and an original RPGCreatorAI asset.
+- `2026-06-02 14:57:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 14:58:22 -03:00` —
+  `npm test -- --run src/providers/__tests__/imagePromptTemplates.test.ts`
+  — PASS; 1 focused file and 5 tests passed.
+- `2026-06-02 14:59:55 -03:00` —
+  `npm run typecheck; npm test -- --run; npm run build` — PASS;
+  typecheck passed, 76 Vitest files and 403 tests passed, and Vite
+  transformed 1941 modules with the known non-fatal chunk-size warning.
+- `2026-06-02 15:01:14 -03:00` —
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\imagePromptTemplates.ts src\providers\__tests__\imagePromptTemplates.test.ts src\types\project.ts docs\PHASE_11_IMAGE_PROMPT_TEMPLATE_LIBRARY.md`
+  — PASS for CP-066 scope; findings were only test names/assertions that
+  verify no secret or live endpoint is present.
+- Fix applied: added versioned image prompt templates, visual-context
+  injection, proprietary-style sanitization, missing-input failure, generated
+  asset provenance manifests, and generated metadata fields.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-100 / CP-065 — GPT Image model configuration
 
 - `2026-06-02 14:30:55 -03:00` —

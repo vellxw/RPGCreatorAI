@@ -78,7 +78,7 @@
   - [x] CP-064 / FRA-99: run the AI Provider Hub foundation integration gate.
 - [ ] 08 GPT Image 2 Asset Pipeline.
   - [x] CP-065 / FRA-100: add GPT Image model configuration.
-  - [ ] CP-066 / FRA-101: create image prompt template library.
+  - [x] CP-066 / FRA-101: create image prompt template library.
   - [ ] CP-067 / FRA-102: implement AI tileset generation workflow.
   - [ ] CP-068 / FRA-103: implement AI item icon generation workflow.
   - [ ] CP-069 / FRA-104: implement AI portrait generation workflow.

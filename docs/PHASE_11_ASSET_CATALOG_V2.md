@@ -21,6 +21,9 @@ The catalog is stored separately from runtime gameplay data:
 
 Each entry has an `id`, `name`, `kind`, `path`, `source`, optional tags, and
 optional visual/audio/generated metadata.
+CP-066 extends generated metadata with prompt template id/version/kind,
+sanitized prompt inputs, provider/model ids, image settings, rendered prompt,
+and visual context source/version for auditable AI asset candidates.
 
 Supported `kind` values:
 

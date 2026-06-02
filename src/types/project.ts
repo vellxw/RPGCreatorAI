@@ -127,6 +127,15 @@ export interface GeneratedAssetMetadata {
   prompt?: string;
   tool?: string;
   createdAt?: string;
+  promptTemplateId?: string;
+  promptTemplateVersion?: number;
+  promptTemplateKind?: string;
+  promptInputs?: Record<string, string>;
+  providerId?: string;
+  modelId?: string;
+  imageSettings?: Partial<ProviderImageGenerationSettings>;
+  visualContextSource?: string;
+  visualContextVersion?: string;
 }
 
 export interface AssetCatalogEntry {
