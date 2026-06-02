@@ -4,6 +4,44 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-91 / CP-056 — asset library integration gate
+
+- `2026-06-02 11:45:54 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts`
+  — PASS; 1 focused file and 8 tests passed after adding integrated
+  import-catalog-metadata-database roundtrip coverage.
+- `2026-06-02 11:46:35 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/stores/__tests__/assetCatalogReducer.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/adapters/__tests__/audioImport.test.ts src/adapters/__tests__/tilesetImport.test.ts src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/TilesetEditor.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 10 focused asset/import files and 96 Vitest tests passed.
+- `2026-06-02 11:46:58 -03:00` —
+  `python -m unittest tests.test_runtime_asset_export` — PASS; 2 tests
+  passed.
+- `2026-06-02 11:46:58 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  — PASS; runtime asset export validation passed.
+- `2026-06-02 11:46:58 -03:00` —
+  `cmd /c scripts\dev\export-runtime-assets.bat --validate-only` — PASS;
+  runtime asset export validation passed.
+- `2026-06-02 11:47:17 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 11:48:03 -03:00` — `npm test -- --run` — PASS; 62 Vitest
+  files and 352 tests passed.
+- `2026-06-02 11:48:35 -03:00` — `npm run build` — PASS; Vite transformed
+  1929 modules and emitted the known non-fatal chunk-size warning.
+- `2026-06-02 11:52:15 -03:00 (logged after run)` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; gate summary reported frontend typecheck/tests/build, native
+  configure/build/CTest, Tauri content check, Rust desktop tests, runtime
+  smoke, and editor-runtime roundtrip all passed. Runtime smoke requested
+  `town_theme -> assets/audio/town_bgm.wav` and `chest_open ->
+  assets/audio/chest.wav`; no local audio endpoint was available, so
+  silent-audio warnings remained expected.
+- Fix applied: added integrated browser-memory asset library roundtrip
+  coverage, documented the milestone gate, updated asset pipeline docs, and
+  marked milestone 06 complete.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-90 / CP-055 — asset optimization and runtime export
 
 - `timestamp unavailable after context compaction` —

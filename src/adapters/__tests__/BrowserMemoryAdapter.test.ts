@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BrowserMemoryAdapter } from '../BrowserMemoryAdapter';
+import type { AssetCatalogEntry } from '../../types/project';
 
 describe('BrowserMemoryAdapter', () => {
   it('reports browser-mode capabilities honestly', () => {
@@ -96,6 +97,127 @@ describe('BrowserMemoryAdapter', () => {
     expect(imported.databases.audio?.sounds?.[0].id).toBe('click');
     expect(imported.databases.audio?.bgm?.[0].path).toBe('assets/audio/town.wav');
     expect(imported.assets?.assets.map(asset => asset.id)).toContain('roundtrip_audio');
+  });
+
+  it('export → import roundtrip preserves integrated imported asset library references', async () => {
+    const a = new BrowserMemoryAdapter();
+    const state = await a.loadProject();
+    const importedAssets: AssetCatalogEntry[] = [
+      {
+        id: 'hero_portrait_imported',
+        name: 'Hero Portrait Imported',
+        kind: 'image',
+        source: 'imported',
+        path: 'assets/imported/images/hero-portrait.png',
+        tags: ['imported', 'image', 'runtime'],
+        provenance: 'Local integration fixture',
+        runtimeCompatible: true,
+        runtimeNotes: 'Ready for runtime export.',
+        protected: true,
+        width: 128,
+        height: 128,
+      },
+      {
+        id: 'hero_run_sheet',
+        name: 'Hero Run Sheet',
+        kind: 'spritesheet',
+        source: 'imported',
+        path: 'assets/imported/spritesheets/hero-run-sheet.png',
+        tags: ['imported', 'spritesheet'],
+        frameWidth: 64,
+        frameHeight: 64,
+        frames: 6,
+      },
+      {
+        id: 'forest_pack',
+        name: 'Forest Pack',
+        kind: 'tileset',
+        source: 'imported',
+        path: 'assets/imported/tilesets/forest-pack.png',
+        tags: ['imported', 'tileset'],
+        width: 256,
+        height: 256,
+      },
+      {
+        id: 'town_loop',
+        name: 'Town Loop',
+        kind: 'audio',
+        source: 'imported',
+        path: 'assets/imported/audio/town-loop.wav',
+        tags: ['imported', 'audio', 'bgm'],
+        durationMs: 120000,
+      },
+    ];
+    state.assets!.assets.push(...importedAssets);
+    state.databases.animations.sets.push({
+      id: 'hero_run_imported',
+      display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+      clips: [
+        {
+          action: 'run',
+          direction: 'right',
+          asset: 'hero_run_sheet',
+          frameSize: { width: 64, height: 64 },
+          frameCount: 6,
+          fps: 10,
+          loop: true,
+          anchor: { x: 32, y: 54 },
+        },
+      ],
+    });
+    state.databases.tilesets.tilesets.push({
+      id: 'forest_tiles',
+      name: 'Forest Pack',
+      tileSize: 16,
+      tiles: [
+        {
+          id: 0,
+          name: 'Tile 0',
+          asset: 'forest_pack',
+          group: 'A',
+          passability: 'blocked',
+          priority: 0,
+        },
+      ],
+    });
+    state.databases.system.audio = {
+      ...state.databases.system.audio,
+      town_loop: 'assets/imported/audio/town-loop.wav',
+    };
+
+    const originalCatalogSnapshot = JSON.stringify(state.assets);
+    const blob = await a.exportAll(state);
+    const imported = await new BrowserMemoryAdapter().importAll(await blob.text());
+    const assetsById = Object.fromEntries(
+      imported.assets!.assets.map(asset => [asset.id, asset]),
+    );
+
+    expect(assetsById.hero_portrait_imported).toMatchObject({
+      kind: 'image',
+      path: 'assets/imported/images/hero-portrait.png',
+      provenance: 'Local integration fixture',
+      runtimeCompatible: true,
+      runtimeNotes: 'Ready for runtime export.',
+      protected: true,
+      width: 128,
+      height: 128,
+    });
+    expect(assetsById.hero_run_sheet).toMatchObject({
+      kind: 'spritesheet',
+      frameWidth: 64,
+      frameHeight: 64,
+      frames: 6,
+    });
+    expect(assetsById.forest_pack).toMatchObject({ kind: 'tileset', width: 256, height: 256 });
+    expect(assetsById.town_loop).toMatchObject({ kind: 'audio', durationMs: 120000 });
+    expect(imported.databases.animations.sets.find(set => set.id === 'hero_run_imported')?.clips[0].asset).toBe(
+      'hero_run_sheet',
+    );
+    expect(imported.databases.tilesets.tilesets.find(tileset => tileset.id === 'forest_tiles')?.tiles[0].asset).toBe(
+      'forest_pack',
+    );
+    expect(imported.databases.system.audio?.town_loop).toBe('assets/imported/audio/town-loop.wav');
+    expect(JSON.stringify(state.assets)).toBe(originalCatalogSnapshot);
   });
 
   it('export → import roundtrip preserves polished map metadata', async () => {

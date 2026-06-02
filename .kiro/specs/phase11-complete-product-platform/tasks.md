@@ -58,7 +58,7 @@
   - [x] CP-046 / FRA-81: polish common event authoring.
   - [x] CP-047 / FRA-82: add reference repair tools.
   - [x] CP-048 / FRA-83: run the database/system completeness gate.
-- [ ] 06 Asset Library And Import Pipeline.
+- [x] 06 Asset Library And Import Pipeline.
   - [x] CP-049 / FRA-84: implement Asset Catalog V2.
   - [x] CP-050 / FRA-85: implement image import workflow.
   - [x] CP-051 / FRA-86: implement spritesheet import workflow.
@@ -66,6 +66,7 @@
   - [x] CP-053 / FRA-88: implement tileset import workflow.
   - [x] CP-054 / FRA-89: implement asset metadata editor.
   - [x] CP-055 / FRA-90: implement asset optimization and runtime export.
+  - [x] CP-056 / FRA-91: run the asset library integration gate.
 - [ ] 07 AI Provider Hub Foundation.
 - [ ] 08 GPT Image 2 Asset Pipeline.
 - [ ] 09 AI Characters And Animations.

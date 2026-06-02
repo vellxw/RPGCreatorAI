@@ -36,8 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-056 next).
-- Phase 11 Linear milestone 07 — AI Provider Hub foundation.
+- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-057 next).
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
@@ -373,6 +372,13 @@ Primary Phase 11 sources:
   animation clip BMP outputs are absent while keeping runtime fallback
   behavior non-fatal. Evidence is recorded in
   `docs/PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md`.
+- Phase 11 CP-056 — asset library integration gate completed. The gate
+  validated asset catalog preservation, image/audio/spritesheet/tileset import
+  workflows, metadata editing, reference indexing, runtime export manifest
+  validation, desktop import helpers, native runtime validation, runtime
+  smoke, and editor-runtime roundtrip as one milestone boundary. Milestone 06
+  is ready to hand off to optional AI Provider Hub work. Evidence is recorded
+  in `docs/PHASE_11_ASSET_LIBRARY_INTEGRATION_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

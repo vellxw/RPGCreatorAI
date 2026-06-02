@@ -20,6 +20,52 @@ with:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
 ```
 
+## Phase 11 Asset Library And Runtime Export
+
+Phase 11 adds a project-owned asset library for local-first authoring. The
+asset catalog is stored at `data/assets/catalog.json` and is preserved through
+browser export/import, Tauri desktop open/save/create, and playtest session
+copies. The native runtime does not consume editor-only catalog metadata.
+
+Desktop import workflows copy selected files into the opened project without
+overwriting existing project files:
+
+- images: `assets/imported/images/`
+- spritesheets: `assets/imported/spritesheets/`
+- audio: `assets/imported/audio/`
+- tilesets: `assets/imported/tilesets/`
+
+Imported spritesheets can create animation database clips. Imported audio can
+register `system.audio` ids for BGM/SFX selectors. Imported tilesets can
+create tileset database metadata for map authoring. Browser mode reports local
+imports as unavailable instead of pretending to access arbitrary files.
+
+Runtime-ready asset export is deterministic and local:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1
+```
+
+Restricted-policy equivalent:
+
+```bat
+scripts\dev\export-runtime-assets.bat
+```
+
+Validate the checked-in manifest and outputs without rewriting them:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only
+```
+
+The exporter reads the catalog, flattens visual assets to BMP files under
+`assets/generated/runtime/` with `#ff00ff` transparency, preserves local WAV
+paths as runtime-ready audio, and writes `data/assets/runtime-manifest.json`.
+The manifest is deterministic and contains no timestamp.
+
+Milestone 06 integration evidence is recorded in
+`docs/PHASE_11_ASSET_LIBRARY_INTEGRATION_GATE.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development
