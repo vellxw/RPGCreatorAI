@@ -121,6 +121,39 @@ describe('PlaytestSessionAdapter', () => {
     ]);
   });
 
+  it('routes project-start session creation without changing source state metadata', async () => {
+    const calls: unknown[] = [];
+    window.rpgBridge = bridge({
+      createPlaytestSession: async (sourceRoot, state, request) => {
+        calls.push({ sourceRoot, state, request });
+        return { success: true, sessionRoot: 'C:\\appdata\\RPGCreatorAI\\playtest-sessions\\session-project-start' };
+      },
+    });
+
+    const adapter = new DesktopPlaytestSessionAdapter();
+    const state = makeState();
+    const originalStart = {
+      startMapId: state.project.startMapId,
+      startPosition: { ...state.project.startPosition },
+    };
+    const result = await adapter.createSession('C:\\source-project', state, {
+      mode: 'projectStart',
+    });
+
+    expect(result.success).toBe(true);
+    expect(state.project.startMapId).toBe(originalStart.startMapId);
+    expect(state.project.startPosition).toEqual(originalStart.startPosition);
+    expect(calls).toEqual([
+      {
+        sourceRoot: 'C:\\source-project',
+        state,
+        request: {
+          mode: 'projectStart',
+        },
+      },
+    ]);
+  });
+
   it('reports unavailable in browser mode without fabricating a temp path', async () => {
     const adapter = new BrowserPlaytestSessionAdapter();
     const result = await adapter.createSession('C:\\source-project', makeState(), {

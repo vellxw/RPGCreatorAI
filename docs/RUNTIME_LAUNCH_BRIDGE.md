@@ -83,6 +83,14 @@ database shards into the temp root. It copies `assets/` when present so local
 runtime visual/audio references keep resolving. It does not write or back up
 files inside the source project.
 
+The Playtest screen launches with a mode-specific button label such as
+`Launch Project Start`, then reports the launch as a status banner rather than
+plain log text. The banner has distinct states for desktop-unavailable,
+session preparation, validation-blocked launch, shell launch failure, runtime
+stopped, and successful runtime launch. Successful launches include the temp
+session root and direct guidance to the Runtime Log, Event Trace, and Runtime
+State tabs so the diagnostics path is visible immediately after launch.
+
 Sessions are stored under the app data directory:
 
 ```text
@@ -114,7 +122,7 @@ The renderer never constructs a shell command.
 ## Launch Flow
 
 ```text
-Playtest screen: Open in Runtime
+Playtest screen: Launch Project Start / Current Map / Selected Event
   -> validate the in-memory project state
   -> fs.createPlaytestSession(sourceRoot, state, request)
       -> write temp data/project.json, maps, items, and database shards

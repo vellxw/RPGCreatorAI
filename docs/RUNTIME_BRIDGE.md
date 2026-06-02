@@ -59,7 +59,7 @@ interface RuntimeLaunchAdapter {
 ## Playtest Launch Flow
 
 1. The user selects Project Start, Current Map, or Selected Event in Playtest.
-2. Open in Runtime validates the in-memory project state.
+2. The mode-specific Launch button validates the in-memory project state.
 3. Desktop mode calls `fs.createPlaytestSession(sourceRoot, state, request)`.
 4. The shell writes a temporary project root under the app data directory,
    copies optional source assets, and prunes older session folders.

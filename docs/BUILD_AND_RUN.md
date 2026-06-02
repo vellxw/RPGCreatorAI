@@ -190,9 +190,9 @@ Diagnostics and failed-launch troubleshooting are documented in
    again before writing, blocks on errors, keeps dirty state on write failure,
    and leaves visible recovery feedback below the toolbar.
 5. In Playtest, choose Project Start, Current Map, or Selected Event.
-6. Open in Runtime from desktop mode. The shell writes a temporary playtest
-   session under the app data directory and launches the native runtime with
-   that temp root as `current_dir`.
+6. Launch the selected mode from desktop mode. The shell writes a temporary
+   playtest session under the app data directory and launches the native
+   runtime with that temp root as `current_dir`.
 7. Use Runtime Log, Event Trace, and Runtime State tabs for local debugging.
    Diagnostics folders and failed-launch troubleshooting are documented in
    `docs/DIAGNOSTICS.md`.

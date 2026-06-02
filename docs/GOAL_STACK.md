@@ -90,6 +90,12 @@ Primary Phase 11 sources:
   Validate directly; `performSave()` returns recovery context and timestamps
   successful saves; and the validation panel explains whether Save is blocked
   or allowed and how to recover.
+- Phase 11 CP-019 — project-start playtest launch flow completed. The Playtest
+  runtime bridge now labels launches by active mode, shows explicit loading,
+  validation-blocked, unavailable, failed, stopped, and success feedback, keeps
+  browser mode honest, points successful launches to Runtime Log/Event Trace/
+  Runtime State diagnostics, and has explicit frontend plus Rust coverage that
+  project-start temp sessions preserve source project data.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

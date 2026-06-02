@@ -3086,3 +3086,68 @@ Error: Port 1420 is already in use
 - `2026-06-01 22:20:43 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-54 / CP-019 — project-start playtest launch flow
+
+- `2026-06-01 22:29:54 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx`
+  — RED as expected; the new Playtest launch feedback tests imported the
+  missing `RuntimeLaunchFeedback` component. Fix applied: added the component,
+  mode labels, and Playtest screen loading/success/unavailable/failure states.
+- `2026-06-01 22:29:54 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_project_start_preserves_source_start_and_data -- --exact`
+  — PASS; the new Rust guardrail proved project-start temp sessions preserve
+  source start data and source project files.
+- `2026-06-01 22:31:58 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx`
+  — PASS; 2 focused frontend files and 6 tests passed after adding project-start
+  adapter coverage and launch feedback UI.
+- `2026-06-01 22:31:58 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_project_start_preserves_source_start_and_data -- --exact`
+  — PASS; 1 Rust playtest project-start test passed.
+- `2026-06-01 22:32:31 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx`
+  — PASS; 6 related frontend files and 22 tests passed.
+- `2026-06-01 22:32:31 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_ -- --nocapture`
+  — PASS; 5 Rust playtest session tests passed.
+- `2026-06-01 22:33:16 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:34:52 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS; 7 related frontend/docs files and 31 tests passed.
+- `2026-06-01 22:34:52 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml`
+  — PASS; 33 Rust desktop tests passed.
+- `2026-06-01 22:34:52 -03:00` — `npm run build` — PASS; 1914 modules
+  transformed, build completed in 8.85s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 22:35:36 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — wrapper exited non-zero even though the verifier printed OK. Not counted
+  as green. Fix applied: reran with explicit child-process cleanup and exit
+  propagation.
+- `2026-06-01 22:36:33 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
+  wrapper exited 0.
+- `2026-06-01 22:35:36 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1`
+  — PASS; runtime launched from real project data, stayed alive after 3 s,
+  generated smoke shots, emitted deterministic trace/log output, and completed
+  with only known missing optional-audio warnings.
+- `2026-06-01 22:40:19 -03:00` —
+  Chrome DevTools browser check at `http://127.0.0.1:3000/` — PASS after
+  correcting stale UI copy from `Open in Runtime` to the runtime bridge panel;
+  browser-mode Playtest showed `Launch Project Start` disabled, native-runtime
+  unavailable feedback, diagnostics tabs, and no visual overlap. Screenshot:
+  `docs/screenshots/phase11-cp019/playtest-project-start-unavailable.png`.
+- `2026-06-01 22:40:55 -03:00` —
+  `npm test -- --run src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after the UI copy/docs correction; 7 related frontend/docs files and
+  31 tests passed.
+- `2026-06-01 22:40:55 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:40:55 -03:00` — `npm run build` — PASS; 1914 modules
+  transformed, build completed in 8.65s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 22:40:55 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

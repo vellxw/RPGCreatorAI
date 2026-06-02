@@ -25,6 +25,7 @@
 - [ ] 02 End-To-End Usability.
   - [x] CP-017 / FRA-52: complete open and create project startup flow.
   - [x] CP-018 / FRA-53: polish save and validation user flow.
+  - [x] CP-019 / FRA-54: polish project-start playtest launch flow.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

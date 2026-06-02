@@ -118,7 +118,7 @@ Warnings (non-blocking):
 ### Runtime Bridge
 - `BrowserRuntimeAdapter`: returns `unavailable` and a real error from `launch()` — never fakes success
 - `DesktopRuntimeAdapter`: feature-detects `window.runtimeBridge`; the seam exists for an Electron/Tauri shell to plug into
-- The Playtest screen now renders a labeled "Editor Preview (simulated) — not the native runtime" banner and a `RuntimeBridgePanel` that shows status, the unavailable reason, and disables "Open in Runtime" when not applicable
+- The Playtest screen now renders a labeled "Editor Preview (simulated) — not the native runtime" banner and a `RuntimeBridgePanel` that shows status, the unavailable reason, and disables the mode-specific Launch button when not applicable
 
 ### What Remains a Seam
 - Real filesystem writes (would require Electron/Tauri/Node host)

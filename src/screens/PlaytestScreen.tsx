@@ -18,6 +18,11 @@ import { validateProject } from '../validation/validateProject';
 import { RuntimeLogPanel } from '../components/playtest/RuntimeLogPanel';
 import { EventTracePanel } from '../components/playtest/EventTracePanel';
 import { RuntimeStatePanel } from '../components/playtest/RuntimeStatePanel';
+import {
+  RuntimeLaunchFeedback,
+  playtestModeLabel,
+  type RuntimeLaunchFeedbackState,
+} from '../components/playtest/RuntimeLaunchFeedback';
 import { animationAssets, eventAssets, gameAssets } from '../assets/generated/assetCatalog';
 import { normalizeVisualProfile } from '../visual/visualProfile';
 import { computeCameraFrame } from '../visual/viewport';
@@ -148,7 +153,7 @@ function PlaytestControls({
             Tip:
           </span>{' '}
           The preview below is a simulated editor preview, not the
-          native runtime. Use &quot;Open in Runtime&quot; to launch the C++ executable.
+          native runtime. Native launch is handled by the runtime bridge panel.
         </p>
       </div>
     </div>
@@ -508,7 +513,8 @@ function RuntimeBridgePanel({
 }) {
   const { state: projectState, dispatch: projectDispatch } = useProjectStore();
   const { state: editorState } = useEditor();
-  const [status, setStatus] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<RuntimeLaunchFeedbackState | null>(null);
+  const [isLaunching, setIsLaunching] = useState(false);
 
   // Poll status every second while the bridge is available so the UI reflects
   // the runtime exiting on its own.
@@ -530,12 +536,24 @@ function RuntimeBridgePanel({
   }, [adapter]);
 
   const handleLaunch = async () => {
+    if (isLaunching || runtimeStatus === 'running') return;
+    const modeLabel = playtestModeLabel(editorState.playtestMode);
     const fsAdapter = getFileSystemAdapter();
     const projectRoot = fsAdapter?.getProjectRoot();
     if (!projectRoot) {
-      setStatus('Open a project folder first (Project > Open).');
+      setFeedback({
+        tone: 'warning',
+        title: `${modeLabel} launch needs an open project`,
+        detail: 'Open or create a project folder before launching the native runtime.',
+      });
       return;
     }
+    setIsLaunching(true);
+    setFeedback({
+      tone: 'loading',
+      title: `Preparing ${modeLabel} playtest`,
+      detail: 'Validating project data and writing a temporary playtest session.',
+    });
     const validation = validateProject({
       project: projectState.project,
       maps: projectState.maps,
@@ -544,36 +562,81 @@ function RuntimeBridgePanel({
     });
     projectDispatch({ type: 'VALIDATE' });
     if (validation.errors.length > 0) {
-      setStatus(`Launch blocked: ${validation.errors[0].message}`);
+      setFeedback({
+        tone: 'error',
+        title: `${modeLabel} launch blocked by validation`,
+        detail: `${validation.errors[0].message} Fix validation errors before launching the runtime.`,
+      });
+      setIsLaunching(false);
       return;
     }
-    const session = await sessionAdapter.createSession(projectRoot, {
-      project: projectState.project,
-      maps: projectState.maps,
-      items: projectState.items,
-      databases: projectState.databases,
-    }, {
-      mode: editorState.playtestMode,
-      currentMapId: editorState.selectedMapId,
-      selectedEventMapId: editorState.selectedEventMapId ?? undefined,
-      selectedEventId: editorState.selectedEvent?.id,
-    });
-    if (!session.success || !session.sessionRoot) {
-      setStatus(`Launch blocked: ${session.error ?? 'playtest session was not created'}`);
-      return;
+    try {
+      const session = await sessionAdapter.createSession(projectRoot, {
+        project: projectState.project,
+        maps: projectState.maps,
+        items: projectState.items,
+        databases: projectState.databases,
+      }, {
+        mode: editorState.playtestMode,
+        currentMapId: editorState.selectedMapId,
+        selectedEventMapId: editorState.selectedEventMapId ?? undefined,
+        selectedEventId: editorState.selectedEvent?.id,
+      });
+      if (!session.success || !session.sessionRoot) {
+        setFeedback({
+          tone: 'error',
+          title: `${modeLabel} session was not created`,
+          detail: session.error ?? 'The desktop shell did not return a temporary playtest session path.',
+        });
+        return;
+      }
+      const result = await adapter.launch(session.sessionRoot, { executableSearchRoot: projectRoot });
+      if (result.success) {
+        setFeedback({
+          tone: 'success',
+          title: `${modeLabel} runtime launched`,
+          detail: result.pid
+            ? `PID ${result.pid} is running from a temporary playtest session.`
+            : 'The runtime accepted the temporary playtest session.',
+          sessionRoot: session.sessionRoot,
+          diagnosticsHint: 'Use Runtime Log, Event Trace, and Runtime State for launch output.',
+        });
+      } else {
+        setFeedback({
+          tone: 'error',
+          title: `${modeLabel} launch failed`,
+          detail: result.error ?? 'The desktop shell returned a failed runtime launch result.',
+          sessionRoot: session.sessionRoot,
+          diagnosticsHint: 'Open Runtime Log after a successful launch; failed process starts are reported here.',
+        });
+      }
+      setRuntimeStatus(adapter.getStatus());
+    } finally {
+      setIsLaunching(false);
     }
-    const result = await adapter.launch(session.sessionRoot, { executableSearchRoot: projectRoot });
-    setStatus(result.success ? `Runtime launched (pid ${result.pid}) from ${session.sessionRoot}` : `Launch failed: ${result.error}`);
-    setRuntimeStatus(adapter.getStatus());
   };
 
   const handleKill = async () => {
     await adapter.kill();
-    setStatus('Runtime stopped');
+    setFeedback({
+      tone: 'info',
+      title: 'Runtime stopped',
+      detail: 'Runtime bridge is ready for another playtest launch.',
+    });
     setRuntimeStatus(adapter.getStatus());
   };
 
   const available = adapter.canLaunch() && sessionAdapter.canCreateSession();
+  const unavailableReason = adapter.getUnavailableReason() ?? sessionAdapter.getUnavailableReason();
+  const visibleFeedback = feedback ?? (!available
+    ? {
+        tone: 'warning' as const,
+        title: 'Native runtime launch unavailable',
+        detail: unavailableReason ?? 'Run inside the Tauri desktop shell to launch Project Start.',
+      }
+    : null);
+  const modeLabel = playtestModeLabel(editorState.playtestMode);
+  const launchDisabled = !available || runtimeStatus === 'running' || isLaunching;
 
   return (
     <div className="px-4 py-3 border-t border-gray-200 bg-white">
@@ -587,8 +650,8 @@ function RuntimeBridgePanel({
           <span className="text-[12px] text-gray-700">
             Runtime bridge: <span className="font-mono">{runtimeStatus}</span>
           </span>
-          {!available && (adapter.getUnavailableReason() ?? sessionAdapter.getUnavailableReason()) && (
-            <span className="text-[11px] text-gray-500 italic">— {adapter.getUnavailableReason() ?? sessionAdapter.getUnavailableReason()}</span>
+          {!available && unavailableReason && (
+            <span className="text-[11px] text-gray-500 italic">- {unavailableReason}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -602,18 +665,19 @@ function RuntimeBridgePanel({
           )}
           <button
             onClick={handleLaunch}
-            disabled={!available || runtimeStatus === 'running'}
-            className={`px-3 py-1.5 text-[12px] rounded-md cursor-pointer ${
-              available && runtimeStatus !== 'running'
-                ? 'bg-indigo-500 text-white hover:bg-indigo-600'
+            disabled={launchDisabled}
+            className={`px-3 py-1.5 text-[12px] rounded-md inline-flex items-center gap-1.5 ${
+              !launchDisabled
+                ? 'bg-indigo-500 text-white hover:bg-indigo-600 cursor-pointer'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Open in Runtime
+            <Gamepad2 size={13} />
+            {isLaunching ? `Launching ${modeLabel}` : `Launch ${modeLabel}`}
           </button>
         </div>
       </div>
-      {status && <p className="text-[11px] text-gray-600 mt-2">{status}</p>}
+      <RuntimeLaunchFeedback feedback={visibleFeedback} />
     </div>
   );
 }

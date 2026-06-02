@@ -1280,6 +1280,52 @@ mod tests {
     }
 
     #[test]
+    fn playtest_project_start_preserves_source_start_and_data() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let original_project = fs::read_to_string(source_root.join("data/project.json")).unwrap();
+        let original_house = fs::read_to_string(source_root.join("data/maps/house.json")).unwrap();
+        let state = read_project_at(&source_root).unwrap();
+        let sessions = TempDir::new().unwrap();
+        let request = PlaytestSessionRequest {
+            mode: "projectStart".into(),
+            current_map_id: Some("house".into()),
+            selected_event_map_id: Some("house".into()),
+            selected_event_id: Some("npc_1".into()),
+        };
+
+        let result =
+            create_playtest_session_at(sessions.path(), &source_root, &state, request).unwrap();
+
+        assert!(result.success);
+        let session_root = PathBuf::from(result.session_root.unwrap());
+        let session_project: ProjectData =
+            read_json(&session_root.join("data/project.json")).unwrap();
+        let source_project: ProjectData = read_json(&source_root.join("data/project.json")).unwrap();
+        assert_eq!(session_project.start_map_id, source_project.start_map_id);
+        assert_eq!(session_project.start_position.x, source_project.start_position.x);
+        assert_eq!(session_project.start_position.y, source_project.start_position.y);
+        assert_eq!(
+            session_project.start_position.direction,
+            source_project.start_position.direction
+        );
+        assert!(session_root.join("data/maps/town.json").is_file());
+        assert!(session_root.join("data/maps/house.json").is_file());
+        assert!(session_root
+            .join("assets/generated/runtime/marker.txt")
+            .is_file());
+        assert_eq!(
+            fs::read_to_string(source_root.join("data/project.json")).unwrap(),
+            original_project
+        );
+        assert_eq!(
+            fs::read_to_string(source_root.join("data/maps/house.json")).unwrap(),
+            original_house
+        );
+    }
+
+    #[test]
     fn playtest_selected_event_starts_at_event_position() {
         let source = TempDir::new().unwrap();
         let source_root = source.path().canonicalize().unwrap();
