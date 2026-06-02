@@ -123,6 +123,34 @@ metadata and runtime-incompatible referenced assets are errors. Detailed
 CP-076 evidence is recorded in
 `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`.
 
+## Phase 11 Animation Preview Evidence
+
+CP-077 adds a deterministic preview generator for normalized animation strips:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1
+```
+
+Restricted-policy equivalent:
+
+```bat
+scripts\dev\generate-animation-preview.bat
+```
+
+The generator reads a CP-075 normalization manifest, opens the normalized web
+PNG strip, verifies every preview frame is non-empty, and writes:
+
+- `docs/screenshots/phase11-animation-preview/{outputId}.gif`
+- `docs/screenshots/phase11-animation-preview/{outputId}_sheet.png`
+- `assets/generated/source/phase11_animation_previews/{outputId}.json`
+
+Preview manifests store source normalization manifest links, source strip
+paths, optional source asset/concept ids, frame metadata, preview scale,
+duration, output paths, and `runtimeDependency: false`. The sample
+`player_adventurer_walk_down` preview evidence is checked in for visual QA.
+Detailed CP-077 evidence is recorded in
+`docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`.
+
 ## Phase 9 Character Animations
 
 Phase 9 uses an `agent-sprite-forge`-compatible workflow for development

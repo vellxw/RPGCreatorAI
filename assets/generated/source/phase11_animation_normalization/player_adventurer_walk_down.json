@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "pipeline": "rpgcreatorai-animation-strip-normalization-v1",
+  "id": "player_adventurer_walk_down",
+  "name": "Player Adventurer Walk Down",
+  "action": "walk",
+  "direction": "down",
+  "sourcePath": "assets/generated/source/phase9_animation/sprite_forge_manifest.json",
+  "sourceAssetId": "player_adventurer_walk_down",
+  "sourceConceptId": null,
+  "frameSize": {
+    "width": 64,
+    "height": 64
+  },
+  "sourceFrameSize": {
+    "width": 64,
+    "height": 64
+  },
+  "frameCount": 4,
+  "fps": 8,
+  "loop": true,
+  "anchor": {
+    "x": 32,
+    "y": 54
+  },
+  "normalization": {
+    "sharedScale": 1,
+    "anchorRule": "bottom-center",
+    "layout": "horizontal-strip"
+  },
+  "transparency": {
+    "pngBackground": "alpha",
+    "runtimeBmpTransparencyKey": "#ff00ff"
+  },
+  "sourceFrames": [
+    {
+      "index": 1
+    },
+    {
+      "index": 2
+    },
+    {
+      "index": 3
+    },
+    {
+      "index": 4
+    }
+  ],
+  "outputs": {
+    "webPng": "assets/generated/web/player_adventurer_walk_down.png",
+    "editorPng": "src/assets/generated/player_adventurer_walk_down.png",
+    "runtimeBmp": "assets/generated/runtime/player_adventurer_walk_down.bmp"
+  }
+}

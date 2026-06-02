@@ -42,13 +42,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md`
 - `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`
 - `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`
+- `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-077 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-078 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -534,6 +535,12 @@ Primary Phase 11 sources:
   gaps surface as warnings; malformed spritesheet metadata and incompatible
   referenced outputs are errors. Evidence is recorded in
   `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`.
+- Phase 11 CP-077 — preview GIF generation completed. The local asset pipeline
+  now includes manifest-driven animation preview generation with GIF and sheet
+  outputs under docs screenshots, source-linked preview manifests, validation
+  that previews stay outside runtime dependency paths, and checked-in visual QA
+  evidence for `player_adventurer_walk_down`. Evidence is recorded in
+  `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

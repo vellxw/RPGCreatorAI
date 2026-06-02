@@ -5766,3 +5766,33 @@ Error: Port 1420 is already in use
 - `2026-06-02 19:20:00 -03:00` -
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\validation\validateProject.ts src\validation\__tests__\validateDatabases.test.ts`
   - PASS for CP-076 scope; no matches.
+
+### Phase 11 FRA-112 / CP-077 - preview GIF generation
+
+- `2026-06-02 19:25:00 -03:00` -
+  `python -m unittest tests.test_animation_preview_generation`
+  - FAIL as expected during TDD red step; the fixture tests could not import
+  `scripts/dev/generate_animation_preview.py` because the preview generator did
+  not exist.
+- `2026-06-02 19:28:00 -03:00` -
+  `python -m unittest tests.test_animation_preview_generation`
+  - PASS after adding manifest-driven preview GIF/sheet generation, preview
+  manifests, output validation, and wrappers; 3 tests passed.
+- `2026-06-02 19:29:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1 --manifest assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json --preview-scale 2`
+  - PASS; generated sample preview GIF, preview sheet, and preview manifest
+  for `player_adventurer_walk_down`.
+- `2026-06-02 19:29:00 -03:00` - visual review of
+  `docs/screenshots/phase11-animation-preview/player_adventurer_walk_down_sheet.png`
+  - PASS; the preview sheet showed four readable, aligned down-walk frames at
+  2x scale on a neutral background.
+- `2026-06-02 19:30:00 -03:00` -
+  `python -m unittest tests.test_animation_preview_generation tests.test_animation_strip_normalization tests.test_runtime_asset_export tests.test_visual_assets`
+  - PASS; CP-077 focused tests plus adjacent asset pipeline tests passed with
+  9 tests.
+- `2026-06-02 19:30:00 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest assets/generated/source/phase11_animation_previews/player_adventurer_walk_down.json`
+  - PASS; sample preview manifest and referenced outputs validated.
+- `2026-06-02 19:30:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\generate_animation_preview.py scripts\dev\generate-animation-preview.ps1 scripts\dev\generate-animation-preview.bat tests\test_animation_preview_generation.py assets\generated\source\phase11_animation_normalization\player_adventurer_walk_down.json assets\generated\source\phase11_animation_previews\player_adventurer_walk_down.json`
+  - PASS for CP-077 scope; no matches.

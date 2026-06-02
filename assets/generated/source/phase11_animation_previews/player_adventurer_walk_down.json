@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "pipeline": "rpgcreatorai-animation-preview-generation-v1",
+  "id": "player_adventurer_walk_down",
+  "name": "Player Adventurer Walk Down",
+  "action": "walk",
+  "direction": "down",
+  "sourceNormalizationManifest": "assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json",
+  "sourceStrip": "assets/generated/web/player_adventurer_walk_down.png",
+  "sourceAssetId": "player_adventurer_walk_down",
+  "sourceConceptId": null,
+  "frameSize": {
+    "width": 64,
+    "height": 64
+  },
+  "frameCount": 4,
+  "fps": 8,
+  "loop": true,
+  "anchor": {
+    "x": 32,
+    "y": 54
+  },
+  "preview": {
+    "scale": 2,
+    "durationMs": 125,
+    "background": "#22242e"
+  },
+  "runtimeDependency": false,
+  "outputs": {
+    "previewGif": "docs/screenshots/phase11-animation-preview/player_adventurer_walk_down.gif",
+    "previewSheetPng": "docs/screenshots/phase11-animation-preview/player_adventurer_walk_down_sheet.png"
+  }
+}
