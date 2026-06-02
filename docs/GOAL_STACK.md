@@ -36,8 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-064 next).
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-065 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -429,6 +428,13 @@ Primary Phase 11 sources:
   adapter shape with retry guidance; and disabled/missing-credential provider
   readiness is covered without live APIs. Evidence is recorded in
   `docs/PHASE_11_MOCK_PROVIDER_CONTRACTS.md`.
+- Phase 11 CP-064 — AI Provider Hub foundation integration gate completed. The
+  full provider-hub suite, frontend validation, static provider/runtime scans,
+  zero-provider Settings smoke, and canonical `scripts/dev/verify.ps1` gate
+  passed. Milestone 07 is ready to hand off to GPT Image 2 asset pipeline work
+  while the native runtime remains independent of AI, providers, network,
+  cloud, credentials, and live APIs. Evidence is recorded in
+  `docs/PHASE_11_AI_PROVIDER_HUB_FOUNDATION_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

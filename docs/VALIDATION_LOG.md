@@ -4,6 +4,51 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-99 / CP-064 — AI Provider Hub foundation integration gate
+
+- `2026-06-02 14:06:49 -03:00` —
+  `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/adapters/__tests__/CredentialStoreAdapter.test.ts src/security/__tests__/redaction.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/providerCostBudget.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/stores/__tests__/providerStore.test.tsx src/stores/__tests__/aiRequestQueueStore.test.ts`
+  — PASS; 14 focused provider-hub files and 41 Vitest tests passed.
+- `2026-06-02 14:07:17 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 14:07:17 -03:00` — `npm test -- --run` — PASS; 74
+  Vitest files and 389 tests passed.
+- `2026-06-02 14:08:12 -03:00` — `npm run build` — PASS; Vite
+  transformed 1940 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 14:09:16 -03:00` — native runtime/provider dependency scan with
+  `rg` over C++/CMake runtime files — PASS; only false positives were
+  `tests/main_test.cpp` and `src/renderer/Renderer2D.cpp`, with no native AI,
+  provider, network, cloud, or credential dependency.
+- `2026-06-02 14:09:42 -03:00` — provider live-call and secret scan with `rg`
+  over `src`, `tests`, and `docs` — PASS; findings were provider metadata,
+  test names, credential labels, and documentation only. No live call site or
+  secret value was found.
+- `2026-06-02 14:10:14 -03:00` — Playwright CLI zero-provider Settings smoke
+  against `npm run dev -- --host 127.0.0.1` at `http://127.0.0.1:3000/` —
+  PASS after re-reading the snapshot with stricter markers; verified
+  `Provider Settings`, `0 ready`, `Capability Gates`, `Cost & Budget`, the
+  `AI Request Queue` panel, `0 active`, runtime-independent copy, and no live
+  generate, connect, or test-provider action.
+- `2026-06-02 14:10:54 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; frontend typecheck, 74 Vitest files and 389 tests, frontend build,
+  native C++ configure/build/CTest, Tauri content check, 43 Rust desktop tests,
+  runtime smoke, and editor-runtime screenshot roundtrip all passed. The gate
+  emitted only known non-fatal Vite chunk-size, third-party CMake
+  policy/deprecation, and local audio-device warnings.
+- `2026-06-02 14:21:52 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS on fresh pre-commit rerun; frontend typecheck, 74 Vitest files and
+  389 tests, frontend build, native C++ configure/build/CTest, Tauri content
+  check, 43 Rust desktop tests, runtime smoke, and editor-runtime screenshot
+  roundtrip all passed.
+- Fix applied: no code fix was required. CP-064 added gate documentation and
+  milestone status updates after validating the implemented provider hub
+  foundation.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-98 / CP-063 — mocked provider contract test suite
 
 - `2026-06-02 13:57:11 -03:00` —

@@ -67,7 +67,7 @@
   - [x] CP-054 / FRA-89: implement asset metadata editor.
   - [x] CP-055 / FRA-90: implement asset optimization and runtime export.
   - [x] CP-056 / FRA-91: run the asset library integration gate.
-- [ ] 07 AI Provider Hub Foundation.
+- [x] 07 AI Provider Hub Foundation.
   - [x] CP-057 / FRA-92: add provider settings UI.
   - [x] CP-058 / FRA-93: implement credential storage policy.
   - [x] CP-059 / FRA-94: add AI request queue and cancellation.
@@ -75,7 +75,7 @@
   - [x] CP-061 / FRA-96: add model capability registry.
   - [x] CP-062 / FRA-97: add cost, rate-limit, and budget states.
   - [x] CP-063 / FRA-98: add mocked provider contract test suite.
-  - [ ] CP-064 / FRA-99: run the AI Provider Hub foundation integration gate.
+  - [x] CP-064 / FRA-99: run the AI Provider Hub foundation integration gate.
 - [ ] 08 GPT Image 2 Asset Pipeline.
 - [ ] 09 AI Characters And Animations.
 - [ ] 10 AI Game Content Pipelines.

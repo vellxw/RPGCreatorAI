@@ -80,3 +80,9 @@ Normal validation uses TypeScript contract tests only:
 
 No live OpenAI, Claude, Kimi/Moonshot, DeepSeek, MiniMax, custom endpoint, or
 other paid provider call was made.
+
+CP-064 ran the AI Provider Hub foundation gate across provider Settings,
+credentials, queue, registry, capabilities, cost/rate-limit states, offline
+contract fixtures, zero-provider browser smoke, provider/runtime dependency
+scans, and the canonical `scripts/dev/verify.ps1` gate. Evidence is recorded
+in `docs/PHASE_11_AI_PROVIDER_HUB_FOUNDATION_GATE.md`.
