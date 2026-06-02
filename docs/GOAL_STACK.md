@@ -252,6 +252,13 @@ Primary Phase 11 sources:
   path capture for separated `weapons`, `armors`, and `states` shards, and
   maps large gaps to existing CP-042 through CP-048 follow-up issues.
   Evidence is recorded in `docs/PHASE_11_DATABASE_SCHEMA_GAP_AUDIT.md`.
+- Phase 11 CP-042 — actor, class, and skill editor polish completed.
+  Actor skills and class usable equipment now use editable reference
+  checklists instead of comma-separated ID fields, unknown refs stay visible
+  and removable, learned-skill rows have safer empty/no-skill states, stat
+  labels are human-readable, and skill delete warnings are covered when actors
+  or classes still reference the skill. Evidence is recorded in
+  `docs/PHASE_11_ACTOR_CLASS_SKILL_EDITOR_POLISH.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

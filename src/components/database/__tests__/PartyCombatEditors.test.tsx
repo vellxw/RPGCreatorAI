@@ -37,6 +37,12 @@ function input(container: HTMLElement, label: string): HTMLInputElement {
   return found;
 }
 
+function checkbox(container: HTMLElement, label: string): HTMLInputElement {
+  const found = container.querySelector(`input[type="checkbox"][aria-label="${label}"]`);
+  if (!(found instanceof HTMLInputElement)) throw new Error(`Missing checkbox: ${label}`);
+  return found;
+}
+
 function select(container: HTMLElement, label: string): HTMLSelectElement {
   const found = container.querySelector(`select[aria-label="${label}"]`);
   if (!(found instanceof HTMLSelectElement)) throw new Error(`Missing select: ${label}`);
@@ -60,6 +66,12 @@ function changeSelect(el: HTMLSelectElement, value: string) {
   act(() => {
     el.value = value;
     el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+function clickCheckbox(el: HTMLInputElement) {
+  act(() => {
+    el.click();
   });
 }
 
@@ -129,14 +141,17 @@ describe('party and combat database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({ level: 2 });
     changeText(input(view.container, 'HP'), '20');
     expect(onChange).toHaveBeenLastCalledWith({ hp: 20 });
-    changeText(input(view.container, 'Base attack'), '7');
+    changeText(input(view.container, 'Base Attack'), '7');
     expect(onChange).toHaveBeenLastCalledWith({ baseStats: { ...stats, attack: 7 } });
     changeSelect(select(view.container, 'Equipment weapon'), 'iron_sword');
     expect(onChange).toHaveBeenLastCalledWith({
       equipment: { weapon: 'iron_sword', armor: null, accessory: null },
     });
-    changeText(input(view.container, 'Actor skills'), 'slash, guard');
+    expect(checkbox(view.container, 'Actor skill Slash').checked).toBe(true);
+    clickCheckbox(checkbox(view.container, 'Actor skill Guard'));
     expect(onChange).toHaveBeenLastCalledWith({ skills: ['slash', 'guard'] });
+    clickCheckbox(checkbox(view.container, 'Actor skill Slash'));
+    expect(onChange).toHaveBeenLastCalledWith({ skills: [] });
 
     view.unmount();
   });
@@ -160,10 +175,12 @@ describe('party and combat database editors', () => {
       />,
     );
 
-    changeText(input(view.container, 'Growth attack'), '3');
+    changeText(input(view.container, 'Growth Attack'), '3');
     expect(onChange).toHaveBeenLastCalledWith({ growth: { ...stats, attack: 3 } });
-    changeText(input(view.container, 'Usable equipment'), 'weapon, armor');
+    clickCheckbox(checkbox(view.container, 'Usable equipment Armor'));
     expect(onChange).toHaveBeenLastCalledWith({ usableEquipment: ['weapon', 'armor'] });
+    clickCheckbox(checkbox(view.container, 'Usable equipment Weapon'));
+    expect(onChange).toHaveBeenLastCalledWith({ usableEquipment: [] });
     changeText(input(view.container, 'Learned skill level 1'), '3');
     expect(onChange).toHaveBeenLastCalledWith({ learnedSkills: [{ level: 3, skillId: 'slash' }] });
     changeSelect(select(view.container, 'Learned skill 1'), 'guard');
@@ -212,7 +229,7 @@ describe('party and combat database editors', () => {
       <EnemiesEditor entry={enemy} items={items} idField={<span />} onChange={onChange} />,
     );
 
-    changeText(input(view.container, 'Enemy attack'), '8');
+    changeText(input(view.container, 'Enemy Attack'), '8');
     expect(onChange).toHaveBeenLastCalledWith({ stats: { ...stats, attack: 8 } });
     changeText(input(view.container, 'Exp reward'), '5');
     expect(onChange).toHaveBeenLastCalledWith({ exp: 5 });

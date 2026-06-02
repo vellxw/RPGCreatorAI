@@ -9,7 +9,7 @@ import {
   type ProjectAction,
   type ProjectStoreState,
 } from '../../../stores/projectStore';
-import type { ActorData } from '../../../types/project';
+import type { ActorData, DatabaseListKey, SkillData } from '../../../types/project';
 
 function actor(id: string, name: string): ActorData {
   return {
@@ -59,6 +59,7 @@ function renderList(
   entries: DatabaseRecord[],
   state: ProjectStoreState,
   selectedId = entries[0]?.id ?? '',
+  table: DatabaseListKey = 'actors',
 ) {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -69,7 +70,7 @@ function renderList(
   act(() => {
     root.render(
       <ProjectContext.Provider value={{ state, dispatch }}>
-        <DatabaseList table="actors" entries={entries} selectedId={selectedId} onSelect={onSelect} />
+        <DatabaseList table={table} entries={entries} selectedId={selectedId} onSelect={onSelect} />
       </ProjectContext.Provider>,
     );
   });
@@ -180,6 +181,47 @@ describe('DatabaseList workflow', () => {
     });
 
     expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/system/startingParty/actor_05'));
+    expect(view.dispatch).not.toHaveBeenCalled();
+
+    view.unmount();
+  });
+
+  it('blocks skill deletes when actors or classes still reference them', () => {
+    const slash: SkillData = {
+      id: 'slash',
+      name: 'Slash',
+      description: '',
+      mpCost: 0,
+      power: 100,
+      target: 'singleEnemy',
+    };
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      databases: {
+        ...initialProjectStoreState.databases,
+        actors: [{ ...actor('actor_01', 'Actor 01'), skills: ['slash'] }],
+        classes: [
+          {
+            id: 'fighter',
+            name: 'Fighter',
+            growth: actor('stats_source', 'Stats Source').baseStats,
+            usableEquipment: ['weapon'],
+            learnedSkills: [{ level: 2, skillId: 'slash' }],
+          },
+        ],
+        skills: [slash],
+      },
+    };
+    const view = renderList([slash] as unknown as DatabaseRecord[], state, 'slash', 'skills');
+
+    expect(view.container.textContent).toContain('2 refs');
+
+    act(() => {
+      button(view.container, 'Delete skill slash blocked by 2 references').click();
+    });
+
+    expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/actors/actor_01/skills/slash'));
+    expect(alert).toHaveBeenCalledWith(expect.stringContaining('database/classes/fighter/learnedSkills/slash'));
     expect(view.dispatch).not.toHaveBeenCalled();
 
     view.unmount();

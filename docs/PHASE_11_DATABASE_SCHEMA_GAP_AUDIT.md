@@ -95,9 +95,10 @@ Legend:
    without making runtime depend on editor-only strings.
 
 4. Skill/class depth - medium impact, medium risk. Classes load growth into
-   runtime battle stats, but learned skills and usable equipment are not fully
-   reflected in native gameplay menus/battle choices. CP-042 owns the editor
-   polish and any v1 runtime-facing decisions.
+   runtime battle stats, and CP-042 now covers editor-side actor skill,
+   learned-skill, usable-equipment, and label polish. Richer native gameplay
+   consumption for learned skills, equipment rules, and skill behavior remains
+   future product depth unless a later issue expands the runtime contract.
 
 5. Asset/audio catalog split - medium impact, medium risk. `system.audio` is
    the current editor-owned registry and optional `database.audio` is now
@@ -106,7 +107,8 @@ Legend:
 
 ## Follow-Up Ownership
 
-- CP-042 / FRA-77: actor, class, and skill editor/runtime-facing polish.
+- CP-042 / FRA-77: actor, class, and skill editor polish completed; runtime
+  data shape unchanged.
 - CP-043 / FRA-78: enemy and troop battle data polish.
 - CP-044 / FRA-79: item, equipment, and state shard polish, including the
   separated shard/runtime item-equipment boundary.

@@ -4197,3 +4197,39 @@ Error: Port 1420 is already in use
   third-party policy/deprecation warnings.
 - `2026-06-02 06:26:39 -03:00` — `cargo test` in `src-tauri` — PASS on the
   final CP-041 worktree; 33 Rust tests passed.
+
+### Phase 11 FRA-77 / CP-042 — actor class and skill editor polish
+
+- `2026-06-02 06:36:22 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — FAIL as expected during TDD red step; actor skills and class usable
+  equipment were still text-entry controls, so the new checklist assertions
+  could not find `Actor skill Slash` or `Usable equipment Armor` checkboxes.
+- `2026-06-02 06:38:52 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — PASS after adding readable stat labels and reference checklists for actor
+  skills and class usable equipment; 1 focused file and 5 tests passed.
+- `2026-06-02 06:39:27 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx`
+  — PASS after adding skill delete warning coverage for actor/class skill
+  references; 2 focused files and 9 tests passed.
+- `2026-06-02 06:40:51 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 06:40:51 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 4 focused files and 28 Vitest tests passed.
+- `2026-06-02 06:41:50 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1919 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 06:46:10 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp042 open http://127.0.0.1:5177/`,
+  `click Use My First RPG`, `click Database`, `snapshot`, `click Open Classes database tab`,
+  `snapshot`, `console`, `close` — PASS for browser smoke; the bundled sample
+  loaded, Actors showed readable stat labels plus `Actor skill Slash/Guard`
+  checkboxes, Classes showed usable-equipment checkboxes plus learned-skill
+  rows, and the console reported 0 errors and 0 warnings. A separate CLI
+  screenshot attempt was discarded because `screenshot output/...` was parsed
+  as a selector target by the CLI rather than a file path.
+- `2026-06-02 06:48:54 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS on the final CP-042 worktree before commit; 4 focused files and 28
+  Vitest tests passed.

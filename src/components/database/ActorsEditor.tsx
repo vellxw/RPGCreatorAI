@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { NumberField, TextField } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
-import { splitIds, StatGrid } from './partyCombatFields';
+import { ReferenceChecklist, StatGrid } from './partyCombatFields';
 import type { ActorData, ClassData, EquipmentSlot, ItemData, SkillData } from '../../types/project';
 
 interface ActorsEditorProps {
@@ -24,7 +24,7 @@ export function ActorsEditor({
   onChange,
 }: ActorsEditorProps) {
   const classOptions = classes.map(cls => ({ value: cls.id, label: cls.name || cls.id }));
-  const skillNames = new Map(skills.map(skill => [skill.id, skill.name || skill.id]));
+  const skillOptions = skills.map(skill => ({ value: skill.id, label: skill.name || skill.id }));
   const itemOptions = items.map(item => ({ value: item.id, label: item.name || item.id }));
 
   const updateEquipment = (slot: EquipmentSlot, itemId: string) => {
@@ -45,6 +45,7 @@ export function ActorsEditor({
           label="Class"
           value={entry.classId}
           options={classOptions}
+          emptyLabel="(no class)"
           onChange={classId => onChange({ classId })}
         />
         <NumberField label="Level" value={entry.level} min={1} onChange={level => onChange({ level })} />
@@ -76,19 +77,14 @@ export function ActorsEditor({
           ))}
         </div>
       </div>
-      <TextField
+      <ReferenceChecklist
         label="Actor skills"
-        value={entry.skills.join(', ')}
-        list="actor-skill-options"
-        onChange={value => onChange({ skills: splitIds(value) })}
+        itemLabel="Actor skill"
+        values={entry.skills}
+        options={skillOptions}
+        emptyText="No skills defined yet."
+        onChange={skills => onChange({ skills })}
       />
-      <datalist id="actor-skill-options">
-        {skills.map(skill => (
-          <option key={skill.id} value={skill.id}>
-            {skillNames.get(skill.id)}
-          </option>
-        ))}
-      </datalist>
     </div>
   );
 }
