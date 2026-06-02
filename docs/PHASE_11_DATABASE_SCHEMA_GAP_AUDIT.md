@@ -129,10 +129,14 @@ Legend:
   project/map, and event-command references now surface same-table replacement
   options in Validation, and repairs are explicit, target-validated, undoable
   reducer actions.
-- CP-048 / FRA-83: database/system completeness integration gate.
+- CP-048 / FRA-83: database/system completeness integration gate completed.
+  The canonical local gate and a focused browser Database/System smoke passed;
+  milestone 05 can hand off to asset library and import pipeline work.
 - CP-049 through CP-052: asset catalog/import ownership for richer animation,
   tileset, and audio asset metadata.
 
 ## Validation
 
-CP-041 validation is recorded in `docs/VALIDATION_LOG.md`.
+CP-041 through CP-048 validation is recorded in `docs/VALIDATION_LOG.md`.
+The integration gate report is
+`docs/PHASE_11_DATABASE_SYSTEM_COMPLETENESS_GATE.md`.

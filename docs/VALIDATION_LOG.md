@@ -4462,3 +4462,35 @@ Error: Port 1420 is already in use
   `console`,
   `close` — PASS; Validation showed `Project passes validation`, and the
   console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-83 / CP-048 — database/system completeness integration gate
+
+- `2026-06-02 08:31:55 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; canonical gate reported `=== ALL PASSED ===` with frontend
+  typecheck, full frontend tests, frontend build, native configure/build/CTest,
+  Tauri content check, Rust desktop tests, runtime smoke, and editor-runtime
+  roundtrip all passing. Frontend tests passed with 57 files and 327 Vitest
+  tests; native `RPGTests` passed 1/1; Rust desktop tests passed 33/33.
+  Known non-fatal warnings remained: Vite chunk-size warning, third-party
+  CMake policy/deprecation warnings, and optional missing local audio
+  file/device warnings during runtime smoke.
+- `2026-06-02 08:40:18 -03:00` —
+  Browser smoke with Playwright CLI commands:
+  `open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Database')"`,
+  `click "button[aria-label='Open Items database tab']"`,
+  `click "button[aria-label='Open Actors database tab']"`,
+  `click "button[aria-label='Open Enemies database tab']"`,
+  `click "button[aria-label='Open Troops database tab']"`,
+  `click "button[aria-label='Open System database tab']"`,
+  `click "button[aria-label='Open Types database tab']"`,
+  `click "button[aria-label='Open Terms database tab']"`,
+  `click "button[aria-label='Open Common Events database tab']"`,
+  `click "button:has-text('Validate')"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS; representative Database/System tabs opened, Common Events
+  showed reusable command controls, Validate reported `Validation passed`, and
+  the console reported 0 errors and 0 warnings.

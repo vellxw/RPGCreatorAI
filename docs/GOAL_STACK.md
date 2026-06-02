@@ -36,7 +36,6 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 05 — database/system completeness.
 - Phase 11 Linear milestone 06 — asset library and import pipeline.
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
@@ -300,6 +299,14 @@ Primary Phase 11 sources:
   `REPAIR_REFERENCE` applies source-scoped, target-validated, undoable repairs
   without destructive cleanup or generated content. Evidence is recorded in
   `docs/PHASE_11_REFERENCE_REPAIR_TOOLS.md`.
+- Phase 11 CP-048 — database/system completeness integration gate completed.
+  The canonical `scripts/dev/verify.ps1` gate passed frontend typecheck, full
+  Vitest, frontend build, native C++ configure/build/CTest, Tauri content
+  check, Rust desktop tests, runtime smoke, and editor-runtime screenshot
+  roundtrip; browser smoke also verified representative Database/System tabs
+  and validation feedback. Milestone 05 is ready to hand off to asset library
+  and import pipeline work. Evidence is recorded in
+  `docs/PHASE_11_DATABASE_SYSTEM_COMPLETENESS_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
