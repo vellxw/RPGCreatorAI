@@ -11,6 +11,7 @@
 
 mod app_paths;
 mod config_commands;
+mod credential_commands;
 mod fs_commands;
 mod project_state;
 mod runtime_commands;
@@ -46,6 +47,10 @@ pub fn run() {
             runtime_commands::runtime_open_log_folder,
             config_commands::config_get_recents,
             config_commands::config_add_recent,
+            credential_commands::credentials_get_status,
+            credential_commands::credentials_list,
+            credential_commands::credentials_set,
+            credential_commands::credentials_delete,
         ])
         .setup(|app| {
             // No-op for now; window setup is declarative in tauri.conf.json.

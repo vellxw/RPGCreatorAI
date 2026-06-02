@@ -27,6 +27,7 @@ default so compiler and package caches stay out of the OneDrive-synced repo.
 | Purpose | Default location | Created when | Retention / cleanup |
 | --- | --- | --- | --- |
 | Recent projects config | `%APPDATA%\RPGCreatorAI\config.json` | Desktop recents are saved | Small JSON file; safe to delete while app is closed |
+| Provider credentials | `%APPDATA%\RPGCreatorAI\provider-credentials\<providerId>.bin` | User explicitly saves a provider credential in desktop Settings | DPAPI-protected binary blobs; safe to delete while app is closed; deletion forgets the credential |
 | Playtest sessions | `%APPDATA%\RPGCreatorAI\playtest-sessions\session-*` | Desktop Playtest creates a temporary project root | Shell keeps the latest 5 sessions and prunes older sessions |
 | Runtime logs | `%APPDATA%\RPGCreatorAI\runtime-logs\runtime-*.log` | Desktop launches the native runtime | User may delete old logs while app/runtime are closed |
 | Runtime state snapshot | `%APPDATA%\RPGCreatorAI\runtime-logs\runtime-state-snapshot.json` | Runtime debug snapshot is enabled by the desktop bridge | Rewritten atomically per runtime run |
@@ -72,6 +73,8 @@ stopped.
 - Only prune app-created playtest sessions and project `.backups` according to
   their documented caps.
 - Keep desktop runtime logs and snapshots under the shared app-data root.
+- Keep provider credentials in desktop app data DPAPI blobs only; never in
+  project JSON, repo files, logs, docs, screenshots, or validation output.
 - Keep compiler/package caches under `%LOCALAPPDATA%`.
 - Keep source-tree writes limited to explicit project saves, explicit frontend
   builds (`dist/`), or explicit validation evidence requested by the issue.

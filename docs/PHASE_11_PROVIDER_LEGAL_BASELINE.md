@@ -135,7 +135,9 @@ Generated output must never be silently imported into accepted project data.
 - PASS: CP-057 exposes provider settings as editor-only availability metadata,
   removes the in-memory `apiKey` value from provider defaults, and renders no
   secret-value input or live provider action.
-- OPEN: CP-058 must still choose and implement desktop-safe credential storage.
+- PASS: CP-058 implements Windows v1 desktop credential storage using DPAPI
+  blobs under app data, returns metadata only, redacts renderer/Rust feedback,
+  and keeps project JSON and the native runtime credential-free.
 - OPEN: Provider Hub implementation issues must still add provider metadata,
   mock contract tests, opt-in UX, cost/rate-limit/error states, and live
   diagnostic gates.

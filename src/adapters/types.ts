@@ -154,6 +154,21 @@ export interface RuntimeLogActionResult {
   error?: string;
 }
 
+export type CredentialStorageKind = 'windows-dpapi' | 'unavailable';
+
+export interface CredentialStatus {
+  providerId: string;
+  configured: boolean;
+  storage: CredentialStorageKind;
+  error?: string;
+}
+
+export interface CredentialWriteResult {
+  success: boolean;
+  status?: CredentialStatus;
+  error?: string;
+}
+
 export interface RuntimeLaunchAdapter {
   canLaunch(): boolean;
   getExecutablePath(): string | null;

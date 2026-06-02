@@ -1,17 +1,21 @@
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { CredentialStoreAdapter } from '../../adapters/CredentialStoreAdapter';
 import type { ProviderConfig } from '../../types/project';
 import { SettingsScreen } from '../SettingsScreen';
 
-function renderSettings(initialProviders: ProviderConfig[]) {
+function renderSettings(
+  initialProviders: ProviderConfig[],
+  credentialStore?: CredentialStoreAdapter,
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   let root: Root;
 
   act(() => {
     root = createRoot(container);
-    root.render(<SettingsScreen initialProviders={initialProviders} />);
+    root.render(<SettingsScreen initialProviders={initialProviders} credentialStore={credentialStore} />);
   });
 
   return {
@@ -72,7 +76,10 @@ describe('SettingsScreen provider settings', () => {
     });
 
     expect(view.container.textContent).toContain('Needs credentials');
-    expect(view.container.querySelector('input[type="password"]')).toBeNull();
+    const credential = view.container.querySelector<HTMLInputElement>('input[type="password"]');
+    expect(credential).toBeDefined();
+    expect(credential?.disabled).toBe(true);
+    expect(view.container.textContent).toContain('Credential storage is only available in the desktop shell.');
 
     view.unmount();
   });
@@ -93,10 +100,66 @@ describe('SettingsScreen provider settings', () => {
     expect(text).toContain('Configured');
     expect(model?.value).toBe('gpt-image-2');
     expect(text).toContain('Image editing');
-    expect(view.container.querySelector('input[type="password"]')).toBeNull();
+    const credential = view.container.querySelector<HTMLInputElement>('input[type="password"]');
+    expect(credential?.value).toBe('');
 
     const buttons = Array.from(view.container.querySelectorAll('button'));
     expect(buttons.map(button => button.textContent ?? '').join(' ')).not.toMatch(/Generate|Test Connection|Connect/i);
+
+    view.unmount();
+  });
+
+  it('stores credentials through the credential adapter and clears raw secret UI state', async () => {
+    const secret = 'fixture-provider-token-value';
+    let captured = '';
+    const credentialStore: CredentialStoreAdapter = {
+      isAvailable: () => true,
+      getUnavailableReason: () => null,
+      getStatus: async providerId => ({ providerId, configured: false, storage: 'windows-dpapi' }),
+      list: async () => [],
+      setCredential: async (providerId, value) => {
+        captured = value;
+        return {
+          success: true,
+          status: { providerId, configured: true, storage: 'windows-dpapi' },
+        };
+      },
+      deleteCredential: async providerId => ({ providerId, configured: false, storage: 'windows-dpapi' }),
+    };
+    const view = renderSettings([
+      {
+        ...disabledOpenAi,
+        enabled: true,
+        status: 'missing-credentials',
+      },
+    ], credentialStore);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const input = view.container.querySelector<HTMLInputElement>('input[aria-label="Credential for OpenAI"]');
+    expect(input).toBeDefined();
+
+    await act(async () => {
+      const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      valueSetter?.call(input, secret);
+      input!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    const save = Array.from(view.container.querySelectorAll('button')).find(button =>
+      button.textContent?.includes('Save Credential'),
+    );
+    expect(save).toBeDefined();
+    expect(save?.disabled).toBe(false);
+    await act(async () => {
+      save?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(captured).toBe(secret);
+    expect(input?.value).toBe('');
+    expect(view.container.textContent).toContain('Credential stored locally');
+    expect(view.container.textContent).not.toContain(secret);
 
     view.unmount();
   });

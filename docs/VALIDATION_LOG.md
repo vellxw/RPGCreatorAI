@@ -4,6 +4,79 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-93 / CP-058 — credential storage policy and implementation
+
+- `2026-06-02 12:21:17 -03:00` —
+  `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — RED as expected before implementation; redaction and credential-store
+  adapter modules did not exist, and Settings had no credential save path.
+- `2026-06-02 12:24:39 -03:00` —
+  `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 3 focused files and 8 tests passed after adding renderer redaction,
+  browser/desktop credential adapters, and Settings credential save/clear UI.
+- `2026-06-02 12:27:00 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml credential_commands -- --nocapture`
+  — RED; `windows-sys` exposed DPAPI blobs as `CRYPT_INTEGER_BLOB`, and
+  `LocalFree` lived under `Win32_Foundation`, not the initially imported
+  modules. Fix applied: corrected bindings and feature list.
+- `2026-06-02 12:30:40 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml credential_commands -- --nocapture`
+  — PASS; 3 Rust tests passed for provider-id path safety, redaction of known
+  fixture secrets, Windows DPAPI app-data storage, no plaintext command return,
+  no plaintext credential blob, decryptability for test verification, and
+  delete/forget behavior.
+- `2026-06-02 12:30:55 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 12:31:06 -03:00` —
+  `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 4 focused files and 11 tests passed.
+- `2026-06-02 12:32:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 12:32:20 -03:00` — `npm test -- --run` — PASS; 65
+  Vitest files and 360 tests passed.
+- `2026-06-02 12:33:22 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 43 Rust tests
+  passed.
+- `2026-06-02 12:34:04 -03:00` — `npm run build` — PASS; Vite
+  transformed 1933 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 12:34:31 -03:00` —
+  `npm run desktop:verify-content` — FAIL; the Tauri dev server at
+  `http://127.0.0.1:1420/` was not running. Fix applied: started
+  `npm run dev:tauri` for the content check.
+- `2026-06-02 12:35:54 -03:00` —
+  `npm run desktop:verify-content` — PASS; `http://127.0.0.1:1420/` served
+  the RPGCreatorAI editor. The temporary dev server was stopped afterward.
+- `2026-06-02 12:38:28 -03:00` —
+  Playwright smoke with text labels — FAIL for CLI invocation only; this
+  Playwright CLI expects fresh snapshot refs for click commands.
+- `2026-06-02 12:43:09 -03:00` —
+  Playwright CLI smoke with refs against `npm run dev` at
+  `http://127.0.0.1:5173/` — PASS; entered the bundled sample with `e37`,
+  opened Settings with `e106`, verified browser-mode credential fields and
+  save/forget controls are disabled with `Credential storage is only
+  available in the desktop shell.`, and confirmed the screen exposes no live
+  generation/connect/test action. The dev server was stopped afterward and
+  generated Playwright artifacts were removed.
+- `2026-06-02 12:46:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 12:46:55 -03:00` — `npm test -- --run` — PASS; 65
+  Vitest files and 360 tests passed.
+- `2026-06-02 12:47:35 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 43 Rust tests
+  passed.
+- `2026-06-02 12:48:05 -03:00` — `npm run build` — PASS; Vite
+  transformed 1933 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 12:49:00 -03:00` —
+  `npm run desktop:verify-content` after starting `npm run dev:tauri` —
+  PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor. The
+  temporary dev server was stopped afterward.
+- Fix applied: added Windows DPAPI-backed Tauri credential commands, typed
+  renderer bridge/adapters, centralized redaction, Settings save/forget
+  controls, browser-unavailable credential states, and docs for the
+  credential boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-92 / CP-057 — provider settings UI
 
 - `2026-06-02 12:01:56 -03:00` —

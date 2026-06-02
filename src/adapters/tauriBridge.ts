@@ -22,6 +22,8 @@ import type {
   SpritesheetImportResult,
   TilesetImportMetadata,
   TilesetImportResult,
+  CredentialStatus,
+  CredentialWriteResult,
 } from './types';
 
 function isTauri(): boolean {
@@ -96,6 +98,15 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
     config: {
       getRecents: () => invoke('config_get_recents') as Promise<string[]>,
       addRecent: (root: string) => invoke('config_add_recent', { root }) as Promise<string[]>,
+    },
+    credentials: {
+      getStatus: (providerId: string) =>
+        invoke('credentials_get_status', { providerId }) as Promise<CredentialStatus>,
+      list: () => invoke('credentials_list') as Promise<CredentialStatus[]>,
+      set: (providerId: string, secret: string) =>
+        invoke('credentials_set', { providerId, secret }) as Promise<CredentialWriteResult>,
+      delete: (providerId: string) =>
+        invoke('credentials_delete', { providerId }) as Promise<CredentialStatus>,
     },
   };
 

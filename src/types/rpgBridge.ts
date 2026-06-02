@@ -21,6 +21,8 @@ import type {
   RuntimeLogInfo,
   RuntimeLogTailResult,
   RuntimeSnapshotResult,
+  CredentialStatus,
+  CredentialWriteResult,
 } from '../adapters/types';
 
 export interface OpenDialogResult {
@@ -82,6 +84,12 @@ export interface RpgBridge {
   config: {
     getRecents(): Promise<string[]>;
     addRecent(root: string): Promise<string[]>;
+  };
+  credentials?: {
+    getStatus(providerId: string): Promise<CredentialStatus>;
+    list(): Promise<CredentialStatus[]>;
+    set(providerId: string, secret: string): Promise<CredentialWriteResult>;
+    delete(providerId: string): Promise<CredentialStatus>;
   };
 }
 

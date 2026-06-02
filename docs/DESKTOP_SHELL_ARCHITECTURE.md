@@ -69,6 +69,10 @@ The renderer never sees a generic `invoke()` function. Instead, a thin typed wra
 | `runtime` | `openLogFolder()` | Opens the allowlisted runtime log folder |
 | `config` | `getRecents()` | Returns recent project roots |
 | `config` | `addRecent(root)` | Persists most recent root |
+| `credentials` | `getStatus(providerId)` | Returns provider credential metadata without a secret value |
+| `credentials` | `list()` | Lists configured provider credential metadata |
+| `credentials` | `set(providerId, secret)` | Stores a user-entered provider credential as a Windows DPAPI blob under app data |
+| `credentials` | `delete(providerId)` | Removes the stored provider credential blob |
 | `shell` | `name`, `version` | Identifies the host (`tauri`/`electron`) |
 
 The Rust side declares each handler with explicit input and output types. There is no string-based dispatch.
@@ -85,6 +89,11 @@ The Rust side declares each handler with explicit input and output types. There 
 - **No arbitrary shell execution** — the runtime bridge resolves an executable
   path and starts it with structured process APIs, not shell interpolation.
 - **No environment-variable read leak** — the renderer cannot read arbitrary env vars; only the shell does, and only for `RPG_RUNTIME_EXE` resolution.
+- **Credential boundary** — provider credentials are opt-in desktop settings
+  only. The renderer may submit a value to `credentials.set`, but Rust stores
+  it as a Windows DPAPI-protected app-data blob and returns only redacted
+  metadata. Project JSON and native runtime inputs never contain provider
+  credentials.
 - **No secrets committed** — `.env`, `*.local`, and `src-tauri/target/` remain gitignored.
 
 ## Build & Output Paths

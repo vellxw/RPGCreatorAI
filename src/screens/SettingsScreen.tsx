@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -16,10 +16,17 @@ import {
   type ProviderStoreValue,
 } from '../stores/providerStore';
 import type { ProviderConfig } from '../types/project';
+import {
+  getCredentialStoreAdapter,
+  type CredentialStoreAdapter,
+} from '../adapters/CredentialStoreAdapter';
+import type { CredentialStatus } from '../adapters/types';
+import { redactSecrets } from '../security/redaction';
 
 interface SettingsScreenProps {
   providerStore?: Pick<ProviderStoreValue, 'providers' | 'setProviders'>;
   initialProviders?: ProviderConfig[];
+  credentialStore?: CredentialStoreAdapter;
 }
 
 function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
@@ -51,18 +58,57 @@ function capabilityClass(provider: ProviderConfig): string {
   return 'border-gray-200 bg-gray-50 text-gray-500';
 }
 
-export function SettingsScreen({ providerStore, initialProviders }: SettingsScreenProps) {
+export function SettingsScreen({ providerStore, initialProviders, credentialStore }: SettingsScreenProps) {
   const [localProviders, setLocalProviders] = useState<ProviderConfig[]>(() =>
     cloneProviders(initialProviders ?? defaultProviderConfigs),
   );
+  const activeCredentialStore = useMemo(
+    () => credentialStore ?? getCredentialStoreAdapter(),
+    [credentialStore],
+  );
   const providers = providerStore?.providers ?? localProviders;
   const setProviders = providerStore?.setProviders ?? setLocalProviders;
+  const [credentialStatuses, setCredentialStatuses] = useState<Record<string, CredentialStatus>>({});
+  const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
+  const [credentialFeedback, setCredentialFeedback] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(providers.map(provider => activeCredentialStore.getStatus(provider.id)))
+      .then(statuses => {
+        if (cancelled) return;
+        setCredentialStatuses(Object.fromEntries(statuses.map(status => [status.providerId, status])));
+      })
+      .catch(error => {
+        if (cancelled) return;
+        setCredentialFeedback({
+          _global: redactSecrets((error as Error).message),
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCredentialStore, providers]);
+
+  const providerWithCredentialStatus = (provider: ProviderConfig): ProviderConfig => {
+    const status = credentialStatuses[provider.id];
+    const credentialState: ProviderConfig['credentialState'] =
+      provider.credentialState === 'not-required'
+        ? 'not-required'
+        : status?.configured
+          ? 'configured'
+          : status
+            ? 'missing'
+            : provider.credentialState;
+    const next = { ...provider, credentialState };
+    return { ...next, status: providerStatusFor(next) };
+  };
 
   const summary = useMemo(() => {
-    const configured = providers.filter(provider => providerStatusFor(provider) === 'configured').length;
-    const missing = providers.filter(provider => providerStatusFor(provider) === 'missing-credentials').length;
+    const configured = providers.filter(provider => providerStatusFor(providerWithCredentialStatus(provider)) === 'configured').length;
+    const missing = providers.filter(provider => providerStatusFor(providerWithCredentialStatus(provider)) === 'missing-credentials').length;
     return { configured, missing, total: providers.length };
-  }, [providers]);
+  }, [credentialStatuses, providers]);
 
   const updateProvider = (id: string, map: (provider: ProviderConfig) => ProviderConfig) => {
     setProviders(prev => prev.map(provider => (provider.id === id ? map(provider) : provider)));
@@ -78,6 +124,38 @@ export function SettingsScreen({ providerStore, initialProviders }: SettingsScre
       model: model.trim(),
       status: providerStatusFor(provider),
     }));
+  };
+
+  const setCredentialInput = (providerId: string, value: string) => {
+    setCredentialInputs(prev => ({ ...prev, [providerId]: value }));
+  };
+
+  const saveCredential = async (provider: ProviderConfig) => {
+    const secret = credentialInputs[provider.id] ?? '';
+    if (!secret.trim()) {
+      setCredentialFeedback(prev => ({ ...prev, [provider.id]: 'Credential value is required.' }));
+      return;
+    }
+    const result = await activeCredentialStore.setCredential(provider.id, secret);
+    setCredentialInputs(prev => ({ ...prev, [provider.id]: '' }));
+    if (!result.success) {
+      setCredentialFeedback(prev => ({
+        ...prev,
+        [provider.id]: result.error ? redactSecrets(result.error, [secret]) : 'Credential storage failed.',
+      }));
+      return;
+    }
+    if (result.status) {
+      setCredentialStatuses(prev => ({ ...prev, [provider.id]: result.status! }));
+    }
+    setCredentialFeedback(prev => ({ ...prev, [provider.id]: 'Credential stored locally.' }));
+  };
+
+  const deleteCredential = async (provider: ProviderConfig) => {
+    const status = await activeCredentialStore.deleteCredential(provider.id);
+    setCredentialStatuses(prev => ({ ...prev, [provider.id]: status }));
+    setCredentialInputs(prev => ({ ...prev, [provider.id]: '' }));
+    setCredentialFeedback(prev => ({ ...prev, [provider.id]: 'Credential removed.' }));
   };
 
   return (
@@ -109,10 +187,14 @@ export function SettingsScreen({ providerStore, initialProviders }: SettingsScre
                 </p>
               </div>
             ) : (
-              providers.map(provider => {
+              providers.map(rawProvider => {
+                const provider = providerWithCredentialStatus(rawProvider);
                 const meta = statusMeta(provider);
                 const StatusIcon = meta.icon;
                 const status = providerStatusFor(provider);
+                const credentialStatus = credentialStatuses[provider.id];
+                const credentialUnavailable = !activeCredentialStore.isAvailable();
+                const credentialValue = credentialInputs[provider.id] ?? '';
                 return (
                   <article key={provider.id} className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -179,6 +261,55 @@ export function SettingsScreen({ providerStore, initialProviders }: SettingsScre
                         />
                       </label>
                     </div>
+                    {provider.credentialEnvVar && (
+                      <div className="mt-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+                        <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+                          <label className="block">
+                            <span className="mb-1 block text-[11px] font-semibold uppercase text-gray-500">Credential</span>
+                            <input
+                              aria-label={`Credential for ${provider.name}`}
+                              type="password"
+                              autoComplete="off"
+                              value={credentialValue}
+                              disabled={!provider.enabled || credentialUnavailable}
+                              onChange={event => setCredentialInput(provider.id, event.target.value)}
+                              placeholder={
+                                credentialStatus?.configured
+                                  ? 'Stored locally'
+                                  : credentialUnavailable
+                                    ? 'Desktop storage unavailable'
+                                    : 'Paste credential'
+                              }
+                              className="h-8 w-full rounded-md border border-gray-200 bg-white px-2 text-[12px] text-gray-700 disabled:bg-gray-100 disabled:text-gray-400"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            disabled={!provider.enabled || credentialUnavailable || !credentialValue.trim()}
+                            onClick={() => saveCredential(provider)}
+                            className="mt-5 inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-2.5 text-[12px] font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Save Credential
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!provider.enabled || credentialUnavailable || !credentialStatus?.configured}
+                            onClick={() => deleteCredential(provider)}
+                            className="mt-5 inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-2.5 text-[12px] font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            Forget
+                          </button>
+                        </div>
+                        <div className="mt-2 text-[11px] text-gray-500">
+                          {credentialFeedback[provider.id] ??
+                            (credentialUnavailable
+                              ? activeCredentialStore.getUnavailableReason()
+                              : credentialStatus?.configured
+                                ? 'Credential is stored outside project data.'
+                                : 'No credential stored.')}
+                        </div>
+                      </div>
+                    )}
                   </article>
                 );
               })

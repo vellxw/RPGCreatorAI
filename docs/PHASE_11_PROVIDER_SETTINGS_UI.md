@@ -13,8 +13,10 @@ or any native runtime dependency.
 - The screen handles an empty provider list without blocking local authoring.
 - Enabled providers without credentials show `Needs credentials`; configured
   providers can be represented by credential availability metadata.
-- No secret value field is rendered. Project JSON still stores no provider
-  credentials.
+- CP-058 adds a desktop-only password field for explicitly saving a provider
+  credential through the Tauri credential bridge. The raw value is cleared
+  after the write attempt and is never returned by the bridge.
+- Project JSON still stores no provider credentials.
 - Generation/test/connect actions remain absent from this screen until later
   provider hub issues add real capability gates and offline contracts.
 
@@ -29,8 +31,10 @@ or any native runtime dependency.
 - credential environment/source name only
 - capability metadata
 
-The store no longer models an `apiKey` value. Credentials remain unavailable
-until CP-058 implements an approved desktop-safe policy.
+The store no longer models an `apiKey` value. CP-058 adds credential
+availability metadata and desktop-safe local storage through the Tauri bridge;
+the raw credential value is never stored in project data or returned to the
+renderer after a save attempt.
 
 ## Runtime Boundary
 
@@ -46,7 +50,7 @@ Focused UI/store coverage validates:
 - disabled provider state
 - enabled provider with missing credentials
 - configured-provider state
-- no secret/password inputs
+- no raw credential value in rendered feedback after save
 - no generation, connect, or live-test action buttons
 - Settings primary navigation dispatch
 - provider defaults start disabled, model-empty, routing-disabled, and without

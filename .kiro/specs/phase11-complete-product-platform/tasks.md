@@ -69,7 +69,7 @@
   - [x] CP-056 / FRA-91: run the asset library integration gate.
 - [ ] 07 AI Provider Hub Foundation.
   - [x] CP-057 / FRA-92: add provider settings UI.
-  - [ ] CP-058 / FRA-93: implement credential storage policy.
+  - [x] CP-058 / FRA-93: implement credential storage policy.
   - [ ] CP-059 / FRA-94: add AI request queue and cancellation.
   - [ ] CP-060 / FRA-95: add provider registry and adapter interface.
   - [ ] CP-061 / FRA-96: add model capability registry.
