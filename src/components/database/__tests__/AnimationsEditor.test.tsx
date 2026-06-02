@@ -29,27 +29,50 @@ function input(container: HTMLElement, label: string): HTMLInputElement {
   return found;
 }
 
+function textarea(container: HTMLElement, label: string): HTMLTextAreaElement {
+  const found = container.querySelector(`textarea[aria-label="${label}"]`);
+  if (!(found instanceof HTMLTextAreaElement)) throw new Error(`Missing textarea: ${label}`);
+  return found;
+}
+
 function select(container: HTMLElement, label: string): HTMLSelectElement {
   const found = container.querySelector(`select[aria-label="${label}"]`);
   if (!(found instanceof HTMLSelectElement)) throw new Error(`Missing select: ${label}`);
   return found;
 }
 
-function click(container: HTMLElement, label: string) {
+function button(container: HTMLElement, label: string): HTMLButtonElement {
   const found = container.querySelector(`button[aria-label="${label}"]`);
   if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  return found;
+}
+
+function click(container: HTMLElement, label: string) {
+  const found = button(container, label);
   act(() => found.dispatchEvent(new MouseEvent('click', { bubbles: true })));
 }
 
 async function clickAsync(container: HTMLElement, label: string) {
-  const found = container.querySelector(`button[aria-label="${label}"]`);
-  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  const found = button(container, label);
   await act(async () => {
     found.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
 }
 
 function changeText(el: HTMLInputElement, value: string) {
+  act(() => {
+    const valueSetter = Object.getOwnPropertyDescriptor(el, 'value')?.set;
+    const prototypeValueSetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
+    if (prototypeValueSetter && valueSetter !== prototypeValueSetter) {
+      prototypeValueSetter.call(el, value);
+    } else {
+      valueSetter?.call(el, value);
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+}
+
+function changeTextarea(el: HTMLTextAreaElement, value: string) {
   act(() => {
     const valueSetter = Object.getOwnPropertyDescriptor(el, 'value')?.set;
     const prototypeValueSetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
@@ -319,7 +342,7 @@ describe('AnimationsEditor', () => {
     view.unmount();
   });
 
-  it('generates a spritesheet candidate and inserts it into animations only after QA acceptance', async () => {
+  it('generates a spritesheet candidate and inserts it into animations only after visual and animation QA acceptance', async () => {
     const candidate: SpriteSheetGenerationCandidate = {
       id: 'sprite-gen-arc',
       reviewState: 'pending',
@@ -425,15 +448,127 @@ describe('AnimationsEditor', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(view.container.querySelector('[aria-label="Generated sprite sheet review"]')).not.toBeNull();
     expect(view.container.textContent).toContain('Visual QA checklist');
+    expect(view.container.textContent).toContain('Character animation QA');
+    expect(view.container.textContent).toContain('Runtime compatibility');
+    expect(button(view.container, 'Accept generated sprite sheet').disabled).toBe(true);
+
+    await clickAsync(view.container, 'Accept character animation QA');
 
     await clickAsync(view.container, 'Accept generated sprite sheet');
 
     expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
       id: 'arc_idle_sheet',
       kind: 'spritesheet',
-      tags: expect.arrayContaining(['reviewed', 'qa-reviewed']),
+      runtimeCompatible: true,
+      tags: expect.arrayContaining(['reviewed', 'qa-reviewed', 'animation-qa-reviewed']),
+      generated: expect.objectContaining({
+        animationQa: expect.objectContaining({
+          status: 'accepted',
+          notes: '',
+        }),
+      }),
     }));
     expect(onChange).toHaveBeenLastCalledWith({ sets: [candidate.animationSet] });
+
+    view.unmount();
+  });
+
+  it('rejects generated spritesheet candidates with animation QA notes without mutating project data', async () => {
+    const candidate: SpriteSheetGenerationCandidate = {
+      id: 'sprite-gen-arc',
+      reviewState: 'pending',
+      owner: { kind: 'actor', id: 'arc', name: 'Arc' },
+      sourceConceptAsset,
+      referenceAssets: [],
+      asset: {
+        id: 'arc_idle_sheet',
+        name: 'Arc Idle Sheet',
+        kind: 'spritesheet',
+        path: 'assets/generated/spritesheets/arc_idle_sheet.png',
+        source: 'generated',
+        tags: ['generated', 'spritesheet', 'character-spritesheet', 'actor', 'idle', 'down', 'ai-draft', 'pending-review'],
+        width: 256,
+        height: 64,
+        frameWidth: 64,
+        frameHeight: 64,
+        frames: 4,
+        generated: {
+          promptTemplateId: 'character-spritesheet-v1',
+          promptTemplateKind: 'spritesheet',
+          providerId: 'local',
+          modelId: 'offline-image-mock',
+          operation: 'image.generate',
+          ownerKind: 'actor',
+          ownerId: 'arc',
+          ownerName: 'Arc',
+          sourceAssetId: 'arc_concept',
+          sourceAssetPath: 'assets/generated/concepts/arc_concept.png',
+          spriteSheet: {
+            frameWidth: 64,
+            frameHeight: 64,
+            frameCount: 4,
+            action: 'idle',
+            direction: 'down',
+            frameLayout: 'horizontal-strip',
+            transparentBackgroundRequired: true,
+          },
+        },
+      },
+      animationSet: {
+        id: 'arc_idle',
+        display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+        clips: [
+          {
+            action: 'idle',
+            direction: 'down',
+            asset: 'arc_idle_sheet',
+            frameSize: { width: 64, height: 64 },
+            frameCount: 4,
+            fps: 8,
+            loop: true,
+            anchor: { x: 32, y: 54 },
+          },
+        ],
+      },
+      qaPreview: {
+        assetRef: 'mock://generated/sprite-gen-arc.png',
+        width: 256,
+        height: 64,
+        frameWidth: 64,
+        frameHeight: 64,
+        frameCount: 4,
+        frameLayout: 'horizontal-strip',
+        transparentBackgroundRequired: true,
+        providerFixture: 'offline-image',
+      },
+    };
+    const spriteSheetGenerator: SpriteSheetGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={{ sets: [] }}
+        assets={[sourceConceptAsset]}
+        spriteSheetGenerator={spriteSheetGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    click(view.container, 'Generate sprite sheet');
+    await clickAsync(view.container, 'Run sprite sheet generation');
+    changeTextarea(textarea(view.container, 'Character animation QA notes'), 'Foot anchors slide between frames.');
+
+    await clickAsync(view.container, 'Reject character animation QA');
+
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Animation QA rejected');
+    expect(view.container.textContent).toContain('Foot anchors slide between frames.');
+    expect(button(view.container, 'Accept generated sprite sheet').disabled).toBe(true);
 
     view.unmount();
   });

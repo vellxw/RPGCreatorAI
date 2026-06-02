@@ -143,6 +143,7 @@ export interface GeneratedAssetMetadata {
   referenceAssetIds?: string[];
   editMode?: 'edit' | 'variation';
   visualQa?: GeneratedImageVisualQaResult;
+  animationQa?: GeneratedAnimationQaResult;
   spriteSheet?: GeneratedSpriteSheetMetadata;
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
@@ -177,6 +178,34 @@ export interface GeneratedImageVisualQaResult {
   tags: string[];
   rejectionReason?: string;
   unresolvedWarnings: GeneratedImageVisualQaCheckId[];
+}
+
+export type GeneratedAnimationQaCheckId =
+  | 'preview'
+  | 'metadata'
+  | 'coverage'
+  | 'runtimeCompatibility';
+
+export type GeneratedAnimationQaStatus = 'accepted' | 'rejected';
+
+export interface GeneratedAnimationQaCheckResult {
+  id: GeneratedAnimationQaCheckId;
+  label: string;
+  status: GeneratedImageVisualQaCheckStatus;
+  notes: string;
+  expected?: string;
+  actual?: string;
+}
+
+export interface GeneratedAnimationQaResult {
+  status: GeneratedAnimationQaStatus;
+  reviewedAt: string;
+  score: number;
+  checks: Record<GeneratedAnimationQaCheckId, GeneratedAnimationQaCheckResult>;
+  notes: string;
+  tags: string[];
+  rejectionReason?: string;
+  unresolvedWarnings: GeneratedAnimationQaCheckId[];
 }
 
 export interface GeneratedSpriteSheetMetadata {

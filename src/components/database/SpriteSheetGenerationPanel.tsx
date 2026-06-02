@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import type { AnimationSetData, AssetCatalogEntry, Direction } from '../../types/project';
 import { Button } from '../ui/Button';
-import { CheckboxField, NumberField, SelectField, TextField } from './DatabaseFields';
+import { CheckboxField, NumberField, SelectField, TextareaField, TextField } from './DatabaseFields';
 import {
   GeneratedImageVisualQaReviewPanel,
   type GeneratedImageVisualQaReviewValue,
@@ -21,6 +21,12 @@ import {
   type SpriteSheetGenerationRunner,
   type SpriteSheetOwnerKind,
 } from '../../providers/spriteSheetGenerationWorkflow';
+import {
+  applyGeneratedAnimationQaResult,
+  buildGeneratedAnimationQaDraft,
+  finalizeGeneratedAnimationQaReview,
+  type GeneratedAnimationQaDraft,
+} from '../../providers/generatedAnimationQa';
 
 interface SpriteSheetGenerationPanelProps {
   assets: AssetCatalogEntry[];
@@ -126,6 +132,107 @@ function SpriteSheetMetadataPreview({ draft }: { draft: SpriteSheetGenerationDra
   );
 }
 
+function CharacterAnimationQaPanel({
+  draft,
+  notes,
+  status,
+  onNotesChange,
+  onAccept,
+  onReject,
+}: {
+  draft: GeneratedAnimationQaDraft;
+  notes: string;
+  status?: string;
+  onNotesChange(value: string): void;
+  onAccept(): void;
+  onReject(): void;
+}) {
+  const checks = Object.values(draft.checks);
+  const hasFailures = checks.some(check => check.status === 'fail');
+  const toneClass = status === 'accepted'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : status === 'rejected'
+      ? 'border-red-200 bg-red-50 text-red-700'
+      : 'border-sky-100 bg-sky-50 text-sky-700';
+
+  return (
+    <div aria-label="Character animation QA" className="border border-sky-100 bg-white p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-[12px] font-semibold text-sky-900">Character animation QA</p>
+          <p className="text-[11px] text-sky-700">
+            Review preview, metadata, coverage, and runtime compatibility before project insertion.
+          </p>
+        </div>
+        {status && (
+          <span className={`rounded border px-2 py-1 text-[11px] font-medium ${toneClass}`}>
+            Animation QA {status}
+          </span>
+        )}
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {checks.map(check => (
+          <div key={check.id} className="border border-gray-100 bg-gray-50 p-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold text-gray-700">{check.label}</p>
+              <span
+                className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                  check.status === 'pass'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : check.status === 'warning'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-red-100 text-red-700'
+                }`}
+              >
+                {check.status}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] text-gray-500">{check.notes}</p>
+            {(check.expected || check.actual) && (
+              <p className="mt-1 truncate font-mono text-[10px] text-gray-400">
+                {check.expected ?? 'expected unknown'} / {check.actual ?? 'actual unknown'}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-3">
+        <TextareaField
+          label="Character animation QA notes"
+          value={notes}
+          onChange={onNotesChange}
+          placeholder="Frame readability, anchor stability, rejection notes, or handoff details."
+        />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] text-gray-500">
+          {hasFailures
+            ? 'Resolve failed checks before accepting this generated animation.'
+            : 'All required generated-animation checks are ready for an explicit decision.'}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={onReject}
+            aria-label="Reject character animation QA"
+          >
+            Reject animation QA
+          </Button>
+          <Button
+            size="sm"
+            disabled={hasFailures}
+            onClick={onAccept}
+            aria-label="Accept character animation QA"
+          >
+            Accept animation QA
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SpriteSheetGenerationPanel({
   assets,
   existingAnimationSetIds,
@@ -140,6 +247,7 @@ export function SpriteSheetGenerationPanel({
   const [status, setStatus] = useState('');
   const [running, setRunning] = useState(false);
   const [qaReview, setQaReview] = useState<GeneratedImageVisualQaReviewValue>(EMPTY_QA_REVIEW);
+  const [animationQaNotes, setAnimationQaNotes] = useState('');
   const selectedSource = conceptAssets.find(asset => asset.id === sourceConceptAssetId);
   const sourceOptions = [
     { value: '', label: '(none)' },
@@ -153,6 +261,7 @@ export function SpriteSheetGenerationPanel({
     setDraft(createDraft(source));
     setCandidate(null);
     setQaReview(EMPTY_QA_REVIEW);
+    setAnimationQaNotes('');
     setStatus('');
     setOpen(true);
   };
@@ -183,6 +292,7 @@ export function SpriteSheetGenerationPanel({
     setRunning(true);
     setStatus('');
     setCandidate(null);
+    setAnimationQaNotes('');
     try {
       const result = await spriteSheetGenerator(
         assets.map(asset => asset.id),
@@ -198,6 +308,7 @@ export function SpriteSheetGenerationPanel({
       }
       setCandidate(result.candidate);
       setQaReview(EMPTY_QA_REVIEW);
+      setAnimationQaNotes('');
       setStatus('Candidate ready for review.');
     } catch (error) {
       setStatus((error as Error).message);
@@ -209,6 +320,10 @@ export function SpriteSheetGenerationPanel({
   const acceptCandidate = () => {
     if (!candidate) return;
     try {
+      if (candidate.asset.generated?.animationQa?.status !== 'accepted') {
+        setStatus('Accept character animation QA before adding this sprite sheet.');
+        return;
+      }
       const reviewedAt = new Date().toISOString();
       const qaResult = finalizeGeneratedImageVisualQaReview(
         buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
@@ -228,6 +343,50 @@ export function SpriteSheetGenerationPanel({
     } catch (error) {
       setStatus((error as Error).message);
     }
+  };
+
+  const acceptAnimationQa = () => {
+    if (!candidate) return;
+    try {
+      const reviewedAt = new Date().toISOString();
+      const draft = buildGeneratedAnimationQaDraft(candidate);
+      const result = finalizeGeneratedAnimationQaReview(draft, {
+        status: 'accepted',
+        reviewedAt,
+        notes: animationQaNotes,
+        tags: ['animation-qa-reviewed'],
+      });
+      setCandidate({
+        ...candidate,
+        asset: applyGeneratedAnimationQaResult(candidate.asset, result),
+      });
+      setStatus('Animation QA accepted.');
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
+  };
+
+  const rejectAnimationQa = () => {
+    if (!candidate) return;
+    const notes = animationQaNotes.trim();
+    if (!notes) {
+      setStatus('Character animation QA rejection notes are required.');
+      return;
+    }
+    const reviewedAt = new Date().toISOString();
+    const draft = buildGeneratedAnimationQaDraft(candidate);
+    const result = finalizeGeneratedAnimationQaReview(draft, {
+      status: 'rejected',
+      reviewedAt,
+      notes,
+      rejectionReason: notes,
+      tags: ['animation-qa-rejected'],
+    });
+    setCandidate({
+      ...candidate,
+      asset: applyGeneratedAnimationQaResult(candidate.asset, result),
+    });
+    setStatus(`Animation QA rejected: ${notes}`);
   };
 
   const rejectCandidate = () => {
@@ -355,6 +514,21 @@ export function SpriteSheetGenerationPanel({
                   </p>
                 </div>
                 <div className="col-span-2">
+                  <CharacterAnimationQaPanel
+                    draft={buildGeneratedAnimationQaDraft(candidate)}
+                    notes={animationQaNotes}
+                    status={candidate.asset.generated?.animationQa?.status}
+                    onNotesChange={setAnimationQaNotes}
+                    onAccept={acceptAnimationQa}
+                    onReject={rejectAnimationQa}
+                  />
+                  {candidate.asset.generated?.animationQa?.status === 'rejected' && (
+                    <p className="mt-2 rounded border border-red-100 bg-red-50 px-2 py-1 text-[11px] text-red-700">
+                      {candidate.asset.generated.animationQa.notes}
+                    </p>
+                  )}
+                </div>
+                <div className="col-span-2">
                   <GeneratedImageVisualQaReviewPanel
                     asset={candidate.asset}
                     preview={candidate.qaPreview}
@@ -382,6 +556,7 @@ export function SpriteSheetGenerationPanel({
                   <Button
                     size="sm"
                     onClick={acceptCandidate}
+                    disabled={candidate.asset.generated?.animationQa?.status !== 'accepted'}
                     aria-label="Accept generated sprite sheet"
                   >
                     Accept

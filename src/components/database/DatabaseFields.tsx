@@ -67,6 +67,8 @@ export function CheckboxField({ label, checked, onChange, className = '', ...pro
 export interface SelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
+  title?: string;
 }
 
 type SelectFieldProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange' | 'value'> & {
@@ -88,7 +90,12 @@ export function SelectField({ label, value, options, onChange, className = '', .
         {...props}
       >
         {options.map(option => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+            title={option.title}
+          >
             {option.label}
           </option>
         ))}

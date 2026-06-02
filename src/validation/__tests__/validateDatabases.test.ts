@@ -617,6 +617,68 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('uses runtime-incompatible spritesheet asset "hero_bad_sheet"'))).toBe(true);
   });
 
+  it('rejects player animation sets that use generated assets rejected by character animation QA', () => {
+    const project = projectWith({
+      animations: {
+        sets: [
+          directionalAnimationSet('player_adventurer', playerCoverageActions),
+          {
+            id: 'rejected_generated_actor',
+            display: { heightTiles: 1.5, widthTiles: 1, yOffsetPx: 0 },
+            clips: [animationClip('idle', 'down', 'rejected_actor_idle_sheet')],
+          },
+        ],
+      },
+      system: { startingParty: [], startingGold: 0, playerAnimationSet: 'rejected_generated_actor' },
+    });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'rejected_actor_idle_sheet',
+          name: 'Rejected Actor Idle Sheet',
+          kind: 'spritesheet',
+          path: 'assets/generated/spritesheets/rejected_actor_idle_sheet.png',
+          source: 'generated',
+          tags: ['generated', 'spritesheet', 'animation-qa-rejected'],
+          width: 256,
+          height: 64,
+          frameWidth: 64,
+          frameHeight: 64,
+          frames: 4,
+          runtimeCompatible: true,
+          generated: {
+            promptTemplateId: 'character-spritesheet-v1',
+            spriteSheet: {
+              frameWidth: 64,
+              frameHeight: 64,
+              frameCount: 4,
+              action: 'idle',
+              direction: 'down',
+              frameLayout: 'horizontal-strip',
+              transparentBackgroundRequired: true,
+            },
+            animationQa: {
+              status: 'rejected',
+              reviewedAt: '2026-06-02T00:00:00.000Z',
+              notes: 'Foot anchors slide between frames.',
+              tags: ['animation-qa-rejected'],
+              rejectionReason: 'Foot anchors slide between frames.',
+              unresolvedWarnings: [],
+              checks: {},
+            },
+          } as unknown as AssetCatalogEntry['generated'],
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e =>
+      e.message.includes('System playerAnimationSet "rejected_generated_actor" uses rejected character animation QA asset "rejected_actor_idle_sheet"'),
+    )).toBe(true);
+  });
+
   it('rejects malformed types and missing required terms', () => {
     const project = projectWith({
       types: {

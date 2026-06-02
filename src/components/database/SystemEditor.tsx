@@ -8,6 +8,7 @@ interface SystemEditorProps {
   actors: ActorData[];
   animations: AnimationSetData[];
   terms?: TermsDatabaseData;
+  blockedAnimationSetIds?: Record<string, string>;
   onChange(changes: Partial<SystemData>): void;
 }
 
@@ -20,14 +21,32 @@ const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
   { value: 'quadruple', label: 'Quadruple' },
 ];
 
-export function SystemEditor({ system, actors, animations, terms, onChange }: SystemEditorProps) {
-  const animationOptions = animations.map(set => ({ value: set.id, label: set.id }));
+export function SystemEditor({
+  system,
+  actors,
+  animations,
+  terms,
+  blockedAnimationSetIds = {},
+  onChange,
+}: SystemEditorProps) {
+  const animationOptions = animations.map(set => {
+    const blockReason = blockedAnimationSetIds[set.id];
+    return {
+      value: set.id,
+      label: blockReason ? `${set.id} (${blockReason})` : set.id,
+      disabled: Boolean(blockReason),
+      title: blockReason,
+    };
+  });
   const actorOptions = actors.map(actor => ({ value: actor.id, label: actor.name || actor.id }));
   const registry = system.audio ?? {};
   const audioEntries = Object.entries(registry);
   const bgmOptions = audioOptions(registry);
   const currencyUnit = terms?.currencyUnit?.trim();
   const startingGoldLabel = currencyUnit ? `Starting gold (${currencyUnit})` : 'Starting gold';
+  const selectedAnimationBlockReason = system.playerAnimationSet
+    ? blockedAnimationSetIds[system.playerAnimationSet]
+    : undefined;
   if (system.defaultBgm && !bgmOptions.some(option => option.value === system.defaultBgm)) {
     bgmOptions.push({ value: system.defaultBgm, label: `${system.defaultBgm} (unknown)` });
   }
@@ -51,6 +70,11 @@ export function SystemEditor({ system, actors, animations, terms, onChange }: Sy
         .filter(([id]) => id !== ''),
     );
     onChange({ audio });
+  };
+
+  const setPlayerAnimationSet = (playerAnimationSet: string) => {
+    if (playerAnimationSet && blockedAnimationSetIds[playerAnimationSet]) return;
+    onChange({ playerAnimationSet: playerAnimationSet || undefined });
   };
 
   return (
@@ -109,8 +133,13 @@ export function SystemEditor({ system, actors, animations, terms, onChange }: Sy
         value={system.playerAnimationSet ?? ''}
         options={animationOptions}
         emptyLabel="(none)"
-        onChange={playerAnimationSet => onChange({ playerAnimationSet: playerAnimationSet || undefined })}
+        onChange={setPlayerAnimationSet}
       />
+      {selectedAnimationBlockReason && (
+        <p className="rounded border border-red-100 bg-red-50 px-2 py-1 text-[11px] text-red-700">
+          Player animation set "{system.playerAnimationSet}" is blocked: {selectedAnimationBlockReason}.
+        </p>
+      )}
       <SelectField
         label="Player movement speed"
         value={system.playerMovementSpeed ?? 'double'}

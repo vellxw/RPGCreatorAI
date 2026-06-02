@@ -27,6 +27,7 @@ import { TilesetEditor } from '../components/database/TilesetEditor';
 import { TroopsEditor } from '../components/database/TroopsEditor';
 import { TypesEditor } from '../components/database/TypesEditor';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
+import { findCharacterAnimationQaBlockedAnimationSets } from '../providers/generatedAnimationQa';
 import {
   flattenCommands,
   useProjectStore,
@@ -1035,6 +1036,10 @@ export function DatabaseScreen() {
     }
     return sources;
   }, [state.assets, state.databases, state.items, state.maps, state.project]);
+  const blockedAnimationSetIds = useMemo(
+    () => findCharacterAnimationQaBlockedAnimationSets(databases.animations.sets, state.assets.assets),
+    [databases.animations.sets, state.assets.assets],
+  );
 
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
@@ -1102,6 +1107,7 @@ export function DatabaseScreen() {
             actors={databases.actors}
             animations={databases.animations.sets}
             terms={databases.terms}
+            blockedAnimationSetIds={blockedAnimationSetIds}
             onChange={changes => dispatch({ type: 'UPDATE_SYSTEM_DATA', changes })}
           />
         ) : tab === 'types' ? (

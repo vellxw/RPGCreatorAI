@@ -25,6 +25,7 @@ import {
   pluginCommandKey,
   type PluginCommandArgDefinition,
 } from '../plugins/pluginCommandRegistry';
+import { isCharacterAnimationQaRejectedAsset } from '../providers/generatedAnimationQa';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
 const VALID_COMMON_EVENT_TRIGGERS = ['manual', 'autorun', 'parallel'];
@@ -1073,6 +1074,7 @@ function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogDat
   const seenSetIds = new Set<string>();
   const validAnimationAssets = new Set<string>(ANIMATION_SHEET_KEY_SET);
   const catalogSpritesheets = new Map<string, NonNullable<AssetCatalogData['assets'][number]>>();
+  const rejectedQaAssetsBySet = new Map<string, string>();
   for (const asset of assets?.assets ?? []) {
     if (asset.kind === 'spritesheet') {
       validAnimationAssets.add(asset.id);
@@ -1116,6 +1118,16 @@ function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogDat
         });
       }
       const catalogAsset = catalogSpritesheets.get(clip.asset);
+      if (isCharacterAnimationQaRejectedAsset(catalogAsset)) {
+        out.push({
+          level: 'error',
+          message: `${label} uses rejected character animation QA asset "${clip.asset}"`,
+          source,
+        });
+        if (!rejectedQaAssetsBySet.has(set.id)) {
+          rejectedQaAssetsBySet.set(set.id, clip.asset);
+        }
+      }
       if (catalogAsset?.runtimeCompatible === false) {
         out.push({
           level: 'error',
@@ -1174,6 +1186,17 @@ function validateAnimationDatabase(db: DatabaseEntries, assets?: AssetCatalogDat
     });
 
     out.push(...validateAnimationCoverage(set, db.system.playerAnimationSet || 'player_adventurer'));
+  }
+
+  if (db.system.playerAnimationSet) {
+    const rejectedAssetId = rejectedQaAssetsBySet.get(db.system.playerAnimationSet);
+    if (rejectedAssetId) {
+      out.push({
+        level: 'error',
+        message: `System playerAnimationSet "${db.system.playerAnimationSet}" uses rejected character animation QA asset "${rejectedAssetId}"`,
+        source: 'database/system',
+      });
+    }
   }
 
   return out;

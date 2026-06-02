@@ -5829,3 +5829,42 @@ Error: Port 1420 is already in use
 - `2026-06-02 19:45:00 -03:00` -
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" scripts\dev\export_runtime_assets.py tests\test_runtime_asset_export.py tests\test_sprite_catalog.cpp data\assets\runtime-manifest.json`
   - PASS for CP-078 scope; no matches.
+
+### Phase 11 FRA-114 / CP-079 - character animation QA review surface
+
+- `2026-06-02 19:50:53 -03:00` -
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  - FAIL as expected during TDD red step; the character animation QA review
+  panel, QA notes textarea, blocked animation-set options, and validation
+  error for rejected character animation QA assets did not exist.
+- `2026-06-02 19:55:12 -03:00` -
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  - PASS after adding explicit animation QA accept/reject metadata, disabled
+  failed-QA player animation assignment options, and validator coverage; 3
+  files and 39 tests passed.
+- `2026-06-02 19:55:40 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 19:56:01 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 84 files and 453 tests.
+- `2026-06-02 19:56:01 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1958 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 19:58:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\generatedAnimationQa.ts src\components\database\SpriteSheetGenerationPanel.tsx src\components\database\SystemEditor.tsx src\screens\DatabaseScreen.tsx src\validation\validateProject.ts src\components\database\__tests__\AnimationsEditor.test.tsx src\components\database\__tests__\SetupProgressionEditors.test.tsx src\validation\__tests__\validateDatabases.test.ts`
+  - PASS for CP-079 scope; no matches.
+- `2026-06-02 20:03:00 -03:00` -
+  Browser plugin smoke - PARTIAL PASS; loaded `http://127.0.0.1:3003/`,
+  opened the bundled sample, and reached the editor, then Browser CDP
+  locator/screenshot commands timed out before completing the Database flow.
+- `2026-06-02 20:08:00 -03:00` -
+  `npx --yes @playwright/cli -s=cp079 open http://127.0.0.1:3003/`,
+  followed by snapshot/click commands for bundled sample, Database,
+  Animations, sprite sheet generation, offline mock run, and animation QA
+  acceptance - PASS; confirmed `Character animation QA`, `Runtime
+  compatibility`, final accept disabled before animation QA approval, and final
+  accept enabled after `Accept character animation QA`. Temporary
+  `.playwright-cli` artifacts were removed after the smoke.
+- `2026-06-02 20:11:14 -03:00` - pre-commit focused rerun:
+  `npm run typecheck` and
+  `npm test -- --run src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  - PASS; TypeScript passed and focused CP-079 suites passed 3 files and 39
+  tests.

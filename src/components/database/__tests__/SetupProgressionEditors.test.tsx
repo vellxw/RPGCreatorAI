@@ -285,4 +285,39 @@ describe('setup and progression database editors', () => {
 
     view.unmount();
   });
+
+  it('prevents assigning animation sets blocked by failed character animation QA', () => {
+    const onChange = vi.fn();
+    const animations: AnimationSetData[] = [
+      { id: 'player_adventurer', clips: [] },
+      { id: 'rejected_generated_actor', clips: [] },
+    ];
+    const system: SystemData = {
+      startingParty: ['arc'],
+      startingGold: 50,
+      playerAnimationSet: 'player_adventurer',
+    };
+    const view = render(
+      <SystemEditor
+        system={system}
+        actors={actors}
+        animations={animations}
+        blockedAnimationSetIds={{
+          rejected_generated_actor: 'failed character animation QA',
+        }}
+        onChange={onChange}
+      />,
+    );
+
+    const playerAnimationSet = select(view.container, 'Player animation set');
+    const rejectedOption = Array.from(playerAnimationSet.options)
+      .find(option => option.value === 'rejected_generated_actor');
+
+    expect(rejectedOption?.disabled).toBe(true);
+    expect(view.container.textContent).toContain('failed character animation QA');
+    changeSelect(playerAnimationSet, 'rejected_generated_actor');
+    expect(onChange).not.toHaveBeenCalled();
+
+    view.unmount();
+  });
 });

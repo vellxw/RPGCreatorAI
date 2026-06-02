@@ -44,13 +44,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`
 - `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`
 - `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`
+- `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 09 — AI characters and animations (CP-079 next).
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-080 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -549,6 +550,14 @@ Primary Phase 11 sources:
   `data/assets/runtime-manifest.json`, and preserves the native
   `SpriteCatalog::runtimePathFor` convention. Evidence is recorded in
   `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`.
+- Phase 11 CP-079 — character animation QA review surface completed.
+  Generated sprite sheet candidates now require explicit character animation
+  QA before entering project animation data, with preview, metadata, coverage,
+  runtime compatibility, reviewer notes, accept/reject metadata, UI blocking
+  for failed-QA player animation assignments, and validator errors for
+  rejected generated animation assets in runtime-critical player slots.
+  Evidence is recorded in
+  `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
