@@ -138,7 +138,7 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
           price: -1,
           params: { attack: Number.NaN },
           animationId: 'missing_animation',
-          traits: [],
+          traits: ['sharp', '', 'sharp'],
         },
       ],
       armors: [
@@ -150,7 +150,7 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
           slot: 'shield',
           price: -5,
           params: { defense: Number.POSITIVE_INFINITY },
-          traits: [],
+          traits: ['guarded', 'guarded', ''],
         },
       ],
       states: [
@@ -160,7 +160,7 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
           priority: 200,
           removeAtBattleEnd: false,
           restriction: 'sleep' as never,
-          traits: [],
+          traits: ['poisoned', '', 'poisoned'],
         },
       ],
     });
@@ -185,10 +185,16 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" references unknown weapon type "axe"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" price must be non-negative'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" references unknown animation "missing_animation"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" trait 2 is blank'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Weapon "bad_weapon" has duplicate trait "sharp"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Armor "bad_armor" references unknown armor type "plate"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Armor "bad_armor" references unknown equipment slot "shield"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Armor "bad_armor" trait 3 is blank'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Armor "bad_armor" has duplicate trait "guarded"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('State "bad_state" priority must be between 0 and 100'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('State "bad_state" has invalid restriction "sleep"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('State "bad_state" trait 2 is blank'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('State "bad_state" has duplicate trait "poisoned"'))).toBe(true);
   });
 
   it('rejects invalid party and combat references and numeric ranges', () => {

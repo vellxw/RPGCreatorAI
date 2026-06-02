@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ArrayFieldEditor } from './ArrayFieldEditor';
 import {
   NumberField,
   TextareaField,
@@ -11,6 +12,7 @@ import {
   FALLBACK_WEAPON_TYPES,
   namedTypeOptions,
 } from './databaseOptions';
+import { STAT_FIELDS, STAT_LABELS } from './partyCombatFields';
 import type { ArmorData, Stats, TypesDatabaseData, WeaponData } from '../../types/project';
 
 type EquipmentEditorProps =
@@ -31,13 +33,6 @@ type EquipmentEditorProps =
       onChange(changes: Partial<ArmorData>): void;
     };
 
-function splitTraits(value: string): string[] {
-  return value
-    .split(',')
-    .map(part => part.trim())
-    .filter(Boolean);
-}
-
 function updateParam<T extends WeaponData | ArmorData>(
   entry: T,
   key: keyof Stats,
@@ -51,15 +46,77 @@ function updateParam<T extends WeaponData | ArmorData>(
   } as Partial<T>;
 }
 
+function createTrait(values: string[]): string {
+  const base = 'new_trait';
+  if (!values.includes(base)) return base;
+  let suffix = 2;
+  while (values.includes(`${base}_${suffix}`)) suffix += 1;
+  return `${base}_${suffix}`;
+}
+
+interface TraitListProps {
+  label: string;
+  itemLabel: string;
+  values: string[];
+  onChange(values: string[]): void;
+}
+
+function TraitList({ label, itemLabel, values, onChange }: TraitListProps) {
+  return (
+    <ArrayFieldEditor
+      label={label}
+      values={values}
+      createValue={() => createTrait(values)}
+      emptyLabel={`No ${label.toLowerCase()} configured.`}
+      onChange={onChange}
+      renderItem={({ value, index, onChange: onItemChange }) => (
+        <TextField
+          label={`${itemLabel} ${index + 1}`}
+          value={value}
+          onChange={onItemChange}
+        />
+      )}
+    />
+  );
+}
+
+interface ModifierGridProps<T extends WeaponData | ArmorData> {
+  label: string;
+  entry: T;
+  onChange(changes: Partial<T>): void;
+}
+
+function ModifierGrid<T extends WeaponData | ArmorData>({
+  label,
+  entry,
+  onChange,
+}: ModifierGridProps<T>) {
+  return (
+    <div>
+      <p className="mb-2 text-[12px] font-medium text-gray-500">Stat modifiers</p>
+      <div className="grid grid-cols-2 gap-3">
+        {STAT_FIELDS.map(field => (
+          <NumberField
+            key={field}
+            label={`${label} modifier ${STAT_LABELS[field]}`}
+            value={entry.params?.[field] ?? 0}
+            onChange={amount => onChange(updateParam(entry, field, amount))}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function EquipmentEditor(props: EquipmentEditorProps) {
   const { idField } = props;
 
   if (props.kind === 'weapon') {
     const entry = props.entry;
-    const traitText = (entry.traits ?? []).join(', ');
     const weaponTypeOptions = namedTypeOptions(props.types.weaponTypes, FALLBACK_WEAPON_TYPES);
+    const traits = entry.traits ?? [];
     return (
-      <div className="space-y-3 max-w-xl">
+      <div className="space-y-4 max-w-2xl">
         {idField}
         <TextField label="Name" value={entry.name} onChange={name => props.onChange({ name })} />
         <TextareaField
@@ -81,35 +138,34 @@ export function EquipmentEditor(props: EquipmentEditorProps) {
             onChange={price => props.onChange({ price })}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <NumberField
-            label="Weapon attack"
-            value={entry.params?.attack ?? 0}
-            onChange={amount => props.onChange(updateParam(entry, 'attack', amount))}
-          />
-          <ReferenceSelect
-            label="Animation"
-            value={entry.animationId ?? ''}
-            options={props.animationOptions}
-            emptyLabel="(none)"
-            onChange={animationId => props.onChange({ animationId })}
-          />
-        </div>
-        <TextField
-          label="Traits"
-          value={traitText}
-          onChange={value => props.onChange({ traits: splitTraits(value) })}
+        <ReferenceSelect
+          label="Animation"
+          value={entry.animationId ?? ''}
+          options={props.animationOptions}
+          emptyLabel="(none)"
+          onChange={animationId => props.onChange({ animationId })}
+        />
+        <ModifierGrid
+          label="Weapon"
+          entry={entry}
+          onChange={changes => props.onChange(changes)}
+        />
+        <TraitList
+          label="Weapon traits"
+          itemLabel="Weapon trait"
+          values={traits}
+          onChange={traits => props.onChange({ traits })}
         />
       </div>
     );
   }
 
   const entry = props.entry;
-  const traitText = (entry.traits ?? []).join(', ');
+  const traits = entry.traits ?? [];
   const armorTypeOptions = namedTypeOptions(props.types.armorTypes, FALLBACK_ARMOR_TYPES);
   const slotOptions = namedTypeOptions(props.types.equipmentSlots, FALLBACK_EQUIPMENT_SLOTS);
   return (
-    <div className="space-y-3 max-w-xl">
+    <div className="space-y-4 max-w-2xl">
       {idField}
       <TextField label="Name" value={entry.name} onChange={name => props.onChange({ name })} />
       <TextareaField
@@ -133,21 +189,22 @@ export function EquipmentEditor(props: EquipmentEditorProps) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <NumberField
-          label="Armor defense"
-          value={entry.params?.defense ?? 0}
-          onChange={amount => props.onChange(updateParam(entry, 'defense', amount))}
-        />
-        <NumberField
           label="Armor price"
           value={entry.price ?? 0}
           min={0}
           onChange={price => props.onChange({ price })}
         />
       </div>
-      <TextField
-        label="Traits"
-        value={traitText}
-        onChange={value => props.onChange({ traits: splitTraits(value) })}
+      <ModifierGrid
+        label="Armor"
+        entry={entry}
+        onChange={changes => props.onChange(changes)}
+      />
+      <TraitList
+        label="Armor traits"
+        itemLabel="Armor trait"
+        values={traits}
+        onChange={traits => props.onChange({ traits })}
       />
     </div>
   );

@@ -514,6 +514,37 @@ function validateStatParams(
   return out;
 }
 
+function validateTraitList(
+  label: string,
+  source: string,
+  traits: string[] | undefined,
+): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  if (!traits) return out;
+  const seen = new Set<string>();
+  traits.forEach((trait, index) => {
+    const normalized = trait.trim();
+    if (!normalized) {
+      out.push({
+        level: 'error',
+        message: `${label} trait ${index + 1} is blank`,
+        source,
+      });
+      return;
+    }
+    if (seen.has(normalized)) {
+      out.push({
+        level: 'error',
+        message: `${label} has duplicate trait "${normalized}"`,
+        source,
+      });
+      return;
+    }
+    seen.add(normalized);
+  });
+  return out;
+}
+
 function validateDatabaseInternal(db: DatabaseEntries): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   out.push(...validateAudioRegistry(db));
@@ -1098,6 +1129,7 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
       });
     }
     out.push(...validateStatParams(`Weapon "${weapon.id}"`, source, weapon.params));
+    out.push(...validateTraitList(`Weapon "${weapon.id}"`, source, weapon.traits));
   }
 
   for (const armor of db.armors) {
@@ -1124,6 +1156,7 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
       });
     }
     out.push(...validateStatParams(`Armor "${armor.id}"`, source, armor.params));
+    out.push(...validateTraitList(`Armor "${armor.id}"`, source, armor.traits));
   }
 
   for (const state of db.states) {
@@ -1142,6 +1175,7 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
         source,
       });
     }
+    out.push(...validateTraitList(`State "${state.id}"`, source, state.traits));
   }
 
   return out;

@@ -436,6 +436,95 @@ TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime")
     fs::remove_all(root);
 }
 
+TEST_CASE("RuntimeProjectValidator reports item equipment data gaps before runtime") {
+    const fs::path root = makeFixtureRoot("item_equipment_database");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": []
+        })",
+        R"({
+            "items": "database/items.json",
+            "actors": "database/actors.json",
+            "classes": "database/classes.json",
+            "system": "database/system.json"
+        })");
+
+    writeFile(root / "database" / "items.json", R"({
+        "schemaVersion": 1,
+        "items": [
+            {
+                "id": "bad_blade",
+                "name": "Bad Blade",
+                "price": -10,
+                "slot": "ring",
+                "effect": { "hp": "lots" },
+                "modifiers": { "attack": "heavy" }
+            }
+        ]
+    })");
+    writeFile(root / "database" / "actors.json", R"({
+        "schemaVersion": 1,
+        "actors": [
+            {
+                "id": "hero",
+                "name": "Hero",
+                "classId": "",
+                "level": 1,
+                "hp": 10,
+                "mp": 0,
+                "baseStats": {
+                    "maxHp": 10,
+                    "maxMp": 0,
+                    "attack": 1,
+                    "defense": 1,
+                    "magicAttack": 1,
+                    "magicDefense": 1,
+                    "agility": 1,
+                    "luck": 1
+                },
+                "equipment": { "ring": "bad_blade" },
+                "skills": []
+            }
+        ]
+    })");
+    writeFile(root / "database" / "classes.json", R"({
+        "schemaVersion": 1,
+        "classes": []
+    })");
+    writeFile(root / "database" / "system.json", R"({
+        "schemaVersion": 1,
+        "startingParty": ["hero"]
+    })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Item \"bad_blade\" price must be a non-negative finite number"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Item \"bad_blade\" effect.hp must be finite"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Item \"bad_blade\" modifier attack must be finite"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Item \"bad_blade\" uses unsupported equipment slot \"ring\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Actor \"hero\" equipment slot \"ring\" is not supported by the runtime"));
+
+    fs::remove_all(root);
+}
+
 TEST_CASE("RuntimeProjectValidator validates registered plugin command metadata") {
     const fs::path root = makeFixtureRoot("plugin_registry");
     writeMinimalProject(

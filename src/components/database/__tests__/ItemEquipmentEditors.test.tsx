@@ -115,7 +115,7 @@ describe('item, equipment, and state database editors', () => {
       items: [expect.objectContaining({ slot: 'accessory' })],
     });
 
-    changeText(input(view.container, 'Modifier attack'), '3');
+    changeText(input(view.container, 'Item modifier Attack'), '3');
     expect(onChange).toHaveBeenLastCalledWith({
       items: [expect.objectContaining({ modifiers: expect.objectContaining({ attack: 3 }) })],
     });
@@ -204,7 +204,7 @@ describe('item, equipment, and state database editors', () => {
       price: 80,
       params: {},
       animationId: '',
-      traits: [],
+      traits: ['sharp'],
     };
     const armor: ArmorData = {
       id: 'leather_armor',
@@ -214,7 +214,7 @@ describe('item, equipment, and state database editors', () => {
       slot: 'body',
       price: 60,
       params: {},
-      traits: [],
+      traits: ['guarded'],
     };
 
     const weaponView = render(
@@ -229,12 +229,18 @@ describe('item, equipment, and state database editors', () => {
     );
     changeSelect(select(weaponView.container, 'Weapon type'), 'staff');
     expect(onWeaponChange).toHaveBeenLastCalledWith({ weaponTypeId: 'staff' });
-    changeText(input(weaponView.container, 'Weapon attack'), '5');
+    changeText(input(weaponView.container, 'Weapon modifier Attack'), '5');
     expect(onWeaponChange).toHaveBeenLastCalledWith({ params: { attack: 5 } });
+    changeText(input(weaponView.container, 'Weapon modifier Luck'), '2');
+    expect(onWeaponChange).toHaveBeenLastCalledWith({ params: { luck: 2 } });
     changeSelect(select(weaponView.container, 'Animation'), 'slash');
     expect(onWeaponChange).toHaveBeenLastCalledWith({ animationId: 'slash' });
-    changeText(input(weaponView.container, 'Traits'), 'sharp, twoHanded');
-    expect(onWeaponChange).toHaveBeenLastCalledWith({ traits: ['sharp', 'twoHanded'] });
+    changeText(input(weaponView.container, 'Weapon trait 1'), 'keen');
+    expect(onWeaponChange).toHaveBeenLastCalledWith({ traits: ['keen'] });
+    act(() => {
+      button(weaponView.container, 'Add Weapon traits item').click();
+    });
+    expect(onWeaponChange).toHaveBeenLastCalledWith({ traits: ['sharp', 'new_trait'] });
     weaponView.unmount();
 
     const armorView = render(
@@ -251,8 +257,14 @@ describe('item, equipment, and state database editors', () => {
     expect(onArmorChange).toHaveBeenLastCalledWith({ armorTypeId: 'heavy' });
     changeSelect(select(armorView.container, 'Armor slot'), 'shield');
     expect(onArmorChange).toHaveBeenLastCalledWith({ slot: 'shield' });
-    changeText(input(armorView.container, 'Armor defense'), '4');
+    changeText(input(armorView.container, 'Armor modifier Defense'), '4');
     expect(onArmorChange).toHaveBeenLastCalledWith({ params: { defense: 4 } });
+    changeText(input(armorView.container, 'Armor modifier Magic Defense'), '6');
+    expect(onArmorChange).toHaveBeenLastCalledWith({ params: { magicDefense: 6 } });
+    act(() => {
+      button(armorView.container, 'Remove Armor traits item 1').click();
+    });
+    expect(onArmorChange).toHaveBeenLastCalledWith({ traits: [] });
     armorView.unmount();
   });
 
@@ -264,7 +276,7 @@ describe('item, equipment, and state database editors', () => {
       priority: 50,
       removeAtBattleEnd: false,
       restriction: 'none',
-      traits: [],
+      traits: ['damageOverTime'],
     };
     const view = render(<StatesEditor entry={state} idField={<span />} onChange={onChange} />);
 
@@ -274,8 +286,12 @@ describe('item, equipment, and state database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({ removeAtBattleEnd: true });
     changeSelect(select(view.container, 'Restriction'), 'cannotMove');
     expect(onChange).toHaveBeenLastCalledWith({ restriction: 'cannotMove' });
-    changeText(input(view.container, 'Traits'), 'damageOverTime, venom');
-    expect(onChange).toHaveBeenLastCalledWith({ traits: ['damageOverTime', 'venom'] });
+    changeText(input(view.container, 'State trait 1'), 'venom');
+    expect(onChange).toHaveBeenLastCalledWith({ traits: ['venom'] });
+    act(() => {
+      button(view.container, 'Add State traits item').click();
+    });
+    expect(onChange).toHaveBeenLastCalledWith({ traits: ['damageOverTime', 'new_trait'] });
 
     view.unmount();
   });

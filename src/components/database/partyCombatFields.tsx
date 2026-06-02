@@ -19,7 +19,7 @@ export function splitIds(value: string): string[] {
     .filter(Boolean);
 }
 
-const STAT_LABELS: Record<keyof Stats, string> = {
+export const STAT_LABELS: Record<keyof Stats, string> = {
   maxHp: 'Max HP',
   maxMp: 'Max MP',
   attack: 'Attack',

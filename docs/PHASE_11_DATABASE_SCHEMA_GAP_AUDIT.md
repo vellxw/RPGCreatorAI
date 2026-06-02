@@ -18,8 +18,10 @@ CP-041 also closed two small preservation gaps found during the audit:
   optional `database.audio` shards without dropping `audio`, `sounds`, or
   `bgm` entries.
 - Native `ProjectLoader` now records optional `database.weapons`,
-  `database.armors`, and `database.states` paths. Runtime v1 still does not
-  consume those separated shards directly; that remains CP-044 scope.
+  `database.armors`, and `database.states` paths. CP-044 resolved this
+  boundary by keeping those separated shards as editor/validation data for v1
+  while strengthening runtime pre-launch checks for the item/equipment records
+  that native gameplay actually consumes.
 
 No new Linear issues were created because the large gaps map to existing
 milestone 05 work: CP-042 through CP-048. This audit documents exactly which
@@ -51,13 +53,13 @@ Legend:
 
 | Shard | TS schema | JSON fixture | Editor/desktop preservation | TS validation | Native loader/validator | Runtime consumption | Status | Owner |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `items` | Yes | Yes | Yes | Duplicate ids, category/slot/effect/modifier checks | `ProjectLoader`, `ItemDatabase`, `RpgDatabases`, validator refs | Inventory, shops, drops, rewards, equipment modifiers | Full | CP-044 for polish |
+| `items` | Yes | Yes | Yes | Duplicate ids, category/slot/effect/modifier checks | `ProjectLoader`, `ItemDatabase`, `RpgDatabases`, validator refs and CP-044 item/equipment range checks | Inventory, shops, drops, rewards, equipment modifiers | Full | CP-044 |
 | `actors` | Yes | Yes | Yes | Stats, class/skill/equipment refs, numeric bounds | `RpgDatabases`, validator refs | Party menu, battle stats, starting party | Full | CP-042 |
 | `classes` | Yes | Yes | Yes | Growth, usable equipment refs, learned skill refs | `RpgDatabases` loads id/name/growth; validator checks learned skills | Battle stat growth; learned skills are authoring-only in v1 | Partial | CP-042 |
 | `skills` | Yes | Yes | Yes | Cost, power, target, element refs | `RpgDatabases` loads combat fields; validator collects ids | Battle/menu metadata depth remains limited | Partial | CP-042 |
-| `weapons` | Yes | Yes | Yes | Type, price, animation, stat param checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only gap | CP-044 |
-| `armors` | Yes | Yes | Yes | Type, slot, price, stat param checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only gap | CP-044 |
-| `states` | Yes | Yes | Yes | Priority/restriction checks | `ProjectLoader` records path after CP-041; validator does not index directly | No runtime status-effect simulation in v1 | Editor-only gap | CP-044 |
+| `weapons` | Yes | Yes | Yes | Type, price, animation, stat param, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only | CP-044 completed for authoring polish |
+| `armors` | Yes | Yes | Yes | Type, slot, price, stat param, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only | CP-044 completed for authoring polish |
+| `states` | Yes | Yes | Yes | Priority, restriction, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | No runtime status-effect simulation in v1 | Editor-only | CP-044 completed for authoring polish |
 | `types` | Yes | Yes | Yes | Required equipment slots, ids, names | `ProjectLoader` records path; native runtime does not load values | Editor labels/reference option tables only | Editor-only | CP-045 |
 | `terms` | Yes | Yes | Yes | Required currency/stat/menu/command/battle/save labels | `ProjectLoader` records path; native runtime does not load values | Editor/system terminology only | Editor-only | CP-045 |
 | `enemies` | Yes | Yes | Yes | Stats, exp/gold/drop rates, drop refs | `RpgDatabases`, validator refs | Battle enemies, rewards | Full | CP-043 |
@@ -77,9 +79,10 @@ Legend:
 1. Separated equipment/state runtime depth - high impact, medium risk.
    `weapons`, `armors`, and `states` are first-class editor shards, but native
    battle/equipment behavior still uses item records for v1 equipment
-   modifiers and has no runtime state/status-effect simulation. CP-044 owns
-   deciding whether separated shards become runtime data or remain authoring
-   metadata with explicit migration/combining rules.
+   modifiers and has no runtime state/status-effect simulation. CP-044 closed
+   the immediate authoring/validation polish and kept direct separated-shard
+   runtime consumption deferred until a future slice defines migration or
+   composition rules.
 
 2. Switch/variable initial values - medium/high impact, low/medium risk.
    Runtime validation indexes switch/variable ids, but `GameState` currently
@@ -111,8 +114,9 @@ Legend:
   data shape unchanged.
 - CP-043 / FRA-78: enemy and troop battle data polish completed; runtime data
   shape unchanged and native battle-facing range validation strengthened.
-- CP-044 / FRA-79: item, equipment, and state shard polish, including the
-  separated shard/runtime item-equipment boundary.
+- CP-044 / FRA-79: item, equipment, and state shard polish completed.
+  Items remain the runtime-consumed equipment records; `weapons`, `armors`,
+  and `states` remain editor/validation shards for v1.
 - CP-045 / FRA-80: system, types, terms, and startup default behavior,
   including switch/variable initial seeding if accepted.
 - CP-046 / FRA-81: common-event authoring parity and scheduler validation.

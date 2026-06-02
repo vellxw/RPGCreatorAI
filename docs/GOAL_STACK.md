@@ -266,6 +266,15 @@ Primary Phase 11 sources:
   repairable from the UI, and the native runtime validator now blocks invalid
   enemy stats, exp/gold, and drop chance ranges before launch. Evidence is
   recorded in `docs/PHASE_11_ENEMY_TROOP_EDITOR_POLISH.md`.
+- Phase 11 CP-044 — item, equipment, and state editor polish completed.
+  Items now expose readable modifier labels for every stat, weapon and armor
+  editors expose complete stat modifier grids, weapon/armor/state traits use
+  row-based list controls instead of comma-separated text, trait validation
+  catches blanks and duplicates, and the native pre-launch validator blocks
+  invalid runtime-consumed item/equipment data. Separated `weapons`, `armors`,
+  and `states` remain editor/validation shards for v1; direct runtime
+  equipment/state simulation remains future depth. Evidence is recorded in
+  `docs/PHASE_11_ITEM_EQUIPMENT_STATE_EDITOR_POLISH.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

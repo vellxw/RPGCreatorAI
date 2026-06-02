@@ -14,6 +14,7 @@ import {
   FALLBACK_ITEM_CATEGORIES,
   namedTypeOptions,
 } from './databaseOptions';
+import { STAT_FIELDS, STAT_LABELS } from './partyCombatFields';
 import type {
   EquipmentSlot,
   ItemData,
@@ -28,17 +29,6 @@ interface ItemsEditorProps {
   referenceSources?: Record<string, string[]>;
   onChange(value: ItemDatabase): void;
 }
-
-const STAT_FIELDS: Array<keyof Stats> = [
-  'maxHp',
-  'maxMp',
-  'attack',
-  'defense',
-  'magicAttack',
-  'magicDefense',
-  'agility',
-  'luck',
-];
 
 function uniqueItemId(base: string, items: ItemData[]): string {
   const cleanBase = base.trim() || 'item';
@@ -296,7 +286,7 @@ export function ItemsEditor({ value, types, referenceSources = {}, onChange }: I
               {STAT_FIELDS.map(field => (
                 <NumberField
                   key={field}
-                  label={`Modifier ${field}`}
+                  label={`Item modifier ${STAT_LABELS[field]}`}
                   value={selected.modifiers?.[field] ?? 0}
                   onChange={amount => updateModifier(field, amount)}
                 />

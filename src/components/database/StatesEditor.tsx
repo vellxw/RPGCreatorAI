@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ArrayFieldEditor } from './ArrayFieldEditor';
 import {
   NumberField,
   SelectField,
@@ -12,16 +13,18 @@ interface StatesEditorProps {
   onChange(changes: Partial<StateData>): void;
 }
 
-function splitTraits(value: string): string[] {
-  return value
-    .split(',')
-    .map(part => part.trim())
-    .filter(Boolean);
+function createTrait(values: string[]): string {
+  const base = 'new_trait';
+  if (!values.includes(base)) return base;
+  let suffix = 2;
+  while (values.includes(`${base}_${suffix}`)) suffix += 1;
+  return `${base}_${suffix}`;
 }
 
 export function StatesEditor({ entry, idField, onChange }: StatesEditorProps) {
+  const traits = entry.traits ?? [];
   return (
-    <div className="space-y-3 max-w-xl">
+    <div className="space-y-4 max-w-xl">
       {idField}
       <TextField label="Name" value={entry.name} onChange={name => onChange({ name })} />
       <NumberField
@@ -49,10 +52,19 @@ export function StatesEditor({ entry, idField, onChange }: StatesEditorProps) {
         ]}
         onChange={restriction => onChange({ restriction: restriction as StateData['restriction'] })}
       />
-      <TextField
-        label="Traits"
-        value={entry.traits.join(', ')}
-        onChange={value => onChange({ traits: splitTraits(value) })}
+      <ArrayFieldEditor
+        label="State traits"
+        values={traits}
+        createValue={() => createTrait(traits)}
+        emptyLabel="No state traits configured."
+        onChange={traits => onChange({ traits })}
+        renderItem={({ value, index, onChange: onItemChange }) => (
+          <TextField
+            label={`State trait ${index + 1}`}
+            value={value}
+            onChange={onItemChange}
+          />
+        )}
       />
     </div>
   );

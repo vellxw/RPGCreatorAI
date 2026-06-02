@@ -160,14 +160,22 @@ void validateNonNegativeNumber(rpg::RuntimeValidationReport& report,
     }
 }
 
-void validateEnemyStats(rpg::RuntimeValidationReport& report,
-                        const json& enemy,
-                        const std::string& enemyId,
-                        const std::string& source) {
-    auto statsIt = enemy.find("stats");
-    if (statsIt == enemy.end() || !statsIt->is_object()) return;
+void validateFiniteNumber(rpg::RuntimeValidationReport& report,
+                          const json& object,
+                          const char* key,
+                          const std::string& source,
+                          const std::string& label) {
+    if (!object.is_object()) return;
+    auto it = object.find(key);
+    if (it == object.end()) return;
+    double value = 0.0;
+    if (!finiteNumber(*it, value)) {
+        addError(report, source, label + " must be finite");
+    }
+}
 
-    const std::vector<const char*> fields = {
+const std::vector<const char*>& statFieldNames() {
+    static const std::vector<const char*> fields = {
         "maxHp",
         "maxMp",
         "attack",
@@ -177,7 +185,17 @@ void validateEnemyStats(rpg::RuntimeValidationReport& report,
         "agility",
         "luck",
     };
-    for (const char* field : fields) {
+    return fields;
+}
+
+void validateEnemyStats(rpg::RuntimeValidationReport& report,
+                        const json& enemy,
+                        const std::string& enemyId,
+                        const std::string& source) {
+    auto statsIt = enemy.find("stats");
+    if (statsIt == enemy.end() || !statsIt->is_object()) return;
+
+    for (const char* field : statFieldNames()) {
         validateNonNegativeNumber(
             report,
             *statsIt,
@@ -185,6 +203,10 @@ void validateEnemyStats(rpg::RuntimeValidationReport& report,
             source,
             "Enemy \"" + enemyId + "\" stats." + field);
     }
+}
+
+bool isSupportedRuntimeEquipmentSlot(const std::string& value) {
+    return value == "weapon" || value == "armor" || value == "accessory";
 }
 
 bool containsId(const IdSet& ids, const std::string& id) {
@@ -881,9 +903,66 @@ void collectAndValidateAudio(const std::unordered_map<std::string, json>& databa
     }
 }
 
+void validateItemRuntimeData(const std::unordered_map<std::string, json>& databases,
+                             rpg::RuntimeValidationReport& report) {
+    auto itemsIt = databases.find("items");
+    if (itemsIt == databases.end()) return;
+
+    const json* items = arrayField(itemsIt->second, "items");
+    if (!items) return;
+
+    for (const auto& item : *items) {
+        const std::string itemId = stringField(item, "id");
+        const std::string source = "database/items/" + itemId;
+        validateNonNegativeNumber(
+            report,
+            item,
+            "price",
+            source,
+            "Item \"" + itemId + "\" price");
+
+        auto effectIt = item.find("effect");
+        if (effectIt != item.end() && effectIt->is_object()) {
+            validateFiniteNumber(
+                report,
+                *effectIt,
+                "hp",
+                source,
+                "Item \"" + itemId + "\" effect.hp");
+            validateFiniteNumber(
+                report,
+                *effectIt,
+                "mp",
+                source,
+                "Item \"" + itemId + "\" effect.mp");
+        }
+
+        auto modifiersIt = item.find("modifiers");
+        if (modifiersIt != item.end() && modifiersIt->is_object()) {
+            for (const char* field : statFieldNames()) {
+                validateFiniteNumber(
+                    report,
+                    *modifiersIt,
+                    field,
+                    source,
+                    "Item \"" + itemId + "\" modifier " + std::string(field));
+            }
+        }
+
+        const std::string slot = stringField(item, "slot");
+        if (!slot.empty() && !isSupportedRuntimeEquipmentSlot(slot)) {
+            addError(report, source,
+                     "Item \"" + itemId +
+                         "\" uses unsupported equipment slot \"" + slot + "\"");
+        }
+    }
+}
+
 void validateDatabaseReferences(const std::unordered_map<std::string, json>& databases,
                                 const DatabaseIndex& db,
                                 rpg::RuntimeValidationReport& report) {
+    validateItemRuntimeData(databases, report);
+
     auto systemIt = databases.find("system");
     if (systemIt != databases.end()) {
         const json* startingParty = arrayField(systemIt->second, "startingParty");
@@ -920,6 +999,12 @@ void validateDatabaseReferences(const std::unordered_map<std::string, json>& dat
                 auto equipmentIt = actor.find("equipment");
                 if (equipmentIt != actor.end() && equipmentIt->is_object()) {
                     for (const auto& [slot, value] : equipmentIt->items()) {
+                        if (!isSupportedRuntimeEquipmentSlot(slot)) {
+                            addError(report, "database/actors/" + actorId,
+                                     "Actor \"" + actorId +
+                                         "\" equipment slot \"" + slot +
+                                         "\" is not supported by the runtime");
+                        }
                         if (!value.is_string()) continue;
                         const std::string itemId = value.get<std::string>();
                         if (!itemId.empty() && !containsId(db.items, itemId)) {

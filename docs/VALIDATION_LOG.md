@@ -4273,3 +4273,67 @@ Error: Port 1420 is already in use
   `Remove drop 1`; Troops showed `Add troop member`, stable move/remove
   labels, and disabled boundary movement. Console reported 0 errors and 0
   warnings.
+
+### Phase 11 FRA-79 / CP-044 — item equipment and state editor polish
+
+- `2026-06-02 07:15:21 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — FAIL as expected during TDD red step; the current UI did not expose
+  `Item modifier Attack`, `Weapon modifier Attack`, or `State trait 1`
+  controls, and validation did not report blank/duplicate weapon traits.
+- `2026-06-02 07:15:21 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — FAIL as expected during TDD red step; native `RPGTests` failed the new
+  item/equipment validator assertions because runtime pre-launch validation did
+  not yet reject invalid item price, effect, modifier, slot, or actor
+  equipment slot data.
+- `2026-06-02 07:18:47 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS after adding readable item modifier labels, complete weapon/armor
+  modifier grids, row-based traits, and trait validation; 2 focused files and
+  22 Vitest tests passed.
+- `2026-06-02 07:18:47 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS after strengthening native item/equipment validation; native
+  configure/build/test completed and `RPGTests` passed 1/1 with known
+  third-party CMake warnings only.
+- `2026-06-02 07:21:19 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 07:21:19 -03:00` —
+  `npm test -- --run src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 4 focused files and 28 Vitest tests passed.
+- `2026-06-02 07:21:19 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS on the final CP-044 worktree; native configure/build/test completed
+  and `RPGTests` passed 1/1 with known third-party CMake warnings only.
+- `2026-06-02 07:21:19 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1920 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 07:23:43 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp044 open http://127.0.0.1:5177/`,
+  then text-based `click "Use My First RPG"`/`click "Database"` attempts —
+  FAIL for navigation only; the snapshot showed the button existed, but the
+  CLI text selector did not resolve it. Fix: reran smoke with explicit CSS
+  selectors.
+- `2026-06-02 07:24:57 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp044 open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Database')"`,
+  `click "button[aria-label='Open Weapons database tab']"`,
+  `snapshot`,
+  `click "button[aria-label='Open Armors database tab']"`,
+  `snapshot`,
+  `click "button[aria-label='Open States database tab']"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS for browser smoke; Weapons and Armors showed full modifier
+  grids and trait add controls, States showed row-based state traits, and the
+  console reported 0 errors and 0 warnings.
+- `2026-06-02 07:25:39 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp044-items open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Database')"`,
+  `click "button[aria-label='Open Items database tab']"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS for browser smoke; Items showed readable `Item modifier`
+  labels for all stats and the console reported 0 errors and 0 warnings.
