@@ -282,6 +282,7 @@ export async function generateItemIconCandidate(
     generated: {
       ...generated,
       tool: 'ai-item-icon-generation-workflow',
+      operation: built.request.operation,
     },
   };
 

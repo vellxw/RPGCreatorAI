@@ -5547,3 +5547,57 @@ Error: Port 1420 is already in use
   asset with generated metadata,
   clicked `Validate` - PASS; toolbar feedback reported `Validation passed` and
   the console reported 0 warnings/errors.
+
+### Phase 11 FRA-107 / CP-072 - GPT Image asset pipeline integration gate
+
+- `2026-06-02 17:41:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - FAIL as expected during TDD red step; no integration test existed yet.
+- `2026-06-02 17:43:02 -03:00` -
+  `npm test -- --run src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - FAIL after adding the test; one matcher was malformed and generation
+  manifests did not yet record `operation: "image.generate"`.
+- `2026-06-02 17:43:47 -03:00` -
+  `npm test -- --run src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - PASS after fixing the matcher and recording `operation: "image.generate"`
+  in tileset, item/equipment icon, and portrait generated metadata; 1 file and
+  2 tests passed.
+- `2026-06-02 17:44:07 -03:00` -
+  `npm test -- --run src/providers/__tests__/providerImageGenerationSettings.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/providers/__tests__/portraitGenerationWorkflow.test.ts src/providers/__tests__/imageEditVariationWorkflow.test.ts src/providers/__tests__/generatedImageVisualQa.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - PASS; mock-only GPT Image asset pipeline suite passed 12 files and 52
+  tests.
+- `2026-06-02 17:44:32 -03:00` - `npm run typecheck` - FAIL; the new
+  integration test accessed optional `AssetCatalogEntry.tags` as required.
+  Fix applied: use optional tag access in the test assertions.
+- `2026-06-02 17:44:32 -03:00` - `npm run build` - FAIL for the same
+  TypeScript issue before Vite build could run.
+- `2026-06-02 17:44:32 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 82 files and 437 tests before the typecheck fix.
+- `2026-06-02 17:45:48 -03:00` -
+  `npm test -- --run src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - PASS after the optional-tags type fix; 1 file and 2 tests passed.
+- `2026-06-02 17:45:48 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 17:45:48 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1953 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 17:46:36 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 82 files and 437 tests after the typecheck fix.
+- `2026-06-02 17:44:07 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\providerImageGenerationSettings.ts src\providers\providerRegistry.ts src\providers\modelCapabilityRegistry.ts src\providers\mockProviderAdapter.ts src\providers\mockProviderContract.ts src\providers\imagePromptTemplates.ts src\providers\tilesetGenerationWorkflow.ts src\providers\itemIconGenerationWorkflow.ts src\providers\portraitGenerationWorkflow.ts src\providers\imageEditVariationWorkflow.ts src\providers\generatedImageVisualQa.ts src\providers\__tests__\gptImageAssetPipelineIntegration.test.ts src\providers\__tests__\providerImageGenerationSettings.test.ts src\providers\__tests__\modelCapabilityRegistry.test.ts src\providers\__tests__\providerRegistry.test.ts src\providers\__tests__\mockProviderAdapter.test.ts src\providers\__tests__\mockProviderContract.test.ts src\providers\__tests__\imagePromptTemplates.test.ts src\providers\__tests__\tilesetGenerationWorkflow.test.ts src\providers\__tests__\itemIconGenerationWorkflow.test.ts src\providers\__tests__\portraitGenerationWorkflow.test.ts src\providers\__tests__\imageEditVariationWorkflow.test.ts src\providers\__tests__\generatedImageVisualQa.test.ts`
+  - PASS for CP-072 scope; matches were existing test assertions,
+  mock-redaction fixture text, and the existing static Moonshot registry base
+  URL.
+- `2026-06-02 17:49:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  open Settings,
+  confirm `Image Model Settings` and `GPT Image 2`,
+  confirm no live `Run image generation` or `Test provider` action,
+  open Assets,
+  click `Run image variation`,
+  confirm `Visual QA checklist` and `5 cataloged assets` while pending,
+  click `Accept`,
+  confirm `6 cataloged assets` and generated metadata,
+  click `Validate` - PASS; toolbar feedback reported `Validation passed` and
+  the console reported 0 warnings/errors.

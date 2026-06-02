@@ -37,14 +37,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`
 - `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`
+- `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-072 next).
-- Phase 11 Linear milestone 09 — AI characters and animations.
+- Phase 11 Linear milestone 09 — AI characters and animations (CP-073 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -493,6 +493,14 @@ Primary Phase 11 sources:
   tags, unresolved warnings, and rejection metadata in generated asset
   metadata while keeping rejected candidates out of project data. Evidence is
   recorded in `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`.
+- Phase 11 CP-072 — GPT Image asset pipeline integration gate completed.
+  Provider/model config, prompt templates, mock image generation, generated
+  tilesets, item/equipment icons, portraits, image edit/variation candidates,
+  review gates, and visual QA scoring now have one mock-only integration test.
+  Generated image manifests now record their provider operation, Settings
+  remains usable without OpenAI credentials or live actions, and milestone 08
+  is ready for the AI character/animation work in milestone 09. Evidence is
+  recorded in `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

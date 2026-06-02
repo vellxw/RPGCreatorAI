@@ -273,6 +273,7 @@ export async function generatePortraitCandidate(
     generated: {
       ...generated,
       tool: 'ai-portrait-generation-workflow',
+      operation: built.request.operation,
     },
   };
 

@@ -327,6 +327,7 @@ export async function generateTilesetCandidate(
     generated: {
       ...generated,
       tool: 'ai-tileset-generation-workflow',
+      operation: built.request.operation,
     },
   };
   const tileset = buildGeneratedTileset(tilesetId, assetId, draft);
