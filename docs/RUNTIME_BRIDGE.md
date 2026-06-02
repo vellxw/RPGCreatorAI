@@ -61,6 +61,8 @@ interface RuntimeLaunchAdapter {
 1. The user selects Project Start, Current Map, or Selected Event in Playtest.
 2. The mode-specific Launch button builds a checked playtest request. Current
    Map is blocked before the adapter if the selected map is not loaded.
+   Selected Event is blocked before the adapter if the selection is missing,
+   stale, or no longer on its map.
 3. The launch flow validates the in-memory project state.
 4. Desktop mode calls `fs.createPlaytestSession(sourceRoot, state, request)`.
 5. The shell writes a temporary project root under the app data directory,
@@ -72,6 +74,11 @@ interface RuntimeLaunchAdapter {
    returns the PID.
 
 The source project is not mutated by playtest launch preparation.
+
+For selected-event debugging, successful launch feedback points to Event Trace
+and Runtime Log. If validation fails, the Playtest screen prefers errors from
+the selected event's map/event source before falling back to the first project
+error.
 
 ## Runtime Debug Surfaces
 

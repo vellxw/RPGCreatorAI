@@ -102,6 +102,12 @@ Primary Phase 11 sources:
   disables Current Map when the selected map is not loaded, and launch feedback
   explains whether the runtime will use the authored start position or the
   temporary `0,0,down` map-iteration spawn.
+- Phase 11 CP-021 — selected-event playtest launch flow completed. Selected
+  Event now uses the fresh event from loaded map data, blocks missing/stale
+  selections before the desktop session adapter, warns when conditional pages
+  may leave the event inactive or when commands are absent, prioritizes
+  selected-event validation errors in launch feedback, and points successful
+  launches to Event Trace and Runtime Log for event debugging.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

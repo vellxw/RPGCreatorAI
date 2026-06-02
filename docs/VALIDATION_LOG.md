@@ -3187,3 +3187,37 @@ Error: Port 1420 is already in use
 - `2026-06-01 22:53:45 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-56 / CP-021 — selected-event playtest launch flow
+
+- `2026-06-01 22:58:35 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts`
+  — RED as expected; selected-event launch plans still used the stale editor
+  event object, did not warn about conditional pages, and did not expose a
+  selected-event validation-error picker. Fix applied: use the fresh loaded
+  event, add event-debug context and warnings, and prioritize selected-event
+  validation errors in Playtest feedback.
+- `2026-06-01 22:59:38 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts`
+  — PASS; 2 focused files and 11 tests passed.
+- `2026-06-01 23:00:08 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/layout/__tests__/TopToolbarPlaytestModes.test.tsx src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx`
+  — PASS; 4 focused adapter/helper/UI files and 17 tests passed, including
+  missing-selection selected-event toolbar blocking.
+- `2026-06-01 23:00:44 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:01:33 -03:00` —
+  `npm test -- --run src/playtest/__tests__/playtestLaunchRequest.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/layout/__tests__/TopToolbarPlaytestModes.test.tsx src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after docs/task updates; 5 related files and 26 tests passed.
+- `2026-06-01 23:01:33 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::playtest_selected_event_starts_at_event_position -- --exact`
+  — PASS; 1 Rust selected-event temp-session guardrail passed.
+- `2026-06-01 23:01:33 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:01:33 -03:00` — `npm run build` — PASS; 1916 modules
+  transformed, build completed in 11.27s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 23:02:56 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
+  controlled server was stopped afterward.
+- `2026-06-01 23:02:56 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

@@ -34,7 +34,7 @@ import {
   movementSpeedToTilesPerSecond,
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
-import { buildPlaytestLaunchPlan } from '../playtest/playtestLaunchRequest';
+import { buildPlaytestLaunchPlan, pickLaunchValidationError } from '../playtest/playtestLaunchRequest';
 import { playtestModeLabel } from '../playtest/playtestMode';
 import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
 import type { RuntimeLaunchAdapter, RuntimeStatus } from '../adapters/types';
@@ -565,10 +565,11 @@ function RuntimeBridgePanel({
       return;
     }
     setIsLaunching(true);
+    const warningDetail = launchPlan.warnings?.length ? ` ${launchPlan.warnings.join(' ')}` : '';
     setFeedback({
       tone: 'loading',
       title: `Preparing ${modeLabel} playtest`,
-      detail: `Validating project data and writing a temporary playtest session for ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`,
+      detail: `Validating project data and writing a temporary playtest session for ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}${warningDetail}`,
     });
     const validation = validateProject({
       project: fullProjectState.project,
@@ -578,10 +579,14 @@ function RuntimeBridgePanel({
     });
     projectDispatch({ type: 'VALIDATE' });
     if (validation.errors.length > 0) {
+      const focusedError = pickLaunchValidationError(launchPlan, validation.errors);
+      const recovery = launchPlan.eventDebugContext
+        ? 'Fix the selected event commands or page data before launching the runtime.'
+        : 'Fix validation errors before launching the runtime.';
       setFeedback({
         tone: 'error',
         title: `${modeLabel} launch blocked by validation`,
-        detail: `${validation.errors[0].message} Fix validation errors before launching the runtime.`,
+        detail: `${focusedError?.message ?? validation.errors[0].message} ${recovery}`,
       });
       setIsLaunching(false);
       return;
@@ -605,7 +610,9 @@ function RuntimeBridgePanel({
             ? `PID ${result.pid} is running on ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`
             : `The runtime accepted ${launchPlan.targetLabel}. ${launchPlan.spawnDescription}`,
           sessionRoot: session.sessionRoot,
-          diagnosticsHint: 'Use Runtime Log, Event Trace, and Runtime State for launch output.',
+          diagnosticsHint: launchPlan.eventDebugContext
+            ? `Use Event Trace and Runtime Log to inspect event "${launchPlan.eventDebugContext.eventId}" after launch. Runtime State confirms map and spawn.${warningDetail}`
+            : 'Use Runtime Log, Event Trace, and Runtime State for launch output.',
         });
       } else {
         setFeedback({

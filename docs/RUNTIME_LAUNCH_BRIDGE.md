@@ -76,7 +76,7 @@ The playtest toolbar exposes three modes:
 |------|------------------|
 | `projectStart` | Preserves the project's authored start map and start position. |
 | `currentMap` | Writes only the temp `data/project.json` to start on the selected editor map. If that map differs from the authored start map, the temp start position becomes `0,0,down`. If it is already the authored start map, the authored start position is preserved. |
-| `selectedEvent` | Writes only the temp `data/project.json` to start on the selected event's map and tile, facing `down`. The mode is disabled when no event is selected. |
+| `selectedEvent` | Writes only the temp `data/project.json` to start on the selected event's map and tile, facing `down`. The mode is disabled when no event is selected. Stale selections are blocked before the session adapter, and the launch plan uses the fresh event from loaded map data. |
 
 The session builder writes the in-memory project state, map JSON, items, and
 database shards into the temp root. It copies `assets/` when present so local
@@ -95,6 +95,14 @@ Current Map launch requests are built before the desktop adapter call. If the
 selected editor map is stale or missing from loaded project data, the toolbar
 disables Current Map and the runtime bridge reports a blocked launch instead
 of asking the session builder to infer a fallback map.
+
+Selected Event launch requests also use this checked launch plan. If the
+selected event is missing, stale, or no longer on its map, launch is blocked
+before the session adapter. If all selected-event pages have conditions, the
+feedback warns that the runtime may keep the event inactive until switches,
+variables, or self switches match. Validation failures prioritize errors whose
+source or message points at the selected event, so invalid commands are surfaced
+as event-debugging work instead of generic project failures.
 
 Sessions are stored under the app data directory:
 

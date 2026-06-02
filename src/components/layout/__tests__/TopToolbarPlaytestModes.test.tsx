@@ -86,4 +86,27 @@ describe('TopToolbar playtest modes', () => {
 
     view.unmount();
   });
+
+  it('disables Selected Event when no event is selected', async () => {
+    const projectState = await loadedProjectState();
+    const editorState: EditorState = {
+      ...initialEditorState,
+      activeScreen: 'playtest',
+      selectedEvent: null,
+      selectedEventMapId: null,
+    };
+    const view = renderToolbar(projectState, editorState);
+    const selectedEvent = Array.from(view.container.querySelectorAll('button')).find(button =>
+      button.textContent?.includes('Selected Event'),
+    ) as HTMLButtonElement | undefined;
+
+    expect(selectedEvent).toBeDefined();
+    expect(selectedEvent?.disabled).toBe(true);
+    act(() => {
+      selectedEvent?.click();
+    });
+    expect(view.editorDispatch).not.toHaveBeenCalledWith({ type: 'SET_PLAYTEST_MODE', mode: 'selectedEvent' });
+
+    view.unmount();
+  });
 });

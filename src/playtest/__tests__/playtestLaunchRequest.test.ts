@@ -3,7 +3,7 @@ import { mergeDatabases } from '../../adapters/defaultDatabases';
 import type { FullProjectState } from '../../adapters/types';
 import type { EditorState } from '../../stores/editorStore';
 import { initialEditorState } from '../../stores/editorStore';
-import { buildPlaytestLaunchPlan } from '../playtestLaunchRequest';
+import { buildPlaytestLaunchPlan, pickLaunchValidationError } from '../playtestLaunchRequest';
 
 function makeProjectState(): FullProjectState {
   return {
@@ -37,7 +37,17 @@ function makeProjectState(): FullProjectState {
         height: 8,
         tileSize: 32,
         layers: [],
-        events: [],
+        events: [
+          {
+            id: 'npc_1',
+            type: 'npc',
+            x: 2,
+            y: 3,
+            solid: false,
+            trigger: 'interact',
+            commands: [{ type: 'showText', text: 'Hello' }],
+          },
+        ],
       },
     },
     items: { items: [] },
@@ -81,5 +91,102 @@ describe('buildPlaytestLaunchPlan', () => {
 
     expect(plan.request).toBeUndefined();
     expect(plan.blocker).toContain("Current Map playtest cannot find selected map 'missing_map'");
+  });
+
+  it('builds a selected-event request from the fresh event on the selected map', () => {
+    const projectState = makeProjectState();
+    const staleEvent = {
+      ...projectState.maps.house.events[0],
+      x: 0,
+      y: 0,
+    };
+    const plan = buildPlaytestLaunchPlan(
+      makeEditorState({
+        playtestMode: 'selectedEvent',
+        selectedMapId: 'town',
+        selectedEventMapId: 'house',
+        selectedEvent: staleEvent,
+      }),
+      projectState,
+    );
+
+    expect(plan.blocker).toBeUndefined();
+    expect(plan.request).toEqual({
+      mode: 'selectedEvent',
+      currentMapId: 'town',
+      selectedEventMapId: 'house',
+      selectedEventId: 'npc_1',
+    });
+    expect(plan.targetLabel).toBe('npc_1 on House Interior (house)');
+    expect(plan.spawnDescription).toContain('2,3,down');
+    expect(plan.eventDebugContext).toEqual({ mapId: 'house', eventId: 'npc_1' });
+  });
+
+  it('blocks selected-event launch when the selected event is stale', () => {
+    const projectState = makeProjectState();
+    const staleEvent = {
+      ...projectState.maps.house.events[0],
+      id: 'missing_event',
+    };
+    const plan = buildPlaytestLaunchPlan(
+      makeEditorState({
+        playtestMode: 'selectedEvent',
+        selectedMapId: 'town',
+        selectedEventMapId: 'house',
+        selectedEvent: staleEvent,
+      }),
+      projectState,
+    );
+
+    expect(plan.request).toBeUndefined();
+    expect(plan.blocker).toContain("Selected Event playtest cannot find event 'missing_event'");
+  });
+
+  it('warns when selected-event pages may be inactive until page conditions match', () => {
+    const projectState = makeProjectState();
+    projectState.maps.house.events[0].pages = [
+      {
+        id: 'page_1',
+        conditions: { switches: { story_started: true } },
+        graphic: {},
+        movement: { type: 'fixed', speed: 'normal' },
+        options: { walking: false, stepping: false, directionFix: false, through: false },
+        priority: 'sameAsCharacters',
+        trigger: 'interact',
+        commands: [{ type: 'showText', text: 'Conditional' }],
+      },
+    ];
+    const plan = buildPlaytestLaunchPlan(
+      makeEditorState({
+        playtestMode: 'selectedEvent',
+        selectedMapId: 'town',
+        selectedEventMapId: 'house',
+        selectedEvent: projectState.maps.house.events[0],
+      }),
+      projectState,
+    );
+
+    expect(plan.blocker).toBeUndefined();
+    expect(plan.warnings?.[0]).toContain('All selected event pages have conditions');
+  });
+
+  it('prioritizes selected-event validation errors over unrelated project errors', () => {
+    const projectState = makeProjectState();
+    const plan = buildPlaytestLaunchPlan(
+      makeEditorState({
+        playtestMode: 'selectedEvent',
+        selectedMapId: 'town',
+        selectedEventMapId: 'house',
+        selectedEvent: projectState.maps.house.events[0],
+      }),
+      projectState,
+    );
+
+    const error = pickLaunchValidationError(plan, [
+      { level: 'error', message: 'Project startMapId "missing" does not exist', source: 'project' },
+      { level: 'error', message: 'Event "npc_1" has unknown command type "bad"', source: 'house/npc_1/page_1' },
+    ]);
+
+    expect(error?.message).toContain('unknown command type');
   });
 });
