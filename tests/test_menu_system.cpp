@@ -8,6 +8,11 @@
 #include "events/GameState.h"
 #include "runtime/MenuSystem.h"
 
+#include <cstdio>
+#include <fstream>
+#include <optional>
+#include <utility>
+
 namespace {
 
 void tap(InputManager& input, std::array<unsigned char, SDL_NUM_SCANCODES>& keys, SDL_Scancode code) {
@@ -16,6 +21,36 @@ void tap(InputManager& input, std::array<unsigned char, SDL_NUM_SCANCODES>& keys
     keys[code] = 1;
     input.update(keys.data());
 }
+
+std::optional<std::string> readExisting(const std::string& path) {
+    std::ifstream in(path);
+    if (!in) return std::nullopt;
+    return std::string((std::istreambuf_iterator<char>(in)),
+                       std::istreambuf_iterator<char>());
+}
+
+void restoreFile(const std::string& path, const std::optional<std::string>& previous) {
+    if (previous) {
+        std::ofstream out(path);
+        out << *previous;
+    } else {
+        std::remove(path.c_str());
+    }
+}
+
+class ScopedFileRestore {
+public:
+    explicit ScopedFileRestore(std::string path)
+        : path_(std::move(path)), previous_(readExisting(path_)) {}
+
+    ~ScopedFileRestore() {
+        restoreFile(path_, previous_);
+    }
+
+private:
+    std::string path_;
+    std::optional<std::string> previous_;
+};
 
 } // namespace
 
@@ -93,4 +128,30 @@ TEST_CASE("MenuSystem snapshots inventory, party, and quest data for rendering")
     REQUIRE(vm.quests[0].objectives.size() == 2);
     CHECK(vm.quests[0].objectives[0].done);
     CHECK_FALSE(vm.quests[0].objectives[1].done);
+}
+
+TEST_CASE("MenuSystem load screen reports empty disabled slots") {
+    const std::string slotPath = "saves/slot_1.json";
+    ScopedFileRestore slotGuard(slotPath);
+    restoreFile(slotPath, std::nullopt);
+
+    rpg::MenuSystem menu;
+    InputManager input;
+    std::array<unsigned char, SDL_NUM_SCANCODES> keys{};
+
+    menu.open();
+    menu.setSelectionForTest(4);
+    tap(input, keys, SDL_SCANCODE_RETURN);
+    CHECK(menu.handleInput(input));
+    REQUIRE(menu.current() == rpg::MenuSystem::Screen::Load);
+
+    tap(input, keys, SDL_SCANCODE_RETURN);
+    CHECK(menu.handleInput(input));
+    CHECK(menu.pendingAction() == rpg::MenuSystem::Action::None);
+
+    GameState state;
+    rpg::RpgDatabases dbs;
+    const auto vm = menu.snapshot(state, dbs);
+    REQUIRE(vm.message.has_value());
+    CHECK(*vm.message == "Slot 1 is empty");
 }

@@ -70,6 +70,11 @@ bool ShopSystem::handleInput(const InputManager& input,
         const std::string displayName =
             item && !item->name.empty() ? item->name : listing.itemId;
 
+        if (!item) {
+            message_ = "Item unavailable";
+            return true;
+        }
+
         if (state.getGold() < listing.price) {
             message_ = "Not enough gold";
             return true;
@@ -103,11 +108,12 @@ ShopSystem::ViewModel ShopSystem::snapshot(const GameState& state,
         ListingRow row;
         row.itemId = listing.itemId;
         row.price = listing.price;
-        row.affordable = state.getGold() >= listing.price;
         const auto owned = state.getInventory().find(listing.itemId);
         row.owned = owned != state.getInventory().end() ? owned->second : 0;
 
-        if (const ItemRecord* item = dbs.findItem(listing.itemId)) {
+        const ItemRecord* item = dbs.findItem(listing.itemId);
+        row.affordable = item && state.getGold() >= listing.price;
+        if (item) {
             row.name = item->name.empty() ? listing.itemId : item->name;
             row.description = item->description;
         } else {

@@ -193,6 +193,15 @@ Primary Phase 11 sources:
   native unknown-command validator parity, all mapped to existing milestone 04
   issues CP-034 through CP-040. Evidence is recorded in
   `docs/PHASE_11_RUNTIME_COMMAND_GAP_AUDIT.md`.
+- Phase 11 CP-034 — runtime menu flow polish completed. Inventory, party,
+  quests, save/load, shop, and battle summary surfaces were audited through
+  focused C++ coverage and smoke screenshots. Empty load slots now give
+  explicit disabled-state feedback instead of emitting a load action, missing
+  shop item listings are unavailable and cannot mutate inventory/gold, long
+  shop lists render around the selected row, and the deterministic runtime
+  smoke path now asserts the shop and battle overlays are active before
+  writing their screenshots. Evidence is recorded in
+  `docs/screenshots/phase11-cp034/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

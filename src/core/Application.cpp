@@ -172,6 +172,11 @@ bool Application::runSmokeShots(const std::string& outputDir) {
             game->pumpEvents(dt);
         }
     };
+    auto requireRuntimeState = [&](bool condition, const std::string& label) {
+        if (condition) return true;
+        Logger::error("Smoke state check failed: " + label);
+        return false;
+    };
     auto holdMove = [&](SDL_Scancode code,
                         int frames,
                         int captureFrame,
@@ -263,9 +268,10 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     game->stepDismissDialogue();           game->pumpEvents(dt);
 
     // 07 — Walk back to door (20,22) and transfer to town.
-    moveMany(0, 1, Direction::Down, 12);   // (29,10) -> (29,22)
-    moveMany(-1, 0, Direction::Left, 9);   // (29,22) -> (20,22), touches transfer
-    game->pumpEvents(dt);                                         // apply transfer
+    moveMany(0, 1, Direction::Down, 11);   // (29,10) -> (29,21)
+    moveMany(-1, 0, Direction::Left, 9);   // (29,21) -> (20,21)
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt); // touch transfer
+    game->pumpEvents(dt);                                        // apply transfer
     if (!snapshot(outputDir, "07-back-in-town")) return false;
 
     // 08 — Load (F9 equivalent) — restores save (we were in house)
@@ -311,14 +317,17 @@ bool Application::runSmokeShots(const std::string& outputDir) {
 
     // 16 — Shop UI. Return to town from the loaded house state, then speak
     // to the shop keeper at (31,13).
-    moveMany(0, 1, Direction::Down, 12);   // (29,10) -> (29,22)
-    moveMany(-1, 0, Direction::Left, 9);   // (29,22) -> (20,22), touches transfer
+    moveMany(0, 1, Direction::Down, 11);   // (29,10) -> (29,21)
+    moveMany(-1, 0, Direction::Left, 9);   // (29,21) -> (20,21)
+    game->stepMove(0, 1, Direction::Down); game->pumpEvents(dt); // touch transfer
     game->pumpEvents(dt); // apply transfer back to town
     moveMany(1, 0, Direction::Right, 10);  // (20,10) -> (30,10)
     moveMany(0, 1, Direction::Down, 3);    // (30,10) -> (30,13)
     game->stepMove(1, 0, Direction::Right); game->pumpEvents(dt); // face shop keeper
     game->stepInteract(); game->pumpEvents(dt); // dialogue
-    game->stepDismissDialogue(); game->pumpEvents(dt); // open shop
+    drainDialogueAndEvents();              // dismiss dialogue and open shop
+    if (!requireRuntimeState(game->buildRuntimeDebugSnapshot(0).activeShop,
+                             "shop overlay should be active before 16-shop")) return false;
     if (!snapshot(outputDir, "16-shop")) return false;
     tap(SDL_SCANCODE_ESCAPE); // close shop
     game->pumpEvents(dt);     // let the paused event list finish
@@ -331,6 +340,8 @@ bool Application::runSmokeShots(const std::string& outputDir) {
     game->stepDismissDialogue(); game->pumpEvents(dt); // attack animation request
     if (!snapshot(outputDir, "phase9-04-player-attack")) return false;
     game->pumpEvents(dt);                  // resolve startBattle and open summary
+    if (!requireRuntimeState(game->buildRuntimeDebugSnapshot(0).activeBattle,
+                             "battle summary should be active before 17-battle-summary")) return false;
     if (!snapshot(outputDir, "17-battle-summary")) return false;
 
     Logger::info("Smoke shots complete.");

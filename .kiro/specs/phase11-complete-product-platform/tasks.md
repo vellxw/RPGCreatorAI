@@ -42,7 +42,7 @@
   - [x] CP-032 / FRA-67: run the professional editor surface integration gate.
 - [ ] 04 Runtime Feature Completeness.
   - [x] CP-033 / FRA-68: audit runtime command support gaps.
-  - [ ] CP-034 / FRA-69: polish runtime menu flow.
+  - [x] CP-034 / FRA-69: polish runtime menu flow.
   - [ ] CP-035 / FRA-70: close battle authoring runtime gaps.
   - [ ] CP-036 / FRA-71: implement audio authoring runtime v1.
   - [ ] CP-037 / FRA-72: implement deterministic plugin command registry v2.

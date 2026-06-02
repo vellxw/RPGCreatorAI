@@ -254,9 +254,9 @@ bool MenuSystem::handleInput(const InputManager& input) {
                 if (FileSystem::exists("saves/" + slotId + ".json")) {
                     pendingAction_ = Action::Load;
                     pendingActionSlot_ = slotIdx;
+                } else {
+                    message_ = "Slot " + std::to_string(slotIdx) + " is empty";
                 }
-                // Empty Load slots are silently ignored (rendered as
-                // disabled by the renderer).
                 return true;
             }
             return true;

@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-69 / CP-034 — runtime menu flow polish
+
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding focused coverage; `ShopSystem disables
+  unknown item listings and blocks purchase` failed because missing shop
+  listings were still affordable, purchase changed gold/inventory, and the
+  message reported a successful buy.
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS after moving missing-item purchase rejection into `ShopSystem` and
+  rendering unavailable rows as disabled.
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding focused menu coverage; `MenuSystem load
+  screen reports empty disabled slots` failed because confirming an empty load
+  slot produced no user-facing message.
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS after empty load slots started reporting `Slot N is empty` without
+  queuing a load action.
+- `2026-06-02 04:02:20 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir docs/screenshots/phase11-cp034`
+  — FAIL during screenshot QA; visual inspection showed `16-shop.bmp` was only
+  the house map and `17-battle-summary.bmp` was covered by the pause menu.
+  Fix applied: corrected the house-door traversal in `Application::runSmokeShots`
+  to enter the transfer tile from row `y=21`, drained the shopkeeper dialogue
+  until `openShop` executed, and added runtime-state guards that fail the smoke
+  if shop or battle overlays are inactive before their screenshots.
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir docs/screenshots/phase11-cp034"`
+  — PASS; runtime launch smoke stayed alive, feature smoke emitted `Shop
+  opened: Town Shop with 1 listings`, resolved `slime_pair`, wrote the menu
+  screenshots, and printed `SMOKE PASSED`. Non-fatal warnings were limited to
+  the known missing local audio endpoint and sample WAV files.
+- `2026-06-02 04:02:20 -03:00` —
+  visual inspection of `docs/screenshots/phase11-cp034/16-shop.bmp` and
+  `docs/screenshots/phase11-cp034/17-battle-summary.bmp` — PASS; shop and
+  battle summary overlays are visible and readable at the target resolution.
+  The directory was trimmed to the eight CP-034 menu surfaces:
+  `10-menu-root.bmp` through `17-battle-summary.bmp`.
+- `2026-06-02 04:02:20 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; after adding RAII restoration around the test save fixture, CTest
+  passed `RPGTests` 1/1 in 0.78s.
+- `2026-06-02 04:02:20 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- Fix applied: runtime menu docs now describe Esc/Tab pause-menu controls,
+  modal menu behavior, save/load slot feedback, disabled empty load slots, and
+  unavailable shop listings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-68 / CP-033 — runtime command gap audit
 
 - `2026-06-02 03:41:00 -03:00` — static inspection of

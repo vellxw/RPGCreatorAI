@@ -544,12 +544,24 @@ void Renderer2D::renderShop(const rpg::ShopSystem::ViewModel& vm) {
     if (vm.listings.empty()) {
         drawTextLine(sdlRenderer, p.textX, p.rowsY, "No items for sale.", 2, kPanelDim);
     } else {
-        int rowsToDraw = std::min(p.rowsPerPanel, static_cast<int>(vm.listings.size()));
+        const int total = static_cast<int>(vm.listings.size());
+        int sel = std::clamp(vm.selectionIndex, 0, total - 1);
+        int firstRow = 0;
+        if (total > p.rowsPerPanel) {
+            const int half = p.rowsPerPanel / 2;
+            firstRow = std::max(0, sel - half);
+            if (firstRow + p.rowsPerPanel > total) {
+                firstRow = std::max(0, total - p.rowsPerPanel);
+            }
+        }
+        int rowsToDraw = std::min(p.rowsPerPanel, total - firstRow);
         for (int i = 0; i < rowsToDraw; ++i) {
-            const auto& row = vm.listings[i];
-            bool selected = (i == vm.selectionIndex);
-            Color color = selected ? kPanelHeader :
-                          (row.affordable ? kPanelText : kPanelDim);
+            const int idx = firstRow + i;
+            const auto& row = vm.listings[idx];
+            bool selected = (idx == sel);
+            Color color = selected
+                              ? (row.affordable ? kPanelHeader : kPanelBad)
+                              : (row.affordable ? kPanelText : kPanelDim);
             std::string line = selected ? "> " : "  ";
             line += row.name;
             line.append(std::max(1, 26 - static_cast<int>(row.name.size())), ' ');

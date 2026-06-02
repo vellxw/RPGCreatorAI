@@ -11,6 +11,7 @@
 | Navigate choice/menu rows | `W` / `S` / `↑` / `↓` |
 | Confirm choice/menu row | `E` / `Enter` / `Space` |
 | Cancel choice/menu/dialogue | `Esc` / `Backspace` |
+| Open or close pause menu | `Esc` / `Tab` when gameplay is idle |
 | Save (slot_1) | `F5` |
 | Load (slot_1) | `F9` |
 | Quit | Close window |
@@ -59,7 +60,21 @@
 
 ## Save / Load
 
-- Save is written to `saves/slot_1.json`.
-- Save data: current map id, player x/y/direction, flags, variables,
-  inventory.
-- Loading restores all of the above and reloads the current map.
+- `F5` writes the quick save to `saves/slot_1.json`.
+- `F9` loads `saves/slot_1.json` when it exists.
+- The pause menu also exposes `Save` and `Load` screens with three slots:
+  `saves/slot_1.json`, `saves/slot_2.json`, and `saves/slot_3.json`.
+- Empty load slots are disabled visually. Confirming one leaves the game
+  state unchanged and shows `Slot N is empty`.
+- Save data: current map id, player x/y/direction, flags, switches,
+  variables, self switches, inventory, gold, party, actor HP, and quests.
+- Loading restores the saved state and reloads the current map.
+
+## Runtime Menus
+
+- Inventory, Party, Quests, Save, Load, Shop, and Battle Summary are modal
+  keyboard surfaces. While one is open, gameplay movement and event input are
+  suppressed.
+- Shop rows are data-driven from the shop and item databases. Rows with
+  missing item records are shown as unavailable, cannot be bought, and do not
+  mutate gold or inventory.

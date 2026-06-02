@@ -229,8 +229,9 @@ All sub-screens are composed of repeated calls to `drawTextPanel` and
   ```
 
 - `Load` on an empty slot is disabled (rendered with `kPanelDim`).
-- After a successful save or load, a 1.5 s toast `Saved to slot 1`
-  appears at the bottom of the menu, then the menu closes.
+  Confirming it does not emit a load action and shows `Slot N is empty`.
+- After a successful save or load, the menu shows a bottom feedback line such
+  as `Saved to slot 1` or `Loaded slot 1`.
 
 ### Format
 
@@ -261,8 +262,11 @@ migration. `mtime` is read from disk, not stored in the file.
   affordability against current gold.
 - `Enter` on an affordable row deducts `price` gold and adds the item
   in a single atomic transaction.
-- `Enter` on an unaffordable row shows `Not enough gold.` for ~1 s; no
+- `Enter` on an unaffordable row shows `Not enough gold`; no
   state changes.
+- `Enter` on an unavailable row shows `Item unavailable`; no state changes.
+- Long shop lists scroll around the selected row so the current selection
+  remains visible when more listings exist than fit in the panel.
 - `Escape` closes the shop and resumes `EventRunner` after the
   `openShop` command.
 
@@ -270,7 +274,8 @@ migration. `mtime` is read from disk, not stored in the file.
 
 - An item id not present in the items database still appears in the
   listings (the shop database is the source of truth for what's for
-  sale) but renders with `(unknown item)`.
+  sale) but renders with `(unknown item)`, is treated as unavailable, and
+  cannot be purchased.
 - A shop id that doesn't exist falls back to a 1-line error message
   and an immediate close, identical to Phase 6 behaviour.
 
