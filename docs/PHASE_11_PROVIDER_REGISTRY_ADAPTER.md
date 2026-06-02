@@ -53,6 +53,9 @@ deterministic, local, and fixture-only:
 - returns structured cancellation when an `AbortSignal` is already aborted
 - returns structured failure for unsupported operations
 - returns deterministic fixture failures for rate-limit and quota states
+- CP-063 adds the offline contract fixture runner and response normalization
+  helpers for success, malformed, provider-error, rate-limit, timeout, and
+  cancellation cases
 
 ## Settings Boundary
 
@@ -72,6 +75,8 @@ Normal validation uses TypeScript contract tests only:
 - deterministic text response shape
 - cancellation response shape
 - unsupported operation failure shape
+- CP-063 offline contract fixtures, deterministic request serialization,
+  response normalization, and disabled/missing-credential readiness states
 
 No live OpenAI, Claude, Kimi/Moonshot, DeepSeek, MiniMax, custom endpoint, or
 other paid provider call was made.

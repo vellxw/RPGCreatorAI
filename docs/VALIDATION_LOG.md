@@ -4,6 +4,42 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-98 / CP-063 — mocked provider contract test suite
+
+- `2026-06-02 13:57:11 -03:00` —
+  `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts`
+  — RED as expected before implementation; `mockProviderContract` and
+  `providerResponseNormalization` modules did not exist.
+- `2026-06-02 13:58:49 -03:00` —
+  `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/providerCostBudget.test.ts`
+  — PASS; 3 focused files and 12 tests passed after adding offline fixtures,
+  request serialization, response normalization, mock adapter fixture handling,
+  and disabled/missing-credential readiness coverage.
+- `2026-06-02 13:59:08 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 14:00:08 -03:00` —
+  `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerCostBudget.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS; 6 focused regression files and 20 tests passed.
+- `2026-06-02 14:00:24 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 14:00:24 -03:00` — `npm test -- --run` — PASS; 74
+  Vitest files and 389 tests passed.
+- `2026-06-02 14:01:25 -03:00` — `npm run build` — PASS; Vite
+  transformed 1940 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 14:02:52 -03:00` —
+  `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts`
+  — PASS; 1 contract file and 5 tests passed after replacing a secret-shaped
+  dummy token with a non-key fixture value.
+- `2026-06-02 14:03:06 -03:00` — `npm test -- --run` — PASS; 74
+  Vitest files and 389 tests passed after the fixture-token cleanup.
+- Fix applied: added offline provider contract fixtures, deterministic request
+  serialization with secret-looking field redaction, response normalization,
+  timeout failure support, mock adapter fixture routing, disabled/missing
+  credential readiness coverage, and docs for the live-diagnostics opt-in
+  boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-97 / CP-062 — cost, rate-limit, and budget states
 
 - `2026-06-02 13:36:32 -03:00` —

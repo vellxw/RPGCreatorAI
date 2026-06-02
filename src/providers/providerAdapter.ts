@@ -5,6 +5,7 @@ export type ProviderFailureKind =
   | 'rate-limit'
   | 'quota-exceeded'
   | 'budget-exceeded'
+  | 'timeout'
   | 'unsupported-operation'
   | 'provider-error'
   | 'cancelled';

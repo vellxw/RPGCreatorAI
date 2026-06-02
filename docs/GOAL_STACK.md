@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-063 next).
+- Phase 11 Linear milestone 07 — AI Provider Hub foundation (CP-064 next).
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
@@ -422,6 +422,13 @@ Primary Phase 11 sources:
   jobs before enqueueing, and Settings shows a read-only `Cost & Budget` panel
   with no live provider actions. Evidence is recorded in
   `docs/PHASE_11_COST_RATE_LIMIT_BUDGET_STATES.md`.
+- Phase 11 CP-063 — mocked provider contract test suite completed. Offline
+  fixtures now cover success, malformed responses, provider errors,
+  rate-limit, timeout, and cancellation; request serialization is deterministic
+  and redacts secret-looking fields; response normalization produces one
+  adapter shape with retry guidance; and disabled/missing-credential provider
+  readiness is covered without live APIs. Evidence is recorded in
+  `docs/PHASE_11_MOCK_PROVIDER_CONTRACTS.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

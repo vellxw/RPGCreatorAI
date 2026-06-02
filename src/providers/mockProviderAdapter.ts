@@ -11,6 +11,7 @@ import {
   type ProviderModelDescriptor,
   type ProviderOperation,
 } from './providerRegistry';
+import { normalizeProviderResponse } from './providerResponseNormalization';
 
 function countPromptTokens(prompt: string): number {
   const trimmed = prompt.trim();
@@ -19,64 +20,42 @@ function countPromptTokens(prompt: string): number {
 }
 
 function cancelledResponse(request: ProviderAdapterRequest): ProviderAdapterResponse {
-  const failure: ProviderAdapterFailure = {
-    kind: 'cancelled',
-    message: 'Request cancelled before execution.',
-    retryGuidance: 'Queue a new request after confirming the editor work is still needed.',
-  };
-  return {
-    id: request.id,
-    operation: request.operation,
-    providerId: request.providerId,
-    modelId: request.modelId,
-    status: 'cancelled',
-    error: failure.message,
-    failure,
-  };
+  return normalizeProviderResponse(request, { status: 'cancelled' });
 }
 
 function fixtureFailureResponse(request: ProviderAdapterRequest): ProviderAdapterResponse | null {
   const fixtureFailure = request.input?.fixtureFailure;
+  if (fixtureFailure === 'malformed-response') {
+    return normalizeProviderResponse(request, {
+      status: 'ok',
+      output: 'not-a-valid-output-shape',
+    });
+  }
+
+  if (fixtureFailure === 'provider-error') {
+    return normalizeProviderResponse(request, {
+      status: 'error',
+      message: 'Fixture provider error.',
+    });
+  }
+
   if (fixtureFailure === 'rate-limit') {
     const rawRetryAfter = request.input?.retryAfterSeconds;
-    const retryAfterSeconds = typeof rawRetryAfter === 'number' && Number.isFinite(rawRetryAfter)
-      ? Math.max(0, Math.round(rawRetryAfter))
-      : undefined;
-    const retryGuidance = retryAfterSeconds !== undefined
-      ? `Wait ${retryAfterSeconds} seconds before retrying this provider request.`
-      : 'Wait for provider retry guidance before retrying this provider request.';
-    const failure: ProviderAdapterFailure = {
-      kind: 'rate-limit',
-      message: 'Mock provider rate limit reached.',
-      retryAfterSeconds,
-      retryGuidance,
-    };
-    return {
-      id: request.id,
-      operation: request.operation,
-      providerId: request.providerId,
-      modelId: request.modelId,
-      status: 'failed',
-      error: failure.message,
-      failure,
-    };
+    return normalizeProviderResponse(request, {
+      status: 'rate-limit',
+      retryAfterSeconds: rawRetryAfter,
+    });
   }
 
   if (fixtureFailure === 'quota-exceeded') {
-    const failure: ProviderAdapterFailure = {
-      kind: 'quota-exceeded',
-      message: 'Mock provider quota exceeded.',
-      retryGuidance: 'Review provider quota or budget settings before retrying.',
-    };
-    return {
-      id: request.id,
-      operation: request.operation,
-      providerId: request.providerId,
-      modelId: request.modelId,
-      status: 'failed',
-      error: failure.message,
-      failure,
-    };
+    return normalizeProviderResponse(request, { status: 'quota-exceeded' });
+  }
+
+  if (fixtureFailure === 'timeout') {
+    return normalizeProviderResponse(request, {
+      status: 'timeout',
+      retryAfterSeconds: request.input?.retryAfterSeconds,
+    });
   }
 
   return null;
