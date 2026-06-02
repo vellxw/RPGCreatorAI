@@ -1,15 +1,20 @@
 import type { ReactNode } from 'react';
 import { NumberField, TextField } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
+import { PortraitGenerationPanel } from './PortraitGenerationPanel';
 import { ReferenceChecklist, StatGrid } from './partyCombatFields';
-import type { ActorData, ClassData, EquipmentSlot, ItemData, SkillData } from '../../types/project';
+import type { ActorData, AssetCatalogEntry, ClassData, EquipmentSlot, ItemData, SkillData } from '../../types/project';
+import type { PortraitGenerationRunner } from '../../providers/portraitGenerationWorkflow';
 
 interface ActorsEditorProps {
   entry: ActorData;
   classes: ClassData[];
   skills: SkillData[];
   items: ItemData[];
+  assets?: AssetCatalogEntry[];
+  portraitGenerator?: PortraitGenerationRunner;
   idField: ReactNode;
+  onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(changes: Partial<ActorData>): void;
 }
 
@@ -20,12 +25,18 @@ export function ActorsEditor({
   classes,
   skills,
   items,
+  assets = [],
+  portraitGenerator,
   idField,
+  onAssetImported,
   onChange,
 }: ActorsEditorProps) {
   const classOptions = classes.map(cls => ({ value: cls.id, label: cls.name || cls.id }));
   const skillOptions = skills.map(skill => ({ value: skill.id, label: skill.name || skill.id }));
   const itemOptions = items.map(item => ({ value: item.id, label: item.name || item.id }));
+  const portraitAssetOptions = assets
+    .filter(asset => asset.kind === 'image' || asset.kind === 'generated')
+    .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` }));
 
   const updateEquipment = (slot: EquipmentSlot, itemId: string) => {
     onChange({
@@ -40,6 +51,25 @@ export function ActorsEditor({
     <div className="space-y-4 max-w-2xl">
       {idField}
       <TextField label="Name" value={entry.name} onChange={name => onChange({ name })} />
+      <ReferenceSelect
+        label="Actor portrait asset"
+        value={entry.portraitAssetId ?? ''}
+        options={portraitAssetOptions}
+        emptyLabel="(none)"
+        onChange={portraitAssetId => onChange({ portraitAssetId: portraitAssetId || undefined })}
+      />
+      <PortraitGenerationPanel
+        ownerKind="actor"
+        ownerId={entry.id}
+        ownerName={entry.name}
+        description={`Actor ${entry.name || entry.id}, level ${entry.level}`}
+        assets={assets}
+        portraitGenerator={portraitGenerator}
+        onAssetAccepted={(asset, portraitAssetId) => {
+          onAssetImported?.(asset);
+          onChange({ portraitAssetId });
+        }}
+      />
       <div className="grid grid-cols-2 gap-3">
         <ReferenceSelect
           label="Class"

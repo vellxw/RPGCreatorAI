@@ -172,6 +172,7 @@ export interface GameEvent {
   solid: boolean;
   sprite?: string;
   animationSet?: string;
+  portraitAssetId?: string;
   displayHeightTiles?: number;
   trigger: TriggerType;
   commands: EventCommand[];
@@ -616,6 +617,7 @@ export interface ActorData {
   id: string;
   name: string;
   classId: string;
+  portraitAssetId?: string;
   level: number;
   hp: number;
   mp: number;

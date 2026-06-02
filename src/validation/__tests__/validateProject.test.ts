@@ -916,6 +916,132 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('Item "ether" references unknown icon asset "missing_icon"'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Armor "leather_armor" icon asset "bad_audio_icon" must be an image asset'))).toBe(true);
   });
+
+  it('validates actor and event portrait asset references through the asset catalog', () => {
+    const project = makeProject({
+      town: makeMap({
+        events: [
+          {
+            id: 'npc_1',
+            type: 'npc',
+            x: 1,
+            y: 1,
+            solid: true,
+            trigger: 'interact',
+            sprite: 'npc_old_man',
+            portraitAssetId: 'npc_portrait',
+            commands: [],
+          },
+          {
+            id: 'npc_2',
+            type: 'npc',
+            x: 2,
+            y: 1,
+            solid: true,
+            trigger: 'interact',
+            sprite: 'npc_old_man',
+            portraitAssetId: 'bad_audio_portrait',
+            commands: [],
+          },
+        ],
+      }),
+    });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'arc_portrait',
+          name: 'Arc Portrait',
+          kind: 'image',
+          path: 'assets/generated/portraits/arc_portrait.png',
+          source: 'generated',
+        },
+        {
+          id: 'npc_portrait',
+          name: 'NPC Portrait',
+          kind: 'generated',
+          path: 'assets/generated/portraits/npc_portrait.png',
+          source: 'generated',
+        },
+        {
+          id: 'bad_audio_portrait',
+          name: 'Bad Audio Portrait',
+          kind: 'audio',
+          path: 'assets/imported/audio/bad.wav',
+          source: 'imported',
+        },
+      ],
+    };
+    project.databases.classes = [
+      {
+        id: 'hero',
+        name: 'Hero',
+        growth: {
+          maxHp: 18,
+          maxMp: 6,
+          attack: 6,
+          defense: 4,
+          magicAttack: 3,
+          magicDefense: 3,
+          agility: 5,
+          luck: 4,
+        },
+        usableEquipment: [],
+        learnedSkills: [],
+      },
+    ];
+    project.databases.actors = [
+      {
+        id: 'arc',
+        name: 'Arc',
+        classId: 'hero',
+        level: 1,
+        hp: 18,
+        mp: 6,
+        baseStats: {
+          maxHp: 18,
+          maxMp: 6,
+          attack: 6,
+          defense: 4,
+          magicAttack: 3,
+          magicDefense: 3,
+          agility: 5,
+          luck: 4,
+        },
+        equipment: {},
+        skills: [],
+        portraitAssetId: 'arc_portrait',
+      },
+      {
+        id: 'orphan',
+        name: 'Orphan',
+        classId: 'hero',
+        level: 1,
+        hp: 18,
+        mp: 6,
+        baseStats: {
+          maxHp: 18,
+          maxMp: 6,
+          attack: 6,
+          defense: 4,
+          magicAttack: 3,
+          magicDefense: 3,
+          agility: 5,
+          luck: 4,
+        },
+        equipment: {},
+        skills: [],
+        portraitAssetId: 'missing_portrait',
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Actor "arc"'))).toBe(false);
+    expect(report.errors.some(e => e.message.includes('Event "npc_1"'))).toBe(false);
+    expect(report.errors.some(e => e.message.includes('Actor "orphan" references unknown portrait asset "missing_portrait"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Event "npc_2" portrait asset "bad_audio_portrait" must be an image asset'))).toBe(true);
+  });
 });
 
 describe('validateUniqueEventIds', () => {

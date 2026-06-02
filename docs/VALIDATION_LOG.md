@@ -5411,3 +5411,38 @@ Error: Port 1420 is already in use
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\itemIconGenerationWorkflow.ts src\providers\__tests__\itemIconGenerationWorkflow.test.ts src\components\database\ItemIconGenerationPanel.tsx src\components\database\ItemsEditor.tsx src\components\database\EquipmentEditor.tsx src\components\database\__tests__\ItemEquipmentEditors.test.tsx src\validation\validateProject.ts src\validation\referenceIndex.ts`
   - PASS for CP-068 scope; the only match was the test assertion that ensures
   generated requests do not contain `apiKey`, `https://api`, or `sk-`.
+
+### Phase 11 FRA-104 / CP-069 - AI portrait generation workflow
+
+- `2026-06-02 16:12:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/portraitGenerationWorkflow.test.ts src/components/database/__tests__/PartyCombatEditors.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL as expected during TDD red step; the portrait provider module, actor
+  and event generation UI entry points, and portrait asset reference
+  validation did not exist yet.
+- `2026-06-02 16:35:50 -03:00` -
+  `npm test -- --run src/providers/__tests__/portraitGenerationWorkflow.test.ts src/components/database/__tests__/PartyCombatEditors.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS after adding the offline portrait workflow, review-gated actor/event
+  editor UI, catalog assignment, and actor/event `portraitAssetId` validation;
+  4 focused files and 59 Vitest tests passed.
+- `2026-06-02 16:36:10 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 16:36:27 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 79 files and 423 tests.
+- `2026-06-02 16:37:15 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1949 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 16:33:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  click `Events`,
+  select `old_man`,
+  click `Generate event portrait`,
+  click `Run event portrait generation`,
+  confirm `Generated event portrait review`,
+  click `Accept generated event portrait`,
+  confirm `old_man Portrait (old_man_portrait)` is selected,
+  click `Validate` - PASS; the validation panel reported no errors.
+- `2026-06-02 16:36:10 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\portraitGenerationWorkflow.ts src\providers\__tests__\portraitGenerationWorkflow.test.ts src\components\database\PortraitGenerationPanel.tsx src\components\database\ActorsEditor.tsx src\screens\EventEditorScreen.tsx src\components\database\__tests__\PartyCombatEditors.test.tsx src\screens\__tests__\EventEditorSurface.test.tsx src\validation\validateProject.ts src\validation\referenceIndex.ts`
+  - PASS for CP-069 scope; the only match was the test assertion that ensures
+  generated requests do not contain `apiKey`, `https://api`, or `sk-`.

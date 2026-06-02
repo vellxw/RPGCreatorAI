@@ -261,6 +261,8 @@ function Detail({ table, entry }: DetailProps) {
           skills={state.databases.skills}
           items={state.items.items}
           idField={idField}
+          assets={state.assets.assets}
+          onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
           onChange={update}
         />
       );

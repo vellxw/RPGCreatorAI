@@ -131,6 +131,7 @@ function walkCommands(commands: EventCommand[], source: string, refs: ReferenceR
 function mapReferences(map: MapData, refs: ReferenceRecord[]) {
   add(refs, 'tilesets', map.tilesetId, `maps/${map.id}/tilesetId`, 'Map tileset');
   for (const event of map.events) {
+    add(refs, 'assets', event.portraitAssetId, `maps/${map.id}/events/${event.id}/portraitAssetId`, 'Event portrait asset');
     add(refs, 'animations', event.animationSet, `maps/${map.id}/events/${event.id}/animationSet`, 'Event animation set');
     walkCommands(event.commands, `maps/${map.id}/events/${event.id}/commands`, refs);
     for (const page of event.pages ?? []) {
@@ -176,6 +177,7 @@ export function listReferences(project: FullProjectState): ReferenceRecord[] {
 
   const { databases, items } = project;
   for (const actor of databases.actors) {
+    add(refs, 'assets', actor.portraitAssetId, `database/actors/${actor.id}/portraitAssetId`, 'Actor portrait asset');
     add(refs, 'classes', actor.classId, `database/actors/${actor.id}/classId`, 'Actor class');
     for (const itemId of Object.values(actor.equipment)) {
       add(refs, 'items', itemId ?? undefined, `database/actors/${actor.id}/equipment`, 'Actor equipment');
@@ -311,6 +313,7 @@ export function renameReferences(project: FullProjectState, table: ReferenceTabl
   for (const map of Object.values(project.maps)) {
     if (table === 'tilesets' && map.tilesetId === oldId) map.tilesetId = newId;
     for (const event of map.events) {
+      if (table === 'assets' && event.portraitAssetId === oldId) event.portraitAssetId = newId;
       if (table === 'animations' && event.animationSet === oldId) event.animationSet = newId;
       renameCommandListReferences(event.commands, table, oldId, newId);
       for (const page of event.pages ?? []) {
@@ -331,6 +334,7 @@ export function renameReferences(project: FullProjectState, table: ReferenceTabl
 
   const { databases, items } = project;
   for (const actor of databases.actors) {
+    if (table === 'assets' && actor.portraitAssetId === oldId) actor.portraitAssetId = newId;
     if (table === 'classes' && actor.classId === oldId) actor.classId = newId;
     if (table === 'skills') actor.skills = actor.skills.map(skillId => skillId === oldId ? newId : skillId);
     if (table === 'items') {
@@ -647,6 +651,14 @@ export function applyReferenceRepair(project: FullProjectState, repair: Referenc
     }
     for (const event of map.events) {
       if (
+        repair.table === 'assets' &&
+        repair.source === `maps/${map.id}/events/${event.id}/portraitAssetId` &&
+        event.portraitAssetId === repair.oldId
+      ) {
+        event.portraitAssetId = repair.newId;
+        changed = true;
+      }
+      if (
         repair.table === 'animations' &&
         repair.source === `maps/${map.id}/events/${event.id}/animationSet` &&
         event.animationSet === repair.oldId
@@ -686,6 +698,10 @@ export function applyReferenceRepair(project: FullProjectState, repair: Referenc
 
   const { databases, items } = project;
   for (const actor of databases.actors) {
+    if (repair.table === 'assets' && repair.source === `database/actors/${actor.id}/portraitAssetId` && actor.portraitAssetId === repair.oldId) {
+      actor.portraitAssetId = repair.newId;
+      changed = true;
+    }
     if (repair.table === 'classes' && repair.source === `database/actors/${actor.id}/classId` && actor.classId === repair.oldId) {
       actor.classId = repair.newId;
       changed = true;

@@ -34,13 +34,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_IMAGE_PROMPT_TEMPLATE_LIBRARY.md`
 - `docs/PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md`
+- `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-069 next).
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-070 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -468,6 +469,13 @@ Primary Phase 11 sources:
   `iconAssetId` values only after review. Validation and reference indexing
   now cover item/equipment icon asset references. Evidence is recorded in
   `docs/PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md`.
+- Phase 11 CP-069 — AI portrait generation workflow completed. Actors and
+  map event NPC metadata now expose a metadata-first generated portrait
+  workflow that renders the versioned character portrait prompt through the
+  local offline mock provider, creates pending catalog candidates, and assigns
+  accepted `portraitAssetId` values only after explicit review. Validation and
+  reference indexing now cover actor/event portrait asset references. Evidence
+  is recorded in `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

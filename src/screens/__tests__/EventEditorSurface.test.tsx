@@ -30,7 +30,7 @@ function page(id: string, index: number, overrides: Partial<EventPage> = {}): Ev
   };
 }
 
-function event(): GameEvent {
+function event(overrides: Partial<GameEvent> = {}): GameEvent {
   const first = page('page_1', 1, {
     graphic: { sprite: 'npc_old_man' },
     commands: [{ type: 'showText', text: 'Page one' }],
@@ -63,6 +63,7 @@ function event(): GameEvent {
     trigger: 'interact',
     commands: first.commands,
     pages: [first, second],
+    ...overrides,
   };
 }
 
@@ -93,6 +94,18 @@ function projectState(gameEvent: GameEvent = event()): ProjectStoreState {
       maps: [{ id: 'town', path: 'data/maps/town.json', parentId: null, order: 0, expanded: true }],
     },
     maps: { town: mapData(gameEvent) },
+    assets: {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'existing_portrait',
+          name: 'Existing Portrait',
+          kind: 'image',
+          path: 'assets/imported/images/existing-portrait.png',
+          source: 'imported',
+        },
+      ],
+    },
     databases: {
       ...initialProjectStoreState.databases,
       switches: [{ id: 'story_ready', name: 'Story Ready', initial: false }],
@@ -101,10 +114,10 @@ function projectState(gameEvent: GameEvent = event()): ProjectStoreState {
   };
 }
 
-function renderScreen() {
+function renderScreen(gameEvent: GameEvent = event()) {
   const projectDispatch = vi.fn<(action: ProjectAction) => void>();
   const editorDispatch = vi.fn<(action: EditorAction) => void>();
-  const selected = event();
+  const selected = gameEvent;
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -140,6 +153,18 @@ function renderScreen() {
 
 function click(element: Element) {
   act(() => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+}
+
+async function clickAsync(element: Element) {
+  await act(async () => {
+    element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+}
+
+function buttonByAria(container: HTMLElement, label: string): HTMLButtonElement {
+  const found = container.querySelector(`button[aria-label="${label}"]`);
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  return found;
 }
 
 function changeSelect(element: HTMLSelectElement, value: string) {
@@ -283,5 +308,37 @@ describe('EventEditorScreen surface polish', () => {
       path: [0],
       command: { type: 'showText', text: 'Page two updated' },
     });
+  });
+
+  it('generates an event portrait candidate and does not overwrite until accepted', async () => {
+    const view = renderScreen(event({ portraitAssetId: 'existing_portrait' }));
+
+    await clickAsync(buttonByAria(view.container, 'Generate event portrait'));
+    expect(view.container.querySelector('[aria-label="Event portrait generation metadata preview"]')).not.toBeNull();
+    await clickAsync(buttonByAria(view.container, 'Run event portrait generation'));
+
+    expect(view.container.querySelector('[aria-label="Generated event portrait review"]')).not.toBeNull();
+    expect(view.projectDispatch.mock.calls.some(([action]) =>
+      action.type === 'UPDATE_EVENT' && 'portraitAssetId' in action.changes
+    )).toBe(false);
+
+    await clickAsync(buttonByAria(view.container, 'Accept generated event portrait'));
+
+    expect(view.projectDispatch).toHaveBeenCalledWith({
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: expect.objectContaining({
+        id: 'npc_1_portrait',
+        source: 'generated',
+        tags: expect.arrayContaining(['reviewed']),
+      }),
+    });
+    expect(view.projectDispatch).toHaveBeenLastCalledWith({
+      type: 'UPDATE_EVENT',
+      mapId: 'town',
+      eventId: 'npc_1',
+      changes: { portraitAssetId: 'npc_1_portrait' },
+    });
+
+    view.unmount();
   });
 });

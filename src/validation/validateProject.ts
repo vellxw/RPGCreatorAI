@@ -253,6 +253,15 @@ export function validateProject(state: FullProjectState): ValidationReport {
         source: `${map.id}/bgm`,
       });
     }
+    for (const event of map.events) {
+      errors.push(...validateImageAssetReference(
+        `Event "${event.id}"`,
+        'portrait',
+        `maps/${map.id}/events/${event.id}/portraitAssetId`,
+        event.portraitAssetId,
+        state.assets,
+      ));
+    }
     errors.push(...validateUniqueEventIds(map));
     errors.push(...validateCommandsInMap(map, mapIds, index));
     errors.push(
@@ -623,25 +632,26 @@ function validateAudioRegistry(db: DatabaseEntries): ValidationMessage[] {
   return out;
 }
 
-function validateIconAssetReference(
+function validateImageAssetReference(
   label: string,
+  fieldLabel: string,
   source: string,
-  iconAssetId: string | undefined,
+  assetId: string | undefined,
   assets?: AssetCatalogData,
 ): ValidationMessage[] {
-  if (!iconAssetId) return [];
-  const asset = (assets?.assets ?? []).find(candidate => candidate.id === iconAssetId);
+  if (!assetId) return [];
+  const asset = (assets?.assets ?? []).find(candidate => candidate.id === assetId);
   if (!asset) {
     return [{
       level: 'error',
-      message: `${label} references unknown icon asset "${iconAssetId}"`,
+      message: `${label} references unknown ${fieldLabel} asset "${assetId}"`,
       source,
     }];
   }
   if (asset.kind !== 'image' && asset.kind !== 'generated') {
     return [{
       level: 'error',
-      message: `${label} icon asset "${iconAssetId}" must be an image asset`,
+      message: `${label} ${fieldLabel} asset "${assetId}" must be an image asset`,
       source,
     }];
   }
@@ -680,8 +690,9 @@ function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries, 
         source: `database/items/${item.id}`,
       });
     }
-    out.push(...validateIconAssetReference(
+    out.push(...validateImageAssetReference(
       `Item "${item.id}"`,
+      'icon',
       `database/items/${item.id}/iconAssetId`,
       item.iconAssetId,
       assets,
@@ -802,7 +813,7 @@ function validateDatabaseInternal(db: DatabaseEntries, assets?: AssetCatalogData
 
   out.push(...validateTilesetDatabase(db, assets));
   out.push(...validateEquipmentAndStateDatabases(db, assets));
-  out.push(...validatePartyCombatDatabases(db));
+  out.push(...validatePartyCombatDatabases(db, assets));
   out.push(...validateSetupProgressionDatabases(db));
   out.push(...validateAnimationDatabase(db, assets));
 
@@ -1211,7 +1222,7 @@ function validateNonNegativeStats(
   return out;
 }
 
-function validatePartyCombatDatabases(db: DatabaseEntries): ValidationMessage[] {
+function validatePartyCombatDatabases(db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const classIds = new Set(db.classes.map(entry => entry.id));
   const skillIds = new Set(db.skills.map(entry => entry.id));
@@ -1242,6 +1253,13 @@ function validatePartyCombatDatabases(db: DatabaseEntries): ValidationMessage[] 
         source,
       });
     }
+    out.push(...validateImageAssetReference(
+      `Actor "${actor.id}"`,
+      'portrait',
+      `${source}/portraitAssetId`,
+      actor.portraitAssetId,
+      assets,
+    ));
     out.push(...validateNonNegativeStats(`Actor "${actor.id}"`, source, 'baseStats', actor.baseStats));
   }
 
@@ -1395,8 +1413,9 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries, assets?: AssetC
         source,
       });
     }
-    out.push(...validateIconAssetReference(
+    out.push(...validateImageAssetReference(
       `Weapon "${weapon.id}"`,
+      'icon',
       `${source}/iconAssetId`,
       weapon.iconAssetId,
       assets,
@@ -1428,8 +1447,9 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries, assets?: AssetC
         source,
       });
     }
-    out.push(...validateIconAssetReference(
+    out.push(...validateImageAssetReference(
       `Armor "${armor.id}"`,
+      'icon',
       `${source}/iconAssetId`,
       armor.iconAssetId,
       assets,

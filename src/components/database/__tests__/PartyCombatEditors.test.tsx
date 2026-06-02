@@ -9,6 +9,7 @@ import { EnemiesEditor } from '../EnemiesEditor';
 import { TroopsEditor } from '../TroopsEditor';
 import type {
   ActorData,
+  AssetCatalogEntry,
   ClassData,
   EnemyData,
   ItemData,
@@ -16,6 +17,10 @@ import type {
   Stats,
   TroopData,
 } from '../../../types/project';
+import type {
+  PortraitGenerationCandidate,
+  PortraitGenerationRunner,
+} from '../../../providers/portraitGenerationWorkflow';
 
 function render(ui: React.ReactNode) {
   const container = document.createElement('div');
@@ -78,6 +83,13 @@ function changeSelect(el: HTMLSelectElement, value: string) {
 function clickCheckbox(el: HTMLInputElement) {
   act(() => {
     el.click();
+  });
+}
+
+async function clickAsync(container: HTMLElement, label: string) {
+  const found = button(container, label);
+  await act(async () => {
+    found.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
 }
 
@@ -158,6 +170,99 @@ describe('party and combat database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({ skills: ['slash', 'guard'] });
     clickCheckbox(checkbox(view.container, 'Actor skill Slash'));
     expect(onChange).toHaveBeenLastCalledWith({ skills: [] });
+
+    view.unmount();
+  });
+
+  it('generates an actor portrait candidate and assigns it only after review', async () => {
+    const generatedAsset: AssetCatalogEntry = {
+      id: 'arc_portrait',
+      name: 'Arc Portrait',
+      kind: 'image',
+      path: 'assets/generated/portraits/arc_portrait.png',
+      source: 'generated',
+      tags: ['generated', 'portrait', 'actor', 'ai-draft', 'pending-review'],
+      width: 1024,
+      height: 1536,
+      generated: {
+        prompt: 'offline portrait prompt',
+        tool: 'ai-portrait-generation-workflow',
+        createdAt: '2026-06-02T19:26:00.000Z',
+        promptTemplateId: 'portrait-character-v1',
+        promptTemplateVersion: 1,
+        promptTemplateKind: 'portrait',
+        providerId: 'local',
+        modelId: 'offline-image-mock',
+      },
+    };
+    const candidate: PortraitGenerationCandidate = {
+      id: 'portrait-gen-ui',
+      reviewState: 'pending',
+      owner: { kind: 'actor', id: 'arc', name: 'Arc' },
+      asset: generatedAsset,
+      qaPreview: {
+        assetRef: 'mock://generated/portrait-gen-ui.png',
+        width: 1024,
+        height: 1536,
+        providerFixture: 'offline-image',
+      },
+    };
+    const portraitGenerator: PortraitGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const actor: ActorData = {
+      id: 'arc',
+      name: 'Arc',
+      classId: 'hero',
+      level: 1,
+      hp: 18,
+      mp: 6,
+      baseStats: stats,
+      equipment: { weapon: null, armor: null, accessory: null },
+      skills: ['slash'],
+      portraitAssetId: 'existing_portrait',
+    };
+    const view = render(
+      <ActorsEditor
+        entry={actor}
+        classes={classes}
+        skills={skills}
+        items={items}
+        idField={<span />}
+        assets={[]}
+        portraitGenerator={portraitGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    act(() => button(view.container, 'Generate actor portrait').click());
+    expect(view.container.querySelector('[aria-label="Actor portrait generation metadata preview"]')).not.toBeNull();
+    changeText(input(view.container, 'Actor portrait subject'), 'Arc hero portrait with teal cloak');
+
+    await clickAsync(view.container, 'Run actor portrait generation');
+
+    expect(portraitGenerator).toHaveBeenCalledWith([], expect.objectContaining({
+      owner: { kind: 'actor', id: 'arc', name: 'Arc' },
+      promptInputs: expect.objectContaining({
+        subject: 'Arc hero portrait with teal cloak',
+      }),
+    }));
+    expect(view.container.querySelector('[aria-label="Generated actor portrait review"]')).not.toBeNull();
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+
+    await clickAsync(view.container, 'Accept generated actor portrait');
+
+    expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'arc_portrait',
+      source: 'generated',
+      tags: expect.arrayContaining(['reviewed']),
+    }));
+    expect(onChange).toHaveBeenLastCalledWith({ portraitAssetId: 'arc_portrait' });
 
     view.unmount();
   });

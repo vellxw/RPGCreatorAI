@@ -15,6 +15,7 @@ import { Input, Select } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
+import { PortraitGenerationPanel } from '../components/database/PortraitGenerationPanel';
 import { validateEvent } from '../validation/validateMap';
 import type {
   EventPage,
@@ -396,6 +397,15 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
   const activeSpriteOptions = pageGraphic.sprite && !spriteOptions.some(option => option.value === pageGraphic.sprite)
     ? [...spriteOptions, { value: pageGraphic.sprite, label: `${pageGraphic.sprite} (unknown)` }]
     : spriteOptions;
+  const portraitAssetOptions = [
+    { value: '', label: '(none)' },
+    ...project.assets.assets
+      .filter(asset => asset.kind === 'image' || asset.kind === 'generated')
+      .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` })),
+  ];
+  const activePortraitAssetOptions = event.portraitAssetId && !portraitAssetOptions.some(option => option.value === event.portraitAssetId)
+    ? [...portraitAssetOptions, { value: event.portraitAssetId, label: `${event.portraitAssetId} (unknown)` }]
+    : portraitAssetOptions;
 
   return (
     <div className="w-[260px] flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto">
@@ -633,6 +643,23 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
           value={pageGraphic.sprite ?? ''}
           options={activeSpriteOptions}
           onChange={v => updatePageGraphic({ sprite: v || undefined })}
+        />
+        <Select
+          label="Portrait asset"
+          value={event.portraitAssetId ?? ''}
+          options={activePortraitAssetOptions}
+          onChange={v => update({ portraitAssetId: v || undefined })}
+        />
+        <PortraitGenerationPanel
+          ownerKind="event"
+          ownerId={event.id}
+          ownerName={event.id}
+          description={`${event.type} event at (${event.x}, ${event.y})`}
+          assets={project.assets.assets}
+          onAssetAccepted={(asset, portraitAssetId) => {
+            dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset });
+            update({ portraitAssetId });
+          }}
         />
         <Input
           label={page ? 'Page animation set' : 'Animation Set'}
