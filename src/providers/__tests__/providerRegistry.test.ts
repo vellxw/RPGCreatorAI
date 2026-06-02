@@ -41,6 +41,11 @@ describe('providerRegistry', () => {
       label: 'Offline image mock',
       operations: ['image.generate'],
     });
+    expect(local?.models).toContainEqual({
+      id: 'offline-image-edit-mock',
+      label: 'Offline image edit mock',
+      operations: ['image.edit'],
+    });
   });
 
   it('derives settings provider configs from registry metadata', () => {

@@ -5446,3 +5446,49 @@ Error: Port 1420 is already in use
   `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\portraitGenerationWorkflow.ts src\providers\__tests__\portraitGenerationWorkflow.test.ts src\components\database\PortraitGenerationPanel.tsx src\components\database\ActorsEditor.tsx src\screens\EventEditorScreen.tsx src\components\database\__tests__\PartyCombatEditors.test.tsx src\screens\__tests__\EventEditorSurface.test.tsx src\validation\validateProject.ts src\validation\referenceIndex.ts`
   - PASS for CP-069 scope; the only match was the test assertion that ensures
   generated requests do not contain `apiKey`, `https://api`, or `sk-`.
+
+### Phase 11 FRA-105 / CP-070 - image edit and variation workflow
+
+- `2026-06-02 16:46:22 -03:00` -
+  `npm test -- --run src/providers/__tests__/imageEditVariationWorkflow.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/screens/__tests__/AssetsScreen.test.tsx`
+  - FAIL as expected during TDD red step; the image edit workflow module,
+  `asset-edit-v1` template, local image-edit mock model, mock `image.edit`
+  adapter behavior, and Assets UI panel did not exist yet.
+- `2026-06-02 16:51:06 -03:00` -
+  same focused command - FAIL; root causes were the common prompt renderer
+  field names for the new template, token-count expectations in the mock
+  adapter test, and mask options leaking non-selected filtered assets for
+  audio sources. Fix applied: the edit template uses the common
+  subject/use-case/palette/style-notes fields, tests use the existing token
+  counter, and mask/reference choices hide when the selected source is not
+  editable.
+- `2026-06-02 16:52:29 -03:00` -
+  same focused command - PASS; 6 focused files and 34 Vitest tests passed.
+- `2026-06-02 16:53:00 -03:00` - `npm run typecheck` - FAIL; the Assets
+  screen test fixture widened `reviewState` and `editMode` literal values.
+  Fix applied: the fixture pins those values as literals.
+- `2026-06-02 16:54:00 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 16:55:21 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 80 files and 431 tests.
+- `2026-06-02 16:56:30 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1951 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 16:56:30 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\imageEditVariationWorkflow.ts src\providers\__tests__\imageEditVariationWorkflow.test.ts src\components\assets\ImageEditVariationPanel.tsx src\screens\AssetsScreen.tsx src\screens\__tests__\AssetsScreen.test.tsx src\providers\mockProviderAdapter.ts src\providers\modelCapabilityRegistry.ts src\providers\providerRegistry.ts src\providers\imagePromptTemplates.ts src\types\project.ts`
+  - PASS for CP-070 scope; matches were the existing Moonshot provider
+  metadata base URL in `providerRegistry.ts` and the test assertion that
+  ensures generated requests do not contain `apiKey`, `https://api`, or
+  `sk-`.
+- `2026-06-02 17:00:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  click `Assets`,
+  confirm `Image edit and variation`,
+  click `Run image variation`,
+  confirm `Generated image variation review` for
+  `player_adventurer_sheet_variation`,
+  click `Accept`,
+  confirm the catalog increased to 6 assets and selected
+  `Player Adventurer Sheet Variation`,
+  click `Validate` - PASS; toolbar feedback reported `Validation passed`.

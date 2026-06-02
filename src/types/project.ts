@@ -133,6 +133,12 @@ export interface GeneratedAssetMetadata {
   promptInputs?: Record<string, string>;
   providerId?: string;
   modelId?: string;
+  operation?: string;
+  sourceAssetId?: string;
+  sourceAssetPath?: string;
+  maskAssetId?: string;
+  referenceAssetIds?: string[];
+  editMode?: 'edit' | 'variation';
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
   visualContextVersion?: string;

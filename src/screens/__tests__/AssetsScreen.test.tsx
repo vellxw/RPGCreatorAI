@@ -10,11 +10,13 @@ import {
 } from '../../stores/projectStore';
 import type { AudioImportRunner } from '../../adapters/audioImport';
 import type { ImageImportRunner } from '../../adapters/assetImport';
+import type { ImageEditVariationRunner } from '../../providers/imageEditVariationWorkflow';
 
 function renderAssetsScreen(
   projectState: ProjectStoreState,
   imageImporter?: ImageImportRunner,
   audioImporter?: AudioImportRunner,
+  imageEditRunner?: ImageEditVariationRunner,
 ) {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -25,7 +27,7 @@ function renderAssetsScreen(
     root = createRoot(container);
     root.render(
       <ProjectContext.Provider value={{ state: projectState, dispatch }}>
-        <AssetsScreen imageImporter={imageImporter} audioImporter={audioImporter} />
+        <AssetsScreen imageImporter={imageImporter} audioImporter={audioImporter} imageEditRunner={imageEditRunner} />
       </ProjectContext.Provider>,
     );
   });
@@ -374,5 +376,171 @@ describe('AssetsScreen', () => {
     expect(view.container.textContent).toContain('Unsupported audio type ".mp3".');
 
     view.unmount();
+  });
+
+  it('runs image variation candidates without mutating the source asset until accepted', async () => {
+    const sourceAsset = {
+      id: 'forest_concept',
+      name: 'Forest Concept',
+      kind: 'image' as const,
+      path: 'assets/imported/images/forest_concept.png',
+      source: 'imported' as const,
+      tags: ['concept'],
+      width: 1536,
+      height: 1024,
+    };
+    const generatedAsset = {
+      id: 'forest_concept_variation',
+      name: 'Forest Concept Variation',
+      kind: 'image' as const,
+      path: 'assets/generated/edits/forest_concept_variation.png',
+      source: 'generated' as const,
+      tags: ['generated', 'image-edit', 'variation', 'reviewed'],
+      width: 1536,
+      height: 1024,
+      generated: {
+        promptTemplateId: 'asset-edit-v1',
+        promptTemplateVersion: 1,
+        promptTemplateKind: 'edit',
+        providerId: 'local',
+        modelId: 'offline-image-edit-mock',
+        operation: 'image.edit',
+        sourceAssetId: 'forest_concept',
+        sourceAssetPath: 'assets/imported/images/forest_concept.png',
+        editMode: 'variation' as const,
+      },
+    };
+    const imageEditRunner: ImageEditVariationRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      candidate: {
+        id: 'edit-run-1',
+        reviewState: 'pending' as const,
+        sourceAsset,
+        asset: generatedAsset,
+        qaPreview: {
+          assetRef: 'mock://generated/edit-run-1.png',
+          width: 1536,
+          height: 1024,
+          providerFixture: 'offline-image-edit',
+        },
+      },
+    }));
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [sourceAsset],
+      },
+    };
+    const view = renderAssetsScreen(state, undefined, undefined, imageEditRunner);
+
+    expect(view.container.textContent).toContain('Image edit and variation');
+    const instruction = view.container.querySelector<HTMLInputElement>('input[aria-label="Image edit instruction"]');
+    act(() => {
+      instruction!.value = 'Create a dusk lighting variation.';
+      instruction!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    const run = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Run image variation'),
+    );
+    expect(run).toBeDefined();
+    await act(async () => {
+      run?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(imageEditRunner).toHaveBeenCalledWith(['forest_concept'], expect.objectContaining({
+      mode: 'variation',
+      sourceAsset,
+      promptInputs: expect.objectContaining({
+        instruction: 'Create a dusk lighting variation.',
+      }),
+    }));
+    expect(view.dispatch).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Generated image variation review');
+    expect(view.container.textContent).toContain('forest_concept_variation');
+
+    const accept = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Accept'),
+    );
+    await act(async () => {
+      accept?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: expect.objectContaining({
+        id: 'forest_concept_variation',
+        generated: expect.objectContaining({
+          sourceAssetId: 'forest_concept',
+          operation: 'image.edit',
+        }),
+      }),
+    });
+    expect(view.container.textContent).toContain('Accepted Forest Concept Variation');
+
+    view.unmount();
+  });
+
+  it('shows image edit cancellation and capability/source gates without catalog mutation', async () => {
+    const imageEditRunner: ImageEditVariationRunner = vi.fn(async () => ({
+      success: false,
+      cancelled: true,
+      error: 'Image edit cancelled.',
+    }));
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [
+          {
+            id: 'town_theme',
+            name: 'Town Theme',
+            kind: 'audio' as const,
+            path: 'assets/audio/town.wav',
+            source: 'local' as const,
+          },
+        ],
+      },
+    };
+    const view = renderAssetsScreen(state, undefined, undefined, imageEditRunner);
+
+    expect(view.container.textContent).toContain('Select an image, generated image, tileset, or spritesheet asset to edit.');
+    const run = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Run image variation'),
+    ) as HTMLButtonElement | undefined;
+    expect(run?.disabled).toBe(true);
+
+    view.unmount();
+
+    const imageState: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [
+          {
+            id: 'forest_concept',
+            name: 'Forest Concept',
+            kind: 'image' as const,
+            path: 'assets/imported/images/forest_concept.png',
+            source: 'imported' as const,
+          },
+        ],
+      },
+    };
+    const cancelView = renderAssetsScreen(imageState, undefined, undefined, imageEditRunner);
+    const cancelRun = Array.from(cancelView.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Run image variation'),
+    );
+
+    await act(async () => {
+      cancelRun?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(cancelView.dispatch).not.toHaveBeenCalled();
+    expect(cancelView.container.textContent).toContain('Image edit cancelled.');
+
+    cancelView.unmount();
   });
 });

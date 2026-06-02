@@ -35,13 +35,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`
+- `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-070 next).
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-071 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -476,6 +477,14 @@ Primary Phase 11 sources:
   accepted `portraitAssetId` values only after explicit review. Validation and
   reference indexing now cover actor/event portrait asset references. Evidence
   is recorded in `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`.
+- Phase 11 CP-070 — image edit and variation workflow completed. The Assets
+  detail panel now exposes capability-gated, source-gated image edit/variation
+  authoring for image, generated, tileset, and spritesheet catalog entries.
+  The local `offline-image-edit-mock` fixture handles normal validation
+  through `image.edit`, source assets are preserved, candidates remain pending
+  until review, and accepted outputs are added as new generated catalog assets
+  with source/mask/reference/prompt/model provenance. Evidence is recorded in
+  `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

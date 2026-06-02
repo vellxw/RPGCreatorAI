@@ -18,7 +18,7 @@ describe('mockProviderAdapter', () => {
   it('discovers capabilities and models without live provider calls', async () => {
     const adapter = createMockProviderAdapter();
 
-    await expect(adapter.discoverCapabilities()).resolves.toEqual(['text.generate', 'image.generate']);
+    await expect(adapter.discoverCapabilities()).resolves.toEqual(['text.generate', 'image.generate', 'image.edit']);
     await expect(adapter.listModels()).resolves.toEqual([
       {
         id: 'offline-mock',
@@ -29,6 +29,11 @@ describe('mockProviderAdapter', () => {
         id: 'offline-image-mock',
         label: 'Offline image mock',
         operations: ['image.generate'],
+      },
+      {
+        id: 'offline-image-edit-mock',
+        label: 'Offline image edit mock',
+        operations: ['image.edit'],
       },
     ]);
   });
@@ -76,7 +81,7 @@ describe('mockProviderAdapter', () => {
 
     expect(result).toMatchObject({
       status: 'failed',
-      error: 'Mock provider does not support image.edit.',
+      error: 'Mock model offline-mock does not support image.edit.',
     });
     expect(result.output).toBeUndefined();
   });
@@ -113,6 +118,49 @@ describe('mockProviderAdapter', () => {
       },
       usage: {
         inputTokens: 7,
+        imageCount: 1,
+        outputTokens: 196,
+      },
+    });
+  });
+
+  it('returns deterministic image edit fixture responses without live provider calls', async () => {
+    const adapter = createMockProviderAdapter();
+    const result = await adapter.execute(textRequest({
+      id: 'image-edit-request-1',
+      operation: 'image.edit',
+      modelId: 'offline-image-edit-mock',
+      prompt: 'Create a dusk variation while preserving composition.',
+      input: {
+        sourceAssetId: 'forest_concept',
+        sourceAssetPath: 'assets/imported/images/forest_concept.png',
+        mode: 'variation',
+        quality: 'low',
+        size: '1536x1024',
+        outputFormat: 'png',
+      },
+    }));
+
+    expect(result).toEqual({
+      id: 'image-edit-request-1',
+      operation: 'image.edit',
+      providerId: 'local',
+      modelId: 'offline-image-edit-mock',
+      status: 'succeeded',
+      output: {
+        assetRefs: ['mock://generated/image-edit-request-1.png'],
+        data: {
+          mimeType: 'image/png',
+          revisedPrompt: 'Create a dusk variation while preserving composition.',
+          fixture: 'offline-image-edit',
+          sourceAssetId: 'forest_concept',
+          mode: 'variation',
+          size: '1536x1024',
+          quality: 'low',
+        },
+      },
+      usage: {
+        inputTokens: 8,
         imageCount: 1,
         outputTokens: 196,
       },

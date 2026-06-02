@@ -73,6 +73,24 @@ describe('modelCapabilityRegistry', () => {
     });
   });
 
+  it('defines a separate offline image edit mock capability fixture', () => {
+    const descriptor = getModelCapabilityDescriptor('local', 'offline-image-edit-mock');
+
+    expect(descriptor).toMatchObject({
+      providerId: 'local',
+      modelId: 'offline-image-edit-mock',
+      capabilities: ['image-edit'],
+      operations: ['image.edit'],
+      limits: {
+        maxImages: 1,
+        inputFileTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        outputFileTypes: ['image/png'],
+      },
+    });
+    expect(modelSupportsCapability(descriptor!, 'image-edit')).toBe(true);
+    expect(modelSupportsCapability(descriptor!, 'image')).toBe(false);
+  });
+
   it('keeps unknown real-provider models unavailable until capability data exists', () => {
     expect(getModelCapabilityDescriptor('openai', 'user-entered-model')).toBeUndefined();
   });

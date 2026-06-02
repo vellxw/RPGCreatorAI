@@ -26,6 +26,7 @@ describe('imagePromptTemplates', () => {
       ['tileset-rpg-map-v1', 'tileset', 1],
       ['icon-item-v1', 'icon', 1],
       ['portrait-character-v1', 'portrait', 1],
+      ['asset-edit-v1', 'edit', 1],
       ['ui-panel-v1', 'ui-panel', 1],
       ['reference-board-v1', 'reference', 1],
     ]);

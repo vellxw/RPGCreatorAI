@@ -4,7 +4,7 @@ import type {
   ProviderImageStyle,
 } from '../types/project';
 
-export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'ui-panel' | 'reference';
+export type ImagePromptTemplateKind = 'tileset' | 'icon' | 'portrait' | 'edit' | 'ui-panel' | 'reference';
 
 export interface ImagePromptTemplate {
   id: string;
@@ -126,6 +126,28 @@ export const imagePromptTemplates: ImagePromptTemplate[] = [
     legalConstraints: [
       'Do not copy actors, celebrities, proprietary characters, or studio-specific likenesses.',
       'Do not claim legal clearance or identity rights.',
+    ],
+  },
+  {
+    id: 'asset-edit-v1',
+    version: 1,
+    kind: 'edit',
+    label: 'Asset edit or variation',
+    requiredInputs: ['subject', 'useCase', 'palette', 'styleNotes'],
+    purpose: 'Generate reviewed edit or variation candidates from existing project assets.',
+    outputGuidance: [
+      'Preserve the source asset identity unless the edit instruction explicitly changes it.',
+      'Return a new image candidate only; never overwrite the referenced source asset.',
+      'Keep source dimensions, readable composition, and project-owned asset intent visible.',
+    ],
+    styleConstraints: [
+      'original RPGCreatorAI asset edit direction only',
+      'source-aware iteration with readable silhouettes',
+      'consistent scale, palette discipline, and no destructive overwrite',
+    ],
+    legalConstraints: [
+      'Do not copy proprietary references, branded assets, or recognizable protected artwork.',
+      'Do not claim third-party license transfer from the source or reference images.',
     ],
   },
   {

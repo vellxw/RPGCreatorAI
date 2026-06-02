@@ -210,7 +210,7 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     credential: { required: false },
     cost: freeOfflineCost,
     rateLimit: noRemoteRateLimit,
-    operations: ['text.generate', 'image.generate'],
+    operations: ['text.generate', 'image.generate', 'image.edit'],
     capabilityLabels: ['Offline mock contracts'],
     models: [
       {
@@ -222,6 +222,11 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
         id: 'offline-image-mock',
         label: 'Offline image mock',
         operations: ['image.generate'],
+      },
+      {
+        id: 'offline-image-edit-mock',
+        label: 'Offline image edit mock',
+        operations: ['image.edit'],
       },
     ],
     modelSelection: 'registry',

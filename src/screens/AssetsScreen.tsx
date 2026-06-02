@@ -4,12 +4,17 @@ import { gameAssets } from '../assets/generated/assetCatalog';
 import { Input, Select } from '../components/ui/Input';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
+import { ImageEditVariationPanel } from '../components/assets/ImageEditVariationPanel';
 import { useProjectStore, type AssetCatalogMetadataChanges } from '../stores/projectStore';
 import { mergeAudioRegistry } from '../audio/audioRegistry';
 import { importAudioAsset, type AudioImportRunner } from '../adapters/audioImport';
 import { importImageAsset, type ImageImportRunner } from '../adapters/assetImport';
 import type { AudioImportUsage } from '../adapters/types';
 import type { AssetCatalogEntry, AssetKind, AssetSource } from '../types/project';
+import type {
+  ImageEditVariationCapability,
+  ImageEditVariationRunner,
+} from '../providers/imageEditVariationWorkflow';
 import { findReferences } from '../validation/referenceIndex';
 
 const KIND_OPTIONS: Array<{ value: AssetKind | 'all'; label: string }> = [
@@ -152,11 +157,15 @@ function StatusChip({ children }: { children: ReactNode }) {
 interface AssetsScreenProps {
   imageImporter?: ImageImportRunner;
   audioImporter?: AudioImportRunner;
+  imageEditRunner?: ImageEditVariationRunner;
+  imageEditCapability?: ImageEditVariationCapability;
 }
 
 export function AssetsScreen({
   imageImporter = importImageAsset,
   audioImporter = importAudioAsset,
+  imageEditRunner,
+  imageEditCapability,
 }: AssetsScreenProps) {
   const { state, dispatch } = useProjectStore();
   const catalog = state.assets;
@@ -399,6 +408,18 @@ export function AssetsScreen({
                       </ul>
                     )}
                   </section>
+                  <ImageEditVariationPanel
+                    selected={selected}
+                    assets={catalog.assets}
+                    existingAssetIds={catalog.assets.map(asset => asset.id)}
+                    imageEditRunner={imageEditRunner}
+                    capability={imageEditCapability}
+                    onAssetAccepted={asset => {
+                      dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset });
+                      setSelectedId(asset.id);
+                      setImportStatus({ tone: 'success', text: `Accepted ${asset.name}` });
+                    }}
+                  />
                   <dl className="rounded-md border border-gray-200 px-3 bg-white">
                     <DetailRow label="Kind" value={kindLabel(selected.kind)} />
                     <DetailRow label="Path" value={selected.path} />

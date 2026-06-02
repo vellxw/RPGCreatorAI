@@ -91,6 +91,40 @@ function imageFixtureResponse(request: ProviderAdapterRequest): ProviderAdapterR
   };
 }
 
+function imageEditFixtureResponse(request: ProviderAdapterRequest): ProviderAdapterResponse {
+  const input = request.input ?? {};
+  const outputFormat = typeof input.outputFormat === 'string' ? input.outputFormat : 'png';
+  const size = typeof input.size === 'string' ? input.size : '1024x1024';
+  const quality = typeof input.quality === 'string' ? input.quality : 'low';
+  const prompt = request.prompt ?? '';
+  const sourceAssetId = typeof input.sourceAssetId === 'string' ? input.sourceAssetId : undefined;
+  const mode = input.mode === 'edit' || input.mode === 'variation' ? input.mode : 'variation';
+  return {
+    id: request.id,
+    operation: request.operation,
+    providerId: request.providerId,
+    modelId: request.modelId ?? 'offline-image-edit-mock',
+    status: 'succeeded',
+    output: {
+      assetRefs: [`mock://generated/${request.id}.${outputFormat}`],
+      data: {
+        mimeType: `image/${outputFormat === 'jpg' ? 'jpeg' : outputFormat}`,
+        revisedPrompt: prompt,
+        fixture: 'offline-image-edit',
+        sourceAssetId,
+        mode,
+        size,
+        quality,
+      },
+    },
+    usage: {
+      inputTokens: countPromptTokens(prompt),
+      imageCount: 1,
+      outputTokens: 196,
+    },
+  };
+}
+
 export function createMockProviderAdapter(): ProviderAdapter {
   const metadata = getProviderMetadata('local');
   if (!metadata) {
@@ -158,6 +192,26 @@ class MockProviderAdapter implements ProviderAdapter {
         };
       }
       return imageFixtureResponse(request);
+    }
+
+    if (request.operation === 'image.edit') {
+      if (request.modelId && request.modelId !== 'offline-image-edit-mock') {
+        const failure: ProviderAdapterFailure = {
+          kind: 'unsupported-operation',
+          message: `Mock model ${request.modelId} does not support image.edit.`,
+          retryGuidance: 'Select offline-image-edit-mock for offline image edit fixture validation.',
+        };
+        return {
+          id: request.id,
+          operation: request.operation,
+          providerId: request.providerId,
+          modelId: request.modelId,
+          status: 'failed',
+          error: failure.message,
+          failure,
+        };
+      }
+      return imageEditFixtureResponse(request);
     }
 
     if (request.operation !== 'text.generate') {

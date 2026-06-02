@@ -102,6 +102,20 @@ export const defaultModelCapabilityRegistry: ModelCapabilityDescriptor[] = [
     },
     contextHints: ['Offline image fixture responses only'],
   },
+  {
+    providerId: 'local',
+    modelId: 'offline-image-edit-mock',
+    label: 'Offline image edit mock',
+    capabilities: ['image-edit'],
+    operations: ['image.edit'],
+    limits: {
+      inputFileTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      outputFileTypes: ['image/png'],
+      maxImages: 1,
+      supportsStreaming: false,
+    },
+    contextHints: ['Offline image edit fixture responses only'],
+  },
 ];
 
 export function getModelCapabilityDescriptor(
