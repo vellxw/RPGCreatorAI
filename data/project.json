@@ -44,6 +44,7 @@
     "animations": "data/database/animations.json",
     "tilesets": "data/database/tilesets.json"
   },
+  "assetCatalog": "data/assets/catalog.json",
   "visualProfile": {
     "aspectRatio": "16:9",
     "baseResolution": {

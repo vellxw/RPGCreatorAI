@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { id: 'maps', label: 'Maps', icon: <img src={editorAssets.map} alt="" className="w-[18px] h-[18px]" />, screen: 'editor' },
   { id: 'events', label: 'Events', icon: <img src={editorAssets.event} alt="" className="w-[18px] h-[18px]" />, screen: 'events' },
   { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
+  { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'assets' },
   { id: 'playtest', label: 'Playtest', icon: <Play size={18} />, screen: 'playtest' },
 ];
 
@@ -25,6 +26,7 @@ export function Sidebar() {
       if (item.id === 'maps' && state.activeScreen === 'editor') return true;
       if (item.id === 'events' && state.activeScreen === 'events') return true;
       if (item.id === 'database' && state.activeScreen === 'database') return true;
+      if (item.id === 'assets' && state.activeScreen === 'assets') return true;
     }
     return false;
   };

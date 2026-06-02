@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { Dispatch } from 'react';
 import type {
+  AssetCatalogData,
   CommonEventData,
   AnimationDatabaseData,
   DatabaseEntries,
@@ -26,6 +27,7 @@ import type {
 } from '../types/project';
 import type { FullProjectState } from '../adapters/types';
 import { mergeDatabases } from '../adapters/defaultDatabases';
+import { normalizeAssetCatalog } from '../adapters/defaultAssetCatalog';
 import { validateProject } from '../validation/validateProject';
 import { applyReferenceRepair, renameReferences, type ReferenceRepairAction } from '../validation/referenceIndex';
 import { withNormalizedVisualProfile } from '../visual/visualProfile';
@@ -39,6 +41,7 @@ export interface ProjectStoreState {
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
+  assets: AssetCatalogData;
   dirty: boolean;
   lastSavedAt: string | null;
   errors: ValidationMessage[];
@@ -368,6 +371,7 @@ export interface ProjectSnapshot {
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
+  assets: AssetCatalogData;
 }
 
 // ---------------------------------------------------------------------------
@@ -570,6 +574,7 @@ function snapshotOf(state: ProjectStoreState): ProjectSnapshot {
     maps: deepClone(state.maps),
     items: deepClone(state.items),
     databases: deepClone(state.databases),
+    assets: deepClone(state.assets),
   };
 }
 
@@ -579,6 +584,7 @@ function withValidation(state: ProjectStoreState): ProjectStoreState {
     maps: state.maps,
     items: state.items,
     databases: state.databases,
+    assets: state.assets,
   });
   return { ...state, errors: report.errors, warnings: report.warnings };
 }
@@ -607,6 +613,7 @@ function restoreSnapshot(
     maps: deepClone(snapshot.maps),
     items: deepClone(snapshot.items),
     databases: deepClone(snapshot.databases),
+    assets: deepClone(snapshot.assets),
     dirty: true,
     history,
     future,
@@ -986,6 +993,7 @@ export const initialProjectStoreState: ProjectStoreState = {
   maps: {},
   items: { items: [] },
   databases: mergeDatabases(undefined),
+  assets: { schemaVersion: 1, assets: [] },
   dirty: false,
   lastSavedAt: null,
   errors: [],
@@ -1056,6 +1064,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
           payload.items,
           mergeDatabases(payload.databases as Partial<DatabaseEntries> | undefined),
         ),
+        assets: normalizeAssetCatalog(payload.assets),
         dirty: false,
         history: [],
         future: [],
@@ -1068,6 +1077,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         maps: next.maps,
         items: next.items,
         databases: next.databases,
+        assets: next.assets,
       };
       const report = validateProject(fullState);
       next.errors = report.errors;
@@ -1649,6 +1659,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         maps: state.maps,
         items: state.items,
         databases: state.databases,
+        assets: state.assets,
       });
       return { ...state, errors: report.errors, warnings: report.warnings };
     }

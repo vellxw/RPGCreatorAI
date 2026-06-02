@@ -1,5 +1,6 @@
 // Adapter interfaces for editor persistence and runtime launch
 import type {
+  AssetCatalogData,
   DatabaseEntries,
   ItemDatabase,
   MapData,
@@ -25,6 +26,7 @@ export interface FullProjectState {
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
+  assets?: AssetCatalogData;
 }
 
 export interface ExportBundle {
@@ -34,6 +36,7 @@ export interface ExportBundle {
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
+  assets?: AssetCatalogData;
 }
 
 export interface ProjectDataAdapter {

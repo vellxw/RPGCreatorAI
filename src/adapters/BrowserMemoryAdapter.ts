@@ -33,6 +33,7 @@ import type {
 } from '../types/project';
 import { buildExportBundle, parseImportBundle, safeStringify } from './jsonUtils';
 import { mergeDatabases } from './defaultDatabases';
+import { normalizeAssetCatalog } from './defaultAssetCatalog';
 
 import projectJson from '../../data/project.json';
 import townJson from '../../data/maps/town.json';
@@ -56,6 +57,7 @@ import variablesJson from '../../data/database/variables.json';
 import commonEventsJson from '../../data/database/commonEvents.json';
 import animationsJson from '../../data/database/animations.json';
 import tilesetsJson from '../../data/database/tilesets.json';
+import assetCatalogJson from '../../data/assets/catalog.json';
 
 function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -110,6 +112,7 @@ function seedFromBundle(): FullProjectState {
       tilesets: extractTilesets(deepClone(tilesetsJson) as Record<string, unknown>),
       system: extractSystem(deepClone(systemJson) as Record<string, unknown>),
     }),
+    assets: normalizeAssetCatalog(deepClone(assetCatalogJson)),
   };
 }
 
@@ -238,6 +241,7 @@ export class BrowserMemoryAdapter implements ProjectDataAdapter {
       for (const [, m] of Object.entries(state.maps)) safeStringify(m);
       safeStringify(state.items);
       safeStringify(state.databases);
+      safeStringify(state.assets);
 
       this.snapshot = deepClone(state);
       return { success: true };

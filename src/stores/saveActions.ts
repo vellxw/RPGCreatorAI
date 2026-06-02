@@ -36,6 +36,7 @@ export async function performSave(
     maps: state.maps,
     items: state.items,
     databases: state.databases,
+    assets: state.assets,
   };
 
   const report = validateProject(fullState);
@@ -103,6 +104,7 @@ export async function performExport(state: ProjectStoreState): Promise<void> {
     maps: state.maps,
     items: state.items,
     databases: state.databases,
+    assets: state.assets,
   };
   exportToFile(fullState);
 }

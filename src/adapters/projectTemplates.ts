@@ -1,5 +1,6 @@
 import type { FullProjectState } from './types';
 import { mergeDatabases } from './defaultDatabases';
+import { EMPTY_ASSET_CATALOG } from './defaultAssetCatalog';
 import type { MapData } from '../types/project';
 import { DEFAULT_VISUAL_PROFILE } from '../visual/visualProfile';
 
@@ -74,6 +75,7 @@ export function createNewProjectState(title?: string): FullProjectState {
         animations: 'data/database/animations.json',
         tilesets: 'data/database/tilesets.json',
       },
+      assetCatalog: 'data/assets/catalog.json',
       visualProfile: deepClone(DEFAULT_VISUAL_PROFILE),
     },
     maps: { [map.id]: map },
@@ -89,5 +91,6 @@ export function createNewProjectState(title?: string): FullProjectState {
           : [],
       },
     }),
+    assets: deepClone(EMPTY_ASSET_CATALOG),
   };
 }

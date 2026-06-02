@@ -103,6 +103,8 @@ pub struct ProjectData {
     pub start_position: StartPosition,
     pub maps: Vec<MapReference>,
     pub database: DatabaseRefs,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub asset_catalog: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -117,6 +119,12 @@ pub struct FullProjectState {
     /// authoritative validator; the shell just round-trips JSON values.
     #[serde(default)]
     pub databases: serde_json::Value,
+    #[serde(default = "default_asset_catalog")]
+    pub assets: serde_json::Value,
+}
+
+fn default_asset_catalog() -> serde_json::Value {
+    serde_json::json!({ "schemaVersion": 1, "assets": [] })
 }
 
 #[derive(Serialize, Default)]
@@ -279,6 +287,11 @@ pub fn fs_write_project(
         &mut warnings,
     )
     .map_err(|e| e.to_string())?;
+
+    if let Some(rel) = project_state.project.asset_catalog.as_ref() {
+        write_with_backup(&canonical, rel, &project_state.assets, &mut warnings)
+            .map_err(|e| e.to_string())?;
+    }
 
     // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
     // so old runtime/editor pipelines keep parsing them.
@@ -536,6 +549,9 @@ fn write_project_snapshot(
     }
 
     write_json_inside(session_root, &project.database.items, &project_state.items)?;
+    if let Some(rel) = project.asset_catalog.as_ref() {
+        write_json_inside(session_root, rel, &project_state.assets)?;
+    }
 
     if let serde_json::Value::Object(map) = &project_state.databases {
         let pairs: [(&str, Option<&String>); 19] = [
@@ -690,6 +706,17 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     let items: serde_json::Value =
         read_json(&items_path).map_err(|e| format!("items.json: {e}"))?;
 
+    let assets = if let Some(rel) = project.asset_catalog.as_ref() {
+        let path = join_inside(root, rel).map_err(|e| e.to_string())?;
+        if path.exists() {
+            read_json(&path).map_err(|e| format!("asset catalog: {e}"))?
+        } else {
+            default_asset_catalog()
+        }
+    } else {
+        default_asset_catalog()
+    };
+
     // Phase 6 — read every additional database shard if its path is declared
     // and the file exists on disk. Missing files are tolerated and surface as
     // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
@@ -732,6 +759,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
         maps,
         items,
         databases: serde_json::Value::Object(databases),
+        assets,
     })
 }
 
@@ -836,6 +864,9 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
         write_new_json(root, &map_ref.path, map_value)?;
     }
     write_new_json(root, &project_state.project.database.items, &project_state.items)?;
+    if let Some(rel) = project_state.project.asset_catalog.as_ref() {
+        write_new_json(root, rel, &project_state.assets)?;
+    }
 
     if let serde_json::Value::Object(map) = &project_state.databases {
         let pairs: [(&str, Option<&String>); 19] = [
@@ -1146,6 +1177,7 @@ mod tests {
                 tilesets: Some("data/database/tilesets.json".into()),
                 audio: None,
             },
+            asset_catalog: Some("data/assets/catalog.json".into()),
         };
         let mut maps = HashMap::new();
         maps.insert(
@@ -1173,6 +1205,18 @@ mod tests {
                 "system": { "startingParty": [], "startingGold": 0 },
                 "tilesets": { "tilesets": [] }
             }),
+            assets: serde_json::json!({
+                "schemaVersion": 1,
+                "assets": [
+                    {
+                        "id": "starter_asset",
+                        "name": "Starter Asset",
+                        "kind": "image",
+                        "path": "assets/generated/web/player_adventurer.png",
+                        "source": "generated"
+                    }
+                ]
+            }),
         }
     }
 
@@ -1191,9 +1235,14 @@ mod tests {
         assert!(root.join("data/database/actors.json").is_file());
         assert!(root.join("data/database/system.json").is_file());
         assert!(root.join("data/database/tilesets.json").is_file());
+        assert!(root.join("data/assets/catalog.json").is_file());
         let reloaded = read_project_at(&root).unwrap();
         assert_eq!(reloaded.project.title, "New Game");
         assert!(reloaded.maps.contains_key("town"));
+        assert_eq!(
+            reloaded.assets["assets"][0]["id"].as_str(),
+            Some("starter_asset")
+        );
         assert!(fs::read_to_string(root.join(".gitignore")).unwrap().contains(".backups/"));
     }
 
@@ -1443,6 +1492,7 @@ mod tests {
                 tilesets: None,
                 audio: None,
             },
+            asset_catalog: None,
         };
 
         let json = serde_json::to_value(project).unwrap();

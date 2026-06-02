@@ -1,6 +1,8 @@
 // Cross-project validation that spans maps, items, and the Phase 6 databases.
 
 import type {
+  AssetKind,
+  AssetSource,
   CommonEventData,
   DatabaseEntries,
   EventCommand,
@@ -127,6 +129,9 @@ const SAFE_PLUGIN_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const SAFE_PLUGIN_COMMAND = /^[A-Za-z][A-Za-z0-9_.-]{0,127}$/;
 const SAFE_PLUGIN_ARG_KEY = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 const SAFE_AUDIO_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+const SAFE_ASSET_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_-]{0,127}$/;
+const VALID_ASSET_KINDS = new Set<AssetKind>(['image', 'spritesheet', 'tileset', 'audio', 'generated']);
+const VALID_ASSET_SOURCES = new Set<AssetSource>(['local', 'generated', 'imported']);
 const CODE_LIKE_PLUGIN_TEXT =
   /(?:=>|\bfunction\b|\beval\s*\(|\bimport\s*\(|\brequire\s*\(|\bnew\s+Function\b|<script\b)/i;
 
@@ -198,6 +203,7 @@ export function validateProject(state: FullProjectState): ValidationReport {
     else warnings.push(message);
   }
   errors.push(...validateItemDatabaseInternal(state.items, state.databases));
+  errors.push(...validateAssetCatalog(state));
 
   const index = buildIndex(state.items, state.databases);
   const mapIds = Object.keys(state.maps);
@@ -387,6 +393,97 @@ function isSafeProjectRelativePath(value: string): boolean {
   if (normalized.startsWith('/') || normalized.startsWith('//')) return false;
   if (/^[a-z][a-z0-9+.-]*:/i.test(normalized)) return false;
   return !normalized.split('/').some(part => part === '..');
+}
+
+function validateAssetCatalog(state: FullProjectState): ValidationMessage[] {
+  const out: ValidationMessage[] = [];
+  const catalog = state.assets;
+  if (!catalog) return out;
+
+  if (!Number.isInteger(catalog.schemaVersion) || catalog.schemaVersion <= 0) {
+    out.push({
+      level: 'error',
+      message: 'Asset catalog schemaVersion must be a positive integer',
+      source: 'assets/schemaVersion',
+    });
+  }
+
+  const seen = new Set<string>();
+  for (const asset of catalog.assets) {
+    const id = asset.id.trim();
+    const source = id ? `assets/${id}` : 'assets';
+    if (!id) {
+      out.push({
+        level: 'error',
+        message: 'Asset catalog entry is missing an id',
+        source,
+      });
+    } else {
+      if (!SAFE_ASSET_IDENTIFIER.test(id)) {
+        out.push({
+          level: 'error',
+          message: `Asset "${id}" has invalid id`,
+          source,
+        });
+      }
+      if (seen.has(id)) {
+        out.push({
+          level: 'error',
+          message: `Duplicate asset id "${id}"`,
+          source: 'assets',
+        });
+      }
+      seen.add(id);
+    }
+
+    if (!asset.name || asset.name.trim() === '') {
+      out.push({
+        level: 'error',
+        message: `Asset "${id}" name is required`,
+        source,
+      });
+    }
+    if (!VALID_ASSET_KINDS.has(asset.kind)) {
+      out.push({
+        level: 'error',
+        message: `Asset "${id}" has invalid kind "${asset.kind}"`,
+        source,
+      });
+    }
+    if (!VALID_ASSET_SOURCES.has(asset.source)) {
+      out.push({
+        level: 'error',
+        message: `Asset "${id}" has invalid source "${asset.source}"`,
+        source,
+      });
+    }
+    if (!asset.path || asset.path.trim() === '') {
+      out.push({
+        level: 'error',
+        message: `Asset "${id}" path is required`,
+        source,
+      });
+    } else if (!isSafeProjectRelativePath(asset.path)) {
+      out.push({
+        level: 'error',
+        message: `Asset "${id}" uses unsafe project-relative path "${asset.path}"`,
+        source,
+      });
+    }
+
+    for (const key of ['width', 'height', 'frameWidth', 'frameHeight', 'frames', 'durationMs'] as const) {
+      const value = asset[key];
+      if (value !== undefined && (!Number.isFinite(value) || value <= 0)) {
+        out.push({
+          level: 'error',
+          message: `Asset "${id}" ${key} must be a positive finite number`,
+          source,
+        });
+      }
+    }
+  }
+
+  return out;
 }
 
 function validateAudioRegistry(db: DatabaseEntries): ValidationMessage[] {

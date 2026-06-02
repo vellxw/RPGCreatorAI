@@ -105,8 +105,10 @@ Legend:
 
 5. Asset/audio catalog split - medium impact, medium risk. `system.audio` is
    the current editor-owned registry and optional `database.audio` is now
-   preserved, but a first-class project asset catalog belongs to milestone 06
-   CP-049 through CP-052.
+   preserved. CP-049 added the first-class editor asset catalog, browser and
+   desktop preservation, UI list/filter/preview basics, and catalog validation.
+   Remaining import workflow and richer asset-reference depth belongs to
+   later milestone 06 issues.
 
 ## Follow-Up Ownership
 
@@ -132,8 +134,12 @@ Legend:
 - CP-048 / FRA-83: database/system completeness integration gate completed.
   The canonical local gate and a focused browser Database/System smoke passed;
   milestone 05 can hand off to asset library and import pipeline work.
-- CP-049 through CP-052: asset catalog/import ownership for richer animation,
-  tileset, and audio asset metadata.
+- CP-049 / FRA-84: asset catalog v2 completed. The catalog is preserved as
+  editor/desktop metadata through `ProjectData.assetCatalog` and
+  `FullProjectState.assets`; native runtime consumption remains intentionally
+  out of scope.
+- CP-050 through CP-052: asset import workflow and richer animation, tileset,
+  and audio asset metadata.
 
 ## Validation
 

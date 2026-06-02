@@ -2,6 +2,7 @@
 import type { FullProjectState, ExportBundle } from './types';
 import type { DatabaseEntries, ItemDatabase, MapData, ProjectData } from '../types/project';
 import { mergeDatabases } from './defaultDatabases';
+import { normalizeAssetCatalog } from './defaultAssetCatalog';
 import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 export function safeStringify(value: unknown): string {
@@ -20,6 +21,7 @@ export function buildExportBundle(state: FullProjectState): ExportBundle {
     maps: state.maps,
     items: state.items,
     databases: state.databases,
+    assets: normalizeAssetCatalog(state.assets),
   };
 }
 
@@ -38,6 +40,7 @@ function validateBundleShape(obj: Record<string, unknown>): FullProjectState {
   const maps = obj.maps as Record<string, MapData> | undefined;
   const items = obj.items as ItemDatabase | undefined;
   const databases = obj.databases as Partial<DatabaseEntries> | undefined;
+  const assets = normalizeAssetCatalog(obj.assets);
 
   if (!project || typeof project !== 'object') {
     throw new Error('Imported bundle is missing valid project metadata');
@@ -49,5 +52,11 @@ function validateBundleShape(obj: Record<string, unknown>): FullProjectState {
     throw new Error('Imported bundle is missing valid items database');
   }
 
-  return { project: withNormalizedVisualProfile(project), maps, items, databases: mergeDatabases(databases) };
+  return {
+    project: withNormalizedVisualProfile(project),
+    maps,
+    items,
+    databases: mergeDatabases(databases),
+    assets,
+  };
 }

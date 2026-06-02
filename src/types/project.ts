@@ -11,6 +11,7 @@ export interface ProjectData {
   };
   maps: MapReference[];
   database: DatabasePaths;
+  assetCatalog?: string;
   visualProfile?: import('../visual/visualProfile').VisualProfileInput;
 }
 
@@ -117,6 +118,36 @@ export interface TilesetData {
 
 export interface TilesetDatabaseData {
   tilesets: TilesetData[];
+}
+
+export type AssetKind = 'image' | 'spritesheet' | 'tileset' | 'audio' | 'generated';
+export type AssetSource = 'local' | 'generated' | 'imported';
+
+export interface GeneratedAssetMetadata {
+  prompt?: string;
+  tool?: string;
+  createdAt?: string;
+}
+
+export interface AssetCatalogEntry {
+  id: string;
+  name: string;
+  kind: AssetKind;
+  path: string;
+  source: AssetSource;
+  tags?: string[];
+  width?: number;
+  height?: number;
+  frameWidth?: number;
+  frameHeight?: number;
+  frames?: number;
+  durationMs?: number;
+  generated?: GeneratedAssetMetadata;
+}
+
+export interface AssetCatalogData {
+  schemaVersion: number;
+  assets: AssetCatalogEntry[];
 }
 
 export interface GameEvent {
@@ -742,7 +773,7 @@ export type DatabaseListKey = Exclude<
 >;
 
 // Editor-specific types
-export type Screen = 'editor' | 'events' | 'database' | 'playtest';
+export type Screen = 'editor' | 'events' | 'database' | 'assets' | 'playtest';
 
 export interface ValidationMessage {
   level: 'error' | 'warning' | 'info';

@@ -33,6 +33,7 @@ function projectWith(databases: Partial<FullProjectState['databases']>): FullPro
     maps: { town: makeMap() },
     items: { items: [{ id: 'potion', name: 'P', description: '', type: 'consumable' }] },
     databases: mergeDatabases(databases),
+    assets: { schemaVersion: 1, assets: [] },
   };
 }
 
@@ -614,6 +615,50 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Audio asset "bad_ext" must use a .wav file'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Audio asset "unsafe" uses unsafe project-relative path'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('playSound references unknown audio id "missing_sfx"'))).toBe(true);
+  });
+
+  it('validates asset catalog ids and project-relative paths', () => {
+    const project = projectWith({});
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_portrait',
+          name: 'Hero Portrait',
+          kind: 'image',
+          path: 'assets/generated/web/player_adventurer.png',
+          source: 'generated',
+        },
+        {
+          id: 'hero_portrait',
+          name: 'Duplicate Hero Portrait',
+          kind: 'image',
+          path: 'assets/generated/web/player_adventurer_duplicate.png',
+          source: 'generated',
+        },
+        {
+          id: 'unsafe_audio',
+          name: 'Unsafe Audio',
+          kind: 'audio',
+          path: '../outside.wav',
+          source: 'local',
+        },
+        {
+          id: '',
+          name: 'Missing ID',
+          kind: 'generated',
+          path: '',
+          source: 'generated',
+        },
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Duplicate asset id "hero_portrait"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "unsafe_audio" uses unsafe project-relative path'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset catalog entry is missing an id'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "" path is required'))).toBe(true);
   });
 
   it('accepts valid quest objective references', () => {

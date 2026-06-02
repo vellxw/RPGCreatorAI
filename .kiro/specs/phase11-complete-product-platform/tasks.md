@@ -59,6 +59,7 @@
   - [x] CP-047 / FRA-82: add reference repair tools.
   - [x] CP-048 / FRA-83: run the database/system completeness gate.
 - [ ] 06 Asset Library And Import Pipeline.
+  - [x] CP-049 / FRA-84: implement Asset Catalog V2.
 - [ ] 07 AI Provider Hub Foundation.
 - [ ] 08 GPT Image 2 Asset Pipeline.
 - [ ] 09 AI Characters And Animations.

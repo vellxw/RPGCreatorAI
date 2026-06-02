@@ -27,6 +27,8 @@ describe('BrowserMemoryAdapter', () => {
     expect(state.databases.states.map(status => status.id)).toContain('poison');
     expect(state.project.database.types).toBe('data/database/types.json');
     expect(state.project.database.terms).toBe('data/database/terms.json');
+    expect(state.project.assetCatalog).toBe('data/assets/catalog.json');
+    expect(state.assets?.assets.map(asset => asset.id)).toContain('player_adventurer_sheet');
     expect(state.databases.types.weaponTypes.map(type => type.id)).toContain('sword');
     expect(state.databases.types.equipmentSlots.map(slot => slot.id)).toEqual(
       expect.arrayContaining(['weapon', 'armor', 'accessory']),
@@ -67,12 +69,22 @@ describe('BrowserMemoryAdapter', () => {
       sounds: [{ id: 'click', path: 'assets/audio/click.wav' }],
       bgm: [{ id: 'town', path: 'assets/audio/town.wav' }],
     };
+    expect(state.assets).toBeDefined();
+    state.assets!.assets.push({
+      id: 'roundtrip_audio',
+      name: 'Roundtrip Audio',
+      kind: 'audio',
+      path: 'assets/audio/roundtrip.wav',
+      source: 'local',
+      tags: ['test'],
+    });
     await a.saveAll(state);
 
     const blob = await a.exportAll(state);
     const text = await blob.text();
     const parsed = JSON.parse(text);
     expect(parsed.project.title).toBe('Roundtrip RPG');
+    expect(parsed.assets.assets.map((asset: { id: string }) => asset.id)).toContain('roundtrip_audio');
 
     const fresh = new BrowserMemoryAdapter();
     const imported = await fresh.importAll(text);
@@ -83,6 +95,7 @@ describe('BrowserMemoryAdapter', () => {
     expect(imported.databases.audio?.audio?.confirm).toBe('assets/audio/confirm.wav');
     expect(imported.databases.audio?.sounds?.[0].id).toBe('click');
     expect(imported.databases.audio?.bgm?.[0].path).toBe('assets/audio/town.wav');
+    expect(imported.assets?.assets.map(asset => asset.id)).toContain('roundtrip_audio');
   });
 
   it('export → import roundtrip preserves polished map metadata', async () => {

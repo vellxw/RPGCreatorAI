@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline.
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-050 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -307,6 +307,15 @@ Primary Phase 11 sources:
   and validation feedback. Milestone 05 is ready to hand off to asset library
   and import pipeline work. Evidence is recorded in
   `docs/PHASE_11_DATABASE_SYSTEM_COMPLETENESS_GATE.md`.
+- Phase 11 CP-049 — asset catalog v2 completed. Project metadata now points
+  to `data/assets/catalog.json`, the editor/browser/desktop adapters
+  round-trip `FullProjectState.assets`, the primary navigation exposes a real
+  Assets workspace with list/filter/detail/preview basics, TypeScript
+  validation rejects missing/duplicate/unsafe asset metadata, and Tauri
+  open/save/create/playtest flows preserve the catalog without making the
+  native runtime consume editor-only metadata. Evidence is recorded in
+  `docs/PHASE_11_ASSET_CATALOG_V2.md` and
+  `docs/screenshots/phase11-cp049/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

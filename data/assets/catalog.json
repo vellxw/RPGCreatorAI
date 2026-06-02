@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "player_adventurer_sheet",
+      "name": "Player Adventurer Sheet",
+      "kind": "spritesheet",
+      "path": "assets/generated/web/player_adventurer.png",
+      "source": "generated",
+      "tags": ["player", "runtime", "sprite"],
+      "width": 384,
+      "height": 64,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 6
+    },
+    {
+      "id": "sample_town_tiles",
+      "name": "Sample Town Tiles",
+      "kind": "tileset",
+      "path": "assets/generated/source/game_atlas.png",
+      "source": "generated",
+      "tags": ["tiles", "runtime"],
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "shopkeeper_portrait",
+      "name": "Shopkeeper Portrait",
+      "kind": "image",
+      "path": "assets/generated/web/npc_shopkeeper.png",
+      "source": "generated",
+      "tags": ["npc", "portrait"]
+    },
+    {
+      "id": "town_theme",
+      "name": "Town Theme",
+      "kind": "audio",
+      "path": "assets/audio/town.wav",
+      "source": "local",
+      "tags": ["bgm", "audio"]
+    },
+    {
+      "id": "forest_concept_generated",
+      "name": "Forest Concept Generated",
+      "kind": "generated",
+      "path": "assets/generated/web/tile_tree.png",
+      "source": "generated",
+      "tags": ["concept", "environment"],
+      "generated": {
+        "tool": "offline-fixture",
+        "createdAt": "2026-06-02T00:00:00.000Z"
+      }
+    }
+  ]
+}

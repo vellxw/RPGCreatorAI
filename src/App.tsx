@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
+import { AssetsScreen } from './screens/AssetsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
 import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
@@ -173,6 +174,7 @@ export default function App() {
     editor: <MainEditorScreen />,
     events: <EventEditorScreen />,
     database: <DatabaseScreen />,
+    assets: <AssetsScreen />,
     playtest: <PlaytestScreen />,
   };
 

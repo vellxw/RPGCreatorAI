@@ -4494,3 +4494,50 @@ Error: Port 1420 is already in use
   `close` — PASS; representative Database/System tabs opened, Common Events
   showed reusable command controls, Validate reported `Validation passed`, and
   the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-84 / CP-049 — asset catalog v2
+
+- `2026-06-02 08:54:04 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — FAIL as expected during TDD red step; `AssetsScreen` did not exist, the
+  browser adapter did not seed or round-trip `assets`, asset catalog
+  validation did not reject duplicate/unsafe entries, and primary navigation
+  did not expose `Assets`.
+- `2026-06-02 09:04:00 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — PASS after adding asset catalog types, sample catalog data, adapter
+  preservation, validation, Assets workspace UI, and primary navigation;
+  4 focused files and 29 Vitest tests passed.
+- `2026-06-02 09:04:38 -03:00` — `npm run typecheck` — FAIL; tests accessed
+  optional legacy `FullProjectState.assets` without a presence check. Fix
+  applied: assertions now use optional access or assert presence before
+  mutating seeded state.
+- `2026-06-02 09:05:08 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 09:05:25 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; Rust desktop
+  tests passed 33/33 after adding `assetCatalog` and `assets` preservation to
+  Tauri open/save/create/playtest snapshot flows.
+- `2026-06-02 09:06:22 -03:00` — `npm test -- --run` — PASS; full frontend
+  Vitest suite passed with 58 files and 329 tests.
+- `2026-06-02 09:07:11 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1925 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 09:09:10 -03:00` —
+  Browser smoke with Chrome DevTools MCP:
+  navigate selected page to `http://127.0.0.1:5177/`,
+  click `Use My First RPG`,
+  click `Assets`,
+  fill `Filter assets` with `town`,
+  click `Town Theme`,
+  list console `error`/`warn` messages — PASS; Assets showed 5 cataloged
+  entries, text filtering narrowed to town assets, the audio asset detail
+  showed `assets/audio/town.wav`, screenshot evidence was saved to
+  `docs/screenshots/phase11-cp049/assets-browser-smoke.png`, and the console
+  reported 0 errors and 0 warnings. `playwright-cli` was unavailable in this
+  session, so the smoke used the available DevTools browser automation.
+- `2026-06-02 09:15:43 -03:00` — `npm run typecheck` — PASS after preserving
+  invalid imported `kind`/`source` strings for validator reporting.
+- `2026-06-02 09:15:43 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — PASS; 4 focused files and 29 Vitest tests passed after the asset catalog
+  normalization robustness adjustment.
