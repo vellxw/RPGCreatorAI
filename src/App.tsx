@@ -20,6 +20,10 @@ import {
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
 
+export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: string): string {
+  return `${label} failed: ${error ?? 'No details were returned. Try again, or use the bundled sample while you inspect the project file.'}`;
+}
+
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
@@ -122,7 +126,7 @@ export default function App() {
     const outcome = await performOpenProject(projectDispatch);
     if (outcome.cancelled) return;
     if (!outcome.success) {
-      setStartupStatus(`Open failed: ${outcome.error ?? 'unknown error'}`);
+      setStartupStatus(startupFailure('Open', outcome.error));
       return;
     }
     setShowStartup(false);
@@ -132,7 +136,7 @@ export default function App() {
     const outcome = await performCreateProject(projectDispatch, { title });
     if (outcome.cancelled) return;
     if (!outcome.success) {
-      setStartupStatus(`Create failed: ${outcome.error ?? 'unknown error'}`);
+      setStartupStatus(startupFailure('Create', outcome.error));
       return;
     }
     setShowStartup(false);
@@ -141,7 +145,7 @@ export default function App() {
   const handleStartupImport = async (file: File) => {
     const result = await performImport(file, projectDispatch);
     if (!result.success) {
-      setStartupStatus(`Import failed: ${result.error ?? 'unknown error'}`);
+      setStartupStatus(startupFailure('Import', result.error));
       return;
     }
     setShowStartup(false);

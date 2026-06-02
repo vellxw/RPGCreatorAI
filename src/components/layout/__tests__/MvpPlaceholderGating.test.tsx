@@ -96,6 +96,8 @@ describe('MVP placeholder AI gating', () => {
     );
 
     expect(text).toContain('Future phase');
+    expect(text).toContain('No provider call');
+    expect(text).toContain('network request');
     expect(enabledButtons).toHaveLength(0);
     expect(text).not.toMatch(/generate maps|generate dialogue|Dialogue generation|Image generation|Code generation|Connect|Test Connections|Usage Limits/i);
 

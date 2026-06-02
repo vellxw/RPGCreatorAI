@@ -3221,3 +3221,50 @@ Error: Port 1420 is already in use
 - `2026-06-01 23:02:56 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-57 / CP-022 — error recovery and user-safe failure states
+
+- `2026-06-01 23:08:47 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts`
+  — RED as expected; save and recent-project failures still surfaced raw
+  filesystem strings such as `EACCES`/`disk full`, and formatter coverage for
+  permission, disk-full, and desktop-unavailable states did not exist. Fix
+  applied: normalized recoverable file/folder errors and routed save, import,
+  open/create, and recent-open failures through the formatter.
+- `2026-06-01 23:10:40 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts`
+  — RED after implementation; the old save test still expected raw `disk full`
+  text. Fix applied: update the test to expect the actionable Free disk space
+  copy.
+- `2026-06-01 23:11:08 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts`
+  — PASS; 2 focused files and 9 tests passed.
+- `2026-06-01 23:12:36 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts src/__tests__/AppStartup.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 4 focused UI/store files and 14 tests passed, including startup
+  fallback copy and provider-disabled no-network/no-key copy.
+- `2026-06-01 23:13:18 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:16:23 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts src/__tests__/AppStartup.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/adapters/__tests__/FileSystemAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS; 9 focused UI/store/adapter/runtime files and 45 tests passed,
+  including filesystem failure copy, launch-failure feedback, and provider-
+  disabled no-network/no-key copy.
+- `2026-06-01 23:17:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:17:12 -03:00` — `npm run build` — PASS; 1916 modules
+  transformed, build completed in 8.73s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 23:18:10 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content`
+  — PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor and the
+  controlled server was stopped afterward, leaving port 1420 clear.
+- `2026-06-01 23:18:20 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-01 23:19:37 -03:00` —
+  `npm test -- --run src/stores/__tests__/saveActions.test.ts src/stores/__tests__/projectStartupActions.test.ts src/__tests__/AppStartup.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/adapters/__tests__/FileSystemAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after final recovery-copy wording polish; 9 focused files and 45
+  tests passed.
+- `2026-06-01 23:20:00 -03:00` — `npm run typecheck` — PASS after final
+  recovery-copy wording polish.
+- `2026-06-01 23:20:12 -03:00` — `npm run build` — PASS after final
+  recovery-copy wording polish; 1916 modules transformed, build completed in
+  9.75s, and Vite emitted only the documented non-fatal chunk-size warning.
+

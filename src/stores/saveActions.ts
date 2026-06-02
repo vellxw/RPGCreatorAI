@@ -60,13 +60,13 @@ export async function performSave(
     return {
       success: false,
       exported: false,
-      errors: [result.error ?? 'Unknown save error'],
+      errors: [formatProjectFolderError(result.error ?? 'Unknown save error')],
       warnings: report.warnings.map(w => w.message),
       adapterName: adapter.getCapabilities().adapterName,
       blockedByValidation: false,
       validationErrorCount: 0,
       validationWarningCount: report.warnings.length,
-      recovery: 'Project data was not marked saved. Resolve the write problem and Save again.',
+      recovery: 'No saved state was recorded; the editor remains dirty. Resolve the write problem, review .backups if a desktop write partially failed, then Save again.',
     };
   }
 
@@ -116,7 +116,7 @@ export async function performImport(
     dispatch({ type: 'LOAD_PROJECT', payload: data });
     return { success: true };
   } catch (e) {
-    return { success: false, error: (e as Error).message };
+    return { success: false, error: formatProjectFolderError((e as Error).message) };
   }
 }
 
@@ -136,6 +136,7 @@ export interface CreateProjectOutcome extends OpenProjectOutcome {
 }
 
 export function formatProjectFolderError(message: string): string {
+  const lower = message.toLowerCase();
   if (message.includes('already contains data/project.json')) {
     return `${message}. Create New Project needs an empty folder. Use Open Project for an existing RPGCreatorAI project.`;
   }
@@ -144,6 +145,21 @@ export function formatProjectFolderError(message: string): string {
   }
   if (message.includes('non-empty data directory')) {
     return `${message}. Create New Project will not overwrite an existing data folder. Pick an empty folder or move those files first.`;
+  }
+  if (lower.includes('desktop shell not available') || lower.includes('desktop shell bridge not available')) {
+    return 'Desktop filesystem is unavailable. Run the desktop app to open or save project folders, or use browser Import/Export for a JSON bundle.';
+  }
+  if (lower.includes('permission denied') || lower.includes('access is denied') || lower.includes('eacces')) {
+    return 'Permission denied while accessing project files. Check folder permissions. Close apps that may be locking project files, then try again.';
+  }
+  if (lower.includes('disk full') || lower.includes('no space') || lower.includes('enospc')) {
+    return 'Disk full while writing project files. Free disk space, then try again.';
+  }
+  if (lower.includes('being used by another process') || lower.includes('file in use') || lower.includes('ebusy')) {
+    return 'Project file is in use by another program. Close the other app or runtime, then try again.';
+  }
+  if (lower.includes('no project is open')) {
+    return 'No project is open. Open or create a project before saving.';
   }
   return message;
 }
@@ -234,7 +250,7 @@ export async function performOpenRecent(
   dispatch: Dispatch<ProjectAction>,
 ): Promise<OpenProjectOutcome> {
   if (!isDesktopShell() || !window.rpgBridge) {
-    return { success: false, cancelled: false, error: 'Desktop shell not available' };
+    return { success: false, cancelled: false, error: formatProjectFolderError('Desktop shell not available') };
   }
   try {
     const data = await window.rpgBridge.fs.readProject(root);
@@ -244,6 +260,6 @@ export async function performOpenRecent(
     await window.rpgBridge.config.addRecent(root);
     return { success: true, cancelled: false, root };
   } catch (e) {
-    return { success: false, cancelled: false, error: (e as Error).message };
+    return { success: false, cancelled: false, error: formatProjectFolderError((e as Error).message) };
   }
 }

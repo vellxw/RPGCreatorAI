@@ -108,6 +108,12 @@ Primary Phase 11 sources:
   may leave the event inactive or when commands are absent, prioritizes
   selected-event validation errors in launch feedback, and points successful
   launches to Event Trace and Runtime Log for event debugging.
+- Phase 11 CP-022 — recoverable error states completed. Startup open/create/
+  import, recent-project open, save adapter failures, browser/desktop
+  filesystem unavailable states, runtime launch/session failures, and provider
+  disabled surfaces now have explicit recovery copy or documented honest
+  unavailable states. Save failures keep the editor dirty and point desktop
+  users to `.backups` when partial writes may need inspection.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

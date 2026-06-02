@@ -5,6 +5,7 @@ import type { FullProjectState, RpgBridge } from '../../adapters/types';
 import {
   formatProjectFolderError,
   performCreateProject,
+  performOpenRecent,
   performOpenProject,
 } from '../saveActions';
 import type { ProjectAction } from '../projectStore';
@@ -162,5 +163,23 @@ describe('project startup actions', () => {
     expect(formatProjectFolderError('selected folder already contains data/project.json')).toContain(
       'Create New Project needs an empty folder',
     );
+    expect(formatProjectFolderError('permission denied')).toContain('Check folder permissions');
+    expect(formatProjectFolderError('disk full')).toContain('Free disk space');
+    expect(formatProjectFolderError('Desktop shell not available')).toContain('Run the desktop app');
+  });
+
+  it('formats recent-project file access failures instead of exposing raw shell errors', async () => {
+    window.rpgBridge = bridge({
+      readProject: async () => {
+        throw new Error('EACCES: permission denied, open C:\\Games\\Broken\\data\\project.json');
+      },
+    });
+
+    const outcome = await performOpenRecent('C:\\Games\\Broken', vi.fn());
+
+    expect(outcome.success).toBe(false);
+    expect(outcome.error).toContain('Permission denied');
+    expect(outcome.error).toContain('Check folder permissions');
+    expect(outcome.error).not.toContain('EACCES');
   });
 });

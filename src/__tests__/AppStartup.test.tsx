@@ -1,7 +1,7 @@
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import App from '../App';
+import App, { startupFailure } from '../App';
 import { _resetAdaptersForTest } from '../adapters/adapterFactory';
 
 function renderApp() {
@@ -68,5 +68,13 @@ describe('App startup project flow', () => {
     expect(view.container.textContent).not.toContain('Start a project');
 
     view.unmount();
+  });
+
+  it('formats startup failures without vague unknown-error copy', () => {
+    expect(startupFailure('Open')).toContain('No details were returned');
+    expect(startupFailure('Open')).not.toContain('unknown error');
+    expect(startupFailure('Import', 'Permission denied while reading bundle.')).toBe(
+      'Import failed: Permission denied while reading bundle.',
+    );
   });
 });

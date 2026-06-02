@@ -22,7 +22,8 @@ export function AIToolsScreen() {
               <p className="text-[13px] font-semibold text-gray-800">Unavailable in the MVP editor</p>
               <p className="text-[12px] text-gray-500 mt-1">
                 Assistance features are intentionally kept out of this release until
-                the real provider layer and product rules exist.
+                the real provider layer and product rules exist. No provider call,
+                network request, or API key is used from this screen.
               </p>
             </div>
           </div>

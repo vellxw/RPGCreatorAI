@@ -69,8 +69,30 @@ describe('performSave', () => {
 
     expect(outcome.success).toBe(false);
     expect(outcome.blockedByValidation).toBe(false);
-    expect(outcome.errors).toEqual(['disk full']);
+    expect(outcome.errors[0]).toContain('Disk full');
+    expect(outcome.errors[0]).toContain('Free disk space');
     expect(outcome.recovery).toContain('Save again');
     expect(actions).toEqual([{ type: 'VALIDATE' }]);
+  });
+
+  it('normalizes write permission failures with non-destructive recovery copy', async () => {
+    const adapter = getProjectDataAdapter();
+    vi.spyOn(adapter, 'saveAll').mockResolvedValueOnce({
+      success: false,
+      error: 'EACCES: permission denied, open data/project.json',
+    });
+    const state = projectReducer(await loadedState(), {
+      type: 'UPDATE_PROJECT_META',
+      changes: { title: 'Permission Failure' },
+    });
+
+    const outcome = await performSave(state, vi.fn());
+
+    expect(outcome.success).toBe(false);
+    expect(outcome.errors[0]).toContain('Permission denied');
+    expect(outcome.errors[0]).toContain('Close apps');
+    expect(outcome.recovery).toContain('No saved state was recorded');
+    expect(outcome.recovery).toContain('editor remains dirty');
+    expect(outcome.recovery).toContain('.backups');
   });
 });
