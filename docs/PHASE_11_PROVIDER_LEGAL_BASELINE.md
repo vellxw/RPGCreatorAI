@@ -132,6 +132,9 @@ Generated output must never be silently imported into accepted project data.
   longer start connected or with hardcoded required model strings.
 - PASS: `src/stores/__tests__/providerStore.test.tsx` covers disconnected,
   secret-free, model-empty provider defaults.
+- PASS: CP-057 exposes provider settings as editor-only availability metadata,
+  removes the in-memory `apiKey` value from provider defaults, and renders no
+  secret-value input or live provider action.
 - OPEN: CP-058 must still choose and implement desktop-safe credential storage.
 - OPEN: Provider Hub implementation issues must still add provider metadata,
   mock contract tests, opt-in UX, cost/rate-limit/error states, and live

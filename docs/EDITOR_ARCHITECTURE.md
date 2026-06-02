@@ -40,7 +40,9 @@ src/
     MainEditorScreen.tsx
     EventEditorScreen.tsx
     DatabaseScreen.tsx
+    AssetsScreen.tsx
     PlaytestScreen.tsx
+    SettingsScreen.tsx
 ```
 
 ## State Management
@@ -72,6 +74,8 @@ Reusable UI components: Button, Badge, Tabs, Input, Select.
 
 ## Navigation
 Simple state-based routing via `activeScreen` in EditorContext.
-Primary screens are Map Editor, Events, Database, and Playtest. The future AI
-workspace is not exposed in primary MVP navigation; if reached directly it is
-read-only and does not advertise runnable AI actions.
+Primary screens are Map Editor, Events, Database, Assets, Playtest, and
+Settings. Settings exposes optional provider availability metadata only:
+no provider credentials are stored in project data, no live provider calls are
+made by normal editor workflows, and the native runtime remains independent of
+AI providers, network, cloud services, and credentials.

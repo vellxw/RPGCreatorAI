@@ -420,12 +420,46 @@ export function TopToolbar() {
     </>
   );
 
+  const renderSettingsToolbar = () => (
+    <>
+      <div className="flex items-center gap-1.5 text-[13px] text-gray-500">
+        <span>Project</span>
+        <span>/</span>
+        <span className="text-gray-800 font-medium">Settings</span>
+      </div>
+      <SaveIndicator
+        dirty={projectState.dirty}
+        errorCount={projectState.errors.length}
+        warningCount={projectState.warnings.length}
+        saving={isSaving}
+      />
+      <div className="flex items-center gap-2">
+        <Button
+          icon={<Save size={14} />}
+          onClick={handleSave}
+          disabled={isSaving}
+          title={isSaving ? 'Save is already writing project data' : 'Validate and save project data'}
+        >
+          Save
+        </Button>
+        <Button
+          variant="primary"
+          icon={<CheckCircle2 size={14} />}
+          onClick={handleValidate}
+        >
+          Validate
+        </Button>
+      </div>
+    </>
+  );
+
   const toolbarContent: Record<Screen, () => React.ReactNode> = {
     editor: renderEditorToolbar,
     events: renderEventToolbar,
     database: renderDatabaseToolbar,
     assets: renderAssetsToolbar,
     playtest: renderPlaytestToolbar,
+    settings: renderSettingsToolbar,
   };
 
   return (

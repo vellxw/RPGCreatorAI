@@ -4,6 +4,37 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-92 / CP-057 — provider settings UI
+
+- `2026-06-02 12:01:56 -03:00` —
+  `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx`
+  — RED as expected before implementation; `SettingsScreen` did not exist
+  and primary navigation did not expose Settings.
+- `2026-06-02 12:04:08 -03:00` —
+  `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx src/stores/__tests__/providerStore.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 4 focused files and 9 tests passed after adding the Settings
+  route, provider availability UI, no-secret provider defaults, and AI
+  placeholder gating regression coverage.
+- `2026-06-02 12:04:40 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 12:09:45 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp057-settings open http://127.0.0.1:5173 --browser msedge`
+  plus snapshot/click smoke — PASS; entered the bundled sample, opened
+  Settings from primary navigation, verified provider rows render, enabled
+  OpenAI to show `Needs credentials`, and confirmed no secret input or
+  generation/test/connect action is visible. The local dev server was stopped
+  afterward and generated Playwright artifacts were removed.
+- `2026-06-02 12:12:09 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 12:12:25 -03:00` — `npm test -- --run` — PASS; 63 Vitest
+  files and 355 tests passed.
+- `2026-06-02 12:13:05 -03:00` — `npm run build` — PASS; Vite transformed
+  1931 modules and emitted the known non-fatal chunk-size warning.
+- Fix applied: added an implemented Settings workspace, provider enablement
+  and missing-credential states, capability display, model labels, no secret
+  value field, and docs for the editor-only provider boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-91 / CP-056 — asset library integration gate
 
 - `2026-06-02 11:45:54 -03:00` —

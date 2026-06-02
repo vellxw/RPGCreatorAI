@@ -1,70 +1,84 @@
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { ProviderConfig } from '../types/project';
 
-const defaultProviders: ProviderConfig[] = [
+export const defaultProviderConfigs: ProviderConfig[] = [
   {
     id: 'openai',
     name: 'OpenAI',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'Vision', 'Image'],
+    credentialEnvVar: 'OPENAI_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'Image generation', 'Image editing', 'Vision analysis'],
   },
   {
     id: 'anthropic',
     name: 'Anthropic Claude',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'Planning'],
+    credentialEnvVar: 'ANTHROPIC_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'Code assistance', 'Planning'],
   },
   {
     id: 'moonshot',
     name: 'Kimi / Moonshot',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'OpenAI-compatible'],
+    credentialEnvVar: 'MOONSHOT_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
   },
   {
     id: 'deepseek',
     name: 'DeepSeek',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Text', 'Code', 'OpenAI-compatible'],
+    credentialEnvVar: 'DEEPSEEK_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
   },
   {
     id: 'minimax',
     name: 'MiniMax',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Text', 'Image', 'Video', 'Audio'],
+    credentialEnvVar: 'MINIMAX_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'Image generation', 'Video generation', 'Audio generation'],
   },
   {
     id: 'opencode',
     name: 'OpenCode adapter',
-    status: 'not-connected',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: ['Code', 'External tool adapter'],
+    credentialState: 'not-required',
+    capabilities: ['Code assistance', 'External tool adapter'],
   },
   {
     id: 'custom',
     name: 'Custom OpenAI-compatible endpoint',
-    status: 'not-tested',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: [],
+    credentialEnvVar: 'CUSTOM_OPENAI_API_KEY',
+    credentialState: 'missing',
+    capabilities: ['Text generation', 'OpenAI-compatible endpoint'],
   },
   {
     id: 'local',
     name: 'Local gateway',
-    status: 'coming-later',
+    enabled: false,
+    status: 'disabled',
     model: '',
-    apiKey: '',
-    capabilities: [],
+    credentialState: 'not-required',
+    capabilities: ['Offline mock contracts'],
   },
 ];
 
@@ -82,8 +96,38 @@ export interface UsageSafety {
   requireConfirmBeforePush: boolean;
 }
 
-export function useProviderStore() {
-  const [providers, setProviders] = useState<ProviderConfig[]>(defaultProviders);
+export interface ProviderStoreValue {
+  providers: ProviderConfig[];
+  setProviders: Dispatch<SetStateAction<ProviderConfig[]>>;
+  routing: ProviderRouting;
+  setRouting: Dispatch<SetStateAction<ProviderRouting>>;
+  safety: UsageSafety;
+  setSafety: Dispatch<SetStateAction<UsageSafety>>;
+  testConnection: (id: string) => void;
+}
+
+function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
+  return providers.map(provider => ({
+    ...provider,
+    capabilities: [...provider.capabilities],
+  }));
+}
+
+export function providerStatusFor(provider: ProviderConfig): ProviderConfig['status'] {
+  if (!provider.enabled) return 'disabled';
+  if (provider.credentialState === 'configured' || provider.credentialState === 'not-required') {
+    return 'configured';
+  }
+  return 'missing-credentials';
+}
+
+export function providerWithEnabled(provider: ProviderConfig, enabled: boolean): ProviderConfig {
+  const next = { ...provider, enabled };
+  return { ...next, status: providerStatusFor(next) };
+}
+
+export function useProviderStore(initialProviders: ProviderConfig[] = defaultProviderConfigs): ProviderStoreValue {
+  const [providers, setProviders] = useState<ProviderConfig[]>(() => cloneProviders(initialProviders));
   const [routing, setRouting] = useState<ProviderRouting>({
     codeGeneration: 'disabled',
     dialogueGeneration: 'disabled',
@@ -101,7 +145,7 @@ export function useProviderStore() {
     setProviders(prev =>
       prev.map(p =>
         p.id === id
-          ? { ...p, status: 'not-tested' as const, lastTested: 'requires explicit credential opt-in' }
+          ? { ...p, status: providerStatusFor(p), lastChecked: 'requires explicit credential opt-in' }
           : p
       )
     );

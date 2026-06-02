@@ -6,6 +6,7 @@ import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
 import { AssetsScreen } from './screens/AssetsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
   ProjectContext,
@@ -20,6 +21,7 @@ import {
   performOpenProject,
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
+import { useProviderStore } from './stores/providerStore';
 
 export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: string): string {
   return `${label} failed: ${error ?? 'No details were returned. Try again, or use the bundled sample while you inspect the project file.'}`;
@@ -28,6 +30,7 @@ export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: stri
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
+  const providerStore = useProviderStore();
   const [loaded, setLoaded] = useState(false);
   const [showStartup, setShowStartup] = useState(true);
   const [startupStatus, setStartupStatus] = useState<string | null>(null);
@@ -176,6 +179,7 @@ export default function App() {
     database: <DatabaseScreen />,
     assets: <AssetsScreen />,
     playtest: <PlaytestScreen />,
+    settings: <SettingsScreen providerStore={providerStore} />,
   };
 
   return (

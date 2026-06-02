@@ -778,7 +778,7 @@ export type DatabaseListKey = Exclude<
 >;
 
 // Editor-specific types
-export type Screen = 'editor' | 'events' | 'database' | 'assets' | 'playtest';
+export type Screen = 'editor' | 'events' | 'database' | 'assets' | 'playtest' | 'settings';
 
 export interface ValidationMessage {
   level: 'error' | 'warning' | 'info';
@@ -789,11 +789,14 @@ export interface ValidationMessage {
 export interface ProviderConfig {
   id: string;
   name: string;
-  status: 'connected' | 'not-connected' | 'coming-later' | 'not-tested';
+  enabled: boolean;
+  status: 'disabled' | 'missing-credentials' | 'configured';
   model: string;
-  apiKey: string;
+  credentialEnvVar?: string;
+  credentialState: 'missing' | 'configured' | 'not-required';
   capabilities: string[];
-  lastTested?: string;
+  notes?: string;
+  lastChecked?: string;
 }
 
 export interface PlaytestState {

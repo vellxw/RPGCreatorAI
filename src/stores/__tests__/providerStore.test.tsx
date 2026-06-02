@@ -22,9 +22,10 @@ describe('useProviderStore', () => {
     const { providers, routing } = captureProviderStore();
 
     expect(providers).not.toHaveLength(0);
-    expect(providers.every(provider => provider.apiKey === '')).toBe(true);
+    expect(providers.every(provider => !Object.prototype.hasOwnProperty.call(provider, 'apiKey'))).toBe(true);
     expect(providers.every(provider => provider.model === '')).toBe(true);
-    expect(providers.every(provider => provider.status !== 'connected')).toBe(true);
+    expect(providers.every(provider => provider.status !== 'configured')).toBe(true);
+    expect(providers.every(provider => provider.enabled === false)).toBe(true);
     expect(Object.values(routing).every(value => value === 'disabled')).toBe(true);
   });
 });

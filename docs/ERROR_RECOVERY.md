@@ -12,7 +12,7 @@ safe, and what to do next.
 | Save | Validation errors block before adapter writes. Adapter failures do not dispatch `MARK_SAVED`; the editor remains dirty. | Fix validation, or resolve the write problem, inspect `.backups` if a desktop write partially failed, then Save again. |
 | Runtime save/load slots | Empty runtime slots are disabled for load. Corrupt or future-version slots remain visible but are not loadable; the runtime reports the specific save-file problem and leaves game state unchanged. | Pick another slot, overwrite the bad slot from Save, or inspect/remove the affected `saves/slot_N.json` file in the runtime current directory. |
 | Runtime launch | Browser mode stays unavailable. Desktop launch/session failures are status feedback, not fake success. | Open/create a project, fix validation/session errors, or inspect Runtime Log/Event Trace/Runtime State after successful launches. |
-| Provider-disabled surfaces | AI tooling remains future-phase and read-only. | The UI states that no provider call, network request, or API key is used from the MVP screen. |
+| Provider settings | Providers are optional editor tooling. Disabled providers and enabled providers without credentials are explicit states, and normal editor workflows remain usable. | Configure availability when needed; no secret value is stored in project data, no live provider call runs during normal validation, and generation actions stay hidden until later capability gates exist. |
 
 The native runtime remains independent of AI providers, network, cloud
 services, and provider credentials. Normal validation uses local tests and

@@ -1,4 +1,4 @@
-import { Play } from 'lucide-react';
+import { Play, Settings2 } from 'lucide-react';
 import { useEditor } from '../../stores/editorStore';
 import type { Screen } from '../../types/project';
 import { editorAssets } from '../../assets/generated/assetCatalog';
@@ -16,19 +16,14 @@ const navItems: NavItem[] = [
   { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
   { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'assets' },
   { id: 'playtest', label: 'Playtest', icon: <Play size={18} />, screen: 'playtest' },
+  { id: 'settings', label: 'Settings', icon: <Settings2 size={18} />, screen: 'settings' },
 ];
 
 export function Sidebar() {
   const { state, dispatch } = useEditor();
 
   const isActive = (item: NavItem) => {
-    if (item.screen === state.activeScreen) {
-      if (item.id === 'maps' && state.activeScreen === 'editor') return true;
-      if (item.id === 'events' && state.activeScreen === 'events') return true;
-      if (item.id === 'database' && state.activeScreen === 'database') return true;
-      if (item.id === 'assets' && state.activeScreen === 'assets') return true;
-    }
-    return false;
+    return item.screen === state.activeScreen;
   };
 
   return (

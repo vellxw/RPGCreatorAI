@@ -80,7 +80,7 @@ describe('Primary navigation', () => {
     const buttons = Array.from(view.container.querySelectorAll('button'));
     const labels = buttons.map(button => button.textContent?.trim()).filter(Boolean);
 
-    expect(labels).toEqual(['Maps', 'Events', 'Database', 'Assets', 'Playtest']);
+    expect(labels).toEqual(['Maps', 'Events', 'Database', 'Assets', 'Playtest', 'Settings']);
     expect(view.container.textContent).not.toContain('Project');
     expect(view.container.textContent).not.toContain('Dialogue');
 
@@ -93,6 +93,11 @@ describe('Primary navigation', () => {
       buttons.find(button => button.textContent?.includes('Playtest'))?.click();
     });
     expect(view.editorDispatch).toHaveBeenCalledWith({ type: 'SET_SCREEN', screen: 'playtest' });
+
+    act(() => {
+      buttons.find(button => button.textContent?.includes('Settings'))?.click();
+    });
+    expect(view.editorDispatch).toHaveBeenCalledWith({ type: 'SET_SCREEN', screen: 'settings' });
 
     view.unmount();
   });
