@@ -8,8 +8,9 @@ import {
   type ProjectAction,
   type ProjectStoreState,
 } from '../../stores/projectStore';
+import type { ImageImportRunner } from '../../adapters/assetImport';
 
-function renderAssetsScreen(projectState: ProjectStoreState) {
+function renderAssetsScreen(projectState: ProjectStoreState, imageImporter?: ImageImportRunner) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   let root: Root;
@@ -19,13 +20,14 @@ function renderAssetsScreen(projectState: ProjectStoreState) {
     root = createRoot(container);
     root.render(
       <ProjectContext.Provider value={{ state: projectState, dispatch }}>
-        <AssetsScreen />
+        <AssetsScreen imageImporter={imageImporter} />
       </ProjectContext.Provider>,
     );
   });
 
   return {
     container,
+    dispatch,
     unmount: () => {
       act(() => root.unmount());
       container.remove();
@@ -86,6 +88,68 @@ describe('AssetsScreen', () => {
     expect(view.container.textContent).toContain('Town Theme');
     expect(view.container.textContent).not.toContain('Player Adventurer Sheet');
     expect(view.container.textContent).toContain('assets/audio/town.wav');
+
+    view.unmount();
+  });
+
+  it('imports an image asset and dispatches a catalog entry', async () => {
+    const imageImporter: ImageImportRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      asset: {
+        id: 'castle_gate',
+        name: 'Castle Gate',
+        kind: 'image' as const,
+        path: 'assets/imported/images/castle_gate.png',
+        source: 'imported' as const,
+        tags: ['imported'],
+      },
+    }));
+    const view = renderAssetsScreen(initialProjectStoreState, imageImporter);
+
+    const button = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Import Image'),
+    );
+    expect(button).toBeDefined();
+
+    await act(async () => {
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(imageImporter).toHaveBeenCalledWith([]);
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: {
+        id: 'castle_gate',
+        name: 'Castle Gate',
+        kind: 'image',
+        path: 'assets/imported/images/castle_gate.png',
+        source: 'imported',
+        tags: ['imported'],
+      },
+    });
+    expect(view.container.textContent).toContain('Imported Castle Gate');
+
+    view.unmount();
+  });
+
+  it('shows image import failures without mutating the catalog', async () => {
+    const imageImporter: ImageImportRunner = vi.fn(async () => ({
+      success: false,
+      cancelled: false,
+      error: 'Unsupported image type ".txt".',
+    }));
+    const view = renderAssetsScreen(initialProjectStoreState, imageImporter);
+    const button = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Import Image'),
+    );
+
+    await act(async () => {
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.dispatch).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Unsupported image type ".txt".');
 
     view.unmount();
   });

@@ -4,6 +4,7 @@
 
 import type {
   FullProjectState,
+  ImageImportResult,
   PlaytestSessionRequest,
   PlaytestSessionResult,
   SaveResult,
@@ -38,6 +39,7 @@ export interface RpgBridge {
     createProjectDialog(state: FullProjectState): Promise<CreateProjectDialogResult>;
     readProject(root: string): Promise<FullProjectState>;
     writeProject(root: string, state: FullProjectState): Promise<SaveResult>;
+    importImageAsset(root: string, existingAssetIds: string[]): Promise<ImageImportResult>;
     listBackups(root: string, file: string): Promise<string[]>;
     closeProject(): Promise<void>;
     createPlaytestSession(

@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import type { Dispatch } from 'react';
 import type {
   AssetCatalogData,
+  AssetCatalogEntry,
   CommonEventData,
   AnimationDatabaseData,
   DatabaseEntries,
@@ -361,6 +362,10 @@ export type ProjectAction =
       type: 'UPDATE_COMMON_EVENT_COMMANDS';
       commonEventId: string;
       commands: CommonEventData['commands'];
+    }
+  | {
+      type: 'ADD_ASSET_CATALOG_ENTRY';
+      asset: AssetCatalogEntry;
     }
   | { type: 'MARK_SAVED'; at?: string }
   | { type: 'VALIDATE' };
@@ -1645,6 +1650,19 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         target.commands = deepClone(action.commands);
         return true;
       });
+
+    case 'ADD_ASSET_CATALOG_ENTRY': {
+      const assetId = action.asset.id.trim();
+      if (!assetId || state.assets.assets.some(asset => asset.id === assetId)) return state;
+      return {
+        ...state,
+        dirty: true,
+        assets: {
+          ...state.assets,
+          assets: [...state.assets.assets, deepClone({ ...action.asset, id: assetId })],
+        },
+      };
+    }
 
     case 'MARK_SAVED':
       return {

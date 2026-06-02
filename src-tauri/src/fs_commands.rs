@@ -127,6 +127,28 @@ fn default_asset_catalog() -> serde_json::Value {
     serde_json::json!({ "schemaVersion": 1, "assets": [] })
 }
 
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportedImageAsset {
+    pub id: String,
+    pub name: String,
+    pub kind: String,
+    pub path: String,
+    pub source: String,
+    pub tags: Vec<String>,
+}
+
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageImportResult {
+    pub success: bool,
+    pub cancelled: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset: Option<ImportedImageAsset>,
+}
+
 #[derive(Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveResult {
@@ -225,6 +247,49 @@ pub fn fs_create_project_dialog(
         cancelled: false,
         state: Some(reloaded),
     })
+}
+
+#[tauri::command]
+pub fn fs_import_image_asset_dialog(
+    app: tauri::AppHandle,
+    root: String,
+    existing_asset_ids: Vec<String>,
+) -> Result<ImageImportResult, String> {
+    let canonical = canonicalize_inside_user_space(&root).map_err(|e| e.to_string())?;
+    must_contain_project_json(&canonical).map_err(|e| e.to_string())?;
+
+    let Some(source) = app
+        .dialog()
+        .file()
+        .add_filter("Image files", &["png", "jpg", "jpeg", "bmp", "webp"])
+        .blocking_pick_file()
+    else {
+        return Ok(ImageImportResult {
+            success: false,
+            cancelled: true,
+            error: None,
+            asset: None,
+        });
+    };
+
+    match source
+        .into_path()
+        .map_err(|e| e.to_string())
+        .and_then(|path| import_image_asset_file(&canonical, &path, &existing_asset_ids))
+    {
+        Ok(asset) => Ok(ImageImportResult {
+            success: true,
+            cancelled: false,
+            error: None,
+            asset: Some(asset),
+        }),
+        Err(error) => Ok(ImageImportResult {
+            success: false,
+            cancelled: false,
+            error: Some(error),
+            asset: None,
+        }),
+    }
 }
 
 #[tauri::command]
@@ -600,6 +665,134 @@ fn write_project_snapshot(
     }
 
     Ok(())
+}
+
+const IMAGE_IMPORT_DIR: &str = "assets/imported/images";
+const ALLOWED_IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "bmp", "webp"];
+
+fn import_image_asset_file(
+    root: &Path,
+    source: &Path,
+    existing_asset_ids: &[String],
+) -> Result<ImportedImageAsset, String> {
+    let source = source
+        .canonicalize()
+        .map_err(|e| format!("source image {}: {e}", source.display()))?;
+    let metadata = fs::metadata(&source).map_err(|e| format!("source image {}: {e}", source.display()))?;
+    if !metadata.is_file() {
+        return Err(format!("source image {} is not a file", source.display()));
+    }
+
+    let extension = source
+        .extension()
+        .and_then(|value| value.to_str())
+        .map(|value| value.to_ascii_lowercase())
+        .unwrap_or_default();
+    if !ALLOWED_IMAGE_EXTENSIONS.contains(&extension.as_str()) {
+        return Err(format!("Unsupported image type \".{}\".", extension));
+    }
+
+    let raw_stem = source
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .unwrap_or("image");
+    let file_stem = slugify(raw_stem, '-');
+    let id_base = slugify(raw_stem, '_');
+    let asset_id = unique_asset_id(&id_base, existing_asset_ids);
+    let name = titleize(raw_stem);
+
+    let import_dir = root.join(IMAGE_IMPORT_DIR);
+    fs::create_dir_all(&import_dir).map_err(|e| format!("mkdir {}: {e}", import_dir.display()))?;
+
+    let mut suffix = 1usize;
+    let (relative_path, destination) = loop {
+        let candidate_name = if suffix == 1 {
+            format!("{file_stem}.{extension}")
+        } else {
+            format!("{file_stem}-{suffix}.{extension}")
+        };
+        let relative_path = format!("{IMAGE_IMPORT_DIR}/{candidate_name}");
+        let destination = join_inside(root, &relative_path).map_err(|e| e.to_string())?;
+        ensure_inside(root, &destination).map_err(|e| e.to_string())?;
+        if !destination.exists() {
+            break (relative_path, destination);
+        }
+        suffix += 1;
+    };
+
+    fs::copy(&source, &destination).map_err(|e| {
+        format!(
+            "copy image {} to {}: {e}",
+            source.display(),
+            destination.display()
+        )
+    })?;
+
+    Ok(ImportedImageAsset {
+        id: asset_id,
+        name,
+        kind: "image".into(),
+        path: relative_path,
+        source: "imported".into(),
+        tags: vec!["imported".into(), "image".into()],
+    })
+}
+
+fn slugify(input: &str, separator: char) -> String {
+    let mut out = String::new();
+    let mut last_was_separator = false;
+    for ch in input.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            last_was_separator = false;
+        } else if !last_was_separator && !out.is_empty() {
+            out.push(separator);
+            last_was_separator = true;
+        }
+    }
+    while out.ends_with(separator) {
+        out.pop();
+    }
+    if out.is_empty() {
+        "image".into()
+    } else {
+        out
+    }
+}
+
+fn unique_asset_id(base: &str, existing_asset_ids: &[String]) -> String {
+    let existing: HashSet<&str> = existing_asset_ids.iter().map(String::as_str).collect();
+    if !existing.contains(base) {
+        return base.to_string();
+    }
+    let mut suffix = 2usize;
+    loop {
+        let candidate = format!("{base}_{suffix}");
+        if !existing.contains(candidate.as_str()) {
+            return candidate;
+        }
+        suffix += 1;
+    }
+}
+
+fn titleize(input: &str) -> String {
+    let words: Vec<String> = input
+        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            let first = chars
+                .next()
+                .map(|ch| ch.to_ascii_uppercase())
+                .unwrap_or('I');
+            format!("{first}{}", chars.as_str())
+        })
+        .collect();
+    if words.is_empty() {
+        "Image".into()
+    } else {
+        words.join(" ")
+    }
 }
 
 fn write_json_inside<T: Serialize>(root: &Path, relative: &str, value: &T) -> Result<(), String> {
@@ -1244,6 +1437,48 @@ mod tests {
             Some("starter_asset")
         );
         assert!(fs::read_to_string(root.join(".gitignore")).unwrap().contains(".backups/"));
+    }
+
+    #[test]
+    fn import_image_asset_file_copies_allowed_images_without_overwrite() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("Castle Gate.PNG");
+        fs::write(&source, b"fixture image").unwrap();
+        fs::create_dir_all(root.join("assets/imported/images")).unwrap();
+        fs::write(root.join("assets/imported/images/castle-gate.png"), b"existing").unwrap();
+
+        let imported = import_image_asset_file(&root, &source, &["castle_gate".into()]).unwrap();
+
+        assert_eq!(imported.id, "castle_gate_2");
+        assert_eq!(imported.name, "Castle Gate");
+        assert_eq!(imported.kind, "image");
+        assert_eq!(imported.source, "imported");
+        assert_eq!(imported.path, "assets/imported/images/castle-gate-2.png");
+        assert_eq!(imported.tags, vec!["imported", "image"]);
+        assert_eq!(
+            fs::read(root.join("assets/imported/images/castle-gate.png")).unwrap(),
+            b"existing"
+        );
+        assert_eq!(
+            fs::read(root.join("assets/imported/images/castle-gate-2.png")).unwrap(),
+            b"fixture image"
+        );
+    }
+
+    #[test]
+    fn import_image_asset_file_rejects_invalid_files() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("notes.txt");
+        fs::write(&source, b"not an image").unwrap();
+
+        let result = import_image_asset_file(&root, &source, &[]);
+
+        assert!(result.unwrap_err().contains("Unsupported image type"));
+        assert!(!root.join("assets/imported/images/notes.txt").exists());
     }
 
     #[test]

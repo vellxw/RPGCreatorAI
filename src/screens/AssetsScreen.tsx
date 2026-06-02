@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Box, Grid2X2, Image, Music, Search, Sparkles } from 'lucide-react';
+import { Box, Grid2X2, Image, Music, Search, Sparkles, Upload } from 'lucide-react';
 import { gameAssets } from '../assets/generated/assetCatalog';
 import { Input, Select } from '../components/ui/Input';
 import { EmptyState } from '../components/ui/EmptyState';
-import { useProject } from '../stores/projectStore';
+import { Button } from '../components/ui/Button';
+import { useProjectStore } from '../stores/projectStore';
+import { importImageAsset, type ImageImportRunner } from '../adapters/assetImport';
 import type { AssetCatalogEntry, AssetKind } from '../types/project';
 
 const KIND_OPTIONS: Array<{ value: AssetKind | 'all'; label: string }> = [
@@ -90,18 +92,40 @@ function DetailRow({ label, value }: { label: string; value: string | number | u
   );
 }
 
-export function AssetsScreen() {
-  const state = useProject();
+export function AssetsScreen({ imageImporter = importImageAsset }: { imageImporter?: ImageImportRunner }) {
+  const { state, dispatch } = useProjectStore();
   const catalog = state.assets;
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<AssetKind | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string>('');
+  const [importing, setImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
 
   const filteredAssets = useMemo(
     () => catalog.assets.filter(asset => matchesAsset(asset, query, kind)),
     [catalog.assets, kind, query],
   );
   const selected = filteredAssets.find(asset => asset.id === selectedId) ?? filteredAssets[0] ?? null;
+
+  const handleImportImage = async () => {
+    setImporting(true);
+    setImportStatus(null);
+    try {
+      const result = await imageImporter(catalog.assets.map(asset => asset.id));
+      if (result.cancelled) return;
+      if (!result.success || !result.asset) {
+        setImportStatus({ tone: 'error', text: result.error ?? 'Image import failed.' });
+        return;
+      }
+      dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset: result.asset });
+      setSelectedId(result.asset.id);
+      setImportStatus({ tone: 'success', text: `Imported ${result.asset.name}` });
+    } catch (error) {
+      setImportStatus({ tone: 'error', text: (error as Error).message });
+    } finally {
+      setImporting(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -130,7 +154,26 @@ export function AssetsScreen() {
             onChange={value => setKind(value as AssetKind | 'all')}
             ariaLabel="Filter asset kind"
           />
+          <Button
+            icon={<Upload size={14} />}
+            onClick={handleImportImage}
+            disabled={importing}
+            title={importing ? 'Image import is already running' : 'Import a project-owned image asset'}
+          >
+            Import Image
+          </Button>
         </div>
+        {importStatus && (
+          <div
+            className={`w-full rounded-md border px-3 py-2 text-[12px] ${
+              importStatus.tone === 'success'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-red-200 bg-red-50 text-red-700'
+            }`}
+          >
+            {importStatus.text}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 flex overflow-hidden">

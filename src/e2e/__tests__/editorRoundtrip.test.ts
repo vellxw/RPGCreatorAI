@@ -16,6 +16,7 @@ function makeBridge(calls: PlaytestSessionRequest[]): RpgBridge {
       createProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
       readProject: async () => { throw new Error('not stubbed'); },
       writeProject: async () => ({ success: true }),
+      importImageAsset: async () => ({ success: false, cancelled: false, error: 'not stubbed' }),
       listBackups: async () => [],
       closeProject: async () => undefined,
       createPlaytestSession: async (_sourceRoot, _state, request) => {

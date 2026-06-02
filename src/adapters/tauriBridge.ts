@@ -15,6 +15,7 @@ import type {
   RuntimeLogInfo,
   RuntimeLogTailResult,
   RuntimeSnapshotResult,
+  ImageImportResult,
 } from './types';
 
 function isTauri(): boolean {
@@ -36,6 +37,8 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
       readProject: (root: string) => invoke('fs_read_project', { root }) as Promise<FullProjectState>,
       writeProject: (root: string, state: FullProjectState) =>
         invoke('fs_write_project', { root, projectState: state }) as Promise<SaveResult>,
+      importImageAsset: (root: string, existingAssetIds: string[]) =>
+        invoke('fs_import_image_asset_dialog', { root, existingAssetIds }) as Promise<ImageImportResult>,
       listBackups: (root: string, file: string) =>
         invoke('fs_list_backups', { root, file }) as Promise<string[]>,
       closeProject: () => invoke('fs_close_project') as Promise<void>,

@@ -4541,3 +4541,48 @@ Error: Port 1420 is already in use
   `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/layout/__tests__/PrimaryNavigation.test.tsx`
   — PASS; 4 focused files and 29 Vitest tests passed after the asset catalog
   normalization robustness adjustment.
+
+### Phase 11 FRA-85 / CP-050 — image import workflow
+
+- `2026-06-02 09:20:00 -03:00` —
+  `npm test -- --run src/stores/__tests__/assetCatalogReducer.test.ts src/screens/__tests__/AssetsScreen.test.tsx`
+  — FAIL as expected during TDD red step; the reducer had no imported-asset
+  action and the Assets screen had no import button or status states.
+- `2026-06-02 09:20:00 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_image_asset_file -- --nocapture`
+  — FAIL as expected during TDD red step; the desktop import helper and
+  command did not exist yet.
+- `2026-06-02 09:29:00 -03:00` —
+  `npm test -- --run src/stores/__tests__/assetCatalogReducer.test.ts src/screens/__tests__/AssetsScreen.test.tsx`
+  — PASS after adding `ADD_ASSET_CATALOG_ENTRY`, the safe image import adapter,
+  and Assets success/failure UI; 2 focused files and 4 Vitest tests passed.
+- `2026-06-02 09:29:00 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml import_image_asset_file -- --nocapture`
+  — PASS after adding allowed-extension filtering, project-contained copy,
+  duplicate filename/id handling, and invalid-file rejection; 2 filtered Rust
+  tests passed.
+- `2026-06-02 09:31:00 -03:00` — `npm run typecheck` — FAIL; TypeScript
+  bridge mocks were missing `fs.importImageAsset`, and a UI test imported
+  asset fixture widened literal `kind`/`source` strings. Fix applied: bridge
+  mocks now include the import method and test fixtures pin literal asset
+  kinds/sources.
+- `2026-06-02 09:31:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 09:32:09 -03:00` — `npm test -- --run` — PASS; full frontend
+  Vitest suite passed with 59 files and 332 tests.
+- `2026-06-02 09:32:09 -03:00` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; Rust desktop tests
+  passed 35/35, including image import copy/rejection coverage.
+- `2026-06-02 09:34:00 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1926 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 09:35:00 -03:00` —
+  Browser smoke with Chrome DevTools MCP:
+  navigate selected page to `http://127.0.0.1:5177/`,
+  click `Use My First RPG`,
+  click `Assets`,
+  click `Import Image`,
+  list console `error`/`warn` messages — PASS; browser mode showed
+  `Image import is available after opening a desktop project folder.`,
+  screenshot evidence was saved to
+  `docs/screenshots/phase11-cp050/image-import-browser-unavailable.png`, and
+  the console reported 0 errors and 0 warnings.

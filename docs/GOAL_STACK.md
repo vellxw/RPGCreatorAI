@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-050 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-051 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -316,6 +316,15 @@ Primary Phase 11 sources:
   native runtime consume editor-only metadata. Evidence is recorded in
   `docs/PHASE_11_ASSET_CATALOG_V2.md` and
   `docs/screenshots/phase11-cp049/`.
+- Phase 11 CP-050 — image import workflow completed. Desktop projects can
+  import local `.png`, `.jpg`, `.jpeg`, `.bmp`, and `.webp` files into
+  `assets/imported/images/` without overwriting existing project files, the
+  generated catalog entry is unique and undo/history-aware through the project
+  reducer, browser mode shows an honest unavailable state, and unsupported
+  files report clear errors. The workflow remains editor-only and does not
+  add runtime, AI, network, or provider dependencies. Evidence is recorded in
+  `docs/PHASE_11_IMAGE_IMPORT_WORKFLOW.md` and
+  `docs/screenshots/phase11-cp050/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

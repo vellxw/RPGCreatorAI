@@ -1,6 +1,7 @@
 // Adapter interfaces for editor persistence and runtime launch
 import type {
   AssetCatalogData,
+  AssetCatalogEntry,
   DatabaseEntries,
   ItemDatabase,
   MapData,
@@ -19,6 +20,13 @@ export interface SaveResult {
   success: boolean;
   error?: string;
   backupPath?: string;
+}
+
+export interface ImageImportResult {
+  success: boolean;
+  cancelled?: boolean;
+  error?: string;
+  asset?: AssetCatalogEntry;
 }
 
 export interface FullProjectState {
