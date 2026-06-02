@@ -3268,3 +3268,47 @@ Error: Port 1420 is already in use
   recovery-copy wording polish; 1916 modules transformed, build completed in
   9.75s, and Vite emitted only the documented non-fatal chunk-size warning.
 
+### Phase 11 FRA-58 / CP-023 — empty states and first-time guidance
+
+- `2026-06-01 23:28:52 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/EditorEmptyStates.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/screens/__tests__/EventEditorEmptyState.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx`
+  — RED as expected; 8 empty-state expectations failed because map tree,
+  missing-map surfaces, database empty tabs, event editor, runtime log, event
+  trace, and runtime state still used terse dead-end copy. Fix applied: add a
+  shared dense `EmptyState` component and route the relevant editor/database/
+  playtest surfaces through action-oriented first-use copy.
+- `2026-06-01 23:35:27 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/EditorEmptyStates.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/screens/__tests__/EventEditorEmptyState.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx`
+  — PASS; 6 focused files and 15 tests passed.
+- `2026-06-01 23:36:49 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/EditorEmptyStates.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/TilesetEditor.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/screens/__tests__/EventEditorEmptyState.test.tsx src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — PASS; 10 related UI/database/playtest files and 25 tests passed.
+- `2026-06-01 23:36:49 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:40:00 -03:00` —
+  controlled `npm run dev` plus Chrome DevTools screenshot review
+  — PASS; browser-mode Create Browser Project opened the editor, Events showed
+  the no-events guidance, Database/Actors showed list and detail empty states,
+  and Playtest/Runtime Log showed the honest browser-unavailable state.
+  Screenshots written:
+  `docs/screenshots/phase11-cp023/empty-events.png`,
+  `docs/screenshots/phase11-cp023/empty-database-actors.png`, and
+  `docs/screenshots/phase11-cp023/empty-playtest-runtime-log.png`.
+  Console had no runtime errors; Chrome reported existing form label/id
+  accessibility issues for a later audit. Network requests inspected were
+  normal Vite/editor asset loads. Controlled server was stopped afterward,
+  leaving port 3000 clear.
+- `2026-06-01 23:47:19 -03:00` — `npm test` — FAIL; full Vitest found 1
+  stale assertion in
+  `src/components/layout/__tests__/TopToolbarSaveFlow.test.tsx` that still
+  expected the raw lowercase `disk full` mock string after the CP-022 recovery
+  formatter normalized the message to professional `Disk full...` copy. Fix
+  applied: update the assertion to validate the normalized user-facing disk
+  full recovery text.
+- `2026-06-01 23:48:20 -03:00` — `npm test` — PASS; 49 test files and 269
+  tests passed.
+- `2026-06-01 23:49:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 23:49:00 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 11.80s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 23:49:00 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.

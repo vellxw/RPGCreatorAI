@@ -90,4 +90,23 @@ describe('RuntimeLogPanel', () => {
     expect(view.container.textContent).toContain('no runtime log has been created yet');
     view.unmount();
   });
+
+  it('guides the first runtime log without fabricating output', () => {
+    const view = render(
+      <RuntimeLogPanel
+        available
+        diagnosticsDir={'C:\\Users\\me\\AppData\\Roaming\\RPGCreatorAI\\runtime-logs'}
+        content=""
+        onRefresh={vi.fn()}
+        onCopy={vi.fn()}
+        onOpenFolder={vi.fn()}
+      />,
+    );
+
+    expect(view.container.textContent).toContain('No runtime log yet');
+    expect(view.container.textContent).toContain('Launch a playtest to create the first native log');
+    expect(view.container.textContent).toContain('Use Refresh after the runtime exits');
+    expect(view.container.textContent).not.toContain('[INFO]');
+    view.unmount();
+  });
 });

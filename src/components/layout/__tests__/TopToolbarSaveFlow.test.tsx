@@ -104,7 +104,7 @@ describe('TopToolbar save flow feedback', () => {
     });
 
     expect(view.container.textContent).toContain('Save failed');
-    expect(view.container.textContent).toContain('disk full');
+    expect(view.container.textContent).toContain('Disk full while writing project files');
     expect(view.projectDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'MARK_SAVED' }));
 
     view.unmount();

@@ -1,6 +1,7 @@
 import { Tabs } from '../ui/Tabs';
 import { CheckCircle2, AlertTriangle, ClipboardList, TerminalSquare } from 'lucide-react';
 import { useProject } from '../../stores/projectStore';
+import { EmptyState } from '../ui/EmptyState';
 
 function ValidationContent() {
   const project = useProject();
@@ -112,7 +113,14 @@ export function BottomPanel() {
             {
               id: 'output',
               label: 'Output',
-              content: <p className="text-[13px] text-gray-500">No output messages</p>,
+              content: (
+                <EmptyState
+                  compact
+                  icon={<ClipboardList size={15} />}
+                  title="No editor output yet"
+                  detail="Validation, save, and playtest messages appear here after you run an editor command."
+                />
+              ),
             },
             {
               id: 'validation',
@@ -123,7 +131,14 @@ export function BottomPanel() {
             {
               id: 'logs',
               label: 'Playtest Logs',
-              content: <p className="text-[13px] text-gray-500">Start a playtest to see logs</p>,
+              content: (
+                <EmptyState
+                  compact
+                  icon={<TerminalSquare size={15} />}
+                  title="No playtest log selected"
+                  detail="Open Playtest and launch the native runtime to create local logs, event traces, and state snapshots."
+                />
+              ),
             },
           ]}
           defaultTab="validation"

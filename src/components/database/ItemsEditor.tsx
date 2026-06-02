@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { EmptyState } from '../ui/EmptyState';
 import {
   IdField,
   NumberField,
@@ -129,7 +130,13 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
         </div>
         <div className="max-h-[520px] overflow-auto">
           {value.items.length === 0 ? (
-            <p className="px-3 py-4 text-[12px] text-gray-400">No items yet. Add one to begin.</p>
+            <div className="p-3">
+              <EmptyState
+                compact
+                title="No items yet"
+                detail="Use Add to define consumables, key items, and equipment references for events and shops."
+              />
+            </div>
           ) : (
             value.items.map(item => (
               <button
@@ -218,7 +225,10 @@ export function ItemsEditor({ value, types, onChange }: ItemsEditorProps) {
           </div>
         </div>
       ) : (
-        <p className="text-[13px] text-gray-400">No items yet. Add one to begin.</p>
+        <EmptyState
+          title="No item selected"
+          detail="Add an item from the list to edit category, price, effects, and equipment modifiers."
+        />
       )}
     </div>
   );

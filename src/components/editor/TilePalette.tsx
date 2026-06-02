@@ -14,12 +14,14 @@ import {
   EyeOff,
   Lock,
   Unlock,
+  Map as MapIcon,
 } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
 import { useEditor, type BrushSelection } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { SCENE_TEMPLATES, cloneSceneTemplateMap, getSceneTemplate } from '../../templates/sceneTemplates';
 import { listTilesetTiles, tileAssetForId } from '../../visual/tileCatalog';
+import { EmptyState } from '../ui/EmptyState';
 
 interface TileCategory {
   id: string;
@@ -43,6 +45,28 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ A: true, B: true });
   const [search, setSearch] = useState('');
   const selectedMap = project.maps[editor.selectedMapId];
+  if (!selectedMap) {
+    return (
+      <div
+        className={`bg-white flex flex-col min-h-0 ${
+          embedded ? 'h-full' : 'w-[220px] flex-shrink-0 border-r border-gray-200'
+        }`}
+      >
+        <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-200">
+          <span className="text-[13px] font-semibold text-gray-700">Tile Palette</span>
+          <X size={14} className="text-gray-400" />
+        </div>
+        <div className="p-3">
+          <EmptyState
+            compact
+            icon={<MapIcon size={15} />}
+            title="Tile palette unavailable"
+            detail="Select a map before choosing layers, brushes, or templates. Palette actions write into the active scene."
+          />
+        </div>
+      </div>
+    );
+  }
   const tilesetTiles = listTilesetTiles(selectedMap?.tilesetId);
   const tileCategories: TileCategory[] = [
     { id: 'A', name: 'Tiles A', color: '#22c55e', tiles: tilesetTiles.filter(tile => tile.group === 'A').map(tile => String(tile.id)) },
@@ -76,6 +100,11 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
     door: { kind: 'event', eventType: 'transfer', label: 'transfer' },
     trigger: { kind: 'event', eventType: 'trigger', label: 'trigger' },
   });
+  const matchesSearch = (tile: string) => {
+    const brush = brushes[tile];
+    return (brush?.label ?? tile).toLowerCase().includes(search.toLowerCase());
+  };
+  const hasSearchMatches = tileCategories.some(cat => cat.tiles.some(matchesSearch));
 
   const selectedTile =
     editor.brush.kind === 'tile'
@@ -255,7 +284,16 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
 
       {/* Categories */}
       <div className="flex-1 overflow-y-auto">
-        {tileCategories.map(cat => (
+        {search.trim() && !hasSearchMatches ? (
+          <div className="p-3">
+            <EmptyState
+              compact
+              icon={<Search size={15} />}
+              title="No palette assets match"
+              detail="Clear the search or choose another layer group to keep painting with available project assets."
+            />
+          </div>
+        ) : tileCategories.map(cat => (
           <div key={cat.id}>
             <button
               onClick={() => toggleCategory(cat.id)}
@@ -268,10 +306,7 @@ export function TilePalette({ embedded = false }: { embedded?: boolean }) {
             {expanded[cat.id] && (
               <div className="grid grid-cols-4 gap-1 px-3 pb-2">
                 {cat.tiles
-                  .filter(tile => {
-                    const brush = brushes[tile];
-                    return (brush?.label ?? tile).toLowerCase().includes(search.toLowerCase());
-                  })
+                  .filter(matchesSearch)
                   .map(tile => (
                   <button
                     key={tile}

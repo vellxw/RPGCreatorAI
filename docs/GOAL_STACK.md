@@ -114,6 +114,12 @@ Primary Phase 11 sources:
   disabled surfaces now have explicit recovery copy or documented honest
   unavailable states. Save failures keep the editor dirty and point desktop
   users to `.backups` when partial writes may need inspection.
+- Phase 11 CP-023 — empty states and first-time guidance completed. A shared
+  dense `EmptyState` surface now guides no-map, missing-map, no-event,
+  database-list/detail, items, tileset, animation, output, runtime-log,
+  event-trace, and runtime-state first-use states without marketing filler or
+  unimplemented AI actions. Screenshot evidence is recorded under
+  `docs/screenshots/phase11-cp023/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

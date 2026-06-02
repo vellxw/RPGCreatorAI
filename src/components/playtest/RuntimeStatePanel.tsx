@@ -1,4 +1,5 @@
 import { Activity, AlertTriangle, RefreshCw } from 'lucide-react';
+import { EmptyState } from '../ui/EmptyState';
 
 export interface RuntimeStateSnapshot {
   frameNumber: number;
@@ -152,8 +153,17 @@ export function RuntimeStatePanel({
         </div>
       )}
       {!snapshot ? (
-        <div className="h-full px-4 py-3 text-[12px] text-gray-500">
-          {loading ? 'Loading native runtime state...' : 'No native runtime state snapshot has been written yet.'}
+        <div className="h-full p-3">
+          {loading ? (
+            <div className="px-1 py-1 text-[12px] text-gray-500">Loading native runtime state...</div>
+          ) : (
+            <EmptyState
+              compact
+              icon={<Activity size={15} />}
+              title="No runtime state snapshot yet"
+              detail="Launch the runtime or Refresh after a playtest is running to inspect the latest native state snapshot."
+            />
+          )}
         </div>
       ) : (
         <div className="flex-1 overflow-auto px-4 py-3 text-[11px] text-gray-700">

@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import type { MapReference } from '../../types/project';
+import { EmptyState } from '../ui/EmptyState';
 
 function slugifyMapId(name: string, existing: Set<string>): string {
   const base = name
@@ -169,7 +170,30 @@ export function MapTreePanel() {
           <Plus size={14} />
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto py-1">{renderBranch(null)}</div>
+      <div className="flex-1 overflow-y-auto py-1">
+        {refs.length === 0 ? (
+          <div className="p-3">
+            <EmptyState
+              compact
+              icon={<Map size={15} />}
+              title="No maps in this project"
+              detail="A project needs at least one authored scene before painting, events, or playtest can start."
+              action={
+                <button
+                  type="button"
+                  onClick={() => createMap(null)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-[12px] font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <Plus size={12} />
+                  Create the first map
+                </button>
+              }
+            />
+          </div>
+        ) : (
+          renderBranch(null)
+        )}
+      </div>
     </div>
   );
 }

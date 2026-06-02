@@ -74,4 +74,13 @@ describe('RuntimeStatePanel', () => {
     expect(unavailable.container.textContent).not.toContain('Frame 42');
     unavailable.unmount();
   });
+
+  it('guides the first native state snapshot', () => {
+    const view = render(<RuntimeStatePanel available snapshotText="" />);
+
+    expect(view.container.textContent).toContain('No runtime state snapshot yet');
+    expect(view.container.textContent).toContain('Launch the runtime');
+    expect(view.container.textContent).toContain('Refresh after a playtest is running');
+    view.unmount();
+  });
 });

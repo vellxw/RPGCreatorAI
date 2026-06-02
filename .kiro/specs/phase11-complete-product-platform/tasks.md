@@ -29,6 +29,7 @@
   - [x] CP-020 / FRA-55: polish current-map playtest launch flow.
   - [x] CP-021 / FRA-56: polish selected-event playtest launch flow.
   - [x] CP-022 / FRA-57: improve recoverable error states and user-safe failure copy.
+  - [x] CP-023 / FRA-58: add professional empty states and first-time guidance.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

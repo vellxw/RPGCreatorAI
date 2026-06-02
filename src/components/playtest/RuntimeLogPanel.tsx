@@ -1,4 +1,5 @@
-import { Copy, FolderOpen, RefreshCw } from 'lucide-react';
+import { Copy, FolderOpen, RefreshCw, TerminalSquare } from 'lucide-react';
+import { EmptyState } from '../ui/EmptyState';
 
 interface RuntimeLogPanelProps {
   available: boolean;
@@ -91,9 +92,20 @@ export function RuntimeLogPanel({
         </button>
       </div>
       {error && <div className="px-4 py-2 text-[11px] text-red-600 bg-red-50 border-b border-red-100">{error}</div>}
-      <pre className="flex-1 overflow-auto px-4 py-2 text-[11px] leading-5 text-gray-700 font-mono whitespace-pre-wrap bg-white">
-        {loading && !content ? 'Loading runtime log...' : content || 'No runtime log output yet.'}
-      </pre>
+      {!loading && !content && !error ? (
+        <div className="flex-1 p-3">
+          <EmptyState
+            compact
+            icon={<TerminalSquare size={15} />}
+            title="No runtime log yet"
+            detail="Launch a playtest to create the first native log. Use Refresh after the runtime exits or while it is running."
+          />
+        </div>
+      ) : (
+        <pre className="flex-1 overflow-auto px-4 py-2 text-[11px] leading-5 text-gray-700 font-mono whitespace-pre-wrap bg-white">
+          {loading && !content ? 'Loading runtime log...' : content || 'No runtime log output yet.'}
+        </pre>
+      )}
     </div>
   );
 }

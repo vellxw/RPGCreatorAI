@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { EmptyState } from '../ui/EmptyState';
 import { useProjectStore, type DatabaseRecord } from '../../stores/projectStore';
 import { findReferences } from '../../validation/referenceIndex';
 import type { DatabaseListKey, Stats } from '../../types/project';
@@ -135,9 +136,26 @@ function entryLabel(entry: DatabaseRecord): string {
   );
 }
 
+const tableCopy: Record<DatabaseListKey, { singular: string; plural: string; purpose: string }> = {
+  actors: { singular: 'actor', plural: 'actors', purpose: 'actor record' },
+  classes: { singular: 'class', plural: 'classes', purpose: 'actor class data' },
+  skills: { singular: 'skill', plural: 'skills', purpose: 'battle and event skills' },
+  weapons: { singular: 'weapon', plural: 'weapons', purpose: 'equipment records' },
+  armors: { singular: 'armor', plural: 'armors', purpose: 'equipment records' },
+  states: { singular: 'state', plural: 'states', purpose: 'battle status effects' },
+  enemies: { singular: 'enemy', plural: 'enemies', purpose: 'battle encounters' },
+  troops: { singular: 'troop', plural: 'troops', purpose: 'enemy groups' },
+  quests: { singular: 'quest', plural: 'quests', purpose: 'quest journal entries' },
+  shops: { singular: 'shop', plural: 'shops', purpose: 'shop inventory data' },
+  switches: { singular: 'switch', plural: 'switches', purpose: 'event conditions' },
+  variables: { singular: 'variable', plural: 'variables', purpose: 'numeric event state' },
+  commonEvents: { singular: 'common event', plural: 'common events', purpose: 'reusable event command stacks' },
+};
+
 export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseListProps) {
   const { state, dispatch } = useProjectStore();
   const ids = useMemo(() => new Set(entries.map(entry => entry.id)), [entries]);
+  const copy = tableCopy[table];
 
   const addEntry = () => {
     const baseId = `${table.replace(/s$/, '')}_${entries.length + 1}`;
@@ -187,7 +205,13 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
       </div>
       <div className="flex-1 overflow-y-auto">
         {entries.length === 0 ? (
-          <p className="p-3 text-[12px] text-gray-400">No entries yet.</p>
+          <div className="p-3">
+            <EmptyState
+              compact
+              title={`No ${copy.plural} yet`}
+              detail={`Use New ${copy.singular} to define the first ${copy.purpose}.`}
+            />
+          </div>
         ) : (
           entries.map(entry => (
             <div

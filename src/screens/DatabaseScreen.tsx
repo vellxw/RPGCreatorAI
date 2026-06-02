@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { EmptyState } from '../components/ui/EmptyState';
 import { Input, Select } from '../components/ui/Input';
 import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
@@ -82,6 +83,74 @@ const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
   { value: 'double', label: 'Double (125 ms/tile)' },
   { value: 'quadruple', label: 'Quadruple' },
 ];
+
+const EMPTY_DETAIL_COPY: Partial<Record<DatabaseTabKey, { plural: string; singular: string; detail: string }>> = {
+  actors: {
+    plural: 'actors',
+    singular: 'actor',
+    detail: 'Create an actor from the list to edit stats, class, equipment, and starting-party references.',
+  },
+  classes: {
+    plural: 'classes',
+    singular: 'class',
+    detail: 'Create a class from the list to define stat growth, equipment rules, and learned skills.',
+  },
+  skills: {
+    plural: 'skills',
+    singular: 'skill',
+    detail: 'Create a skill from the list to define costs, target rules, and battle behavior.',
+  },
+  weapons: {
+    plural: 'weapons',
+    singular: 'weapon',
+    detail: 'Create a weapon from the list to define equipment stats, price, and animation references.',
+  },
+  armors: {
+    plural: 'armors',
+    singular: 'armor',
+    detail: 'Create an armor record from the list to define equipment stats, slot, and traits.',
+  },
+  states: {
+    plural: 'states',
+    singular: 'state',
+    detail: 'Create a state from the list to define status effects and battle restrictions.',
+  },
+  enemies: {
+    plural: 'enemies',
+    singular: 'enemy',
+    detail: 'Create an enemy from the list to define stats, rewards, and drops.',
+  },
+  troops: {
+    plural: 'troops',
+    singular: 'troop',
+    detail: 'Create a troop from the list to group enemies for battle encounters.',
+  },
+  quests: {
+    plural: 'quests',
+    singular: 'quest',
+    detail: 'Create a quest from the list to define objectives and rewards.',
+  },
+  shops: {
+    plural: 'shops',
+    singular: 'shop',
+    detail: 'Create a shop from the list to define listings and prices.',
+  },
+  switches: {
+    plural: 'switches',
+    singular: 'switch',
+    detail: 'Create a switch from the list to drive event conditions and branches.',
+  },
+  variables: {
+    plural: 'variables',
+    singular: 'variable',
+    detail: 'Create a variable from the list to track numeric event state.',
+  },
+  commonEvents: {
+    plural: 'common events',
+    singular: 'common event',
+    detail: 'Create a common event from the list to author reusable command stacks.',
+  },
+};
 
 interface DatabaseUsageCounts {
   switches: Record<string, number>;
@@ -924,6 +993,7 @@ export function DatabaseScreen() {
 
   const selectedEntry = entries.find(e => e.id === selectedId) ?? entries[0];
   const activeTabLabel = TAB_ORDER.find(t => t.key === tab)?.label ?? 'Database';
+  const emptyDetail = EMPTY_DETAIL_COPY[tab];
   const mapUsage = Object.values(state.maps).reduce<Record<string, string[]>>((acc, map) => {
     if (!map.tilesetId) return acc;
     acc[map.tilesetId] = [...(acc[map.tilesetId] ?? []), map.name || map.id];
@@ -1013,7 +1083,10 @@ export function DatabaseScreen() {
           selectedEntry ? (
             <Detail table={tab as DatabaseListKey} entry={selectedEntry} />
           ) : (
-            <p className="text-[13px] text-gray-400">No entries — add one to begin.</p>
+            <EmptyState
+              title={`No ${emptyDetail?.plural ?? activeTabLabel.toLowerCase()} selected`}
+              detail={emptyDetail?.detail ?? `Create a ${activeTabLabel.toLowerCase()} entry from the list to edit it here.`}
+            />
           )
         )}
       </DatabaseLayout>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Input, Select } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { EmptyState } from '../components/ui/EmptyState';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
 import { validateEvent } from '../validation/validateMap';
 import type { EventPage, EventPriority, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
@@ -494,7 +495,16 @@ export function EventEditorScreen() {
     : map?.events[0];
 
   if (!event || !map) {
-    return <div className="flex-1 flex items-center justify-center text-gray-400">No events found</div>;
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-8">
+        <EmptyState
+          align="center"
+          icon={<Plus size={18} />}
+          title="No events in this project"
+          detail="Use the Events layer in the main editor palette. Place an NPC, chest, transfer, or trigger on a map, then return here to edit pages and commands."
+        />
+      </div>
+    );
   }
 
   const pages = event.pages ?? [];

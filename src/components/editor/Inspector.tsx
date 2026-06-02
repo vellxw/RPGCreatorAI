@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
-import { Copy, MoreVertical, Plus, Trash2 } from 'lucide-react';
+import { Copy, Map as MapIcon, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import type {
   EventCommand,
   GameEvent,
@@ -16,6 +16,7 @@ import { findDuplicatePlacement } from '../../utils/eventEditing';
 import { normalizeVisualProfile } from '../../visual/visualProfile';
 import { getVisibleTileSpan } from '../../visual/viewport';
 import { getTileset, listTilesetTiles } from '../../visual/tileCatalog';
+import { EmptyState } from '../ui/EmptyState';
 
 function CommandRow({ index, command }: { index: number; command: EventCommand }) {
   const labels: Record<string, string> = {
@@ -272,8 +273,14 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
 
   if (!map) {
     return (
-      <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex items-center justify-center p-6 text-center">
-        <p className="text-[13px] text-gray-500">Select a map to edit its scene settings.</p>
+      <div className="w-[280px] flex-shrink-0 bg-white border-l border-gray-200 flex items-center justify-center p-4">
+        <EmptyState
+          align="center"
+          compact
+          icon={<MapIcon size={16} />}
+          title="No map selected"
+          detail="Select or create a map in the Map Tree to edit scene settings, viewport size, and start position."
+        />
       </div>
     );
   }

@@ -8,6 +8,7 @@ import type {
   Direction,
 } from '../../types/project';
 import { Button } from '../ui/Button';
+import { EmptyState } from '../ui/EmptyState';
 import { CheckboxField, IdField, NumberField, SelectField, TextField } from './DatabaseFields';
 import { AnimationPreview } from './AnimationPreview';
 
@@ -132,7 +133,10 @@ export function AnimationsEditor({ value, onChange }: AnimationsEditorProps) {
   if (value.sets.length === 0 || !selected) {
     return (
       <div className="space-y-3">
-        <p className="text-[13px] text-gray-400">No animation sets yet.</p>
+        <EmptyState
+          title="No animation sets yet"
+          detail="Add an animation set to define character display size, clips, frame timing, and anchors."
+        />
         <Button size="sm" icon={<Plus size={12} />} aria-label="Add animation set" onClick={addSet}>
           Add animation set
         </Button>

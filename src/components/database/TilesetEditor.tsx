@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { EmptyState } from '../ui/EmptyState';
 import {
   CheckboxField,
   NumberField,
@@ -137,7 +138,10 @@ export function TilesetEditor({ value, mapUsage = {}, onChange }: TilesetEditorP
   if (value.tilesets.length === 0 || !selected) {
     return (
       <div className="space-y-3">
-        <p className="text-[13px] text-gray-400">No tilesets yet.</p>
+        <EmptyState
+          title="No tilesets yet"
+          detail="Add a tileset to define tile art, passability, terrain tags, and map palette metadata."
+        />
         <Button size="sm" icon={<Plus size={12} />} aria-label="Add tileset" onClick={addTileset}>
           Add tileset
         </Button>
@@ -227,7 +231,11 @@ export function TilesetEditor({ value, mapUsage = {}, onChange }: TilesetEditorP
 
         <div className="space-y-3">
           {groupedTiles.length === 0 ? (
-            <p className="text-[12px] text-gray-400">No tiles in group {activeGroup}.</p>
+            <EmptyState
+              compact
+              title={`No ${activeGroup} tiles`}
+              detail="Use Add tile to define a tile in this group, then assign art and passability."
+            />
           ) : (
             groupedTiles.map(tile => (
               <div key={tile.id} className="border border-gray-200 bg-white p-3 space-y-3">

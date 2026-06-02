@@ -66,4 +66,13 @@ describe('EventTracePanel', () => {
 
     view.unmount();
   });
+
+  it('guides the first trace instead of leaving an unexplained blank table', () => {
+    const view = render(<EventTracePanel logText="" />);
+
+    expect(view.container.textContent).toContain('No event trace rows yet');
+    expect(view.container.textContent).toContain('Launch the native runtime');
+    expect(view.container.textContent).toContain('trigger a map event or common event');
+    view.unmount();
+  });
 });

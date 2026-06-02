@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { useEditor } from '../../stores/editorStore';
 import { useProject, useProjectStore } from '../../stores/projectStore';
 import type { EventType, GameEvent } from '../../types/project';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Map as MapIcon } from 'lucide-react';
 import { eventAssets, gameAssets } from '../../assets/generated/assetCatalog';
+import { EmptyState } from '../ui/EmptyState';
 import { normalizeVisualProfile } from '../../visual/visualProfile';
 import {
   computeCameraFrame,
@@ -29,7 +30,18 @@ export function MapCanvas() {
   const [rectangleStart, setRectangleStart] = useState<{ x: number; y: number } | null>(null);
   const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
 
-  if (!map) return <div className="flex-1 flex items-center justify-center text-gray-400">No map selected</div>;
+  if (!map) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-100 p-8">
+        <EmptyState
+          align="center"
+          icon={<MapIcon size={18} />}
+          title="No map selected"
+          detail="Select or create a map in the Map Tree to start painting tiles, placing events, and applying scene templates."
+        />
+      </div>
+    );
+  }
 
   const profile = normalizeVisualProfile(project.project.visualProfile);
   const tileSize = map.tileSize || profile.tileSize;

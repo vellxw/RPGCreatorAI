@@ -1,5 +1,6 @@
 import { AlertTriangle, GitBranch, ListFilter } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { EmptyState } from '../ui/EmptyState';
 
 export interface EventTraceRow {
   sequence: number;
@@ -113,8 +114,13 @@ export function EventTracePanel({ logText }: { logText: string }) {
         </div>
       </div>
       {rows.length === 0 ? (
-        <div className="h-full px-4 py-3 text-[12px] text-gray-500">
-          No event trace rows found in the current runtime log.
+        <div className="h-full p-3">
+          <EmptyState
+            compact
+            icon={<GitBranch size={15} />}
+            title="No event trace rows yet"
+            detail="Launch the native runtime, then trigger a map event or common event to produce deterministic trace rows."
+          />
         </div>
       ) : filteredRows.length === 0 ? (
         <div className="h-full px-4 py-3 text-[12px] text-gray-500">
