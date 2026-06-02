@@ -272,4 +272,38 @@ describe('MVP verify script', () => {
     expect(readme + buildRun + windowsNotes).not.toContain('Canonical MVP');
     expect(readme + buildRun).not.toContain('MVP limitations');
   });
+
+  it('keeps startup open/create project docs and desktop bridge aligned', () => {
+    const buildRun = readFileSync(join(process.cwd(), 'docs/BUILD_AND_RUN.md'), 'utf8');
+    const shellArchitecture = readFileSync(join(process.cwd(), 'docs/DESKTOP_SHELL_ARCHITECTURE.md'), 'utf8');
+    const filesystemDoc = readFileSync(join(process.cwd(), 'docs/FILESYSTEM_ADAPTER.md'), 'utf8');
+    const app = readFileSync(join(process.cwd(), 'src/App.tsx'), 'utf8');
+    const bridgeTypes = readFileSync(join(process.cwd(), 'src/types/rpgBridge.ts'), 'utf8');
+    const tauriBridge = readFileSync(join(process.cwd(), 'src/adapters/tauriBridge.ts'), 'utf8');
+    const tauriLib = readFileSync(join(process.cwd(), 'src-tauri/src/lib.rs'), 'utf8');
+    const fsCommands = readFileSync(join(process.cwd(), 'src-tauri/src/fs_commands.rs'), 'utf8');
+
+    for (const expected of [
+      'On the startup screen',
+      'open an existing project folder',
+      'create a new',
+      'import a project bundle',
+      'Browser-created projects are memory-backed',
+    ]) {
+      expect(buildRun).toContain(expected);
+    }
+
+    expect(shellArchitecture).toContain('createProjectDialog(state)');
+    expect(filesystemDoc).toContain('## Create Flow');
+    expect(filesystemDoc).toContain('refuses to overwrite an existing `data/project.json`');
+    expect(filesystemDoc).toContain('browser mode cannot open folders');
+
+    expect(app).toContain('ProjectStartupScreen');
+    expect(app).toContain('performCreateProject');
+    expect(bridgeTypes).toContain('createProjectDialog(state: FullProjectState)');
+    expect(tauriBridge).toContain("invoke('fs_create_project_dialog'");
+    expect(tauriLib).toContain('fs_commands::fs_create_project_dialog');
+    expect(fsCommands).toContain('pub fn fs_create_project_dialog');
+    expect(fsCommands).toContain('ensure_new_project_target');
+  });
 });

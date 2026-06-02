@@ -23,6 +23,7 @@
   - [x] CP-015 / FRA-50: refresh build, run, and packaging docs.
   - [x] CP-016 / FRA-51: run the packaging integration gate.
 - [ ] 02 End-To-End Usability.
+  - [x] CP-017 / FRA-52: complete open and create project startup flow.
 - [ ] 03 Professional Editor Surface.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.

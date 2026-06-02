@@ -31,6 +31,8 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
     },
     fs: {
       openProjectDialog: () => invoke('fs_open_project_dialog'),
+      createProjectDialog: (state: FullProjectState) =>
+        invoke('fs_create_project_dialog', { projectState: state }),
       readProject: (root: string) => invoke('fs_read_project', { root }) as Promise<FullProjectState>,
       writeProject: (root: string, state: FullProjectState) =>
         invoke('fs_write_project', { root, projectState: state }) as Promise<SaveResult>,

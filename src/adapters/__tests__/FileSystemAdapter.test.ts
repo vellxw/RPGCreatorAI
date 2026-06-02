@@ -14,6 +14,7 @@ function fakeBridge(overrides: Partial<RpgBridge['fs']> = {}): RpgBridge {
     shell: { info: async () => ({ name: 'tauri' as const, version: 'test' }) },
     fs: {
       openProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
+      createProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
       readProject: async () => {
         throw new Error('not stubbed');
       },

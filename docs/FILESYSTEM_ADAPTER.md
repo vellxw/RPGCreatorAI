@@ -42,6 +42,23 @@ In browser mode the existing `BrowserMemoryAdapter` is used; capabilities remain
 4. Renderer dispatches `LOAD_PROJECT` to the project store. `dirty=false`.
 5. Validation runs once on load and surfaces in the bottom panel.
 
+## Create Flow
+
+1. A first-time user can choose Create Project from the startup screen without
+   hand-editing JSON.
+2. In desktop mode the renderer builds a deterministic starter
+   `FullProjectState` and calls `fs.createProjectDialog(state)`.
+3. The shell asks for a target folder, canonicalises it under user space, and
+   refuses to overwrite an existing `data/project.json` or a non-empty
+   `data/` directory.
+4. The shell writes `data/project.json`, referenced maps, item data, database
+   shards, and a `.gitignore` entry for `.backups/`, then reloads the project
+   through the same read path used by `openProjectDialog()`.
+5. In browser mode Create Project is intentionally memory-backed. The startup
+   screen states that browser mode cannot open folders or write native project
+   files; users must export a bundle to keep the new project outside the
+   browser session.
+
 ## Write Flow
 
 1. User clicks Save. `performSave()` runs `validateProject()` first (renderer-side, same gate that Phase 4 introduced).

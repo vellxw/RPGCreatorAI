@@ -22,6 +22,8 @@ export interface OpenDialogResult {
   state: FullProjectState | null;
 }
 
+export type CreateProjectDialogResult = OpenDialogResult;
+
 export interface ShellInfo {
   name: 'tauri' | 'electron';
   version: string;
@@ -33,6 +35,7 @@ export interface RpgBridge {
   };
   fs: {
     openProjectDialog(): Promise<OpenDialogResult>;
+    createProjectDialog(state: FullProjectState): Promise<CreateProjectDialogResult>;
     readProject(root: string): Promise<FullProjectState>;
     writeProject(root: string, state: FullProjectState): Promise<SaveResult>;
     listBackups(root: string, file: string): Promise<string[]>;

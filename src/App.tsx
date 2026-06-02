@@ -5,19 +5,27 @@ import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
+import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
   ProjectContext,
   initialProjectStoreState,
   projectReducer,
 } from './stores/projectStore';
 import { EditorContext, editorReducer, initialEditorState } from './stores/editorStore';
-import { getProjectDataAdapter } from './adapters/adapterFactory';
+import { getProjectDataAdapter, isDesktopShell } from './adapters/adapterFactory';
+import {
+  performCreateProject,
+  performImport,
+  performOpenProject,
+} from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
 
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
   const [loaded, setLoaded] = useState(false);
+  const [showStartup, setShowStartup] = useState(true);
+  const [startupStatus, setStartupStatus] = useState<string | null>(null);
 
   // Load project once via the active adapter.
   useEffect(() => {
@@ -105,6 +113,55 @@ export default function App() {
       <div className="flex items-center justify-center h-screen text-gray-500 text-sm">
         Loading project…
       </div>
+    );
+  }
+
+  const desktop = isDesktopShell();
+
+  const handleStartupOpen = async () => {
+    const outcome = await performOpenProject(projectDispatch);
+    if (outcome.cancelled) return;
+    if (!outcome.success) {
+      setStartupStatus(`Open failed: ${outcome.error ?? 'unknown error'}`);
+      return;
+    }
+    setShowStartup(false);
+  };
+
+  const handleStartupCreate = async (title: string) => {
+    const outcome = await performCreateProject(projectDispatch, { title });
+    if (outcome.cancelled) return;
+    if (!outcome.success) {
+      setStartupStatus(`Create failed: ${outcome.error ?? 'unknown error'}`);
+      return;
+    }
+    setShowStartup(false);
+  };
+
+  const handleStartupImport = async (file: File) => {
+    const result = await performImport(file, projectDispatch);
+    if (!result.success) {
+      setStartupStatus(`Import failed: ${result.error ?? 'unknown error'}`);
+      return;
+    }
+    setShowStartup(false);
+  };
+
+  if (showStartup) {
+    return (
+      <ProjectContext.Provider value={{ state: projectState, dispatch: projectDispatch }}>
+        <EditorContext.Provider value={{ state: editorState, dispatch: editorDispatch }}>
+          <ProjectStartupScreen
+            desktop={desktop}
+            sampleTitle={projectState.project.title || 'bundled sample'}
+            statusMessage={startupStatus}
+            onUseSample={() => setShowStartup(false)}
+            onOpenProject={handleStartupOpen}
+            onCreateProject={handleStartupCreate}
+            onImportProject={handleStartupImport}
+          />
+        </EditorContext.Provider>
+      </ProjectContext.Provider>
     );
   }
 

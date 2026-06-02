@@ -180,7 +180,11 @@ Diagnostics and failed-launch troubleshooting are documented in
 
 1. Use `npm run desktop:dev` for real filesystem persistence and native
    runtime launch, or `npm run dev` for browser-only editing.
-2. Open a project folder or use the bundled `data/` project.
+2. On the startup screen, open an existing project folder, create a new
+   project, import a project bundle, or use the bundled `data/` sample.
+   Browser mode cannot open native folders; its Create Project path starts an
+   in-memory project that must be exported as a bundle to persist outside the
+   browser session.
 3. Edit maps, event pages/commands, common events, and database entries.
 4. Run Validate from the toolbar; Save only writes valid project data.
 5. In Playtest, choose Project Start, Current Map, or Selected Event.
@@ -194,6 +198,8 @@ Diagnostics and failed-launch troubleshooting are documented in
 ## Current Limitations
 
 - Browser mode does not fake native filesystem/runtime capabilities.
+- Browser-created projects are memory-backed until exported as a project
+  bundle.
 - Runtime data is local JSON plus committed assets; there is no cloud service,
   marketplace, proprietary project import, scripting VM, or runtime AI
   dependency.

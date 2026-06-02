@@ -7,6 +7,7 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
     shell: { info: async () => ({ name: 'tauri' as const, version: 'test' }) },
     fs: {
       openProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
+      createProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
       readProject: async () => { throw new Error('not stubbed'); },
       writeProject: async () => ({ success: true }),
       listBackups: async () => [],

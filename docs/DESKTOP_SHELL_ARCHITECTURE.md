@@ -54,6 +54,7 @@ The renderer never sees a generic `invoke()` function. Instead, a thin typed wra
 | Namespace | Command | Purpose |
 |-----------|---------|---------|
 | `fs` | `openProjectDialog()` | Native folder picker, returns selected root or cancellation |
+| `fs` | `createProjectDialog(state)` | Native folder picker for a new project; writes the supplied validated starter data without overwriting existing project data |
 | `fs` | `readProject(root)` | Reads project.json + maps + items, returns `FullProjectState` |
 | `fs` | `writeProject(root, state)` | Atomic write with backup; runs validation in renderer first |
 | `fs` | `listBackups(root, file)` | Lists `.backups/` entries for a given file |

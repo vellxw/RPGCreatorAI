@@ -13,6 +13,7 @@ function makeBridge(calls: PlaytestSessionRequest[]): RpgBridge {
     shell: { info: async () => ({ name: 'tauri', version: 'test' }) },
     fs: {
       openProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
+      createProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
       readProject: async () => { throw new Error('not stubbed'); },
       writeProject: async () => ({ success: true }),
       listBackups: async () => [],

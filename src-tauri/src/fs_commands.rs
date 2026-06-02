@@ -188,6 +188,36 @@ pub fn fs_open_project_dialog(app: tauri::AppHandle) -> Result<OpenDialogResult,
 }
 
 #[tauri::command]
+pub fn fs_create_project_dialog(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    project_state: FullProjectState,
+) -> Result<OpenDialogResult, String> {
+    let folder = app.dialog().file().blocking_pick_folder();
+
+    let Some(picked) = folder else {
+        return Ok(OpenDialogResult {
+            root: None,
+            cancelled: true,
+            state: None,
+        });
+    };
+
+    let raw = picked.into_path().map_err(|e| e.to_string())?;
+    let root = canonicalize_inside_user_space(&raw).map_err(|e| e.to_string())?;
+
+    write_new_project_at(&root, &project_state).map_err(|e| e.to_string())?;
+    let reloaded = read_project_at(&root).map_err(|e| e.to_string())?;
+    *state.project_root.lock().unwrap() = Some(root.clone());
+
+    Ok(OpenDialogResult {
+        root: Some(root.to_string_lossy().to_string()),
+        cancelled: false,
+        state: Some(reloaded),
+    })
+}
+
+#[tauri::command]
 pub fn fs_read_project(
     state: State<'_, AppState>,
     root: String,
@@ -737,9 +767,162 @@ fn must_contain_project_json(root: &Path) -> Result<(), String> {
     Ok(())
 }
 
+fn ensure_new_project_target(root: &Path) -> Result<(), String> {
+    let project_path = root.join("data/project.json");
+    if project_path.exists() {
+        return Err(format!(
+            "selected folder already contains data/project.json (looked at {})",
+            project_path.display()
+        ));
+    }
+
+    let data_dir = root.join("data");
+    if data_dir.exists() {
+        if !data_dir.is_dir() {
+            return Err(format!(
+                "selected folder contains a non-directory data path at {}",
+                data_dir.display()
+            ));
+        }
+        let mut entries = fs::read_dir(&data_dir).map_err(|e| e.to_string())?;
+        if entries.next().transpose().map_err(|e| e.to_string())?.is_some() {
+            return Err(format!(
+                "selected folder has a non-empty data directory at {}",
+                data_dir.display()
+            ));
+        }
+    }
+
+    Ok(())
+}
+
 fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
     let bytes = fs::read(path).map_err(|e| format!("read {}: {e}", path.display()))?;
     serde_json::from_slice(&bytes).map_err(|e| format!("parse {}: {e}", path.display()))
+}
+
+fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result<SaveResult, String> {
+    ensure_new_project_target(root)?;
+
+    let mut map_paths = HashSet::new();
+    for map_ref in &project_state.project.maps {
+        let path_key = map_ref.path.trim().replace('\\', "/").to_lowercase();
+        if path_key.is_empty() {
+            return Err(format!("map '{}' has an empty path", map_ref.id));
+        }
+        if !map_paths.insert(path_key) {
+            return Err(format!(
+                "duplicate map path '{}' would overwrite map data",
+                map_ref.path
+            ));
+        }
+        if !project_state.maps.contains_key(&map_ref.id) {
+            return Err(format!(
+                "new project state is missing data for map id '{}'",
+                map_ref.id
+            ));
+        }
+    }
+
+    let mut warnings: Vec<String> = Vec::new();
+    write_new_json(root, "data/project.json", &project_state.project)?;
+    for map_ref in &project_state.project.maps {
+        let map_value = project_state.maps.get(&map_ref.id).unwrap();
+        write_new_json(root, &map_ref.path, map_value)?;
+    }
+    write_new_json(root, &project_state.project.database.items, &project_state.items)?;
+
+    if let serde_json::Value::Object(map) = &project_state.databases {
+        let pairs: [(&str, Option<&String>); 18] = [
+            ("actors", project_state.project.database.actors.as_ref()),
+            ("classes", project_state.project.database.classes.as_ref()),
+            ("skills", project_state.project.database.skills.as_ref()),
+            ("weapons", project_state.project.database.weapons.as_ref()),
+            ("armors", project_state.project.database.armors.as_ref()),
+            ("states", project_state.project.database.states.as_ref()),
+            ("types", project_state.project.database.types.as_ref()),
+            ("terms", project_state.project.database.terms.as_ref()),
+            ("enemies", project_state.project.database.enemies.as_ref()),
+            ("troops", project_state.project.database.troops.as_ref()),
+            ("quests", project_state.project.database.quests.as_ref()),
+            ("shops", project_state.project.database.shops.as_ref()),
+            ("system", project_state.project.database.system.as_ref()),
+            ("switches", project_state.project.database.switches.as_ref()),
+            (
+                "variables",
+                project_state.project.database.variables.as_ref(),
+            ),
+            (
+                "commonEvents",
+                project_state.project.database.common_events.as_ref(),
+            ),
+            (
+                "animations",
+                project_state.project.database.animations.as_ref(),
+            ),
+            ("tilesets", project_state.project.database.tilesets.as_ref()),
+        ];
+        for (key, maybe_rel) in pairs {
+            let Some(rel) = maybe_rel else { continue };
+            let Some(payload) = map.get(key) else {
+                continue;
+            };
+            let wrapped = if is_object_database_shard(key) {
+                let mut m = serde_json::Map::new();
+                m.insert("schemaVersion".into(), serde_json::Value::from(1));
+                if let serde_json::Value::Object(object_payload) = payload {
+                    for (k, v) in object_payload {
+                        if k == "schemaVersion" {
+                            continue;
+                        }
+                        m.insert(k.clone(), v.clone());
+                    }
+                }
+                serde_json::Value::Object(m)
+            } else {
+                serde_json::json!({ "schemaVersion": 1, key: payload })
+            };
+            write_new_json(root, rel, &wrapped)?;
+        }
+    }
+
+    if let Err(e) = ensure_gitignore_mentions_backups(root) {
+        warnings.push(format!("could not update .gitignore: {e}"));
+    }
+
+    Ok(SaveResult {
+        success: true,
+        error: None,
+        warnings,
+        backup_path: None,
+    })
+}
+
+fn write_new_json<T: Serialize>(root: &Path, relative: &str, value: &T) -> Result<(), String> {
+    let target = join_inside(root, relative).map_err(|e| e.to_string())?;
+    if target.exists() {
+        return Err(format!("refusing to overwrite existing file {}", target.display()));
+    }
+
+    let pretty =
+        serde_json::to_string_pretty(value).map_err(|e| format!("serialise {relative}: {e}"))?;
+    serde_json::from_str::<serde_json::Value>(&pretty)
+        .map_err(|e| format!("post-serialise validation failed for {relative}: {e}"))?;
+
+    if let Some(parent) = target.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("mkdir {}: {e}", parent.display()))?;
+    }
+
+    let mut f = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&target)
+        .map_err(|e| format!("create {}: {e}", target.display()))?;
+    f.write_all(pretty.as_bytes())
+        .map_err(|e| format!("write {}: {e}", target.display()))?;
+    f.sync_all().map_err(|e| format!("fsync {}: {e}", target.display()))?;
+
+    Ok(())
 }
 
 fn write_with_backup<T: Serialize>(
@@ -916,6 +1099,114 @@ mod tests {
         assert!(result.maps.contains_key("town"));
         assert_eq!(result.project.maps[0].order, Some(0));
         assert_eq!(result.project.maps[0].expanded, Some(true));
+    }
+
+    fn starter_project_state() -> FullProjectState {
+        let project = ProjectData {
+            schema_version: 1,
+            title: "New Game".into(),
+            start_map_id: "town".into(),
+            start_position: StartPosition {
+                x: 1,
+                y: 1,
+                direction: "down".into(),
+            },
+            maps: vec![MapReference {
+                id: "town".into(),
+                path: "data/maps/town.json".into(),
+                parent_id: None,
+                order: Some(0),
+                expanded: Some(true),
+            }],
+            database: DatabaseRefs {
+                items: "data/database/items.json".into(),
+                actors: Some("data/database/actors.json".into()),
+                classes: None,
+                skills: None,
+                weapons: None,
+                armors: None,
+                states: None,
+                types: None,
+                terms: None,
+                enemies: None,
+                troops: None,
+                quests: None,
+                shops: None,
+                system: Some("data/database/system.json".into()),
+                switches: None,
+                variables: None,
+                common_events: None,
+                animations: None,
+                tilesets: Some("data/database/tilesets.json".into()),
+            },
+        };
+        let mut maps = HashMap::new();
+        maps.insert(
+            "town".into(),
+            serde_json::json!({
+                "schemaVersion": 1,
+                "id": "town",
+                "name": "Town",
+                "width": 2,
+                "height": 2,
+                "tileSize": 32,
+                "layers": [
+                    { "name": "ground", "type": "visual", "tiles": [1,1,1,1] },
+                    { "name": "collision", "type": "collision", "tiles": [0,0,0,0] }
+                ],
+                "events": []
+            }),
+        );
+        FullProjectState {
+            project,
+            maps,
+            items: serde_json::json!({ "items": [] }),
+            databases: serde_json::json!({
+                "actors": [],
+                "system": { "startingParty": [], "startingGold": 0 },
+                "tilesets": { "tilesets": [] }
+            }),
+        }
+    }
+
+    #[test]
+    fn create_new_project_writes_required_files_and_reloads() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path().canonicalize().unwrap();
+        let state = starter_project_state();
+
+        let result = write_new_project_at(&root, &state).unwrap();
+
+        assert!(result.success);
+        assert!(root.join("data/project.json").is_file());
+        assert!(root.join("data/maps/town.json").is_file());
+        assert!(root.join("data/database/items.json").is_file());
+        assert!(root.join("data/database/actors.json").is_file());
+        assert!(root.join("data/database/system.json").is_file());
+        assert!(root.join("data/database/tilesets.json").is_file());
+        let reloaded = read_project_at(&root).unwrap();
+        assert_eq!(reloaded.project.title, "New Game");
+        assert!(reloaded.maps.contains_key("town"));
+        assert!(fs::read_to_string(root.join(".gitignore")).unwrap().contains(".backups/"));
+    }
+
+    #[test]
+    fn create_new_project_rejects_non_empty_data_directory() {
+        let tmp = TempDir::new().unwrap();
+        let root = tmp.path().canonicalize().unwrap();
+        fs::create_dir_all(root.join("data")).unwrap();
+        fs::write(root.join("data/notes.txt"), "keep me").unwrap();
+
+        let result = write_new_project_at(&root, &starter_project_state());
+
+        assert!(result.is_err());
+        let err = match result {
+            Ok(_) => panic!("expected non-empty data directory to be rejected"),
+            Err(err) => err,
+        };
+        assert!(err.contains("non-empty data directory"));
+        assert!(root.join("data/notes.txt").is_file());
+        assert!(!root.join("data/project.json").exists());
     }
 
     fn make_playtest_project(root: &Path) {

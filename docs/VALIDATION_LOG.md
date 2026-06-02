@@ -2972,3 +2972,75 @@ Error: Port 1420 is already in use
 - `2026-06-01 21:29:22 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
 
+### Phase 11 FRA-52 / CP-017 — open and create project flow
+
+- `2026-06-01 21:57:09 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectStartupActions.test.ts` —
+  RED as expected; the create-project action tests referenced the missing
+  starter-project template. Fix applied: added deterministic project template
+  construction and create/open error handling in `saveActions`.
+- `2026-06-01 21:57:09 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::create_new_project -- --nocapture`
+  — RED as expected; desktop create-project helpers did not exist yet. Fix
+  applied: added `fs_create_project_dialog`, safe new-project writes, target
+  folder guards, and Rust coverage for successful creation plus non-empty
+  `data/` rejection.
+- `2026-06-01 21:57:09 -03:00` —
+  `npm test -- --run src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  — RED as expected; the startup screen component did not exist yet. Fix
+  applied: added the first-run startup screen with desktop and browser-mode
+  actions.
+- `2026-06-01 21:57:09 -03:00` —
+  `npm test -- --run src/__tests__/AppStartup.test.tsx` — RED as expected;
+  the app still entered the editor directly. Fix applied: render startup first
+  and route open/create/import/sample actions through the existing store
+  adapters.
+- `2026-06-01 21:57:09 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectStartupActions.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx src/__tests__/AppStartup.test.tsx src/adapters/__tests__/FileSystemAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/e2e/__tests__/editorRoundtrip.test.ts`
+  — PASS; 7 focused frontend/e2e files and 27 tests passed.
+- `2026-06-01 21:57:09 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::create_new_project -- --nocapture`
+  — PASS; 2 create-project Rust tests passed.
+- `2026-06-01 21:57:09 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 21:57:09 -03:00` — `npm run build` — PASS; Vite emitted the
+  known non-fatal chunk-size warning.
+- `2026-06-01 21:57:09 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml` — PASS; 32 Rust desktop
+  tests passed.
+- `2026-06-01 21:57:09 -03:00` — `npm run desktop:verify-content` — RED; the
+  Tauri content verifier could not reach `http://127.0.0.1:1420/` because the
+  dev content server was not running. Fix applied: reran the verifier with a
+  controlled hidden `npm run dev:tauri` process and stopped it afterward.
+- `2026-06-01 21:57:09 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content` —
+  PASS; content verification reached the local Tauri dev URL and returned exit
+  code 0.
+- `2026-06-01 21:57:09 -03:00` —
+  Playwright CLI smoke against `npm run dev` on `http://127.0.0.1:3000/` —
+  PASS; snapshot showed the startup screen with browser-mode filesystem
+  honesty, screenshot visual inspection showed no first-viewport overlap, and
+  clicking `Create Browser Project` entered the editor with `Map Tree`.
+- `2026-06-01 21:56:14 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — RED; the new
+  documentation/bridge alignment assertion was too literal about Markdown line
+  wrapping. Fix applied: loosened the assertion to match the wrapped phrase.
+- `2026-06-01 21:56:58 -03:00` —
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS; 1 test
+  file and 9 tests passed.
+- `2026-06-01 21:58:48 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectStartupActions.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx src/__tests__/AppStartup.test.tsx src/adapters/__tests__/FileSystemAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/e2e/__tests__/verifyScript.test.ts`
+  — PASS after docs/test updates; 8 focused frontend/e2e files and 36 tests
+  passed.
+- `2026-06-01 22:00:43 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-01 22:00:43 -03:00` —
+  `cargo test --manifest-path src-tauri/Cargo.toml` — PASS; 32 Rust desktop
+  tests passed.
+- `2026-06-01 22:00:43 -03:00` — `npm run build` — PASS; 1913 modules
+  transformed, build completed in 8.32s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-01 22:00:43 -03:00` —
+  controlled `npm run dev:tauri` plus `npm run desktop:verify-content` —
+  PASS; `http://127.0.0.1:1420/` served the RPGCreatorAI editor.
+- `2026-06-01 22:00:43 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+

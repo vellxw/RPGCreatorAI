@@ -77,6 +77,13 @@ Primary Phase 11 sources:
   local gate and packaged-app smoke, verified colocated package artifacts under
   `%LOCALAPPDATA%`, confirmed generated binaries/app-data outputs were not
   staged, and wrote `docs/PHASE_11_PACKAGING_INTEGRATION_GATE.md`.
+- Phase 11 CP-017 — open/create project flow completed. The first-run startup
+  screen now exposes open, create, import, and bundled-sample paths; desktop
+  creation writes a safe starter project through `fs.createProjectDialog`
+  without overwriting existing project data; browser creation is explicitly
+  memory-backed until export; invalid folder errors are surfaced as actionable
+  user messages; and focused frontend, Rust, build, desktop content, and
+  Playwright startup/create smoke checks validated the flow.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

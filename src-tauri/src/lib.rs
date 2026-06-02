@@ -1,7 +1,7 @@
 // RPGCreatorAI desktop shell — Phase 5
 //
 // Exposes a small, allowlisted IPC surface to the renderer:
-//   fs.openProjectDialog / readProject / writeProject / listBackups / closeProject / createPlaytestSession
+//   fs.openProjectDialog / createProjectDialog / readProject / writeProject / listBackups / closeProject / createPlaytestSession
 //   runtime.launch / kill / status / diagnostics / latestLog / readLogTail / readLatestSnapshot / openLogFolder
 //   config.getRecents / addRecent
 //   shell.info
@@ -26,6 +26,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             shell_info,
             fs_commands::fs_open_project_dialog,
+            fs_commands::fs_create_project_dialog,
             fs_commands::fs_read_project,
             fs_commands::fs_write_project,
             fs_commands::fs_list_backups,

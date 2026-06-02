@@ -9,6 +9,8 @@ import {
   isDesktopShell,
 } from '../adapters/adapterFactory';
 import { exportToFile, importFromFile } from '../adapters/JsonImportExportAdapter';
+import { createNewProjectState } from '../adapters/projectTemplates';
+import type { FullProjectState } from '../adapters/types';
 
 export interface SaveOutcome {
   success: boolean;
@@ -105,6 +107,25 @@ export interface OpenProjectOutcome {
   error?: string;
 }
 
+export interface CreateProjectOutcome extends OpenProjectOutcome {
+  browserOnly: boolean;
+  state?: FullProjectState;
+  warning?: string;
+}
+
+export function formatProjectFolderError(message: string): string {
+  if (message.includes('already contains data/project.json')) {
+    return `${message}. Create New Project needs an empty folder. Use Open Project for an existing RPGCreatorAI project.`;
+  }
+  if (message.includes('does not contain data/project.json')) {
+    return `${message}. Choose an RPGCreatorAI project root, or use Create New Project to initialize an empty folder.`;
+  }
+  if (message.includes('non-empty data directory')) {
+    return `${message}. Create New Project will not overwrite an existing data folder. Pick an empty folder or move those files first.`;
+  }
+  return message;
+}
+
 export async function performOpenProject(
   dispatch: Dispatch<ProjectAction>,
 ): Promise<OpenProjectOutcome> {
@@ -132,7 +153,57 @@ export async function performOpenProject(
 
     return { success: true, cancelled: false, root: dlg.root };
   } catch (e) {
-    return { success: false, cancelled: false, error: (e as Error).message };
+    return {
+      success: false,
+      cancelled: false,
+      error: formatProjectFolderError((e as Error).message),
+    };
+  }
+}
+
+export async function performCreateProject(
+  dispatch: Dispatch<ProjectAction>,
+  options: { title?: string } = {},
+): Promise<CreateProjectOutcome> {
+  const state = createNewProjectState(options.title);
+
+  if (!isDesktopShell() || !window.rpgBridge) {
+    dispatch({ type: 'LOAD_PROJECT', payload: state });
+    return {
+      success: true,
+      cancelled: false,
+      browserOnly: true,
+      state,
+      warning: 'Created in browser memory. Export the project bundle to keep a copy on disk.',
+    };
+  }
+
+  try {
+    const dlg = await window.rpgBridge.fs.createProjectDialog(state);
+    if (dlg.cancelled || !dlg.root || !dlg.state) {
+      return { success: false, cancelled: true, browserOnly: false };
+    }
+
+    const fsAdapter = getFileSystemAdapter();
+    fsAdapter?.setProjectRoot(dlg.root);
+
+    dispatch({ type: 'LOAD_PROJECT', payload: dlg.state });
+    await window.rpgBridge.config.addRecent(dlg.root);
+
+    return {
+      success: true,
+      cancelled: false,
+      browserOnly: false,
+      root: dlg.root,
+      state: dlg.state,
+    };
+  } catch (e) {
+    return {
+      success: false,
+      cancelled: false,
+      browserOnly: false,
+      error: formatProjectFolderError((e as Error).message),
+    };
   }
 }
 
