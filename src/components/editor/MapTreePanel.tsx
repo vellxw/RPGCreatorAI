@@ -35,17 +35,34 @@ function sortedChildren(refs: MapReference[], parentId: string | null): MapRefer
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id));
 }
 
+function mapNameFor(ref: MapReference, maps: Record<string, { name?: string }>): string {
+  return maps[ref.id]?.name ?? ref.id;
+}
+
+function directChildCount(refs: MapReference[], mapId: string): number {
+  return refs.filter(ref => (ref.parentId ?? null) === mapId).length;
+}
+
 export function MapTreePanel() {
   const { state: editor, dispatch: editorDispatch } = useEditor();
   const { state: project, dispatch: projectDispatch } = useProjectStore();
   const refs = project.project.maps;
   const existingIds = new Set(refs.map(ref => ref.id));
+  const canDeleteAnyMap = refs.length > 1;
 
   const createMap = (parentId: string | null = null) => {
     const name = window.prompt('Map name', 'New Map');
-    if (!name) return;
-    const mapId = slugifyMapId(name, existingIds);
-    projectDispatch({ type: 'CREATE_MAP', mapId, name, parentId, width: 20, height: 15 });
+    const normalizedName = name?.trim();
+    if (!normalizedName) return;
+    const mapId = slugifyMapId(normalizedName, existingIds);
+    if (parentId) {
+      projectDispatch({
+        type: 'UPDATE_MAP_REFERENCE',
+        mapId: parentId,
+        changes: { expanded: true },
+      });
+    }
+    projectDispatch({ type: 'CREATE_MAP', mapId, name: normalizedName, parentId, width: 20, height: 15 });
     editorDispatch({ type: 'SELECT_MAP', mapId });
   };
 
@@ -53,16 +70,31 @@ export function MapTreePanel() {
     const source = project.maps[sourceMapId];
     if (!source) return;
     const name = window.prompt('Duplicate map name', `${source.name} Copy`);
-    if (!name) return;
-    const newMapId = slugifyMapId(name, existingIds);
-    projectDispatch({ type: 'DUPLICATE_MAP', sourceMapId, newMapId, name });
+    const normalizedName = name?.trim();
+    if (!normalizedName) return;
+    const newMapId = slugifyMapId(normalizedName, existingIds);
+    const sourceRef = refs.find(ref => ref.id === sourceMapId);
+    const parentId = sourceRef?.parentId ?? null;
+    if (parentId) {
+      projectDispatch({
+        type: 'UPDATE_MAP_REFERENCE',
+        mapId: parentId,
+        changes: { expanded: true },
+      });
+    }
+    projectDispatch({ type: 'DUPLICATE_MAP', sourceMapId, newMapId, name: normalizedName });
     editorDispatch({ type: 'SELECT_MAP', mapId: newMapId });
   };
 
   const deleteMap = (mapId: string) => {
     const map = project.maps[mapId];
     if (!map) return;
-    if (!window.confirm(`Delete map "${map.name}"?`)) return;
+    if (!canDeleteAnyMap || project.project.startMapId === mapId) return;
+    const children = directChildCount(refs, mapId);
+    const childWarning = children > 0
+      ? `\n\n${children} child map${children === 1 ? '' : 's'} will stay in the project and move to root.`
+      : '';
+    if (!window.confirm(`Delete map "${map.name}"?${childWarning}\n\nUse Undo if this was accidental.`)) return;
     projectDispatch({ type: 'REMOVE_MAP', mapId });
     if (editor.selectedMapId === mapId) {
       editorDispatch({ type: 'SELECT_MAP', mapId: project.project.startMapId });
@@ -87,11 +119,20 @@ export function MapTreePanel() {
 
   const renderBranch = (parentId: string | null, depth = 0): ReactNode => {
     const children = sortedChildren(refs, parentId);
-    return children.map(ref => {
+    return children.map((ref, index) => {
       const map = project.maps[ref.id];
       const hasChildren = refs.some(candidate => (candidate.parentId ?? null) === ref.id);
       const expanded = ref.expanded ?? true;
       const selected = editor.selectedMapId === ref.id;
+      const mapName = mapNameFor(ref, project.maps);
+      const canMoveUp = index > 0;
+      const canMoveDown = index < children.length - 1;
+      const canDelete = canDeleteAnyMap && project.project.startMapId !== ref.id;
+      const deleteLabel = project.project.startMapId === ref.id
+        ? `Start map ${mapName} cannot be deleted`
+        : !canDeleteAnyMap
+          ? `At least one map is required`
+          : `Delete map ${mapName}`;
       return (
         <div key={ref.id}>
           <div
@@ -111,7 +152,8 @@ export function MapTreePanel() {
               }
               className="p-0.5 text-gray-400 hover:text-gray-700"
               disabled={!hasChildren}
-              title={expanded ? 'Collapse map group' : 'Expand map group'}
+              aria-label={expanded ? `Collapse map group ${mapName}` : `Expand map group ${mapName}`}
+              title={expanded ? `Collapse map group ${mapName}` : `Expand map group ${mapName}`}
             >
               {hasChildren ? expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} /> : <span className="block w-[13px]" />}
             </button>
@@ -128,24 +170,52 @@ export function MapTreePanel() {
                 <span className="text-[10px] text-blue-600 bg-blue-50 px-1 rounded">Start</span>
               )}
             </button>
-            <div className="hidden group-hover:flex items-center gap-0.5">
-              <button type="button" title="Move up" onClick={() => moveMap(ref, -1)} className="p-1 hover:bg-white rounded">
+            <div className="hidden group-hover:flex group-focus-within:flex items-center gap-0.5">
+              <button
+                type="button"
+                aria-label={`Move ${mapName} up`}
+                title={`Move ${mapName} up`}
+                disabled={!canMoveUp}
+                onClick={() => moveMap(ref, -1)}
+                className="p-1 hover:bg-white rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              >
                 <ArrowUp size={12} />
               </button>
-              <button type="button" title="Move down" onClick={() => moveMap(ref, 1)} className="p-1 hover:bg-white rounded">
+              <button
+                type="button"
+                aria-label={`Move ${mapName} down`}
+                title={`Move ${mapName} down`}
+                disabled={!canMoveDown}
+                onClick={() => moveMap(ref, 1)}
+                className="p-1 hover:bg-white rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              >
                 <ArrowDown size={12} />
               </button>
-              <button type="button" title="Duplicate map" onClick={() => duplicateMap(ref.id)} className="p-1 hover:bg-white rounded">
+              <button
+                type="button"
+                aria-label={`Duplicate map ${mapName}`}
+                title={`Duplicate map ${mapName}`}
+                onClick={() => duplicateMap(ref.id)}
+                className="p-1 hover:bg-white rounded"
+              >
                 <Copy size={12} />
               </button>
-              <button type="button" title="Create child map" onClick={() => createMap(ref.id)} className="p-1 hover:bg-white rounded">
+              <button
+                type="button"
+                aria-label={`Create child map under ${mapName}`}
+                title={`Create child map under ${mapName}`}
+                onClick={() => createMap(ref.id)}
+                className="p-1 hover:bg-white rounded"
+              >
                 <Plus size={12} />
               </button>
               <button
                 type="button"
-                title="Delete map"
+                aria-label={deleteLabel}
+                title={deleteLabel}
+                disabled={!canDelete}
                 onClick={() => deleteMap(ref.id)}
-                className="p-1 hover:bg-red-50 hover:text-red-600 rounded"
+                className="p-1 hover:bg-red-50 hover:text-red-600 rounded disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-current"
               >
                 <Trash2 size={12} />
               </button>
@@ -164,7 +234,8 @@ export function MapTreePanel() {
         <button
           type="button"
           onClick={() => createMap(null)}
-          title="Create map"
+          aria-label="Create root map"
+          title="Create root map"
           className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
         >
           <Plus size={14} />

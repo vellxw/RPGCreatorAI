@@ -391,6 +391,76 @@ function nextMapOrder(project: ProjectData, parentId: string | null): number {
   return siblingOrders.length === 0 ? 0 : Math.max(...siblingOrders) + 1;
 }
 
+function compareMapReferences(a: MapReference, b: MapReference): number {
+  return (a.order ?? 0) - (b.order ?? 0) || a.id.localeCompare(b.id);
+}
+
+function normalizeMapSiblingOrders(refs: MapReference[]): MapReference[] {
+  const orders = new Map<string, number>();
+  const parentIds = new Set(refs.map(ref => ref.parentId ?? null));
+
+  for (const parentId of parentIds) {
+    refs
+      .filter(ref => (ref.parentId ?? null) === parentId)
+      .sort(compareMapReferences)
+      .forEach((ref, index) => orders.set(ref.id, index));
+  }
+
+  return refs.map(ref => ({
+    ...ref,
+    parentId: ref.parentId ?? null,
+    order: orders.get(ref.id) ?? ref.order ?? 0,
+  }));
+}
+
+function moveMapReference(
+  refs: MapReference[],
+  mapId: string,
+  parentId: string | null,
+  order: number,
+): MapReference[] {
+  const target = refs.find(ref => ref.id === mapId);
+  if (!target) return refs;
+
+  const oldParentId = target.parentId ?? null;
+  const clampedOrder = Math.max(0, Math.floor(order));
+  const withoutTarget = refs.filter(ref => ref.id !== mapId);
+  const siblingIdsToNormalize = new Set<string>();
+
+  for (const ref of withoutTarget) {
+    const refParentId = ref.parentId ?? null;
+    if (refParentId === oldParentId || refParentId === parentId) {
+      siblingIdsToNormalize.add(ref.id);
+    }
+  }
+
+  const targetSiblings = withoutTarget
+    .filter(ref => (ref.parentId ?? null) === parentId)
+    .sort(compareMapReferences);
+  targetSiblings.splice(Math.min(clampedOrder, targetSiblings.length), 0, {
+    ...target,
+    parentId,
+  });
+
+  const updates = new Map<string, MapReference>();
+  targetSiblings.forEach((ref, index) => {
+    updates.set(ref.id, { ...ref, parentId, order: index });
+  });
+
+  withoutTarget
+    .filter(ref => (ref.parentId ?? null) === oldParentId && oldParentId !== parentId)
+    .sort(compareMapReferences)
+    .forEach((ref, index) => {
+      updates.set(ref.id, { ...ref, parentId: oldParentId, order: index });
+    });
+
+  return refs.map(ref => {
+    if (updates.has(ref.id)) return updates.get(ref.id)!;
+    if (siblingIdsToNormalize.has(ref.id)) return { ...ref, parentId: ref.parentId ?? null };
+    return ref;
+  });
+}
+
 function wouldCreateMapParentCycle(project: ProjectData, mapId: string, parentId: string | null): boolean {
   let cursor = parentId;
   const seen = new Set<string>();
@@ -1131,18 +1201,33 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
       if (!state.maps[action.mapId]) return state;
       const maps = { ...state.maps };
       delete maps[action.mapId];
+      const remainingRefs = state.project.maps.filter(ref => ref.id !== action.mapId);
+      const existingRootOrders = remainingRefs
+        .filter(ref => (ref.parentId ?? null) !== action.mapId && (ref.parentId ?? null) === null)
+        .map(ref => ref.order ?? 0);
+      const reparentedRootStart = existingRootOrders.length === 0 ? 0 : Math.max(...existingRootOrders) + 1;
+      const reparentedOrders = new Map<string, number>();
+      remainingRefs
+        .filter(ref => (ref.parentId ?? null) === action.mapId)
+        .sort(compareMapReferences)
+        .forEach((ref, index) => reparentedOrders.set(ref.id, reparentedRootStart + index));
+      const nextRefs = normalizeMapSiblingOrders(
+        remainingRefs.map(ref => {
+          const wasChild = (ref.parentId ?? null) === action.mapId;
+          return {
+            ...ref,
+            parentId: wasChild ? null : ref.parentId ?? null,
+            order: wasChild ? reparentedOrders.get(ref.id) ?? ref.order : ref.order,
+          };
+        }),
+      );
       return {
         ...state,
         dirty: true,
         maps,
         project: {
           ...state.project,
-          maps: state.project.maps
-            .filter(ref => ref.id !== action.mapId)
-            .map(ref => ({
-              ...ref,
-              parentId: (ref.parentId ?? null) === action.mapId ? null : ref.parentId ?? null,
-            })),
+          maps: nextRefs,
         },
       };
     }
@@ -1157,11 +1242,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         dirty: true,
         project: {
           ...state.project,
-          maps: state.project.maps.map(ref =>
-            ref.id === action.mapId
-              ? { ...ref, parentId, order: Math.max(0, Math.floor(action.order)) }
-              : ref,
-          ),
+          maps: moveMapReference(state.project.maps, action.mapId, parentId, action.order),
         },
       };
     }

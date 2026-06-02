@@ -3388,3 +3388,52 @@ Error: Port 1420 is already in use
   `docs/screenshots/phase11-cp025/primary-navigation-maps.png`,
   `docs/screenshots/phase11-cp025/primary-navigation-events.png`, and
   `docs/screenshots/phase11-cp025/primary-navigation-playtest.png`.
+
+### Phase 11 FRA-61 / CP-026 — map tree workflow polish
+
+- `2026-06-02 00:29:06 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — RED as expected; new reducer and focused component coverage failed
+  because `MOVE_MAP` left duplicate sibling orders, `REMOVE_MAP` reparented
+  children with unstable root order, creating a child under a collapsed parent
+  did not expand the parent, start-map delete still opened confirmation,
+  parent delete confirmation omitted child-map reparenting, and icon-only
+  map-tree controls lacked accessible names.
+- `2026-06-02 00:31:27 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — FAIL during root-cause verification; component tests were green, but
+  deleted-parent reparenting still gave the moved child and existing root the
+  same provisional order, so id sorting placed the child first. Typecheck also
+  failed because direct `globalThis.IS_REACT_ACT_ENVIRONMENT` assignment
+  lacked a TypeScript-safe declaration.
+- `2026-06-02 00:32:21 -03:00` —
+  `npm test -- --run src/stores/__tests__/projectReducer.test.ts src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — PASS; 2 focused files and 51 tests passed after assigning reparented
+  children root-order slots after existing roots and typing the React act test
+  flag safely.
+- `2026-06-02 00:32:21 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 00:32:47 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx src/components/editor/__tests__/EditorEmptyStates.test.tsx src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 4 related reducer/component/validation files and 87 tests passed.
+- `2026-06-02 00:38:56 -03:00` — `npm test` — PASS; 51 test files and 277
+  Vitest tests passed.
+- `2026-06-02 00:38:56 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 00:38:56 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 17.49s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 00:38:56 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-02 00:36:00 -03:00` —
+  controlled `npm run dev` plus Chrome DevTools screenshot review — PASS;
+  bundled sample opened, map-tree actions appeared on focus with accessible
+  labels, start-map delete was disabled before confirmation, child creation
+  under `Town` expanded the parent and selected `Secret Cave`, creating
+  `Basement` under `House` exposed the nested child, and deleting `House`
+  opened an explicit confirmation that one child map would remain and move to
+  root. The confirmation was dismissed. Current-page console had no app/runtime
+  errors; Chrome still reports existing form label/id accessibility issues for
+  later audit work. Inspected network requests were normal Vite/editor asset
+  loads with 200/304 statuses. Screenshots written:
+  `docs/screenshots/phase11-cp026/map-tree-after-create-child.png`,
+  `docs/screenshots/phase11-cp026/map-tree-after-create-child.snapshot.txt`,
+  and `docs/screenshots/phase11-cp026/map-tree-focused-actions.png`.

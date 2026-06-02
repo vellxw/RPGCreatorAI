@@ -135,6 +135,14 @@ Primary Phase 11 sources:
   Events breadcrumbs now navigate through real buttons instead of fake
   clickable text. Evidence is recorded in
   `docs/screenshots/phase11-cp025/`.
+- Phase 11 CP-026 — map tree workflow polish completed. Map movement now
+  inserts within sibling groups and renumbers affected orders, deleting a
+  non-start parent reparents direct children to root with stable ordering,
+  creating or duplicating under a collapsed parent expands that parent before
+  selecting the new map, start/last-map deletes are blocked before prompting,
+  child-retaining delete confirmations are explicit, and icon-only map-tree
+  controls expose accessible names and disabled states. Evidence is recorded
+  in `docs/screenshots/phase11-cp026/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -1017,6 +1017,44 @@ describe('projectReducer', () => {
     expect(s4.project.maps.find(ref => ref.id === 'cave')?.order).toBe(2);
   });
 
+  it('MOVE_MAP inserts within sibling groups and renumbers affected orders', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'house',
+      name: 'House',
+      parentId: 'town',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'CREATE_MAP',
+      mapId: 'cave',
+      name: 'Cave',
+      parentId: 'town',
+      width: 4,
+      height: 4,
+    });
+    const s3 = projectReducer(s2, {
+      type: 'MOVE_MAP',
+      mapId: 'cave',
+      parentId: 'town',
+      order: 0,
+    });
+
+    expect(s3.project.maps.find(ref => ref.id === 'cave')).toMatchObject({
+      parentId: 'town',
+      order: 0,
+    });
+    expect(s3.project.maps.find(ref => ref.id === 'house')).toMatchObject({
+      parentId: 'town',
+      order: 1,
+    });
+
+    const s4 = projectReducer(s3, { type: 'UNDO' });
+    expect(s4.project.maps.find(ref => ref.id === 'house')?.order).toBe(0);
+    expect(s4.project.maps.find(ref => ref.id === 'cave')?.order).toBe(1);
+  });
+
   it('MOVE_MAP refuses to move a parent under its own descendant', () => {
     const s1 = projectReducer(loadedState(), {
       type: 'CREATE_MAP',
@@ -1051,6 +1089,35 @@ describe('projectReducer', () => {
     const s3 = projectReducer(s2, { type: 'REMOVE_MAP', mapId: 'forest' });
     expect(s3.project.maps.map(ref => ref.id)).toEqual(['town']);
     expect(s3.maps.forest).toBeUndefined();
+  });
+
+  it('REMOVE_MAP reparents children with stable root ordering', () => {
+    const s1 = projectReducer(loadedState(), {
+      type: 'CREATE_MAP',
+      mapId: 'forest',
+      name: 'Forest',
+      width: 4,
+      height: 4,
+    });
+    const s2 = projectReducer(s1, {
+      type: 'CREATE_MAP',
+      mapId: 'cave',
+      name: 'Cave',
+      parentId: 'forest',
+      width: 4,
+      height: 4,
+    });
+    const s3 = projectReducer(s2, { type: 'REMOVE_MAP', mapId: 'forest' });
+
+    expect(s3.project.maps.map(ref => ref.id)).toEqual(['town', 'cave']);
+    expect(s3.project.maps.find(ref => ref.id === 'town')).toMatchObject({
+      parentId: null,
+      order: 0,
+    });
+    expect(s3.project.maps.find(ref => ref.id === 'cave')).toMatchObject({
+      parentId: null,
+      order: 1,
+    });
   });
 
   it('VALIDATE refreshes errors/warnings', () => {
