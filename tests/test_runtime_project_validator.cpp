@@ -387,10 +387,10 @@ TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime")
             {
                 "id": "bad_enemy",
                 "name": "Bad Enemy",
-                "stats": { "maxHp": 10, "attack": 1, "defense": 1 },
-                "exp": 1,
-                "gold": 1,
-                "drops": [{ "itemId": "missing_item", "rate": 1.0 }]
+                "stats": { "maxHp": -1, "attack": 1, "defense": 1 },
+                "exp": -1,
+                "gold": -2,
+                "drops": [{ "itemId": "missing_item", "rate": 1.5 }]
             }
         ]
     })");
@@ -420,6 +420,14 @@ TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime")
                      "Class \"bad_class\" references unknown learned skill \"missing_skill\""));
     CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
                      "Enemy \"bad_enemy\" drops unknown item \"missing_item\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Enemy \"bad_enemy\" stats.maxHp must be a non-negative finite number"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Enemy \"bad_enemy\" exp must be a non-negative finite number"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Enemy \"bad_enemy\" gold must be a non-negative finite number"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Enemy \"bad_enemy\" drop rate must be between 0 and 1"));
     CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
                      "Troop \"empty_troop\" must contain at least one enemy"));
     CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,

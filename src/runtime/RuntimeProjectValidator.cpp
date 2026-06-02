@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -137,6 +138,53 @@ int intField(const json& object, const char* key, int fallback = 0) {
     if (!object.is_object()) return fallback;
     auto it = object.find(key);
     return it != object.end() && it->is_number_integer() ? it->get<int>() : fallback;
+}
+
+bool finiteNumber(const json& value, double& out) {
+    if (!value.is_number()) return false;
+    out = value.get<double>();
+    return std::isfinite(out);
+}
+
+void validateNonNegativeNumber(rpg::RuntimeValidationReport& report,
+                               const json& object,
+                               const char* key,
+                               const std::string& source,
+                               const std::string& label) {
+    if (!object.is_object()) return;
+    auto it = object.find(key);
+    if (it == object.end()) return;
+    double value = 0.0;
+    if (!finiteNumber(*it, value) || value < 0.0) {
+        addError(report, source, label + " must be a non-negative finite number");
+    }
+}
+
+void validateEnemyStats(rpg::RuntimeValidationReport& report,
+                        const json& enemy,
+                        const std::string& enemyId,
+                        const std::string& source) {
+    auto statsIt = enemy.find("stats");
+    if (statsIt == enemy.end() || !statsIt->is_object()) return;
+
+    const std::vector<const char*> fields = {
+        "maxHp",
+        "maxMp",
+        "attack",
+        "defense",
+        "magicAttack",
+        "magicDefense",
+        "agility",
+        "luck",
+    };
+    for (const char* field : fields) {
+        validateNonNegativeNumber(
+            report,
+            *statsIt,
+            field,
+            source,
+            "Enemy \"" + enemyId + "\" stats." + field);
+    }
 }
 
 bool containsId(const IdSet& ids, const std::string& id) {
@@ -925,14 +973,37 @@ void validateDatabaseReferences(const std::unordered_map<std::string, json>& dat
         if (enemies) {
             for (const auto& enemy : *enemies) {
                 const std::string enemyId = stringField(enemy, "id");
+                const std::string source = "database/enemies/" + enemyId;
+                validateEnemyStats(report, enemy, enemyId, source);
+                validateNonNegativeNumber(
+                    report,
+                    enemy,
+                    "exp",
+                    source,
+                    "Enemy \"" + enemyId + "\" exp");
+                validateNonNegativeNumber(
+                    report,
+                    enemy,
+                    "gold",
+                    source,
+                    "Enemy \"" + enemyId + "\" gold");
                 const json* drops = arrayField(enemy, "drops");
                 if (!drops) continue;
                 for (const auto& drop : *drops) {
                     const std::string itemId = stringField(drop, "itemId");
                     if (!itemId.empty() && !containsId(db.items, itemId)) {
-                        addError(report, "database/enemies/" + enemyId,
+                        addError(report, source,
                                  "Enemy \"" + enemyId +
                                      "\" drops unknown item \"" + itemId + "\"");
+                    }
+                    auto rateIt = drop.find("rate");
+                    if (rateIt != drop.end()) {
+                        double rate = 0.0;
+                        if (!finiteNumber(*rateIt, rate) || rate < 0.0 || rate > 1.0) {
+                            addError(report, source,
+                                     "Enemy \"" + enemyId +
+                                         "\" drop rate must be between 0 and 1");
+                        }
                     }
                 }
             }

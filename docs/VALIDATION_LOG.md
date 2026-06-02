@@ -4233,3 +4233,43 @@ Error: Port 1420 is already in use
   `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
   — PASS on the final CP-042 worktree before commit; 4 focused files and 28
   Vitest tests passed.
+
+### Phase 11 FRA-78 / CP-043 — enemy and troop editor polish
+
+- `2026-06-02 06:56:21 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — FAIL as expected during TDD red step; enemy drop controls still exposed
+  `Drop rate`, add actions had no stable aria labels, and troop move/add
+  controls could not satisfy the new no-empty-reference assertions.
+- `2026-06-02 06:56:21 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — FAIL as expected during TDD red step; native `RPGTests` failed 4
+  assertions because `RuntimeProjectValidator` did not yet report invalid
+  enemy `stats.maxHp`, `exp`, `gold`, or drop-rate range errors.
+- `2026-06-02 06:58:49 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx`
+  — PASS after enemy/troop editor polish; 1 focused file and 7 tests passed.
+- `2026-06-02 06:58:49 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS after adding native battle-facing enemy range validation; native
+  configure/build/test completed and `RPGTests` passed 1/1 with only known
+  third-party CMake warnings.
+- `2026-06-02 07:01:25 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 07:01:25 -03:00` —
+  `npm test -- --run src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 4 focused files and 30 Vitest tests passed.
+- `2026-06-02 07:01:25 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS on the final CP-043 worktree; native configure/build/test completed
+  and `RPGTests` passed 1/1 with known third-party CMake warnings only.
+- `2026-06-02 07:04:33 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1919 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 07:04:33 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp043 open http://127.0.0.1:5177/`,
+  `click Use My First RPG`, `click Database`, `click Open Enemies database tab`,
+  `snapshot`, `click Open Troops database tab`, `snapshot`, `console`, `close`
+  — PASS for browser smoke; Enemies showed `Add drop`, `Drop chance`, and
+  `Remove drop 1`; Troops showed `Add troop member`, stable move/remove
+  labels, and disabled boundary movement. Console reported 0 errors and 0
+  warnings.

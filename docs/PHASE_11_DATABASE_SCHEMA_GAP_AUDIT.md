@@ -109,7 +109,8 @@ Legend:
 
 - CP-042 / FRA-77: actor, class, and skill editor polish completed; runtime
   data shape unchanged.
-- CP-043 / FRA-78: enemy and troop battle data polish.
+- CP-043 / FRA-78: enemy and troop battle data polish completed; runtime data
+  shape unchanged and native battle-facing range validation strengthened.
 - CP-044 / FRA-79: item, equipment, and state shard polish, including the
   separated shard/runtime item-equipment boundary.
 - CP-045 / FRA-80: system, types, terms, and startup default behavior,

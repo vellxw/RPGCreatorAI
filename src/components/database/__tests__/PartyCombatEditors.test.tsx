@@ -43,6 +43,12 @@ function checkbox(container: HTMLElement, label: string): HTMLInputElement {
   return found;
 }
 
+function button(container: HTMLElement, label: string): HTMLButtonElement {
+  const found = container.querySelector(`button[aria-label="${label}"]`);
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  return found;
+}
+
 function select(container: HTMLElement, label: string): HTMLSelectElement {
   const found = container.querySelector(`select[aria-label="${label}"]`);
   if (!(found instanceof HTMLSelectElement)) throw new Error(`Missing select: ${label}`);
@@ -237,15 +243,44 @@ describe('party and combat database editors', () => {
     expect(onChange).toHaveBeenLastCalledWith({ gold: 12 });
     changeSelect(select(view.container, 'Drop item 1'), 'iron_sword');
     expect(onChange).toHaveBeenLastCalledWith({ drops: [{ itemId: 'iron_sword', rate: 0.25 }] });
-    changeText(input(view.container, 'Drop rate 1'), '0.5');
+    changeText(input(view.container, 'Drop chance 1'), '0.5');
     expect(onChange).toHaveBeenLastCalledWith({ drops: [{ itemId: 'potion', rate: 0.5 }] });
+    act(() => button(view.container, 'Add drop').click());
+    expect(onChange).toHaveBeenLastCalledWith({
+      drops: [
+        { itemId: 'potion', rate: 0.25 },
+        { itemId: 'iron_sword', rate: 1 },
+      ],
+    });
+    act(() => button(view.container, 'Remove drop 1').click());
+    expect(onChange).toHaveBeenLastCalledWith({ drops: [] });
+
+    view.unmount();
+  });
+
+  it('does not add empty enemy drops when no item records exist', () => {
+    const onChange = vi.fn();
+    const enemy: EnemyData = {
+      id: 'slime',
+      name: 'Slime',
+      stats,
+      exp: 4,
+      gold: 8,
+      drops: [],
+    };
+    const view = render(
+      <EnemiesEditor entry={enemy} items={[]} idField={<span />} onChange={onChange} />,
+    );
+
+    expect(button(view.container, 'Add drop').disabled).toBe(true);
+    expect(view.container.textContent).toContain('Create an item before adding drops.');
 
     view.unmount();
   });
 
   it('edits ordered troop enemy members', () => {
     const onChange = vi.fn();
-    const troop: TroopData = { id: 'slime_pair', name: 'Slime x2', members: ['slime'] };
+    const troop: TroopData = { id: 'slime_pair', name: 'Slime x2', members: ['slime', 'bat'] };
     const enemies: EnemyData[] = [
       { id: 'slime', name: 'Slime', stats, exp: 4, gold: 8, drops: [] },
       { id: 'bat', name: 'Bat', stats, exp: 6, gold: 10, drops: [] },
@@ -255,7 +290,30 @@ describe('party and combat database editors', () => {
     );
 
     changeSelect(select(view.container, 'Troop member 1'), 'bat');
+    expect(onChange).toHaveBeenLastCalledWith({ members: ['bat', 'bat'] });
+    expect(button(view.container, 'Move troop member 1 up').disabled).toBe(true);
+    expect(button(view.container, 'Move troop member 2 down').disabled).toBe(true);
+    act(() => button(view.container, 'Move troop member 1 down').click());
+    expect(onChange).toHaveBeenLastCalledWith({ members: ['bat', 'slime'] });
+    act(() => button(view.container, 'Move troop member 2 up').click());
+    expect(onChange).toHaveBeenLastCalledWith({ members: ['bat', 'slime'] });
+    act(() => button(view.container, 'Add troop member').click());
+    expect(onChange).toHaveBeenLastCalledWith({ members: ['slime', 'bat', 'slime'] });
+    act(() => button(view.container, 'Remove troop member 1').click());
     expect(onChange).toHaveBeenLastCalledWith({ members: ['bat'] });
+
+    view.unmount();
+  });
+
+  it('does not add empty troop members when no enemy records exist', () => {
+    const onChange = vi.fn();
+    const troop: TroopData = { id: 'empty', name: 'Empty', members: [] };
+    const view = render(
+      <TroopsEditor entry={troop} enemies={[]} idField={<span />} onChange={onChange} />,
+    );
+
+    expect(button(view.container, 'Add troop member').disabled).toBe(true);
+    expect(view.container.textContent).toContain('Create an enemy before adding troop members.');
 
     view.unmount();
   });

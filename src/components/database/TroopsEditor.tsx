@@ -14,8 +14,14 @@ interface TroopsEditorProps {
 
 export function TroopsEditor({ entry, enemies, idField, onChange }: TroopsEditorProps) {
   const enemyOptions = enemies.map(enemy => ({ value: enemy.id, label: enemy.name || enemy.id }));
+  const canAddMember = enemyOptions.length > 0;
   const setMember = (index: number, enemyId: string) => {
     onChange({ members: entry.members.map((member, i) => (i === index ? enemyId : member)) });
+  };
+  const addMember = () => {
+    const firstEnemy = enemies[0]?.id;
+    if (!firstEnemy) return;
+    onChange({ members: [...entry.members, firstEnemy] });
   };
   const moveMember = (index: number, direction: -1 | 1) => {
     const target = index + direction;
@@ -34,14 +40,19 @@ export function TroopsEditor({ entry, enemies, idField, onChange }: TroopsEditor
           <p className="text-[12px] font-medium text-gray-500">Members</p>
           <Button
             size="sm"
+            aria-label="Add troop member"
             icon={<Plus size={12} />}
-            onClick={() => onChange({ members: [...entry.members, enemies[0]?.id ?? ''] })}
+            onClick={addMember}
+            disabled={!canAddMember}
+            title={canAddMember ? 'Add troop member' : 'Create an enemy before adding troop members.'}
           >
             Add
           </Button>
         </div>
         {entry.members.length === 0 ? (
-          <p className="mt-2 text-[12px] text-amber-600">Empty troops cannot start a meaningful battle.</p>
+          <div className="mt-2 rounded border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-[12px] text-gray-500">
+            {canAddMember ? 'Empty troops cannot start a meaningful battle.' : 'Create an enemy before adding troop members.'}
+          </div>
         ) : (
           <div className="mt-2 space-y-2">
             {entry.members.map((memberId, index) => (
@@ -50,18 +61,34 @@ export function TroopsEditor({ entry, enemies, idField, onChange }: TroopsEditor
                   label={`Troop member ${index + 1}`}
                   value={memberId}
                   options={enemyOptions}
+                  emptyLabel="(missing enemy)"
                   onChange={enemyId => setMember(index, enemyId)}
                 />
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" icon={<ArrowUp size={12} />} onClick={() => moveMember(index, -1)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Move troop member ${index + 1} up`}
+                    icon={<ArrowUp size={12} />}
+                    onClick={() => moveMember(index, -1)}
+                    disabled={index === 0}
+                  >
                     Up
                   </Button>
-                  <Button size="sm" variant="ghost" icon={<ArrowDown size={12} />} onClick={() => moveMember(index, 1)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Move troop member ${index + 1} down`}
+                    icon={<ArrowDown size={12} />}
+                    onClick={() => moveMember(index, 1)}
+                    disabled={index === entry.members.length - 1}
+                  >
                     Down
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
+                    aria-label={`Remove troop member ${index + 1}`}
                     icon={<Trash2 size={12} />}
                     onClick={() => onChange({ members: entry.members.filter((_, i) => i !== index) })}
                   >

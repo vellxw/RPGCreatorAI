@@ -52,7 +52,7 @@
 - [ ] 05 Database/System Completeness.
   - [x] CP-041 / FRA-76: audit database schema gaps.
   - [x] CP-042 / FRA-77: polish actor, class, and skill authoring.
-  - [ ] CP-043 / FRA-78: polish enemy and troop authoring.
+  - [x] CP-043 / FRA-78: polish enemy and troop authoring.
   - [ ] CP-044 / FRA-79: polish item, equipment, and state authoring.
   - [ ] CP-045 / FRA-80: polish system, types, and terms.
   - [ ] CP-046 / FRA-81: polish common event authoring.

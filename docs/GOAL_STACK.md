@@ -259,6 +259,13 @@ Primary Phase 11 sources:
   labels are human-readable, and skill delete warnings are covered when actors
   or classes still reference the skill. Evidence is recorded in
   `docs/PHASE_11_ACTOR_CLASS_SKILL_EDITOR_POLISH.md`.
+- Phase 11 CP-043 — enemy and troop editor polish completed. Enemy drop and
+  troop member add actions no longer create empty references, default starter
+  drops are immediately meaningful, member move/remove controls have stable
+  accessible labels and disabled boundary states, empty/no-reference states are
+  repairable from the UI, and the native runtime validator now blocks invalid
+  enemy stats, exp/gold, and drop chance ranges before launch. Evidence is
+  recorded in `docs/PHASE_11_ENEMY_TROOP_EDITOR_POLISH.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
