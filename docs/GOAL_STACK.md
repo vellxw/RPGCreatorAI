@@ -293,6 +293,13 @@ Primary Phase 11 sources:
   validation now reject direct common-event self-calls. Full multi-event cycle
   detection remains future reference-analysis depth. Evidence is recorded in
   `docs/PHASE_11_COMMON_EVENT_AUTHORING_POLISH.md`.
+- Phase 11 CP-047 — reference repair tools completed. The shared reference
+  index now detects broken refs and same-table replacement options for
+  database, map, event-command, project-start, and map-tree parent sources;
+  the Validation tab exposes explicit replacement controls; and
+  `REPAIR_REFERENCE` applies source-scoped, target-validated, undoable repairs
+  without destructive cleanup or generated content. Evidence is recorded in
+  `docs/PHASE_11_REFERENCE_REPAIR_TOOLS.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

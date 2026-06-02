@@ -27,7 +27,7 @@ import type {
 import type { FullProjectState } from '../adapters/types';
 import { mergeDatabases } from '../adapters/defaultDatabases';
 import { validateProject } from '../validation/validateProject';
-import { renameReferences } from '../validation/referenceIndex';
+import { applyReferenceRepair, renameReferences, type ReferenceRepairAction } from '../validation/referenceIndex';
 import { withNormalizedVisualProfile } from '../visual/visualProfile';
 
 // ---------------------------------------------------------------------------
@@ -325,6 +325,10 @@ export type ProjectAction =
       oldId: string;
       newId: string;
       updateReferences?: boolean;
+    }
+  | {
+      type: 'REPAIR_REFERENCE';
+      repair: ReferenceRepairAction;
     }
   | {
       type: 'UPDATE_SYSTEM_DATA';
@@ -1571,6 +1575,20 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         renameReferences(next, action.table, action.oldId, action.newId);
       }
       return next;
+    }
+
+    case 'REPAIR_REFERENCE': {
+      const next: ProjectStoreState = {
+        ...state,
+        dirty: true,
+        project: deepClone(state.project),
+        maps: deepClone(state.maps),
+        items: deepClone(state.items),
+        databases: deepClone(state.databases),
+      };
+      const changed = applyReferenceRepair(next, action.repair);
+      if (!changed) return state;
+      return withValidation(next);
     }
 
     case 'UPDATE_SYSTEM_DATA':

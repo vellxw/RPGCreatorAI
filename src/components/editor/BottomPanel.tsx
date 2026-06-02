@@ -1,12 +1,39 @@
+import { useMemo, useState } from 'react';
 import { Tabs } from '../ui/Tabs';
-import { CheckCircle2, AlertTriangle, ClipboardList, TerminalSquare } from 'lucide-react';
-import { useProject } from '../../stores/projectStore';
+import { CheckCircle2, AlertTriangle, ClipboardList, TerminalSquare, Wrench } from 'lucide-react';
+import { useProject, useProjectStore } from '../../stores/projectStore';
 import { EmptyState } from '../ui/EmptyState';
+import { Button } from '../ui/Button';
+import { listBrokenReferences, type BrokenReferenceRecord } from '../../validation/referenceIndex';
+
+function brokenReferenceKey(record: BrokenReferenceRecord): string {
+  const { reference } = record;
+  return `${reference.table}:${reference.parentId ?? ''}:${reference.id}:${reference.source}`;
+}
 
 function ValidationContent() {
-  const project = useProject();
+  const { state: project, dispatch } = useProjectStore();
   const errors = project.errors;
   const warnings = project.warnings;
+  const [repairSelections, setRepairSelections] = useState<Record<string, string>>({});
+  const projectState = useMemo(() => ({
+    project: project.project,
+    maps: project.maps,
+    items: project.items,
+    databases: project.databases,
+  }), [project.databases, project.items, project.maps, project.project]);
+  const repairableReferences = useMemo(() => {
+    const seen = new Set<string>();
+    return listBrokenReferences(projectState)
+      .filter(record => record.options.length > 0)
+      .filter(record => {
+        const key = brokenReferenceKey(record);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0, 4);
+  }, [projectState]);
 
   if (errors.length === 0 && warnings.length === 0) {
     return (
@@ -31,6 +58,62 @@ function ValidationContent() {
         <div className="rounded-md border border-amber-100 bg-amber-50 px-3 py-2">
           <p className="text-[12px] font-semibold text-amber-800">Save is allowed</p>
           <p className="text-[12px] text-amber-700">Warnings are review items. Save will still validate before writing.</p>
+        </div>
+      )}
+      {repairableReferences.length > 0 && (
+        <div className="rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2">
+          <div className="mb-2 flex items-start gap-2">
+            <Wrench size={14} className="mt-0.5 flex-shrink-0 text-indigo-600" />
+            <div>
+              <p className="text-[12px] font-semibold text-indigo-900">Reference repair</p>
+              <p className="text-[12px] text-indigo-700">Replace broken references with an existing record.</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {repairableReferences.map(record => {
+              const key = brokenReferenceKey(record);
+              const selectedId = repairSelections[key] ?? record.options[0].replacementId;
+              const selectedOption = record.options.find(option => option.replacementId === selectedId) ?? record.options[0];
+              const selectId = `repair-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+              return (
+                <div key={key} className="grid grid-cols-[1fr_auto] gap-2 rounded border border-indigo-100 bg-white px-2 py-1.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-[12px] font-medium text-gray-800" title={record.reason}>
+                      {record.reason}
+                    </p>
+                    <p className="truncate text-[11px] text-gray-500" title={record.reference.source}>
+                      {record.reference.source}
+                    </p>
+                    <label className="sr-only" htmlFor={selectId}>
+                      Replacement for missing {record.reference.table} reference {record.reference.id}
+                    </label>
+                    <select
+                      id={selectId}
+                      aria-label={`Replacement for missing ${record.reference.table} reference ${record.reference.id}`}
+                      className="mt-1 w-full rounded border border-gray-200 bg-white px-2 py-1 text-[12px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      value={selectedOption.replacementId}
+                      onChange={event => setRepairSelections(prev => ({ ...prev, [key]: event.target.value }))}
+                    >
+                      {record.options.map(option => (
+                        <option key={option.replacementId} value={option.replacementId}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    aria-label={`Apply repair for missing ${record.reference.table} reference ${record.reference.id}`}
+                    className="self-end"
+                    onClick={() => dispatch({ type: 'REPAIR_REFERENCE', repair: selectedOption.action })}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       {errors.map((msg, i) => (

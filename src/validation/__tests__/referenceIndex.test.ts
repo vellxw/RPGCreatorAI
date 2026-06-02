@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findReferences } from '../referenceIndex';
+import { findReferences, listBrokenReferences } from '../referenceIndex';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 import type { FullProjectState } from '../../adapters/types';
 import type { EventCommand, MapData } from '../../types/project';
@@ -134,5 +134,46 @@ describe('referenceIndex', () => {
     expect(findReferences(project, { table: 'tilesets', id: 'sample-town' }).map(ref => ref.source)).toContain(
       'maps/town/tilesetId',
     );
+  });
+
+  it('suggests same-table replacements for broken references', () => {
+    const project = makeProject();
+    project.maps.town.events[0].commands.push({ type: 'addItem', itemId: 'missing_potion', amount: 1 });
+
+    const broken = listBrokenReferences(project);
+    const missingItem = broken.find(ref => ref.reference.table === 'items' && ref.reference.id === 'missing_potion');
+
+    expect(missingItem).toEqual(expect.objectContaining({
+      reason: 'Missing items reference "missing_potion"',
+      reference: expect.objectContaining({
+        table: 'items',
+        id: 'missing_potion',
+        source: 'maps/town/events/event_1/commands',
+      }),
+    }));
+    expect(missingItem?.options).toEqual([
+      expect.objectContaining({
+        kind: 'replace',
+        replacementId: 'potion',
+        label: 'Potion (potion)',
+        action: {
+          table: 'items',
+          source: 'maps/town/events/event_1/commands',
+          oldId: 'missing_potion',
+          newId: 'potion',
+        },
+      }),
+    ]);
+  });
+
+  it('does not suggest repairs when the target table has no replacement records', () => {
+    const project = makeProject();
+    project.databases.switches = [];
+    project.databases.commonEvents[0].switchId = 'missing_switch';
+
+    const broken = listBrokenReferences(project);
+    const missingSwitch = broken.find(ref => ref.reference.table === 'switches' && ref.reference.id === 'missing_switch');
+
+    expect(missingSwitch?.options).toEqual([]);
   });
 });

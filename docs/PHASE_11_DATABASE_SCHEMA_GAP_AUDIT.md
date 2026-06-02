@@ -125,7 +125,10 @@ Legend:
   `callCommonEvent` editing now prevents accidental direct self-calls, empty
   branch append behavior is covered, and TypeScript/native validators reject
   direct common-event self-calls.
-- CP-047 / FRA-82: reference repair tools for broken database/map/event refs.
+- CP-047 / FRA-82: reference repair tools completed. Broken database,
+  project/map, and event-command references now surface same-table replacement
+  options in Validation, and repairs are explicit, target-validated, undoable
+  reducer actions.
 - CP-048 / FRA-83: database/system completeness integration gate.
 - CP-049 through CP-052: asset catalog/import ownership for richer animation,
   tileset, and audio asset metadata.

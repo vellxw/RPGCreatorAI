@@ -243,6 +243,111 @@ describe('projectReducer database actions', () => {
     expect(s2.databases.shops).toHaveLength(0);
   });
 
+  it('REPAIR_REFERENCE replaces one broken command reference with undo support', () => {
+    const map: MapData = {
+      schemaVersion: 1,
+      id: 'town',
+      name: 'Town',
+      width: 4,
+      height: 4,
+      tileSize: 32,
+      layers: [
+        { name: 'ground', type: 'visual', tiles: new Array(16).fill(1) },
+        { name: 'collision', type: 'collision', tiles: new Array(16).fill(0) },
+      ],
+      events: [
+        {
+          id: 'chest',
+          type: 'chest',
+          x: 1,
+          y: 1,
+          solid: true,
+          trigger: 'interact',
+          commands: [{ type: 'addItem', itemId: 'missing_potion', amount: 1 }],
+        },
+      ],
+    };
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      project: {
+        ...initialProjectStoreState.project,
+        startMapId: 'town',
+        maps: [{ id: 'town', path: 'data/maps/town.json' }],
+      },
+      maps: { town: map },
+      items: { items: [{ id: 'potion', name: 'Potion', description: '', type: 'consumable' }] },
+    };
+
+    const repaired = projectReducer(state, {
+      type: 'REPAIR_REFERENCE',
+      repair: {
+        table: 'items',
+        source: 'maps/town/events/chest/commands',
+        oldId: 'missing_potion',
+        newId: 'potion',
+      },
+    });
+
+    const command = repaired.maps.town.events[0].commands[0];
+    if (command.type !== 'addItem') throw new Error('expected addItem');
+    expect(command.itemId).toBe('potion');
+    expect(repaired.dirty).toBe(true);
+    expect(repaired.canUndo).toBe(true);
+
+    const undone = projectReducer(repaired, { type: 'UNDO' });
+    const undoneCommand = undone.maps.town.events[0].commands[0];
+    if (undoneCommand.type !== 'addItem') throw new Error('expected addItem');
+    expect(undoneCommand.itemId).toBe('missing_potion');
+  });
+
+  it('REPAIR_REFERENCE is a no-op when the replacement target does not exist', () => {
+    const map: MapData = {
+      schemaVersion: 1,
+      id: 'town',
+      name: 'Town',
+      width: 4,
+      height: 4,
+      tileSize: 32,
+      layers: [
+        { name: 'ground', type: 'visual', tiles: new Array(16).fill(1) },
+        { name: 'collision', type: 'collision', tiles: new Array(16).fill(0) },
+      ],
+      events: [
+        {
+          id: 'chest',
+          type: 'chest',
+          x: 1,
+          y: 1,
+          solid: true,
+          trigger: 'interact',
+          commands: [{ type: 'addItem', itemId: 'missing_potion', amount: 1 }],
+        },
+      ],
+    };
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      project: {
+        ...initialProjectStoreState.project,
+        startMapId: 'town',
+        maps: [{ id: 'town', path: 'data/maps/town.json' }],
+      },
+      maps: { town: map },
+      items: { items: [{ id: 'potion', name: 'Potion', description: '', type: 'consumable' }] },
+    };
+
+    const repaired = projectReducer(state, {
+      type: 'REPAIR_REFERENCE',
+      repair: {
+        table: 'items',
+        source: 'maps/town/events/chest/commands',
+        oldId: 'missing_potion',
+        newId: 'ether',
+      },
+    });
+
+    expect(repaired).toBe(state);
+  });
+
   it('UPDATE_SYSTEM_DATA updates partial fields', () => {
     const s1 = projectReducer(initialProjectStoreState, {
       type: 'UPDATE_SYSTEM_DATA',

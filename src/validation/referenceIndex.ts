@@ -1,7 +1,7 @@
 import type { FullProjectState } from '../adapters/types';
 import type { DatabaseListKey, EventCommand, MapData } from '../types/project';
 
-export type ReferenceTable = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'questObjectives';
+export type ReferenceTable = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'questObjectives' | 'maps';
 
 export interface ReferenceTarget {
   table: ReferenceTable;
@@ -15,6 +15,34 @@ export interface ReferenceRecord {
   parentId?: string;
   source: string;
   label: string;
+}
+
+export interface ReferenceTargetRecord {
+  table: ReferenceTable;
+  id: string;
+  label: string;
+  parentId?: string;
+}
+
+export interface ReferenceRepairAction {
+  table: ReferenceTable;
+  source: string;
+  oldId: string;
+  newId: string;
+  parentId?: string;
+}
+
+export interface ReferenceRepairOption {
+  kind: 'replace';
+  replacementId: string;
+  label: string;
+  action: ReferenceRepairAction;
+}
+
+export interface BrokenReferenceRecord {
+  reference: ReferenceRecord;
+  reason: string;
+  options: ReferenceRepairOption[];
 }
 
 function matches(ref: ReferenceRecord, target: ReferenceTarget): boolean {
@@ -49,6 +77,10 @@ function commandReferences(command: EventCommand, source: string, refs: Referenc
     case 'controlVariable':
       add(refs, 'variables', command.variableId, source, 'Variable command');
       add(refs, 'variables', command.sourceVariableId, source, 'Variable source command');
+      break;
+    case 'transferMap':
+    case 'setPlayerPosition':
+      add(refs, 'maps', command.mapId, source, 'Map command');
       break;
     case 'addItem':
     case 'removeItem':
@@ -128,6 +160,10 @@ function mapReferences(map: MapData, refs: ReferenceRecord[]) {
 
 export function listReferences(project: FullProjectState): ReferenceRecord[] {
   const refs: ReferenceRecord[] = [];
+  add(refs, 'maps', project.project.startMapId, 'project/startMapId', 'Project start map');
+  for (const mapRef of project.project.maps) {
+    add(refs, 'maps', mapRef.parentId ?? undefined, `project/maps/${mapRef.id}/parentId`, 'Map tree parent');
+  }
   for (const map of Object.values(project.maps)) {
     mapReferences(map, refs);
   }
@@ -329,4 +365,375 @@ export function renameReferences(project: FullProjectState, table: ReferenceTabl
     }
   }
   return project;
+}
+
+const databaseListTables: DatabaseListKey[] = [
+  'actors',
+  'classes',
+  'skills',
+  'weapons',
+  'armors',
+  'states',
+  'enemies',
+  'troops',
+  'quests',
+  'shops',
+  'switches',
+  'variables',
+  'commonEvents',
+];
+
+function isDatabaseListTable(table: ReferenceTable): table is DatabaseListKey {
+  return (databaseListTables as ReferenceTable[]).includes(table);
+}
+
+function recordLabel(record: { id: string } & Record<string, unknown>): string {
+  const label = typeof record.name === 'string'
+    ? record.name
+    : typeof record.title === 'string'
+      ? record.title
+      : record.id;
+  return `${label} (${record.id})`;
+}
+
+export function listReferenceTargets(project: FullProjectState, table: ReferenceTable): ReferenceTargetRecord[] {
+  if (table === 'maps') {
+    return Object.values(project.maps).map(map => ({
+      table,
+      id: map.id,
+      label: `${map.displayName ?? map.name} (${map.id})`,
+    }));
+  }
+  if (table === 'items') {
+    return project.items.items.map(item => ({
+      table,
+      id: item.id,
+      label: `${item.name} (${item.id})`,
+    }));
+  }
+  if (table === 'tilesets') {
+    return project.databases.tilesets.tilesets.map(tileset => ({
+      table,
+      id: tileset.id,
+      label: `${tileset.name} (${tileset.id})`,
+    }));
+  }
+  if (table === 'animations') {
+    return project.databases.animations.sets.map(set => ({
+      table,
+      id: set.id,
+      label: set.id,
+    }));
+  }
+  if (table === 'questObjectives') {
+    return project.databases.quests.flatMap(quest =>
+      quest.objectives.map(objective => ({
+        table,
+        id: objective.id,
+        parentId: quest.id,
+        label: `${quest.title}: ${objective.description || objective.id} (${objective.id})`,
+      })),
+    );
+  }
+  if (isDatabaseListTable(table)) {
+    return (project.databases[table] as unknown as Array<{ id: string } & Record<string, unknown>>).map(record => ({
+      table,
+      id: record.id,
+      label: recordLabel(record),
+    }));
+  }
+  return [];
+}
+
+export function hasReferenceTarget(project: FullProjectState, target: ReferenceTarget): boolean {
+  return listReferenceTargets(project, target.table).some(candidate =>
+    candidate.id === target.id &&
+    (target.parentId === undefined || candidate.parentId === target.parentId),
+  );
+}
+
+export function getReferenceRepairOptions(project: FullProjectState, reference: ReferenceRecord): ReferenceRepairOption[] {
+  return listReferenceTargets(project, reference.table)
+    .filter(target => reference.table !== 'questObjectives' || target.parentId === reference.parentId)
+    .map(target => ({
+      kind: 'replace' as const,
+      replacementId: target.id,
+      label: target.label,
+      action: {
+        table: reference.table,
+        source: reference.source,
+        oldId: reference.id,
+        newId: target.id,
+        ...(reference.parentId ? { parentId: reference.parentId } : {}),
+      },
+    }));
+}
+
+export function listBrokenReferences(project: FullProjectState): BrokenReferenceRecord[] {
+  return listReferences(project)
+    .filter(reference => !hasReferenceTarget(project, reference))
+    .map(reference => ({
+      reference,
+      reason: `Missing ${reference.table} reference "${reference.id}"`,
+      options: getReferenceRepairOptions(project, reference),
+    }));
+}
+
+function replaceCommandReference(command: EventCommand, repair: ReferenceRepairAction): boolean {
+  let changed = false;
+  const replace = (value: string | undefined): string | undefined => {
+    if (value !== repair.oldId) return value;
+    changed = true;
+    return repair.newId;
+  };
+
+  switch (command.type) {
+    case 'ifSwitch':
+    case 'controlSwitch':
+      if (repair.table === 'switches') command.switchId = replace(command.switchId)!;
+      break;
+    case 'ifVariable':
+      if (repair.table === 'variables') command.variableId = replace(command.variableId)!;
+      break;
+    case 'controlVariable':
+      if (repair.table === 'variables') {
+        command.variableId = replace(command.variableId)!;
+        command.sourceVariableId = replace(command.sourceVariableId);
+      }
+      break;
+    case 'transferMap':
+    case 'setPlayerPosition':
+      if (repair.table === 'maps') command.mapId = replace(command.mapId)!;
+      break;
+    case 'addItem':
+    case 'removeItem':
+      if (repair.table === 'items') command.itemId = replace(command.itemId)!;
+      break;
+    case 'callCommonEvent':
+      if (repair.table === 'commonEvents') command.commonEventId = replace(command.commonEventId)!;
+      break;
+    case 'startQuest':
+    case 'completeQuest':
+      if (repair.table === 'quests') command.questId = replace(command.questId)!;
+      break;
+    case 'updateQuestObjective':
+      if (repair.table === 'quests') command.questId = replace(command.questId)!;
+      if (
+        repair.table === 'questObjectives' &&
+        (!repair.parentId || command.questId === repair.parentId)
+      ) {
+        command.objectiveId = replace(command.objectiveId)!;
+      }
+      break;
+    case 'openShop':
+      if (repair.table === 'shops') command.shopId = replace(command.shopId)!;
+      break;
+    case 'startBattle':
+      if (repair.table === 'troops') command.troopId = replace(command.troopId)!;
+      break;
+    case 'changeActorHp':
+      if (repair.table === 'actors') command.actorId = replace(command.actorId)!;
+      break;
+    default:
+      break;
+  }
+  return changed;
+}
+
+function replaceNestedCommandReferences(command: EventCommand, repair: ReferenceRepairAction): boolean {
+  let changed = replaceCommandReference(command, repair);
+  if (command.type === 'ifFlag' || command.type === 'ifSwitch' || command.type === 'ifSelfSwitch' || command.type === 'ifVariable') {
+    changed = replaceCommandListValues(command.then, repair) || changed;
+    changed = replaceCommandListValues(command.else, repair) || changed;
+  } else if (command.type === 'showChoices') {
+    for (const choice of command.choices) {
+      changed = replaceCommandListValues(choice.commands, repair) || changed;
+    }
+  } else if (command.type === 'startBattle') {
+    changed = replaceCommandListValues(command.victoryBranch ?? [], repair) || changed;
+    changed = replaceCommandListValues(command.defeatBranch ?? [], repair) || changed;
+  }
+  return changed;
+}
+
+function replaceCommandListValues(commands: EventCommand[], repair: ReferenceRepairAction): boolean {
+  let changed = false;
+  for (const command of commands) {
+    changed = replaceNestedCommandReferences(command, repair) || changed;
+  }
+  return changed;
+}
+
+function replaceCommandListAtSource(commands: EventCommand[], source: string, repair: ReferenceRepairAction): boolean {
+  if (source !== repair.source) return false;
+  return replaceCommandListValues(commands, repair);
+}
+
+function replaceArrayValue(values: string[], repair: ReferenceRepairAction): boolean {
+  let changed = false;
+  for (let index = 0; index < values.length; index += 1) {
+    if (values[index] === repair.oldId) {
+      values[index] = repair.newId;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+export function applyReferenceRepair(project: FullProjectState, repair: ReferenceRepairAction): boolean {
+  if (repair.oldId === repair.newId) return false;
+  if (!hasReferenceTarget(project, { table: repair.table, id: repair.newId, parentId: repair.parentId })) return false;
+
+  let changed = false;
+  if (repair.table === 'maps' && repair.source === 'project/startMapId' && project.project.startMapId === repair.oldId) {
+    project.project.startMapId = repair.newId;
+    changed = true;
+  }
+  for (const mapRef of project.project.maps) {
+    if (
+      repair.table === 'maps' &&
+      repair.source === `project/maps/${mapRef.id}/parentId` &&
+      mapRef.parentId === repair.oldId
+    ) {
+      mapRef.parentId = repair.newId;
+      changed = true;
+    }
+  }
+
+  for (const map of Object.values(project.maps)) {
+    if (repair.table === 'tilesets' && repair.source === `maps/${map.id}/tilesetId` && map.tilesetId === repair.oldId) {
+      map.tilesetId = repair.newId;
+      changed = true;
+    }
+    for (const event of map.events) {
+      if (
+        repair.table === 'animations' &&
+        repair.source === `maps/${map.id}/events/${event.id}/animationSet` &&
+        event.animationSet === repair.oldId
+      ) {
+        event.animationSet = repair.newId;
+        changed = true;
+      }
+      changed = replaceCommandListAtSource(event.commands, `maps/${map.id}/events/${event.id}/commands`, repair) || changed;
+      for (const page of event.pages ?? []) {
+        if (repair.table === 'switches' && repair.source === `maps/${map.id}/events/${event.id}/pages/${page.id}/conditions/switches/${repair.oldId}`) {
+          if (page.conditions.switches?.[repair.oldId] !== undefined) {
+            page.conditions.switches[repair.newId] = page.conditions.switches[repair.oldId];
+            delete page.conditions.switches[repair.oldId];
+            changed = true;
+          }
+        }
+        if (repair.table === 'variables' && repair.source === `maps/${map.id}/events/${event.id}/pages/${page.id}/conditions/variables/${repair.oldId}`) {
+          for (const variable of page.conditions.variables ?? []) {
+            if (variable.variableId === repair.oldId) {
+              variable.variableId = repair.newId;
+              changed = true;
+            }
+          }
+        }
+        if (
+          repair.table === 'animations' &&
+          repair.source === `maps/${map.id}/events/${event.id}/pages/${page.id}/graphic/animationSet` &&
+          page.graphic.animationSet === repair.oldId
+        ) {
+          page.graphic.animationSet = repair.newId;
+          changed = true;
+        }
+        changed = replaceCommandListAtSource(page.commands, `maps/${map.id}/events/${event.id}/commands`, repair) || changed;
+      }
+    }
+  }
+
+  const { databases, items } = project;
+  for (const actor of databases.actors) {
+    if (repair.table === 'classes' && repair.source === `database/actors/${actor.id}/classId` && actor.classId === repair.oldId) {
+      actor.classId = repair.newId;
+      changed = true;
+    }
+    if (repair.table === 'items' && repair.source === `database/actors/${actor.id}/equipment`) {
+      for (const [slot, itemId] of Object.entries(actor.equipment)) {
+        if (itemId === repair.oldId) {
+          actor.equipment[slot as keyof typeof actor.equipment] = repair.newId;
+          changed = true;
+        }
+      }
+    }
+    if (repair.table === 'skills' && repair.source === `database/actors/${actor.id}/skills/${repair.oldId}`) {
+      changed = replaceArrayValue(actor.skills, repair) || changed;
+    }
+  }
+  for (const cls of databases.classes) {
+    if (repair.table === 'skills' && repair.source === `database/classes/${cls.id}/learnedSkills/${repair.oldId}`) {
+      for (const learned of cls.learnedSkills) {
+        if (learned.skillId === repair.oldId) {
+          learned.skillId = repair.newId;
+          changed = true;
+        }
+      }
+    }
+  }
+  for (const weapon of databases.weapons) {
+    if (repair.table === 'animations' && repair.source === `database/weapons/${weapon.id}/animationId` && weapon.animationId === repair.oldId) {
+      weapon.animationId = repair.newId;
+      changed = true;
+    }
+  }
+  for (const enemy of databases.enemies) {
+    if (repair.table === 'items' && repair.source === `database/enemies/${enemy.id}/drops/${repair.oldId}`) {
+      for (const drop of enemy.drops) {
+        if (drop.itemId === repair.oldId) {
+          drop.itemId = repair.newId;
+          changed = true;
+        }
+      }
+    }
+  }
+  for (const troop of databases.troops) {
+    if (repair.table === 'enemies' && repair.source === `database/troops/${troop.id}/members/${repair.oldId}`) {
+      changed = replaceArrayValue(troop.members, repair) || changed;
+    }
+  }
+  for (const quest of databases.quests) {
+    if (repair.table === 'items' && repair.source === `database/quests/${quest.id}/rewards/items/${repair.oldId}`) {
+      for (const reward of quest.rewards.items) {
+        if (reward.itemId === repair.oldId) {
+          reward.itemId = repair.newId;
+          changed = true;
+        }
+      }
+    }
+  }
+  for (const shop of databases.shops) {
+    if (repair.table === 'items' && repair.source === `database/shops/${shop.id}/listings/${repair.oldId}`) {
+      for (const listing of shop.listings) {
+        if (listing.itemId === repair.oldId) {
+          listing.itemId = repair.newId;
+          changed = true;
+        }
+      }
+    }
+  }
+  for (const commonEvent of databases.commonEvents) {
+    if (repair.table === 'switches' && repair.source === `database/commonEvents/${commonEvent.id}/switchId` && commonEvent.switchId === repair.oldId) {
+      commonEvent.switchId = repair.newId;
+      changed = true;
+    }
+    changed = replaceCommandListAtSource(commonEvent.commands, `database/commonEvents/${commonEvent.id}/commands`, repair) || changed;
+  }
+  if (repair.table === 'actors' && repair.source === `database/system/startingParty/${repair.oldId}`) {
+    changed = replaceArrayValue(databases.system.startingParty, repair) || changed;
+  }
+  if (repair.table === 'animations' && repair.source === 'database/system/playerAnimationSet' && databases.system.playerAnimationSet === repair.oldId) {
+    databases.system.playerAnimationSet = repair.newId;
+    changed = true;
+  }
+  if (repair.table === 'items') {
+    for (const item of items.items) {
+      if (repair.source === `database/items/${item.id}/slot` && item.id === repair.oldId) {
+        item.id = repair.newId;
+        changed = true;
+      }
+    }
+  }
+  return changed;
 }

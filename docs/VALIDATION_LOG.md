@@ -4426,3 +4426,39 @@ Error: Port 1420 is already in use
   `console`,
   `close` — PASS; Common Events showed trigger, condition switch, and shared
   command-stack controls, and the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-82 / CP-047 — reference repair tools
+
+- `2026-06-02 08:18:06 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts src/stores/__tests__/databaseReducer.test.ts src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — FAIL as expected during TDD red step; `listBrokenReferences` did not
+  exist, `REPAIR_REFERENCE` did not repair command references, and the
+  Validation panel did not expose repair affordances.
+- `2026-06-02 08:22:39 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts src/stores/__tests__/databaseReducer.test.ts src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — PASS after adding broken-reference detection, same-table replacement
+  options, source-scoped repair mutation, undoable `REPAIR_REFERENCE`, and the
+  Validation-panel repair control; 3 focused files and 20 Vitest tests passed.
+- `2026-06-02 08:23:18 -03:00` — `npm run typecheck` — FAIL; TypeScript
+  rejected the generic typed-database cast in `referenceIndex`. Fix applied:
+  cast through `unknown` only inside the target-label helper.
+- `2026-06-02 08:24:31 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 08:25:25 -03:00` —
+  `npm test -- --run src/validation/__tests__/referenceIndex.test.ts src/stores/__tests__/databaseReducer.test.ts src/components/editor/__tests__/BottomPanelValidation.test.tsx`
+  — PASS; 3 focused files and 20 Vitest tests passed after documentation
+  updates.
+- `2026-06-02 08:25:48 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 08:25:48 -03:00` — `npm test -- --run` — PASS; full
+  frontend Vitest suite passed with 57 files and 327 tests.
+- `2026-06-02 08:26:40 -03:00` — `npm run build` — PASS; TypeScript and
+  Vite production build completed, 1922 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 08:28:00 -03:00` —
+  Browser smoke with Playwright CLI commands:
+  `open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Validation')"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS; Validation showed `Project passes validation`, and the
+  console reported 0 errors and 0 warnings.
