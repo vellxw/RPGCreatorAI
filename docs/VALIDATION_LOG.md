@@ -5372,3 +5372,42 @@ Error: Port 1420 is already in use
   screenshot evidence was saved to
   `docs/screenshots/phase11-cp051/spritesheet-import-browser-unavailable.png`,
   and the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-103 / CP-068 - AI item icon generation workflow
+
+- `2026-06-02 15:40:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - FAIL as expected during TDD red step; the item icon provider module,
+  item/weapon generation UI entry points, and icon asset reference validation
+  did not exist yet.
+- `2026-06-02 15:52:18 -03:00` -
+  `npm test -- --run src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS after adding the offline item icon workflow, review-gated
+  item/equipment editor UI, catalog assignment, and item/equipment
+  `iconAssetId` validation; 3 focused files and 51 Vitest tests passed.
+- `2026-06-02 15:53:28 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 15:53:28 -03:00` -
+  `npm test -- --run src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/validation/__tests__/validateProject.test.ts`
+  - PASS; focused regression rerun passed 3 files and 51 tests after fixing
+  the button variant typecheck issue.
+- `2026-06-02 15:54:29 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 78 files and 416 tests.
+- `2026-06-02 15:54:29 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1947 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 16:04:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  click `Database`,
+  open `Items`,
+  click `Generate item icon`,
+  click `Run item icon generation`,
+  confirm `Generated item icon review`,
+  click `Accept generated item icon`,
+  confirm `Potion Icon (potion_icon)` is selected,
+  click `Validate` - PASS; toolbar feedback reported `Validation passed`.
+- `2026-06-02 16:05:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\itemIconGenerationWorkflow.ts src\providers\__tests__\itemIconGenerationWorkflow.test.ts src\components\database\ItemIconGenerationPanel.tsx src\components\database\ItemsEditor.tsx src\components\database\EquipmentEditor.tsx src\components\database\__tests__\ItemEquipmentEditors.test.tsx src\validation\validateProject.ts src\validation\referenceIndex.ts`
+  - PASS for CP-068 scope; the only match was the test assertion that ensures
+  generated requests do not contain `apiKey`, `https://api`, or `sk-`.

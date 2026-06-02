@@ -232,6 +232,7 @@ function Detail({ table, entry }: DetailProps) {
       maps: state.maps,
       items: state.items,
       databases: state.databases,
+      assets: state.assets,
     }, { table, id: entry.id });
     const updateReferences = refs.length > 0 && confirm(
       `Rename "${entry.id}" to "${newId}"?\n\nOK: rename and update ${refs.length} reference${refs.length === 1 ? '' : 's'}.\nCancel: rename only the ID.`,
@@ -290,6 +291,8 @@ function Detail({ table, entry }: DetailProps) {
           types={state.databases.types}
           animationOptions={animationOptions}
           idField={idField}
+          assets={state.assets.assets}
+          onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
           onChange={update}
         />
       );
@@ -301,6 +304,8 @@ function Detail({ table, entry }: DetailProps) {
           types={state.databases.types}
           animationOptions={animationOptions}
           idField={idField}
+          assets={state.assets.assets}
+          onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
           onChange={update}
         />
       );
@@ -1020,13 +1025,14 @@ export function DatabaseScreen() {
       maps: state.maps,
       items: state.items,
       databases: state.databases,
+      assets: state.assets,
     })) {
       if (ref.table === 'items' || ref.table === 'animations') {
         sources[ref.table][ref.id] = [...(sources[ref.table][ref.id] ?? []), ref.source];
       }
     }
     return sources;
-  }, [state.databases, state.items, state.maps, state.project]);
+  }, [state.assets, state.databases, state.items, state.maps, state.project]);
 
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
@@ -1110,7 +1116,9 @@ export function DatabaseScreen() {
           <ItemsEditor
             value={state.items}
             types={databases.types}
+            assets={state.assets.assets}
             referenceSources={standaloneReferenceSources.items}
+            onAssetImported={asset => dispatch({ type: 'ADD_ASSET_CATALOG_ENTRY', asset })}
             onChange={items => dispatch({ type: 'UPDATE_ITEM_DATABASE', items })}
           />
         ) : tab === 'tilesets' ? (

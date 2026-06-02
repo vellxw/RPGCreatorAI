@@ -484,6 +484,7 @@ export interface ItemData {
   name: string;
   description: string;
   type: string;
+  iconAssetId?: string;
   price?: number;
   /**
    * For 'weapon' or 'armor': stat modifiers applied while equipped.
@@ -583,6 +584,7 @@ export interface WeaponData {
   name: string;
   description: string;
   weaponTypeId: string;
+  iconAssetId?: string;
   price?: number;
   params?: Partial<Stats>;
   animationId?: string;
@@ -595,6 +597,7 @@ export interface ArmorData {
   description: string;
   armorTypeId: string;
   slot: ArmorSlot;
+  iconAssetId?: string;
   price?: number;
   params?: Partial<Stats>;
   traits?: string[];

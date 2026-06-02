@@ -225,7 +225,7 @@ export function validateProject(state: FullProjectState): ValidationReport {
     if (message.level === 'error') errors.push(message);
     else warnings.push(message);
   }
-  errors.push(...validateItemDatabaseInternal(state.items, state.databases));
+  errors.push(...validateItemDatabaseInternal(state.items, state.databases, state.assets));
   errors.push(...validateAssetCatalog(state));
 
   const index = buildIndex(state.items, state.databases);
@@ -623,7 +623,32 @@ function validateAudioRegistry(db: DatabaseEntries): ValidationMessage[] {
   return out;
 }
 
-function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries): ValidationMessage[] {
+function validateIconAssetReference(
+  label: string,
+  source: string,
+  iconAssetId: string | undefined,
+  assets?: AssetCatalogData,
+): ValidationMessage[] {
+  if (!iconAssetId) return [];
+  const asset = (assets?.assets ?? []).find(candidate => candidate.id === iconAssetId);
+  if (!asset) {
+    return [{
+      level: 'error',
+      message: `${label} references unknown icon asset "${iconAssetId}"`,
+      source,
+    }];
+  }
+  if (asset.kind !== 'image' && asset.kind !== 'generated') {
+    return [{
+      level: 'error',
+      message: `${label} icon asset "${iconAssetId}" must be an image asset`,
+      source,
+    }];
+  }
+  return [];
+}
+
+function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const seen = new Set<string>();
   const itemCategoryIds = new Set(db.types.itemCategories.map(entry => entry.id));
@@ -655,6 +680,12 @@ function validateItemDatabaseInternal(items: ItemDatabase, db: DatabaseEntries):
         source: `database/items/${item.id}`,
       });
     }
+    out.push(...validateIconAssetReference(
+      `Item "${item.id}"`,
+      `database/items/${item.id}/iconAssetId`,
+      item.iconAssetId,
+      assets,
+    ));
     if (item.slot && equipmentSlotIds.size > 0 && !equipmentSlotIds.has(item.slot)) {
       out.push({
         level: 'error',
@@ -770,7 +801,7 @@ function validateDatabaseInternal(db: DatabaseEntries, assets?: AssetCatalogData
   }
 
   out.push(...validateTilesetDatabase(db, assets));
-  out.push(...validateEquipmentAndStateDatabases(db));
+  out.push(...validateEquipmentAndStateDatabases(db, assets));
   out.push(...validatePartyCombatDatabases(db));
   out.push(...validateSetupProgressionDatabases(db));
   out.push(...validateAnimationDatabase(db, assets));
@@ -1334,7 +1365,7 @@ function validatePartyCombatDatabases(db: DatabaseEntries): ValidationMessage[] 
   return out;
 }
 
-function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMessage[] {
+function validateEquipmentAndStateDatabases(db: DatabaseEntries, assets?: AssetCatalogData): ValidationMessage[] {
   const out: ValidationMessage[] = [];
   const weaponTypeIds = new Set(db.types.weaponTypes.map(entry => entry.id));
   const armorTypeIds = new Set(db.types.armorTypes.map(entry => entry.id));
@@ -1364,6 +1395,12 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
         source,
       });
     }
+    out.push(...validateIconAssetReference(
+      `Weapon "${weapon.id}"`,
+      `${source}/iconAssetId`,
+      weapon.iconAssetId,
+      assets,
+    ));
     out.push(...validateStatParams(`Weapon "${weapon.id}"`, source, weapon.params));
     out.push(...validateTraitList(`Weapon "${weapon.id}"`, source, weapon.traits));
   }
@@ -1391,6 +1428,12 @@ function validateEquipmentAndStateDatabases(db: DatabaseEntries): ValidationMess
         source,
       });
     }
+    out.push(...validateIconAssetReference(
+      `Armor "${armor.id}"`,
+      `${source}/iconAssetId`,
+      armor.iconAssetId,
+      assets,
+    ));
     out.push(...validateStatParams(`Armor "${armor.id}"`, source, armor.params));
     out.push(...validateTraitList(`Armor "${armor.id}"`, source, armor.traits));
   }

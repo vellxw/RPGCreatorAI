@@ -856,6 +856,66 @@ describe('validateProject', () => {
 
     expect(report.errors.some(e => e.message.includes('setMovementRoute steps must be an array'))).toBe(true);
   });
+
+  it('validates item and equipment icon asset references through the asset catalog', () => {
+    const project = makeProject({ town: makeMap() });
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'potion_icon',
+          name: 'Potion Icon',
+          kind: 'image',
+          path: 'assets/generated/icons/potion_icon.png',
+          source: 'generated',
+        },
+        {
+          id: 'sword_icon',
+          name: 'Sword Icon',
+          kind: 'generated',
+          path: 'assets/generated/icons/sword_icon.png',
+          source: 'generated',
+        },
+        {
+          id: 'bad_audio_icon',
+          name: 'Bad Audio Icon',
+          kind: 'audio',
+          path: 'assets/imported/audio/bad.wav',
+          source: 'imported',
+        },
+      ],
+    };
+    project.items.items = [
+      { id: 'potion', name: 'Potion', description: '', type: 'consumable', iconAssetId: 'potion_icon' },
+      { id: 'ether', name: 'Ether', description: '', type: 'consumable', iconAssetId: 'missing_icon' },
+    ];
+    project.databases.weapons = [
+      {
+        id: 'iron_sword',
+        name: 'Iron Sword',
+        description: '',
+        weaponTypeId: 'sword',
+        iconAssetId: 'sword_icon',
+      },
+    ];
+    project.databases.armors = [
+      {
+        id: 'leather_armor',
+        name: 'Leather Armor',
+        description: '',
+        armorTypeId: 'light',
+        slot: 'body',
+        iconAssetId: 'bad_audio_icon',
+      },
+    ];
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Item "potion"'))).toBe(false);
+    expect(report.errors.some(e => e.message.includes('Weapon "iron_sword"'))).toBe(false);
+    expect(report.errors.some(e => e.message.includes('Item "ether" references unknown icon asset "missing_icon"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Armor "leather_armor" icon asset "bad_audio_icon" must be an image asset'))).toBe(true);
+  });
 });
 
 describe('validateUniqueEventIds', () => {

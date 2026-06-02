@@ -6,6 +6,7 @@ import {
   TextField,
 } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
+import { ItemIconGenerationPanel } from './ItemIconGenerationPanel';
 import {
   FALLBACK_ARMOR_TYPES,
   FALLBACK_EQUIPMENT_SLOTS,
@@ -13,25 +14,32 @@ import {
   namedTypeOptions,
 } from './databaseOptions';
 import { STAT_FIELDS, STAT_LABELS } from './partyCombatFields';
-import type { ArmorData, Stats, TypesDatabaseData, WeaponData } from '../../types/project';
+import type { ArmorData, AssetCatalogEntry, Stats, TypesDatabaseData, WeaponData } from '../../types/project';
+import type { ItemIconGenerationRunner } from '../../providers/itemIconGenerationWorkflow';
+
+interface EquipmentIconGenerationProps {
+  assets?: AssetCatalogEntry[];
+  iconGenerator?: ItemIconGenerationRunner;
+  onAssetImported?(asset: AssetCatalogEntry): void;
+}
 
 type EquipmentEditorProps =
-  | {
+  | ({
       kind: 'weapon';
       entry: WeaponData;
       types: TypesDatabaseData;
       animationOptions: Array<{ value: string; label: string }>;
       idField: ReactNode;
       onChange(changes: Partial<WeaponData>): void;
-    }
-  | {
+    } & EquipmentIconGenerationProps)
+  | ({
       kind: 'armor';
       entry: ArmorData;
       types: TypesDatabaseData;
       animationOptions: Array<{ value: string; label: string }>;
       idField: ReactNode;
       onChange(changes: Partial<ArmorData>): void;
-    };
+    } & EquipmentIconGenerationProps);
 
 function updateParam<T extends WeaponData | ArmorData>(
   entry: T,
@@ -110,6 +118,10 @@ function ModifierGrid<T extends WeaponData | ArmorData>({
 
 export function EquipmentEditor(props: EquipmentEditorProps) {
   const { idField } = props;
+  const assets = props.assets ?? [];
+  const iconAssetOptions = assets
+    .filter(asset => asset.kind === 'image' || asset.kind === 'generated')
+    .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` }));
 
   if (props.kind === 'weapon') {
     const entry = props.entry;
@@ -123,6 +135,26 @@ export function EquipmentEditor(props: EquipmentEditorProps) {
           label="Description"
           value={entry.description}
           onChange={description => props.onChange({ description })}
+        />
+        <ReferenceSelect
+          label="Weapon icon asset"
+          value={entry.iconAssetId ?? ''}
+          options={iconAssetOptions}
+          emptyLabel="(none)"
+          onChange={iconAssetId => props.onChange({ iconAssetId: iconAssetId || undefined })}
+        />
+        <ItemIconGenerationPanel
+          ownerKind="weapon"
+          ownerId={entry.id}
+          ownerName={entry.name}
+          description={entry.description}
+          category={entry.weaponTypeId}
+          assets={assets}
+          iconGenerator={props.iconGenerator}
+          onAssetAccepted={(asset, iconAssetId) => {
+            props.onAssetImported?.(asset);
+            props.onChange({ iconAssetId });
+          }}
         />
         <div className="grid grid-cols-2 gap-3">
           <ReferenceSelect
@@ -172,6 +204,26 @@ export function EquipmentEditor(props: EquipmentEditorProps) {
         label="Description"
         value={entry.description}
         onChange={description => props.onChange({ description })}
+      />
+      <ReferenceSelect
+        label="Armor icon asset"
+        value={entry.iconAssetId ?? ''}
+        options={iconAssetOptions}
+        emptyLabel="(none)"
+        onChange={iconAssetId => props.onChange({ iconAssetId: iconAssetId || undefined })}
+      />
+      <ItemIconGenerationPanel
+        ownerKind="armor"
+        ownerId={entry.id}
+        ownerName={entry.name}
+        description={entry.description}
+        category={entry.armorTypeId}
+        assets={assets}
+        iconGenerator={props.iconGenerator}
+        onAssetAccepted={(asset, iconAssetId) => {
+          props.onAssetImported?.(asset);
+          props.onChange({ iconAssetId });
+        }}
       />
       <div className="grid grid-cols-2 gap-3">
         <ReferenceSelect

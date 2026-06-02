@@ -5,7 +5,11 @@ import { mergeDatabases } from '../../../adapters/defaultDatabases';
 import { ItemsEditor } from '../ItemsEditor';
 import { EquipmentEditor } from '../EquipmentEditor';
 import { StatesEditor } from '../StatesEditor';
-import type { ArmorData, ItemDatabase, StateData, WeaponData } from '../../../types/project';
+import type { ArmorData, AssetCatalogEntry, ItemDatabase, StateData, WeaponData } from '../../../types/project';
+import type {
+  ItemIconGenerationCandidate,
+  ItemIconGenerationRunner,
+} from '../../../providers/itemIconGenerationWorkflow';
 
 function render(ui: React.ReactNode) {
   const container = document.createElement('div');
@@ -37,6 +41,13 @@ function button(container: HTMLElement, label: string): HTMLButtonElement {
   const found = container.querySelector(`button[aria-label="${label}"]`);
   if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
   return found;
+}
+
+async function clickAsync(container: HTMLElement, label: string) {
+  const found = button(container, label);
+  await act(async () => {
+    found.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
 }
 
 function changeText(el: HTMLInputElement, value: string) {
@@ -192,6 +203,101 @@ describe('item, equipment, and state database editors', () => {
     view.unmount();
   });
 
+  it('generates an item icon candidate and assigns it only after review', async () => {
+    const generatedAsset: AssetCatalogEntry = {
+      id: 'potion_icon',
+      name: 'Potion Icon',
+      kind: 'image',
+      path: 'assets/generated/icons/potion_icon.png',
+      source: 'generated',
+      tags: ['generated', 'item-icon', 'item', 'ai-draft', 'pending-review'],
+      width: 1024,
+      height: 1024,
+      generated: {
+        prompt: 'offline icon prompt',
+        tool: 'ai-item-icon-generation-workflow',
+        createdAt: '2026-06-02T18:51:00.000Z',
+        promptTemplateId: 'icon-item-v1',
+        promptTemplateVersion: 1,
+        promptTemplateKind: 'icon',
+        providerId: 'local',
+        modelId: 'offline-image-mock',
+      },
+    };
+    const candidate: ItemIconGenerationCandidate = {
+      id: 'icon-gen-ui',
+      reviewState: 'pending',
+      owner: { kind: 'item', id: 'potion', name: 'Potion' },
+      asset: generatedAsset,
+      qaPreview: {
+        assetRef: 'mock://generated/icon-gen-ui.png',
+        width: 1024,
+        height: 1024,
+        providerFixture: 'offline-image',
+      },
+    };
+    const iconGenerator: ItemIconGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const value: ItemDatabase = {
+      items: [
+        {
+          id: 'potion',
+          name: 'Potion',
+          description: 'Heals HP',
+          type: 'consumable',
+        },
+      ],
+    };
+    const view = render(
+      <ItemsEditor
+        value={value}
+        types={mergeDatabases(undefined).types}
+        assets={[]}
+        iconGenerator={iconGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    act(() => button(view.container, 'Generate item icon').click());
+    expect(view.container.querySelector('[aria-label="Item icon generation metadata preview"]')).not.toBeNull();
+    changeText(input(view.container, 'Item icon subject'), 'red potion bottle with cork');
+
+    await clickAsync(view.container, 'Run item icon generation');
+
+    expect(iconGenerator).toHaveBeenCalledWith([], expect.objectContaining({
+      owner: { kind: 'item', id: 'potion', name: 'Potion' },
+      promptInputs: expect.objectContaining({
+        subject: 'red potion bottle with cork',
+      }),
+    }));
+    expect(view.container.querySelector('[aria-label="Generated item icon review"]')).not.toBeNull();
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+
+    await clickAsync(view.container, 'Accept generated item icon');
+
+    expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'potion_icon',
+      source: 'generated',
+      tags: expect.arrayContaining(['reviewed']),
+    }));
+    expect(onChange).toHaveBeenLastCalledWith({
+      items: [
+        expect.objectContaining({
+          id: 'potion',
+          iconAssetId: 'potion_icon',
+        }),
+      ],
+    });
+
+    view.unmount();
+  });
+
   it('edits weapon and armor type references, params, animations, and traits', () => {
     const types = mergeDatabases(undefined).types;
     const onWeaponChange = vi.fn();
@@ -266,6 +372,91 @@ describe('item, equipment, and state database editors', () => {
     });
     expect(onArmorChange).toHaveBeenLastCalledWith({ traits: [] });
     armorView.unmount();
+  });
+
+  it('generates a weapon icon candidate and assigns it only after review', async () => {
+    const generatedAsset: AssetCatalogEntry = {
+      id: 'iron_sword_icon',
+      name: 'Iron Sword Icon',
+      kind: 'image',
+      path: 'assets/generated/icons/iron_sword_icon.png',
+      source: 'generated',
+      tags: ['generated', 'item-icon', 'weapon', 'ai-draft', 'pending-review'],
+      width: 1024,
+      height: 1024,
+      generated: {
+        prompt: 'offline weapon icon prompt',
+        tool: 'ai-item-icon-generation-workflow',
+        createdAt: '2026-06-02T18:52:00.000Z',
+        promptTemplateId: 'icon-item-v1',
+        promptTemplateVersion: 1,
+        promptTemplateKind: 'icon',
+        providerId: 'local',
+        modelId: 'offline-image-mock',
+      },
+    };
+    const candidate: ItemIconGenerationCandidate = {
+      id: 'icon-gen-weapon-ui',
+      reviewState: 'pending',
+      owner: { kind: 'weapon', id: 'iron_sword', name: 'Iron Sword' },
+      asset: generatedAsset,
+      qaPreview: {
+        assetRef: 'mock://generated/icon-gen-weapon-ui.png',
+        width: 1024,
+        height: 1024,
+        providerFixture: 'offline-image',
+      },
+    };
+    const iconGenerator: ItemIconGenerationRunner = vi.fn(async () => ({
+      success: true,
+      candidate,
+    }));
+    const onAssetImported = vi.fn();
+    const onChange = vi.fn();
+    const weapon: WeaponData = {
+      id: 'iron_sword',
+      name: 'Iron Sword',
+      description: 'Starter blade',
+      weaponTypeId: 'sword',
+      price: 80,
+    };
+    const view = render(
+      <EquipmentEditor
+        kind="weapon"
+        entry={weapon}
+        types={mergeDatabases(undefined).types}
+        animationOptions={[]}
+        idField={<span />}
+        assets={[]}
+        iconGenerator={iconGenerator}
+        onAssetImported={onAssetImported}
+        onChange={onChange}
+      />,
+    );
+
+    act(() => button(view.container, 'Generate weapon icon').click());
+    changeText(input(view.container, 'Weapon icon subject'), 'short iron sword icon');
+
+    await clickAsync(view.container, 'Run weapon icon generation');
+
+    expect(iconGenerator).toHaveBeenCalledWith([], expect.objectContaining({
+      owner: { kind: 'weapon', id: 'iron_sword', name: 'Iron Sword' },
+      promptInputs: expect.objectContaining({
+        subject: 'short iron sword icon',
+      }),
+    }));
+    expect(onAssetImported).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+
+    await clickAsync(view.container, 'Accept generated weapon icon');
+
+    expect(onAssetImported).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'iron_sword_icon',
+      tags: expect.arrayContaining(['reviewed']),
+    }));
+    expect(onChange).toHaveBeenLastCalledWith({ iconAssetId: 'iron_sword_icon' });
+
+    view.unmount();
   });
 
   it('edits state priority, battle-end removal, restriction, and traits', () => {

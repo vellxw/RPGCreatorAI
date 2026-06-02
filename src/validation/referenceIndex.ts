@@ -191,6 +191,10 @@ export function listReferences(project: FullProjectState): ReferenceRecord[] {
   }
   for (const weapon of databases.weapons) {
     add(refs, 'animations', weapon.animationId, `database/weapons/${weapon.id}/animationId`, 'Weapon animation');
+    addAsset(weapon.iconAssetId, `database/weapons/${weapon.id}/iconAssetId`, 'Weapon icon asset');
+  }
+  for (const armor of databases.armors) {
+    addAsset(armor.iconAssetId, `database/armors/${armor.id}/iconAssetId`, 'Armor icon asset');
   }
   for (const enemy of databases.enemies) {
     for (const drop of enemy.drops) {
@@ -235,6 +239,7 @@ export function listReferences(project: FullProjectState): ReferenceRecord[] {
   }
   for (const item of items.items) {
     add(refs, 'items', item.slot ? item.id : undefined, `database/items/${item.id}/slot`, 'Equippable item');
+    addAsset(item.iconAssetId, `database/items/${item.id}/iconAssetId`, 'Item icon asset');
   }
   return refs;
 }
@@ -343,6 +348,10 @@ export function renameReferences(project: FullProjectState, table: ReferenceTabl
   }
   for (const weapon of databases.weapons) {
     if (table === 'animations' && weapon.animationId === oldId) weapon.animationId = newId;
+    if (table === 'assets' && weapon.iconAssetId === oldId) weapon.iconAssetId = newId;
+  }
+  for (const armor of databases.armors) {
+    if (table === 'assets' && armor.iconAssetId === oldId) armor.iconAssetId = newId;
   }
   for (const enemy of databases.enemies) {
     if (table === 'items') {
@@ -381,6 +390,11 @@ export function renameReferences(project: FullProjectState, table: ReferenceTabl
   if (table === 'items') {
     for (const item of items.items) {
       if (item.id === oldId) item.id = newId;
+    }
+  }
+  if (table === 'assets') {
+    for (const item of items.items) {
+      if (item.iconAssetId === oldId) item.iconAssetId = newId;
     }
   }
   return project;
@@ -703,6 +717,16 @@ export function applyReferenceRepair(project: FullProjectState, repair: Referenc
       weapon.animationId = repair.newId;
       changed = true;
     }
+    if (repair.table === 'assets' && repair.source === `database/weapons/${weapon.id}/iconAssetId` && weapon.iconAssetId === repair.oldId) {
+      weapon.iconAssetId = repair.newId;
+      changed = true;
+    }
+  }
+  for (const armor of databases.armors) {
+    if (repair.table === 'assets' && repair.source === `database/armors/${armor.id}/iconAssetId` && armor.iconAssetId === repair.oldId) {
+      armor.iconAssetId = repair.newId;
+      changed = true;
+    }
   }
   for (const enemy of databases.enemies) {
     if (repair.table === 'items' && repair.source === `database/enemies/${enemy.id}/drops/${repair.oldId}`) {
@@ -757,6 +781,14 @@ export function applyReferenceRepair(project: FullProjectState, repair: Referenc
     for (const item of items.items) {
       if (repair.source === `database/items/${item.id}/slot` && item.id === repair.oldId) {
         item.id = repair.newId;
+        changed = true;
+      }
+    }
+  }
+  if (repair.table === 'assets') {
+    for (const item of items.items) {
+      if (repair.source === `database/items/${item.id}/iconAssetId` && item.iconAssetId === repair.oldId) {
+        item.iconAssetId = repair.newId;
         changed = true;
       }
     }

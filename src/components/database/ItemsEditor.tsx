@@ -9,6 +9,7 @@ import {
   TextField,
 } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
+import { ItemIconGenerationPanel } from './ItemIconGenerationPanel';
 import {
   FALLBACK_EQUIPMENT_SLOTS,
   FALLBACK_ITEM_CATEGORIES,
@@ -17,16 +18,21 @@ import {
 import { STAT_FIELDS, STAT_LABELS } from './partyCombatFields';
 import type {
   EquipmentSlot,
+  AssetCatalogEntry,
   ItemData,
   ItemDatabase,
   Stats,
   TypesDatabaseData,
 } from '../../types/project';
+import type { ItemIconGenerationRunner } from '../../providers/itemIconGenerationWorkflow';
 
 interface ItemsEditorProps {
   value: ItemDatabase;
   types: TypesDatabaseData;
+  assets?: AssetCatalogEntry[];
+  iconGenerator?: ItemIconGenerationRunner;
   referenceSources?: Record<string, string[]>;
+  onAssetImported?(asset: AssetCatalogEntry): void;
   onChange(value: ItemDatabase): void;
 }
 
@@ -52,7 +58,15 @@ function createItem(items: ItemData[], category: string): ItemData {
   };
 }
 
-export function ItemsEditor({ value, types, referenceSources = {}, onChange }: ItemsEditorProps) {
+export function ItemsEditor({
+  value,
+  types,
+  assets = [],
+  iconGenerator,
+  referenceSources = {},
+  onAssetImported,
+  onChange,
+}: ItemsEditorProps) {
   const [selectedId, setSelectedId] = useState(value.items[0]?.id ?? '');
   const [query, setQuery] = useState('');
   const categoryOptions = namedTypeOptions(types.itemCategories, FALLBACK_ITEM_CATEGORIES);
@@ -71,6 +85,12 @@ export function ItemsEditor({ value, types, referenceSources = {}, onChange }: I
     normalizedQuery &&
     selected &&
     !filteredItems.some(item => item.id === selected.id),
+  );
+  const iconAssetOptions = useMemo(
+    () => assets
+      .filter(asset => asset.kind === 'image' || asset.kind === 'generated')
+      .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` })),
+    [assets],
   );
 
   const replaceItems = (items: ItemData[]) => onChange({ items });
@@ -246,6 +266,26 @@ export function ItemsEditor({ value, types, referenceSources = {}, onChange }: I
             label="Description"
             value={selected.description}
             onChange={description => updateSelected({ description })}
+          />
+          <ReferenceSelect
+            label="Item icon asset"
+            value={selected.iconAssetId ?? ''}
+            options={iconAssetOptions}
+            emptyLabel="(none)"
+            onChange={iconAssetId => updateSelected({ iconAssetId: iconAssetId || undefined })}
+          />
+          <ItemIconGenerationPanel
+            ownerKind="item"
+            ownerId={selected.id}
+            ownerName={selected.name}
+            description={selected.description}
+            category={selected.type}
+            assets={assets}
+            iconGenerator={iconGenerator}
+            onAssetAccepted={(asset, iconAssetId) => {
+              onAssetImported?.(asset);
+              updateSelected({ iconAssetId });
+            }}
           />
           <div className="grid grid-cols-2 gap-3">
             <ReferenceSelect
