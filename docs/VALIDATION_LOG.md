@@ -4137,3 +4137,30 @@ Error: Port 1420 is already in use
   completed, screenshots were refreshed under `build/runtime_smoke_cp039`, and
   warnings remained limited to known optional missing WAV/audio-device
   conditions.
+
+### Phase 11 FRA-75 / CP-040 — runtime feature completeness integration gate
+
+- `2026-06-02 05:58:50 -03:00` —
+  repo/runtime audit before the gate — PASS; `origin` pointed to
+  `https://github.com/vellxw/RPGCreatorAI.git`, HEAD was `9e43223`, local
+  status had only the unrelated untracked
+  `docs/agent_prompts/LINEAR_MVP_CODEX_GOAL_PROMPT.md`, and provider/AI/cloud
+  search hits were limited to docs, older specs, and editor-only provider
+  surfaces rather than native runtime code.
+- `2026-06-02 05:59:09 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS; canonical gate summary reported PASS for frontend typecheck,
+  frontend tests, frontend build, native configure/build/test, Tauri content
+  check, Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+  Frontend tests passed 56 files and 313 Vitest tests. Native `RPGTests`
+  passed 1/1. Rust desktop tests passed 33 tests. Runtime smoke reported
+  `SMOKE PASSED`, and editor-runtime roundtrip hashes were
+  `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944` and
+  `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+  Warnings were limited to the known Vite chunk-size warning, known CMake
+  third-party policy/deprecation warnings, and optional missing WAV/audio
+  endpoint warnings in runtime smoke.
+- `2026-06-02 06:01:36 -03:00` — result recorded in
+  `docs/PHASE_11_RUNTIME_FEATURE_COMPLETENESS_GATE.md`; milestone 04 marked
+  complete in `.kiro/specs/phase11-complete-product-platform/tasks.md` and
+  `docs/GOAL_STACK.md`.

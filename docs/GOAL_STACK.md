@@ -36,7 +36,6 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 04 — runtime feature completeness.
 - Phase 11 Linear milestone 05 — database/system completeness.
 - Phase 11 Linear milestone 06 — asset library and import pipeline.
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
@@ -238,6 +237,13 @@ Primary Phase 11 sources:
   the bounded summary, and `RPG_RUNTIME_DEBUG_OVERLAY=1` enables a small
   in-window runtime debug overlay without IPC, AI, network, or gameplay
   mutation.
+- Phase 11 CP-040 — runtime feature completeness integration gate completed.
+  The canonical `scripts/dev/verify.ps1` gate passed frontend typecheck,
+  full Vitest, frontend build, native C++ configure/build/CTest, Tauri content
+  check, Rust desktop tests, runtime smoke, and editor-runtime screenshot
+  roundtrip. Runtime milestone 04 is green and ready for database/system
+  dependency work. Evidence is recorded in
+  `docs/PHASE_11_RUNTIME_FEATURE_COMPLETENESS_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
