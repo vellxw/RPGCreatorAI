@@ -81,6 +81,32 @@ TEST_CASE("ProjectLoader loads optional database types and terms paths") {
     removeTempFile(projectPath);
 }
 
+TEST_CASE("ProjectLoader loads optional separated equipment state and audio paths") {
+    const std::string projectPath = writeTempJson("with_equipment_state_audio_project.json", R"({
+        "schemaVersion": 1,
+        "title": "EquipmentStateAudio",
+        "startMapId": "town",
+        "startPosition": { "x": 0, "y": 0, "direction": "down" },
+        "maps": [{ "id": "town", "path": "maps/town.json" }],
+        "database": {
+            "items": "data/database/items.json",
+            "weapons": "data/database/weapons.json",
+            "armors": "data/database/armors.json",
+            "states": "data/database/states.json",
+            "audio": "data/database/audio.json"
+        }
+    })");
+
+    auto project = ProjectLoader::load(projectPath);
+    REQUIRE(project.has_value());
+    CHECK(project->database.weaponsPath == "data/database/weapons.json");
+    CHECK(project->database.armorsPath == "data/database/armors.json");
+    CHECK(project->database.statesPath == "data/database/states.json");
+    CHECK(project->database.audioPath == "data/database/audio.json");
+
+    removeTempFile(projectPath);
+}
+
 TEST_CASE("RpgDatabases loads tilesets and finds them by id") {
     const std::string tilesetsPath = writeTempJson("tilesets_database.json", R"({
         "schemaVersion": 1,

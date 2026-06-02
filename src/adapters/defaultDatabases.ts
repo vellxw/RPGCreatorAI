@@ -74,6 +74,30 @@ function mergeTermsDatabase(
   };
 }
 
+function mergeAudioDatabase(input: unknown): DatabaseEntries['audio'] {
+  if (!input || typeof input !== 'object') return undefined;
+  const source = input as Partial<NonNullable<DatabaseEntries['audio']>>;
+  const merged: NonNullable<DatabaseEntries['audio']> = {};
+
+  if (source.audio && typeof source.audio === 'object' && !Array.isArray(source.audio)) {
+    merged.audio = Object.fromEntries(
+      Object.entries(source.audio).filter(([, value]) => typeof value === 'string'),
+    );
+  }
+  if (Array.isArray(source.sounds)) {
+    merged.sounds = source.sounds.filter(
+      entry => entry && typeof entry.id === 'string' && typeof entry.path === 'string',
+    );
+  }
+  if (Array.isArray(source.bgm)) {
+    merged.bgm = source.bgm.filter(
+      entry => entry && typeof entry.id === 'string' && typeof entry.path === 'string',
+    );
+  }
+
+  return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
 export function emptyDatabases(): DatabaseEntries {
   return {
     actors: [],
@@ -235,5 +259,6 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
   }
   merged.types = mergeNamedTypeTables(base.types, input.types);
   merged.terms = mergeTermsDatabase(base.terms, input.terms);
+  merged.audio = mergeAudioDatabase(input.audio);
   return merged;
 }

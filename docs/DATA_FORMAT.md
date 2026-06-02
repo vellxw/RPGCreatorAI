@@ -12,6 +12,7 @@ data/
   database/
     animations.json
     actors.json
+    armors.json
     classes.json
     commonEvents.json
     enemies.json
@@ -19,10 +20,15 @@ data/
     quests.json
     shops.json
     skills.json
+    states.json
     switches.json
     system.json
+    terms.json
+    tilesets.json
     troops.json
+    types.json
     variables.json
+    weapons.json
 ```
 
 ## project.json
@@ -37,7 +43,24 @@ data/
 | `startPosition.direction` | string | `"up" \| "down" \| "left" \| "right"`. |
 | `maps` | array | List of `{ id, path }`. |
 | `database.items` | string | Path to the items database. |
+| `database.actors` | string | Optional path to actor records. |
+| `database.classes` | string | Optional path to class records. |
+| `database.skills` | string | Optional path to skill records. |
+| `database.weapons` | string | Optional path to separated weapon authoring records. Runtime v1 still consumes item equipment modifiers. |
+| `database.armors` | string | Optional path to separated armor authoring records. Runtime v1 still consumes item equipment modifiers. |
+| `database.states` | string | Optional path to state authoring records. Runtime v1 has no status-effect simulation. |
+| `database.types` | string | Optional path to editor type tables. |
+| `database.terms` | string | Optional path to editor/system terminology. |
+| `database.enemies` | string | Optional path to enemy records. |
+| `database.troops` | string | Optional path to troop records. |
+| `database.quests` | string | Optional path to quest records. |
+| `database.shops` | string | Optional path to shop records. |
+| `database.system` | string | Optional path to system defaults and audio registry. |
+| `database.switches` | string | Optional path to switch records. |
+| `database.variables` | string | Optional path to variable records. |
+| `database.commonEvents` | string | Optional path to common event records. |
 | `database.animations` | string | Optional path to character animation sets. |
+| `database.tilesets` | string | Optional path to tileset records. |
 | `database.audio` | string | Optional path to an audio registry shard. |
 
 `ProjectLoader` validates the file strictly; any missing or invalid

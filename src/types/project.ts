@@ -34,6 +34,7 @@ export interface DatabasePaths {
   commonEvents?: string;
   animations?: string;
   tilesets?: string;
+  audio?: string;
 }
 
 export type DatabaseKey = keyof Omit<DatabasePaths, 'items'>;
@@ -702,6 +703,17 @@ export interface AnimationDatabaseData {
   sets: AnimationSetData[];
 }
 
+export interface AudioRegistryEntry {
+  id: string;
+  path: string;
+}
+
+export interface AudioDatabaseData {
+  audio?: Record<string, string>;
+  sounds?: AudioRegistryEntry[];
+  bgm?: AudioRegistryEntry[];
+}
+
 export interface DatabaseEntries {
   actors: ActorData[];
   classes: ClassData[];
@@ -721,11 +733,12 @@ export interface DatabaseEntries {
   animations: AnimationDatabaseData;
   tilesets: TilesetDatabaseData;
   system: SystemData;
+  audio?: AudioDatabaseData;
 }
 
 export type DatabaseListKey = Exclude<
   keyof DatabaseEntries,
-  'system' | 'animations' | 'tilesets' | 'types' | 'terms'
+  'system' | 'animations' | 'tilesets' | 'types' | 'terms' | 'audio'
 >;
 
 // Editor-specific types

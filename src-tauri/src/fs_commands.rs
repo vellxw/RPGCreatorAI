@@ -90,6 +90,8 @@ pub struct DatabaseRefs {
     pub animations: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tilesets: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audio: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -281,7 +283,7 @@ pub fn fs_write_project(
     // 3b. Phase 6 database shards. Each is wrapped in `{ schemaVersion, <key>: ... }`
     // so old runtime/editor pipelines keep parsing them.
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 18] = [
+        let pairs: [(&str, Option<&String>); 19] = [
             ("actors", project_state.project.database.actors.as_ref()),
             ("classes", project_state.project.database.classes.as_ref()),
             ("skills", project_state.project.database.skills.as_ref()),
@@ -309,6 +311,7 @@ pub fn fs_write_project(
                 project_state.project.database.animations.as_ref(),
             ),
             ("tilesets", project_state.project.database.tilesets.as_ref()),
+            ("audio", project_state.project.database.audio.as_ref()),
         ];
         for (key, maybe_rel) in pairs {
             let Some(rel) = maybe_rel else { continue };
@@ -535,7 +538,7 @@ fn write_project_snapshot(
     write_json_inside(session_root, &project.database.items, &project_state.items)?;
 
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 18] = [
+        let pairs: [(&str, Option<&String>); 19] = [
             ("actors", project.database.actors.as_ref()),
             ("classes", project.database.classes.as_ref()),
             ("skills", project.database.skills.as_ref()),
@@ -554,6 +557,7 @@ fn write_project_snapshot(
             ("commonEvents", project.database.common_events.as_ref()),
             ("animations", project.database.animations.as_ref()),
             ("tilesets", project.database.tilesets.as_ref()),
+            ("audio", project.database.audio.as_ref()),
         ];
         for (key, maybe_rel) in pairs {
             let Some(rel) = maybe_rel else { continue };
@@ -690,7 +694,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
     // and the file exists on disk. Missing files are tolerated and surface as
     // empty defaults; the renderer's `mergeDatabases()` fills the gaps.
     let mut databases = serde_json::Map::new();
-    let pairs: [(&str, Option<&String>); 18] = [
+    let pairs: [(&str, Option<&String>); 19] = [
         ("actors", project.database.actors.as_ref()),
         ("classes", project.database.classes.as_ref()),
         ("skills", project.database.skills.as_ref()),
@@ -709,6 +713,7 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
         ("commonEvents", project.database.common_events.as_ref()),
         ("animations", project.database.animations.as_ref()),
         ("tilesets", project.database.tilesets.as_ref()),
+        ("audio", project.database.audio.as_ref()),
     ];
     for (key, maybe_rel) in pairs {
         if let Some(rel) = maybe_rel {
@@ -752,7 +757,7 @@ fn extract_database_payload(key: &str, value: serde_json::Value) -> serde_json::
 fn is_object_database_shard(key: &str) -> bool {
     matches!(
         key,
-        "system" | "animations" | "tilesets" | "types" | "terms"
+        "system" | "animations" | "tilesets" | "types" | "terms" | "audio"
     )
 }
 
@@ -833,7 +838,7 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
     write_new_json(root, &project_state.project.database.items, &project_state.items)?;
 
     if let serde_json::Value::Object(map) = &project_state.databases {
-        let pairs: [(&str, Option<&String>); 18] = [
+        let pairs: [(&str, Option<&String>); 19] = [
             ("actors", project_state.project.database.actors.as_ref()),
             ("classes", project_state.project.database.classes.as_ref()),
             ("skills", project_state.project.database.skills.as_ref()),
@@ -861,6 +866,7 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
                 project_state.project.database.animations.as_ref(),
             ),
             ("tilesets", project_state.project.database.tilesets.as_ref()),
+            ("audio", project_state.project.database.audio.as_ref()),
         ];
         for (key, maybe_rel) in pairs {
             let Some(rel) = maybe_rel else { continue };
@@ -1138,6 +1144,7 @@ mod tests {
                 common_events: None,
                 animations: None,
                 tilesets: Some("data/database/tilesets.json".into()),
+                audio: None,
             },
         };
         let mut maps = HashMap::new();
@@ -1434,6 +1441,7 @@ mod tests {
                 common_events: None,
                 animations: None,
                 tilesets: None,
+                audio: None,
             },
         };
 
@@ -1550,7 +1558,8 @@ mod tests {
                 "terms": "data/database/terms.json",
                 "system": "data/database/system.json",
                 "switches": "data/database/switches.json",
-                "animations": "data/database/animations.json"
+                "animations": "data/database/animations.json",
+                "audio": "data/database/audio.json"
             }
         });
         fs::write(
@@ -1622,6 +1631,11 @@ mod tests {
             r#"{"schemaVersion":1,"sets":[{"id":"player_adventurer","clips":[{"action":"idle","direction":"down","asset":"player_adventurer_idle_down","frameSize":{"width":64,"height":64},"frameCount":4,"fps":6,"loop":true,"anchor":{"x":32,"y":54}}]}]}"#,
         )
         .unwrap();
+        fs::write(
+            root.join("data/database/audio.json"),
+            r#"{"schemaVersion":1,"audio":{"confirm":"assets/audio/confirm.wav"},"sounds":[{"id":"click","path":"assets/audio/click.wav"}],"bgm":[{"id":"town","path":"assets/audio/town.wav"}]}"#,
+        )
+        .unwrap();
     }
 
     #[test]
@@ -1641,6 +1655,7 @@ mod tests {
         assert!(dbs.contains_key("system"));
         assert!(dbs.contains_key("switches"));
         assert!(dbs.contains_key("animations"));
+        assert!(dbs.contains_key("audio"));
         // actors should be unwrapped to the list, not the wrapping object
         let actors = dbs.get("actors").unwrap().as_array().unwrap();
         assert_eq!(actors.len(), 1);
@@ -1660,6 +1675,11 @@ mod tests {
         assert_eq!(system.get("startingGold").unwrap(), 50);
         let animations = dbs.get("animations").unwrap().as_object().unwrap();
         assert!(animations.get("sets").unwrap().as_array().unwrap().len() > 0);
+        let audio = dbs.get("audio").unwrap().as_object().unwrap();
+        assert_eq!(
+            audio.get("audio").unwrap().get("confirm").unwrap(),
+            "assets/audio/confirm.wav"
+        );
     }
 
     #[test]
@@ -1690,7 +1710,7 @@ mod tests {
         // Re-implement what fs_write_project does for databases inline so we
         // don't need a State<AppState>.
         if let serde_json::Value::Object(map) = &state.databases {
-            let pairs: [(&str, Option<&String>); 18] = [
+            let pairs: [(&str, Option<&String>); 19] = [
                 ("actors", state.project.database.actors.as_ref()),
                 ("classes", state.project.database.classes.as_ref()),
                 ("skills", state.project.database.skills.as_ref()),
@@ -1712,6 +1732,7 @@ mod tests {
                 ),
                 ("animations", state.project.database.animations.as_ref()),
                 ("tilesets", state.project.database.tilesets.as_ref()),
+                ("audio", state.project.database.audio.as_ref()),
             ];
             for (key, maybe_rel) in pairs {
                 let Some(rel) = maybe_rel else { continue };
@@ -1775,6 +1796,18 @@ mod tests {
             .as_object()
             .unwrap();
         assert_eq!(terms.get("currencyUnit").unwrap(), "G");
+        let audio = reloaded
+            .databases
+            .as_object()
+            .unwrap()
+            .get("audio")
+            .unwrap()
+            .as_object()
+            .unwrap();
+        assert_eq!(
+            audio.get("audio").unwrap().get("confirm").unwrap(),
+            "assets/audio/confirm.wav"
+        );
     }
 
     #[test]

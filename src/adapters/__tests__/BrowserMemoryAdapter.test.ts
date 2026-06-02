@@ -59,8 +59,14 @@ describe('BrowserMemoryAdapter', () => {
     const a = new BrowserMemoryAdapter();
     const state = await a.loadProject();
     state.project.title = 'Roundtrip RPG';
+    state.project.database.audio = 'data/database/audio.json';
     state.databases.types.weaponTypes.push({ id: 'axe', name: 'Axe' });
     state.databases.terms.currencyUnit = 'Credits';
+    state.databases.audio = {
+      audio: { confirm: 'assets/audio/confirm.wav' },
+      sounds: [{ id: 'click', path: 'assets/audio/click.wav' }],
+      bgm: [{ id: 'town', path: 'assets/audio/town.wav' }],
+    };
     await a.saveAll(state);
 
     const blob = await a.exportAll(state);
@@ -71,8 +77,12 @@ describe('BrowserMemoryAdapter', () => {
     const fresh = new BrowserMemoryAdapter();
     const imported = await fresh.importAll(text);
     expect(imported.project.title).toBe('Roundtrip RPG');
+    expect(imported.project.database.audio).toBe('data/database/audio.json');
     expect(imported.databases.types.weaponTypes.map(type => type.id)).toContain('axe');
     expect(imported.databases.terms.currencyUnit).toBe('Credits');
+    expect(imported.databases.audio?.audio?.confirm).toBe('assets/audio/confirm.wav');
+    expect(imported.databases.audio?.sounds?.[0].id).toBe('click');
+    expect(imported.databases.audio?.bgm?.[0].path).toBe('assets/audio/town.wav');
   });
 
   it('export → import roundtrip preserves polished map metadata', async () => {

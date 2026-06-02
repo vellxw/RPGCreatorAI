@@ -244,6 +244,14 @@ Primary Phase 11 sources:
   roundtrip. Runtime milestone 04 is green and ready for database/system
   dependency work. Evidence is recorded in
   `docs/PHASE_11_RUNTIME_FEATURE_COMPLETENESS_GATE.md`.
+- Phase 11 CP-041 — database schema gap audit completed. The support matrix
+  now distinguishes TypeScript schema, bundled JSON shards, editor/desktop
+  preservation, TypeScript validation, native loader/validator support, and
+  actual runtime consumption. CP-041 also aligned optional `database.audio`
+  preservation across TypeScript and Tauri, added native `ProjectLoader`
+  path capture for separated `weapons`, `armors`, and `states` shards, and
+  maps large gaps to existing CP-042 through CP-048 follow-up issues.
+  Evidence is recorded in `docs/PHASE_11_DATABASE_SCHEMA_GAP_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

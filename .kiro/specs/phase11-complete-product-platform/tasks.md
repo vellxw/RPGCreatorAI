@@ -50,6 +50,14 @@
   - [x] CP-039 / FRA-74: add runtime diagnostics and developer overlay.
   - [x] CP-040 / FRA-75: run the runtime feature completeness integration gate.
 - [ ] 05 Database/System Completeness.
+  - [x] CP-041 / FRA-76: audit database schema gaps.
+  - [ ] CP-042 / FRA-77: polish actor, class, and skill authoring.
+  - [ ] CP-043 / FRA-78: polish enemy and troop authoring.
+  - [ ] CP-044 / FRA-79: polish item, equipment, and state authoring.
+  - [ ] CP-045 / FRA-80: polish system, types, and terms.
+  - [ ] CP-046 / FRA-81: polish common event authoring.
+  - [ ] CP-047 / FRA-82: add reference repair tools.
+  - [ ] CP-048 / FRA-83: run the database/system completeness gate.
 - [ ] 06 Asset Library And Import Pipeline.
 - [ ] 07 AI Provider Hub Foundation.
 - [ ] 08 GPT Image 2 Asset Pipeline.

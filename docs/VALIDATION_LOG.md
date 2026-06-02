@@ -4164,3 +4164,36 @@ Error: Port 1420 is already in use
   `docs/PHASE_11_RUNTIME_FEATURE_COMPLETENESS_GATE.md`; milestone 04 marked
   complete in `.kiro/specs/phase11-complete-product-platform/tasks.md` and
   `docs/GOAL_STACK.md`.
+
+### Phase 11 FRA-76 / CP-041 — database schema gap audit
+
+- `2026-06-02 06:19:48 -03:00` —
+  `npm run typecheck` — FAIL; adding optional `databases.audio` made
+  `DatabaseListKey` include `audio`, so `DatabaseList` became non-exhaustive.
+  Fix: excluded `audio` from CRUD database-list keys because it is an optional
+  registry shard, not a list editor table.
+- `2026-06-02 06:19:48 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS; 2 focused files and 24 Vitest tests passed, including audio shard
+  export/import preservation.
+- `2026-06-02 06:19:48 -03:00` — `cargo test` in `src-tauri` — PASS before
+  cleanup; 33 Rust tests passed, including database shard read/write
+  round-trip coverage for optional `database.audio`.
+- `2026-06-02 06:19:48 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — FAIL; native tests crashed in `ProjectLoader loads optional database audio
+  path` because the incremental build reused a stale test object after the
+  `ProjectData` layout changed. Fix: reran the repo-native build with
+  `-Clean` to rebuild generated native artifacts.
+- `2026-06-02 06:21:27 -03:00` — `npm run typecheck` — PASS after excluding
+  `audio` from `DatabaseListKey`.
+- `2026-06-02 06:21:27 -03:00` —
+  `npm test -- --run src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS; 2 focused files and 24 Vitest tests passed.
+- `2026-06-02 06:21:27 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1 -Clean`
+  — PASS; native configure/build/test completed from a clean generated build
+  directory and `RPGTests` passed 1/1. Warnings were limited to known CMake
+  third-party policy/deprecation warnings.
+- `2026-06-02 06:26:39 -03:00` — `cargo test` in `src-tauri` — PASS on the
+  final CP-041 worktree; 33 Rust tests passed.

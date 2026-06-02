@@ -25,9 +25,9 @@ Legend:
 | Event priority / Y-sort | val | yes | yes | yes | yes | yes | Below/same/above render priority is data-driven from active pages; same-priority entities interleave with the player by foot Y and stable id tie-breaks. |
 | Common events | val | yes | yes | yes | yes | yes | Common events reuse the command-stack editor and runtime scheduling remains covered. |
 | Database V2 shared editor framework | val | n/a | yes | n/a | yes | yes | Reusable database layout, list, field, reference-select, and array editor primitives are integrated with tests. |
-| Items, weapons, armors, states | val | yes | yes | yes | yes | yes | Dedicated V2 forms, type references, numeric validation, and separated equipment shard compatibility are integrated. |
-| Actors, classes, skills, enemies, troops | val | yes | yes | yes | yes | yes | Dedicated party/combat V2 forms, reference validation, and tests are integrated. |
-| Quests, shops, switches, variables, system | val | yes | yes | yes | yes | yes | Dedicated setup/progression V2 forms, usage warnings, system defaults, and reference validation are integrated. |
+| Items, weapons, armors, states | partial | yes | yes | partial | yes | yes | Items are runtime-consumed for inventory/equipment modifiers; separated `weapons`, `armors`, and `states` shards are editor/validation data until CP-044 resolves direct runtime depth. |
+| Actors, classes, skills, enemies, troops | partial | yes | yes | partial | yes | yes | Actor/class/enemy/troop battle data is runtime-consumed; class learned skills, usable equipment, and richer skill behavior remain CP-042 polish. |
+| Quests, shops, switches, variables, system | partial | yes | yes | partial | yes | yes | Quests, shops, and system defaults are runtime-consumed; switch/variable ids are validated but non-default initial values are not seeded into runtime state yet. |
 | Types and terms | val | yes | yes | partial | yes | yes | Shards persist, validate, and are consumed by V2 editors for typed references and default labels. |
 | Animations | val | yes | yes | yes | yes | yes | Animation database editor, sprite-sheet preview, runtime data, validation, and tests are integrated. |
 | Runtime project validator | val | n/a | n/a | yes | yes | yes | Pre-start validator blocks malformed projects before `Game::initialize` with C++ tests and smoke coverage. |
