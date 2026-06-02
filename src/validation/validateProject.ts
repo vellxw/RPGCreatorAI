@@ -506,6 +506,68 @@ function validateAssetCatalog(state: FullProjectState): ValidationMessage[] {
         });
       }
     }
+
+    const rawAsset = asset as unknown as Record<string, unknown>;
+    if (rawAsset.tags !== undefined) {
+      if (!Array.isArray(rawAsset.tags)) {
+        out.push({
+          level: 'error',
+          message: `Asset "${id}" tags must be an array`,
+          source,
+        });
+      } else {
+        const seenTags = new Set<string>();
+        rawAsset.tags.forEach((tag, index) => {
+          if (typeof tag !== 'string') {
+            out.push({
+              level: 'error',
+              message: `Asset "${id}" tag ${index + 1} must be text`,
+              source,
+            });
+            return;
+          }
+          const normalized = tag.trim();
+          if (!normalized) {
+            out.push({
+              level: 'error',
+              message: `Asset "${id}" has blank tag`,
+              source,
+            });
+            return;
+          }
+          const tagKey = normalized.toLowerCase();
+          if (seenTags.has(tagKey)) {
+            out.push({
+              level: 'error',
+              message: `Asset "${id}" has duplicate tag "${normalized}"`,
+              source,
+            });
+            return;
+          }
+          seenTags.add(tagKey);
+        });
+      }
+    }
+
+    for (const key of ['provenance', 'runtimeNotes', 'notes'] as const) {
+      if (rawAsset[key] !== undefined && typeof rawAsset[key] !== 'string') {
+        out.push({
+          level: 'error',
+          message: `Asset "${id}" ${key} must be text`,
+          source,
+        });
+      }
+    }
+
+    for (const key of ['runtimeCompatible', 'protected'] as const) {
+      if (rawAsset[key] !== undefined && typeof rawAsset[key] !== 'boolean') {
+        out.push({
+          level: 'error',
+          message: `Asset "${id}" ${key} must be boolean`,
+          source,
+        });
+      }
+    }
   }
 
   return out;

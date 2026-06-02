@@ -136,6 +136,83 @@ describe('referenceIndex', () => {
     );
   });
 
+  it('finds references to cataloged assets without treating static generated keys as broken assets', () => {
+    const project = makeProject();
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_run_sheet',
+          name: 'Hero Run Sheet',
+          kind: 'spritesheet',
+          path: 'assets/imported/spritesheets/hero-run-sheet.png',
+          source: 'imported',
+        },
+        {
+          id: 'forest_pack',
+          name: 'Forest Pack',
+          kind: 'tileset',
+          path: 'assets/imported/tilesets/forest-pack.png',
+          source: 'imported',
+        },
+        {
+          id: 'town_loop',
+          name: 'Town Loop',
+          kind: 'audio',
+          path: 'assets/imported/audio/town-loop.wav',
+          source: 'imported',
+        },
+      ],
+    };
+    project.databases.animations.sets = [
+      {
+        id: 'hero',
+        clips: [
+          {
+            action: 'run',
+            direction: 'down',
+            asset: 'hero_run_sheet',
+            frameSize: { width: 64, height: 64 },
+            frameCount: 6,
+            fps: 10,
+            loop: true,
+            anchor: { x: 32, y: 54 },
+          },
+        ],
+      },
+    ];
+    project.databases.tilesets.tilesets = [
+      {
+        id: 'forest',
+        name: 'Forest',
+        tileSize: 32,
+        tiles: [
+          {
+            id: 0,
+            name: 'Grass',
+            asset: 'forest_pack',
+            group: 'A',
+            passability: 'passable',
+          },
+        ],
+      },
+    ];
+    project.databases.system.audio = {
+      town_loop: 'assets/imported/audio/town-loop.wav',
+    };
+
+    expect(findReferences(project, { table: 'assets', id: 'hero_run_sheet' }).map(ref => ref.source)).toContain(
+      'database/animations/hero/clips/1/asset',
+    );
+    expect(findReferences(project, { table: 'assets', id: 'forest_pack' }).map(ref => ref.source)).toContain(
+      'database/tilesets/forest/tiles/0/asset',
+    );
+    expect(findReferences(project, { table: 'assets', id: 'town_loop' }).map(ref => ref.source)).toContain(
+      'database/system/audio/town_loop',
+    );
+    expect(listBrokenReferences(project).some(ref => ref.reference.table === 'assets' && ref.reference.id === 'grass')).toBe(false);
+  });
+
   it('suggests same-table replacements for broken references', () => {
     const project = makeProject();
     project.maps.town.events[0].commands.push({ type: 'addItem', itemId: 'missing_potion', amount: 1 });

@@ -4,6 +4,53 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-89 / CP-054 — asset metadata editor
+
+- `timestamp unavailable after context compaction` —
+  `npm test -- --run src/screens/__tests__/AssetsScreen.test.tsx src/stores/__tests__/assetCatalogReducer.test.ts src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — RED as expected after adding CP-054 coverage; the Assets screen lacked
+  editable asset metadata controls and disabled asset id display, the reducer
+  had no `UPDATE_ASSET_CATALOG_METADATA` action, asset metadata validation did
+  not reject invalid editable values, and the reference index did not report
+  catalog asset refs.
+- `2026-06-02 11:04:44 -03:00` —
+  `npm test -- --run src/screens/__tests__/AssetsScreen.test.tsx src/stores/__tests__/assetCatalogReducer.test.ts src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/referenceIndex.test.ts`
+  — PASS; 4 focused files and 35 Vitest tests passed after adding metadata
+  editing, reducer updates, metadata validation, and asset reference indexing.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` — `npm run typecheck` — FAIL; the invalid
+  metadata test fixture referenced optional `project.assets.assets`, and
+  `validateProject` needed an explicit `unknown` cast before runtime metadata
+  type inspection. Fix applied: type the fixture as `AssetCatalogEntry` and
+  cast through `unknown` for raw loaded JSON checks.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` — `npm run typecheck` — PASS.
+- `2026-06-02 11:07:46 -03:00` — `npm test -- --run` — PASS; 62 Vitest
+  files and 351 tests passed.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` — `npm run build` — PASS; Vite transformed
+  1929 modules and emitted the known non-fatal chunk-size warning.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` —
+  `cargo test --manifest-path src-tauri\Cargo.toml` — PASS; 40 Rust desktop
+  tests passed.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; CMake/Ninja reported no work to do for the runtime, and CTest
+  passed `RPGTests` 1/1.
+- `2026-06-02 11:17:14 -03:00 (logged after run)` — Browser smoke via Chrome DevTools — PASS:
+  Vite `http://127.0.0.1:5177/` -> `Use My First RPG` -> `Assets` -> filter
+  `theme` -> selected `town_theme` -> edited display name and tags. The panel
+  kept `Asset ID` disabled, showed `Referenced by 1 source` with
+  `database/system/audio/town_theme`, exposed runtime compatibility and notes
+  controls, saved screenshot evidence to
+  `docs/screenshots/phase11-cp054/asset-metadata-editor.png`, and console had
+  no errors or warnings.
+- Fix applied: catalog assets now have editable display/source/tags/
+  provenance/dimension/runtime/protected/notes metadata, immutable identity
+  fields in the UI, reducer-backed metadata updates, validation for invalid
+  editable values, and selected-asset reference visibility for animation,
+  tileset, and system audio refs.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-88 / CP-053 — tileset import workflow
 
 - `2026-06-02 10:32:17 -03:00` —

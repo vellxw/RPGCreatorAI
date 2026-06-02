@@ -36,7 +36,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-054 next).
+- Phase 11 Linear milestone 06 — asset library and import pipeline (CP-055 next).
 - Phase 11 Linear milestone 07 — AI Provider Hub foundation.
 - Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline.
 - Phase 11 Linear milestone 09 — AI characters and animations.
@@ -354,6 +354,16 @@ Primary Phase 11 sources:
   visual layer tile ids against the active project tileset database.
   Evidence is recorded in `docs/PHASE_11_TILESET_IMPORT_WORKFLOW.md` and
   `docs/screenshots/phase11-cp053/`.
+- Phase 11 CP-054 — asset metadata editor completed. The Assets workspace now
+  edits catalog display name, source, tags, provenance, dimensions, runtime
+  compatibility, runtime notes, protected status, and notes while keeping asset
+  ids, kind, and path immutable in the UI. The detail panel surfaces
+  generated/imported/protected/runtime status and reference sources for the
+  selected asset; TypeScript validation rejects invalid metadata values, and
+  the shared reference index reports catalog asset references without treating
+  static generated tile keys as broken asset refs. Evidence is recorded in
+  `docs/PHASE_11_ASSET_METADATA_EDITOR.md` and
+  `docs/screenshots/phase11-cp054/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

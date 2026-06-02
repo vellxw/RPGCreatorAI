@@ -97,6 +97,134 @@ describe('AssetsScreen', () => {
     view.unmount();
   });
 
+  it('edits mutable asset metadata while keeping referenced IDs locked', () => {
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [
+          {
+            id: 'hero_run_sheet',
+            name: 'Hero Run Sheet',
+            kind: 'spritesheet',
+            path: 'assets/imported/spritesheets/hero-run-sheet.png',
+            source: 'imported',
+            tags: ['hero', 'runtime'],
+            width: 384,
+            height: 64,
+            frameWidth: 64,
+            frameHeight: 64,
+            frames: 6,
+            provenance: 'Local import',
+            runtimeCompatible: true,
+            runtimeNotes: 'Used by hero animation set',
+            notes: 'Original run cycle.',
+            protected: true,
+          },
+        ],
+      },
+      databases: {
+        ...initialProjectStoreState.databases,
+        animations: {
+          sets: [
+            {
+              id: 'hero',
+              clips: [
+                {
+                  action: 'run',
+                  direction: 'down',
+                  asset: 'hero_run_sheet',
+                  frameSize: { width: 64, height: 64 },
+                  frameCount: 6,
+                  fps: 10,
+                  loop: true,
+                  anchor: { x: 32, y: 54 },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    const view = renderAssetsScreen(state);
+
+    const id = view.container.querySelector<HTMLInputElement>('input[aria-label="Asset ID"]');
+    expect(id?.value).toBe('hero_run_sheet');
+    expect(id?.disabled).toBe(true);
+    expect(view.container.textContent).toContain('Imported');
+    expect(view.container.textContent).toContain('Protected');
+    expect(view.container.textContent).toContain('Referenced by 1 source');
+    expect(view.container.textContent).toContain('database/animations/hero/clips/1/asset');
+
+    const name = view.container.querySelector<HTMLInputElement>('input[aria-label="Asset display name"]');
+    act(() => {
+      name!.value = 'Hero Run Revised';
+      name!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { name: 'Hero Run Revised' },
+    });
+
+    const tags = view.container.querySelector<HTMLInputElement>('input[aria-label="Asset tags"]');
+    act(() => {
+      tags!.value = 'hero, runtime, imported';
+      tags!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { tags: ['hero', 'runtime', 'imported'] },
+    });
+
+    const source = view.container.querySelector<HTMLSelectElement>('select[aria-label="Asset source"]');
+    act(() => {
+      source!.value = 'local';
+      source!.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { source: 'local' },
+    });
+
+    const width = view.container.querySelector<HTMLInputElement>('input[aria-label="Asset width"]');
+    act(() => {
+      width!.value = '256';
+      width!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { width: 256 },
+    });
+
+    const compatibility = view.container.querySelector<HTMLSelectElement>('select[aria-label="Runtime compatibility"]');
+    act(() => {
+      compatibility!.value = 'false';
+      compatibility!.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { runtimeCompatible: false },
+    });
+
+    const notes = view.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="Asset notes"]');
+    act(() => {
+      notes!.value = 'Reviewed for runtime export.';
+      notes!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(view.dispatch).toHaveBeenCalledWith({
+      type: 'UPDATE_ASSET_CATALOG_METADATA',
+      id: 'hero_run_sheet',
+      changes: { notes: 'Reviewed for runtime export.' },
+    });
+
+    view.unmount();
+  });
+
   it('imports an image asset and dispatches a catalog entry', async () => {
     const imageImporter: ImageImportRunner = vi.fn(async () => ({
       success: true,

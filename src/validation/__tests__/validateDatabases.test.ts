@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateProject } from '../validateProject';
 import type { FullProjectState } from '../../adapters/types';
-import type { MapData } from '../../types/project';
+import type { AssetCatalogEntry, MapData } from '../../types/project';
 import { mergeDatabases } from '../../adapters/defaultDatabases';
 
 function makeMap(): MapData {
@@ -744,6 +744,38 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Asset "unsafe_audio" uses unsafe project-relative path'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Asset catalog entry is missing an id'))).toBe(true);
     expect(report.errors.some(e => e.message.includes('Asset "" path is required'))).toBe(true);
+  });
+
+  it('validates editable asset metadata values', () => {
+    const project = projectWith({});
+    project.assets = {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_sheet',
+          name: 'Hero Sheet',
+          kind: 'spritesheet',
+          path: 'assets/imported/spritesheets/hero.png',
+          source: 'imported',
+          tags: ['hero', ' ', 'hero'],
+          runtimeCompatible: 'yes',
+          runtimeNotes: 42,
+          provenance: 100,
+          notes: 12,
+          protected: 'true',
+        } as unknown as AssetCatalogEntry,
+      ],
+    };
+
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" has blank tag'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" has duplicate tag "hero"'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" runtimeCompatible must be boolean'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" runtimeNotes must be text'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" provenance must be text'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" notes must be text'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('Asset "hero_sheet" protected must be boolean'))).toBe(true);
   });
 
   it('accepts valid quest objective references', () => {

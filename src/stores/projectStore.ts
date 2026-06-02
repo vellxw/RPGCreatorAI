@@ -367,10 +367,33 @@ export type ProjectAction =
       type: 'ADD_ASSET_CATALOG_ENTRY';
       asset: AssetCatalogEntry;
     }
+  | {
+      type: 'UPDATE_ASSET_CATALOG_METADATA';
+      id: string;
+      changes: AssetCatalogMetadataChanges;
+    }
   | { type: 'MARK_SAVED'; at?: string }
   | { type: 'VALIDATE' };
 
 export type DatabaseRecord = { id: string } & Record<string, unknown>;
+export type AssetCatalogMetadataChanges = Partial<Pick<
+  AssetCatalogEntry,
+  | 'name'
+  | 'source'
+  | 'tags'
+  | 'provenance'
+  | 'runtimeCompatible'
+  | 'runtimeNotes'
+  | 'notes'
+  | 'protected'
+  | 'width'
+  | 'height'
+  | 'frameWidth'
+  | 'frameHeight'
+  | 'frames'
+  | 'durationMs'
+>>;
+
 export interface ProjectSnapshot {
   project: ProjectData;
   maps: Record<string, MapData>;
@@ -571,6 +594,58 @@ function normalizeMapPropertyChanges(
     next.parallax = normalizeMapParallax(next.parallax);
   }
   return next;
+}
+
+const MUTABLE_ASSET_TEXT_FIELDS = ['name', 'provenance', 'runtimeNotes', 'notes'] as const;
+const MUTABLE_ASSET_NUMBER_FIELDS = ['width', 'height', 'frameWidth', 'frameHeight', 'frames', 'durationMs'] as const;
+const MUTABLE_ASSET_BOOLEAN_FIELDS = ['runtimeCompatible', 'protected'] as const;
+const VALID_ASSET_SOURCES = new Set(['local', 'generated', 'imported']);
+
+function optionalTrimmedText(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const trimmed = value.trim();
+  return trimmed === '' ? undefined : trimmed;
+}
+
+function positiveFiniteNumberOrUndefined(value: number | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function normalizeAssetCatalogMetadataChanges(
+  changes: AssetCatalogMetadataChanges,
+): AssetCatalogMetadataChanges {
+  const out: AssetCatalogMetadataChanges = {};
+
+  for (const key of MUTABLE_ASSET_TEXT_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(changes, key)) {
+      out[key] = optionalTrimmedText(changes[key]);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(changes, 'source') && VALID_ASSET_SOURCES.has(changes.source ?? '')) {
+    out.source = changes.source;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(changes, 'tags')) {
+    out.tags = Array.from(
+      new Set((changes.tags ?? []).map(tag => tag.trim()).filter(Boolean)),
+    );
+  }
+
+  for (const key of MUTABLE_ASSET_NUMBER_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(changes, key)) {
+      out[key] = positiveFiniteNumberOrUndefined(changes[key]);
+    }
+  }
+
+  for (const key of MUTABLE_ASSET_BOOLEAN_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(changes, key)) {
+      out[key] = changes[key];
+    }
+  }
+
+  return out;
 }
 
 function snapshotOf(state: ProjectStoreState): ProjectSnapshot {
@@ -1660,6 +1735,33 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         assets: {
           ...state.assets,
           assets: [...state.assets.assets, deepClone({ ...action.asset, id: assetId })],
+        },
+      };
+    }
+
+    case 'UPDATE_ASSET_CATALOG_METADATA': {
+      const assetId = action.id.trim();
+      const assetIndex = state.assets.assets.findIndex(asset => asset.id === assetId);
+      if (!assetId || assetIndex < 0) return state;
+
+      const patch = normalizeAssetCatalogMetadataChanges(action.changes);
+      const current = state.assets.assets[assetIndex];
+      const nextAsset: AssetCatalogEntry = { ...current, ...patch };
+
+      for (const key of Object.keys(patch) as Array<keyof AssetCatalogMetadataChanges>) {
+        if (patch[key] === undefined) {
+          delete nextAsset[key];
+        }
+      }
+
+      if (JSON.stringify(nextAsset) === JSON.stringify(current)) return state;
+
+      return {
+        ...state,
+        dirty: true,
+        assets: {
+          ...state.assets,
+          assets: state.assets.assets.map(asset => (asset.id === assetId ? nextAsset : asset)),
         },
       };
     }

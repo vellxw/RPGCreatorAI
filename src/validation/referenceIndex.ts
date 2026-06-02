@@ -1,7 +1,7 @@
 import type { FullProjectState } from '../adapters/types';
 import type { DatabaseListKey, EventCommand, MapData } from '../types/project';
 
-export type ReferenceTable = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'questObjectives' | 'maps';
+export type ReferenceTable = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'questObjectives' | 'maps' | 'assets';
 
 export interface ReferenceTarget {
   table: ReferenceTable;
@@ -160,6 +160,12 @@ function mapReferences(map: MapData, refs: ReferenceRecord[]) {
 
 export function listReferences(project: FullProjectState): ReferenceRecord[] {
   const refs: ReferenceRecord[] = [];
+  const assetIds = new Set((project.assets?.assets ?? []).map(asset => asset.id));
+  const addAsset = (id: string | undefined, source: string, label: string) => {
+    if (!id || !assetIds.has(id)) return;
+    add(refs, 'assets', id, source, label);
+  };
+
   add(refs, 'maps', project.project.startMapId, 'project/startMapId', 'Project start map');
   for (const mapRef of project.project.maps) {
     add(refs, 'maps', mapRef.parentId ?? undefined, `project/maps/${mapRef.id}/parentId`, 'Map tree parent');
@@ -214,6 +220,19 @@ export function listReferences(project: FullProjectState): ReferenceRecord[] {
     add(refs, 'actors', actorId, `database/system/startingParty/${actorId}`, 'System starting party');
   }
   add(refs, 'animations', databases.system.playerAnimationSet, 'database/system/playerAnimationSet', 'System player animation set');
+  for (const [audioId] of Object.entries(databases.system.audio ?? {})) {
+    addAsset(audioId, `database/system/audio/${audioId}`, 'System audio asset');
+  }
+  for (const set of databases.animations.sets) {
+    set.clips.forEach((clip, index) => {
+      addAsset(clip.asset, `database/animations/${set.id}/clips/${index + 1}/asset`, 'Animation clip asset');
+    });
+  }
+  for (const tileset of databases.tilesets.tilesets) {
+    for (const tile of tileset.tiles) {
+      addAsset(tile.asset, `database/tilesets/${tileset.id}/tiles/${tile.id}/asset`, 'Tileset tile asset');
+    }
+  }
   for (const item of items.items) {
     add(refs, 'items', item.slot ? item.id : undefined, `database/items/${item.id}/slot`, 'Equippable item');
   }
@@ -423,6 +442,13 @@ export function listReferenceTargets(project: FullProjectState, table: Reference
       table,
       id: set.id,
       label: set.id,
+    }));
+  }
+  if (table === 'assets') {
+    return (project.assets?.assets ?? []).map(asset => ({
+      table,
+      id: asset.id,
+      label: `${asset.name} (${asset.id})`,
     }));
   }
   if (table === 'questObjectives') {

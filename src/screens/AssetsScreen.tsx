@@ -1,15 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Box, Grid2X2, Image, Music, Search, Sparkles, Upload } from 'lucide-react';
 import { gameAssets } from '../assets/generated/assetCatalog';
 import { Input, Select } from '../components/ui/Input';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
-import { useProjectStore } from '../stores/projectStore';
+import { useProjectStore, type AssetCatalogMetadataChanges } from '../stores/projectStore';
 import { mergeAudioRegistry } from '../audio/audioRegistry';
 import { importAudioAsset, type AudioImportRunner } from '../adapters/audioImport';
 import { importImageAsset, type ImageImportRunner } from '../adapters/assetImport';
 import type { AudioImportUsage } from '../adapters/types';
-import type { AssetCatalogEntry, AssetKind } from '../types/project';
+import type { AssetCatalogEntry, AssetKind, AssetSource } from '../types/project';
+import { findReferences } from '../validation/referenceIndex';
 
 const KIND_OPTIONS: Array<{ value: AssetKind | 'all'; label: string }> = [
   { value: 'all', label: 'All kinds' },
@@ -18,6 +19,18 @@ const KIND_OPTIONS: Array<{ value: AssetKind | 'all'; label: string }> = [
   { value: 'tileset', label: 'Tilesets' },
   { value: 'audio', label: 'Audio' },
   { value: 'generated', label: 'Generated' },
+];
+
+const SOURCE_OPTIONS: Array<{ value: AssetSource; label: string }> = [
+  { value: 'local', label: 'Local' },
+  { value: 'generated', label: 'Generated' },
+  { value: 'imported', label: 'Imported' },
+];
+
+const RUNTIME_COMPATIBILITY_OPTIONS = [
+  { value: 'unset', label: 'Not checked' },
+  { value: 'true', label: 'Runtime compatible' },
+  { value: 'false', label: 'Not runtime compatible' },
 ];
 
 const PREVIEW_BY_PATH: Record<string, string> = {
@@ -47,6 +60,10 @@ function kindLabel(kind: AssetKind): string {
   return kind === 'spritesheet' ? 'Sprite Sheet' : kind[0].toUpperCase() + kind.slice(1);
 }
 
+function sourceLabel(source: AssetSource): string {
+  return SOURCE_OPTIONS.find(option => option.value === source)?.label ?? source;
+}
+
 function matchesAsset(asset: AssetCatalogEntry, query: string, kind: AssetKind | 'all'): boolean {
   const normalizedQuery = query.trim().toLowerCase();
   if (kind !== 'all' && asset.kind !== kind) return false;
@@ -57,6 +74,10 @@ function matchesAsset(asset: AssetCatalogEntry, query: string, kind: AssetKind |
     asset.kind,
     asset.source,
     asset.path,
+    asset.provenance ?? '',
+    asset.runtimeNotes ?? '',
+    asset.notes ?? '',
+    asset.protected ? 'protected' : '',
     ...(asset.tags ?? []),
   ].join(' ').toLowerCase();
   return haystack.includes(normalizedQuery);
@@ -85,6 +106,31 @@ function Preview({ asset }: { asset: AssetCatalogEntry }) {
   );
 }
 
+function parseTagList(value: string): string[] {
+  return value
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean);
+}
+
+function optionalNumber(value: string): number | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function runtimeCompatibilityValue(asset: AssetCatalogEntry): string {
+  if (asset.runtimeCompatible === undefined) return 'unset';
+  return asset.runtimeCompatible ? 'true' : 'false';
+}
+
+function runtimeCompatibilityFromValue(value: string): boolean | undefined {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return undefined;
+}
+
 function DetailRow({ label, value }: { label: string; value: string | number | undefined }) {
   if (value === undefined || value === '') return null;
   return (
@@ -92,6 +138,14 @@ function DetailRow({ label, value }: { label: string; value: string | number | u
       <dt className="text-[12px] font-medium text-gray-500">{label}</dt>
       <dd className="text-[12px] text-gray-800 min-w-0 break-words">{value}</dd>
     </div>
+  );
+}
+
+function StatusChip({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-medium text-gray-600">
+      {children}
+    </span>
   );
 }
 
@@ -118,6 +172,24 @@ export function AssetsScreen({
     [catalog.assets, kind, query],
   );
   const selected = filteredAssets.find(asset => asset.id === selectedId) ?? filteredAssets[0] ?? null;
+  const selectedReferences = useMemo(() => {
+    if (!selected) return [];
+    return findReferences(
+      {
+        project: state.project,
+        maps: state.maps,
+        items: state.items,
+        databases: state.databases,
+        assets: state.assets,
+      },
+      { table: 'assets', id: selected.id },
+    );
+  }, [selected, state.assets, state.databases, state.items, state.maps, state.project]);
+
+  const updateSelectedMetadata = (changes: AssetCatalogMetadataChanges) => {
+    if (!selected) return;
+    dispatch({ type: 'UPDATE_ASSET_CATALOG_METADATA', id: selected.id, changes });
+  };
 
   const handleImportImage = async () => {
     setImporting(true);
@@ -285,31 +357,187 @@ export function AssetsScreen({
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4">
           {selected ? (
-            <div className="max-w-4xl space-y-4">
+            <div className="max-w-6xl space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <h2 className="text-[18px] font-semibold text-gray-900 truncate">{selected.name}</h2>
                   <p className="mt-1 text-[12px] text-gray-500 font-mono break-all">{selected.path}</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[12px] text-gray-600 bg-gray-100 border border-gray-200 rounded-md px-2 py-1">
-                  {iconForKind(selected.kind)}
-                  <span>{kindLabel(selected.kind)}</span>
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  <StatusChip>
+                    <span className="mr-1 text-gray-500">{iconForKind(selected.kind)}</span>
+                    {kindLabel(selected.kind)}
+                  </StatusChip>
+                  <StatusChip>{sourceLabel(selected.source)}</StatusChip>
+                  {selected.protected && <StatusChip>Protected</StatusChip>}
+                  {selected.generated && <StatusChip>Generated metadata</StatusChip>}
+                  {selected.runtimeCompatible === true && <StatusChip>Runtime ready</StatusChip>}
+                  {selected.runtimeCompatible === false && <StatusChip>Runtime blocked</StatusChip>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-[minmax(220px,320px)_minmax(0,1fr)] gap-4">
-                <Preview asset={selected} />
-                <dl className="rounded-md border border-gray-200 px-3 bg-white">
-                  <DetailRow label="ID" value={selected.id} />
-                  <DetailRow label="Source" value={selected.source} />
-                  <DetailRow label="Dimensions" value={dimensions(selected) ?? undefined} />
-                  <DetailRow label="Frame Size" value={selected.frameWidth && selected.frameHeight ? `${selected.frameWidth} x ${selected.frameHeight}` : undefined} />
-                  <DetailRow label="Frames" value={selected.frames} />
-                  <DetailRow label="Duration" value={selected.durationMs ? `${selected.durationMs} ms` : undefined} />
-                  <DetailRow label="Tags" value={selected.tags?.join(', ')} />
-                  <DetailRow label="Generated Tool" value={selected.generated?.tool} />
-                  <DetailRow label="Created" value={selected.generated?.createdAt} />
-                </dl>
+              <div className="grid grid-cols-[minmax(220px,300px)_minmax(0,1fr)] gap-4">
+                <div className="space-y-4">
+                  <Preview asset={selected} />
+                  <section className="rounded-md border border-gray-200 bg-white px-3 py-3">
+                    <h3 className="text-[12px] font-semibold text-gray-800">Reference safety</h3>
+                    <p className="mt-1 text-[12px] text-gray-500">
+                      {selectedReferences.length === 0
+                        ? 'No catalog references'
+                        : `Referenced by ${selectedReferences.length} source${selectedReferences.length === 1 ? '' : 's'}`}
+                    </p>
+                    {selectedReferences.length > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {selectedReferences.map(reference => (
+                          <li
+                            key={`${reference.table}:${reference.source}`}
+                            className="text-[11px] font-mono text-gray-600 break-all"
+                          >
+                            {reference.source}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                  <dl className="rounded-md border border-gray-200 px-3 bg-white">
+                    <DetailRow label="Kind" value={kindLabel(selected.kind)} />
+                    <DetailRow label="Path" value={selected.path} />
+                    <DetailRow label="Dimensions" value={dimensions(selected) ?? undefined} />
+                    <DetailRow label="Frame Size" value={selected.frameWidth && selected.frameHeight ? `${selected.frameWidth} x ${selected.frameHeight}` : undefined} />
+                    <DetailRow label="Frames" value={selected.frames} />
+                    <DetailRow label="Duration" value={selected.durationMs ? `${selected.durationMs} ms` : undefined} />
+                    <DetailRow label="Generated Tool" value={selected.generated?.tool} />
+                    <DetailRow label="Created" value={selected.generated?.createdAt} />
+                  </dl>
+                </div>
+
+                <section className="rounded-md border border-gray-200 bg-white p-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Asset ID"
+                      aria-label="Asset ID"
+                      value={selected.id}
+                      disabled
+                      className="font-mono text-gray-500 bg-gray-50"
+                    />
+                    <Input
+                      label="Display name"
+                      aria-label="Asset display name"
+                      value={selected.name}
+                      onInput={event => updateSelectedMetadata({ name: event.currentTarget.value })}
+                    />
+                    <Select
+                      label="Source"
+                      ariaLabel="Asset source"
+                      value={selected.source}
+                      options={SOURCE_OPTIONS}
+                      onChange={value => updateSelectedMetadata({ source: value as AssetSource })}
+                    />
+                    <Input
+                      label="Tags"
+                      aria-label="Asset tags"
+                      value={selected.tags?.join(', ') ?? ''}
+                      onInput={event => updateSelectedMetadata({ tags: parseTagList(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Provenance"
+                      aria-label="Asset provenance"
+                      value={selected.provenance ?? ''}
+                      onInput={event => updateSelectedMetadata({ provenance: event.currentTarget.value })}
+                      className="col-span-2"
+                    />
+                    <Input
+                      label="Width"
+                      aria-label="Asset width"
+                      type="number"
+                      min="1"
+                      value={selected.width ?? ''}
+                      onInput={event => updateSelectedMetadata({ width: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Height"
+                      aria-label="Asset height"
+                      type="number"
+                      min="1"
+                      value={selected.height ?? ''}
+                      onInput={event => updateSelectedMetadata({ height: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Frame width"
+                      aria-label="Asset frame width"
+                      type="number"
+                      min="1"
+                      value={selected.frameWidth ?? ''}
+                      onInput={event => updateSelectedMetadata({ frameWidth: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Frame height"
+                      aria-label="Asset frame height"
+                      type="number"
+                      min="1"
+                      value={selected.frameHeight ?? ''}
+                      onInput={event => updateSelectedMetadata({ frameHeight: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Frames"
+                      aria-label="Asset frames"
+                      type="number"
+                      min="1"
+                      value={selected.frames ?? ''}
+                      onInput={event => updateSelectedMetadata({ frames: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Input
+                      label="Duration ms"
+                      aria-label="Asset duration ms"
+                      type="number"
+                      min="1"
+                      value={selected.durationMs ?? ''}
+                      onInput={event => updateSelectedMetadata({ durationMs: optionalNumber(event.currentTarget.value) })}
+                    />
+                    <Select
+                      label="Runtime"
+                      ariaLabel="Runtime compatibility"
+                      value={runtimeCompatibilityValue(selected)}
+                      options={RUNTIME_COMPATIBILITY_OPTIONS}
+                      onChange={value => updateSelectedMetadata({ runtimeCompatible: runtimeCompatibilityFromValue(value) })}
+                    />
+                    <label className="flex items-end gap-2 rounded-md border border-gray-200 px-2.5 py-1.5 text-[12px] text-gray-600">
+                      <input
+                        type="checkbox"
+                        aria-label="Protected asset metadata"
+                        checked={selected.protected === true}
+                        onChange={event => updateSelectedMetadata({ protected: event.currentTarget.checked })}
+                      />
+                      <span className="pb-0.5">Protected</span>
+                    </label>
+                    <div className="col-span-2 flex flex-col gap-1">
+                      <label htmlFor="asset-runtime-notes" className="text-[12px] font-medium text-gray-500">
+                        Runtime notes
+                      </label>
+                      <textarea
+                        id="asset-runtime-notes"
+                        aria-label="Runtime notes"
+                        value={selected.runtimeNotes ?? ''}
+                        onInput={event => updateSelectedMetadata({ runtimeNotes: event.currentTarget.value })}
+                        rows={3}
+                        className="px-2.5 py-1.5 text-[13px] border border-gray-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 resize-y"
+                      />
+                    </div>
+                    <div className="col-span-2 flex flex-col gap-1">
+                      <label htmlFor="asset-notes" className="text-[12px] font-medium text-gray-500">
+                        Notes
+                      </label>
+                      <textarea
+                        id="asset-notes"
+                        aria-label="Asset notes"
+                        value={selected.notes ?? ''}
+                        onInput={event => updateSelectedMetadata({ notes: event.currentTarget.value })}
+                        rows={4}
+                        className="px-2.5 py-1.5 text-[13px] border border-gray-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 resize-y"
+                      />
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
           ) : (

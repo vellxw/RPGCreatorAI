@@ -136,6 +136,11 @@ export interface AssetCatalogEntry {
   path: string;
   source: AssetSource;
   tags?: string[];
+  provenance?: string;
+  runtimeCompatible?: boolean;
+  runtimeNotes?: string;
+  notes?: string;
+  protected?: boolean;
   width?: number;
   height?: number;
   frameWidth?: number;
