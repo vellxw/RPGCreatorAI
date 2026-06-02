@@ -72,7 +72,7 @@
   - [x] CP-058 / FRA-93: implement credential storage policy.
   - [x] CP-059 / FRA-94: add AI request queue and cancellation.
   - [x] CP-060 / FRA-95: add provider registry and adapter interface.
-  - [ ] CP-061 / FRA-96: add model capability registry.
+  - [x] CP-061 / FRA-96: add model capability registry.
   - [ ] CP-062 / FRA-97: add cost, rate-limit, and budget states.
   - [ ] CP-063 / FRA-98: add mocked provider contract test suite.
   - [ ] CP-064 / FRA-99: run the AI Provider Hub foundation integration gate.

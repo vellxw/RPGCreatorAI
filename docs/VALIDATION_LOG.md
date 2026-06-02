@@ -4,6 +4,37 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-96 / CP-061 — model capability registry
+
+- `2026-06-02 13:22:42 -03:00` —
+  `npm test -- --run src/providers/__tests__/modelCapabilityRegistry.test.ts src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx`
+  — RED as expected before implementation; `modelCapabilityRegistry` and
+  `ProviderCapabilityGatesPanel` modules did not exist.
+- `2026-06-02 13:23:46 -03:00` —
+  `npm test -- --run src/providers/__tests__/modelCapabilityRegistry.test.ts src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  — PASS; 4 focused files and 12 tests passed after adding model capability
+  descriptors, workflow gates, Settings gate UI, and no-live-action
+  regressions.
+- `2026-06-02 13:24:10 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:25:05 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 13:25:39 -03:00` — `npm test -- --run` — PASS; 71
+  Vitest files and 379 tests passed.
+- `2026-06-02 13:26:35 -03:00` — `npm run build` — PASS; Vite
+  transformed 1938 modules and emitted the known non-fatal chunk-size
+  warning.
+- `2026-06-02 13:28:40 -03:00` —
+  Playwright CLI smoke with refs against `npm run dev` at
+  `http://127.0.0.1:5173/` — PASS; entered the bundled sample, opened
+  Settings, verified `Capability Gates`, `0 ready`, workflow unavailable
+  states, and no live generation/connect/test action. The dev server was
+  stopped afterward and generated Playwright artifacts were removed.
+- Fix applied: added editor-side model capability schema, limits, workflow
+  gate helpers, read-only Settings capability gates, and docs for the
+  data-driven no-live-provider boundary.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-95 / CP-060 — provider registry and adapter interface
 
 - `2026-06-02 13:13:02 -03:00` —

@@ -44,6 +44,10 @@ Settings still renders the same disabled/no-secret defaults, but provider ids,
 credential requirements, supported operations, and capability labels now come
 from registry data instead of a duplicated settings-only list.
 
+CP-061 adds a read-only `Capability Gates` panel. Workflow availability is
+resolved from configured model capability descriptors, not provider names, and
+the panel still exposes no generation/connect/test-provider action.
+
 ## Runtime Boundary
 
 The native runtime remains independent of provider settings, AI providers,

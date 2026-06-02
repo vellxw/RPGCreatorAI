@@ -146,6 +146,10 @@ Generated output must never be silently imported into accepted project data.
   editor-side TypeScript contracts, derives Settings provider defaults from
   registry metadata, and adds only a deterministic mock local adapter for
   contract tests. Real provider adapters remain future opt-in work.
+- PASS: CP-061 defines model capabilities, limits, and workflow gates as
+  editor-side data. UI availability is resolved from configured model
+  descriptors rather than provider names, and no live generation action is
+  exposed.
 - OPEN: Provider Hub implementation issues must still add provider metadata,
   mock contract tests, opt-in UX, cost/rate-limit/error states, and live
   diagnostic gates.

@@ -15,13 +15,15 @@ dependency, credential read, project mutation, or native runtime dependency.
 - supported operation ids:
   `text.generate`, `image.generate`, `image.edit`, `vision.analyze`,
   `code.assist`, `audio.generate`, and `video.generate`
-- model-list policy
+- model-list policy; CP-061 adds model capability descriptors and workflow
+  gates on top of this provider-level metadata
 - optional base URL metadata for OpenAI-compatible providers
 
 Real provider model ids are not required product defaults. Most real providers
-use `modelSelection: user-selected`; CP-061 owns richer model/capability
-registry work. The local mock provider has a fixture model descriptor so
-contract tests can validate the adapter shape offline.
+use `modelSelection: user-selected`; CP-061 stores model capability data
+separately so capabilities can change without rewriting provider screens. The
+local mock provider has a fixture model descriptor so contract tests can
+validate the adapter shape offline.
 
 ## Adapter Contract
 
