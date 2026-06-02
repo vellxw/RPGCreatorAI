@@ -12,9 +12,9 @@ tests. No v1 command is completely missing from the native EventRunner.
 
 The remaining gaps are product-depth gaps, not parser/schema holes:
 
-- battle commands run through the deterministic battle runner and summary, but
-  do not yet expose full authored battle flow such as escape handling policy
-  or richer battle event outcomes;
+- battle commands run through the deterministic battle runner and summary.
+  CP-035 closed the hidden stat/reference assumptions and now rejects
+  `canEscape=true` by validation until interactive escape exists;
 - audio commands cover local sound-effect dispatch, but not full BGM/BGS/ME
   authoring controls;
 - plugin commands are intentionally limited to deterministic debug built-ins;
@@ -84,7 +84,7 @@ Legend:
 | `updateQuestObjective` | Yes | Yes | Quest/objective refs | Yes | Updates quest objective state. | `test_event_runner.cpp`, state tests | Full |
 | `completeQuest` | Yes | Yes | Quest reference | Yes | Marks quest completed. | `test_event_runner.cpp`, state tests | Full |
 | `openShop` | Yes | Yes | Shop reference | Yes | Emits shop request; `Game` opens local shop system when id exists. | `test_event_runner.cpp`, shop tests | Full |
-| `startBattle` | Yes | Yes | Troop reference and branches | Yes | Runs deterministic battle runner, applies victory rewards, opens summary, queues victory/defeat branches. | `test_event_runner.cpp`, battle tests | Partial |
+| `startBattle` | Yes | Yes | Troop reference, branches, unsupported escape policy, and battle database refs | Yes | Runs deterministic battle runner from actor/class/equipment/enemy/troop data, applies victory rewards, opens summary, queues victory/defeat branches. | `test_event_runner.cpp`, battle tests, runtime validator tests | Partial |
 | `changeActorHp` | Yes | Yes | Actor reference | Yes | Applies actor HP delta with zero clamp in `GameState`. | `test_event_runner.cpp` | Partial |
 | `playAnimation` | Yes | Yes | Target, event, action, direction, duration refs | Yes | Emits animation request; `Game` applies manual player/event animation state and optional blocking wait. | `test_event_runner.cpp`, validator tests | Partial |
 | `setMovementRoute` | Yes | Yes | Target, event, step shape | Yes | Emits route request; `Game` applies deterministic move/turn/wait steps to player or event. | `test_event_runner.cpp`, movement-route tests | Partial |
@@ -92,10 +92,12 @@ Legend:
 ## Ranked Gaps
 
 1. Battle authoring depth (`startBattle`) - high user impact, medium risk.
-   Existing runtime supports deterministic battle execution, reward application,
-   summary display, and victory/defeat branches. CP-035 should decide and
-   implement the v1 policy for escape/canEscape, game-over or defeat handling,
-   and which authored battle outcomes are in scope.
+   CP-035 closes the v1 runtime data gap by resolving actor base stats, class
+   growth, level, and equipment modifiers through shared battle stats, adding
+   native battle database reference validation, rejecting empty troops, and
+   making `canEscape=true` a validation error instead of a hidden no-op.
+   Remaining future-depth work is richer interactive battle control and any
+   future game-over/defeat presentation beyond deterministic branches.
 
 2. Audio command breadth (`playSound`) - high user impact, low/medium risk.
    The current command is SFX-only. CP-036 should define local-first BGM/BGS/ME
@@ -129,8 +131,9 @@ Legend:
 - CP-034 / FRA-69: polish menu/runtime flow around modal systems so battle
   summaries, shops, dialogue, saves, and event runner blocking states are
   predictable.
-- CP-035 / FRA-70: close battle authoring runtime gaps for `startBattle`,
-  battle outcomes, rewards, escape policy, and defeat handling.
+- CP-035 / FRA-70: closed v1 battle authoring runtime gaps for
+  `startBattle` stat resolution, battle database validation, rewards, and
+  explicit unsupported escape policy.
 - CP-036 / FRA-71: expand local audio authoring/runtime from SFX dispatch to
   the agreed v1 audio command set.
 - CP-037 / FRA-72: replace ad hoc debug plugin handling with a deterministic

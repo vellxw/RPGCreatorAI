@@ -497,6 +497,46 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('unknown troop'))).toBe(true);
   });
 
+  it('rejects startBattle configured with escape before runtime support exists', () => {
+    const project = projectWith({
+      enemies: [
+        {
+          id: 'slime',
+          name: 'Slime',
+          stats: {
+            maxHp: 10,
+            maxMp: 0,
+            attack: 1,
+            defense: 1,
+            magicAttack: 0,
+            magicDefense: 0,
+            agility: 1,
+            luck: 1,
+          },
+          exp: 0,
+          gold: 0,
+          drops: [],
+        },
+      ],
+      troops: [{ id: 'slime_one', name: 'Slime One', members: ['slime'] }],
+    });
+    project.maps.town.events.push({
+      id: 'evt',
+      type: 'object',
+      x: 0,
+      y: 0,
+      solid: false,
+      trigger: 'interact',
+      commands: [{ type: 'startBattle', troopId: 'slime_one', canEscape: true }],
+    });
+    const report = validateProject(project);
+    expect(
+      report.errors.some(e =>
+        e.message.includes('startBattle canEscape is not supported by deterministic runtime battles'),
+      ),
+    ).toBe(true);
+  });
+
   it('accepts valid quest objective references', () => {
     const project = projectWith({
       quests: [

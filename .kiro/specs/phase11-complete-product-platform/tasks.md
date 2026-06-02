@@ -43,7 +43,7 @@
 - [ ] 04 Runtime Feature Completeness.
   - [x] CP-033 / FRA-68: audit runtime command support gaps.
   - [x] CP-034 / FRA-69: polish runtime menu flow.
-  - [ ] CP-035 / FRA-70: close battle authoring runtime gaps.
+  - [x] CP-035 / FRA-70: close battle authoring runtime gaps.
   - [ ] CP-036 / FRA-71: implement audio authoring runtime v1.
   - [ ] CP-037 / FRA-72: implement deterministic plugin command registry v2.
   - [ ] CP-038 / FRA-73: polish save/load UX and runtime slots.

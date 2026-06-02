@@ -202,6 +202,14 @@ Primary Phase 11 sources:
   smoke path now asserts the shop and battle overlays are active before
   writing their screenshots. Evidence is recorded in
   `docs/screenshots/phase11-cp034/`.
+- Phase 11 CP-035 — battle authoring runtime gaps closed for v1. Battle actor
+  stats now resolve through shared runtime data (`baseStats` plus class growth
+  by level plus equipment modifiers), the party menu displays the same stats
+  used by `BattleSystem`, battle database references are validated natively
+  before launch, empty troops are rejected, and `startBattle.canEscape=true` is
+  explicitly blocked by editor/runtime validation until interactive escape is
+  implemented. Evidence is recorded in
+  `docs/PHASE_11_BATTLE_RUNTIME_GAP_CLOSURE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

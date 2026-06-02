@@ -1,4 +1,5 @@
 #include "runtime/BattleSystem.h"
+#include "runtime/BattleStats.h"
 #include "events/GameState.h"
 #include "core/Logger.h"
 #include <algorithm>
@@ -23,24 +24,6 @@ struct Combatant {
     bool isParty;
 };
 
-int actorAttack(const RpgDatabases& dbs, const ActorRecord& a) {
-    int atk = a.baseStats.attack;
-    for (const auto& [slot, itemId] : a.equipment) {
-        (void)slot;
-        if (auto* item = dbs.findItem(itemId)) atk += item->modifiers.attack;
-    }
-    return atk;
-}
-
-int actorDefense(const RpgDatabases& dbs, const ActorRecord& a) {
-    int def = a.baseStats.defense;
-    for (const auto& [slot, itemId] : a.equipment) {
-        (void)slot;
-        if (auto* item = dbs.findItem(itemId)) def += item->modifiers.defense;
-    }
-    return def;
-}
-
 } // anon
 
 BattleResult BattleSystem::run(const std::string& troopId) {
@@ -58,11 +41,12 @@ BattleResult BattleSystem::run(const std::string& troopId) {
     for (const auto& aid : state_.getParty()) {
         const auto* actor = dbs_.findActor(aid);
         if (!actor) continue;
+        const ActorBattleStats stats = resolveActorBattleStats(dbs_, *actor);
         Combatant c;
         c.id = aid;
-        c.hp = state_.getActorHp(aid, actor->hp);
-        c.attack = actorAttack(dbs_, *actor);
-        c.defense = actorDefense(dbs_, *actor);
+        c.hp = state_.getActorHp(aid, stats.hp);
+        c.attack = stats.stats.attack;
+        c.defense = stats.stats.defense;
         c.isParty = true;
         party.push_back(c);
     }

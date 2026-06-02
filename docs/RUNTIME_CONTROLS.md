@@ -78,3 +78,7 @@
 - Shop rows are data-driven from the shop and item databases. Rows with
   missing item records are shown as unavailable, cannot be bought, and do not
   mutate gold or inventory.
+- Battle summaries are data-driven from the authored actor, class, equipment,
+  enemy, and troop databases. Battles remain deterministic auto-attack flows;
+  `startBattle.canEscape=true` is invalid until escape receives real runtime
+  input support.

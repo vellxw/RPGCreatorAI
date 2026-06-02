@@ -305,6 +305,10 @@ void validateCommand(const json& command,
         requireId(report, db.shops, stringField(command, "shopId"), source, "shop");
     } else if (type == "startBattle") {
         requireId(report, db.troops, stringField(command, "troopId"), source, "troop");
+        if (command.value("canEscape", false)) {
+            addError(report, source,
+                     "Command startBattle canEscape is not supported by deterministic runtime battles");
+        }
     } else if (type == "startQuest" || type == "completeQuest") {
         requireId(report, db.quests, stringField(command, "questId"), source, "quest");
     } else if (type == "updateQuestObjective") {
@@ -522,6 +526,89 @@ void validateDatabaseReferences(const std::unordered_map<std::string, json>& dat
         }
     }
 
+    auto actorsIt = databases.find("actors");
+    if (actorsIt != databases.end()) {
+        const json* actors = arrayField(actorsIt->second, "actors");
+        if (actors) {
+            for (const auto& actor : *actors) {
+                const std::string actorId = stringField(actor, "id");
+                const std::string classId = stringField(actor, "classId");
+                if (!classId.empty() && !containsId(db.classes, classId)) {
+                    addError(report, "database/actors/" + actorId,
+                             "Actor \"" + actorId + "\" references unknown class \"" +
+                                 classId + "\"");
+                }
+
+                auto equipmentIt = actor.find("equipment");
+                if (equipmentIt != actor.end() && equipmentIt->is_object()) {
+                    for (const auto& [slot, value] : equipmentIt->items()) {
+                        if (!value.is_string()) continue;
+                        const std::string itemId = value.get<std::string>();
+                        if (!itemId.empty() && !containsId(db.items, itemId)) {
+                            addError(report, "database/actors/" + actorId,
+                                     "Actor \"" + actorId + "\" equips unknown item \"" +
+                                         itemId + "\" in slot \"" + slot + "\"");
+                        }
+                    }
+                }
+
+                const json* skills = arrayField(actor, "skills");
+                if (skills) {
+                    for (const auto& skill : *skills) {
+                        if (!skill.is_string()) continue;
+                        const std::string skillId = skill.get<std::string>();
+                        if (!skillId.empty() && !containsId(db.skills, skillId)) {
+                            addError(report, "database/actors/" + actorId,
+                                     "Actor \"" + actorId +
+                                         "\" references unknown skill \"" + skillId + "\"");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto classesIt = databases.find("classes");
+    if (classesIt != databases.end()) {
+        const json* classes = arrayField(classesIt->second, "classes");
+        if (classes) {
+            for (const auto& klass : *classes) {
+                const std::string classId = stringField(klass, "id");
+                const json* learnedSkills = arrayField(klass, "learnedSkills");
+                if (!learnedSkills) continue;
+                for (const auto& learned : *learnedSkills) {
+                    const std::string skillId = stringField(learned, "skillId");
+                    if (!skillId.empty() && !containsId(db.skills, skillId)) {
+                        addError(report, "database/classes/" + classId,
+                                 "Class \"" + classId +
+                                     "\" references unknown learned skill \"" +
+                                     skillId + "\"");
+                    }
+                }
+            }
+        }
+    }
+
+    auto enemiesIt = databases.find("enemies");
+    if (enemiesIt != databases.end()) {
+        const json* enemies = arrayField(enemiesIt->second, "enemies");
+        if (enemies) {
+            for (const auto& enemy : *enemies) {
+                const std::string enemyId = stringField(enemy, "id");
+                const json* drops = arrayField(enemy, "drops");
+                if (!drops) continue;
+                for (const auto& drop : *drops) {
+                    const std::string itemId = stringField(drop, "itemId");
+                    if (!itemId.empty() && !containsId(db.items, itemId)) {
+                        addError(report, "database/enemies/" + enemyId,
+                                 "Enemy \"" + enemyId +
+                                     "\" drops unknown item \"" + itemId + "\"");
+                    }
+                }
+            }
+        }
+    }
+
     auto shopsIt = databases.find("shops");
     if (shopsIt != databases.end()) {
         const json* shops = arrayField(shopsIt->second, "shops");
@@ -549,6 +636,11 @@ void validateDatabaseReferences(const std::unordered_map<std::string, json>& dat
                 const std::string troopId = stringField(troop, "id");
                 const json* members = arrayField(troop, "members");
                 if (!members) continue;
+                if (members->empty()) {
+                    addError(report, "database/troops/" + troopId,
+                             "Troop \"" + troopId +
+                                 "\" must contain at least one enemy");
+                }
                 for (const auto& member : *members) {
                     const std::string enemyId =
                         member.is_string() ? member.get<std::string>() : stringField(member, "enemyId");

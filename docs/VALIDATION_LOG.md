@@ -4,6 +4,78 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-70 / CP-035 — battle authoring runtime gap closure
+
+- `2026-06-02 04:18:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding focused battle coverage; `BattleSystem
+  applies actor class growth by level to battle stats` failed because battle
+  math ignored actor class growth and resolved `slime_one` as `DEFEAT`
+  instead of awarding the authored victory rewards.
+- `2026-06-02 04:18:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding focused runtime-validator coverage;
+  `RuntimeProjectValidator reports battle database gaps before runtime` failed
+  because actor class/equipment/skill refs, class learned-skill refs, enemy
+  drop refs, and empty troops were not reported.
+- `2026-06-02 04:19:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — FAIL during first GREEN attempt; new `BattleStats.cpp` was not linked
+  because the existing build tree had been configured before the new source
+  file. Fix applied: reran `cmake --preset default` to refresh the CMake glob
+  input before building.
+- `2026-06-02 04:20:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; `RPGTests` passed 1/1 after adding shared actor battle-stat
+  resolution and native battle database reference validation.
+- `2026-06-02 04:20:00 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 2 Vitest files and 50 validation tests passed.
+- `2026-06-02 04:20:00 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir build/runtime_smoke_cp035`
+  — PASS; runtime smoke launched, reached shop and battle paths, resolved
+  `slime_pair` as `VICTORY`, and printed `SMOKE PASSED`. Non-fatal warnings
+  were limited to the known missing local audio endpoint and sample WAV files.
+- `2026-06-02 04:23:23 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  — RED as expected after adding `canEscape` coverage; the new test failed
+  because editor validation did not reject `startBattle.canEscape=true`.
+- `2026-06-02 04:23:23 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — RED as expected after adding native `canEscape` coverage; the focused
+  runtime project validator test failed because `canEscape=true` was still
+  accepted.
+- `2026-06-02 04:23:52 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts`
+  — PASS; 1 Vitest file and 16 validation tests passed after rejecting
+  `startBattle.canEscape=true` until interactive escape exists.
+- `2026-06-02 04:23:52 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure -R RPGTests"`
+  — PASS; `RPGTests` passed 1/1 after native validation started reporting
+  unsupported `startBattle.canEscape=true`.
+- `2026-06-02 04:27:42 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --preset default && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; configure regenerated the build tree, Ninja reported no work to do,
+  and CTest passed `RPGTests` 1/1 in 0.86s. CMake emitted known third-party
+  FetchContent/deprecation warnings only.
+- `2026-06-02 04:27:42 -03:00` —
+  `npm test -- --run src/validation/__tests__/validateDatabases.test.ts src/validation/__tests__/validateProject.test.ts`
+  — PASS; 2 Vitest files and 51 validation tests passed.
+- `2026-06-02 04:28:16 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir build -ScreenshotDir build/runtime_smoke_cp035`
+  — PASS; runtime launch smoke stayed alive, feature smoke reached shop and
+  battle, emitted `Shop opened: Town Shop with 1 listings`, resolved
+  `slime_pair` as `VICTORY`, wrote screenshots under ignored `build/`, and
+  printed `SMOKE PASSED`. Non-fatal warnings were limited to the known missing
+  local audio endpoint and sample WAV files.
+- Fix applied: authored battle stats now resolve through a shared runtime
+  helper used by both `BattleSystem` and the party menu, battle database gaps
+  are reported before runtime launch, and unsupported escape authoring is a
+  validation error instead of a silent no-op.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-69 / CP-034 — runtime menu flow polish
 
 - `2026-06-02 04:02:20 -03:00` —

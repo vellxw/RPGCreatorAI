@@ -1401,6 +1401,7 @@ function validateSingleCommand(
       break;
     case 'startBattle':
       if (!index.troopIds.has(cmd.troopId)) err(`startBattle references unknown troop "${cmd.troopId}"`);
+      if (cmd.canEscape) err('startBattle canEscape is not supported by deterministic runtime battles');
       break;
     case 'changeActorHp':
       if (!index.actorIds.has(cmd.actorId)) err(`changeActorHp references unknown actor "${cmd.actorId}"`);

@@ -1,4 +1,5 @@
 #include "runtime/MenuSystem.h"
+#include "runtime/BattleStats.h"
 #include "platform/InputManager.h"
 #include "events/GameState.h"
 #include "database/RpgDatabases.h"
@@ -330,24 +331,17 @@ MenuSystem::ViewModel MenuSystem::snapshot(const GameState& state, const RpgData
 
         row.name = actor->name.empty() ? actorId : actor->name;
         row.level = actor->level;
-        row.maxHp = actor->baseStats.maxHp;
-        row.maxMp = actor->baseStats.maxMp;
-        row.hp = state.getActorHp(actorId, actor->hp);
-        row.mp = actor->mp;
-        // Stats include base + equipment modifiers (must match BattleSystem
-        // resolver semantics).
-        row.attack = actor->baseStats.attack;
-        row.defense = actor->baseStats.defense;
-        row.agility = actor->baseStats.agility;
-        row.luck = actor->baseStats.luck;
+        const ActorBattleStats battleStats = resolveActorBattleStats(dbs, *actor);
+        row.maxHp = battleStats.stats.maxHp;
+        row.maxMp = battleStats.stats.maxMp;
+        row.hp = state.getActorHp(actorId, battleStats.hp);
+        row.mp = battleStats.mp;
+        row.attack = battleStats.stats.attack;
+        row.defense = battleStats.stats.defense;
+        row.agility = battleStats.stats.agility;
+        row.luck = battleStats.stats.luck;
         for (const auto& [slot, itemId] : actor->equipment) {
             const ItemRecord* item = dbs.findItem(itemId);
-            if (item) {
-                row.attack += item->modifiers.attack;
-                row.defense += item->modifiers.defense;
-                row.agility += item->modifiers.agility;
-                row.luck += item->modifiers.luck;
-            }
             std::string display = item ? item->name : itemId;
             if (slot == "weapon") row.weapon = display;
             else if (slot == "armor") row.armor = display;

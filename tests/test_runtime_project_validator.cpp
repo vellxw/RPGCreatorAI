@@ -222,3 +222,141 @@ TEST_CASE("RuntimeProjectValidator reports structural map and critical command r
 
     fs::remove_all(root);
 }
+
+TEST_CASE("RuntimeProjectValidator reports battle database gaps before runtime") {
+    const fs::path root = makeFixtureRoot("battle_database");
+    writeMinimalProject(
+        root,
+        R"({
+            "schemaVersion": 1,
+            "id": "town",
+            "name": "Town",
+            "width": 2,
+            "height": 2,
+            "tileSize": 32,
+            "layers": [
+                { "name": "ground", "type": "visual", "role": "ground", "tiles": [0, 0, 0, 0] },
+                { "name": "collision", "type": "collision", "role": "collision", "tiles": [0, 0, 0, 0] }
+            ],
+            "events": [
+                {
+                    "id": "battle_event",
+                    "type": "object",
+                    "x": 0,
+                    "y": 0,
+                    "trigger": "interact",
+                    "commands": [
+                        { "type": "startBattle", "troopId": "battle_troop", "canEscape": true }
+                    ]
+                }
+            ]
+        })",
+        R"({
+            "items": "database/items.json",
+            "actors": "database/actors.json",
+            "classes": "database/classes.json",
+            "skills": "database/skills.json",
+            "enemies": "database/enemies.json",
+            "troops": "database/troops.json",
+            "system": "database/system.json"
+        })");
+
+    writeFile(root / "database" / "items.json", R"({
+        "schemaVersion": 1,
+        "items": [{ "id": "potion", "name": "Potion" }]
+    })");
+    writeFile(root / "database" / "actors.json", R"({
+        "schemaVersion": 1,
+        "actors": [
+            {
+                "id": "bad_actor",
+                "name": "Bad Actor",
+                "classId": "missing_class",
+                "level": 1,
+                "hp": 10,
+                "mp": 0,
+                "baseStats": {
+                    "maxHp": 10,
+                    "maxMp": 0,
+                    "attack": 1,
+                    "defense": 1,
+                    "magicAttack": 1,
+                    "magicDefense": 1,
+                    "agility": 1,
+                    "luck": 1
+                },
+                "equipment": { "weapon": "missing_item" },
+                "skills": ["missing_skill"]
+            }
+        ]
+    })");
+    writeFile(root / "database" / "classes.json", R"({
+        "schemaVersion": 1,
+        "classes": [
+            {
+                "id": "bad_class",
+                "name": "Bad Class",
+                "growth": {
+                    "maxHp": 1,
+                    "maxMp": 0,
+                    "attack": 1,
+                    "defense": 1,
+                    "magicAttack": 1,
+                    "magicDefense": 1,
+                    "agility": 1,
+                    "luck": 1
+                },
+                "learnedSkills": [{ "level": 1, "skillId": "missing_skill" }]
+            }
+        ]
+    })");
+    writeFile(root / "database" / "skills.json", R"({
+        "schemaVersion": 1,
+        "skills": [{ "id": "slash", "name": "Slash", "target": "singleEnemy" }]
+    })");
+    writeFile(root / "database" / "enemies.json", R"({
+        "schemaVersion": 1,
+        "enemies": [
+            {
+                "id": "bad_enemy",
+                "name": "Bad Enemy",
+                "stats": { "maxHp": 10, "attack": 1, "defense": 1 },
+                "exp": 1,
+                "gold": 1,
+                "drops": [{ "itemId": "missing_item", "rate": 1.0 }]
+            }
+        ]
+    })");
+    writeFile(root / "database" / "troops.json", R"({
+        "schemaVersion": 1,
+        "troops": [
+            { "id": "battle_troop", "name": "Battle Troop", "members": ["bad_enemy"] },
+            { "id": "empty_troop", "name": "Empty Troop", "members": [] }
+        ]
+    })");
+    writeFile(root / "database" / "system.json", R"({
+        "schemaVersion": 1,
+        "startingParty": ["bad_actor"]
+    })");
+
+    rpg::RuntimeProjectValidator validator;
+    const auto report = validator.validateProjectFile(root / "project.json");
+
+    CHECK(report.hasErrors());
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Actor \"bad_actor\" references unknown class \"missing_class\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Actor \"bad_actor\" equips unknown item \"missing_item\" in slot \"weapon\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Actor \"bad_actor\" references unknown skill \"missing_skill\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Class \"bad_class\" references unknown learned skill \"missing_skill\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Enemy \"bad_enemy\" drops unknown item \"missing_item\""));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "Troop \"empty_troop\" must contain at least one enemy"));
+    CHECK(hasMessage(report, rpg::RuntimeValidationSeverity::Error,
+                     "startBattle canEscape is not supported by deterministic runtime battles"));
+
+    fs::remove_all(root);
+}

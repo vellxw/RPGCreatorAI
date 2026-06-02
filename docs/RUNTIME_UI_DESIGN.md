@@ -310,16 +310,25 @@ migration. `mtime` is read from disk, not stored in the file.
 
 ### Behaviour
 
-- `BattleResolver` runs the existing Phase 6 `BattleSystem` math at
-  battle start and produces an ordered turn list. The math is unchanged.
+- `BattleSystem` runs the authored troop through the deterministic v1
+  auto-attack resolver at battle start.
+- Actor combat stats come from `actor.baseStats`, plus
+  `class.growth * max(0, actor.level - 1)` when the actor class exists,
+  plus equipment item modifiers. Current HP still comes from
+  `GameState.actorHps` when present.
+- Enemy HP, attack, defense, EXP, gold, and guaranteed drops are read from
+  the enemy database. Troop members are resolved from the troop database.
 - `BattleUI::tick(dt)` advances a deterministic counter (e.g. one turn
   per 250 ms of simulated time). Tests step the counter directly.
 - HP bars animate down to the next value over ~150 ms (cosmetic only).
 - The most recent ~6 turns appear in the log; older lines scroll off.
-- On `isFinished()` the panel shows the outcome banner (`Victory`,
-  `Defeat`, `Escape`) and the rewards summary; `Enter` resumes the
+- On `isFinished()` the panel shows the outcome banner (`Victory` or
+  `Defeat`) and the rewards summary; `Enter` resumes the
   EventRunner with the same victory / defeat branch dispatching as
   Phase 6.
+- `startBattle.canEscape=true` is rejected by editor and native runtime
+  validation until an interactive battle escape flow exists. Runtime battles
+  do not silently pretend escape is available.
 - The UI never introduces real RNG. `BattleSystem::computeDamage` stays
   the deterministic source of truth.
 
