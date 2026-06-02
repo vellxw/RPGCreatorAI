@@ -22,8 +22,10 @@ import { SkillsEditor } from '../components/database/SkillsEditor';
 import { StatesEditor } from '../components/database/StatesEditor';
 import { SwitchesVariablesEditor } from '../components/database/SwitchesVariablesEditor';
 import { SystemEditor } from '../components/database/SystemEditor';
+import { TermsEditor } from '../components/database/TermsEditor';
 import { TilesetEditor } from '../components/database/TilesetEditor';
 import { TroopsEditor } from '../components/database/TroopsEditor';
+import { TypesEditor } from '../components/database/TypesEditor';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
 import {
   flattenCommands,
@@ -53,7 +55,7 @@ import type {
   WeaponData,
 } from '../types/project';
 
-type DatabaseTabKey = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'system';
+type DatabaseTabKey = DatabaseListKey | 'items' | 'tilesets' | 'animations' | 'types' | 'terms' | 'system';
 
 const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'actors', label: 'Actors' },
@@ -72,6 +74,8 @@ const TAB_ORDER: Array<{ key: DatabaseTabKey; label: string }> = [
   { key: 'variables', label: 'Variables' },
   { key: 'commonEvents', label: 'Common Events' },
   { key: 'animations', label: 'Animations' },
+  { key: 'types', label: 'Types' },
+  { key: 'terms', label: 'Terms' },
   { key: 'system', label: 'System' },
 ];
 
@@ -985,7 +989,13 @@ export function DatabaseScreen() {
   const [selectedId, setSelectedId] = useState<string>('');
 
   const databases = state.databases;
-  const standaloneTab = tab === 'system' || tab === 'tilesets' || tab === 'items' || tab === 'animations';
+  const standaloneTab =
+    tab === 'system' ||
+    tab === 'tilesets' ||
+    tab === 'items' ||
+    tab === 'animations' ||
+    tab === 'types' ||
+    tab === 'terms';
   const entries =
     standaloneTab
       ? []
@@ -1020,7 +1030,7 @@ export function DatabaseScreen() {
   // keep selection consistent when switching tabs
   const ensureSelection = (key: DatabaseTabKey) => {
     setTab(key);
-    if (key === 'system' || key === 'tilesets' || key === 'items' || key === 'animations') {
+    if (key === 'system' || key === 'tilesets' || key === 'items' || key === 'animations' || key === 'types' || key === 'terms') {
       setSelectedId('');
       return;
     }
@@ -1029,7 +1039,7 @@ export function DatabaseScreen() {
   };
 
   const tabCount = (key: DatabaseTabKey): number | null => {
-    if (key === 'system') return null;
+    if (key === 'system' || key === 'types' || key === 'terms') return null;
     if (key === 'items') return state.items.items.length;
     if (key === 'tilesets') return databases.tilesets.tilesets.length;
     if (key === 'animations') return databases.animations.sets.length;
@@ -1082,7 +1092,18 @@ export function DatabaseScreen() {
             system={databases.system}
             actors={databases.actors}
             animations={databases.animations.sets}
+            terms={databases.terms}
             onChange={changes => dispatch({ type: 'UPDATE_SYSTEM_DATA', changes })}
+          />
+        ) : tab === 'types' ? (
+          <TypesEditor
+            types={databases.types}
+            onChange={types => dispatch({ type: 'UPDATE_TYPES_DATABASE', types })}
+          />
+        ) : tab === 'terms' ? (
+          <TermsEditor
+            terms={databases.terms}
+            onChange={terms => dispatch({ type: 'UPDATE_TERMS_DATABASE', terms })}
           />
         ) : tab === 'items' ? (
           <ItemsEditor

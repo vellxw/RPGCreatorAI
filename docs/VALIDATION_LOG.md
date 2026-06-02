@@ -4337,3 +4337,54 @@ Error: Port 1420 is already in use
   `console`,
   `close` — PASS for browser smoke; Items showed readable `Item modifier`
   labels for all stats and the console reported 0 errors and 0 warnings.
+
+### Phase 11 FRA-80 / CP-045 — system types and terms polish
+
+- `2026-06-02 07:39:40 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SystemTypesTermsEditors.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — FAIL as expected during TDD red step; `TermsEditor`/`TypesEditor` did not
+  exist, `SystemEditor` did not expose `Starting gold (Credits)` or starting
+  party actor selects, and validation did not yet warn about unstable system
+  defaults.
+- `2026-06-02 07:42:30 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SystemTypesTermsEditors.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS after adding Types/Terms editors, system term-aware gold and
+  reference-safe starting-party editing, and system-default validation; 3
+  focused files and 24 Vitest tests passed.
+- `2026-06-02 07:43:00 -03:00` — `npm run typecheck` — FAIL; TypeScript
+  rejected `TermsEditor` term-group indexing over a union type. Fix applied:
+  render group values through a local `Record<string, string>` while keeping
+  the public `TermsDatabaseData` schema unchanged.
+- `2026-06-02 07:43:35 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 07:43:44 -03:00` —
+  `npm test -- --run src/components/database/__tests__/SystemTypesTermsEditors.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/validation/__tests__/validateDatabases.test.ts`
+  — PASS after the type fix; 3 focused files and 24 Vitest tests passed.
+- `2026-06-02 07:46:18 -03:00` — `npm test -- --run` — PASS; full frontend
+  Vitest suite passed with 57 files and 319 tests.
+- `2026-06-02 07:47:02 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1922 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 07:48:14 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS; native configure/build/test completed and `RPGTests` passed 1/1
+  with known third-party CMake warnings only.
+- `2026-06-02 07:48:43 -03:00` —
+  `npx --yes --package @playwright/cli playwright-cli -s=cp045 open http://127.0.0.1:5177/ click ...`
+  — FAIL for CLI invocation only; this Playwright CLI version expects one
+  command per call. Fix: reran the same browser smoke as separate commands in
+  the same `cp045` session.
+- `2026-06-02 07:49:30 -03:00` —
+  Browser smoke with separate Playwright CLI commands:
+  `open http://127.0.0.1:5177/`,
+  `click "button:has-text('Use My First RPG')"`,
+  `click "button:has-text('Database')"`,
+  `click "button[aria-label='Open Types database tab']"`,
+  `snapshot`,
+  `click "button[aria-label='Open Terms database tab']"`,
+  `snapshot`,
+  `click "button[aria-label='Open System database tab']"`,
+  `snapshot`,
+  `console`,
+  `close` — PASS; Types showed every type table, Terms showed required
+  terminology groups, System showed `Starting gold (G)` and starting-party
+  actor selects, and the console reported 0 errors and 0 warnings.

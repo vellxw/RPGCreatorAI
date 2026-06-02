@@ -54,7 +54,7 @@
   - [x] CP-042 / FRA-77: polish actor, class, and skill authoring.
   - [x] CP-043 / FRA-78: polish enemy and troop authoring.
   - [x] CP-044 / FRA-79: polish item, equipment, and state authoring.
-  - [ ] CP-045 / FRA-80: polish system, types, and terms.
+  - [x] CP-045 / FRA-80: polish system, types, and terms.
   - [ ] CP-046 / FRA-81: polish common event authoring.
   - [ ] CP-047 / FRA-82: add reference repair tools.
   - [ ] CP-048 / FRA-83: run the database/system completeness gate.

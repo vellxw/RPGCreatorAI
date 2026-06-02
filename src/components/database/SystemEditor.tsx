@@ -1,13 +1,13 @@
 import { NumberField, SelectField, TextField } from './DatabaseFields';
 import { ReferenceSelect } from './ReferenceSelect';
-import { splitIds } from './partyCombatFields';
-import type { ActorData, AnimationSetData, MovementSpeed, SystemData } from '../../types/project';
+import type { ActorData, AnimationSetData, MovementSpeed, SystemData, TermsDatabaseData } from '../../types/project';
 import { audioOptions } from '../../audio/audioRegistry';
 
 interface SystemEditorProps {
   system: SystemData;
   actors: ActorData[];
   animations: AnimationSetData[];
+  terms?: TermsDatabaseData;
   onChange(changes: Partial<SystemData>): void;
 }
 
@@ -20,14 +20,29 @@ const MOVEMENT_SPEED_OPTIONS: Array<{ value: MovementSpeed; label: string }> = [
   { value: 'quadruple', label: 'Quadruple' },
 ];
 
-export function SystemEditor({ system, actors, animations, onChange }: SystemEditorProps) {
+export function SystemEditor({ system, actors, animations, terms, onChange }: SystemEditorProps) {
   const animationOptions = animations.map(set => ({ value: set.id, label: set.id }));
+  const actorOptions = actors.map(actor => ({ value: actor.id, label: actor.name || actor.id }));
   const registry = system.audio ?? {};
   const audioEntries = Object.entries(registry);
   const bgmOptions = audioOptions(registry);
+  const currencyUnit = terms?.currencyUnit?.trim();
+  const startingGoldLabel = currencyUnit ? `Starting gold (${currencyUnit})` : 'Starting gold';
   if (system.defaultBgm && !bgmOptions.some(option => option.value === system.defaultBgm)) {
     bgmOptions.push({ value: system.defaultBgm, label: `${system.defaultBgm} (unknown)` });
   }
+
+  const setStartingPartyActor = (index: number, actorId: string) => {
+    const next = system.startingParty.slice();
+    next[index] = actorId;
+    onChange({ startingParty: next.filter(id => id.trim() !== '') });
+  };
+
+  const addStartingPartyActor = () => {
+    const nextActor = actors.find(actor => !system.startingParty.includes(actor.id)) ?? actors[0];
+    if (!nextActor) return;
+    onChange({ startingParty: [...system.startingParty, nextActor.id] });
+  };
 
   const commitAudioEntries = (entries: Array<[string, string]>) => {
     const audio = Object.fromEntries(
@@ -41,24 +56,54 @@ export function SystemEditor({ system, actors, animations, onChange }: SystemEdi
   return (
     <div className="space-y-3 max-w-xl">
       <NumberField
-        label="Starting gold"
+        label={startingGoldLabel}
         value={system.startingGold}
         min={0}
         onChange={startingGold => onChange({ startingGold })}
       />
-      <TextField
-        label="Starting party"
-        value={system.startingParty.join(', ')}
-        list="starting-party-options"
-        onChange={value => onChange({ startingParty: splitIds(value) })}
-      />
-      <datalist id="starting-party-options">
-        {actors.map(actor => (
-          <option key={actor.id} value={actor.id}>
-            {actor.name || actor.id}
-          </option>
-        ))}
-      </datalist>
+      <div className="space-y-2 rounded-md border border-gray-200 p-2">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <div className="text-[12px] font-semibold text-gray-700">Starting party</div>
+            {actors.length > 0 && system.startingParty.length === 0 && (
+              <p className="text-[11px] text-amber-700">Starting party is empty while actors exist.</p>
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label="Add starting party actor"
+            disabled={actors.length === 0}
+            className="h-8 px-2 text-[12px] rounded border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+            onClick={addStartingPartyActor}
+          >
+            Add actor
+          </button>
+        </div>
+        {system.startingParty.length === 0 ? (
+          <p className="text-[12px] text-gray-400">No starting actors selected.</p>
+        ) : (
+          <div className="space-y-2">
+            {system.startingParty.map((actorId, index) => (
+              <div key={`${actorId}-${index}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-end">
+                <ReferenceSelect
+                  label={`Starting party actor ${index + 1}`}
+                  value={actorId}
+                  options={actorOptions}
+                  onChange={nextActorId => setStartingPartyActor(index, nextActorId)}
+                />
+                <button
+                  type="button"
+                  aria-label={`Remove starting party actor ${index + 1}`}
+                  className="h-8 px-2 text-[12px] rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  onClick={() => onChange({ startingParty: system.startingParty.filter((_, i) => i !== index) })}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <ReferenceSelect
         label="Player animation set"
         value={system.playerAnimationSet ?? ''}

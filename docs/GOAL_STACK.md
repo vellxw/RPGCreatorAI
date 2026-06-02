@@ -275,6 +275,16 @@ Primary Phase 11 sources:
   and `states` remain editor/validation shards for v1; direct runtime
   equipment/state simulation remains future depth. Evidence is recorded in
   `docs/PHASE_11_ITEM_EQUIPMENT_STATE_EDITOR_POLISH.md`.
+- Phase 11 CP-045 — system, types, and terms polish completed. The Database
+  screen now exposes standalone `Types` and `Terms` tabs, type tables and
+  terminology labels are editable with visible missing-label warnings,
+  starting party editing uses actor reference selects instead of raw
+  comma-separated ids, starting gold reflects the configured currency term,
+  and TypeScript validation now flags unstable system defaults for duplicate
+  party actors, empty party-with-actors, and missing player animation-set
+  defaults. Types and terms remain editor/validation data; the native runtime
+  remains independent of editor-only labels. Evidence is recorded in
+  `docs/PHASE_11_SYSTEM_TYPES_TERMS_POLISH.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

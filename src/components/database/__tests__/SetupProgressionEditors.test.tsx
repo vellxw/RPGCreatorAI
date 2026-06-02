@@ -5,6 +5,7 @@ import { QuestsEditor } from '../QuestsEditor';
 import { ShopsEditor } from '../ShopsEditor';
 import { SwitchesVariablesEditor } from '../SwitchesVariablesEditor';
 import { SystemEditor } from '../SystemEditor';
+import { mergeDatabases } from '../../../adapters/defaultDatabases';
 import type {
   ActorData,
   AnimationSetData,
@@ -43,6 +44,12 @@ function select(container: HTMLElement, label: string): HTMLSelectElement {
   return found;
 }
 
+function button(container: HTMLElement, label: string): HTMLButtonElement {
+  const found = container.querySelector(`button[aria-label="${label}"]`);
+  if (!(found instanceof HTMLButtonElement)) throw new Error(`Missing button: ${label}`);
+  return found;
+}
+
 function changeText(el: HTMLInputElement, value: string) {
   act(() => {
     const valueSetter = Object.getOwnPropertyDescriptor(el, 'value')?.set;
@@ -60,6 +67,12 @@ function changeSelect(el: HTMLSelectElement, value: string) {
   act(() => {
     el.value = value;
     el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+function clickButton(el: HTMLButtonElement) {
+  act(() => {
+    el.click();
   });
 }
 
@@ -231,14 +244,22 @@ describe('setup and progression database editors', () => {
       windowTint: 'indigo',
       battleBackground: 'grass_field',
     };
+    const terms = {
+      ...mergeDatabases(undefined).terms,
+      currencyUnit: 'Credits',
+    };
     const view = render(
-      <SystemEditor system={system} actors={actors} animations={animations} onChange={onChange} />,
+      <SystemEditor system={system} actors={actors} animations={animations} terms={terms} onChange={onChange} />,
     );
 
-    changeText(input(view.container, 'Starting gold'), '75');
+    changeText(input(view.container, 'Starting gold (Credits)'), '75');
     expect(onChange).toHaveBeenLastCalledWith({ startingGold: 75 });
-    changeText(input(view.container, 'Starting party'), 'arc, mei');
+    changeSelect(select(view.container, 'Starting party actor 1'), 'mei');
+    expect(onChange).toHaveBeenLastCalledWith({ startingParty: ['mei'] });
+    clickButton(button(view.container, 'Add starting party actor'));
     expect(onChange).toHaveBeenLastCalledWith({ startingParty: ['arc', 'mei'] });
+    clickButton(button(view.container, 'Remove starting party actor 1'));
+    expect(onChange).toHaveBeenLastCalledWith({ startingParty: [] });
     changeSelect(select(view.container, 'Player animation set'), 'player_mage');
     expect(onChange).toHaveBeenLastCalledWith({ playerAnimationSet: 'player_mage' });
     changeSelect(select(view.container, 'Player movement speed'), 'normal');

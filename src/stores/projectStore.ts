@@ -16,8 +16,10 @@ import type {
   MapScrollType,
   ProjectData,
   SystemData,
+  TermsDatabaseData,
   TilesetDatabaseData,
   TriggerType,
+  TypesDatabaseData,
   ValidationMessage,
   WeaponData,
   ArmorData,
@@ -327,6 +329,14 @@ export type ProjectAction =
   | {
       type: 'UPDATE_SYSTEM_DATA';
       changes: Partial<SystemData>;
+    }
+  | {
+      type: 'UPDATE_TYPES_DATABASE';
+      types: TypesDatabaseData;
+    }
+  | {
+      type: 'UPDATE_TERMS_DATABASE';
+      terms: TermsDatabaseData;
     }
   | {
       type: 'UPDATE_ITEM_DATABASE';
@@ -1566,6 +1576,18 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'UPDATE_SYSTEM_DATA':
       return withDatabases(state, db => {
         db.system = { ...db.system, ...action.changes };
+        return true;
+      });
+
+    case 'UPDATE_TYPES_DATABASE':
+      return withDatabases(state, db => {
+        db.types = deepClone(action.types);
+        return true;
+      });
+
+    case 'UPDATE_TERMS_DATABASE':
+      return withDatabases(state, db => {
+        db.terms = deepClone(action.terms);
         return true;
       });
 

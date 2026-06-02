@@ -60,8 +60,8 @@ Legend:
 | `weapons` | Yes | Yes | Yes | Type, price, animation, stat param, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only | CP-044 completed for authoring polish |
 | `armors` | Yes | Yes | Yes | Type, slot, price, stat param, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | Not consumed directly; runtime equipment still comes from item records | Editor-only | CP-044 completed for authoring polish |
 | `states` | Yes | Yes | Yes | Priority, restriction, and trait checks | `ProjectLoader` records path after CP-041; validator does not index directly | No runtime status-effect simulation in v1 | Editor-only | CP-044 completed for authoring polish |
-| `types` | Yes | Yes | Yes | Required equipment slots, ids, names | `ProjectLoader` records path; native runtime does not load values | Editor labels/reference option tables only | Editor-only | CP-045 |
-| `terms` | Yes | Yes | Yes | Required currency/stat/menu/command/battle/save labels | `ProjectLoader` records path; native runtime does not load values | Editor/system terminology only | Editor-only | CP-045 |
+| `types` | Yes | Yes | Yes | Required equipment slots, ids, names | `ProjectLoader` records path; native runtime does not load values | Editor labels/reference option tables only | Editor-only | CP-045 completed for authoring polish |
+| `terms` | Yes | Yes | Yes | Required currency/stat/menu/command/battle/save labels | `ProjectLoader` records path; native runtime does not load values | Editor/system terminology only | Editor-only | CP-045 completed for authoring polish |
 | `enemies` | Yes | Yes | Yes | Stats, exp/gold/drop rates, drop refs | `RpgDatabases`, validator refs | Battle enemies, rewards | Full | CP-043 |
 | `troops` | Yes | Yes | Yes | Members, non-empty, enemy refs | `RpgDatabases`, validator refs | `startBattle` troop selection | Full | CP-043 |
 | `quests` | Yes | Yes | Yes | Objective ids, reward values, item refs | `RpgDatabases`, validator refs | Quest state commands and rewards | Full | CP-046/047 |
@@ -87,15 +87,15 @@ Legend:
 2. Switch/variable initial values - medium/high impact, low/medium risk.
    Runtime validation indexes switch/variable ids, but `GameState` currently
    defaults switches to false and variables to 0 instead of seeding
-   `switches[].initial` and `variables[].initial`. CP-045/CP-046 should decide
-   and implement startup seeding if non-default initial values are required for
+   `switches[].initial` and `variables[].initial`. CP-046 should decide and
+   implement startup seeding if non-default initial values are required for
    complete authored projects.
 
-3. Types and terms runtime/editor boundary - medium impact, low risk.
-   Types and terms are stable editor schema and validation data, but native
-   runtime does not consume labels or typed category tables. CP-045 owns
-   improving fallback behavior and ensuring editor UI consistently uses terms
-   without making runtime depend on editor-only strings.
+3. Types and terms runtime/editor boundary - closed for v1 by CP-045.
+   Types and terms now have standalone editors, visible missing-label
+   warnings, TypeScript validation, and system-default terminology usage.
+   Native runtime intentionally does not consume labels or typed category
+   tables.
 
 4. Skill/class depth - medium impact, medium risk. Classes load growth into
    runtime battle stats, and CP-042 now covers editor-side actor skill,
@@ -117,8 +117,10 @@ Legend:
 - CP-044 / FRA-79: item, equipment, and state shard polish completed.
   Items remain the runtime-consumed equipment records; `weapons`, `armors`,
   and `states` remain editor/validation shards for v1.
-- CP-045 / FRA-80: system, types, terms, and startup default behavior,
-  including switch/variable initial seeding if accepted.
+- CP-045 / FRA-80: system, types, and terms polish completed. Types and terms
+  remain editor/validation data; system default validation now covers duplicate
+  starting-party actors, empty party-with-actors, and missing animation-set
+  defaults.
 - CP-046 / FRA-81: common-event authoring parity and scheduler validation.
 - CP-047 / FRA-82: reference repair tools for broken database/map/event refs.
 - CP-048 / FRA-83: database/system completeness integration gate.

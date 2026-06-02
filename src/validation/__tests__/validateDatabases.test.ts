@@ -471,6 +471,48 @@ describe('validateProject (Phase 6 cross-database checks)', () => {
     expect(report.errors.some(e => e.message.includes('Terms menu.equip is required'))).toBe(true);
   });
 
+  it('flags unstable required system defaults', () => {
+    const project = projectWith({
+      actors: [
+        {
+          id: 'arc',
+          name: 'Arc',
+          classId: '',
+          level: 1,
+          hp: 10,
+          mp: 0,
+          baseStats: {
+            maxHp: 10,
+            maxMp: 0,
+            attack: 1,
+            defense: 1,
+            magicAttack: 1,
+            magicDefense: 1,
+            agility: 1,
+            luck: 1,
+          },
+          equipment: { weapon: null, armor: null, accessory: null },
+          skills: [],
+        },
+      ],
+      animations: {
+        sets: [{ id: 'player_adventurer', clips: [] }],
+      },
+      system: {
+        startingParty: [],
+        startingGold: 0,
+      },
+    });
+
+    const report = validateProject(project);
+    expect(report.warnings.some(w => w.message.includes('System startingParty is empty'))).toBe(true);
+    expect(report.warnings.some(w => w.message.includes('System playerAnimationSet is not set'))).toBe(true);
+
+    project.databases.system.startingParty = ['arc', 'arc'];
+    const duplicateReport = validateProject(project);
+    expect(duplicateReport.errors.some(e => e.message.includes('duplicate actor "arc"'))).toBe(true);
+  });
+
   it('rejects controlVariable referencing unknown variable', () => {
     const project = projectWith({
       variables: [{ id: 'v1', name: 'V1', initial: 0 }],

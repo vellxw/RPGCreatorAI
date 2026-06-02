@@ -909,6 +909,31 @@ function validateSetupProgressionDatabases(db: DatabaseEntries): ValidationMessa
       source: 'database/system',
     });
   }
+  if (db.actors.length > 0 && db.system.startingParty.length === 0) {
+    out.push({
+      level: 'warning',
+      message: 'System startingParty is empty while actors exist',
+      source: 'database/system',
+    });
+  }
+  const startingPartySeen = new Set<string>();
+  for (const actorId of db.system.startingParty) {
+    if (startingPartySeen.has(actorId)) {
+      out.push({
+        level: 'error',
+        message: `System startingParty contains duplicate actor "${actorId}"`,
+        source: 'database/system',
+      });
+    }
+    startingPartySeen.add(actorId);
+  }
+  if (animationSetIds.size > 0 && !db.system.playerAnimationSet) {
+    out.push({
+      level: 'warning',
+      message: 'System playerAnimationSet is not set while animation sets exist',
+      source: 'database/system',
+    });
+  }
   if (
     db.system.playerAnimationSet &&
     animationSetIds.size > 0 &&
