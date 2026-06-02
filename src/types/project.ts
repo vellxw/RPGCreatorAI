@@ -139,9 +139,40 @@ export interface GeneratedAssetMetadata {
   maskAssetId?: string;
   referenceAssetIds?: string[];
   editMode?: 'edit' | 'variation';
+  visualQa?: GeneratedImageVisualQaResult;
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
   visualContextVersion?: string;
+}
+
+export type GeneratedImageVisualQaCheckId =
+  | 'dimensions'
+  | 'transparency'
+  | 'styleConsistency'
+  | 'readability'
+  | 'runtimeSuitability';
+
+export type GeneratedImageVisualQaCheckStatus = 'pass' | 'warning' | 'fail';
+export type GeneratedImageVisualQaStatus = 'accepted' | 'rejected';
+
+export interface GeneratedImageVisualQaCheckResult {
+  id: GeneratedImageVisualQaCheckId;
+  label: string;
+  status: GeneratedImageVisualQaCheckStatus;
+  notes: string;
+  expected?: string;
+  actual?: string;
+}
+
+export interface GeneratedImageVisualQaResult {
+  status: GeneratedImageVisualQaStatus;
+  reviewedAt: string;
+  score: number;
+  checks: Record<GeneratedImageVisualQaCheckId, GeneratedImageVisualQaCheckResult>;
+  notes: string;
+  tags: string[];
+  rejectionReason?: string;
+  unresolvedWarnings: GeneratedImageVisualQaCheckId[];
 }
 
 export interface AssetCatalogEntry {

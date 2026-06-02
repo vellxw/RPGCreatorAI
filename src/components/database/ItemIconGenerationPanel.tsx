@@ -4,6 +4,15 @@ import type { AssetCatalogEntry } from '../../types/project';
 import { Button } from '../ui/Button';
 import { TextField } from './DatabaseFields';
 import {
+  GeneratedImageVisualQaReviewPanel,
+  type GeneratedImageVisualQaReviewValue,
+} from '../assets/GeneratedImageVisualQaReviewPanel';
+import {
+  applyGeneratedImageVisualQaResult,
+  buildGeneratedImageVisualQaDraft,
+  finalizeGeneratedImageVisualQaReview,
+} from '../../providers/generatedImageVisualQa';
+import {
   approveItemIconGenerationCandidate,
   defaultItemIconGenerationDraft,
   generateItemIconDraft,
@@ -28,6 +37,13 @@ const titleByKind: Record<ItemIconOwnerKind, string> = {
   item: 'Item',
   weapon: 'Weapon',
   armor: 'Armor',
+};
+
+const EMPTY_QA_REVIEW: GeneratedImageVisualQaReviewValue = {
+  notes: '',
+  tags: 'qa-reviewed',
+  rejectionReason: '',
+  checks: {},
 };
 
 function createDraft(props: Pick<ItemIconGenerationPanelProps, 'ownerKind' | 'ownerId' | 'ownerName' | 'description' | 'category'>) {
@@ -63,10 +79,12 @@ export function ItemIconGenerationPanel(props: ItemIconGenerationPanelProps) {
   const [candidate, setCandidate] = useState<ItemIconGenerationCandidate | null>(null);
   const [status, setStatus] = useState('');
   const [running, setRunning] = useState(false);
+  const [qaReview, setQaReview] = useState<GeneratedImageVisualQaReviewValue>(EMPTY_QA_REVIEW);
 
   const openPanel = () => {
     setDraft(createDraft(props));
     setCandidate(null);
+    setQaReview(EMPTY_QA_REVIEW);
     setStatus('');
     setOpen(true);
   };
@@ -82,6 +100,7 @@ export function ItemIconGenerationPanel(props: ItemIconGenerationPanelProps) {
         return;
       }
       setCandidate(result.candidate);
+      setQaReview(EMPTY_QA_REVIEW);
       setStatus('Candidate ready for review.');
     } catch (error) {
       setStatus((error as Error).message);
@@ -93,16 +112,44 @@ export function ItemIconGenerationPanel(props: ItemIconGenerationPanelProps) {
   const acceptCandidate = () => {
     if (!candidate) return;
     try {
+      const reviewedAt = new Date().toISOString();
+      const qaResult = finalizeGeneratedImageVisualQaReview(
+        buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+        {
+          status: 'accepted',
+          reviewedAt,
+          notes: qaReview.notes,
+          tags: qaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          checks: qaReview.checks,
+        },
+      );
       const approved = approveItemIconGenerationCandidate(candidate, {
-        reviewedAt: new Date().toISOString(),
+        reviewedAt,
       });
-      props.onAssetAccepted(approved.asset, approved.iconAssetId);
+      props.onAssetAccepted(applyGeneratedImageVisualQaResult(approved.asset, qaResult), approved.iconAssetId);
       setCandidate(null);
       setStatus(`Assigned ${approved.iconAssetId}.`);
       setOpen(false);
     } catch (error) {
       setStatus((error as Error).message);
     }
+  };
+
+  const rejectCandidate = () => {
+    if (!candidate) return;
+    const qaResult = finalizeGeneratedImageVisualQaReview(
+      buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+      {
+        status: 'rejected',
+        reviewedAt: new Date().toISOString(),
+        notes: qaReview.notes,
+        tags: qaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        rejectionReason: qaReview.rejectionReason,
+        checks: qaReview.checks,
+      },
+    );
+    setCandidate(null);
+    setStatus(`Rejected ${candidate.asset.name}${qaResult.rejectionReason ? `: ${qaResult.rejectionReason}` : ''}`);
   };
 
   return (
@@ -187,6 +234,14 @@ export function ItemIconGenerationPanel(props: ItemIconGenerationPanelProps) {
                     {candidate.qaPreview.width}x{candidate.qaPreview.height} · {candidate.qaPreview.providerFixture ?? 'offline'}
                   </p>
                 </div>
+                <div className="col-span-2">
+                  <GeneratedImageVisualQaReviewPanel
+                    asset={candidate.asset}
+                    preview={candidate.qaPreview}
+                    value={qaReview}
+                    onChange={setQaReview}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
@@ -195,6 +250,14 @@ export function ItemIconGenerationPanel(props: ItemIconGenerationPanelProps) {
                     aria-label={`Discard generated ${lower} icon`}
                   >
                     Discard
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={rejectCandidate}
+                    aria-label={`Reject generated ${lower} icon`}
+                  >
+                    Reject
                   </Button>
                   <Button
                     size="sm"

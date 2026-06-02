@@ -5492,3 +5492,58 @@ Error: Port 1420 is already in use
   confirm the catalog increased to 6 assets and selected
   `Player Adventurer Sheet Variation`,
   click `Validate` - PASS; toolbar feedback reported `Validation passed`.
+
+### Phase 11 FRA-106 / CP-071 - generated image visual QA scoring
+
+- `2026-06-02 17:05:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/generatedImageVisualQa.test.ts src/screens/__tests__/AssetsScreen.test.tsx`
+  - FAIL as expected during TDD red step; the visual QA provider module and
+  generated image review controls did not exist yet.
+- `2026-06-02 17:09:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/generatedImageVisualQa.test.ts src/screens/__tests__/AssetsScreen.test.tsx`
+  - PASS after adding the local QA rubric, accept metadata stamping, and
+  reject-without-catalog-mutation coverage; 2 focused files and 12 Vitest
+  tests passed.
+- `2026-06-02 17:12:00 -03:00` -
+  `npm test -- --run src/providers/__tests__/generatedImageVisualQa.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/TilesetEditor.test.tsx`
+  - PASS after wiring the shared QA panel into image variations, item/equipment
+  icons, actor/event portraits, and generated tilesets; 5 focused files and 32
+  Vitest tests passed.
+- `2026-06-02 17:13:00 -03:00` - `npm run typecheck` - PASS.
+- `2026-06-02 17:16:00 -03:00` - `npm test -- --run` - PASS; full frontend
+  Vitest suite passed with 81 files and 435 tests.
+- `2026-06-02 17:18:00 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build completed, 1953 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 17:18:00 -03:00` -
+  `rg -n "(fetch|axios|WebSocket|EventSource|XMLHttpRequest|https://api|apiKey|secret|token|sk-)" src\providers\generatedImageVisualQa.ts src\providers\__tests__\generatedImageVisualQa.test.ts src\components\assets\GeneratedImageVisualQaReviewPanel.tsx src\components\assets\ImageEditVariationPanel.tsx src\components\database\ItemIconGenerationPanel.tsx src\components\database\PortraitGenerationPanel.tsx src\components\database\TilesetEditor.tsx src\screens\__tests__\AssetsScreen.test.tsx src\types\project.ts`
+  - PASS for CP-071 scope; no matches.
+- `2026-06-02 17:23:00 -03:00` -
+  Browser smoke with the in-app Browser:
+  navigate to `http://127.0.0.1:3003/`,
+  click `Use My First RPG`,
+  click `Assets`,
+  click `Run image variation`,
+  confirm `Generated image variation review`,
+  confirm `Visual QA checklist`, score, and unresolved QA warnings,
+  click `Accept`,
+  confirm `Player Adventurer Sheet Variation` was added as the sixth catalog
+  asset with generated metadata,
+  click `Validate` - PASS; toolbar feedback reported `Validation passed` and
+  the console reported 0 warnings/errors.
+- `2026-06-02 17:35:00 -03:00` -
+  Final post-layout-polish rerun:
+  `npm test -- --run src/providers/__tests__/generatedImageVisualQa.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/PartyCombatEditors.test.tsx src/components/database/__tests__/TilesetEditor.test.tsx`
+  - PASS, 5 files and 32 tests;
+  `npm run typecheck` - PASS;
+  `npm test -- --run` - PASS, 81 files and 435 tests;
+  `npm run build` - PASS, 1953 modules transformed with the known non-fatal
+  Vite chunk-size warning.
+- `2026-06-02 17:36:00 -03:00` -
+  Browser resmoke with the in-app Browser after QA layout polish:
+  confirmed `Visual QA Dimensions notes` renders as a multiline textarea,
+  clicked `Accept`,
+  confirmed `Player Adventurer Sheet Variation` was added as the sixth catalog
+  asset with generated metadata,
+  clicked `Validate` - PASS; toolbar feedback reported `Validation passed` and
+  the console reported 0 warnings/errors.

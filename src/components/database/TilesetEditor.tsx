@@ -5,6 +5,15 @@ import {
   type TilesetImportRunner,
 } from '../../adapters/tilesetImport';
 import {
+  GeneratedImageVisualQaReviewPanel,
+  type GeneratedImageVisualQaReviewValue,
+} from '../assets/GeneratedImageVisualQaReviewPanel';
+import {
+  applyGeneratedImageVisualQaResult,
+  buildGeneratedImageVisualQaDraft,
+  finalizeGeneratedImageVisualQaReview,
+} from '../../providers/generatedImageVisualQa';
+import {
   approveTilesetGenerationCandidate,
   defaultTilesetGenerationDraft,
   generateTilesetDraft,
@@ -38,6 +47,12 @@ const PASSABILITY_OPTIONS = [
   { value: 'blocked', label: 'Blocked' },
 ];
 const ASSET_OPTIONS = [...TILE_ASSET_KEYS].map(key => ({ value: key, label: key }));
+const EMPTY_QA_REVIEW: GeneratedImageVisualQaReviewValue = {
+  notes: '',
+  tags: 'qa-reviewed',
+  rejectionReason: '',
+  checks: {},
+};
 
 interface TilesetEditorProps {
   value: TilesetDatabaseData;
@@ -226,6 +241,7 @@ export function TilesetEditor({
   const [generating, setGenerating] = useState(false);
   const [generationCandidate, setGenerationCandidate] = useState<TilesetGenerationCandidate | null>(null);
   const [generationStatus, setGenerationStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [generationQaReview, setGenerationQaReview] = useState<GeneratedImageVisualQaReviewValue>(EMPTY_QA_REVIEW);
   const selected = value.tilesets.find(tileset => tileset.id === selectedId) ?? value.tilesets[0];
   const selectedUsage = selected ? mapUsage[selected.id] ?? [] : [];
   const ids = useMemo(() => new Set(value.tilesets.map(tileset => tileset.id)), [value.tilesets]);
@@ -244,6 +260,7 @@ export function TilesetEditor({
   const openTilesetGeneration = () => {
     setGenerationDraft(defaultTilesetGenerationDraft(value.tilesets.length + 1));
     setGenerationCandidate(null);
+    setGenerationQaReview(EMPTY_QA_REVIEW);
     setGenerationStatus(null);
   };
 
@@ -310,6 +327,7 @@ export function TilesetEditor({
     setGenerating(true);
     setGenerationStatus(null);
     setGenerationCandidate(null);
+    setGenerationQaReview(EMPTY_QA_REVIEW);
     try {
       const result = await tilesetGenerator(
         assets.map(asset => asset.id),
@@ -322,6 +340,7 @@ export function TilesetEditor({
         return;
       }
       setGenerationCandidate(result.candidate);
+      setGenerationQaReview(EMPTY_QA_REVIEW);
       setGenerationStatus({ tone: 'success', text: 'Generated draft ready for review.' });
     } catch (error) {
       setGenerationStatus({ tone: 'error', text: (error as Error).message });
@@ -333,10 +352,21 @@ export function TilesetEditor({
   const acceptGeneratedTileset = () => {
     if (!generationCandidate) return;
     try {
+      const reviewedAt = new Date().toISOString();
+      const qaResult = finalizeGeneratedImageVisualQaReview(
+        buildGeneratedImageVisualQaDraft(generationCandidate.asset, generationCandidate.qaPreview),
+        {
+          status: 'accepted',
+          reviewedAt,
+          notes: generationQaReview.notes,
+          tags: generationQaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          checks: generationQaReview.checks,
+        },
+      );
       const approved = approveTilesetGenerationCandidate(generationCandidate, {
-        reviewedAt: new Date().toISOString(),
+        reviewedAt,
       });
-      onAssetImported?.(approved.asset);
+      onAssetImported?.(applyGeneratedImageVisualQaResult(approved.asset, qaResult));
       emitTilesets([...value.tilesets, approved.tileset]);
       setSelectedId(approved.tileset.id);
       setActiveGroup('A');
@@ -346,6 +376,26 @@ export function TilesetEditor({
     } catch (error) {
       setGenerationStatus({ tone: 'error', text: (error as Error).message });
     }
+  };
+
+  const rejectGeneratedTileset = () => {
+    if (!generationCandidate) return;
+    const qaResult = finalizeGeneratedImageVisualQaReview(
+      buildGeneratedImageVisualQaDraft(generationCandidate.asset, generationCandidate.qaPreview),
+      {
+        status: 'rejected',
+        reviewedAt: new Date().toISOString(),
+        notes: generationQaReview.notes,
+        tags: generationQaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        rejectionReason: generationQaReview.rejectionReason,
+        checks: generationQaReview.checks,
+      },
+    );
+    setGenerationCandidate(null);
+    setGenerationStatus({
+      tone: 'error',
+      text: `Rejected generated tileset ${generationCandidate.asset.name}${qaResult.rejectionReason ? `: ${qaResult.rejectionReason}` : ''}`,
+    });
   };
 
   const updateSelected = (changes: Partial<TilesetData>) => {
@@ -497,6 +547,7 @@ export function TilesetEditor({
               onClick={() => {
                 setGenerationDraft(null);
                 setGenerationCandidate(null);
+                setGenerationQaReview(EMPTY_QA_REVIEW);
               }}
             >
               Cancel
@@ -546,6 +597,14 @@ export function TilesetEditor({
                 Pending review · {generationCandidate.qaPreview.width} x {generationCandidate.qaPreview.height}px · {generationCandidate.qaPreview.tileSize}px tiles · {generationCandidate.qaPreview.assetRef}
               </p>
             </div>
+            <div className="w-full">
+              <GeneratedImageVisualQaReviewPanel
+                asset={generationCandidate.asset}
+                preview={generationCandidate.qaPreview}
+                value={generationQaReview}
+                onChange={setGenerationQaReview}
+              />
+            </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -553,6 +612,14 @@ export function TilesetEditor({
                 onClick={() => setGenerationCandidate(null)}
               >
                 Discard
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                aria-label="Reject generated tileset"
+                onClick={rejectGeneratedTileset}
+              >
+                Reject generated tileset
               </Button>
               <Button
                 size="sm"

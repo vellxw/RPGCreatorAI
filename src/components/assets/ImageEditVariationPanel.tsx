@@ -2,7 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input, Select } from '../ui/Input';
+import {
+  GeneratedImageVisualQaReviewPanel,
+  type GeneratedImageVisualQaReviewValue,
+} from './GeneratedImageVisualQaReviewPanel';
 import type { AssetCatalogEntry } from '../../types/project';
+import {
+  applyGeneratedImageVisualQaResult,
+  buildGeneratedImageVisualQaDraft,
+  finalizeGeneratedImageVisualQaReview,
+} from '../../providers/generatedImageVisualQa';
 import {
   approveImageEditVariationCandidate,
   defaultImageEditVariationCapability,
@@ -20,6 +29,13 @@ const MODE_OPTIONS = [
   { value: 'variation', label: 'Variation' },
   { value: 'edit', label: 'Edit' },
 ];
+
+const EMPTY_QA_REVIEW: GeneratedImageVisualQaReviewValue = {
+  notes: '',
+  tags: 'qa-reviewed',
+  rejectionReason: '',
+  checks: {},
+};
 
 function parseReferenceIds(value: string): string[] {
   return Array.from(new Set(value
@@ -60,6 +76,7 @@ export function ImageEditVariationPanel({
   const [running, setRunning] = useState(false);
   const [candidate, setCandidate] = useState<ImageEditVariationCandidate | null>(null);
   const [status, setStatus] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [qaReview, setQaReview] = useState<GeneratedImageVisualQaReviewValue>(EMPTY_QA_REVIEW);
   const cancelRequested = useRef(false);
 
   const editableSource = isEditableImageAsset(selected) ? selected : null;
@@ -73,6 +90,7 @@ export function ImageEditVariationPanel({
   useEffect(() => {
     setCandidate(null);
     setStatus(null);
+    setQaReview(EMPTY_QA_REVIEW);
     setMaskAssetId('');
     setReferenceIds('');
     if (selected) {
@@ -127,6 +145,7 @@ export function ImageEditVariationPanel({
         return;
       }
       setCandidate(result.candidate);
+      setQaReview(EMPTY_QA_REVIEW);
       setStatus({ tone: 'info', text: 'Candidate ready for review.' });
     } catch (error) {
       setStatus({ tone: 'error', text: (error as Error).message });
@@ -144,12 +163,42 @@ export function ImageEditVariationPanel({
 
   const handleAccept = () => {
     if (!candidate) return;
+    const qaResult = finalizeGeneratedImageVisualQaReview(
+      buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+      {
+        status: 'accepted',
+        reviewedAt: new Date().toISOString(),
+        notes: qaReview.notes,
+        tags: parseReferenceIds(qaReview.tags),
+        checks: qaReview.checks,
+      },
+    );
     const approved = approveImageEditVariationCandidate(candidate, {
       reviewedAt: new Date().toISOString(),
     });
-    onAssetAccepted(approved.asset);
+    onAssetAccepted(applyGeneratedImageVisualQaResult(approved.asset, qaResult));
     setCandidate(null);
     setStatus({ tone: 'success', text: `Accepted ${approved.asset.name}` });
+  };
+
+  const handleReject = () => {
+    if (!candidate) return;
+    const qaResult = finalizeGeneratedImageVisualQaReview(
+      buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+      {
+        status: 'rejected',
+        reviewedAt: new Date().toISOString(),
+        notes: qaReview.notes,
+        tags: parseReferenceIds(qaReview.tags),
+        rejectionReason: qaReview.rejectionReason,
+        checks: qaReview.checks,
+      },
+    );
+    setCandidate(null);
+    setStatus({
+      tone: 'error',
+      text: `Rejected ${candidate.asset.name}${qaResult.rejectionReason ? `: ${qaResult.rejectionReason}` : ''}`,
+    });
   };
 
   return (
@@ -257,6 +306,12 @@ export function ImageEditVariationPanel({
           <p className="mt-1 text-[11px] font-mono text-indigo-600 break-all">
             {candidate.qaPreview.assetRef}
           </p>
+          <GeneratedImageVisualQaReviewPanel
+            asset={candidate.asset}
+            preview={candidate.qaPreview}
+            value={qaReview}
+            onChange={setQaReview}
+          />
           <div className="mt-2 flex gap-2">
             <Button
               type="button"
@@ -268,6 +323,9 @@ export function ImageEditVariationPanel({
               }}
             >
               Discard
+            </Button>
+            <Button type="button" size="sm" variant="danger" onClick={handleReject}>
+              Reject
             </Button>
             <Button type="button" size="sm" variant="primary" onClick={handleAccept}>
               Accept

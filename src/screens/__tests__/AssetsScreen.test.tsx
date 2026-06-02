@@ -460,6 +460,19 @@ describe('AssetsScreen', () => {
     expect(view.dispatch).not.toHaveBeenCalled();
     expect(view.container.textContent).toContain('Generated image variation review');
     expect(view.container.textContent).toContain('forest_concept_variation');
+    expect(view.container.textContent).toContain('Visual QA checklist');
+    expect(view.container.textContent).toContain('Unresolved QA warnings');
+
+    const qaNotes = view.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="Visual QA notes"]');
+    act(() => {
+      qaNotes!.value = 'Manual preview confirms readability.';
+      qaNotes!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    const qaTags = view.container.querySelector<HTMLInputElement>('input[aria-label="Visual QA tags"]');
+    act(() => {
+      qaTags!.value = 'manual-pass, qa-reviewed';
+      qaTags!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
 
     const accept = Array.from(view.container.querySelectorAll('button')).find(element =>
       element.textContent?.includes('Accept'),
@@ -475,10 +488,89 @@ describe('AssetsScreen', () => {
         generated: expect.objectContaining({
           sourceAssetId: 'forest_concept',
           operation: 'image.edit',
+          visualQa: expect.objectContaining({
+            status: 'accepted',
+            notes: 'Manual preview confirms readability.',
+            tags: ['manual-pass', 'qa-reviewed'],
+          }),
         }),
       }),
     });
     expect(view.container.textContent).toContain('Accepted Forest Concept Variation');
+
+    view.unmount();
+  });
+
+  it('rejects generated image candidates with QA reasons without catalog mutation', async () => {
+    const sourceAsset = {
+      id: 'forest_concept',
+      name: 'Forest Concept',
+      kind: 'image' as const,
+      path: 'assets/imported/images/forest_concept.png',
+      source: 'imported' as const,
+      width: 1536,
+      height: 1024,
+    };
+    const imageEditRunner: ImageEditVariationRunner = vi.fn(async () => ({
+      success: true,
+      cancelled: false,
+      candidate: {
+        id: 'edit-run-reject',
+        reviewState: 'pending' as const,
+        sourceAsset,
+        asset: {
+          id: 'forest_concept_variation',
+          name: 'Forest Concept Variation',
+          kind: 'image' as const,
+          path: 'assets/generated/edits/forest_concept_variation.png',
+          source: 'generated' as const,
+          width: 1536,
+          height: 1024,
+          generated: {
+            promptTemplateId: 'asset-edit-v1',
+            operation: 'image.edit',
+            sourceAssetId: 'forest_concept',
+            editMode: 'variation' as const,
+          },
+        },
+        qaPreview: {
+          assetRef: 'mock://generated/edit-run-reject.png',
+          width: 1536,
+          height: 1024,
+        },
+      },
+    }));
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [sourceAsset],
+      },
+    };
+    const view = renderAssetsScreen(state, undefined, undefined, imageEditRunner);
+    const run = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Run image variation'),
+    );
+
+    await act(async () => {
+      run?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    const reason = view.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="Visual QA rejection reason"]');
+    act(() => {
+      reason!.value = 'Composition is too noisy for the asset library.';
+      reason!.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    const reject = Array.from(view.container.querySelectorAll('button')).find(element =>
+      element.textContent?.includes('Reject'),
+    );
+    await act(async () => {
+      reject?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.dispatch).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('Rejected Forest Concept Variation');
+    expect(view.container.textContent).toContain('Composition is too noisy for the asset library.');
 
     view.unmount();
   });

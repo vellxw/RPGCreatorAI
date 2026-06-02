@@ -36,13 +36,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`
 - `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`
+- `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-071 next).
+- Phase 11 Linear milestone 08 — GPT Image 2 asset pipeline (CP-072 next).
 - Phase 11 Linear milestone 09 — AI characters and animations.
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -485,6 +486,13 @@ Primary Phase 11 sources:
   until review, and accepted outputs are added as new generated catalog assets
   with source/mask/reference/prompt/model provenance. Evidence is recorded in
   `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`.
+- Phase 11 CP-071 — generated image visual QA scoring completed. Generated
+  image candidates now show a reviewer-facing checklist for dimensions,
+  transparency, style consistency, readability, and runtime suitability before
+  project assignment. Accept/reject flows store finalized QA score, notes,
+  tags, unresolved warnings, and rejection metadata in generated asset
+  metadata while keeping rejected candidates out of project data. Evidence is
+  recorded in `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

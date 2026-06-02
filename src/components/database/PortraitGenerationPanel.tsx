@@ -4,6 +4,15 @@ import type { AssetCatalogEntry } from '../../types/project';
 import { Button } from '../ui/Button';
 import { TextField } from './DatabaseFields';
 import {
+  GeneratedImageVisualQaReviewPanel,
+  type GeneratedImageVisualQaReviewValue,
+} from '../assets/GeneratedImageVisualQaReviewPanel';
+import {
+  applyGeneratedImageVisualQaResult,
+  buildGeneratedImageVisualQaDraft,
+  finalizeGeneratedImageVisualQaReview,
+} from '../../providers/generatedImageVisualQa';
+import {
   approvePortraitGenerationCandidate,
   defaultPortraitGenerationDraft,
   generatePortraitDraft,
@@ -26,6 +35,13 @@ interface PortraitGenerationPanelProps {
 const titleByKind: Record<PortraitOwnerKind, string> = {
   actor: 'Actor',
   event: 'Event',
+};
+
+const EMPTY_QA_REVIEW: GeneratedImageVisualQaReviewValue = {
+  notes: '',
+  tags: 'qa-reviewed',
+  rejectionReason: '',
+  checks: {},
 };
 
 function createDraft(props: Pick<PortraitGenerationPanelProps, 'ownerKind' | 'ownerId' | 'ownerName' | 'description'>) {
@@ -60,10 +76,12 @@ export function PortraitGenerationPanel(props: PortraitGenerationPanelProps) {
   const [candidate, setCandidate] = useState<PortraitGenerationCandidate | null>(null);
   const [status, setStatus] = useState('');
   const [running, setRunning] = useState(false);
+  const [qaReview, setQaReview] = useState<GeneratedImageVisualQaReviewValue>(EMPTY_QA_REVIEW);
 
   const openPanel = () => {
     setDraft(createDraft(props));
     setCandidate(null);
+    setQaReview(EMPTY_QA_REVIEW);
     setStatus('');
     setOpen(true);
   };
@@ -79,6 +97,7 @@ export function PortraitGenerationPanel(props: PortraitGenerationPanelProps) {
         return;
       }
       setCandidate(result.candidate);
+      setQaReview(EMPTY_QA_REVIEW);
       setStatus('Candidate ready for review.');
     } catch (error) {
       setStatus((error as Error).message);
@@ -90,16 +109,44 @@ export function PortraitGenerationPanel(props: PortraitGenerationPanelProps) {
   const acceptCandidate = () => {
     if (!candidate) return;
     try {
+      const reviewedAt = new Date().toISOString();
+      const qaResult = finalizeGeneratedImageVisualQaReview(
+        buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+        {
+          status: 'accepted',
+          reviewedAt,
+          notes: qaReview.notes,
+          tags: qaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          checks: qaReview.checks,
+        },
+      );
       const approved = approvePortraitGenerationCandidate(candidate, {
-        reviewedAt: new Date().toISOString(),
+        reviewedAt,
       });
-      props.onAssetAccepted(approved.asset, approved.portraitAssetId);
+      props.onAssetAccepted(applyGeneratedImageVisualQaResult(approved.asset, qaResult), approved.portraitAssetId);
       setCandidate(null);
       setStatus(`Assigned ${approved.portraitAssetId}.`);
       setOpen(false);
     } catch (error) {
       setStatus((error as Error).message);
     }
+  };
+
+  const rejectCandidate = () => {
+    if (!candidate) return;
+    const qaResult = finalizeGeneratedImageVisualQaReview(
+      buildGeneratedImageVisualQaDraft(candidate.asset, candidate.qaPreview),
+      {
+        status: 'rejected',
+        reviewedAt: new Date().toISOString(),
+        notes: qaReview.notes,
+        tags: qaReview.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        rejectionReason: qaReview.rejectionReason,
+        checks: qaReview.checks,
+      },
+    );
+    setCandidate(null);
+    setStatus(`Rejected ${candidate.asset.name}${qaResult.rejectionReason ? `: ${qaResult.rejectionReason}` : ''}`);
   };
 
   return (
@@ -184,6 +231,14 @@ export function PortraitGenerationPanel(props: PortraitGenerationPanelProps) {
                     {candidate.qaPreview.width}x{candidate.qaPreview.height} · {candidate.qaPreview.providerFixture ?? 'offline'}
                   </p>
                 </div>
+                <div className="col-span-2">
+                  <GeneratedImageVisualQaReviewPanel
+                    asset={candidate.asset}
+                    preview={candidate.qaPreview}
+                    value={qaReview}
+                    onChange={setQaReview}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
@@ -192,6 +247,14 @@ export function PortraitGenerationPanel(props: PortraitGenerationPanelProps) {
                     aria-label={`Discard generated ${lower} portrait`}
                   >
                     Discard
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={rejectCandidate}
+                    aria-label={`Reject generated ${lower} portrait`}
+                  >
+                    Reject
                   </Button>
                   <Button
                     size="sm"
