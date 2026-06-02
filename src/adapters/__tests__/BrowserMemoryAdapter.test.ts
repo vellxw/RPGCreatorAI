@@ -75,6 +75,37 @@ describe('BrowserMemoryAdapter', () => {
     expect(imported.databases.terms.currencyUnit).toBe('Credits');
   });
 
+  it('export → import roundtrip preserves polished map metadata', async () => {
+    const a = new BrowserMemoryAdapter();
+    const state = await a.loadProject();
+    state.project.startPosition = { x: 3, y: 4, direction: 'right' };
+    state.maps.town.scrollType = 'both';
+    state.maps.town.battleback = 'field';
+    state.maps.town.encounterSteps = 18;
+    state.maps.town.parallax = {
+      image: 'clouds',
+      loopX: true,
+      loopY: false,
+      scrollX: 1.5,
+      scrollY: -0.5,
+    };
+
+    const blob = await a.exportAll(state);
+    const imported = await new BrowserMemoryAdapter().importAll(await blob.text());
+
+    expect(imported.project.startPosition).toEqual({ x: 3, y: 4, direction: 'right' });
+    expect(imported.maps.town.scrollType).toBe('both');
+    expect(imported.maps.town.battleback).toBe('field');
+    expect(imported.maps.town.encounterSteps).toBe(18);
+    expect(imported.maps.town.parallax).toEqual({
+      image: 'clouds',
+      loopX: true,
+      loopY: false,
+      scrollX: 1.5,
+      scrollY: -0.5,
+    });
+  });
+
   it('importAll rejects malformed bundles', async () => {
     const a = new BrowserMemoryAdapter();
     await expect(a.importAll('{}')).rejects.toThrow();

@@ -3437,3 +3437,47 @@ Error: Port 1420 is already in use
   `docs/screenshots/phase11-cp026/map-tree-after-create-child.png`,
   `docs/screenshots/phase11-cp026/map-tree-after-create-child.snapshot.txt`,
   and `docs/screenshots/phase11-cp026/map-tree-focused-actions.png`.
+
+### Phase 11 FRA-62 / CP-027 — map properties polish
+
+- `2026-06-02 00:51:53 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapPropertiesPanel.test.tsx src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts src/adapters/__tests__/BrowserMemoryAdapter.test.ts`
+  — RED as expected; focused coverage failed because map property updates did
+  not normalize invalid metadata, validation did not flag invalid scroll,
+  encounter-step, or parallax-scroll values, the inspector did not expose
+  parallax/start controls, missing tileset references were not explained, and
+  setting a new start map did not persist a safe start position.
+- `2026-06-02 00:52:23 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapPropertiesPanel.test.tsx src/stores/__tests__/projectReducer.test.ts src/validation/__tests__/validateProject.test.ts src/adapters/__tests__/BrowserMemoryAdapter.test.ts`
+  — PASS; 4 focused files and 93 tests passed after adding map metadata
+  normalization, validation, editable parallax/start controls, missing
+  tileset display, and project roundtrip coverage.
+- `2026-06-02 00:52:37 -03:00` — `npm test` — PASS; 52 test files and 283
+  Vitest tests passed.
+- `2026-06-02 00:53:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 00:53:20 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-02 00:54:10 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 9.95s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 00:58:00 -03:00` —
+  controlled `npm run dev` plus Chrome DevTools screenshot review — PASS;
+  bundled sample opened, the map inspector showed editable tileset, scroll,
+  encounter, battleback, parallax image/loop/scroll, and start X/Y/direction
+  controls, and validation still reported `Project passes validation`.
+  Current-page console had no app/runtime errors; Chrome reported unrelated
+  form label/id issues from the hidden import file input and tile search box,
+  while the polished map-property controls had generated ids and labels.
+  Screenshots and snapshot written:
+  `docs/screenshots/phase11-cp027/map-properties-start-parallax.png` and
+  `docs/screenshots/phase11-cp027/map-properties-start-parallax.snapshot.txt`.
+  The controlled server was stopped afterward, leaving port 3000 clear.
+- `2026-06-02 01:01:06 -03:00` — `npm test` — PASS after documentation
+  updates; 52 test files and 283 Vitest tests passed.
+- `2026-06-02 01:02:00 -03:00` — `npm run typecheck` — PASS after
+  documentation updates.
+- `2026-06-02 01:02:00 -03:00` — `git diff --check` — PASS after
+  documentation updates with line-ending conversion warnings only.
+- `2026-06-02 01:02:45 -03:00` — `npm run build` — PASS after documentation
+  updates; 1917 modules transformed, build completed in 9.51s, and Vite
+  emitted only the documented non-fatal chunk-size warning.

@@ -912,6 +912,37 @@ describe('projectReducer', () => {
     expect(s3.maps.town.name).toBe('Town');
   });
 
+  it('UPDATE_MAP_PROPERTIES normalizes editable map metadata', () => {
+    const s1 = loadedState();
+    const s2 = projectReducer(s1, {
+      type: 'UPDATE_MAP_PROPERTIES',
+      mapId: 'town',
+      changes: {
+        scrollType: 'diagonal' as never,
+        encounterSteps: -12,
+        battleback: '  field  ',
+        parallax: {
+          image: '  clouds  ',
+          loopX: true,
+          loopY: false,
+          scrollX: Number.NaN,
+          scrollY: -2,
+        },
+      },
+    });
+
+    expect(s2.maps.town.scrollType).toBe('none');
+    expect(s2.maps.town.encounterSteps).toBe(0);
+    expect(s2.maps.town.battleback).toBe('field');
+    expect(s2.maps.town.parallax).toEqual({
+      image: 'clouds',
+      loopX: true,
+      loopY: false,
+      scrollX: 0,
+      scrollY: -2,
+    });
+  });
+
   it('CREATE_MAP appends a map reference and default authoring layers', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

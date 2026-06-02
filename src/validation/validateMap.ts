@@ -7,6 +7,7 @@ import {
 } from '../visual/tileCatalog';
 
 const VALID_TRIGGERS = ['interact', 'touch', 'autorun', 'parallel'];
+const VALID_SCROLL_TYPES = ['none', 'vertical', 'horizontal', 'both'];
 const VALID_PAGE_PRIORITIES = ['belowCharacters', 'sameAsCharacters', 'aboveCharacters'];
 const VALID_SELF_SWITCHES = ['A', 'B', 'C', 'D'];
 const VALID_MOVEMENT_ROUTE_TARGETS = ['player', 'thisEvent', 'event'];
@@ -62,6 +63,40 @@ const CODE_LIKE_PLUGIN_TEXT =
 
 export function validateMap(map: MapData, allMapIds: string[]): ValidationMessage[] {
   const messages: ValidationMessage[] = [];
+
+  if (map.scrollType !== undefined && !VALID_SCROLL_TYPES.includes(map.scrollType)) {
+    messages.push({
+      level: 'error',
+      message: `Map "${map.id}" has invalid scrollType "${map.scrollType}"`,
+      source: `${map.id}/scrollType`,
+    });
+  }
+  if (
+    map.encounterSteps !== undefined &&
+    (!Number.isFinite(map.encounterSteps) || map.encounterSteps < 0)
+  ) {
+    messages.push({
+      level: 'error',
+      message: `Map "${map.id}" encounterSteps must be non-negative`,
+      source: `${map.id}/encounterSteps`,
+    });
+  }
+  if (map.parallax) {
+    if (map.parallax.scrollX !== undefined && !Number.isFinite(map.parallax.scrollX)) {
+      messages.push({
+        level: 'error',
+        message: `Map "${map.id}" parallax.scrollX must be finite`,
+        source: `${map.id}/parallax`,
+      });
+    }
+    if (map.parallax.scrollY !== undefined && !Number.isFinite(map.parallax.scrollY)) {
+      messages.push({
+        level: 'error',
+        message: `Map "${map.id}" parallax.scrollY must be finite`,
+        source: `${map.id}/parallax`,
+      });
+    }
+  }
 
   // Check dimensions
   const expectedTiles = map.width * map.height;

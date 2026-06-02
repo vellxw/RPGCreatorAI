@@ -88,6 +88,31 @@ small, but keep it representative of the MVP runtime/editor contract:
 11. Switching maps clears the selection, but the undo stack is per
    editor session and stays alive until the editor is closed.
 
+## Map properties inspector
+
+When no event is selected, the right inspector edits map-level metadata.
+Creators can edit name, display name, tileset, scroll behavior, size,
+viewport preset, encounter steps, battleback id, parallax image, parallax
+loop flags, parallax scroll speeds, and project start position without
+opening JSON.
+
+The tileset dropdown keeps invalid references visible instead of silently
+falling back. If a map points at a tileset id that is not present in the
+loaded tileset database, the inspector shows `Missing tileset: <id>` and
+keeps that value selectable until the creator chooses a valid tileset.
+
+Start-map editing is explicit. The current start map exposes start X, start
+Y, and facing direction controls. Selecting another map as the project start
+also writes a safe start position clamped inside that map's dimensions, so
+shrinking or switching maps cannot leave the player spawn outside bounds.
+
+Map property writes are normalized by the project reducer before persistence:
+unknown scroll modes become `none`, negative or non-finite encounter step
+counts become `0`, battleback and parallax image ids are trimmed, and
+non-finite parallax scroll values become `0`. Project validation still flags
+invalid loaded JSON for invalid scroll modes, negative encounter steps, and
+non-finite parallax scroll values before save or playtest handoff.
+
 ## Tools
 
 | Tool | Cursor / hint | Click action | Drag action |

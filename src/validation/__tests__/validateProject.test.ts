@@ -316,6 +316,27 @@ describe('validateProject', () => {
     expect(report.errors.some(e => e.message.includes('unknown tileset "missing-tileset"'))).toBe(true);
   });
 
+  it('flags invalid map metadata settings', () => {
+    const map = makeMap({
+      scrollType: 'diagonal' as never,
+      encounterSteps: -1,
+      parallax: {
+        image: 'clouds',
+        loopX: true,
+        loopY: false,
+        scrollX: Number.NaN,
+        scrollY: Number.POSITIVE_INFINITY,
+      },
+    });
+    const project = makeProject({ town: map });
+    const report = validateProject(project);
+
+    expect(report.errors.some(e => e.message.includes('invalid scrollType'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('encounterSteps must be non-negative'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('parallax.scrollX must be finite'))).toBe(true);
+    expect(report.errors.some(e => e.message.includes('parallax.scrollY must be finite'))).toBe(true);
+  });
+
   it('flags duplicate tile ids and unknown tile assets in tileset databases', () => {
     const project = makeProject({ town: makeMap({ tilesetId: 'sample-town' }) });
     project.databases.tilesets.tilesets = [

@@ -143,6 +143,13 @@ Primary Phase 11 sources:
   child-retaining delete confirmations are explicit, and icon-only map-tree
   controls expose accessible names and disabled states. Evidence is recorded
   in `docs/screenshots/phase11-cp026/`.
+- Phase 11 CP-027 — map properties polish completed. The map inspector now
+  exposes editable tileset, scroll, encounter, battleback, parallax, viewport,
+  and start position/direction settings without JSON editing, shows missing
+  tileset references explicitly, clamps start positions when assigning a new
+  start map, normalizes saved map metadata, and validates invalid scroll,
+  encounter-step, and parallax-scroll values before save/playtest handoff.
+  Evidence is recorded in `docs/screenshots/phase11-cp027/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

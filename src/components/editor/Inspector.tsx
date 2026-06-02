@@ -4,9 +4,11 @@ import { useProjectStore } from '../../stores/projectStore';
 import { Input, Select } from '../ui/Input';
 import { Copy, Map as MapIcon, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import type {
+  Direction,
   EventCommand,
   GameEvent,
   MapData,
+  MapParallax,
   MapScrollType,
   ShowTextCommand,
   TriggerType,
@@ -71,6 +73,44 @@ function findFirstShowText(commands: EventCommand[]): { command: ShowTextCommand
     return null;
   }
   return walk(commands, []);
+}
+
+type StartPosition = { x: number; y: number; direction: Direction };
+type EditableMapParallax = { image: string; loopX: boolean; loopY: boolean; scrollX: number; scrollY: number };
+
+const START_DIRECTION_OPTIONS: Array<{ value: Direction; label: string }> = [
+  { value: 'down', label: 'Down' },
+  { value: 'up', label: 'Up' },
+  { value: 'left', label: 'Left' },
+  { value: 'right', label: 'Right' },
+];
+
+function finiteNumberOr(value: number | undefined, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function toEditableParallax(parallax: MapParallax | undefined): EditableMapParallax {
+  return {
+    image: parallax?.image ?? '',
+    loopX: parallax?.loopX ?? false,
+    loopY: parallax?.loopY ?? false,
+    scrollX: finiteNumberOr(parallax?.scrollX, 0),
+    scrollY: finiteNumberOr(parallax?.scrollY, 0),
+  };
+}
+
+function clampTileCoordinate(value: number, size: number): number {
+  const max = Math.max(0, size - 1);
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(Math.max(0, Math.floor(value)), max);
+}
+
+function clampStartPositionForMap(map: MapData, position: StartPosition): StartPosition {
+  return {
+    x: clampTileCoordinate(position.x, map.width),
+    y: clampTileCoordinate(position.y, map.height),
+    direction: position.direction,
+  };
 }
 
 export function Inspector() {
@@ -291,9 +331,42 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
     value: tileset.id,
     label: tileset.name,
   }));
+  const baseTilesetOptions =
+    tilesetOptions.length > 0 ? tilesetOptions : [{ value: 'sample-town', label: 'Sample Town' }];
+  const missingTilesetId =
+    map.tilesetId && !baseTilesetOptions.some(option => option.value === map.tilesetId) ? map.tilesetId : '';
+  const editableTilesetOptions = missingTilesetId
+    ? [{ value: missingTilesetId, label: `Missing: ${missingTilesetId}` }, ...baseTilesetOptions]
+    : baseTilesetOptions;
   const selectedTileset = getTileset(map.tilesetId);
+  const parallax = toEditableParallax(map.parallax);
+  const isStartMap = projectState.project.startMapId === map.id;
+  const startPosition = clampStartPositionForMap(map, projectState.project.startPosition);
   const updateMap = (changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>) => {
     dispatch({ type: 'UPDATE_MAP_PROPERTIES', mapId: map.id, changes });
+  };
+  const updateParallax = (changes: Partial<EditableMapParallax>) => {
+    updateMap({ parallax: { ...parallax, ...changes } });
+  };
+  const updateStartPosition = (changes: Partial<StartPosition>) => {
+    dispatch({
+      type: 'UPDATE_PROJECT_META',
+      changes: {
+        startPosition: clampStartPositionForMap(map, {
+          ...projectState.project.startPosition,
+          ...changes,
+        }),
+      },
+    });
+  };
+  const setAsStartMap = () => {
+    dispatch({
+      type: 'UPDATE_PROJECT_META',
+      changes: {
+        startMapId: map.id,
+        startPosition,
+      },
+    });
   };
   const applyResize = () => {
     dispatch({
@@ -357,9 +430,14 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
             <Select
               label="Tileset"
               value={map.tilesetId ?? 'sample-town'}
-              options={tilesetOptions.length > 0 ? tilesetOptions : [{ value: 'sample-town', label: 'Sample Town' }]}
+              options={editableTilesetOptions}
               onChange={v => updateMap({ tilesetId: v })}
             />
+            {missingTilesetId && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[12px] text-amber-800">
+                Missing tileset: {missingTilesetId}
+              </div>
+            )}
             <Select
               label="Scroll"
               value={map.scrollType ?? 'none'}
@@ -444,17 +522,92 @@ function MapSettingsPanel({ map }: { map: MapData | undefined }) {
         </div>
 
         <div>
+          <div className="text-[12px] font-semibold text-gray-700 mb-3">Parallax</div>
+          <div className="space-y-3">
+            <Input
+              label="Image"
+              aria-label="Parallax image"
+              value={parallax.image}
+              onChange={e => updateParallax({ image: e.target.value })}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <label className="flex items-center gap-2 rounded-md border border-gray-200 px-2.5 py-2 text-[12px] text-gray-600">
+                <input
+                  type="checkbox"
+                  aria-label="Loop parallax horizontally"
+                  checked={parallax.loopX}
+                  onChange={e => updateParallax({ loopX: e.target.checked })}
+                />
+                Loop X
+              </label>
+              <label className="flex items-center gap-2 rounded-md border border-gray-200 px-2.5 py-2 text-[12px] text-gray-600">
+                <input
+                  type="checkbox"
+                  aria-label="Loop parallax vertically"
+                  checked={parallax.loopY}
+                  onChange={e => updateParallax({ loopY: e.target.checked })}
+                />
+                Loop Y
+              </label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                label="Scroll X"
+                aria-label="Parallax scroll X"
+                type="number"
+                value={parallax.scrollX}
+                onChange={e => updateParallax({ scrollX: Number(e.target.value) })}
+              />
+              <Input
+                label="Scroll Y"
+                aria-label="Parallax scroll Y"
+                type="number"
+                value={parallax.scrollY}
+                onChange={e => updateParallax({ scrollY: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
           <div className="text-[12px] font-semibold text-gray-700 mb-3">Start</div>
+          {isStartMap && (
+            <div className="space-y-3 mb-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  label="X"
+                  aria-label="Start X"
+                  type="number"
+                  value={startPosition.x}
+                  onChange={e => updateStartPosition({ x: Number(e.target.value) })}
+                />
+                <Input
+                  label="Y"
+                  aria-label="Start Y"
+                  type="number"
+                  value={startPosition.y}
+                  onChange={e => updateStartPosition({ y: Number(e.target.value) })}
+                />
+              </div>
+              <Select
+                label="Direction"
+                ariaLabel="Start direction"
+                value={startPosition.direction}
+                options={START_DIRECTION_OPTIONS}
+                onChange={v => updateStartPosition({ direction: v as Direction })}
+              />
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => dispatch({ type: 'UPDATE_PROJECT_META', changes: { startMapId: map.id } })}
+            onClick={setAsStartMap}
             className={`w-full px-3 py-1.5 text-[12px] rounded-md border ${
-              projectState.project.startMapId === map.id
+              isStartMap
                 ? 'border-blue-200 bg-blue-50 text-blue-700'
                 : 'border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            {projectState.project.startMapId === map.id ? 'Start map' : 'Set as start map'}
+            {isStartMap ? 'Start map' : 'Set as start map'}
           </button>
         </div>
       </div>

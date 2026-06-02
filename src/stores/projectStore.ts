@@ -11,7 +11,9 @@ import type {
   ItemDatabase,
   ItemData,
   MapData,
+  MapParallax,
   MapReference,
+  MapScrollType,
   ProjectData,
   SystemData,
   TilesetDatabaseData,
@@ -506,6 +508,41 @@ function createAuthoringMap(
     ],
     events: [],
   };
+}
+
+const VALID_MAP_SCROLL_TYPES: MapScrollType[] = ['none', 'vertical', 'horizontal', 'both'];
+
+function finiteNumberOr(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function normalizeMapParallax(parallax: MapParallax | undefined): MapParallax {
+  return {
+    image: typeof parallax?.image === 'string' ? parallax.image.trim() : '',
+    loopX: parallax?.loopX === true,
+    loopY: parallax?.loopY === true,
+    scrollX: finiteNumberOr(parallax?.scrollX, 0),
+    scrollY: finiteNumberOr(parallax?.scrollY, 0),
+  };
+}
+
+function normalizeMapPropertyChanges(
+  changes: Partial<Omit<MapData, 'id' | 'layers' | 'events'>>,
+): Partial<Omit<MapData, 'id' | 'layers' | 'events'>> {
+  const next = deepClone(changes);
+  if (next.scrollType !== undefined && !VALID_MAP_SCROLL_TYPES.includes(next.scrollType)) {
+    next.scrollType = 'none';
+  }
+  if (next.encounterSteps !== undefined) {
+    next.encounterSteps = Math.max(0, Math.floor(finiteNumberOr(next.encounterSteps, 0)));
+  }
+  if (next.battleback !== undefined) {
+    next.battleback = next.battleback.trim();
+  }
+  if (next.parallax !== undefined) {
+    next.parallax = normalizeMapParallax(next.parallax);
+  }
+  return next;
 }
 
 function snapshotOf(state: ProjectStoreState): ProjectSnapshot {
@@ -1112,7 +1149,7 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
 
     case 'UPDATE_MAP_PROPERTIES':
       return withMap(state, action.mapId, map => {
-        Object.assign(map, deepClone(action.changes), { id: map.id });
+        Object.assign(map, normalizeMapPropertyChanges(action.changes), { id: map.id });
       });
 
     case 'UPDATE_MAP_REFERENCE': {
