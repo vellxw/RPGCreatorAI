@@ -101,6 +101,7 @@ void Application::run() {
 
         renderer.beginFrame();
         game->render(renderer);
+        renderDebugOverlayIfEnabled();
         renderer.endFrame();
 
         SDL_Delay(16);
@@ -121,6 +122,7 @@ void Application::renderFrameOnce() {
 
     renderer.beginFrame();
     if (game) game->render(renderer);
+    renderDebugOverlayIfEnabled();
     renderer.endFrame();
 }
 
@@ -352,8 +354,13 @@ void Application::configureRuntimeDebugSnapshot() {
     runtimeDebugSnapshotFile.clear();
     runtimeDebugFrame = 0;
     runtimeDebugSnapshotAccumulator = 0.0f;
+    runtimeDebugOverlayEnabled = false;
     if (const char* path = std::getenv("RPG_RUNTIME_DEBUG_SNAPSHOT_PATH")) {
         if (*path) runtimeDebugSnapshotFile = path;
+    }
+    if (const char* overlay = std::getenv("RPG_RUNTIME_DEBUG_OVERLAY")) {
+        runtimeDebugOverlayEnabled =
+            std::string(overlay) == "1" || std::string(overlay) == "true";
     }
 }
 
@@ -366,4 +373,9 @@ void Application::writeRuntimeDebugSnapshot() {
             &error)) {
         Logger::warning("Runtime debug snapshot write failed: " + error);
     }
+}
+
+void Application::renderDebugOverlayIfEnabled() {
+    if (!runtimeDebugOverlayEnabled || !game) return;
+    renderer.renderDebugOverlay(game->buildRuntimeDebugSnapshot(runtimeDebugFrame));
 }

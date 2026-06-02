@@ -216,6 +216,12 @@ Primary Phase 11 sources:
   check unknown ids plus unsafe or unsupported audio paths, and the native
   validator warns rather than blocks when optional local WAV files are absent.
   Evidence is recorded in `docs/PHASE_11_AUDIO_AUTHORING_RUNTIME_V1.md`.
+- Phase 11 CP-037 — deterministic plugin command registry v2 completed.
+  Authored plugin commands now use a typed local registry for `debug.log`,
+  `debug.setSwitch`, and `debug.setVariable` in the editor, TypeScript
+  validator, native runtime validator, and `EventRunner` dispatch. Unknown
+  safe commands remain non-fatal, while registered commands validate argument
+  types and switch/variable references before playtest handoff.
 - Phase 11 CP-038 — save/load UX and runtime slot polish completed.
   `SaveManager` now exposes detailed save/load results while preserving the
   legacy bool/optional API, validates save envelopes for supported
@@ -224,6 +230,14 @@ Primary Phase 11 sources:
   corrupt/future slots as existing but not loadable, blocks load actions for
   them, and surfaces actionable feedback without moving gameplay rules into
   persistence.
+- Phase 11 CP-039 — runtime diagnostics and developer overlay completed.
+  Runtime state snapshots now serialize bounded collections with explicit
+  limits, total counts, omitted counts, map dimensions, map-event count, and
+  event-trace count/capacity. `EventTraceBuffer` exposes size/capacity for
+  tests and snapshot diagnostics, the Playtest Runtime State panel surfaces
+  the bounded summary, and `RPG_RUNTIME_DEBUG_OVERLAY=1` enables a small
+  in-window runtime debug overlay without IPC, AI, network, or gameplay
+  mutation.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

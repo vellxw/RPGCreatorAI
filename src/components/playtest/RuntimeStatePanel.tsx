@@ -22,6 +22,31 @@ export interface RuntimeStateSnapshot {
     battle: boolean;
   };
   runningEventIds: string[];
+  diagnostics: {
+    limits: {
+      collectionEntries: number;
+      runningEvents: number;
+    };
+    counts: {
+      party: number;
+      switches: number;
+      variables: number;
+      selfSwitches: number;
+      inventory: number;
+      runningEvents: number;
+      mapEvents: number;
+      eventTraceEntries: number;
+      eventTraceCapacity: number;
+    };
+    omitted: {
+      party: number;
+      switches: number;
+      variables: number;
+      selfSwitches: number;
+      inventory: number;
+      runningEvents: number;
+    };
+  };
 }
 
 interface RuntimeStatePanelProps {
@@ -44,6 +69,43 @@ function readStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
 
+function readNumber(value: unknown): number {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function readDiagnostics(parsed: Record<string, unknown>): RuntimeStateSnapshot['diagnostics'] {
+  const diagnostics = readRecord<unknown>(parsed.diagnostics);
+  const limits = readRecord<unknown>(diagnostics.limits);
+  const counts = readRecord<unknown>(diagnostics.counts);
+  const omitted = readRecord<unknown>(diagnostics.omitted);
+  return {
+    limits: {
+      collectionEntries: readNumber(limits.collectionEntries),
+      runningEvents: readNumber(limits.runningEvents),
+    },
+    counts: {
+      party: readNumber(counts.party),
+      switches: readNumber(counts.switches),
+      variables: readNumber(counts.variables),
+      selfSwitches: readNumber(counts.selfSwitches),
+      inventory: readNumber(counts.inventory),
+      runningEvents: readNumber(counts.runningEvents),
+      mapEvents: readNumber(counts.mapEvents),
+      eventTraceEntries: readNumber(counts.eventTraceEntries),
+      eventTraceCapacity: readNumber(counts.eventTraceCapacity),
+    },
+    omitted: {
+      party: readNumber(omitted.party),
+      switches: readNumber(omitted.switches),
+      variables: readNumber(omitted.variables),
+      selfSwitches: readNumber(omitted.selfSwitches),
+      inventory: readNumber(omitted.inventory),
+      runningEvents: readNumber(omitted.runningEvents),
+    },
+  };
+}
+
 export function parseRuntimeStateSnapshot(text: string): RuntimeStateSnapshot | null {
   if (!text.trim()) return null;
   try {
@@ -51,6 +113,21 @@ export function parseRuntimeStateSnapshot(text: string): RuntimeStateSnapshot | 
     const player = readRecord<unknown>(parsed.player);
     const active = readRecord<unknown>(parsed.active);
     const frameNumber = Number(parsed.frameNumber);
+    const party = readStringArray(parsed.party);
+    const switches = readRecord<boolean>(parsed.switches);
+    const variables = readRecord<number>(parsed.variables);
+    const selfSwitches = readRecord<boolean>(parsed.selfSwitches);
+    const inventory = readRecord<number>(parsed.inventory);
+    const runningEventIds = readStringArray(parsed.runningEventIds);
+    const diagnostics = readDiagnostics(parsed);
+    if (!parsed.diagnostics) {
+      diagnostics.counts.party = party.length;
+      diagnostics.counts.switches = Object.keys(switches).length;
+      diagnostics.counts.variables = Object.keys(variables).length;
+      diagnostics.counts.selfSwitches = Object.keys(selfSwitches).length;
+      diagnostics.counts.inventory = Object.keys(inventory).length;
+      diagnostics.counts.runningEvents = runningEventIds.length;
+    }
     return {
       frameNumber: Number.isFinite(frameNumber) ? frameNumber : 0,
       mapId: typeof parsed.mapId === 'string' ? parsed.mapId : '',
@@ -60,18 +137,19 @@ export function parseRuntimeStateSnapshot(text: string): RuntimeStateSnapshot | 
         direction: typeof player.direction === 'string' ? player.direction : 'down',
       },
       gold: Number(parsed.gold) || 0,
-      party: readStringArray(parsed.party),
-      switches: readRecord<boolean>(parsed.switches),
-      variables: readRecord<number>(parsed.variables),
-      selfSwitches: readRecord<boolean>(parsed.selfSwitches),
-      inventory: readRecord<number>(parsed.inventory),
+      party,
+      switches,
+      variables,
+      selfSwitches,
+      inventory,
       active: {
         dialogue: active.dialogue === true,
         menu: active.menu === true,
         shop: active.shop === true,
         battle: active.battle === true,
       },
-      runningEventIds: readStringArray(parsed.runningEventIds),
+      runningEventIds,
+      diagnostics,
     };
   } catch {
     return null;
@@ -98,6 +176,11 @@ function KeyValueList({ values }: { values: Record<string, string | number | boo
       {entries.length > 6 && <div className="text-gray-400">+{entries.length - 6} more</div>}
     </div>
   );
+}
+
+function OmittedNote({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return <div className="text-gray-400">{count} omitted</div>;
 }
 
 export function RuntimeStatePanel({
@@ -183,6 +266,32 @@ export function RuntimeStatePanel({
             <div>
               <div className="text-gray-400">Gold</div>
               <div className="font-mono text-gray-900">{snapshot.gold}</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-3 mb-3 rounded border border-gray-100 bg-gray-50 px-3 py-2">
+            <div>
+              <div className="text-gray-400">Snapshot</div>
+              <div className="font-mono text-gray-900">
+                Snapshot cap {snapshot.diagnostics.limits.collectionEntries || '-'}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-400">Trace</div>
+              <div className="font-mono text-gray-900">
+                Trace {snapshot.diagnostics.counts.eventTraceEntries} / {snapshot.diagnostics.counts.eventTraceCapacity || '-'}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-400">Switches</div>
+              <div className="font-mono text-gray-900">
+                Switches {snapshot.diagnostics.counts.switches}
+              </div>
+              <OmittedNote count={snapshot.diagnostics.omitted.switches} />
+            </div>
+            <div>
+              <div className="text-gray-400">Map Events</div>
+              <div className="font-mono text-gray-900">{snapshot.diagnostics.counts.mapEvents}</div>
             </div>
           </div>
 

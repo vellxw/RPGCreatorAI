@@ -41,6 +41,34 @@ and the hard read caps used by the editor.
 The editor reads only the latest 256 KiB of the latest log and only the latest 128 KiB
 of the runtime snapshot. Full files remain local on disk for manual debugging.
 
+## Runtime State Snapshot
+
+`runtime-state-snapshot.json` remains a local deterministic JSON artifact. It
+contains the existing map id, player position/direction, gold, active runtime
+surfaces, party, switches, variables, self switches, inventory, and running
+event ids. CP-039 adds a bounded diagnostics object:
+
+- `diagnostics.limits.collectionEntries`: maximum emitted entries per party,
+  switch, variable, self-switch, and inventory collection (`64`).
+- `diagnostics.limits.runningEvents`: maximum emitted running event ids (`32`).
+- `diagnostics.counts`: total party, switch, variable, self-switch, inventory,
+  running-event, map-event, and event-trace counts.
+- `diagnostics.omitted`: entries intentionally omitted from bounded emitted
+  collections.
+- `diagnostics.counts.eventTraceCapacity`: current deterministic
+  `EventTraceBuffer` capacity.
+
+The Playtest Runtime State panel displays this summary so large projects can
+be diagnosed without relying on an unbounded JSON dump or runtime IPC.
+
+## Optional Runtime Overlay
+
+Set `RPG_RUNTIME_DEBUG_OVERLAY=1` before launching the native runtime to draw a
+small in-window developer overlay. The overlay shows frame number, map size,
+player position/direction, event-trace count/capacity, and running-event count.
+It reads the same runtime snapshot data, is off by default, and does not mutate
+gameplay state or add any AI/network/cloud dependency.
+
 ## Failed Startup Or Runtime Launch
 
 If the desktop app fails before the UI opens:

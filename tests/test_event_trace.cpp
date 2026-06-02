@@ -50,6 +50,34 @@ TEST_CASE("EventTraceBuffer assigns deterministic sequence numbers and formats s
           R"([TRACE] {"sequence":1,"sourceType":"mapEvent","mapId":"town","eventId":"npc_1","commonEventId":"","commandPath":"0","commandType":"showText","action":"start","result":"queued"})");
 }
 
+TEST_CASE("EventTraceBuffer reports capacity and keeps only the bounded tail") {
+    EventTraceBuffer trace(2);
+
+    EventTraceEntry first;
+    first.commandType = "showText";
+    trace.record(first);
+
+    EventTraceEntry second;
+    second.commandType = "wait";
+    trace.record(second);
+
+    EventTraceEntry third;
+    third.commandType = "transferMap";
+    trace.record(third);
+
+    REQUIRE(trace.entries().size() == 2);
+    CHECK(trace.size() == 2);
+    CHECK(trace.capacity() == 2);
+    CHECK(trace.entries()[0].sequence == 2);
+    CHECK(trace.entries()[0].commandType == "wait");
+    CHECK(trace.entries()[1].sequence == 3);
+    CHECK(trace.entries()[1].commandType == "transferMap");
+
+    trace.clear();
+    CHECK(trace.size() == 0);
+    CHECK(trace.capacity() == 2);
+}
+
 TEST_CASE("EventRunner traces map-event branches waits and transfer requests") {
     GameState state;
     state.setCurrentMap("town");

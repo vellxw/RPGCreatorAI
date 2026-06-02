@@ -8,6 +8,7 @@
 #include "runtime/MenuSystem.h"
 #include "runtime/ShopSystem.h"
 #include "runtime/BattleSummarySystem.h"
+#include "runtime/RuntimeDebugSnapshot.h"
 
 class IRenderer {
 public:
@@ -20,6 +21,7 @@ public:
                                 EntityRenderPass pass) = 0;
     virtual void renderDialogue(const DialogueSystem& dialogue) = 0;
     virtual void renderHUD(const GameState& state) = 0;
+    virtual void renderDebugOverlay(const rpg::RuntimeDebugSnapshot& snapshot) = 0;
     virtual void renderMenu(const rpg::MenuSystem::ViewModel& vm) = 0;
     virtual void renderShop(const rpg::ShopSystem::ViewModel& vm) = 0;
     virtual void renderBattleSummary(const rpg::BattleSummarySystem::ViewModel& vm) = 0;

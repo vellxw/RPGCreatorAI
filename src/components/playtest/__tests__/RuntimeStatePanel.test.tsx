@@ -32,6 +32,28 @@ const sampleSnapshot = JSON.stringify({
   inventory: { potion: 2 },
   active: { dialogue: true, menu: false, shop: true, battle: false },
   runningEventIds: ['map:town:npc_1', 'common:intro'],
+  diagnostics: {
+    limits: { collectionEntries: 64, runningEvents: 32 },
+    counts: {
+      party: 2,
+      switches: 5,
+      variables: 1,
+      selfSwitches: 1,
+      inventory: 1,
+      runningEvents: 2,
+      mapEvents: 4,
+      eventTraceEntries: 2,
+      eventTraceCapacity: 256,
+    },
+    omitted: {
+      switches: 4,
+      variables: 0,
+      selfSwitches: 0,
+      inventory: 0,
+      party: 0,
+      runningEvents: 0,
+    },
+  },
 });
 
 describe('RuntimeStatePanel', () => {
@@ -43,6 +65,8 @@ describe('RuntimeStatePanel', () => {
     expect(snapshot?.player.direction).toBe('up');
     expect(snapshot?.switches.intro_done).toBe(true);
     expect(snapshot?.runningEventIds).toContain('common:intro');
+    expect(snapshot?.diagnostics.counts.eventTraceEntries).toBe(2);
+    expect(snapshot?.diagnostics.omitted.switches).toBe(4);
   });
 
   it('renders bounded native state details and honest unavailable state', () => {
@@ -60,6 +84,10 @@ describe('RuntimeStatePanel', () => {
     expect(view.container.textContent).toContain('10, 12');
     expect(view.container.textContent).toContain('intro_done');
     expect(view.container.textContent).toContain('map:town:npc_1');
+    expect(view.container.textContent).toContain('Snapshot cap 64');
+    expect(view.container.textContent).toContain('Trace 2 / 256');
+    expect(view.container.textContent).toContain('Switches 5');
+    expect(view.container.textContent).toContain('4 omitted');
     view.unmount();
 
     const unavailable = render(

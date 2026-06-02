@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 namespace {
 
@@ -330,6 +331,12 @@ void drawHint(SDL_Renderer* r, const PanelLayout& p, const std::string& hint) {
     drawTextLine(r, p.textX, hintY, hint, 1, kPanelDim);
 }
 
+std::string compactDebugText(const std::string& value, std::size_t maxLength) {
+    if (value.size() <= maxLength) return value;
+    if (maxLength <= 3) return value.substr(0, maxLength);
+    return value.substr(0, maxLength - 3) + "...";
+}
+
 } // namespace
 
 void Renderer2D::renderHUD(const GameState& state) {
@@ -345,6 +352,49 @@ void Renderer2D::renderHUD(const GameState& state) {
     fillRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelFill);
     drawRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelBorder);
     drawTextLine(sdlRenderer, boxX + padX, boxY + padY, text, 2, kPanelHeader);
+}
+
+void Renderer2D::renderDebugOverlay(const rpg::RuntimeDebugSnapshot& snapshot) {
+    if (!sdlRenderer) return;
+
+    const std::vector<std::string> lines = {
+        "DEBUG",
+        "Frame: " + std::to_string(snapshot.frameNumber),
+        "Map: " + compactDebugText(snapshot.mapId, 24) + " " +
+            std::to_string(snapshot.mapWidth) + "x" +
+            std::to_string(snapshot.mapHeight),
+        "Player: " + std::to_string(snapshot.playerX) + "," +
+            std::to_string(snapshot.playerY) + " " + snapshot.playerDirection,
+        "Trace: " + std::to_string(snapshot.eventTraceEntryCount) + "/" +
+            std::to_string(snapshot.eventTraceCapacity),
+        "Events: " + std::to_string(snapshot.runningEventCount) + " running",
+    };
+
+    constexpr int scale = 1;
+    constexpr int padding = 8;
+    constexpr int margin = 12;
+    constexpr int rowHeight = BitmapFont::GlyphHeight * scale + 4;
+    int maxTextWidth = 0;
+    for (const auto& line : lines) {
+        maxTextWidth = std::max(maxTextWidth, BitmapFont::measureWidth(line, scale));
+    }
+
+    const int boxW = maxTextWidth + padding * 2;
+    const int boxH = rowHeight * static_cast<int>(lines.size()) + padding * 2;
+    const int boxX = std::max(margin, screenWidth - boxW - margin);
+    const int boxY = margin;
+    fillRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelFill);
+    drawRect(sdlRenderer, boxX, boxY, boxW, boxH, kPanelBorder);
+
+    for (std::size_t i = 0; i < lines.size(); ++i) {
+        const Color color = i == 0 ? kPanelHeader : kPanelText;
+        drawTextLine(sdlRenderer,
+                     boxX + padding,
+                     boxY + padding + static_cast<int>(i) * rowHeight,
+                     lines[i],
+                     scale,
+                     color);
+    }
 }
 
 void Renderer2D::renderMenu(const rpg::MenuSystem::ViewModel& vm) {

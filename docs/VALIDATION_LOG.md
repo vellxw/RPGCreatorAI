@@ -4073,3 +4073,67 @@ Error: Port 1420 is already in use
   missing-audio/device warnings only.
 - `2026-06-02 05:30:39 -03:00` — `git diff --check` — PASS with line-ending
   conversion warnings only.
+
+### Phase 11 FRA-74 / CP-039 — runtime diagnostics and developer overlay
+
+- `2026-06-02 05:40:10 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx`
+  — RED as expected; new Playtest coverage failed because runtime snapshots did
+  not parse or display the bounded `diagnostics` summary yet.
+- `2026-06-02 05:40:10 -03:00` —
+  `cmake --build build --config Debug --target rpg_tests` — FAIL before useful
+  code validation; the raw shell was not initialized with MSVC standard include
+  paths and failed on `cstdint`. Fix applied: use the repo `scripts/dev`
+  verifier path that calls `VsDevCmd.bat` before native configure/build/tests.
+- `2026-06-02 05:43:46 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS; native configure/build completed through the repo MSVC setup and
+  `RPGTests` passed 1/1 after bounded snapshot diagnostics, EventTraceBuffer
+  size/capacity, and optional renderer overlay hooks were added. CMake emitted
+  only known third-party policy/deprecation warnings.
+- `2026-06-02 05:43:46 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx`
+  — PASS; 2 focused Playtest diagnostics files and 6 tests passed after the
+  Runtime State panel surfaced snapshot caps, trace capacity, total counts, and
+  omitted-entry counts.
+- `2026-06-02 05:47:30 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 05:47:51 -03:00` — `npm test` — PASS; 56 test files and 313
+  Vitest tests passed.
+- `2026-06-02 05:48:39 -03:00` — `npm run build` — PASS; TypeScript and Vite
+  production build completed, 1919 modules transformed, with the known
+  non-fatal chunk-size warning.
+- `2026-06-02 05:49:27 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1`
+  — PASS; Rust safe no-log diagnostics test passed, Runtime Log adapter/UI
+  diagnostics tests passed, frontend typecheck passed, and the script reported
+  `RUNTIME DIAGNOSTICS VERIFY PASSED`.
+- `2026-06-02 05:49:57 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir "$env:LOCALAPPDATA\RPGCreatorAI\build" -ScreenshotDir build/runtime_smoke_cp039`
+  — PASS; launch smoke and feature smoke completed, screenshots were written
+  to `build/runtime_smoke_cp039`, traces reached battle/menu/save/load flows,
+  and warnings were limited to known optional missing local WAV files plus
+  unavailable audio endpoint fallback.
+- `2026-06-02 05:50:31 -03:00` — `git diff --check` — PASS with line-ending
+  conversion warnings only.
+- `2026-06-02 05:52:43 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/build.ps1`
+  — PASS after truncating long overlay labels; native configure/build completed
+  and `RPGTests` passed 1/1 with only known third-party CMake warnings.
+- `2026-06-02 05:52:43 -03:00` —
+  `npm test -- --run src/components/playtest/__tests__/RuntimeStatePanel.test.tsx`
+  — PASS after adding fallback counts for older snapshots without a
+  `diagnostics` block.
+- `2026-06-02 05:53:06 -03:00` — `npm run typecheck` — PASS after the final
+  Runtime State parser adjustment.
+- `2026-06-02 05:53:06 -03:00` — `npm test` — PASS after the final Runtime
+  State parser adjustment; 56 test files and 313 Vitest tests passed.
+- `2026-06-02 05:53:56 -03:00` — `npm run build` — PASS after the final
+  Runtime State parser adjustment; TypeScript and Vite production build
+  completed, 1919 modules transformed, with the known non-fatal chunk-size
+  warning.
+- `2026-06-02 05:54:36 -03:00` —
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -BuildDir "$env:LOCALAPPDATA\RPGCreatorAI\build" -ScreenshotDir build/runtime_smoke_cp039`
+  — PASS after the final overlay truncation; launch smoke and feature smoke
+  completed, screenshots were refreshed under `build/runtime_smoke_cp039`, and
+  warnings remained limited to known optional missing WAV/audio-device
+  conditions.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,8 @@ public:
     void clear();
 
     const std::vector<EventTraceEntry>& entries() const { return recordedEntries; }
+    std::size_t size() const { return recordedEntries.size(); }
+    std::size_t capacity() const { return maxEntries; }
 
 private:
     std::size_t maxEntries = 256;

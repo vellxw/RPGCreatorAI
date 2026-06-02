@@ -16,6 +16,7 @@ public:
                         EntityRenderPass pass) override;
     void renderDialogue(const DialogueSystem& dialogue) override;
     void renderHUD(const GameState& state) override;
+    void renderDebugOverlay(const rpg::RuntimeDebugSnapshot& snapshot) override;
     void renderMenu(const rpg::MenuSystem::ViewModel& vm) override;
     void renderShop(const rpg::ShopSystem::ViewModel& vm) override;
     void renderBattleSummary(const rpg::BattleSummarySystem::ViewModel& vm) override;

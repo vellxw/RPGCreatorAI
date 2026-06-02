@@ -47,7 +47,7 @@
   - [x] CP-036 / FRA-71: implement audio authoring runtime v1.
   - [x] CP-037 / FRA-72: implement deterministic plugin command registry v2.
   - [x] CP-038 / FRA-73: polish save/load UX and runtime slots.
-  - [ ] CP-039 / FRA-74: add runtime diagnostics and developer overlay.
+  - [x] CP-039 / FRA-74: add runtime diagnostics and developer overlay.
   - [ ] CP-040 / FRA-75: run the runtime feature completeness integration gate.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

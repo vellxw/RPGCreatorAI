@@ -85,10 +85,17 @@ error.
 - Runtime logs are stored under the app data runtime-log directory and read
   with a hard 256 KiB tail cap.
 - Event trace rows use the stable `[TRACE]` prefix plus JSON payloads in the
-  runtime log. The Playtest Event Trace tab parses those rows directly.
+  runtime log. The bounded `EventTraceBuffer` exposes its current size and
+  capacity to runtime snapshots, and the Playtest Event Trace tab parses those
+  rows directly from the bounded log tail.
 - Native runtime state snapshots are written as
   `runtime-state-snapshot.json` through a temp-file replace path and read with
-  a hard 128 KiB cap.
+  a hard 128 KiB cap. Snapshot collections are emitted with explicit caps and
+  omitted-entry counts so large projects remain diagnosable without unbounded
+  IPC or JSON reads.
+- `RPG_RUNTIME_DEBUG_OVERLAY=1` enables an optional native in-window developer
+  overlay that draws the current frame, map, player, trace, and running-event
+  summary. It is off by default and has no gameplay or provider dependency.
 - The log-folder opener opens only the allowlisted runtime log directory.
 
 ## Browser Mode

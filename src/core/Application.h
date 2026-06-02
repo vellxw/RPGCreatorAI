@@ -28,6 +28,7 @@ private:
     bool snapshot(const std::string& outputDir, const std::string& name);
     void configureRuntimeDebugSnapshot();
     void writeRuntimeDebugSnapshot();
+    void renderDebugOverlayIfEnabled();
 
     Window window;
     InputManager inputManager;
@@ -37,6 +38,7 @@ private:
     std::filesystem::path runtimeDebugSnapshotFile;
     std::uint64_t runtimeDebugFrame = 0;
     float runtimeDebugSnapshotAccumulator = 0.0f;
+    bool runtimeDebugOverlayEnabled = false;
     
     bool isRunning = false;
 };

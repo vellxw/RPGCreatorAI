@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <map>
 
 namespace {
 
@@ -26,6 +27,23 @@ int movementRouteMoveStepMs(float tilesPerSecond) {
     return tilesPerSecond > 0.0f
         ? std::max(1, static_cast<int>(std::ceil(1000.0f / tilesPerSecond)))
         : 125;
+}
+
+template <typename T>
+std::size_t copyBoundedByKey(const std::unordered_map<std::string, T>& source,
+                             std::map<std::string, T>& target,
+                             std::size_t limit) {
+    target.clear();
+    std::size_t total = 0;
+    for (const auto& [key, value] : source) {
+        ++total;
+        if (limit == 0) continue;
+        target[key] = value;
+        if (target.size() > limit) {
+            target.erase(std::prev(target.end()));
+        }
+    }
+    return total;
 }
 
 EntityRenderPriority renderPriorityFromEventPriority(const std::string& priority) {
@@ -1060,37 +1078,51 @@ rpg::RuntimeDebugSnapshot Game::buildRuntimeDebugSnapshot(std::uint64_t frameNum
     rpg::RuntimeDebugSnapshot snapshot;
     snapshot.frameNumber = frameNumber;
     snapshot.mapId = state.getCurrentMapId();
+    snapshot.mapWidth = currentScene.getWidth();
+    snapshot.mapHeight = currentScene.getHeight();
+    snapshot.tileSize = currentScene.getTileSize();
+    snapshot.mapEventCount = currentScene.getData().events.size();
     snapshot.playerX = state.getPlayerX();
     snapshot.playerY = state.getPlayerY();
     snapshot.playerDirection = directionToString(state.getPlayerDirection());
     snapshot.gold = state.getGold();
-    snapshot.party = state.getParty();
+    snapshot.partyCount = state.getParty().size();
+    const auto partyLimit =
+        std::min(snapshot.partyCount, rpg::kRuntimeDebugSnapshotCollectionLimit);
+    snapshot.party.assign(state.getParty().begin(), state.getParty().begin() + partyLimit);
 
-    for (const auto& [key, value] : state.getSwitches()) {
-        snapshot.switches[key] = value;
-    }
-    for (const auto& [key, value] : state.getVariables()) {
-        snapshot.variables[key] = value;
-    }
-    for (const auto& [key, value] : state.getSelfSwitches()) {
-        snapshot.selfSwitches[key] = value;
-    }
-    for (const auto& [key, value] : state.getInventory()) {
-        snapshot.inventory[key] = value;
-    }
+    snapshot.switchCount = copyBoundedByKey(
+        state.getSwitches(), snapshot.switches, rpg::kRuntimeDebugSnapshotCollectionLimit);
+    snapshot.variableCount = copyBoundedByKey(
+        state.getVariables(), snapshot.variables, rpg::kRuntimeDebugSnapshotCollectionLimit);
+    snapshot.selfSwitchCount = copyBoundedByKey(
+        state.getSelfSwitches(), snapshot.selfSwitches, rpg::kRuntimeDebugSnapshotCollectionLimit);
+    snapshot.inventoryCount = copyBoundedByKey(
+        state.getInventory(), snapshot.inventory, rpg::kRuntimeDebugSnapshotCollectionLimit);
 
     snapshot.activeDialogue = dialogue.isActive();
     snapshot.activeMenu = menuSystem.isOpen();
     snapshot.activeShop = shopSystem.isOpen();
     snapshot.activeBattle = battleSummarySystem.isOpen();
+    snapshot.eventTraceEntryCount = eventTraceBuffer.size();
+    snapshot.eventTraceCapacity = eventTraceBuffer.capacity();
+
+    auto appendRunningEventId = [&](const std::string& id) {
+        if (id.empty()) return;
+        ++snapshot.runningEventCount;
+        if (snapshot.runningEventIds.size() < rpg::kRuntimeDebugSnapshotRunningEventLimit) {
+            snapshot.runningEventIds.push_back(id);
+        }
+    };
 
     if (eventRunner) {
-        const std::string id = eventRunner->debugRunningSourceId();
-        if (!id.empty()) snapshot.runningEventIds.push_back(id);
+        appendRunningEventId(eventRunner->debugRunningSourceId());
     }
     if (eventScheduler) {
         auto ids = eventScheduler->runningDebugSourceIds();
-        snapshot.runningEventIds.insert(snapshot.runningEventIds.end(), ids.begin(), ids.end());
+        for (const auto& id : ids) {
+            appendRunningEventId(id);
+        }
     }
 
     return snapshot;

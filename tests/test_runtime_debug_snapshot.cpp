@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 
 namespace {
@@ -11,6 +12,12 @@ std::string readTextFile(const std::filesystem::path& path) {
     std::ifstream in(path);
     std::ostringstream out;
     out << in.rdbuf();
+    return out.str();
+}
+
+std::string numberedId(const std::string& prefix, int index) {
+    std::ostringstream out;
+    out << prefix << "_" << std::setw(3) << std::setfill('0') << index;
     return out.str();
 }
 
@@ -34,6 +41,12 @@ TEST_CASE("RuntimeDebugSnapshot serializes deterministic runtime state JSON") {
     snapshot.activeShop = true;
     snapshot.activeBattle = false;
     snapshot.runningEventIds = {"map:town:npc_1", "common:intro"};
+    snapshot.mapWidth = 32;
+    snapshot.mapHeight = 18;
+    snapshot.tileSize = 32;
+    snapshot.mapEventCount = 4;
+    snapshot.eventTraceEntryCount = 2;
+    snapshot.eventTraceCapacity = 256;
 
     const auto json = nlohmann::json::parse(rpg::serializeRuntimeDebugSnapshot(snapshot));
 
@@ -51,6 +64,45 @@ TEST_CASE("RuntimeDebugSnapshot serializes deterministic runtime state JSON") {
     CHECK(json["active"]["dialogue"] == true);
     CHECK(json["active"]["shop"] == true);
     CHECK(json["runningEventIds"][0] == "map:town:npc_1");
+    CHECK(json["map"]["width"] == 32);
+    CHECK(json["map"]["height"] == 18);
+    CHECK(json["map"]["tileSize"] == 32);
+    CHECK(json["diagnostics"]["limits"]["collectionEntries"] ==
+          rpg::kRuntimeDebugSnapshotCollectionLimit);
+    CHECK(json["diagnostics"]["limits"]["runningEvents"] ==
+          rpg::kRuntimeDebugSnapshotRunningEventLimit);
+    CHECK(json["diagnostics"]["counts"]["mapEvents"] == 4);
+    CHECK(json["diagnostics"]["counts"]["eventTraceEntries"] == 2);
+    CHECK(json["diagnostics"]["counts"]["eventTraceCapacity"] == 256);
+}
+
+TEST_CASE("RuntimeDebugSnapshot bounds serialized collections and reports omitted counts") {
+    rpg::RuntimeDebugSnapshot snapshot;
+    snapshot.mapId = "large_map";
+
+    for (std::size_t i = 0; i < rpg::kRuntimeDebugSnapshotCollectionLimit + 3; ++i) {
+        snapshot.switches[numberedId("switch", static_cast<int>(i))] = true;
+        snapshot.variables[numberedId("variable", static_cast<int>(i))] = static_cast<int>(i);
+        snapshot.inventory[numberedId("item", static_cast<int>(i))] = 1;
+    }
+    for (std::size_t i = 0; i < rpg::kRuntimeDebugSnapshotRunningEventLimit + 2; ++i) {
+        snapshot.runningEventIds.push_back(numberedId("event", static_cast<int>(i)));
+    }
+
+    const auto json = nlohmann::json::parse(rpg::serializeRuntimeDebugSnapshot(snapshot));
+
+    CHECK(json["switches"].size() == rpg::kRuntimeDebugSnapshotCollectionLimit);
+    CHECK(json["variables"].size() == rpg::kRuntimeDebugSnapshotCollectionLimit);
+    CHECK(json["inventory"].size() == rpg::kRuntimeDebugSnapshotCollectionLimit);
+    CHECK(json["runningEventIds"].size() == rpg::kRuntimeDebugSnapshotRunningEventLimit);
+    CHECK(json["switches"].contains("switch_000"));
+    CHECK_FALSE(json["switches"].contains("switch_066"));
+    CHECK(json["diagnostics"]["counts"]["switches"] ==
+          rpg::kRuntimeDebugSnapshotCollectionLimit + 3);
+    CHECK(json["diagnostics"]["omitted"]["switches"] == 3);
+    CHECK(json["diagnostics"]["counts"]["runningEvents"] ==
+          rpg::kRuntimeDebugSnapshotRunningEventLimit + 2);
+    CHECK(json["diagnostics"]["omitted"]["runningEvents"] == 2);
 }
 
 TEST_CASE("RuntimeDebugSnapshot writes atomically to a stable snapshot path") {

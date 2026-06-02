@@ -62,6 +62,13 @@
   from those ids. Missing optional files or unavailable audio devices warn and
   continue silently.
 
+## Developer Diagnostics
+
+- Playtest exposes bounded Runtime Log, Event Trace, and Runtime State panels.
+- Set `RPG_RUNTIME_DEBUG_OVERLAY=1` before launching the native runtime to
+  draw the optional frame/map/player/trace overlay. This is a developer
+  diagnostic flag, not an in-game control, and it is off by default.
+
 ## Save / Load
 
 - `F5` writes the quick save to `saves/slot_1.json`.
