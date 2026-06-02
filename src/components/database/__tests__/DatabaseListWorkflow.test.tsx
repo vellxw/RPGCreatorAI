@@ -132,6 +132,7 @@ describe('DatabaseList workflow', () => {
 
     expect(view.container.textContent).toContain('Showing 1 of 35 actors');
     expect(button(view.container, 'Select actor actor_29')).toBeTruthy();
+    expect(button(view.container, 'Clear actor search').className).toContain('h-6');
     expect(view.container.textContent).toContain('Selected actor_05 is hidden by this filter.');
 
     act(() => {
@@ -147,6 +148,19 @@ describe('DatabaseList workflow', () => {
       button(view.container, 'Clear actor search').click();
     });
     expect(view.container.textContent).toContain('Showing 35 of 35 actors');
+
+    view.unmount();
+  });
+
+  it('keeps row icon actions at stable button dimensions', () => {
+    const actors = makeActors(2);
+    const view = renderList(actors as unknown as DatabaseRecord[], makeState(actors), 'actor_01');
+
+    for (const label of ['Duplicate actor actor_01', 'Delete actor actor_01']) {
+      const action = button(view.container, label);
+      expect(action.className).toContain('h-6');
+      expect(action.className).toContain('w-6');
+    }
 
     view.unmount();
   });

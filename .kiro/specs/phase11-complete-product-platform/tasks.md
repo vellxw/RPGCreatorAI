@@ -31,7 +31,7 @@
   - [x] CP-022 / FRA-57: improve recoverable error states and user-safe failure copy.
   - [x] CP-023 / FRA-58: add professional empty states and first-time guidance.
   - [x] CP-024 / FRA-59: run the end-to-end usability integration gate.
-- [ ] 03 Professional Editor Surface.
+- [x] 03 Professional Editor Surface.
   - [x] CP-025 / FRA-60: polish primary navigation and route visibility.
   - [x] CP-026 / FRA-61: polish map tree workflow reliability.
   - [x] CP-027 / FRA-62: polish map properties editing and validation.
@@ -39,6 +39,7 @@
   - [x] CP-029 / FRA-64: polish layer workflow safety and overlays.
   - [x] CP-030 / FRA-65: polish event editor surface and command editing.
   - [x] CP-031 / FRA-66: polish database navigation and large-list safety.
+  - [x] CP-032 / FRA-67: run the professional editor surface integration gate.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

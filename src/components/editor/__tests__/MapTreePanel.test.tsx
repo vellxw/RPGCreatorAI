@@ -166,4 +166,36 @@ describe('MapTreePanel workflow polish', () => {
 
     view.unmount();
   });
+
+  it('keeps branch disclosure controls at stable icon-button dimensions', () => {
+    const view = renderMapTree(projectState([
+      { id: 'town', path: 'data/maps/town.json', parentId: null, order: 0, expanded: true },
+      { id: 'forest', path: 'data/maps/forest.json', parentId: 'town', order: 0, expanded: true },
+      { id: 'cave', path: 'data/maps/cave.json', parentId: 'forest', order: 0, expanded: true },
+    ]));
+
+    for (const name of ['Town', 'Forest', 'Cave']) {
+      const control = view.container.querySelector<HTMLButtonElement>(
+        `button[aria-label="Collapse map group ${name}"]`,
+      );
+      expect(control?.className).toContain('h-6');
+      expect(control?.className).toContain('w-6');
+    }
+
+    view.unmount();
+  });
+
+  it('keeps selectable map rows at stable button height', () => {
+    const view = renderMapTree(projectState([
+      { id: 'town', path: 'data/maps/town.json', parentId: null, order: 0, expanded: true },
+      { id: 'forest', path: 'data/maps/forest.json', parentId: 'town', order: 0, expanded: true },
+    ]));
+
+    for (const name of ['Town', 'Forest']) {
+      const rowButton = view.container.querySelector<HTMLButtonElement>(`button[title="${name}"]`);
+      expect(rowButton?.className).toContain('h-6');
+    }
+
+    view.unmount();
+  });
 });

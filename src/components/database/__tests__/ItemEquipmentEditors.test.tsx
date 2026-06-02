@@ -145,6 +145,7 @@ describe('item, equipment, and state database editors', () => {
 
     expect(view.container.textContent).toContain('Showing 1 of 32 items');
     expect(button(view.container, 'Select item item_29')).toBeTruthy();
+    expect(button(view.container, 'Clear item search').className).toContain('h-6');
     expect(view.container.textContent).toContain('Selected item_01 is hidden by this filter.');
 
     changeText(input(view.container, 'Search items'), 'missing');

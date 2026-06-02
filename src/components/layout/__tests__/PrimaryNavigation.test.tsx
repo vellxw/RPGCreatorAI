@@ -105,6 +105,8 @@ describe('Primary navigation', () => {
     });
 
     expect(mapsCrumb).toBeDefined();
+    expect(mapsCrumb?.className).toContain('h-6');
+    expect(buttons.find(button => button.textContent?.trim() === 'Events')?.className).toContain('h-6');
     expect(unlabeledButtons).toHaveLength(0);
 
     act(() => {

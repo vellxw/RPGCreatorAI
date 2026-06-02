@@ -271,7 +271,7 @@ export function TopToolbar() {
         <button
           type="button"
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'editor' })}
-          className="text-gray-500 hover:text-indigo-600 cursor-pointer"
+          className="inline-flex h-6 items-center rounded px-1 text-gray-500 hover:text-indigo-600 cursor-pointer"
         >
           Maps
         </button>
@@ -281,7 +281,7 @@ export function TopToolbar() {
         <button
           type="button"
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'events' })}
-          className="text-gray-500 hover:text-indigo-600 cursor-pointer"
+          className="inline-flex h-6 items-center rounded px-1 text-gray-500 hover:text-indigo-600 cursor-pointer"
         >
           Events
         </button>

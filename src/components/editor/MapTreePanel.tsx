@@ -150,18 +150,18 @@ export function MapTreePanel() {
                   changes: { expanded: !expanded },
                 })
               }
-              className="p-0.5 text-gray-400 hover:text-gray-700"
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-gray-400 hover:text-gray-700 disabled:cursor-default disabled:opacity-40"
               disabled={!hasChildren}
               aria-label={expanded ? `Collapse map group ${mapName}` : `Expand map group ${mapName}`}
               title={expanded ? `Collapse map group ${mapName}` : `Expand map group ${mapName}`}
             >
-              {hasChildren ? expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} /> : <span className="block w-[13px]" />}
+              {hasChildren ? expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} /> : <span aria-hidden="true" className="block h-[13px] w-[13px]" />}
             </button>
             <button
               type="button"
               onClick={() => editorDispatch({ type: 'SELECT_MAP', mapId: ref.id })}
               onDoubleClick={() => renameMap(ref.id)}
-              className="min-w-0 flex-1 flex items-center gap-1.5 text-left"
+              className="flex h-6 min-w-0 flex-1 items-center gap-1.5 text-left"
               title={map?.name ?? ref.id}
             >
               <Map size={13} className={selected ? 'text-indigo-500' : 'text-gray-400'} />

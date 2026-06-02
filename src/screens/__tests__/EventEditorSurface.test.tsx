@@ -239,6 +239,25 @@ describe('EventEditorScreen surface polish', () => {
     });
   });
 
+  it('keeps compact page and condition actions at stable button heights', () => {
+    const view = renderScreen();
+
+    for (const title of ['Move page left', 'Move page right']) {
+      const pageAction = view.container.querySelector<HTMLButtonElement>(`button[title="${title}"]`);
+      expect(pageAction?.className).toContain('h-6');
+      expect(pageAction?.className).toContain('w-6');
+    }
+
+    for (const label of ['Add switch condition', 'Add variable condition', 'Event Preview', 'Notes']) {
+      const action = Array.from(view.container.querySelectorAll('button')).find(button =>
+        button.textContent?.trim() === label,
+      );
+      expect(action?.className).toContain('h-6');
+    }
+
+    view.unmount();
+  });
+
   it('keeps command edits scoped to the selected page id', () => {
     const view = renderScreen();
     selectPageTwo(view.container);

@@ -160,6 +160,8 @@ describe('AnimationsEditor', () => {
     changeText(input(view.container, 'Search animation sets'), 'animation_21');
 
     expect(view.container.textContent).toContain('Showing 1 of 24 animation sets');
+    const clearSearch = view.container.querySelector<HTMLButtonElement>('button[aria-label="Clear animation set search"]');
+    expect(clearSearch?.className).toContain('h-6');
     expect(view.container.textContent).toContain('Selected animation_01 is hidden by this filter.');
     click(view.container, 'Select animation set animation_21');
     expect(view.container.textContent).toContain('animation_21');

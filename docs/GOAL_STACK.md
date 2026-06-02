@@ -36,7 +36,6 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 03 — professional editor surface.
 - Phase 11 Linear milestone 04 — runtime feature completeness.
 - Phase 11 Linear milestone 05 — database/system completeness.
 - Phase 11 Linear milestone 06 — asset library and import pipeline.
@@ -176,6 +175,16 @@ Primary Phase 11 sources:
   names, and surfaces reference impact before destructive deletes for standard
   database records, items, and animation sets. Evidence is recorded in
   `docs/screenshots/phase11-cp031/`.
+- Phase 11 CP-032 — professional editor surface integration gate completed.
+  Focused frontend coverage and screenshot audit now validate navigation, map
+  tree, map properties, tile/layer workflows, Events, and Database as one
+  coherent authoring surface. The gate also fixed unstable compact controls in
+  map-tree rows, Events breadcrumbs/page actions/condition actions, and
+  Database list icon actions so the audited desktop and narrow views expose no
+  future AI/provider actions, no desktop horizontal overflow, and no visible
+  controls smaller than 20 px. Evidence is recorded in
+  `docs/PHASE_11_EDITOR_SURFACE_INTEGRATION_GATE.md` and
+  `docs/screenshots/phase11-cp032/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -246,7 +246,7 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
             <button
               type="button"
               aria-label={`Clear ${copy.singular} search`}
-              className="text-indigo-600 hover:text-indigo-700 cursor-pointer"
+              className="inline-flex h-6 items-center rounded px-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer"
               onClick={() => setQuery('')}
             >
               Clear
@@ -309,7 +309,7 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
                 type="button"
                 aria-label={`Duplicate ${copy.singular} ${entry.id}`}
                 title={`Duplicate ${copy.singular}`}
-                className="text-gray-400 hover:text-indigo-600 cursor-pointer"
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer"
                 onClick={event => {
                   event.stopPropagation();
                   duplicateEntry(entry.id);
@@ -325,7 +325,7 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
                     : `Delete ${copy.singular} ${entry.id}`
                 }
                 title={referenceCount > 0 ? `Referenced by ${referenceLabel}` : `Delete ${copy.singular}`}
-                className="text-gray-400 hover:text-red-500 cursor-pointer"
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-gray-400 hover:bg-red-50 hover:text-red-500 cursor-pointer"
                 onClick={event => {
                   event.stopPropagation();
                   removeEntry(entry.id);

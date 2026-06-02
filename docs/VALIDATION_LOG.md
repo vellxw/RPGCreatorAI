@@ -4,6 +4,72 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-67 / CP-032 — professional editor surface integration gate
+
+- `2026-06-02 02:58:52 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/components/editor/__tests__/MapTreePanel.test.tsx src/components/editor/__tests__/MapPropertiesPanel.test.tsx src/components/editor/__tests__/TilePaletteWorkflow.test.tsx src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — PASS initially; 11 focused files and 37 tests passed before screenshot
+  audit fixes added more compact-control coverage.
+- `2026-06-02 02:59:45 -03:00` — `npm run typecheck`, `npm test`, and
+  `npm run build` — PASS initially; full Vitest covered 56 files and 305
+  tests, and the build transformed 1917 modules with only the known non-fatal
+  chunk-size warning.
+- `2026-06-02 03:02:18 -03:00` — controlled Vite plus Chrome CDP screenshot
+  audit — RED; Maps, Events, Database, and narrow Maps exposed no future
+  AI/provider actions and no desktop horizontal overflow, but the audit found
+  two visible controls smaller than 20 px. Diagnostic CDP inspection traced
+  them to map-tree branch disclosure buttons.
+- `2026-06-02 03:06:42 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — RED as expected; new map-tree disclosure dimension coverage failed against
+  the existing `p-0.5` disclosure button.
+- `2026-06-02 03:07:12 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — PASS after giving branch disclosure controls stable `h-6 w-6` dimensions.
+- `2026-06-02 03:15:50 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — RED as expected; the broadened audit then found selectable map rows with
+  18 px button height.
+- `2026-06-02 03:16:23 -03:00` —
+  `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx`
+  — PASS after giving selectable map rows stable `h-6` height.
+- `2026-06-02 03:18:54 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx`
+  — RED as expected; Events breadcrumbs, page reorder arrows, condition add
+  actions, and lower tabs lacked stable button heights.
+- `2026-06-02 03:19:45 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx`
+  — PASS after normalizing Events toolbar and compact event-editor controls.
+- `2026-06-02 03:23:01 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — RED as expected; Database row icon actions and clear-search controls lacked
+  stable button dimensions.
+- `2026-06-02 03:23:36 -03:00` —
+  `npm test -- --run src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — PASS; 3 focused files and 12 tests passed after normalizing Database row
+  icon actions and clear-search controls.
+- `2026-06-02 03:27:00 -03:00` — Chrome DevTools MCP screenshot audit against
+  controlled Vite on `127.0.0.1:3010` — PASS; `mapsDesktop`,
+  `eventsDesktop`, `databaseDesktop`, and `mapsNarrow` all reported
+  `badFuture=false`, desktop `bodyOverflowX=false`, and `tinyButtonCount=0`.
+  Evidence was written to `docs/screenshots/phase11-cp032/`.
+- `2026-06-02 03:28:18 -03:00` —
+  `npm test -- --run src/components/layout/__tests__/PrimaryNavigation.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/components/editor/__tests__/MapTreePanel.test.tsx src/components/editor/__tests__/MapPropertiesPanel.test.tsx src/components/editor/__tests__/TilePaletteWorkflow.test.tsx src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/components/database/__tests__/DatabaseListWorkflow.test.tsx src/components/database/__tests__/DatabaseEmptyStates.test.tsx src/components/database/__tests__/ItemEquipmentEditors.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx`
+  — PASS; 11 focused files and 41 tests passed.
+- `2026-06-02 03:28:50 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 03:29:01 -03:00` — `npm test` — PASS; 56 test files and 309
+  Vitest tests passed.
+- `2026-06-02 03:29:35 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 11.04s, and Vite emitted only the known
+  non-fatal chunk-size warning.
+- Fix applied: the professional editor surface now has screenshot-audited
+  stable compact controls across navigation, map tree, Events, and Database;
+  no placeholder/future provider actions are exposed as functional, and the
+  audited desktop/narrow views show no broken tiny controls.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-66 / CP-031 — database navigation and large-list polish
 
 - `2026-06-02 02:35:18 -03:00` —

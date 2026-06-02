@@ -166,7 +166,7 @@ export function ItemsEditor({ value, types, referenceSources = {}, onChange }: I
               <button
                 type="button"
                 aria-label="Clear item search"
-                className="text-indigo-600 hover:text-indigo-700 cursor-pointer"
+                className="inline-flex h-6 items-center rounded px-1.5 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer"
                 onClick={() => setQuery('')}
               >
                 Clear

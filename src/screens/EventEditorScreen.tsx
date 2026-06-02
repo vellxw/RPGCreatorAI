@@ -211,7 +211,7 @@ function EventPageTabs({
             type="button"
             title="Move page left"
             onClick={() => dispatch({ type: 'REORDER_EVENT_PAGE', mapId, eventId: event.id, pageId: page.id, direction: 'up' })}
-            className="px-1 text-[11px] text-gray-400 hover:text-gray-700"
+            className="flex h-6 w-6 items-center justify-center rounded text-[11px] text-gray-400 hover:bg-gray-50 hover:text-gray-700"
           >
             ←
           </button>
@@ -219,7 +219,7 @@ function EventPageTabs({
             type="button"
             title="Move page right"
             onClick={() => dispatch({ type: 'REORDER_EVENT_PAGE', mapId, eventId: event.id, pageId: page.id, direction: 'down' })}
-            className="px-1 text-[11px] text-gray-400 hover:text-gray-700"
+            className="flex h-6 w-6 items-center justify-center rounded text-[11px] text-gray-400 hover:bg-gray-50 hover:text-gray-700"
           >
             →
           </button>
@@ -516,7 +516,7 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
                 <button
                   type="button"
                   onClick={addSwitchCondition}
-                  className="text-[11px] text-indigo-600 hover:text-indigo-700"
+                  className="inline-flex h-6 items-center rounded px-1.5 text-[11px] text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
                 >
                   Add switch condition
                 </button>
@@ -567,7 +567,7 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
                 <button
                   type="button"
                   onClick={addVariableCondition}
-                  className="text-[11px] text-indigo-600 hover:text-indigo-700"
+                  className="inline-flex h-6 items-center rounded px-1.5 text-[11px] text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
                 >
                   Add variable condition
                 </button>
@@ -665,11 +665,11 @@ function ValidationPanel({ event, map, mapIds }: { event: GameEvent; map: MapDat
   return (
     <div className="border-t border-gray-200 bg-white">
       <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-100">
-        <button className="text-[13px] font-medium text-indigo-600 border-b-2 border-indigo-500 pb-1 cursor-pointer">
+        <button className="inline-flex h-6 items-center text-[13px] font-medium text-indigo-600 border-b-2 border-indigo-500 cursor-pointer">
           Validation
         </button>
-        <button className="text-[13px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Event Preview</button>
-        <button className="text-[13px] text-gray-500 pb-1 cursor-pointer hover:text-gray-700">Notes</button>
+        <button className="inline-flex h-6 items-center text-[13px] text-gray-500 cursor-pointer hover:text-gray-700">Event Preview</button>
+        <button className="inline-flex h-6 items-center text-[13px] text-gray-500 cursor-pointer hover:text-gray-700">Notes</button>
         <div className="ml-auto">
           <Button size="sm" icon={<RefreshCw size={12} />} onClick={() => dispatch({ type: 'VALIDATE' })}>
             Re-validate
