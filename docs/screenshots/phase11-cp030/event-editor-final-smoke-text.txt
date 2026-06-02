@@ -1,0 +1,15 @@
+{
+  "opened": true,
+  "eventsOpened": true,
+  "pageCount": 1,
+  "addedSwitch": true,
+  "hasPageConditions": true,
+  "hasSwitchConditions": true,
+  "hasVariableConditions": true,
+  "hasMovementType": true,
+  "hasMovementSpeed": true,
+  "hasPageSprite": true,
+  "hasWalkingAnimation": true,
+  "hasThrough": true,
+  "bodyTextLength": 2216
+}

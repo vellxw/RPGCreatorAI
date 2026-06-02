@@ -60,6 +60,19 @@ function changeTextarea(element: HTMLTextAreaElement, value: string) {
   });
 }
 
+function changeInput(element: HTMLInputElement, value: string) {
+  act(() => {
+    const valueSetter = Object.getOwnPropertyDescriptor(element, 'value')?.set;
+    const prototypeValueSetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value')?.set;
+    if (prototypeValueSetter && valueSetter !== prototypeValueSetter) {
+      prototypeValueSetter.call(element, value);
+    } else {
+      valueSetter?.call(element, value);
+    }
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+}
+
 describe('CommandStackEditor', () => {
   beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
@@ -178,6 +191,44 @@ describe('CommandStackEditor', () => {
     expect(onCommandsChange).toHaveBeenLastCalledWith([
       { type: 'showText', text: 'Keep' },
       { type: 'showText', text: 'Tail' },
+    ]);
+  });
+
+  it('edits movement route wait steps with named controls while preserving step order', () => {
+    const commands: EventCommand[] = [
+      {
+        type: 'setMovementRoute',
+        target: 'player',
+        repeat: false,
+        skippable: true,
+        wait: true,
+        steps: [{ type: 'moveDown' }, { type: 'wait', ms: 250 }],
+      },
+    ];
+    const onCommandsChange = vi.fn();
+    const view = render(
+      <CommandStackEditor
+        commands={commands}
+        mapIds={['town']}
+        itemIds={['potion']}
+        onCommandsChange={onCommandsChange}
+      />,
+    );
+
+    click(checkboxByDescription(view.container, '2 steps'));
+    const waitInput = view.container.querySelector<HTMLInputElement>('input[aria-label="Route step 2 wait ms"]');
+    if (!(waitInput instanceof HTMLInputElement)) throw new Error('Missing route wait input');
+    changeInput(waitInput, '500');
+
+    expect(onCommandsChange).toHaveBeenLastCalledWith([
+      {
+        type: 'setMovementRoute',
+        target: 'player',
+        repeat: false,
+        skippable: true,
+        wait: true,
+        steps: [{ type: 'moveDown' }, { type: 'wait', ms: 500 }],
+      },
     ]);
   });
 });

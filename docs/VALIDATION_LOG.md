@@ -4,6 +4,92 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-65 / CP-030 — event editor surface polish
+
+- `2026-06-02 01:53:31 -03:00` —
+  `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx src/components/events/__tests__/CommandStackEditor.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — RED as expected; new Events screen coverage failed because page-specific
+  graphic controls, page condition/movement/option controls, and switch
+  condition authoring were not exposed yet. Existing reducer and command stack
+  tests still passed.
+- `2026-06-02 01:56:10 -03:00` —
+  `npm test -- --run src/components/events/__tests__/CommandStackEditor.test.tsx`
+  — RED as expected for movement-route UI; route wait-step controls were not
+  addressable by stable accessible names.
+- `2026-06-02 01:56:51 -03:00` —
+  `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx src/components/events/__tests__/CommandStackEditor.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — PASS; 3 focused files and 60 tests passed after adding page-scoped
+  graphic/condition/movement/option controls and named movement-route step
+  controls.
+- `2026-06-02 01:57:10 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-02 01:57:50 -03:00` — `npm test` — PASS; 55 test files and 298
+  Vitest tests passed.
+- `2026-06-02 01:58:30 -03:00` — `npm run build` — PASS; 1917 modules
+  transformed, build completed in 8.45s, and Vite emitted only the documented
+  non-fatal chunk-size warning.
+- `2026-06-02 01:59:00 -03:00` —
+  `cmd /c "call ""C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\Tools\VsDevCmd.bat"" -arch=x64 -host_arch=x64 -no_logo && cmake --build --preset default && ctest --test-dir build --output-on-failure"`
+  — PASS; native build reported `ninja: no work to do`, and `RPGTests`
+  passed in CTest.
+- `2026-06-02 02:09:20 -03:00` —
+  controlled `npm run dev` plus local Chrome headless CDP smoke — PASS;
+  bundled sample opened, Events workspace loaded, Page 2 controls exposed page
+  conditions, switch/variable conditions, page sprite, movement type/speed,
+  walking animation, and through options, and the `route_coach` movement route
+  command exposed named route step type/wait/move controls after scroll.
+  Earlier smoke attempts timed out because page creation was clicked in a
+  synchronous loop without waiting for React; the final script used explicit
+  waits. Screenshots and smoke text written:
+  `docs/screenshots/phase11-cp030/event-page-controls.png`,
+  `docs/screenshots/phase11-cp030/event-movement-route-controls.png`,
+  `docs/screenshots/phase11-cp030/event-movement-route-step-controls.png`,
+  and `docs/screenshots/phase11-cp030/event-editor-smoke-text.txt`.
+  Controlled Chrome/CDP and Vite processes were stopped afterward, leaving
+  ports 9225 and 3000 clear.
+- `2026-06-02 02:10:49 -03:00` —
+  `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx src/components/events/__tests__/CommandStackEditor.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — PASS after documentation updates; 3 focused files and 60 tests passed.
+- `2026-06-02 02:11:31 -03:00` — `npm test` — PASS after documentation
+  updates; 55 test files and 298 Vitest tests passed.
+- `2026-06-02 02:11:45 -03:00` — `npm run typecheck` — PASS after
+  documentation updates.
+- `2026-06-02 02:12:15 -03:00` — `npm run build` — PASS after
+  documentation updates; 1917 modules transformed, build completed in 8.28s,
+  and Vite emitted only the documented non-fatal chunk-size warning.
+- `2026-06-02 02:12:16 -03:00` — `git diff --check` — PASS after
+  documentation updates with line-ending conversion warnings only.
+- `2026-06-02 02:17:01 -03:00` —
+  `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx src/components/events/__tests__/CommandStackEditor.test.tsx src/stores/__tests__/projectReducer.test.ts`
+  — PASS after final condition-row layout compaction; 3 focused files and 60
+  tests passed.
+- `2026-06-02 02:17:23 -03:00` — `npm test` — PASS after final layout
+  compaction; 55 test files and 298 Vitest tests passed.
+- `2026-06-02 02:18:00 -03:00` — `npm run typecheck` — PASS after final
+  layout compaction.
+- `2026-06-02 02:18:35 -03:00` — `npm run build` — PASS after final
+  layout compaction; 1917 modules transformed, build completed in 8.64s, and
+  Vite emitted only the documented non-fatal chunk-size warning.
+- `2026-06-02 02:26:30 -03:00` —
+  controlled `npm run dev` plus local Chrome headless CDP final layout smoke
+  — PASS; the harness waited for Vite hydration, entered the bundled sample
+  through the current `Use ...` startup action, opened Events, added a switch
+  condition, and verified page conditions, switch/variable conditions, page
+  sprite, movement type/speed, walking animation, and through controls were
+  present. The final page-control screenshot and smoke text were refreshed:
+  `docs/screenshots/phase11-cp030/event-page-controls.png` and
+  `docs/screenshots/phase11-cp030/event-editor-final-smoke-text.txt`.
+  Controlled Chrome/CDP and Vite processes were stopped afterward, leaving
+  ports 9226 and 3000 clear.
+- `2026-06-02 02:27:40 -03:00` — `git diff --check` — PASS after final
+  layout validation with line-ending conversion warnings only.
+- Fix applied: Events page editing now writes selected-page graphic,
+  condition, movement, and option changes through `UPDATE_EVENT_PAGE`, command
+  edits remain page-id scoped, and movement route step controls are named and
+  easier to scan.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-64 / CP-029 — layer workflow polish
 
 - `2026-06-02 01:34:09 -03:00` —

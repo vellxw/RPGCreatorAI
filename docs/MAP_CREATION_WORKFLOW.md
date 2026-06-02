@@ -113,6 +113,27 @@ non-finite parallax scroll values become `0`. Project validation still flags
 invalid loaded JSON for invalid scroll modes, negative encounter steps, and
 non-finite parallax scroll values before save or playtest handoff.
 
+## Events screen
+
+The Events workspace is the full event-authoring surface. It lists events by
+map, keeps the selected event synchronized with map selection, shows a compact
+map preview, and edits event pages and command stacks without requiring JSON
+editing.
+
+Page tabs create, select, and reorder event pages. The active page exposes
+page name, trigger, priority, self-switch conditions, switch conditions,
+variable conditions, page-specific sprite/animation/display-height settings,
+movement type/speed, and walking/stepping/direction-fix/through options. Page
+graphic edits dispatch `UPDATE_EVENT_PAGE`; page 1 is still mirrored back to
+legacy event fields by the reducer so old runtime-facing fields remain
+consistent.
+
+The command stack remains ordered top-to-bottom and is scoped to the active
+page when a page tab is selected. Branch commands expose nested inline branch
+targets, multi-select/range deletion preserves branch boundaries, and movement
+route commands expose named per-step controls for type, wait duration, moving
+steps up/down, removal, and adding new route steps.
+
 ## Tools
 
 The tile palette is the primary repeated-authoring surface. It keeps

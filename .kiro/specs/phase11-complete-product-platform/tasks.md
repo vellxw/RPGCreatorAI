@@ -37,6 +37,7 @@
   - [x] CP-027 / FRA-62: polish map properties editing and validation.
   - [x] CP-028 / FRA-63: polish tile palette and brush workflow.
   - [x] CP-029 / FRA-64: polish layer workflow safety and overlays.
+  - [x] CP-030 / FRA-65: polish event editor surface and command editing.
 - [ ] 04 Runtime Feature Completeness.
 - [ ] 05 Database/System Completeness.
 - [ ] 06 Asset Library And Import Pipeline.

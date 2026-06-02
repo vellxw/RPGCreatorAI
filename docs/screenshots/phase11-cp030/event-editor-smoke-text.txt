@@ -1,0 +1,40 @@
+{
+  "url": "http://127.0.0.1:3000",
+  "viewport": "1500x1000",
+  "pageState": {
+    "hasPageConditions": true,
+    "hasSwitchConditions": true,
+    "hasVariableConditions": true,
+    "hasMovementType": true,
+    "hasMovementSpeed": true,
+    "hasPageSprite": true,
+    "hasWalkingAnimation": true,
+    "hasThrough": true,
+    "pageTabs": [
+      "Page 1",
+      "Page 2",
+      "Page"
+    ]
+  },
+  "routeState": {
+    "routeClick": {
+      "clicked": true,
+      "label": "Select command 2: Set Movement Route event:patrol_crate (3 steps)"
+    },
+    "hasRouteTypeControl": true,
+    "hasRouteWaitInput": true,
+    "hasRouteMoveButtons": true,
+    "bodyExcerpt": "RPGCreatorAI\nMaps\n/\nTown\n/\nEvents\n/\nroute_coach\nUnsaved changes - Save will validate first\nSave\nValidate\nMaps\nEvents\nDatabase\nPlaytest\nGD\nCreator\nEvents\nTown\nold_man\nshop_keeper\nwild_slime\ndoor_to_house\npatrol_crate\nroute_coach\nHouse\ndoor_to_town\nchest_001\nAdd Event\nMap Preview — Town\nroute_coach\nPage 1\n←\n→\nPage\nEvent Commands\n\nExecuted top to bottom.\n\nAdd command...\nShow Text\nShow Choices\nSet Flag (legacy)\nIf Flag (legacy)\nControl Switch\nControl Self Switch\nIf Switch\nIf Self Switch\nControl Variable\nIf Variable\nAdd Item\nRemove Item\nAdd Gold\nRemove Gold\nTransfer Map\nSet Player Position\nWait\nPlay Sound\nPlugin Command\nComment\nCall Common Event\nStart Quest\nUpdate Quest Objective\nComplete Quest\nOpen Shop\nStart Battle\nChange Actor HP\nPlay Animation\nSet Movement Route\n1\nShow Text\n\nWatch the crate move one step and settle.\n\n2\nSet Movement Route\n\nevent:patrol_crate (3 steps)\n\n3\nPlugin Command\n\ndebug.log\n\n4\nControl Switch\n\nmvp_debug_enabled -> ON\n\nEditing selected command\n\nTarget\nPlayer\nThis event\nNamed event\nEvent ID\nRepeat\nNo\nYes\nSkippable\nYes\nNo\nWait\nYes\nNo\nRoute Steps\n#1\nMove Up\nMove Down\nMove Left\nMove Right\nTurn Up\nTurn Down\nTurn Left\nTurn Right\nWait\nstep\nUp\nDown\nRemove\n#2\nMove Up\nMove Down\nMove Left\nMove Right\nTurn Up\nTurn Down\nTurn Left\nTurn Right\nWait\nUp\nDown\nRemove\n#3\nMove Up\nMove Down\nMove Left\nMove Right\nTurn Up\nTurn Down\nTurn Left\nTurn Right\nWait\nstep\nUp\nDown\nRemove\nAdd rout"
+  },
+  "files": [
+    "event-page-controls.png",
+    "event-movement-route-controls.png",
+    "event-movement-route-step-controls.png"
+  ],
+  "routeStepScrollState": {
+    "scrolled": true,
+    "hasRouteTypeControl": true,
+    "hasRouteWaitInput": true,
+    "hasRouteMoveButtons": true
+  }
+}

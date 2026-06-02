@@ -16,7 +16,20 @@ import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { CommandStackEditor } from '../components/events/CommandStackEditor';
 import { validateEvent } from '../validation/validateMap';
-import type { EventPage, EventPriority, EventType, GameEvent, MapData, TriggerType, Direction } from '../types/project';
+import type {
+  EventPage,
+  EventPageConditions,
+  EventPageGraphic,
+  EventPageMovement,
+  EventPageOptions,
+  EventPriority,
+  EventType,
+  GameEvent,
+  MapData,
+  MovementSpeed,
+  TriggerType,
+  VariableComparison,
+} from '../types/project';
 import { eventAssets } from '../assets/generated/assetCatalog';
 
 function EventList() {
@@ -287,7 +300,7 @@ function MapPreview({ event, map }: { event: GameEvent; map: MapData }) {
 }
 
 function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: string; page: EventPage | null }) {
-  const { dispatch } = useProjectStore();
+  const { state: project, dispatch } = useProjectStore();
 
   const update = (changes: Partial<Omit<GameEvent, 'commands'>>) => {
     dispatch({ type: 'UPDATE_EVENT', mapId, eventId: event.id, changes });
@@ -303,6 +316,86 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
     else delete next[switchId];
     updatePage({ conditions: { ...page.conditions, selfSwitches: next } });
   };
+  const updatePageGraphic = (changes: Partial<EventPageGraphic>) => {
+    if (!page) {
+      update(changes);
+      return;
+    }
+    updatePage({ graphic: { ...page.graphic, ...changes } });
+  };
+  const updatePageMovement = (changes: Partial<EventPageMovement>) => {
+    if (!page) return;
+    updatePage({ movement: { ...page.movement, ...changes } });
+  };
+  const updatePageOptions = (changes: Partial<EventPageOptions>) => {
+    if (!page) return;
+    updatePage({ options: { ...page.options, ...changes } });
+  };
+  const updatePageConditions = (changes: Partial<EventPageConditions>) => {
+    if (!page) return;
+    updatePage({ conditions: { ...page.conditions, ...changes } });
+  };
+  const updateSwitchCondition = (oldId: string, nextId: string, value: boolean) => {
+    if (!page) return;
+    const next = { ...(page.conditions.switches ?? {}) };
+    delete next[oldId];
+    const cleanId = nextId.trim();
+    if (cleanId) next[cleanId] = value;
+    updatePageConditions({ switches: next });
+  };
+  const addSwitchCondition = () => {
+    if (!page) return;
+    const next = { ...(page.conditions.switches ?? {}) };
+    let index = Object.keys(next).length + 1;
+    while (next[`switch_${index}`] !== undefined) index += 1;
+    next[`switch_${index}`] = true;
+    updatePageConditions({ switches: next });
+  };
+  const removeSwitchCondition = (switchId: string) => {
+    if (!page) return;
+    const next = { ...(page.conditions.switches ?? {}) };
+    delete next[switchId];
+    updatePageConditions({ switches: next });
+  };
+  const updateVariableCondition = (
+    index: number,
+    changes: Partial<NonNullable<EventPageConditions['variables']>[number]>,
+  ) => {
+    if (!page) return;
+    const next = [...(page.conditions.variables ?? [])];
+    next[index] = { ...next[index], ...changes };
+    updatePageConditions({ variables: next });
+  };
+  const addVariableCondition = () => {
+    if (!page) return;
+    const variableId = project.databases.variables[0]?.id ?? `variable_${(page.conditions.variables ?? []).length + 1}`;
+    updatePageConditions({
+      variables: [
+        ...(page.conditions.variables ?? []),
+        { variableId, op: 'eq', value: 0 },
+      ],
+    });
+  };
+  const removeVariableCondition = (index: number) => {
+    if (!page) return;
+    updatePageConditions({ variables: (page.conditions.variables ?? []).filter((_, i) => i !== index) });
+  };
+  const pageGraphic: EventPageGraphic = page?.graphic ?? {
+    sprite: event.sprite,
+    animationSet: event.animationSet,
+    displayHeightTiles: event.displayHeightTiles,
+  };
+  const spriteOptions = [
+    { value: '', label: '(none)' },
+    { value: 'npc_old_man', label: 'Old Man' },
+    { value: 'npc_shopkeeper', label: 'Shopkeeper' },
+    { value: 'chest_closed', label: 'Closed Chest' },
+    { value: 'transfer_door', label: 'Transfer Door' },
+    { value: 'npc_placeholder', label: 'Placeholder NPC' },
+  ];
+  const activeSpriteOptions = pageGraphic.sprite && !spriteOptions.some(option => option.value === pageGraphic.sprite)
+    ? [...spriteOptions, { value: pageGraphic.sprite, label: `${pageGraphic.sprite} (unknown)` }]
+    : spriteOptions;
 
   return (
     <div className="w-[260px] flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto">
@@ -375,17 +468,151 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
               ]}
               onChange={v => updatePage({ priority: v as EventPriority })}
             />
-            <div>
-              <div className="text-[12px] font-medium text-gray-500 mb-1">Self Switch Conditions</div>
-              <div className="grid grid-cols-4 gap-1">
-                {(['A', 'B', 'C', 'D'] as const).map(id => (
-                  <label key={id} className="flex items-center justify-center gap-1 rounded border border-gray-200 bg-white px-2 py-1 text-[11px] text-gray-600">
+            <div className="space-y-2">
+              <div className="text-[12px] font-semibold text-gray-700">Page Conditions</div>
+              <div>
+                <div className="text-[12px] font-medium text-gray-500 mb-1">Self Switch Conditions</div>
+                <div className="grid grid-cols-4 gap-1">
+                  {(['A', 'B', 'C', 'D'] as const).map(id => (
+                    <label key={id} className="flex items-center justify-center gap-1 rounded border border-gray-200 bg-white px-2 py-1 text-[11px] text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={page.conditions.selfSwitches?.[id] === true}
+                        onChange={e => updateSelfSwitchCondition(id, e.target.checked)}
+                      />
+                      {id}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="text-[12px] font-medium text-gray-500">Switch Conditions</div>
+                {Object.entries(page.conditions.switches ?? {}).map(([switchId, value]) => (
+                  <div key={switchId} className="grid grid-cols-[minmax(0,1fr)_64px] gap-1.5 rounded border border-gray-100 bg-white p-1.5">
+                    <input
+                      aria-label={`Switch condition ${switchId}`}
+                      className="min-w-0 px-2 py-1 text-[12px] border border-gray-200 rounded bg-white"
+                      value={switchId}
+                      onChange={e => updateSwitchCondition(switchId, e.target.value, value)}
+                    />
+                    <select
+                      aria-label={`Switch ${switchId} value`}
+                      className="px-2 py-1 text-[12px] border border-gray-200 rounded bg-white"
+                      value={value ? 'true' : 'false'}
+                      onChange={e => updateSwitchCondition(switchId, switchId, e.target.value === 'true')}
+                    >
+                      <option value="true">ON</option>
+                      <option value="false">OFF</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="col-span-2 justify-self-start px-2 py-1 text-[11px] text-red-600 border border-red-100 rounded bg-white hover:bg-red-50"
+                      onClick={() => removeSwitchCondition(switchId)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSwitchCondition}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-700"
+                >
+                  Add switch condition
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                <div className="text-[12px] font-medium text-gray-500">Variable Conditions</div>
+                {(page.conditions.variables ?? []).map((condition, index) => (
+                  <div key={`${condition.variableId}-${index}`} className="space-y-1.5 rounded border border-gray-100 bg-white p-1.5">
+                    <div className="grid grid-cols-[minmax(0,1fr)_64px] gap-1.5">
+                      <input
+                        aria-label={`Variable condition ${index + 1}`}
+                        className="min-w-0 px-2 py-1 text-[12px] border border-gray-200 rounded bg-white"
+                        value={condition.variableId}
+                        onChange={e => updateVariableCondition(index, { variableId: e.target.value })}
+                      />
+                      <select
+                        aria-label={`Variable condition ${index + 1} comparison`}
+                        className="px-2 py-1 text-[12px] border border-gray-200 rounded bg-white"
+                        value={condition.op}
+                        onChange={e => updateVariableCondition(index, { op: e.target.value as VariableComparison })}
+                      >
+                        <option value="eq">==</option>
+                        <option value="neq">!=</option>
+                        <option value="gt">&gt;</option>
+                        <option value="gte">&gt;=</option>
+                        <option value="lt">&lt;</option>
+                        <option value="lte">&lt;=</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
+                      <input
+                        aria-label={`Variable condition ${index + 1} value`}
+                        type="number"
+                        className="min-w-0 px-2 py-1 text-[12px] border border-gray-200 rounded bg-white"
+                        value={condition.value}
+                        onChange={e => updateVariableCondition(index, { value: Number(e.target.value) })}
+                      />
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-[11px] text-red-600 border border-red-100 rounded bg-white hover:bg-red-50"
+                        onClick={() => removeVariableCondition(index)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addVariableCondition}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-700"
+                >
+                  Add variable condition
+                </button>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="text-[12px] font-semibold text-gray-700">Movement</div>
+              <Select
+                label="Movement Type"
+                value={page.movement.type}
+                options={[
+                  { value: 'fixed', label: 'Fixed' },
+                  { value: 'random', label: 'Random' },
+                  { value: 'approach', label: 'Approach player' },
+                  { value: 'custom', label: 'Custom' },
+                ]}
+                onChange={v => updatePageMovement({ type: v as EventPageMovement['type'] })}
+              />
+              <Select
+                label="Movement Speed"
+                value={page.movement.speed}
+                options={[
+                  { value: 'oneEighth', label: '1/8x' },
+                  { value: 'oneQuarter', label: '1/4x' },
+                  { value: 'half', label: '1/2x' },
+                  { value: 'normal', label: 'Normal' },
+                  { value: 'double', label: '2x' },
+                  { value: 'quadruple', label: '4x' },
+                ]}
+                onChange={v => updatePageMovement({ speed: v as MovementSpeed })}
+              />
+              <div className="grid grid-cols-2 gap-1.5">
+                {([
+                  ['walking', 'Walking animation'],
+                  ['stepping', 'Stepping animation'],
+                  ['directionFix', 'Direction fix'],
+                  ['through', 'Through'],
+                ] as const).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-1.5 rounded border border-gray-200 bg-white px-2 py-1.5 text-[11px] text-gray-600">
                     <input
                       type="checkbox"
-                      checked={page.conditions.selfSwitches?.[id] === true}
-                      onChange={e => updateSelfSwitchCondition(id, e.target.checked)}
+                      checked={page.options[key]}
+                      onChange={e => updatePageOptions({ [key]: e.target.checked })}
                     />
-                    {id}
+                    {label}
                   </label>
                 ))}
               </div>
@@ -402,27 +629,24 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
           onChange={v => page ? updatePage({ priority: v === 'yes' ? 'sameAsCharacters' : 'belowCharacters' }) : update({ solid: v === 'yes' })}
         />
         <Select
-          label="Sprite"
-          value={event.sprite ?? ''}
-          options={[
-            { value: '', label: '(none)' },
-            { value: 'npc_placeholder', label: 'Placeholder NPC' },
-          ]}
-          onChange={v => update({ sprite: v || undefined })}
+          label={page ? 'Page sprite' : 'Sprite'}
+          value={pageGraphic.sprite ?? ''}
+          options={activeSpriteOptions}
+          onChange={v => updatePageGraphic({ sprite: v || undefined })}
         />
         <Input
-          label="Animation Set"
-          value={event.animationSet ?? ''}
-          onChange={e => update({ animationSet: e.target.value || undefined })}
+          label={page ? 'Page animation set' : 'Animation Set'}
+          value={pageGraphic.animationSet ?? ''}
+          onChange={e => updatePageGraphic({ animationSet: e.target.value || undefined })}
         />
         <Input
-          label="Display height (tiles)"
+          label={page ? 'Page display height (tiles)' : 'Display height (tiles)'}
           type="number"
           step="0.1"
           min="0.1"
-          value={event.displayHeightTiles ?? ''}
+          value={pageGraphic.displayHeightTiles ?? ''}
           onChange={e =>
-            update({
+            updatePageGraphic({
               displayHeightTiles: e.target.value === '' ? undefined : Number(e.target.value),
             })
           }

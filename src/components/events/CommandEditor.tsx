@@ -152,9 +152,11 @@ function select<T extends string>(
   value: T,
   options: Array<{ value: T; label: string }>,
   onChange: (v: T) => void,
+  ariaLabel?: string,
 ) {
   return (
     <select
+      aria-label={ariaLabel}
       className="w-full px-2 py-1 text-[12px] border border-gray-200 rounded"
       value={value}
       onChange={e => onChange(e.target.value as T)}
@@ -799,15 +801,43 @@ function MovementRouteEditor({ command, onChange }: { command: SetMovementRouteC
       <Field label="Route Steps">
         <div className="space-y-1">
           {command.steps.map((step, index) => (
-            <div key={index} className="grid grid-cols-[1fr_74px_auto_auto_auto] gap-1 items-center">
-              {select<MovementRouteStepType>(step.type, MOVEMENT_ROUTE_STEP_OPTIONS, type => updateStep(index, defaultRouteStep(type)))}
+            <div key={index} className="grid grid-cols-[42px_1fr_82px_auto_auto_auto] gap-1 items-center">
+              <span className="text-[11px] font-mono text-gray-400">#{index + 1}</span>
+              {select<MovementRouteStepType>(
+                step.type,
+                MOVEMENT_ROUTE_STEP_OPTIONS,
+                type => updateStep(index, defaultRouteStep(type)),
+                `Route step ${index + 1} type`,
+              )}
               {step.type === 'wait'
-                ? input({ type: 'number', value: step.ms ?? 0, onChange: e => updateStep(index, { ...step, ms: Number(e.target.value) }) })
+                ? input({
+                    'aria-label': `Route step ${index + 1} wait ms`,
+                    type: 'number',
+                    value: step.ms ?? 0,
+                    onChange: e => updateStep(index, { ...step, ms: Number(e.target.value) }),
+                  })
                 : <span className="text-[11px] text-gray-400">step</span>}
-              <button type="button" className="px-2 text-[11px] text-gray-600 cursor-pointer" onClick={() => moveStep(index, -1)}>Up</button>
-              <button type="button" className="px-2 text-[11px] text-gray-600 cursor-pointer" onClick={() => moveStep(index, 1)}>Down</button>
               <button
                 type="button"
+                aria-label={`Move route step ${index + 1} up`}
+                disabled={index === 0}
+                className="px-2 text-[11px] text-gray-600 cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                onClick={() => moveStep(index, -1)}
+              >
+                Up
+              </button>
+              <button
+                type="button"
+                aria-label={`Move route step ${index + 1} down`}
+                disabled={index === command.steps.length - 1}
+                className="px-2 text-[11px] text-gray-600 cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                onClick={() => moveStep(index, 1)}
+              >
+                Down
+              </button>
+              <button
+                type="button"
+                aria-label={`Remove route step ${index + 1}`}
                 className="px-2 text-[11px] text-red-600 cursor-pointer"
                 onClick={() => onChange({ ...command, steps: command.steps.filter((_, i) => i !== index) })}
               >
@@ -816,6 +846,7 @@ function MovementRouteEditor({ command, onChange }: { command: SetMovementRouteC
             </div>
           ))}
           <select
+            aria-label="Add route step"
             className="w-full px-2 py-1 text-[12px] border border-gray-200 rounded"
             defaultValue=""
             onChange={e => {

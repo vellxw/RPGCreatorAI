@@ -164,6 +164,12 @@ Primary Phase 11 sources:
   occlusion; and collision, passability, and region overlays are tagged and
   visually distinct from authored tiles. Evidence is recorded in
   `docs/screenshots/phase11-cp029/`.
+- Phase 11 CP-030 — event editor surface polish completed. The Events
+  workspace now exposes page-scoped graphic, trigger, priority, condition,
+  movement, and option controls without JSON editing, keeps page command edits
+  scoped to the selected page id, preserves page-one legacy command mirroring,
+  and makes movement-route step controls addressable and readable. Evidence is
+  recorded in `docs/screenshots/phase11-cp030/`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
