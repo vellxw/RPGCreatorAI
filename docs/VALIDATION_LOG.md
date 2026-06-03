@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-117 / CP-082 — AI Quest Generator
+
+- `2026-06-03 01:33:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-03 01:30:54 -03:00` — `npm test -- --run src/providers/__tests__/questGenerationWorkflow.test.ts` — PASS; 1 file and 5 tests passed (verifying candidate building, prompt serialization, invalid reward handling, and approvals).
+- `2026-06-03 01:32:01 -03:00` — `npm test -- --run src/components/database/__tests__/QuestGenerationIntegration.test.tsx` — PASS; 1 file and 1 test passed (verifying UI sparkles trigger button, modal prompt input, candidate review detail rendering, and accept/insert store dispatch).
+- `2026-06-03 01:34:04 -03:00` — `npm test -- --run` — PASS; 88 Vitest files and 467 tests passed.
+- `2026-06-03 01:34:40 -03:00` — `npm run build` — PASS; built production assets successfully.
+- Fix applied: added sparkles icon trigger button in DatabaseList (when on quests table), quest generation modal prompt/title controls, pending candidate review details UI, and accept/discard store dispatching, backed by robust validation layers in `questGenerationWorkflow`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-116 / CP-081 — AI Map Draft Generator
 
 - `2026-06-03 01:25:00 -03:00` — `npm run typecheck` — PASS.

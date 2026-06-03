@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react';
-import { Copy, Plus, Trash2 } from 'lucide-react';
+import { Copy, Plus, Trash2, Sparkles } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import { useProjectStore, type DatabaseRecord } from '../../stores/projectStore';
 import { findReferences, listReferences } from '../../validation/referenceIndex';
 import type { DatabaseListKey, Stats } from '../../types/project';
+import { createMockProviderAdapter } from '../../providers/mockProviderAdapter';
+import {
+  generateQuestCandidate,
+  validateQuestCandidate,
+  approveQuestCandidate,
+} from '../../providers/questGenerationWorkflow';
 
 interface DatabaseListProps {
   table: DatabaseListKey;
@@ -186,6 +192,81 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
     !filteredEntries.some(entry => entry.id === selectedId),
   );
 
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [genTitle, setGenTitle] = useState('New Quest');
+  const [genPrompt, setGenPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [candidate, setCandidate] = useState<any>(null);
+  const [genStatus, setGenStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+  const openQuestGeneration = () => {
+    setGenTitle(`Quest ${entries.length + 1}`);
+    setGenPrompt('Help a townsperson recover their stolen heirloom from a nearby goblin cave.');
+    setCandidate(null);
+    setGenStatus(null);
+    setShowGenModal(true);
+  };
+
+  const handleGenerateQuest = async () => {
+    setGenerating(true);
+    setGenStatus(null);
+    setCandidate(null);
+    try {
+      const slugId = (title: string) => title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'quest';
+      const questId = uniqueId(ids, slugId(genTitle));
+      const adapter = createMockProviderAdapter();
+      const context = {
+        items: state.items.items,
+      };
+      const result = await generateQuestCandidate(
+        adapter,
+        context,
+        {
+          prompt: genPrompt,
+          questId,
+          questTitle: genTitle.trim(),
+        },
+        {
+          requestId: `quest-gen-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        }
+      );
+      const validationErrors = validateQuestCandidate(result, context);
+      if (validationErrors.length > 0) {
+        setGenStatus({ tone: 'error', text: `Validation failed: ${validationErrors[0]}` });
+        return;
+      }
+      setCandidate(result);
+      setGenStatus({ tone: 'success', text: 'Quest draft generated successfully! Please review below.' });
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAcceptQuest = () => {
+    if (!candidate) return;
+    try {
+      const context = {
+        items: state.items.items,
+      };
+      const approved = approveQuestCandidate(candidate, context, {
+        reviewedAt: new Date().toISOString(),
+      });
+      dispatch({
+        type: 'ADD_DATABASE_ENTRY',
+        table: 'quests',
+        entry: approved.quest,
+      });
+      onSelect(approved.quest.id);
+      setShowGenModal(false);
+      setCandidate(null);
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    }
+  };
+
   const addEntry = () => {
     const baseId = `${table.replace(/s$/, '')}_${entries.length + 1}`;
     const id = uniqueId(ids, baseId);
@@ -228,9 +309,22 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
   return (
     <div className="w-[260px] flex-shrink-0 border-r border-gray-200 bg-white flex flex-col">
       <div className="p-3 border-b border-gray-200 space-y-2">
-        <Button size="sm" icon={<Plus size={12} />} onClick={addEntry}>
-          New {copy.singular}
-        </Button>
+        <div className="flex gap-1.5">
+          <Button size="sm" icon={<Plus size={12} />} onClick={addEntry}>
+            New {copy.singular}
+          </Button>
+          {table === 'quests' && (
+            <button
+              type="button"
+              onClick={openQuestGeneration}
+              aria-label="Generate quest draft"
+              title="Generate quest draft"
+              className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 border border-gray-200 rounded flex items-center justify-center cursor-pointer"
+            >
+              <Sparkles size={14} />
+            </button>
+          )}
+        </div>
         <input
           aria-label={`Search ${copy.plural}`}
           className="w-full px-2 py-1.5 text-[12px] border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -338,6 +432,186 @@ export function DatabaseList({ table, entries, selectedId, onSelect }: DatabaseL
           })
         )}
       </div>
+      {showGenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl flex flex-col max-h-[90vh]">
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-500" />
+                Generate Quest Draft
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGenModal(false);
+                  setCandidate(null);
+                  setGenStatus(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {genStatus && (
+                <div
+                  className={`rounded border p-2.5 text-xs ${
+                    genStatus.tone === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {genStatus.text}
+                </div>
+              )}
+
+              {!candidate ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Quest Title
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      value={genTitle}
+                      onChange={e => setGenTitle(e.target.value)}
+                      placeholder="e.g. Stolen Heirloom"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      AI Prompt
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      value={genPrompt}
+                      onChange={e => setGenPrompt(e.target.value)}
+                      placeholder="Describe the quest plot, objectives, and reward expectations..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-gray-50 rounded border p-3">
+                  <h4 className="text-xs font-semibold text-gray-700 border-b pb-1.5">
+                    Candidate Review Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
+                    <div>
+                      <span className="text-gray-400">Quest ID:</span>{' '}
+                      <span className="font-mono text-gray-800 font-semibold">{candidate.quest.id}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Quest Title:</span>{' '}
+                      <span className="text-gray-800 font-semibold">{candidate.quest.title}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-gray-400 text-[11px] font-medium">Summary:</span>
+                    <p className="text-[11px] text-gray-600 bg-white border rounded p-1.5 mt-0.5">
+                      {candidate.quest.summary}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-500 block mb-1">
+                      Objectives ({candidate.quest.objectives.length})
+                    </span>
+                    <ul className="text-[11px] text-gray-600 list-disc list-inside max-h-[100px] overflow-y-auto bg-white border rounded p-1.5 space-y-1">
+                      {candidate.quest.objectives.map((obj: any) => (
+                        <li key={obj.id}>
+                          <span className="font-mono font-semibold text-gray-800">{obj.id}</span>: {obj.description}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-500 block mb-1">
+                      Rewards
+                    </span>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] bg-white border rounded p-1.5">
+                      <div>
+                        <span className="text-gray-400">Gold:</span>{' '}
+                        <span className="text-gray-800 font-semibold">{candidate.quest.rewards.gold}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Exp:</span>{' '}
+                        <span className="text-gray-800 font-semibold">{candidate.quest.rewards.exp}</span>
+                      </div>
+                      <div className="col-span-2 border-t pt-1 mt-1">
+                        <span className="text-gray-400">Items:</span>{' '}
+                        {candidate.quest.rewards.items.length === 0 ? (
+                          <span className="text-gray-500 italic">None</span>
+                        ) : (
+                          <span className="text-gray-800 font-semibold">
+                            {candidate.quest.rewards.items.map((item: any) => {
+                              const found = state.items.items.find(i => i.id === item.itemId);
+                              return `${found?.name ?? item.itemId} x${item.amount}`;
+                            }).join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-2 mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Provenance:</span>
+                    <span className="text-gray-500 font-mono">
+                      {candidate.provenance.providerId}/{candidate.provenance.modelId}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2 border-t pt-3 flex-shrink-0">
+              {!candidate ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowGenModal(false)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={generating || !genTitle.trim() || !genPrompt.trim()}
+                    onClick={handleGenerateQuest}
+                    aria-label="Generate Draft"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                  >
+                    {generating ? 'Generating...' : 'Generate Draft'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCandidate(null)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcceptQuest}
+                    aria-label="Accept and Insert"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    Accept & Insert
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
