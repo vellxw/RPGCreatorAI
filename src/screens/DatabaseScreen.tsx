@@ -3,13 +3,19 @@
 // existing project reducer + top toolbar Save button.
 
 import { useMemo, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Input, Select } from '../components/ui/Input';
 import { DatabaseLayout } from '../components/database/DatabaseLayout';
 import { DatabaseList } from '../components/database/DatabaseList';
 import { IdField } from '../components/database/DatabaseFields';
+import { createMockProviderAdapter } from '../providers/mockProviderAdapter';
+import {
+  generateBalancingCandidate,
+  validateBalancingCandidate,
+  approveBalancingCandidate,
+} from '../providers/balancingAssistantWorkflow';
 import { ActorsEditor } from '../components/database/ActorsEditor';
 import { AnimationsEditor } from '../components/database/AnimationsEditor';
 import { ClassesEditor } from '../components/database/ClassesEditor';
@@ -997,6 +1003,113 @@ export function DatabaseScreen() {
   const [tab, setTab] = useState<DatabaseTabKey>('actors');
   const [selectedId, setSelectedId] = useState<string>('');
 
+  const [showBalancingModal, setShowBalancingModal] = useState(false);
+  const [balancingPrompt, setBalancingPrompt] = useState('');
+  const [balancingCurve, setBalancingCurve] = useState('standard');
+  const [balancingGenerating, setBalancingGenerating] = useState(false);
+  const [balancingCandidate, setBalancingCandidate] = useState<any>(null);
+  const [balancingStatus, setBalancingStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+  const openBalancingAssistant = () => {
+    setBalancingPrompt('Ensure enemies are tougher at early stages while giving more EXP and gold, keeping items slightly cheaper.');
+    setBalancingCurve('standard');
+    setBalancingCandidate(null);
+    setBalancingStatus(null);
+    setShowBalancingModal(true);
+  };
+
+  const handleGenerateBalancing = async () => {
+    setBalancingGenerating(true);
+    setBalancingStatus(null);
+    setBalancingCandidate(null);
+    try {
+      const adapter = createMockProviderAdapter();
+      const context = {
+        actors: databases.actors,
+        enemies: databases.enemies,
+        items: state.items.items,
+      };
+      const result = await generateBalancingCandidate(
+        adapter,
+        balancingPrompt,
+        context,
+        { curve: balancingCurve },
+        {
+          requestId: `bal-gen-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        }
+      );
+      const validationErrors = validateBalancingCandidate(result, context);
+      if (validationErrors.length > 0) {
+        setBalancingStatus({ tone: 'error', text: `Validation failed: ${validationErrors[0]}` });
+        return;
+      }
+      setBalancingCandidate(result);
+      setBalancingStatus({ tone: 'success', text: 'Balancing adjustments generated successfully! Review below.' });
+    } catch (e) {
+      setBalancingStatus({ tone: 'error', text: (e as Error).message });
+    } finally {
+      setBalancingGenerating(false);
+    }
+  };
+
+  const handleAcceptBalancing = () => {
+    if (!balancingCandidate) return;
+    try {
+      const context = {
+        actors: databases.actors,
+        enemies: databases.enemies,
+        items: state.items.items,
+      };
+      const approved = approveBalancingCandidate(balancingCandidate, context, {
+        reviewedAt: new Date().toISOString(),
+      });
+
+      // Apply changes to Actors
+      if (approved.adjustments.actors) {
+        for (const adj of approved.adjustments.actors) {
+          dispatch({
+            type: 'UPDATE_DATABASE_ENTRY',
+            table: 'actors',
+            id: adj.id,
+            changes: adj.changes as any,
+          });
+        }
+      }
+
+      // Apply changes to Enemies
+      if (approved.adjustments.enemies) {
+        for (const adj of approved.adjustments.enemies) {
+          dispatch({
+            type: 'UPDATE_DATABASE_ENTRY',
+            table: 'enemies',
+            id: adj.id,
+            changes: adj.changes as any,
+          });
+        }
+      }
+
+      // Apply changes to Items
+      if (approved.adjustments.items) {
+        let updatedItems = state.items.items.slice();
+        for (const adj of approved.adjustments.items) {
+          updatedItems = updatedItems.map(item =>
+            item.id === adj.id ? { ...item, ...adj.changes } : item
+          );
+        }
+        dispatch({
+          type: 'UPDATE_ITEM_DATABASE',
+          items: { items: updatedItems },
+        });
+      }
+
+      setShowBalancingModal(false);
+      setBalancingCandidate(null);
+    } catch (e) {
+      setBalancingStatus({ tone: 'error', text: (e as Error).message });
+    }
+  };
+
   const databases = state.databases;
   const standaloneTab =
     tab === 'system' ||
@@ -1086,6 +1199,17 @@ export function DatabaseScreen() {
             )}
           </button>
         ))}
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={openBalancingAssistant}
+          aria-label="Balance database"
+          title="AI Balancing Assistant"
+          className="my-1.5 px-2.5 py-1 text-[12px] font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded flex items-center gap-1 cursor-pointer transition-colors"
+        >
+          <Sparkles size={13} />
+          Balance Database
+        </button>
       </div>
 
       <DatabaseLayout
@@ -1156,6 +1280,165 @@ export function DatabaseScreen() {
           )
         )}
       </DatabaseLayout>
+
+      {showBalancingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl flex flex-col max-h-[90vh]">
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-500" />
+                AI Balancing Assistant
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBalancingModal(false);
+                  setBalancingCandidate(null);
+                  setBalancingStatus(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {balancingStatus && (
+                <div
+                  className={`rounded border p-2.5 text-xs ${
+                    balancingStatus.tone === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {balancingStatus.text}
+                </div>
+              )}
+
+              {!balancingCandidate ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Progression Curve
+                    </label>
+                    <select
+                      value={balancingCurve}
+                      onChange={e => setBalancingCurve(e.target.value)}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white cursor-pointer"
+                    >
+                      <option value="standard">Standard Curve (Smooth)</option>
+                      <option value="fast">Fast Scaling (Aggressive growth)</option>
+                      <option value="slow">Slow Scaling (Flat growth)</option>
+                      <option value="hard">Hard Mode (Tough enemies, low gold)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Balancing Prompt
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      value={balancingPrompt}
+                      onChange={e => setBalancingPrompt(e.target.value)}
+                      placeholder="Describe how you want to balance stats, exp, rewards, prices..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-gray-50 rounded border p-3 text-xs text-gray-600">
+                  <h4 className="text-xs font-semibold text-gray-700 border-b pb-1.5">
+                    Proposed Adjustments Review
+                  </h4>
+                  {balancingCandidate.adjustments.actors && balancingCandidate.adjustments.actors.length > 0 && (
+                    <div>
+                      <span className="font-semibold block mb-1">Actors ({balancingCandidate.adjustments.actors.length}):</span>
+                      <ul className="list-disc list-inside bg-white p-2 rounded border space-y-1">
+                        {balancingCandidate.adjustments.actors.map((adj: any) => (
+                          <li key={adj.id} className="font-mono text-[10px]">
+                            ID: {adj.id} - HP: {adj.changes.hp}, MP: {adj.changes.mp}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {balancingCandidate.adjustments.enemies && balancingCandidate.adjustments.enemies.length > 0 && (
+                    <div>
+                      <span className="font-semibold block mb-1">Enemies ({balancingCandidate.adjustments.enemies.length}):</span>
+                      <ul className="list-disc list-inside bg-white p-2 rounded border space-y-1">
+                        {balancingCandidate.adjustments.enemies.map((adj: any) => (
+                          <li key={adj.id} className="font-mono text-[10px]">
+                            ID: {adj.id} - Gold: {adj.changes.gold}, EXP: {adj.changes.exp}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {balancingCandidate.adjustments.items && balancingCandidate.adjustments.items.length > 0 && (
+                    <div>
+                      <span className="font-semibold block mb-1">Items ({balancingCandidate.adjustments.items.length}):</span>
+                      <ul className="list-disc list-inside bg-white p-2 rounded border space-y-1">
+                        {balancingCandidate.adjustments.items.map((adj: any) => (
+                          <li key={adj.id} className="font-mono text-[10px]">
+                            ID: {adj.id} - Price: {adj.changes.price}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="border-t pt-2 mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Provenance:</span>
+                    <span className="text-gray-500 font-mono">
+                      {balancingCandidate.provenance.providerId}/{balancingCandidate.provenance.modelId}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2 border-t pt-3 flex-shrink-0">
+              {!balancingCandidate ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowBalancingModal(false)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={balancingGenerating || !balancingPrompt.trim()}
+                    onClick={handleGenerateBalancing}
+                    aria-label="Generate Adjustments"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                  >
+                    {balancingGenerating ? 'Generating...' : 'Generate Adjustments'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setBalancingCandidate(null)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcceptBalancing}
+                    aria-label="Accept and Apply"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    Accept and Apply
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

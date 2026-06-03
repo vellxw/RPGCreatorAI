@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-120 / CP-085 — AI Balancing Assistant
+
+- `2026-06-03 00:24:00 -03:00` — `npx vitest run src/providers/__tests__/balancingAssistantWorkflow.test.ts` — PASS; 1 file and 5 tests passed (verifying candidate building, prompt serialization, invalid references/ranges, and approvals).
+- `2026-06-03 00:25:16 -03:00` — `npx vitest run src/components/database/__tests__/BalancingAssistantIntegration.test.tsx` — PASS; 1 file and 1 test passed (verifying UI sparkles balance button, modal parameters, proposed adjustments list view, and accept dispatching).
+- `2026-06-03 00:26:00 -03:00` — `npm test -- --run` — PASS; 94 Vitest files and 493 tests passed.
+- `2026-06-03 00:26:20 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-03 00:26:50 -03:00` — `npm run build` — PASS; built production assets successfully.
+- Fix applied: added sparkles icon trigger button in Database tables tab bar, progression curve select/prompt input modal, adjustments list details preview UI, and accept apply dispatching, backed by validation rules in `balancingAssistantWorkflow`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-119 / CP-084 — AI Database Draft Generator
 
 - `2026-06-03 00:15:53 -03:00` — `npx vitest run src/providers/__tests__/dbDraftGenerationWorkflow.test.ts` — PASS; 1 file and 9 tests passed (verifying candidate building, prompt serialization, invalid types/references, and approvals for Actors, Enemies, and Items).

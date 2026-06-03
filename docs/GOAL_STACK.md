@@ -52,7 +52,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-085 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-086 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -584,6 +584,10 @@ Primary Phase 11 sources:
   in ActorsEditor, EnemiesEditor, and ItemsEditor opens draft generation modals with prompt config,
   candidate review, and validations of structures/references before applying the properties.
   Evidence is recorded in `docs/PHASE_11_AI_DATABASE_DRAFT_GENERATOR.md`.
+- Phase 11 CP-085 — AI Balancing Assistant completed. Sparks button in the Database tab bar
+  opens a balancing modal supporting progression curve configuration, prompt inputs, proposed adjustments
+  review lists across Actors, Enemies, and Items, reference validations, and accept apply updates.
+  Evidence is recorded in `docs/PHASE_11_AI_BALANCING_ASSISTANT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
