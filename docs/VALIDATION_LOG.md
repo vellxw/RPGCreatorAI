@@ -4,6 +4,17 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-116 / CP-081 — AI Map Draft Generator
+
+- `2026-06-03 01:25:00 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-03 01:24:10 -03:00` — `npm test -- --run src/components/editor/__tests__/MapTreePanel.test.tsx` — PASS; 1 file and 7 tests passed (including UI modal workflow, generation review details, accept and insert dispatching).
+- `2026-06-03 01:25:41 -03:00` — `npm test -- --run` — PASS; 86 Vitest files and 461 tests passed.
+- `2026-06-03 01:26:10 -03:00` — `npm run build` — PASS; built production assets successfully.
+- Fix applied: added sparkles icon trigger button in Map Tree, generation modal prompt/aspect-ratio controls, pending candidate review details UI, and accept/discard insertion logic, backed by robust validation layers in `mapDraftGenerationWorkflow`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-102 / CP-067 — AI tileset generation workflow
 
 - Timestamp not captured —

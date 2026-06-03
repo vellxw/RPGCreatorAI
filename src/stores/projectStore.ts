@@ -372,6 +372,11 @@ export type ProjectAction =
       id: string;
       changes: AssetCatalogMetadataChanges;
     }
+  | {
+      type: 'ADD_GENERATED_MAP';
+      map: MapData;
+      parentId?: string | null;
+    }
   | { type: 'MARK_SAVED'; at?: string }
   | { type: 'VALIDATE' };
 
@@ -1307,6 +1312,27 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
         dirty: true,
         project: { ...state.project, maps: [...state.project.maps, ref] },
         maps: { ...state.maps, [mapId]: map },
+      };
+    }
+
+    case 'ADD_GENERATED_MAP': {
+      const map = action.map;
+      const mapId = map.id.trim();
+      if (!mapId || state.maps[mapId] || state.project.maps.some(ref => ref.id === mapId)) return state;
+      const parentId = action.parentId ?? null;
+      if (parentId && !state.maps[parentId]) return state;
+      const ref: MapReference = {
+        id: mapId,
+        path: makeMapPath(mapId),
+        parentId,
+        order: nextMapOrder(state.project, parentId),
+        expanded: true,
+      };
+      return {
+        ...state,
+        dirty: true,
+        project: { ...state.project, maps: [...state.project.maps, ref] },
+        maps: { ...state.maps, [mapId]: deepClone(map) },
       };
     }
 

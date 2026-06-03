@@ -6,13 +6,22 @@ import {
   Copy,
   Map,
   Plus,
+  Sparkles,
   Trash2,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useEditor } from '../../stores/editorStore';
 import { useProjectStore } from '../../stores/projectStore';
 import type { MapReference } from '../../types/project';
 import { EmptyState } from '../ui/EmptyState';
+import { SCENE_TEMPLATES } from '../../templates/sceneTemplates';
+import { createMockProviderAdapter } from '../../providers/mockProviderAdapter';
+import {
+  generateMapDraftCandidate,
+  validateMapDraftGenerationCandidate,
+  approveMapDraftGenerationCandidate,
+} from '../../providers/mapDraftGenerationWorkflow';
+
 
 function slugifyMapId(name: string, existing: Set<string>): string {
   const base = name
@@ -49,6 +58,90 @@ export function MapTreePanel() {
   const refs = project.project.maps;
   const existingIds = new Set(refs.map(ref => ref.id));
   const canDeleteAnyMap = refs.length > 1;
+
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [genName, setGenName] = useState('Draft Map');
+  const [genParentId, setGenParentId] = useState<string>('');
+  const [genTemplateId, setGenTemplateId] = useState<string>('story-room-16x9');
+  const [genPrompt, setGenPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [candidate, setCandidate] = useState<any>(null);
+  const [genStatus, setGenStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+  const openMapDraftGeneration = () => {
+    setGenName(`Draft Map ${refs.length + 1}`);
+    setGenParentId('');
+    setGenTemplateId('story-room-16x9');
+    setGenPrompt('Draft a cozy room with comfortable seating, a treasure chest, and a friendly host.');
+    setCandidate(null);
+    setGenStatus(null);
+    setShowGenModal(true);
+  };
+
+  const handleGenerateMap = async () => {
+    setGenerating(true);
+    setGenStatus(null);
+    setCandidate(null);
+    try {
+      const mapId = slugifyMapId(genName, existingIds);
+      const adapter = createMockProviderAdapter();
+      const context = {
+        existingMapIds: Object.keys(project.maps),
+        tilesets: project.databases.tilesets,
+        defaultTilesetId: project.maps[project.project.startMapId]?.tilesetId ?? 'sample-town',
+      };
+      const result = await generateMapDraftCandidate(
+        adapter,
+        context,
+        {
+          prompt: genPrompt,
+          mapId,
+          mapName: genName.trim(),
+          templateId: genTemplateId,
+        },
+        {
+          requestId: `map-gen-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        }
+      );
+      // Validate candidate using validateMapDraftGenerationCandidate
+      const validationErrors = validateMapDraftGenerationCandidate(result, context);
+      if (validationErrors.length > 0) {
+        setGenStatus({ tone: 'error', text: `Validation failed: ${validationErrors[0]}` });
+        return;
+      }
+      setCandidate(result);
+      setGenStatus({ tone: 'success', text: 'Map draft generated successfully! Please review below.' });
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAcceptMap = () => {
+    if (!candidate) return;
+    try {
+      const context = {
+        existingMapIds: Object.keys(project.maps),
+        tilesets: project.databases.tilesets,
+        defaultTilesetId: project.maps[project.project.startMapId]?.tilesetId ?? 'sample-town',
+      };
+      const approved = approveMapDraftGenerationCandidate(candidate, context, {
+        reviewedAt: new Date().toISOString(),
+      });
+      projectDispatch({
+        type: 'ADD_GENERATED_MAP',
+        map: approved.map,
+        parentId: genParentId || null,
+      });
+      editorDispatch({ type: 'SELECT_MAP', mapId: approved.map.id });
+      setShowGenModal(false);
+      setCandidate(null);
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    }
+  };
 
   const createMap = (parentId: string | null = null) => {
     const name = window.prompt('Map name', 'New Map');
@@ -231,15 +324,26 @@ export function MapTreePanel() {
     <div className="h-[240px] flex-shrink-0 bg-white border-b border-gray-200 flex flex-col">
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-200">
         <span className="text-[13px] font-semibold text-gray-700">Map Tree</span>
-        <button
-          type="button"
-          onClick={() => createMap(null)}
-          aria-label="Create root map"
-          title="Create root map"
-          className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
-        >
-          <Plus size={14} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={openMapDraftGeneration}
+            aria-label="Generate map draft"
+            title="Generate map draft"
+            className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+          >
+            <Sparkles size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => createMap(null)}
+            aria-label="Create root map"
+            title="Create root map"
+            className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto py-1">
         {refs.length === 0 ? (
@@ -265,6 +369,218 @@ export function MapTreePanel() {
           renderBranch(null)
         )}
       </div>
+
+      {showGenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl flex flex-col max-h-[90vh]">
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-500" />
+                Generate Map Draft
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGenModal(false);
+                  setCandidate(null);
+                  setGenStatus(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {genStatus && (
+                <div
+                  className={`rounded border p-2.5 text-xs ${
+                    genStatus.tone === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {genStatus.text}
+                </div>
+              )}
+
+              {!candidate ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Map Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      value={genName}
+                      onChange={e => setGenName(e.target.value)}
+                      placeholder="e.g. Castle Interior"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Parent Map
+                    </label>
+                    <select
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      value={genParentId}
+                      onChange={e => setGenParentId(e.target.value)}
+                    >
+                      <option value="">None (Root)</option>
+                      {refs.map(ref => (
+                        <option key={ref.id} value={ref.id}>
+                          {mapNameFor(ref, project.maps)} ({ref.id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Scene Template
+                    </label>
+                    <select
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      value={genTemplateId}
+                      onChange={e => setGenTemplateId(e.target.value)}
+                    >
+                      {SCENE_TEMPLATES.map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.label} ({t.aspectRatio})
+                        </option>
+                      ))}
+                    </select>
+                    {genTemplateId && (
+                      <p className="mt-1 text-[11px] text-gray-400 italic">
+                        {SCENE_TEMPLATES.find(t => t.id === genTemplateId)?.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      AI Prompt
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      value={genPrompt}
+                      onChange={e => setGenPrompt(e.target.value)}
+                      placeholder="Describe what kind of layout, pathing, or entities you want to draft..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-gray-50 rounded border p-3">
+                  <h4 className="text-xs font-semibold text-gray-700 border-b pb-1.5">
+                    Candidate Review Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
+                    <div>
+                      <span className="text-gray-400">Map ID:</span>{' '}
+                      <span className="font-mono text-gray-800 font-semibold">{candidate.map.id}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Map Name:</span>{' '}
+                      <span className="text-gray-800 font-semibold">{candidate.map.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Size:</span>{' '}
+                      <span className="text-gray-800 font-mono">
+                        {candidate.map.width} x {candidate.map.height}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Tileset ID:</span>{' '}
+                      <span className="font-mono text-gray-800 font-mono">{candidate.map.tilesetId}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-500 block mb-1">
+                      Layers ({candidate.map.layers.length})
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {candidate.map.layers.map((l: any) => (
+                        <span
+                          key={l.name}
+                          className="bg-indigo-50 text-indigo-700 border border-indigo-100 rounded px-1.5 py-0.5 text-[9px] font-mono"
+                        >
+                          {l.name} ({l.type})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-500 block mb-1">
+                      Events ({candidate.map.events.length})
+                    </span>
+                    <ul className="text-[11px] text-gray-600 list-disc list-inside max-h-[100px] overflow-y-auto">
+                      {candidate.map.events.map((e: any) => (
+                        <li key={e.id}>
+                          Event <span className="font-mono font-semibold text-gray-800">{e.id}</span> (
+                          {e.trigger})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="border-t pt-2 mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Provenance:</span>
+                    <span className="text-gray-500 font-mono">
+                      {candidate.provenance.providerId}/{candidate.provenance.modelId}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2 border-t pt-3 flex-shrink-0">
+              {!candidate ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowGenModal(false)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={generating || !genName.trim() || !genPrompt.trim()}
+                    onClick={handleGenerateMap}
+                    aria-label="Generate Draft"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {generating ? 'Generating...' : 'Generate Draft'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCandidate(null)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcceptMap}
+                    aria-label="Accept and Insert"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 flex items-center gap-1"
+                  >
+                    Accept & Insert
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

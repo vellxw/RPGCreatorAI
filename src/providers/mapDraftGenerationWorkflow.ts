@@ -1,3 +1,4 @@
+import { isSupportedCollisionTile, isSupportedRegionTile } from '../visual/tileCatalog';
 import type { ProviderAdapter } from './providerAdapter';
 
 export function buildMapDraftGenerationRequest(
@@ -86,6 +87,141 @@ export async function generateMapDraftCandidate(
 
 export function validateMapDraftGenerationCandidate(candidate: any, context: any): string[] {
   const errors: string[] = [];
+  if (!candidate) {
+    errors.push('Candidate is required');
+    return errors;
+  }
+  const map = candidate.map;
+  if (!map) {
+    errors.push('Map data is required');
+    return errors;
+  }
+  if (typeof map.id !== 'string' || !map.id.trim()) {
+    errors.push('Map ID is required');
+  }
+  if (typeof map.name !== 'string' || !map.name.trim()) {
+    errors.push('Map Name is required');
+  }
+  if (typeof map.width !== 'number' || !Number.isInteger(map.width) || map.width <= 0) {
+    errors.push('Map width must be a positive integer');
+  }
+  if (typeof map.height !== 'number' || !Number.isInteger(map.height) || map.height <= 0) {
+    errors.push('Map height must be a positive integer');
+  }
+  if (typeof map.tileSize !== 'number' || !Number.isInteger(map.tileSize) || map.tileSize <= 0) {
+    errors.push('Map tileSize must be a positive integer');
+  }
+
+  // tilesetId validation
+  let tilesetsArray: any[] | null = null;
+  if (context && context.tilesets) {
+    if (Array.isArray(context.tilesets)) {
+      tilesetsArray = context.tilesets;
+    } else if (Array.isArray(context.tilesets.tilesets)) {
+      tilesetsArray = context.tilesets.tilesets;
+    }
+  }
+
+  if (typeof map.tilesetId !== 'string' || !map.tilesetId.trim()) {
+    errors.push('Map tilesetId is required');
+  } else if (tilesetsArray) {
+    const tilesetExists = tilesetsArray.some((ts: any) => ts.id === map.tilesetId);
+    if (!tilesetExists) {
+      errors.push(`Tileset "${map.tilesetId}" does not exist in project context`);
+    }
+  }
+
+  const expectedLength = (map.width || 0) * (map.height || 0);
+
+  // layers validation
+  if (!Array.isArray(map.layers)) {
+    errors.push('Map layers must be an array');
+  } else {
+    const requiredLayers = [
+      { name: 'ground', type: 'visual', role: 'ground' },
+      { name: 'decoration', type: 'visual', role: 'decoration' },
+      { name: 'foreground', type: 'visual', role: 'foreground' },
+      { name: 'collision', type: 'collision', role: 'collision' },
+      { name: 'region', type: 'region', role: 'region' },
+    ];
+
+    for (const req of requiredLayers) {
+      const layer = map.layers.find((l: any) => l.name === req.name);
+      if (!layer) {
+        errors.push(`Map is missing required layer "${req.name}"`);
+        continue;
+      }
+      if (layer.type !== req.type) {
+        errors.push(`Layer "${req.name}" must have type "${req.type}"`);
+      }
+      if (layer.role !== req.role) {
+        errors.push(`Layer "${req.name}" must have role "${req.role}"`);
+      }
+      if (!Array.isArray(layer.tiles)) {
+        errors.push(`Layer "${req.name}" tiles must be an array`);
+        continue;
+      }
+      if (layer.tiles.length !== expectedLength) {
+        errors.push(`Layer "${req.name}" has ${layer.tiles.length} tiles, expected ${expectedLength}`);
+        continue;
+      }
+
+      // Check tile IDs in layers
+      if (layer.type === 'visual') {
+        if (tilesetsArray) {
+          const tileset = tilesetsArray.find((ts: any) => ts.id === map.tilesetId);
+          if (tileset && Array.isArray(tileset.tiles)) {
+            const validTileIds = new Set(tileset.tiles.map((t: any) => t.id));
+            // Always allow tile id 0 (transparent/void)
+            validTileIds.add(0);
+            for (let i = 0; i < layer.tiles.length; i++) {
+              const tileId = layer.tiles[i];
+              if (!validTileIds.has(tileId)) {
+                errors.push(`Layer "${req.name}" contains invalid tile ID ${tileId} at index ${i}`);
+                break; // Just report one invalid tile per layer to avoid spamming
+              }
+            }
+          }
+        }
+      } else if (layer.type === 'collision') {
+        for (let i = 0; i < layer.tiles.length; i++) {
+          const tileId = layer.tiles[i];
+          if (!isSupportedCollisionTile(tileId)) {
+            errors.push(`Layer "${req.name}" contains invalid collision tile ID ${tileId} at index ${i}`);
+            break;
+          }
+        }
+      } else if (layer.type === 'region') {
+        for (let i = 0; i < layer.tiles.length; i++) {
+          const tileId = layer.tiles[i];
+          if (!isSupportedRegionTile(tileId)) {
+            errors.push(`Layer "${req.name}" contains invalid region tile ID ${tileId} at index ${i}`);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Check event references / validity
+  if (map.events !== undefined) {
+    if (!Array.isArray(map.events)) {
+      errors.push('Map events must be an array');
+    } else {
+      const seenEventIds = new Set<string>();
+      for (const event of map.events) {
+        if (!event.id || typeof event.id !== 'string' || !event.id.trim()) {
+          errors.push('Map event is missing id');
+        } else {
+          if (seenEventIds.has(event.id)) {
+            errors.push(`Duplicate event id "${event.id}" in map draft`);
+          }
+          seenEventIds.add(event.id);
+        }
+      }
+    }
+  }
+
   return errors;
 }
 

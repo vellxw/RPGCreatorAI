@@ -1053,6 +1053,44 @@ describe('projectReducer', () => {
     expect(s2.maps.forest.layers[4].type).toBe('region');
   });
 
+  it('ADD_GENERATED_MAP inserts a fully structured generated map', () => {
+    const s1 = loadedState();
+    const mapData: MapData = {
+      schemaVersion: 1,
+      id: 'generated_desert',
+      name: 'Generated Desert',
+      width: 40,
+      height: 23,
+      tileSize: 32,
+      layers: [
+        { name: 'ground', type: 'visual', role: 'ground', tiles: Array(40 * 23).fill(2) },
+        { name: 'decoration', type: 'visual', role: 'decoration', tiles: Array(40 * 23).fill(0) },
+        { name: 'foreground', type: 'visual', role: 'foreground', tiles: Array(40 * 23).fill(0) },
+        { name: 'collision', type: 'collision', role: 'collision', tiles: Array(40 * 23).fill(0) },
+        { name: 'region', type: 'region', role: 'region', tiles: Array(40 * 23).fill(0) },
+      ],
+      events: [{ id: 'desert_npc', type: 'npc', x: 10, y: 12, solid: true, trigger: 'interact', commands: [] }],
+    };
+
+    const s2 = projectReducer(s1, {
+      type: 'ADD_GENERATED_MAP',
+      map: mapData,
+      parentId: 'town',
+    });
+
+    expect(s2.dirty).toBe(true);
+    expect(s2.project.maps.find(ref => ref.id === 'generated_desert')).toMatchObject({
+      id: 'generated_desert',
+      path: 'data/maps/generated_desert.json',
+      parentId: 'town',
+      order: 0,
+      expanded: true,
+    });
+    expect(s2.maps.generated_desert).toBeDefined();
+    expect(s2.maps.generated_desert.events).toHaveLength(1);
+    expect(s2.maps.generated_desert.events[0].id).toBe('desert_npc');
+  });
+
   it('DUPLICATE_MAP deep-clones maps without aliasing source arrays', () => {
     const s1 = loadedState();
     const s2 = projectReducer(s1, {

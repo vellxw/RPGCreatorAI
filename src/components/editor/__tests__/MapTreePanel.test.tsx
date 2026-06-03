@@ -1,6 +1,7 @@
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mergeDatabases } from '../../../adapters/defaultDatabases';
 import { EditorContext, initialEditorState, type EditorAction } from '../../../stores/editorStore';
 import {
   initialProjectStoreState,
@@ -43,6 +44,21 @@ function projectState(refs: MapReference[]): ProjectStoreState {
       maps: refs,
     },
     maps: Object.fromEntries(refs.map(ref => [ref.id, mapData(ref.id, names[ref.id] ?? ref.id)])),
+    databases: mergeDatabases({
+      tilesets: {
+        tilesets: [
+          {
+            id: 'sample-town',
+            name: 'Sample Town',
+            tileSize: 32,
+            tiles: [
+              { id: 0, name: 'Transparent', asset: 'voidWarning', group: 'A', passability: 'blocked', priority: 0 },
+              { id: 1, name: 'Grass', asset: 'grass', group: 'A', passability: 'passable', priority: 0 },
+            ],
+          },
+        ],
+      },
+    }),
   };
 }
 
@@ -195,6 +211,63 @@ describe('MapTreePanel workflow polish', () => {
       const rowButton = view.container.querySelector<HTMLButtonElement>(`button[title="${name}"]`);
       expect(rowButton?.className).toContain('h-6');
     }
+
+    view.unmount();
+  });
+
+  it('opens the AI map draft generator, drafts, validates, and accepts insertion', async () => {
+    const state = projectState([
+      { id: 'town', path: 'data/maps/town.json', parentId: null, order: 0, expanded: true },
+    ]);
+    const view = renderMapTree(state);
+
+    const genButton = view.container.querySelector<HTMLButtonElement>('button[aria-label="Generate map draft"]');
+    expect(genButton).toBeDefined();
+
+    // Open modal
+    act(() => {
+      genButton?.click();
+    });
+
+    // Check modal title is rendered
+    expect(document.body.innerHTML).toContain('Generate Map Draft');
+
+    const generateSubmitButton = document.body.querySelector<HTMLButtonElement>('button[aria-label="Generate Draft"]');
+    expect(generateSubmitButton).toBeDefined();
+
+    // Trigger generate map (uses mock adapter internally)
+    await act(async () => {
+      generateSubmitButton?.click();
+    });
+
+    // Check candidate review is visible
+    expect(document.body.innerHTML).toContain('Candidate Review Details');
+
+    const acceptButton = document.body.querySelector<HTMLButtonElement>('button[aria-label="Accept and Insert"]');
+    expect(acceptButton).not.toBeNull();
+
+    // Trigger accept
+    act(() => {
+      acceptButton?.click();
+    });
+
+    // Modal should close
+    expect(document.body.innerHTML).not.toContain('Generate Map Draft');
+
+    // Assert projectDispatch called with correct payload
+    expect(view.projectDispatch).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'ADD_GENERATED_MAP',
+      map: expect.objectContaining({
+        id: expect.stringContaining('draft_map'),
+        name: expect.stringContaining('Draft Map'),
+        width: 40,
+        height: 23,
+      }),
+    }));
+    expect(view.editorDispatch).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'SELECT_MAP',
+      mapId: expect.stringContaining('draft_map'),
+    }));
 
     view.unmount();
   });

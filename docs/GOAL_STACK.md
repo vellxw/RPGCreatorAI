@@ -52,7 +52,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-081 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-082 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -567,6 +567,11 @@ Primary Phase 11 sources:
   native runtime fixture path tests all pass without live provider calls.
   Evidence is recorded in
   `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`.
+- Phase 11 CP-081 — AI Map Draft Generator completed. The sparkles icon action
+  in the Map Tree launches a modal overlay where creators configure drafts.
+  Pending candidates list sizes, layers, and events, then validate against standard
+  project assets before Accept/Discard decisions. No live network or provider APIs
+  are called. Evidence is recorded in `docs/PHASE_11_AI_MAP_DRAFT_GENERATOR.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
