@@ -184,6 +184,8 @@ Before commit:
 - run `git status --short`
 - ensure `build/`, `.env`, secrets, generated binaries, API keys are not
   staged
+- do not stage `.commandcode/` unless explicitly requested
+- do not stage unrelated files
 
 Commit only when:
 - configure passes
@@ -195,6 +197,57 @@ After commit:
 - push to `origin/main`
 - report commit hash
 - report final `git status --short`
+
+## Linear Issue Discipline
+
+### Core rules
+
+- Always read the real Linear issue before implementing or closing it.
+- Never batch-close Linear issues.
+- Never close an issue "in spirit", "functionally satisfied", or by
+  implication. An issue is Done only when Linear shows Done with evidence.
+- Never claim an issue is complete just because infrastructure or scaffolding
+  exists.
+- One issue = one clear unit of work = one commit, unless the issue is
+  audit-only and requires no code/docs changes.
+
+### Per-issue evidence (all required)
+
+For every issue the agent works, all of these must be true:
+
+1. The issue was read from Linear.
+2. Files were changed or inspected.
+3. Validation commands were actually run.
+4. Exact validation results were recorded.
+5. A commit hash exists if code or docs changed.
+6. A final Linear comment was posted with the above evidence.
+
+### Linear MCP failure
+
+- If Linear MCP fails to read, comment, or update an issue, stop immediately.
+- Do not continue working while pretending Linear was updated.
+- Do not move an issue to Done unless validation passed and was documented.
+
+### Validation honesty
+
+- Never claim validation passed unless the command was actually run.
+- Never make live paid AI provider calls during normal validation.
+- AI/provider validation must use mocks, fixtures, contract tests, or
+  offline diagnostics.
+
+### Staging and secrets
+
+- Never commit secrets, API keys, tokens, `.env` files, generated binaries,
+  or unrelated build artifacts.
+- Do not stage `.commandcode/` unless explicitly requested.
+- Do not stage unrelated files.
+
+### Already-satisfied and ambiguous issues
+
+- If an issue is already satisfied, inaction is acceptable, but only after
+  evidence is documented in a Linear comment.
+- If an issue is ambiguous or requires a product decision not documented in
+  Linear or repo docs, stop and report.
 
 ## Validation Log
 
