@@ -23,6 +23,7 @@ import {
   Swords,
   Timer,
   ToggleLeft,
+  Sparkles,
   Trash2,
   Volume2,
 } from 'lucide-react';
@@ -36,6 +37,12 @@ import {
 } from '../../utils/commandSelection';
 import { defaultPluginCommand } from '../../plugins/pluginCommandRegistry';
 import type { EventCommand } from '../../types/project';
+import { createMockProviderAdapter } from '../../providers/mockProviderAdapter';
+import {
+  generateEventCommandsCandidate,
+  validateEventCommandsCandidate,
+  approveEventCommandsCandidate,
+} from '../../providers/eventCommandGenerationWorkflow';
 
 export interface CommandStackOperations {
   update(path: number[], command: EventCommand): void;
@@ -587,6 +594,103 @@ export function CommandStackEditor({
   const [selectionAnchorPath, setSelectionAnchorPath] = useState<number[] | null>(null);
   const [clipboardCommand, setClipboardCommand] = useState<EventCommand | null>(null);
 
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [genPrompt, setGenPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [candidate, setCandidate] = useState<any>(null);
+  const [genStatus, setGenStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+  const openEventCommandDraftGeneration = () => {
+    setGenPrompt('Create a sequence of text and add a potion item.');
+    setCandidate(null);
+    setGenStatus(null);
+    setShowGenModal(true);
+  };
+
+  const handleGenerateCommands = async () => {
+    setGenerating(true);
+    setGenStatus(null);
+    setCandidate(null);
+    try {
+      const adapter = createMockProviderAdapter();
+      const context = {
+        mapIds,
+        items: itemIds.map(id => ({ id })),
+      };
+      const result = await generateEventCommandsCandidate(
+        adapter,
+        context,
+        {
+          prompt: genPrompt,
+          targetEventId: undefined,
+        },
+        {
+          requestId: `event-commands-gen-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        }
+      );
+      const validationErrors = validateEventCommandsCandidate(result, context);
+      if (validationErrors.length > 0) {
+        setGenStatus({ tone: 'error', text: `Validation failed: ${validationErrors[0]}` });
+        return;
+      }
+      setCandidate(result);
+      setGenStatus({ tone: 'success', text: 'Event commands generated successfully! Please review below.' });
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAcceptCommands = () => {
+    if (!candidate) return;
+    try {
+      const context = {
+        mapIds,
+        items: itemIds.map(id => ({ id })),
+      };
+      const approved = approveEventCommandsCandidate(candidate, context, {
+        reviewedAt: new Date().toISOString(),
+      });
+      
+      let path = selectedPath ?? selectedBranchPath ?? [];
+      let placement: 'before' | 'after' | 'append' = (selectedPath ? 'after' : 'append') as 'before' | 'after' | 'append';
+      
+      if (operations?.insert) {
+        for (const cmd of approved.commands) {
+          operations.insert(path, placement, cmd);
+          if (placement === 'after') {
+            const nextPath = path.slice();
+            nextPath[nextPath.length - 1] += 1;
+            path = nextPath;
+          } else if (placement === 'before') {
+            placement = 'after';
+          }
+        }
+      } else {
+        let tempCommands = commands.slice();
+        for (const cmd of approved.commands) {
+          tempCommands = insertCommandAtPath(tempCommands, path, cmd, placement);
+          if (placement === 'after') {
+            const nextPath = path.slice();
+            nextPath[nextPath.length - 1] += 1;
+            path = nextPath;
+          } else if (placement === 'before') {
+            placement = 'after';
+          }
+        }
+        commitCommands(tempCommands);
+      }
+
+      setShowGenModal(false);
+      setCandidate(null);
+      setGenPrompt('');
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    }
+  };
+
   const rows = flattenCommandRows(commands);
   const commandRows = rows.filter((row): row is Extract<CommandStackRow, { type: 'command' }> => row.type === 'command');
   const commandPaths = commandRows.map(row => row.path);
@@ -774,6 +878,15 @@ export function CommandStackEditor({
           {hasMultiSelection && (
             <span className="px-1.5 text-[11px] font-medium text-indigo-700">{activeSelectedCommandPaths.length} selected</span>
           )}
+          <button
+            type="button"
+            onClick={openEventCommandDraftGeneration}
+            aria-label="Generate event commands"
+            title="Generate event commands"
+            className="p-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+          >
+            <Sparkles size={14} />
+          </button>
           <select
             className="px-2 py-1 text-[12px] border border-gray-200 rounded"
             onChange={e => {
@@ -853,6 +966,126 @@ export function CommandStackEditor({
           </div>
         )}
       </div>
+      {showGenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl flex flex-col max-h-[90vh]">
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-500" />
+                Generate Event Commands
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGenModal(false);
+                  setCandidate(null);
+                  setGenStatus(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {genStatus && (
+                <div
+                  className={`rounded border p-2.5 text-xs ${
+                    genStatus.tone === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {genStatus.text}
+                </div>
+              )}
+
+              {!candidate ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      AI Prompt
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      value={genPrompt}
+                      onChange={e => setGenPrompt(e.target.value)}
+                      placeholder="Describe the command sequence you want to generate..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-gray-50 rounded border p-3">
+                  <h4 className="text-xs font-semibold text-gray-700 border-b pb-1.5">
+                    Candidate Review Details
+                  </h4>
+                  <div>
+                    <span className="text-[11px] font-semibold text-gray-500 block mb-1">
+                      Commands ({candidate.commands.length})
+                    </span>
+                    <ul className="text-[11px] text-gray-600 list-disc list-inside max-h-[200px] overflow-y-auto font-mono bg-white p-2 rounded border space-y-1">
+                      {candidate.commands.map((cmd: any, idx: number) => (
+                        <li key={idx} className="truncate">
+                          [{cmd.type}] {cmd.text || cmd.itemId || cmd.switchId || JSON.stringify(cmd)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="border-t pt-2 mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Provenance:</span>
+                    <span className="text-gray-500 font-mono">
+                      {candidate.provenance.providerId}/{candidate.provenance.modelId}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2 border-t pt-3 flex-shrink-0">
+              {!candidate ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowGenModal(false)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={generating || !genPrompt.trim()}
+                    onClick={handleGenerateCommands}
+                    aria-label="Generate Draft"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {generating ? 'Generating...' : 'Generate Draft'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCandidate(null)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcceptCommands}
+                    aria-label="Accept and Insert"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 flex items-center gap-1"
+                  >
+                    Accept and Insert
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -52,7 +52,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-082 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-084 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -572,6 +572,14 @@ Primary Phase 11 sources:
   Pending candidates list sizes, layers, and events, then validate against standard
   project assets before Accept/Discard decisions. No live network or provider APIs
   are called. Evidence is recorded in `docs/PHASE_11_AI_MAP_DRAFT_GENERATOR.md`.
+- Phase 11 CP-082 — AI Quest Generator completed. Sparks icon in DatabaseList opens
+  a quest generator modal supporting offline prompt-based draft generation of quests
+  with objectives, rewards, state schemas, validation against maps/items, and insert workflow.
+  Evidence is recorded in `docs/PHASE_11_AI_QUEST_GENERATOR.md`.
+- Phase 11 CP-083 — AI Event Command Generator completed. Sparks button in CommandStackEditor
+  launches modal where users describe commands sequence, showing candidate commands, provenance
+  information, validation details, and accepting them as editable commands with support for
+  insertion paths. Evidence is recorded in `docs/PHASE_11_AI_EVENT_COMMAND_GENERATOR.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

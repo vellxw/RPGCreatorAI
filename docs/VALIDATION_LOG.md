@@ -4,6 +4,19 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-118 / CP-083 — AI Event Command Generator
+
+- `2026-06-03 22:43:20 -03:00` — `npx vitest run src/providers/__tests__/eventCommandGenerationWorkflow.test.ts` — PASS; 1 file and 5 tests passed (verifying candidate building, prompt serialization, invalid types/references, and approvals).
+- `2026-06-03 22:44:54 -03:00` — `npx vitest run src/components/events/__tests__/EventCommandGenerationIntegration.test.tsx` — PASS; 1 file and 3 tests passed (verifying UI sparkles trigger button, modal prompt input, candidate review detail rendering, sequential operations.insert calls, and onCommandsChange fallback).
+- `2026-06-03 22:45:55 -03:00` — `npm test -- --run` — PASS; 90 Vitest files and 475 tests passed.
+- `2026-06-03 22:46:45 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-03 22:47:14 -03:00` — `npm run build` — PASS; built production assets successfully.
+- `2026-06-03 22:49:38 -03:00` — `verify.ps1` — PASS; all frontend, C++, desktop, and smoke gates passed successfully.
+- Fix applied: added sparkles icon trigger button in CommandStackEditor, event command generation modal, pending candidate review details UI showing generated command sequence list, and accept/discard sequential insert/commit dispatching, backed by validation rules in `eventCommandGenerationWorkflow`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-117 / CP-082 — AI Quest Generator
 
 - `2026-06-03 01:33:00 -03:00` — `npm run typecheck` — PASS.
