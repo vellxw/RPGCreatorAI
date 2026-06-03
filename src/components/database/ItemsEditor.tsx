@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Copy, Plus, Trash2 } from 'lucide-react';
+import { Copy, Plus, Trash2, Sparkles } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
 import {
@@ -25,6 +25,12 @@ import type {
   TypesDatabaseData,
 } from '../../types/project';
 import type { ItemIconGenerationRunner } from '../../providers/itemIconGenerationWorkflow';
+import { createMockProviderAdapter } from '../../providers/mockProviderAdapter';
+import {
+  generateItemDraftCandidate,
+  validateItemCandidate,
+  approveDbDraftCandidate,
+} from '../../providers/dbDraftGenerationWorkflow';
 
 interface ItemsEditorProps {
   value: ItemDatabase;
@@ -92,6 +98,72 @@ export function ItemsEditor({
       .map(asset => ({ value: asset.id, label: `${asset.name} (${asset.id})` })),
     [assets],
   );
+
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [genPrompt, setGenPrompt] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [candidate, setCandidate] = useState<any>(null);
+  const [genStatus, setGenStatus] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+  const openItemGeneration = () => {
+    setGenPrompt('A powerful fire sword that deals burning damage and increases attack.');
+    setCandidate(null);
+    setGenStatus(null);
+    setShowGenModal(true);
+  };
+
+  const handleGenerateItem = async () => {
+    setGenerating(true);
+    setGenStatus(null);
+    setCandidate(null);
+    try {
+      if (!selected) return;
+      const adapter = createMockProviderAdapter();
+      const context = {
+        categories: categoryOptions.map(opt => opt.value),
+        slots: slotOptions.map(opt => opt.value),
+      };
+      const result = await generateItemDraftCandidate(
+        adapter,
+        genPrompt,
+        context,
+        { itemId: selected.id, itemName: selected.name || selected.id },
+        {
+          requestId: `item-gen-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+        }
+      );
+      const validationErrors = validateItemCandidate(result, context);
+      if (validationErrors.length > 0) {
+        setGenStatus({ tone: 'error', text: `Validation failed: ${validationErrors[0]}` });
+        return;
+      }
+      setCandidate(result);
+      setGenStatus({ tone: 'success', text: 'Item draft generated successfully! Please review below.' });
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAcceptItem = () => {
+    if (!candidate) return;
+    try {
+      const context = {
+        categories: categoryOptions.map(opt => opt.value),
+        slots: slotOptions.map(opt => opt.value),
+      };
+      const approved = approveDbDraftCandidate('item', candidate, context, {
+        reviewedAt: new Date().toISOString(),
+      });
+      updateSelected(approved.item);
+      setShowGenModal(false);
+      setCandidate(null);
+    } catch (e) {
+      setGenStatus({ tone: 'error', text: (e as Error).message });
+    }
+  };
 
   const replaceItems = (items: ItemData[]) => onChange({ items });
   const updateSelected = (changes: Partial<ItemData>) => {
@@ -260,7 +332,20 @@ export function ItemsEditor({
 
           <div className="grid grid-cols-2 gap-3">
             <IdField label="Item ID" value={selected.id} onChange={id => updateSelected({ id })} />
-            <TextField label="Item name" value={selected.name} onChange={name => updateSelected({ name })} />
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <TextField label="Item name" value={selected.name} onChange={name => updateSelected({ name })} />
+              </div>
+              <button
+                type="button"
+                onClick={openItemGeneration}
+                aria-label="Generate item draft"
+                title="Generate item draft"
+                className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 border border-gray-200 rounded-md flex items-center justify-center cursor-pointer mb-[1px]"
+              >
+                <Sparkles size={14} />
+              </button>
+            </div>
           </div>
           <TextareaField
             label="Description"
@@ -339,6 +424,129 @@ export function ItemsEditor({
           title="No item selected"
           detail="Add an item from the list to edit category, price, effects, and equipment modifiers."
         />
+      )}
+
+      {showGenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl flex flex-col max-h-[90vh]">
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-indigo-500" />
+                Generate Item Draft
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGenModal(false);
+                  setCandidate(null);
+                  setGenStatus(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {genStatus && (
+                <div
+                  className={`rounded border p-2.5 text-xs ${
+                    genStatus.tone === 'success'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-red-200 bg-red-50 text-red-700'
+                  }`}
+                >
+                  {genStatus.text}
+                </div>
+              )}
+
+              {!candidate ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1">
+                      Item Prompt
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full rounded border border-gray-200 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      value={genPrompt}
+                      onChange={e => setGenPrompt(e.target.value)}
+                      placeholder="Describe the item concepts and attributes..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 bg-gray-50 rounded border p-3 text-xs text-gray-600">
+                  <h4 className="text-xs font-semibold text-gray-700 border-b pb-1.5">
+                    Candidate Review Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="font-semibold">Name:</span> {candidate.item.name}</div>
+                    <div><span className="font-semibold">Category:</span> {candidate.item.type}</div>
+                    <div><span className="font-semibold">Price:</span> {candidate.item.price}</div>
+                  </div>
+                  <div>
+                    <span className="font-semibold block mb-1">Description:</span>
+                    <p className="p-2 bg-white rounded border text-xs">{candidate.item.description}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold block mb-1">Effects:</span>
+                    <pre className="p-2 bg-white rounded border text-[10px] font-mono">
+                      {JSON.stringify(candidate.item.effect, null, 2)}
+                    </pre>
+                  </div>
+                  <div className="border-t pt-2 mt-2 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Provenance:</span>
+                    <span className="text-gray-500 font-mono">
+                      {candidate.provenance.providerId}/{candidate.provenance.modelId}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2 border-t pt-3 flex-shrink-0">
+              {!candidate ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowGenModal(false)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={generating || !genPrompt.trim()}
+                    onClick={handleGenerateItem}
+                    aria-label="Generate Draft"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                  >
+                    {generating ? 'Generating...' : 'Generate Draft'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setCandidate(null)}
+                    className="rounded border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 cursor-pointer"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcceptItem}
+                    aria-label="Accept and Insert"
+                    className="rounded bg-indigo-600 px-3 py-1.5 text-xs text-white hover:bg-indigo-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    Accept and Apply
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

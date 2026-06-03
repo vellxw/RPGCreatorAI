@@ -52,7 +52,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-084 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-085 next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -580,6 +580,10 @@ Primary Phase 11 sources:
   launches modal where users describe commands sequence, showing candidate commands, provenance
   information, validation details, and accepting them as editable commands with support for
   insertion paths. Evidence is recorded in `docs/PHASE_11_AI_EVENT_COMMAND_GENERATOR.md`.
+- Phase 11 CP-084 — AI Database Draft Generator completed. Sparks button next to name inputs
+  in ActorsEditor, EnemiesEditor, and ItemsEditor opens draft generation modals with prompt config,
+  candidate review, and validations of structures/references before applying the properties.
+  Evidence is recorded in `docs/PHASE_11_AI_DATABASE_DRAFT_GENERATOR.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

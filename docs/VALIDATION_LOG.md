@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-119 / CP-084 — AI Database Draft Generator
+
+- `2026-06-03 00:15:53 -03:00` — `npx vitest run src/providers/__tests__/dbDraftGenerationWorkflow.test.ts` — PASS; 1 file and 9 tests passed (verifying candidate building, prompt serialization, invalid types/references, and approvals for Actors, Enemies, and Items).
+- `2026-06-03 00:17:39 -03:00` — `npx vitest run src/components/database/__tests__/DbDraftGenerationIntegration.test.tsx` — PASS; 1 file and 3 tests passed (verifying UI sparkles trigger buttons, modal prompt inputs, candidate review detail rendering, and Accept/Discard workflows in Actors, Enemies, and Items editors).
+- `2026-06-03 00:18:00 -03:00` — `npm test -- --run` — PASS; 92 Vitest files and 487 tests passed.
+- `2026-06-03 00:18:25 -03:00` — `npm run typecheck` — PASS.
+- `2026-06-03 00:18:50 -03:00` — `npm run build` — PASS; built production assets successfully.
+- Fix applied: added sparkles icon trigger buttons in ActorsEditor, EnemiesEditor, and ItemsEditor detail panes, database draft generation modal, pending candidate review details UI, and accept/discard apply dispatching, backed by validation rules in `dbDraftGenerationWorkflow`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-118 / CP-083 — AI Event Command Generator
 
 - `2026-06-03 22:43:20 -03:00` — `npx vitest run src/providers/__tests__/eventCommandGenerationWorkflow.test.ts` — PASS; 1 file and 5 tests passed (verifying candidate building, prompt serialization, invalid types/references, and approvals).
