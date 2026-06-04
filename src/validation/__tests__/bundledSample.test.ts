@@ -188,4 +188,53 @@ describe('Bundled sample project (Phase 6 slice 10)', () => {
     expect(state.maps.town.height).toBeGreaterThanOrEqual(23);
     expect(state.maps.town.layers[0].tiles).not.toContain(0);
   });
+
+  it('includes accepted local mock generation evidence for complete-platform workflows', async () => {
+    const adapter = new BrowserMemoryAdapter();
+    const state = await adapter.loadProject();
+    const assets = state.assets?.assets ?? [];
+
+    expect([...new Set(assets.map(asset => asset.kind))]).toEqual(
+      expect.arrayContaining(['image', 'spritesheet', 'tileset', 'audio', 'generated']),
+    );
+
+    const acceptedGeneratedAssets = assets.filter(asset =>
+      asset.source === 'generated' &&
+      asset.generated?.providerId === 'local' &&
+      asset.generated.visualQa?.status === 'accepted',
+    );
+    expect(acceptedGeneratedAssets.map(asset => asset.id)).toEqual(
+      expect.arrayContaining(['sample_town_tiles', 'shopkeeper_portrait']),
+    );
+    expect(acceptedGeneratedAssets.every(asset =>
+      !!asset.generated?.promptTemplateId &&
+      !!asset.generated.modelId &&
+      asset.generated.visualQa?.unresolvedWarnings.length === 0,
+    )).toBe(true);
+
+    expect(state.project.generationHistory?.records).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'sample-history-tileset',
+          reviewState: 'accepted',
+          providerId: 'local',
+          linkedOutputs: expect.arrayContaining([
+            expect.objectContaining({ kind: 'asset', id: 'sample_town_tiles' }),
+            expect.objectContaining({ kind: 'database', table: 'tilesets', id: 'sample-town' }),
+          ]),
+        }),
+        expect.objectContaining({
+          id: 'sample-history-quest',
+          kind: 'structured-data',
+          operation: 'quest.generate',
+          providerId: 'local',
+          reviewState: 'accepted',
+          linkedOutputs: expect.arrayContaining([
+            expect.objectContaining({ kind: 'database', table: 'quests', id: 'lost_chest' }),
+            expect.objectContaining({ kind: 'event', id: 'old_man' }),
+          ]),
+        }),
+      ]),
+    );
+  });
 });

@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-160 / CP-125 - Sample Project Complete Platform Expansion
+
+- `2026-06-04 07:49:20 -03:00` - bundled sample complete-platform expansion -
+  PASS.
+- TDD red:
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts` - FAIL
+  as expected before data changes; the new sample-history test found zero
+  accepted local/mock generated assets with visual QA metadata.
+- Fix applied: expanded `data/assets/catalog.json` with accepted local/mock
+  generated metadata, free cost metadata, prompt provenance, and visual QA
+  acceptance for `sample_town_tiles` and `shopkeeper_portrait`. Added
+  `data/project.json` generation history records linking accepted outputs to
+  `sample_town_tiles`, `sample-town`, `lost_chest`, and `old_man`. Added
+  `src/validation/__tests__/bundledSample.test.ts` coverage for asset classes,
+  accepted generated QA metadata, and sample generation history. Updated
+  `src/e2e/__tests__/aiContentPipelineIntegration.test.ts` so CP-088 asserts
+  the 7 records it adds instead of assuming the bundled sample has no seed
+  history.
+- Focused green:
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts` - PASS;
+  1 file / 7 tests.
+- Focused project/asset/history suite:
+  `npm test -- --run src/validation/__tests__/bundledSample.test.ts src/validation/__tests__/validateProject.test.ts src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/assets/generated/__tests__/assetManifestIntegrity.test.ts src/providers/__tests__/generationHistory.test.ts src/providers/__tests__/questGenerationWorkflow.test.ts src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/providers/__tests__/portraitGenerationWorkflow.test.ts`
+  - PASS; 8 files / 80 tests.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  - PASS; runtime asset export validation passed.
+- First full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - FAIL at FRONTEND TYPECHECK because the new test accessed optional
+  `state.assets` without a null guard. Fixed by using `state.assets?.assets ??
+  []`.
+- Second full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - FAIL at FRONTEND TESTS because CP-088 expected total generation history
+  length 7; the sample now seeds 2 accepted records. Fixed the test to count
+  only `cp088-*` records and keep the 7-record gate intact.
+- Focused regression after CP-088 fix:
+  `npm test -- --run src/e2e/__tests__/aiContentPipelineIntegration.test.ts src/validation/__tests__/bundledSample.test.ts`
+  - PASS; 2 files / 8 tests.
+- Final full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - PASS. Gates passed: frontend typecheck, full Vitest (108 files / 572
+  tests), frontend build (1966 modules, known non-fatal chunk-size warning),
+  Phase 11 asset pipeline checks, native configure/build/CTest, Tauri content
+  check, Rust desktop tests (43 tests), runtime smoke, and editor-runtime
+  roundtrip. Runtime smoke generated/validated the Phase 10 MVP screenshot set;
+  roundtrip hashes were baseline
+  `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944` and
+  edited `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+- `npm run desktop:package:windows` - PASS. Package script passed asset
+  pipeline check, native configure/build/CTest, Tauri debug no-bundle build,
+  and packaged smoke launch with `PACKAGED SMOKE PASSED` /
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-158 / CP-123 - AI Workflow Documentation Repair
 
 - `2026-06-04 07:18:28 -03:00` - AI workflow documentation and UI cross-check

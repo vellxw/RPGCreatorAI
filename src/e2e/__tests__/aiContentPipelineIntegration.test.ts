@@ -379,8 +379,9 @@ describe('CP-088 AI game content pipeline integration gate', () => {
       selectedEventMapId: approvedMap.map.id,
       selectedEventId: 'draft_greeter',
     });
-    expect(reloaded.project.generationHistory?.records).toHaveLength(7);
-    expect(reloaded.project.generationHistory?.records.every(record => record.reviewState === 'accepted')).toBe(true);
+    const cp088Records = reloaded.project.generationHistory?.records.filter(record => record.id.startsWith('cp088-')) ?? [];
+    expect(cp088Records).toHaveLength(7);
+    expect(cp088Records.every(record => record.reviewState === 'accepted')).toBe(true);
     expect(JSON.stringify(reloaded.project.generationHistory)).not.toMatch(/sk-test-secret|Bearer/i);
   });
 });

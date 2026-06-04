@@ -22,7 +22,72 @@
       "source": "generated",
       "tags": ["tiles", "runtime"],
       "width": 1254,
-      "height": 1254
+      "height": 1254,
+      "generated": {
+        "prompt": "Create an original town tileset for the bundled RPGCreatorAI sample with grass, paths, water, snow, trees, and interior transition tiles.",
+        "tool": "local-mock",
+        "createdAt": "2026-06-04T07:35:00.000Z",
+        "promptTemplateId": "tileset-rpg-map-v1",
+        "promptTemplateVersion": 1,
+        "promptTemplateKind": "tileset",
+        "promptInputs": {
+          "subject": "starter town and nearby field",
+          "useCase": "bundled sample map authoring and runtime smoke",
+          "palette": "natural greens, stone path neutrals, water blue, snow accent",
+          "styleNotes": "original local sample art, readable at 32 pixel tile scale"
+        },
+        "providerId": "local",
+        "modelId": "offline-image-mock",
+        "operation": "tileset.generate",
+        "visualContextSource": "docs/GAME_VISUAL_DESIGN.md",
+        "visualContextVersion": "2026-06-02",
+        "cost": {
+          "availability": "free",
+          "detail": "Bundled offline fixture; no live provider call."
+        },
+        "visualQa": {
+          "status": "accepted",
+          "reviewedAt": "2026-06-04T07:36:00.000Z",
+          "score": 9,
+          "checks": {
+            "dimensions": {
+              "id": "dimensions",
+              "label": "Dimensions",
+              "status": "pass",
+              "notes": "Source dimensions match catalog and runtime manifest.",
+              "expected": "1254x1254",
+              "actual": "1254x1254"
+            },
+            "transparency": {
+              "id": "transparency",
+              "label": "Transparency",
+              "status": "pass",
+              "notes": "Runtime export applies the project magenta transparency key where needed."
+            },
+            "styleConsistency": {
+              "id": "styleConsistency",
+              "label": "Style consistency",
+              "status": "pass",
+              "notes": "Tiles match the authored bundled sample scale and visual profile."
+            },
+            "readability": {
+              "id": "readability",
+              "label": "Readability",
+              "status": "pass",
+              "notes": "Ground, path, water, snow, tree, wall, and floor tiles are distinguishable."
+            },
+            "runtimeSuitability": {
+              "id": "runtimeSuitability",
+              "label": "Runtime suitability",
+              "status": "pass",
+              "notes": "Runtime export validation confirms the BMP output and manifest entry."
+            }
+          },
+          "notes": "Accepted local mock tileset evidence for the bundled complete-platform sample.",
+          "tags": ["sample", "tileset", "runtime"],
+          "unresolvedWarnings": []
+        }
+      }
     },
     {
       "id": "shopkeeper_portrait",
@@ -30,7 +95,77 @@
       "kind": "image",
       "path": "assets/generated/web/npc_shopkeeper.png",
       "source": "generated",
-      "tags": ["npc", "portrait"]
+      "tags": ["npc", "portrait"],
+      "width": 64,
+      "height": 64,
+      "generated": {
+        "prompt": "Create an original friendly shopkeeper portrait for the bundled RPGCreatorAI sample.",
+        "tool": "local-mock",
+        "createdAt": "2026-06-04T07:37:00.000Z",
+        "promptTemplateId": "portrait-character-v1",
+        "promptTemplateVersion": 1,
+        "promptTemplateKind": "portrait",
+        "promptInputs": {
+          "subject": "friendly village shopkeeper",
+          "useCase": "sample shop dialogue and asset catalog review",
+          "palette": "warm cloth tones with clear facial silhouette",
+          "styleNotes": "original local sample portrait, readable at small preview size"
+        },
+        "providerId": "local",
+        "modelId": "offline-image-mock",
+        "operation": "portrait.generate",
+        "ownerKind": "event",
+        "ownerId": "shop_keeper",
+        "ownerName": "Shop Keeper",
+        "visualContextSource": "docs/GAME_VISUAL_DESIGN.md",
+        "visualContextVersion": "2026-06-02",
+        "cost": {
+          "availability": "free",
+          "detail": "Bundled offline fixture; no live provider call."
+        },
+        "visualQa": {
+          "status": "accepted",
+          "reviewedAt": "2026-06-04T07:38:00.000Z",
+          "score": 9,
+          "checks": {
+            "dimensions": {
+              "id": "dimensions",
+              "label": "Dimensions",
+              "status": "pass",
+              "notes": "Source dimensions match the catalog entry.",
+              "expected": "64x64",
+              "actual": "64x64"
+            },
+            "transparency": {
+              "id": "transparency",
+              "label": "Transparency",
+              "status": "pass",
+              "notes": "Preview and runtime export retain a clean silhouette."
+            },
+            "styleConsistency": {
+              "id": "styleConsistency",
+              "label": "Style consistency",
+              "status": "pass",
+              "notes": "Portrait matches the bundled sample character scale."
+            },
+            "readability": {
+              "id": "readability",
+              "label": "Readability",
+              "status": "pass",
+              "notes": "The shopkeeper remains readable in asset previews."
+            },
+            "runtimeSuitability": {
+              "id": "runtimeSuitability",
+              "label": "Runtime suitability",
+              "status": "pass",
+              "notes": "The asset has a deterministic runtime manifest entry."
+            }
+          },
+          "notes": "Accepted local mock portrait evidence for the bundled complete-platform sample.",
+          "tags": ["sample", "portrait", "npc"],
+          "unresolvedWarnings": []
+        }
+      }
     },
     {
       "id": "town_theme",

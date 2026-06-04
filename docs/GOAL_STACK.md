@@ -772,6 +772,15 @@ Primary Phase 11 sources:
   92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
   PowerShell wrappers validate committed normalization, preview, and runtime
   manifests offline.
+- Phase 11 CP-125 — sample project complete-platform expansion completed.
+  The bundled sample now includes accepted local/mock generation evidence in
+  `data/assets/catalog.json` for the runtime tileset and shopkeeper portrait,
+  plus `data/project.json` generation history records linked to asset,
+  tileset database, quest database, and event outputs. Regression coverage now
+  verifies those sample asset classes, accepted visual QA metadata, and history
+  records, while the CP-088 integration test counts its own generated history
+  records without assuming an empty sample history. Evidence is recorded in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-124 — asset pipeline documentation final pass repaired. The
   earlier audit overstated coverage in scattered docs; `docs/ASSET_PIPELINE.md`
   now acts as the reproducible operating guide for asset classes, project

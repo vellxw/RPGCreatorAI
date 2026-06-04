@@ -56,5 +56,131 @@
     "mapPresentation": "full-scene",
     "zoom": 1,
     "integerScale": true
+  },
+  "generationHistory": {
+    "schemaVersion": 1,
+    "maxRecords": 50,
+    "records": [
+      {
+        "id": "sample-history-tileset",
+        "kind": "asset",
+        "operation": "tileset.generate",
+        "providerId": "local",
+        "modelId": "offline-image-mock",
+        "createdAt": "2026-06-04T07:35:00.000Z",
+        "prompt": "Create an original town tileset for the bundled RPGCreatorAI sample with grass, paths, water, snow, trees, and interior transition tiles.",
+        "inputContext": {
+          "promptTemplateId": "tileset-rpg-map-v1",
+          "visualContextSource": "docs/GAME_VISUAL_DESIGN.md",
+          "sampleScope": "authoring, database tilesets, runtime export, packaging"
+        },
+        "outputSummary": "Sample Town Tiles accepted into the asset catalog and linked to the sample-town tileset database entry.",
+        "promptTemplateId": "tileset-rpg-map-v1",
+        "promptTemplateVersion": 1,
+        "promptTemplateKind": "tileset",
+        "cost": {
+          "availability": "free",
+          "detail": "Bundled offline fixture; no live provider call."
+        },
+        "reviewState": "accepted",
+        "linkedOutputs": [
+          {
+            "kind": "asset",
+            "id": "sample_town_tiles",
+            "path": "assets/generated/source/game_atlas.png",
+            "label": "Sample Town Tiles"
+          },
+          {
+            "kind": "database",
+            "table": "tilesets",
+            "id": "sample-town",
+            "label": "Sample Town"
+          }
+        ],
+        "acceptanceHistory": [
+          {
+            "status": "accepted",
+            "reviewedAt": "2026-06-04T07:36:00.000Z",
+            "output": {
+              "kind": "asset",
+              "id": "sample_town_tiles",
+              "path": "assets/generated/source/game_atlas.png",
+              "label": "Sample Town Tiles"
+            },
+            "notes": "Accepted for bundled sample maps, runtime export, and package validation."
+          },
+          {
+            "status": "accepted",
+            "reviewedAt": "2026-06-04T07:36:30.000Z",
+            "output": {
+              "kind": "database",
+              "table": "tilesets",
+              "id": "sample-town",
+              "label": "Sample Town"
+            },
+            "notes": "Linked to sample map authoring metadata."
+          }
+        ]
+      },
+      {
+        "id": "sample-history-quest",
+        "kind": "structured-data",
+        "operation": "quest.generate",
+        "providerId": "local",
+        "modelId": "offline-mock",
+        "createdAt": "2026-06-04T07:40:00.000Z",
+        "prompt": "Create a simple local-first starter quest that demonstrates choices, self switches, transfer, rewards, and a return objective.",
+        "inputContext": {
+          "mapId": "town",
+          "questTable": "data/database/quests.json",
+          "sampleScope": "database, events, runtime smoke"
+        },
+        "outputSummary": "The Lost Chest quest accepted into database and connected to old_man event dialogue.",
+        "promptTemplateId": "quest-starter-v1",
+        "promptTemplateVersion": 1,
+        "promptTemplateKind": "quest",
+        "cost": {
+          "availability": "free",
+          "detail": "Bundled offline fixture; no live provider call."
+        },
+        "reviewState": "accepted",
+        "linkedOutputs": [
+          {
+            "kind": "database",
+            "table": "quests",
+            "id": "lost_chest",
+            "label": "The Lost Chest"
+          },
+          {
+            "kind": "event",
+            "id": "old_man",
+            "label": "Old Man quest giver"
+          }
+        ],
+        "acceptanceHistory": [
+          {
+            "status": "accepted",
+            "reviewedAt": "2026-06-04T07:41:00.000Z",
+            "output": {
+              "kind": "database",
+              "table": "quests",
+              "id": "lost_chest",
+              "label": "The Lost Chest"
+            },
+            "notes": "Accepted as deterministic structured content for the bundled sample."
+          },
+          {
+            "status": "accepted",
+            "reviewedAt": "2026-06-04T07:41:30.000Z",
+            "output": {
+              "kind": "event",
+              "id": "old_man",
+              "label": "Old Man quest giver"
+            },
+            "notes": "Linked to event commands that runtime smoke can exercise."
+          }
+        ]
+      }
+    ]
   }
 }
