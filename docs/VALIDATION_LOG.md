@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-159 / CP-124 — Asset Pipeline Documentation Final Pass
+
+- `2026-06-04 01:15:00 -03:00` — asset pipeline documentation audit — PASS.
+- Asset classes and directories: ASSET_PIPELINE.md documents asset types, directory structure, and runtime/editor split.
+- Generated/imported/protected asset states: PHASE_11_ASSET_CATALOG_V2.md documents asset states, metadata editor, and catalog management.
+- QA rubric and runtime export checks: GAME_VISUAL_QA.md (7-category rubric), PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md (runtime export pipeline), GENERATED_ASSET_QUALITY_AUDIT.md (CP-102 audit).
+- Recovery steps for failed generation/import: ERROR_RECOVERY.md, individual workflow specs (PHASE_11_IMAGE_IMPORT_WORKFLOW.md, PHASE_11_TILESET_IMPORT_WORKFLOW.md, PHASE_11_AUDIO_IMPORT_WORKFLOW.md, PHASE_11_SPRITESHEET_IMPORT_WORKFLOW.md).
+- Asset pipeline tests: 47 tests pass (from CP-107).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-158 / CP-123 — AI Workflow Documentation
 
 - `2026-06-04 01:10:00 -03:00` — AI workflow documentation audit — PASS.

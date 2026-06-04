@@ -652,6 +652,12 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-124 — asset pipeline documentation final pass. Asset pipeline
+  docs already comprehensive: ASSET_PIPELINE.md, GAME_VISUAL_QA.md,
+  GENERATED_ASSET_QUALITY_AUDIT.md, PHASE_11_ASSET_CATALOG_V2.md,
+  PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md, and individual workflow
+  specs. Asset pipeline tests pass (47/47). No changes needed. Evidence in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-123 — AI workflow documentation audit. AI docs already
   comprehensive across 18+ Phase 11 spec files covering provider setup,
   mock tests, image/asset generation, character/animation workflows,
