@@ -21,6 +21,7 @@ provider mock policy, cache expectations, and known nonfatal warnings.
 | `npm run typecheck` | Yes | TypeScript compilation check; ~30s |
 | `npm test -- --run` | Yes | Vitest suite; ~60s; all provider mocks included |
 | `npm run build` | Yes | Vite production build; ~15s; output in `dist/` |
+| `scripts/dev/export-runtime-assets.ps1 --validate-only` | Yes | Validates committed runtime asset manifest paths without live APIs |
 | `cargo test` (src-tauri/) | Yes | Rust unit tests; ~30s |
 | `cmake --build build --config Release` | Yes | Native runtime build; requires CMake + C++ toolchain |
 | `ctest --test-dir build --build-config Release --output-on-failure` | Yes | Native runtime tests; ~10s |
@@ -40,6 +41,7 @@ provider mock policy, cache expectations, and known nonfatal warnings.
 | `scripts/dev/verify.ps1 -SkipDesktop` | `-SkipDesktop` | Cargo test, native build/test |
 | `scripts/dev/verify.ps1 -SkipRuntime` | `-SkipRuntime` | CMake configure + build + CTest |
 | `scripts/dev/verify.ps1 -SkipSmoke` | `-SkipSmoke` | Runtime launch smoke |
+| `scripts/dev/verify.ps1 -SkipAssets` | `-SkipAssets` | Phase 11 asset pipeline validation |
 
 ### Requires Windows Desktop/Tauri Shell (Not CI-Safe)
 

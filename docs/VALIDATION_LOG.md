@@ -4,6 +4,46 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-140 / CP-105 — Verify Script Expansion Repair
+
+- `2026-06-04 04:26:24 -03:00` — verify script expansion repair — PASS.
+- Audit finding: CP-105 had a real documentation commit (`0331e81`), but the
+  canonical `scripts/dev/verify.ps1` did not actually add a Phase 11 asset
+  pipeline gate. It documented helpers while leaving the full gate unable to
+  run `export-runtime-assets.ps1 --validate-only` directly.
+- TDD evidence:
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` was RED after
+  adding assertions for `PHASE 11 ASSET PIPELINE CHECKS` and
+  `export-runtime-assets.ps1`.
+- Fix applied: added `-SkipAssets` and a `PHASE 11 ASSET PIPELINE CHECKS` gate
+  to `scripts/dev/verify.ps1`, wired to
+  `scripts/dev/export-runtime-assets.ps1 --validate-only`. Updated
+  `docs/BUILD_AND_RUN.md`, `docs/GOAL_STACK.md`, and verify script regression
+  coverage.
+- Focused `npm test -- --run src/e2e/__tests__/verifyScript.test.ts src/assets/generated/__tests__/assetManifestIntegrity.test.ts`
+  — PASS, 2 files / 11 tests.
+- Focused
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipRuntime -SkipSmoke`
+  — PASS; `PHASE 11 ASSET PIPELINE CHECKS` ran and passed while the other
+  gates were skipped by explicit flags.
+- Focused
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipRuntime -SkipSmoke -SkipAssets`
+  — PASS; `PHASE 11 ASSET PIPELINE CHECKS` was explicitly skipped and reported
+  as `SKIP: PHASE 11 ASSET PIPELINE CHECKS - SkipAssets`.
+- Focused
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  — PASS: Runtime asset export validation passed.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS: frontend typecheck; full Vitest 107 files / 561 tests; frontend
+  build; Phase 11 asset pipeline checks; native C++ configure/build/CTest; Tauri
+  content check; Rust desktop tests 43; runtime smoke; editor-runtime
+  roundtrip; final marker `=== ALL PASSED ===`. Known nonfatal warnings:
+  Vite chunk-size warning and CMake FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-139 / CP-104 — Continuous Audit Integration Gate Repair
 
 - `2026-06-04 04:22:02 -03:00` — continuous audit integration gate repair —

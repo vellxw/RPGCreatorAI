@@ -1,7 +1,7 @@
 # scripts/dev/verify.ps1
-# Canonical local green gate. Runs frontend, native runtime, desktop/Tauri,
-# smoke, and editor-runtime roundtrip validation unless a targeted skip flag
-# is provided.
+# Canonical local green gate. Runs frontend, Phase 11 asset pipeline checks,
+# native runtime, desktop/Tauri, smoke, and editor-runtime roundtrip validation
+# unless a targeted skip flag is provided.
 
 [CmdletBinding()]
 param(
@@ -10,6 +10,7 @@ param(
     [switch]$SkipDesktop,
     [switch]$SkipFrontend,
     [switch]$SkipRuntime,
+    [switch]$SkipAssets,
     [string]$BuildDir
 )
 
@@ -311,10 +312,12 @@ $frontendSkip = ''
 $desktopSkip = ''
 $runtimeSkip = ''
 $smokeSkip = ''
+$assetSkip = ''
 if ($SkipFrontend) { $frontendSkip = 'SkipFrontend' }
 if ($SkipDesktop) { $desktopSkip = 'SkipDesktop' }
 if ($SkipRuntime) { $runtimeSkip = 'SkipRuntime' }
 if ($SkipSmoke) { $smokeSkip = 'SkipSmoke' }
+if ($SkipAssets) { $assetSkip = 'SkipAssets' }
 $runtimeSmokeSkip = Join-SkipReason @($runtimeSkip, $smokeSkip)
 $roundtripSkip = Join-SkipReason @($frontendSkip, $desktopSkip, $runtimeSkip, $smokeSkip)
 
@@ -330,6 +333,12 @@ try {
     Invoke-Gate 'FRONTEND BUILD' {
         Invoke-CheckedCommand 'npm run build' { & npm run build }
     } $frontendSkip
+
+    Invoke-Gate 'PHASE 11 ASSET PIPELINE CHECKS' {
+        Invoke-CheckedCommand 'runtime asset export validation' {
+            & (Join-Path $PSScriptRoot 'export-runtime-assets.ps1') --validate-only
+        }
+    } $assetSkip
 
     Invoke-Gate 'NATIVE CONFIGURE BUILD TEST' {
         Invoke-NativeConfigureBuildTest -ResolvedBuildDir $resolvedBuildDir

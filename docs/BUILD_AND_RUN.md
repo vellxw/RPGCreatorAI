@@ -15,11 +15,11 @@ Run the full local green gate from the repository root:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
 ```
 
-This command runs frontend typecheck, Vitest, frontend build, native C++
-configure/build/CTest, Tauri content verification, Rust desktop tests,
-runtime smoke, and editor-runtime roundtrip validation. The native build
-defaults to `%LOCALAPPDATA%\RPGCreatorAI\build` to avoid OneDrive file locks.
-A successful run ends with `=== ALL PASSED ===`.
+This command runs frontend typecheck, Vitest, frontend build, Phase 11 asset
+pipeline validation, native C++ configure/build/CTest, Tauri content
+verification, Rust desktop tests, runtime smoke, and editor-runtime roundtrip
+validation. The native build defaults to `%LOCALAPPDATA%\RPGCreatorAI\build` to
+avoid OneDrive file locks. A successful run ends with `=== ALL PASSED ===`.
 
 NPM alias:
 
@@ -34,6 +34,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -Skip
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipDesktop
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipRuntime
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipAssets
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -BuildDir D:\rpg-build
 ```
 

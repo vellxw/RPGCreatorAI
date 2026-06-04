@@ -52,6 +52,7 @@ scripts\dev\verify-runtime.bat
 .\scripts\dev\verify.ps1 -SkipFrontend        # skip npm typecheck/test/build
 .\scripts\dev\verify.ps1 -SkipDesktop         # skip Tauri content and cargo tests
 .\scripts\dev\verify.ps1 -SkipRuntime         # skip C++ configure/build/CTest
+.\scripts\dev\verify.ps1 -SkipAssets          # skip Phase 11 asset pipeline validation
 ```
 
 ### `build.ps1` / `build.bat`

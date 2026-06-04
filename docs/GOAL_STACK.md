@@ -752,11 +752,13 @@ Primary Phase 11 sources:
   workflows active and producing usable evidence. CP-100 through CP-103 repair
   commits are integrated into the gate evidence; no blocking defects remain
   unfixed. Evidence is recorded in `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md`.
-- Phase 11 CP-105 — verify script expansion for Phase 11 completed. The canonical
-  verify.ps1 already covers 8 gates with 4 explicit skip flags. Phase 11 asset
-  pipeline helpers (export-runtime-assets, normalize-animation-strip,
-  generate-animation-preview, analyze-screenshots) were added to BUILD_AND_RUN.md
-  with .bat equivalents and success markers.
+- Phase 11 CP-105 — verify script expansion for Phase 11 completed. The
+  canonical `verify.ps1` now includes a Phase 11 asset pipeline validation gate
+  using `export-runtime-assets.ps1 --validate-only`, with an explicit
+  `-SkipAssets` diagnostic flag. Phase 11 asset pipeline helpers
+  (export-runtime-assets, normalize-animation-strip, generate-animation-preview,
+  analyze-screenshots) are documented in BUILD_AND_RUN.md with .bat equivalents
+  and success markers.
 - Phase 11 CP-106 — provider mock contract regression suite verified. 21 provider
   test files exist; core contract suite (mockProviderContract, mockProviderAdapter,
   providerRegistry) passes offline with 16 tests. Already satisfied by CP-063.
