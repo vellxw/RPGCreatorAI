@@ -4,6 +4,36 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-137 / CP-102 — Generated Asset Quality Audit Repair
+
+- `2026-06-04 04:14:38 -03:00` — generated asset quality audit repair —
+  PASS.
+- Audit finding: CP-102 had a real audit commit (`b925ce5`), but its PASS
+  evidence missed source metadata drift. `player_adventurer_sheet` declared
+  384x64 / 6 frames while `assets/generated/web/player_adventurer.png` is
+  64x64, and `sample_town_tiles` declared 256x256 while
+  `assets/generated/source/game_atlas.png` is 1254x1254.
+- TDD evidence:
+  `npm test -- --run src/assets/generated/__tests__/assetManifestIntegrity.test.ts`
+  was RED after adding manifest/file header validation: 2 tests failed on the
+  catalog source dimensions and runtime spritesheet frame metadata.
+- Fix applied: aligned `data/assets/catalog.json` and
+  `data/assets/runtime-manifest.json` with the actual PNG/BMP dimensions and
+  updated `docs/GENERATED_ASSET_QUALITY_AUDIT.md`.
+- Focused `npm test -- --run src/assets/generated/__tests__/assetManifestIntegrity.test.ts src/assets/generated/__tests__/assetCatalog.test.ts src/providers/__tests__/generatedImageVisualQa.test.ts src/stores/__tests__/assetCatalogReducer.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/adapters/__tests__/BrowserMemoryAdapter.test.ts`
+  — PASS, 6 files / 30 tests.
+- Focused `npm test -- --run src/validation/__tests__/validateProject.test.ts src/validation/__tests__/validateDatabases.test.ts`
+  — PASS, 2 files / 69 tests.
+- `npm run typecheck` — PASS.
+- `python scripts/dev/export_runtime_assets.py --validate-only` — PASS:
+  Runtime asset export validation passed.
+- Structured source/runtime header check — PASS: catalog assets = 5, runtime
+  assets = 6, web PNGs = 79, runtime BMPs = 80, repaired declared dimensions
+  match PNG/BMP headers, original audit commit `b925ce5` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-136 / CP-101 — UX Copy Audit Repair
 
 - `2026-06-04 04:07:46 -03:00` — UX copy audit repair — PASS.

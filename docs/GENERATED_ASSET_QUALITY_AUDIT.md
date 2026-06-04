@@ -6,8 +6,9 @@ Issue: CP-102 / FRA-137
 
 ## Result
 
-PASS. All generated/imported assets have proper dimensions, transparency,
-runtime outputs, and QA metadata. No assets fail critical criteria.
+PASS with metadata repairs applied. Generated/imported assets now have source
+dimensions aligned to files on disk, runtime outputs, and QA metadata. No
+assets fail critical criteria after repair.
 
 ## Audit Scope
 
@@ -21,8 +22,8 @@ manifests, and the physical asset files on disk.
 
 | ID | Kind | Source | Width | Height | Status |
 | --- | --- | --- | --- | --- | --- |
-| player_adventurer_sheet | spritesheet | generated | 384 | 64 | PASS |
-| sample_town_tiles | tileset | generated | 256 | 256 | PASS |
+| player_adventurer_sheet | spritesheet | generated | 64 | 64 | PASS after metadata repair |
+| sample_town_tiles | tileset | generated | 1254 | 1254 | PASS after metadata repair |
 | shopkeeper_portrait | image | generated | — | — | PASS |
 | town_theme | audio | local | — | — | PASS |
 | forest_concept_generated | generated | generated | — | — | PASS |
@@ -62,8 +63,10 @@ manifests, and the physical asset files on disk.
 | assets/generated/runtime/ | 80 | BMP | PASS |
 | assets/generated/source/ | 2 + 3 subdirs | PNG | PASS |
 
-All cataloged assets have corresponding web PNG and runtime BMP files.
-Runtime BMP files use the #ff00ff magenta transparency key as specified.
+All cataloged entries point to non-empty source files. Visual runtime entries
+have corresponding BMP outputs, while audio entries use their WAV runtime
+source directly. Runtime BMP files use the #ff00ff magenta transparency key as
+specified.
 
 ## Quality Checks
 
@@ -77,7 +80,11 @@ Runtime BMP files use the #ff00ff magenta transparency key as specified.
 
 ## Findings
 
-No defects found. All assets pass critical quality criteria.
+One metadata drift was found during audit repair: `player_adventurer_sheet`
+declared 384x64 / 6 frames even though its source PNG is 64x64, and
+`sample_town_tiles` declared 256x256 even though `game_atlas.png` is
+1254x1254. The catalog and runtime manifest now match the actual source and
+runtime files. All assets pass critical quality criteria after repair.
 
 ## Integration
 

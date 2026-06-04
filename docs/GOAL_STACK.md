@@ -738,7 +738,9 @@ Primary Phase 11 sources:
 - Phase 11 CP-102 — generated asset quality audit completed. All 5 cataloged
   assets, 6 runtime manifest entries, and 1 animation normalization manifest
   verified for dimensions, transparency, runtime outputs, and frame metadata.
-  No assets fail critical criteria. Evidence is recorded in
+  Metadata drift in `player_adventurer_sheet` and `sample_town_tiles` was
+  repaired so declared dimensions match source/runtime files. No assets fail
+  critical criteria. Evidence is recorded in
   `docs/GENERATED_ASSET_QUALITY_AUDIT.md`.
 - Phase 11 CP-103 — regression triage workflow completed. The workflow defines
   severity classification (Blocking/Visible/Minor), required Linear issue fields,

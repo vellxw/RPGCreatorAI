@@ -8,11 +8,11 @@
       "path": "assets/generated/web/player_adventurer.png",
       "source": "generated",
       "tags": ["player", "runtime", "sprite"],
-      "width": 384,
+      "width": 64,
       "height": 64,
       "frameWidth": 64,
       "frameHeight": 64,
-      "frames": 6
+      "frames": 1
     },
     {
       "id": "sample_town_tiles",
@@ -21,8 +21,8 @@
       "path": "assets/generated/source/game_atlas.png",
       "source": "generated",
       "tags": ["tiles", "runtime"],
-      "width": 256,
-      "height": 256
+      "width": 1254,
+      "height": 1254
     },
     {
       "id": "shopkeeper_portrait",
