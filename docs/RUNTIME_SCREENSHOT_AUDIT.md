@@ -201,7 +201,8 @@ Examples:
 
 - `docs/screenshots/phase-7/` — Phase 7 runtime smoke evidence (18 screenshots).
 - `docs/screenshots/phase10-mvp/` — Phase 10 MVP runtime smoke (3 screenshots).
-- `docs/screenshots/phase11-cp098/` — CP-098 runtime screenshot audit evidence.
+- `docs/screenshots/{future-runtime-audit-id}/` — dedicated evidence for a
+  future runtime visual audit that captures a new screenshot set.
 
 Runtime screenshots use `.bmp` format by convention (native SDL renderer output).
 Editor-side or browser-captured evidence may use `.png`.
@@ -312,4 +313,4 @@ part of the gate evidence set alongside the editor screenshot audit evidence.
 | --- | --- | --- | --- | --- |
 | 2026-05-16 | Phase 7 | Runtime smoke (18 screenshots) | PASS | `docs/screenshots/phase-7/` |
 | 2026-06-01 | Phase 10 | MVP runtime smoke (3 screenshots) | PASS | `docs/screenshots/phase10-mvp/` |
-| 2026-06-04 | CP-098 | Full runtime screenshot audit workflow defined | N/A (checklist) | `docs/screenshots/phase11-cp098/` |
+| 2026-06-04 | CP-098 | Full runtime screenshot audit workflow defined; existing runtime baseline evidence verified | PASS (checklist + existing evidence) | `docs/screenshots/phase-7/`, `docs/screenshots/phase10-mvp/` |

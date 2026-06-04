@@ -4,6 +4,28 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-133 / CP-098 — Runtime Screenshot Audit Workflow Evidence Repair
+
+- `2026-06-04 03:53:47 -03:00` — Runtime screenshot audit workflow evidence
+  repair — PASS.
+- Audit finding: CP-098 had a real commit (`9423dcc`) and a valid workflow doc,
+  but `docs/RUNTIME_SCREENSHOT_AUDIT.md` referenced
+  `docs/screenshots/phase11-cp098/` as CP-098 evidence even though that
+  directory was not present and the Linear closeout only claimed existing
+  `phase-7` and `phase10-mvp` runtime evidence was verified.
+- Fix applied: updated `docs/RUNTIME_SCREENSHOT_AUDIT.md` so CP-098 evidence
+  truthfully points to the existing verified `docs/screenshots/phase-7/` and
+  `docs/screenshots/phase10-mvp/` baselines, and reserves dedicated
+  `{future-runtime-audit-id}` directories for future captures.
+- Validation:
+  `$doc = Test-Path -LiteralPath 'docs\RUNTIME_SCREENSHOT_AUDIT.md'; $phase7 = Get-ChildItem -LiteralPath 'docs\screenshots\phase-7' -File -ErrorAction Stop; $mvp = Get-ChildItem -LiteralPath 'docs\screenshots\phase10-mvp' -File -ErrorAction Stop; $nonEmptyPhase7 = @($phase7 | Where-Object { $_.Length -gt 0 }).Count; $nonEmptyMvp = @($mvp | Where-Object { $_.Length -gt 0 }).Count; $requiredText = Select-String -LiteralPath 'docs\RUNTIME_SCREENSHOT_AUDIT.md' -Pattern 'Required Screenshots','Audit Checklist','Evidence Storage','Audit History' -SimpleMatch; $stale = Select-String -LiteralPath 'docs\RUNTIME_SCREENSHOT_AUDIT.md' -Pattern 'phase11-cp098' -SimpleMatch; [pscustomobject]@{ DocumentExists = $doc; Phase7ScreenshotCount = $phase7.Count; Phase7NonEmptyCount = $nonEmptyPhase7; Phase10MvpScreenshotCount = $mvp.Count; Phase10MvpNonEmptyCount = $nonEmptyMvp; RequiredSectionsFound = @($requiredText).Count; StalePhase11Cp098References = @($stale).Count; CommitPresent = [bool](git rev-parse --verify 9423dcc 2>$null) } | ConvertTo-Json`
+  — PASS: document exists; Phase 7 screenshots 18/18 non-empty; Phase 10 MVP
+  screenshots 3/3 non-empty; required sections found; stale CP-098 evidence
+  references = 0; commit `9423dcc` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-131 / CP-096 — Multi-Provider Integration Gate Remediation
 
 - `2026-06-04 03:48:02 -03:00` — Multi-provider integration gate
