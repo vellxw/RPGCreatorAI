@@ -60,6 +60,22 @@ export const providerWorkflowDefinitions: ProviderWorkflowDefinition[] = [
 export const defaultModelCapabilityRegistry: ModelCapabilityDescriptor[] = [
   {
     providerId: 'openai',
+    modelId: 'gpt-5.5',
+    label: 'GPT-5.5',
+    capabilities: ['text', 'structured-json', 'vision', 'tool'],
+    operations: ['text.generate', 'vision.analyze'],
+    limits: {
+      contextWindowTokens: 1050000,
+      maxOutputTokens: 128000,
+      supportsStreaming: false,
+      maxImages: 8,
+      inputFileTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      outputFileTypes: [],
+    },
+    contextHints: ['OpenAI Responses API model for text and vision workflows; credentials are required before use'],
+  },
+  {
+    providerId: 'openai',
     modelId: 'gpt-image-2',
     label: 'GPT Image 2',
     capabilities: ['image', 'image-edit', 'vision'],

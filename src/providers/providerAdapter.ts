@@ -2,6 +2,7 @@ import type { ProviderMetadata, ProviderModelDescriptor, ProviderOperation } fro
 
 export type ProviderRequestStatus = 'succeeded' | 'failed' | 'cancelled';
 export type ProviderFailureKind =
+  | 'missing-credentials'
   | 'rate-limit'
   | 'quota-exceeded'
   | 'budget-exceeded'

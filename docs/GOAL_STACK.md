@@ -47,16 +47,15 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`
 - `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`
 - `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md`
+- `docs/PHASE_11_OPENAI_PROVIDER_ADAPTER.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-089 through
+- Phase 11 Linear milestone 11 — multi-provider integrations (CP-090 through
   CP-096 audit/remediation next).
-- Phase 11 Linear milestone 10 — AI game content pipelines.
-- Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
 - Phase 11 Linear milestone 13 — QA automation and regression.
 - Phase 11 Linear milestone 14 — security, privacy, and cost controls.
@@ -614,6 +613,15 @@ Primary Phase 11 sources:
   draft validation now rejects incomplete events before approval, and map
   validation reports malformed command arrays instead of throwing. Evidence is
   recorded in `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md` and
+  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-089 — OpenAI Provider Adapter remediated. Linear's prior
+  closeout cited `a95e4cf` and only described registry/mock metadata. The
+  project now has an executable OpenAI adapter behind the shared
+  `ProviderAdapter` interface, with injected credential lookup, mocked
+  Responses API text/vision execution, Image API generation/edit execution,
+  structured missing-credential/API/rate-limit failures, redacted provider
+  errors, and configurable `gpt-5.5` plus `gpt-image-2` capability metadata.
+  Evidence is recorded in `docs/PHASE_11_OPENAI_PROVIDER_ADAPTER.md` and
   `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across

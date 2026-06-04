@@ -115,6 +115,11 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     operations: ['text.generate', 'image.generate', 'image.edit', 'vision.analyze'],
     models: [
       {
+        id: 'gpt-5.5',
+        label: 'GPT-5.5',
+        operations: ['text.generate', 'vision.analyze'],
+      },
+      {
         id: 'gpt-image-2',
         label: 'GPT Image 2',
         operations: ['image.generate', 'image.edit'],

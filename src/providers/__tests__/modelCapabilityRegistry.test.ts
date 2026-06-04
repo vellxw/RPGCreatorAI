@@ -19,6 +19,26 @@ const configuredLocal: ProviderConfig = {
 };
 
 describe('modelCapabilityRegistry', () => {
+  it('defines GPT-5.5 text and vision capabilities from current OpenAI Responses docs', () => {
+    const descriptor = getModelCapabilityDescriptor('openai', 'gpt-5.5');
+
+    expect(descriptor).toMatchObject({
+      providerId: 'openai',
+      modelId: 'gpt-5.5',
+      label: 'GPT-5.5',
+      capabilities: ['text', 'structured-json', 'vision', 'tool'],
+      operations: ['text.generate', 'vision.analyze'],
+      limits: {
+        contextWindowTokens: 1050000,
+        maxOutputTokens: 128000,
+        supportsStreaming: false,
+      },
+    });
+    expect(modelSupportsCapability(descriptor!, 'text')).toBe(true);
+    expect(modelSupportsCapability(descriptor!, 'vision')).toBe(true);
+    expect(modelSupportsCapability(descriptor!, 'video')).toBe(false);
+  });
+
   it('defines offline mock model capabilities with limits as data', () => {
     const descriptor = getModelCapabilityDescriptor('local', 'offline-mock');
 

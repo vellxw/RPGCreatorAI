@@ -4,6 +4,50 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-124 / CP-089 — OpenAI Provider Adapter Remediation
+
+- `2026-06-04 02:09:17 -03:00` — OpenAI provider adapter remediation —
+  PASS.
+- Audit finding: Linear marked CP-089 Done, but the closeout cited commit
+  `a95e4cf` and described only OpenAI registry metadata plus offline mock
+  contracts. Repo history had no CP-089/FRA-124 commit and no executable
+  OpenAI adapter through the shared provider interface.
+- Official docs checked before implementation: OpenAI Responses API reference,
+  image generation guide, Images API reference, Responses image-generation
+  tool guide, rate-limit guide, and GPT-5.5 model page.
+- TDD evidence: `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts`
+  was RED before implementation because `../openAiProviderAdapter` did not
+  exist.
+- Fix applied: added `src/providers/openAiProviderAdapter.ts` with injected
+  credential lookup, mocked-fetch execution, Responses API text/vision request
+  normalization, Image API generation/edit request normalization, OpenAI image
+  and text response normalization, structured missing-credential/API/rate-limit
+  failures, cancellation handling, retry-after parsing, and redacted provider
+  errors. Added `missing-credentials` to the shared provider failure kind and
+  registered configurable `gpt-5.5` text/vision capability metadata.
+- Documentation: added `docs/PHASE_11_OPENAI_PROVIDER_ADAPTER.md`.
+- Focused `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts`
+  — PASS, 1 file / 6 tests.
+- Focused `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 6 files / 30 tests before adding explicit GPT-5.5
+  registry/capability assertions.
+- `npm run typecheck` — FAIL once after implementation due to Vitest mock tuple
+  inference and two adapter narrowing issues. Fix applied: typed mocked fetch
+  functions and made image/adapter-response guards explicit.
+- `npm run typecheck` — PASS.
+- Focused rerun
+  `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 6 files / 31 tests.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (99 files / 514 tests),
+  frontend build, native C++ configure/build/CTest, Tauri content check, 43
+  Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-123 / CP-088 — AI Game Content Pipeline Integration Gate Remediation
 
 - `2026-06-04 01:47:06 -03:00` — AI game content pipeline integration gate

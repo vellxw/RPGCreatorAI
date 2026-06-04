@@ -26,11 +26,16 @@ describe('providerRegistry', () => {
     expect(getProviderMetadata('local')?.credential.required).toBe(false);
   });
 
-  it('declares documented image model options without making them required defaults', () => {
+  it('declares documented OpenAI model options without making them required defaults', () => {
     const openai = getProviderMetadata('openai');
     const local = getProviderMetadata('local');
 
     expect(openai?.modelSelection).toBe('user-selected');
+    expect(openai?.models).toContainEqual({
+      id: 'gpt-5.5',
+      label: 'GPT-5.5',
+      operations: ['text.generate', 'vision.analyze'],
+    });
     expect(openai?.models).toContainEqual({
       id: 'gpt-image-2',
       label: 'GPT Image 2',
