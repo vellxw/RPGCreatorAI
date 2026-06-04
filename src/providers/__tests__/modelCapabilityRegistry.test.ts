@@ -180,6 +180,42 @@ describe('modelCapabilityRegistry', () => {
     expect(modelSupportsCapability(reasoner!, 'image')).toBe(false);
   });
 
+  it('defines MiniMax app-supported text and image capabilities from current docs', () => {
+    const m3 = getModelCapabilityDescriptor('minimax', 'MiniMax-M3');
+    const m27 = getModelCapabilityDescriptor('minimax', 'MiniMax-M2.7');
+    const image = getModelCapabilityDescriptor('minimax', 'image-01');
+
+    expect(m3).toMatchObject({
+      providerId: 'minimax',
+      modelId: 'MiniMax-M3',
+      capabilities: ['text', 'structured-json', 'code', 'tool', 'vision'],
+      operations: ['text.generate'],
+      limits: {
+        contextWindowTokens: 1000000,
+      },
+    });
+    expect(m27).toMatchObject({
+      providerId: 'minimax',
+      modelId: 'MiniMax-M2.7',
+      capabilities: ['text', 'structured-json', 'code', 'tool'],
+      limits: {
+        contextWindowTokens: 204800,
+      },
+    });
+    expect(image).toMatchObject({
+      providerId: 'minimax',
+      modelId: 'image-01',
+      capabilities: ['image'],
+      operations: ['image.generate'],
+      limits: {
+        maxImages: 9,
+        outputFileTypes: ['image/jpeg'],
+      },
+    });
+    expect(modelSupportsCapability(m3!, 'video')).toBe(false);
+    expect(modelSupportsCapability(image!, 'image-edit')).toBe(false);
+  });
+
   it('defines a separate offline image mock capability fixture', () => {
     const descriptor = getModelCapabilityDescriptor('local', 'offline-image-mock');
 

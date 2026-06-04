@@ -147,6 +147,40 @@ describe('providerRegistry', () => {
     ]);
   });
 
+  it('declares app-supported MiniMax model options with configurable base URL', () => {
+    const minimax = getProviderMetadata('minimax');
+
+    expect(minimax?.adapterKind).toBe('official-api');
+    expect(minimax?.modelSelection).toBe('user-selected');
+    expect(minimax?.operations).toEqual(['text.generate', 'image.generate']);
+    expect(minimax?.baseUrl).toEqual({
+      configurable: true,
+      defaultValue: 'https://api.minimax.io/v1',
+    });
+    expect(minimax?.models).toEqual([
+      {
+        id: 'MiniMax-M3',
+        label: 'MiniMax M3',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'MiniMax-M2.7',
+        label: 'MiniMax M2.7',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'MiniMax-M2.7-highspeed',
+        label: 'MiniMax M2.7 Highspeed',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'image-01',
+        label: 'MiniMax Image 01',
+        operations: ['image.generate'],
+      },
+    ]);
+  });
+
   it('derives settings provider configs from registry metadata', () => {
     const configs = providerConfigsFromRegistry(defaultProviderRegistry);
     const openai = configs.find(provider => provider.id === 'openai');
@@ -176,12 +210,10 @@ describe('providerRegistry', () => {
     }
 
     expect([...operations].sort()).toEqual([
-      'audio.generate',
       'code.assist',
       'image.edit',
       'image.generate',
       'text.generate',
-      'video.generate',
       'vision.analyze',
     ]);
   });

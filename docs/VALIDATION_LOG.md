@@ -4,6 +4,45 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-128 / CP-093 — MiniMax Provider Adapter Remediation
+
+- `2026-06-04 03:08:29 -03:00` — MiniMax provider adapter remediation —
+  PASS.
+- Audit finding: Linear marked CP-093 Done, but the closeout cited commit
+  `a95e4cf` and described only MiniMax registry metadata plus offline mock
+  contracts. Repo history had no CP-093/FRA-128 commit and no executable
+  MiniMax adapter through the shared provider interface.
+- Official docs checked before implementation: MiniMax API overview,
+  OpenAI-compatible text API, text generation guide, image generation guide,
+  text-to-image API, T2A HTTP API, video generation guide, rate limits, and
+  error codes.
+- TDD evidence: `npm test -- --run src/providers/__tests__/miniMaxProviderAdapter.test.ts`
+  was RED before implementation because `../miniMaxProviderAdapter` did not
+  exist.
+- Fix applied: added `src/providers/miniMaxProviderAdapter.ts` for
+  app-supported MiniMax text and image execution, mapped MiniMax
+  OpenAI-compatible `/chat/completions` requests, mapped MiniMax
+  `/image_generation` requests and URL/base64 responses, added configurable
+  base URLs and credential lookup, normalized MiniMax `base_resp` and HTTP
+  errors, mapped rate-limit/quota/timeout/API failures, preserved retry headers
+  where available, redacted provider errors, and removed false audio/video
+  execution gates until app workflows exist for those outputs.
+- Documentation: added `docs/PHASE_11_MINIMAX_PROVIDER_ADAPTER.md`.
+- Focused `npm test -- --run src/providers/__tests__/miniMaxProviderAdapter.test.ts`
+  — PASS, 1 file / 6 tests.
+- Focused `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/miniMaxProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 10 files / 60 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (103 files / 543
+  tests), frontend build, native C++ configure/build/CTest, Tauri content check,
+  43 Rust desktop tests, runtime smoke, and editor-runtime screenshot roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-127 / CP-092 — DeepSeek Provider Adapter Remediation
 
 - `2026-06-04 02:47:59 -03:00` — DeepSeek provider adapter remediation —

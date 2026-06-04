@@ -235,9 +235,32 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     credential: { required: true, envVar: 'MINIMAX_API_KEY' },
     cost: paidUnknownCost,
     rateLimit: providerManagedRateLimit,
-    operations: ['text.generate', 'image.generate', 'video.generate', 'audio.generate'],
-    models: [],
+    operations: ['text.generate', 'image.generate'],
+    capabilityLabels: ['Text generation', 'Image generation', 'OpenAI-compatible text endpoint'],
+    models: [
+      {
+        id: 'MiniMax-M3',
+        label: 'MiniMax M3',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'MiniMax-M2.7',
+        label: 'MiniMax M2.7',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'MiniMax-M2.7-highspeed',
+        label: 'MiniMax M2.7 Highspeed',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'image-01',
+        label: 'MiniMax Image 01',
+        operations: ['image.generate'],
+      },
+    ],
     modelSelection: 'user-selected',
+    baseUrl: { configurable: true, defaultValue: 'https://api.minimax.io/v1' },
   },
   {
     id: 'opencode',
