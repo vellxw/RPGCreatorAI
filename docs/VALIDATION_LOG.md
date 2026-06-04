@@ -4,6 +4,19 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-155 / CP-120 — Security Privacy Cost Integration Gate
+
+- `2026-06-04 00:55:00 -03:00` — security privacy cost integration gate — PASS.
+- Security-focused tests: PASS (21/21 tests across 5 test files: redaction, aiRequestQueueStore, providerCostBudget, mockProviderAdapter, mockProviderContract).
+- No secret-like strings staged: `git status --short` confirms only unrelated BottomPanel.tsx and .commandcode/taste/ unstaged.
+- Local workflows work with providers disabled: verified from editor snapshots (all workspaces functional without providers).
+- Redaction audit: 11 test files verify no API keys/secrets/tokens in provider output (from CP-113).
+- Provider mock failure suites: all pass (from CP-106, CP-118, CP-119).
+- Security/provider docs: SECURITY_THREAT_MODEL.md, PRIVACY_COST_POLICY.md, EMPTY_STATES.md all verified.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-154 / CP-119 — Failed AI Call Recovery
 
 - `2026-06-04 00:50:00 -03:00` — failed AI call recovery audit — PASS.
