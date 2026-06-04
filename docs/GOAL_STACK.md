@@ -783,11 +783,14 @@ Primary Phase 11 sources:
   mock tests, image/asset generation, character/animation workflows,
   content generation, opt-in/cost/rate-limit, and data boundaries. No
   changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-122 — build/run/release docs final pass. BUILD_AND_RUN.md
-  updated in CP-105 with Phase 11 focused helpers. README documents packaged
-  build and first-run behavior. CI_READY_VALIDATION.md documents known
-  nonfatal warnings. Browser/desktop capability differences explicitly
-  documented. No changes needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-122 — build/run/release docs final pass repaired. The earlier
+  closeout lacked command evidence and predated the README repair. Build/run
+  docs now distinguish validation-only helper commands from output-writing
+  commands, include the first-run `.bat` fallback, link the actual desktop
+  shell architecture doc, and align CI examples on Node 22. Full verify,
+  package, first-run, diagnostics, branding, asset validation, animation
+  manifest validation, browser-skip smoke, and manual CMake preset evidence is
+  recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-121 — README complete platform rewrite repaired. The earlier
   closeout said no rewrite was needed, but the README still described AI as a
   future layer and used the wrong restricted-policy verification wrapper. The

@@ -4,6 +4,75 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-157 / CP-122 - Build Run And Release Docs Final Pass Repair
+
+- `2026-06-04 07:03:20 -03:00` - build/run/release documentation final pass -
+  PASS.
+- Audit finding: Linear marked CP-122 Done with a no-change closeout and no
+  command output. The docs also predated the CP-121 README repair. During audit,
+  `docs/BUILD_AND_RUN.md` still mixed output-writing asset commands with
+  validation commands, omitted the first-run smoke `.bat` fallback, and did not
+  link the actual desktop shell architecture document. The CI runbook examples
+  still used Node 20 while the README recommends Node 22.
+- Fix applied: updated `docs/BUILD_AND_RUN.md` to list reproducible
+  validation-only asset/animation commands, keep output-writing usage delegated
+  to `docs/ASSET_PIPELINE.md`, add `scripts\dev\smoke-first-run-app-data.bat`,
+  identify `scripts/dev/analyze-screenshots.ps1` as a metrics helper rather
+  than a pass/fail gate, and link `docs/DESKTOP_SHELL_ARCHITECTURE.md`.
+  Updated `docs/CI_READY_VALIDATION.md` Node examples to 22 and updated
+  `docs/GOAL_STACK.md`.
+- Command inventory checks:
+  `Test-Path` for documented `.bat` wrappers and helper scripts - PASS for
+  verify, build, test, smoke-runtime, smoke-browser-editor,
+  verify-diagnostics, verify-branding-assets, export-runtime-assets,
+  normalize-animation-strip, generate-animation-preview,
+  smoke-first-run-app-data, verify-runtime, package-windows,
+  build_bootstrap, and verify-editor-runtime-roundtrip.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - PASS in the CP-121 repair immediately before this pass; final marker
+  `=== ALL PASSED ===`. Gate summary: frontend typecheck PASS, frontend
+  Vitest PASS (108 files / 571 tests), frontend build PASS, Phase 11 asset
+  pipeline checks PASS, native configure/build/CTest PASS (`RPGTests` 1/1),
+  Tauri content check PASS, Rust desktop tests PASS (43 tests), runtime smoke
+  PASS, editor-runtime roundtrip PASS.
+- `npm run desktop:package:windows` - PASS in the CP-121 repair immediately
+  before this pass; packaged executable and colocated runtime were created
+  under `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, packaged smoke
+  printed `PACKAGED SMOKE PASSED`, and final marker was
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1`
+  - PASS; safe empty-log Rust diagnostic test passed, diagnostics UI/adapter
+  Vitest passed (2 files / 12 tests), `npm run typecheck` passed, final marker
+  `RUNTIME DIAGNOSTICS VERIFY PASSED`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  - PASS; final marker `BRANDING ASSETS PASSED`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1`
+  - PASS; launched the packaged app with temporary `APPDATA`, `LOCALAPPDATA`,
+  and `HOME`, final marker `FIRST-RUN APP DATA SMOKE PASSED`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  - PASS; printed `Runtime asset export validation passed.`
+- `python scripts/dev/export_runtime_assets.py --validate-only` - PASS; printed
+  `Runtime asset export validation passed.`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1 --validate-manifest assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json`
+  - PASS; printed `Animation strip normalization validation passed.`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest assets/generated/source/phase11_animation_previews/player_adventurer_walk_down.json`
+  - PASS; printed `Animation preview generation validation passed.`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1 -SkipBrowser -OutputDir output/playwright/cp122-skip`
+  - PASS; explicit optional-browser skip printed
+  `BROWSER SMOKE SKIPPED: SkipBrowser requested.`
+- `cmake --preset windows-dev; cmake --build --preset windows-dev; ctest --preset windows-dev`
+  - PASS; configure/build completed and CTest reported `100% tests passed`,
+  `RPGTests` 1/1.
+- Docs/path check for the modified build/run docs - PASS; README/BUILD/CI
+  links and `docs/DESKTOP_SHELL_ARCHITECTURE.md` resolved.
+- `git diff --check` - PASS.
+- Known non-fatal warnings matched documented policy: Vite chunk-size warning,
+  CMake FetchContent/deprecation warnings, and missing PkgConfig during
+  SDL/CMake configuration.
+- Final pass/fail for repaired issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-156 / CP-121 - README Complete Platform Rewrite Repair
 
 - `2026-06-04 06:55:44 -03:00` - README platform documentation repair - PASS.

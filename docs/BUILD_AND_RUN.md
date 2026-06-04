@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js and npm.
+- Node.js 22 recommended and npm 10+.
 - Rust and Cargo for the Tauri desktop bridge.
 - Visual Studio Build Tools or Visual Studio with the C++ workload.
 - CMake and Ninja.
@@ -66,18 +66,25 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnosti
 # Release branding metadata/icon checks.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
 
-# Asset export pipeline (cataloged assets to runtime BMP/WAV).
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1
+# Asset export pipeline validation, without rewriting committed outputs.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only
 
-# Animation strip normalization (generated sprite sheets to runtime-ready strips).
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1
+# Animation strip normalization manifest validation, without rewriting outputs.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1 --validate-manifest assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json
 
-# Animation preview generation (GIF/sheet previews from normalization manifests).
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1
+# Animation preview manifest validation, without rewriting preview outputs.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest assets/generated/source/phase11_animation_previews/player_adventurer_walk_down.json
 
-# Screenshot analysis (audit helper for screenshot directories).
+# First-run packaged-shell app-data smoke. Run after `npm run desktop:package:windows`.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
+
+# Screenshot analysis audit helper. Prints palette metrics; it is not a pass/fail gate.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/analyze-screenshots.ps1
 ```
+
+To rewrite asset export, normalization, or preview outputs intentionally, run
+the same scripts without the validation-only flags and with the source/input
+arguments documented in `docs/ASSET_PIPELINE.md`.
 
 Equivalent `.bat` wrappers are available when direct PowerShell script
 execution is blocked:
@@ -92,6 +99,7 @@ scripts\dev\verify-branding-assets.bat
 scripts\dev\export-runtime-assets.bat
 scripts\dev\normalize-animation-strip.bat
 scripts\dev\generate-animation-preview.bat
+scripts\dev\smoke-first-run-app-data.bat
 ```
 
 Expected success markers:
@@ -107,9 +115,9 @@ Expected success markers:
 | `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
 | `npm run desktop:package:windows` | `PACKAGED SMOKE PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
 | `scripts/dev/smoke-first-run-app-data.ps1` | `FIRST-RUN APP DATA SMOKE PASSED` |
-| `scripts/dev/export-runtime-assets.ps1` | `RUNTIME EXPORT PASSED` |
-| `scripts/dev/normalize-animation-strip.ps1` | `NORMALIZATION PASSED` |
-| `scripts/dev/generate-animation-preview.ps1` | `PREVIEW GENERATION PASSED` |
+| `scripts/dev/export-runtime-assets.ps1 --validate-only` | `Runtime asset export validation passed.` |
+| `scripts/dev/normalize-animation-strip.ps1 --validate-manifest ...` | `Animation strip normalization validation passed.` |
+| `scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest ...` | `Animation preview generation validation passed.` |
 
 Known nonfatal warnings in the current Windows environment:
 
@@ -159,6 +167,10 @@ against `http://localhost:1420`. This is also an interactive long-running
 command. Noninteractive content verification is covered by `verify.ps1` and
 `npm run desktop:verify-content`.
 
+Desktop shell architecture, IPC boundaries, browser/desktop adapter selection,
+and output paths are documented in
+`docs/DESKTOP_SHELL_ARCHITECTURE.md`.
+
 When `npm run desktop:verify-content` is run by itself, start
 `npm run dev:tauri` first in another terminal or controlled process; the
 content check only verifies an already-running `http://127.0.0.1:1420/`
@@ -202,6 +214,12 @@ temporary `APPDATA` and `LOCALAPPDATA` roots:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
+```
+
+Restricted-policy fallback:
+
+```cmd
+scripts\dev\smoke-first-run-app-data.bat
 ```
 
 Diagnostics and failed-launch troubleshooting are documented in

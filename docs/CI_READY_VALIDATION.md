@@ -131,7 +131,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - run: npm ci
       - run: npm run typecheck
       - run: npm test -- --run
@@ -142,7 +142,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - run: npm ci
@@ -153,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '22' }
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - run: npm ci
