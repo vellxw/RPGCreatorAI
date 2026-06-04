@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-141 / CP-106 — Provider Mock Contract Regression Suite
+
+- `2026-06-03 23:41:00 -03:00` — provider mock test suite verification — PASS; 21 provider test files exist under `src/providers/__tests__/`. Core contract suite (mockProviderContract, mockProviderAdapter, providerRegistry) runs offline: 3 files, 16 tests passed. No network calls, no real credentials. Already satisfied by CP-063 (mocked provider contract test suite).
+- Final pass/fail for this issue validation: PASS (already satisfied).
+
+---
+
 ### Phase 11 FRA-140 / CP-105 — Verify Script Expansion For Phase 11
 
 - `2026-06-03 23:30:00 -03:00` — verify.ps1 coverage audit — PASS; 8 gates already cover frontend typecheck/tests/build, native configure/build/test, Tauri content, Rust desktop, runtime smoke, and editor-runtime roundtrip. Skip flags (-SkipFrontend, -SkipDesktop, -SkipRuntime, -SkipSmoke) are explicit and documented.

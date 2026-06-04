@@ -645,6 +645,9 @@ Primary Phase 11 sources:
   pipeline helpers (export-runtime-assets, normalize-animation-strip,
   generate-animation-preview, analyze-screenshots) were added to BUILD_AND_RUN.md
   with .bat equivalents and success markers.
+- Phase 11 CP-106 — provider mock contract regression suite verified. 21 provider
+  test files exist; core contract suite (mockProviderContract, mockProviderAdapter,
+  providerRegistry) passes offline with 16 tests. Already satisfied by CP-063.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
