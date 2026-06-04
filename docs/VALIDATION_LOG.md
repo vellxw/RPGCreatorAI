@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-149 / CP-114 — No-Key Logging Audit
+
+- `2026-06-04 00:25:00 -03:00` — no-key logging audit — PASS.
+- Log sources identified: runtime stdout/stderr (smoke-runtime.ps1 checks for [ERROR]), Tauri/dev console (Chrome DevTools MCP snapshots show clean), provider adapter logs (redacted by `redactSecrets()`), validation output (no secrets), Playtest panels (editor-preview only, no live calls).
+- Redaction tests: PASS (2/2 in `src/security/__tests__/redaction.test.ts`).
+- 11 provider test files verify no API keys/secrets/tokens in output.
+- Console messages from editor snapshots: no API key leaks detected.
+- Runtime smoke script checks stderr for `[ERROR]` lines and fails if found.
+- Final pass/fail for this issue validation: PASS (logs are safe to share).
+
+---
+
 ### Phase 11 FRA-148 / CP-113 — Secret Redaction Everywhere
 
 - `2026-06-04 00:20:00 -03:00` — secret redaction audit — PASS.

@@ -652,6 +652,12 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-114 — no-key logging audit. All log sources verified safe:
+  runtime stdout/stderr (smoke checks for [ERROR]), Tauri/dev console (clean
+  in snapshots), provider adapter logs (redacted), validation output (no
+  secrets), Playtest panels (editor-preview only). Redaction tests pass.
+  11 provider test files verify no API keys in output. No code changes needed.
+  Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-113 — secret redaction everywhere audit. Shared redaction
   helper exists in `src/security/redaction.ts`. 11 test files verify provider
   requests don't contain API keys/secrets/tokens. Settings UI confirms
