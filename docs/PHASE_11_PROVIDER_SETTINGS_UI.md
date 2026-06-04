@@ -23,8 +23,9 @@ or any native runtime dependency.
   cancellation, retry, and failure visibility. It does not start provider
   requests or expose generation actions.
 - Project JSON still stores no provider credentials.
-- Generation/test/connect actions remain absent from this screen until later
-  provider hub issues add real capability gates and offline contracts.
+- Generation/test/connect actions remain absent from this screen. Capability
+  gates, cost/budget states, offline contracts, and queue recovery are exposed
+  as read-only local validation surfaces.
 
 ## Store Boundary
 

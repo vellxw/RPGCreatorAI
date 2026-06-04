@@ -4,6 +4,55 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-158 / CP-123 - AI Workflow Documentation Repair
+
+- `2026-06-04 07:18:28 -03:00` - AI workflow documentation and UI cross-check
+  repair - PASS.
+- Audit finding: Linear marked CP-123 Done with only "18+ spec files already
+  cover all areas." There was no consolidated user/operator AI workflow guide,
+  and `src/screens/AIToolsScreen.tsx` still displayed `Future AI Workspace`
+  and `Unavailable in the MVP editor`, contradicting the implemented Settings
+  provider hub, mocks, cost/rate-limit states, generation history, and
+  review-gated workflows.
+- TDD red:
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  - FAIL as expected before the fix; the direct AI Tools route still rendered
+  the stale future/MVP copy instead of current optional AI editor tooling.
+- Fix applied: added `docs/AI_WORKFLOWS.md` as the consolidated provider setup,
+  mock-vs-live diagnostic, workflow, safety-boundary, troubleshooting, and
+  validation guide. Linked it from README. Updated
+  `docs/PHASE_11_PROVIDER_SETTINGS_UI.md`,
+  `docs/PHASE_11_EDITOR_SURFACE_INTEGRATION_GATE.md`,
+  `docs/PHASE_11_PROVIDER_REGISTRY_ADAPTER.md`, and
+  `docs/RPG_SYSTEMS_MATRIX.md` to avoid stale current-state AI copy. Replaced
+  `AIToolsScreen` with a read-only current AI tooling status surface and
+  updated the regression test.
+- Focused green:
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  - PASS; 1 file / 3 tests.
+- Focused AI/provider docs and UI suite:
+  `npm test -- --run src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/providers/__tests__/generationHistory.test.ts src/providers/__tests__/mockProviderContract.test.ts`
+  - PASS; 7 files / 30 tests.
+- `npm test -- --run` - PASS; full frontend Vitest suite passed with 108 files
+  / 571 tests.
+- `npm run typecheck` - PASS.
+- `npm run build` - PASS; Vite transformed 1966 modules and emitted the known
+  non-fatal chunk-size warning.
+- AI docs link check - PASS; README and modified AI/provider docs resolved.
+- Current stale-copy scan for `Future AI Workspace`, `Unavailable in the MVP`,
+  `real provider layer`, `future AI integrations`, and related current-state
+  phrases - PASS; no matches in README, `docs/AI_WORKFLOWS.md`, updated
+  provider docs, or `AIToolsScreen`.
+- Browser UI cross-check at `http://127.0.0.1:3000` - PASS. Opened bundled
+  sample, navigated to Settings, verified Provider Settings, Capability Gates,
+  Cost & Budget, AI Request Queue, provider-bound context copy, browser
+  credential-storage-unavailable state, and OpenAI provider opt-in disclosure.
+  No live `Run image generation`, `Test provider`, `Connect`, or live
+  diagnostic action appeared. Vite was stopped after the check.
+- Final pass/fail for repaired issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-157 / CP-122 - Build Run And Release Docs Final Pass Repair
 
 - `2026-06-04 07:03:20 -03:00` - build/run/release documentation final pass -

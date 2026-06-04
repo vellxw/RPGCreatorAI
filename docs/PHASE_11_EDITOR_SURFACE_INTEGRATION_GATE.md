@@ -22,8 +22,10 @@ editor surface:
 - Database navigation, large-list filtering, reference badges, and destructive
   action safety.
 
-No future AI/provider feature was exposed as functional. AI remains an optional
-future editor/tooling layer and the native runtime remains provider-independent.
+At the time of this CP-032 gate, no AI/provider feature was exposed as
+functional. Later Phase 11 issues added optional editor-only provider settings,
+mock-backed workflows, cost/rate-limit states, generation history, and
+review-gated candidates. The native runtime remains provider-independent.
 
 ## Fixes Applied During Gate
 

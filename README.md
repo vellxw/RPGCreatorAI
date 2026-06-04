@@ -243,6 +243,7 @@ candidate until explicitly accepted.
 
 Start with:
 
+- [AI Workflows And Provider Setup](docs/AI_WORKFLOWS.md)
 - [Provider Hub Foundation Gate](docs/PHASE_11_AI_PROVIDER_HUB_FOUNDATION_GATE.md)
 - [AI Game Content Pipeline Gate](docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md)
 - [Provider Settings UI](docs/PHASE_11_PROVIDER_SETTINGS_UI.md)

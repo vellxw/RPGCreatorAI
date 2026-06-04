@@ -88,18 +88,24 @@ describe('MVP placeholder AI gating', () => {
     view.unmount();
   });
 
-  it('renders the future AI workspace as read-only if reached directly', () => {
+  it('renders the AI workflow status surface as read-only if reached directly', () => {
     const view = render(<AIToolsScreen />);
     const text = view.container.textContent ?? '';
     const enabledButtons = Array.from(view.container.querySelectorAll('button')).filter(
       button => !button.disabled,
     );
 
-    expect(text).toContain('Future phase');
-    expect(text).toContain('No provider call');
-    expect(text).toContain('network request');
+    expect(text).toContain('Optional AI Editor Tooling');
+    expect(text).toContain('Provider setup');
+    expect(text).toContain('Cost & Budget');
+    expect(text).toContain('Generation history');
+    expect(text).toContain('Map drafts');
+    expect(text).toContain('Image assets');
+    expect(text).toContain('Runtime independent');
+    expect(text).not.toContain('Future phase');
+    expect(text).not.toContain('Unavailable in the MVP editor');
     expect(enabledButtons).toHaveLength(0);
-    expect(text).not.toMatch(/generate maps|generate dialogue|Dialogue generation|Image generation|Code generation|Connect|Test Connections|Usage Limits/i);
+    expect(text).not.toMatch(/Run provider|Run image generation|Connect|Test Connections|Live diagnostic/i);
 
     view.unmount();
   });

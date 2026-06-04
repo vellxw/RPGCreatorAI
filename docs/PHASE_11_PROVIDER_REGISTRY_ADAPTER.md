@@ -1,7 +1,7 @@
 # Phase 11 Provider Registry And Adapter Interface
 
 CP-060 / FRA-95 defines the editor-side provider registry and adapter contract
-used by future AI integrations. It adds no live provider call, network
+used by downstream AI integrations. It adds no live provider call, network
 dependency, credential read, project mutation, or native runtime dependency.
 
 ## Registry

@@ -778,11 +778,15 @@ Primary Phase 11 sources:
   PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md, and individual workflow
   specs. Asset pipeline tests pass (47/47). No changes needed. Evidence in
   `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-123 — AI workflow documentation audit. AI docs already
-  comprehensive across 18+ Phase 11 spec files covering provider setup,
-  mock tests, image/asset generation, character/animation workflows,
-  content generation, opt-in/cost/rate-limit, and data boundaries. No
-  changes needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-123 — AI workflow documentation repaired. The earlier closeout
+  pointed at scattered spec files and missed that the direct `AI Tools` surface
+  still described AI as a future MVP placeholder. Added
+  `docs/AI_WORKFLOWS.md` as the consolidated provider/workflow/safety guide,
+  linked it from README, updated stale provider/editor docs, and replaced the
+  direct AI Tools route with a read-only status surface for optional editor
+  tooling, provider setup, cost/budget, generation history, safety boundaries,
+  and review-gated workflows. Evidence is recorded in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-122 — build/run/release docs final pass repaired. The earlier
   closeout lacked command evidence and predated the README repair. Build/run
   docs now distinguish validation-only helper commands from output-writing
