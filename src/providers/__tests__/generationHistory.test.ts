@@ -3,11 +3,13 @@ import type { AssetCatalogEntry, ProjectData } from '../../types/project';
 import {
   appendGenerationHistoryRecord,
   clearGenerationHistory,
+  createFailedGenerationHistoryRecord,
   createHistoryRecordForGeneratedAsset,
   createGenerationHistoryRecord,
   exportGenerationHistory,
   linkGenerationHistoryOutput,
 } from '../generationHistory';
+import type { ProviderAdapterRequest, ProviderAdapterResponse } from '../providerAdapter';
 
 function projectWithHistory(): ProjectData {
   return {
@@ -239,5 +241,90 @@ describe('generation history', () => {
         confirmationThresholdUsd: 0.1,
       },
     });
+  });
+
+  it('records failed provider calls as rejected non-destructive history with preserved context', () => {
+    const request: ProviderAdapterRequest = {
+      id: 'failed-request-1',
+      operation: 'image.generate',
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      createdAt: '2026-06-04T04:50:00.000Z',
+      prompt: 'Create portrait from prompt secret sk-failed-prompt',
+      input: {
+        ownerKind: 'actor',
+        ownerId: 'hero',
+        promptDraft: 'original user prompt',
+        apiKey: 'sk-input-secret',
+      },
+    };
+    const response: ProviderAdapterResponse = {
+      id: 'failed-request-1',
+      operation: 'image.generate',
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      status: 'failed',
+      error: 'Provider error included token raw-failure-token',
+      failure: {
+        kind: 'provider-error',
+        message: 'Malformed provider response with token raw-failure-token',
+        retryGuidance: 'Edit the prompt and retry without changing accepted assets.',
+      },
+      output: {
+        assetRefs: ['mock://partial/failed.png'],
+        data: {
+          apiKey: 'sk-output-secret',
+          note: 'partial provider output',
+        },
+      },
+    };
+
+    const record = createFailedGenerationHistoryRecord({
+      kind: 'image',
+      request,
+      response,
+      failedAt: '2026-06-04T04:51:00.000Z',
+    });
+
+    expect(record).toMatchObject({
+      id: 'failed:failed-request-1',
+      kind: 'image',
+      operation: 'image.generate',
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      createdAt: '2026-06-04T04:51:00.000Z',
+      reviewState: 'rejected',
+      linkedOutputs: [],
+      failure: {
+        kind: 'provider-error',
+        message: 'Malformed provider response with token [REDACTED]',
+        retryGuidance: 'Edit the prompt and retry without changing accepted assets.',
+      },
+    });
+    expect(record.prompt).toContain('[REDACTED]');
+    expect(record.inputContext).toMatchObject({
+      ownerKind: 'actor',
+      ownerId: 'hero',
+      promptDraft: 'original user prompt',
+      apiKey: '[REDACTED]',
+    });
+    expect(record.output).toMatchObject({
+      failedCandidate: true,
+      partialOutput: {
+        assetRefs: ['mock://partial/failed.png'],
+        data: {
+          apiKey: '[REDACTED]',
+          note: 'partial provider output',
+        },
+      },
+    });
+    expect(record.acceptanceHistory).toEqual([
+      {
+        status: 'rejected',
+        reviewedAt: '2026-06-04T04:51:00.000Z',
+        notes: 'provider-error: Malformed provider response with token [REDACTED]',
+      },
+    ]);
+    expect(JSON.stringify(record)).not.toMatch(/sk-failed-prompt|sk-input-secret|sk-output-secret|raw-failure-token/i);
   });
 });

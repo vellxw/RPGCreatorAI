@@ -22,6 +22,8 @@ Each record captures:
 - redacted `inputContext`
 - redacted `output` or `outputSummary`
 - prompt template metadata when available
+- known cost metadata when available
+- provider failure metadata when a request fails
 - `reviewState`
 - accepted output links
 - review/acceptance events
@@ -52,6 +54,19 @@ Structured/text workflows can use `appendGenerationHistoryRecord()` and
 `linkGenerationHistoryOutput()` to link accepted database, map, event, or asset
 outputs without bypassing normal reducers.
 
+## Failed Provider Calls
+
+Failed provider calls can be recorded with
+`createFailedGenerationHistoryRecord()`. The helper preserves the original
+prompt and input context after redaction, stores provider failure kind/message,
+retry-after and retry guidance when available, and marks any returned partial
+output as a `failedCandidate`.
+
+Failed records use `reviewState: rejected`, contain no accepted linked outputs,
+and add a rejected review event. They are recovery/audit metadata only: they
+must not import generated assets, apply database/map/event changes, or mutate
+runtime project data.
+
 ## Cleanup And Export
 
 `appendGenerationHistoryRecord()` enforces `maxRecords` retention by trimming
@@ -68,6 +83,8 @@ CP-087 validation covers:
 - recursive secret redaction
 - retention trimming
 - accepted asset/database output links
+- failed provider call history with preserved prompt context, redacted failure
+  metadata, and failed-candidate partial output
 - export clone behavior
 - cleanup behavior
 - reducer auto-recording for accepted generated assets

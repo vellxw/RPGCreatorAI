@@ -4,6 +4,8 @@ import type {
   GeneratedAssetMetadata,
   GenerationHistoryData,
   GenerationHistoryCostMetadata,
+  GenerationHistoryFailureKind,
+  GenerationHistoryFailureMetadata,
   GenerationHistoryKind,
   GenerationHistoryLinkedOutput,
   GenerationHistoryRecord,
@@ -11,6 +13,7 @@ import type {
   GenerationHistoryReviewState,
   ProjectData,
 } from '../types/project';
+import type { ProviderAdapterRequest, ProviderAdapterResponse } from './providerAdapter';
 
 const DEFAULT_MAX_RECORDS = 200;
 const MAX_DEPTH = 4;
@@ -35,6 +38,13 @@ export interface CreateGenerationHistoryRecordInput {
   promptTemplateVersion?: number;
   promptTemplateKind?: string;
   cost?: GenerationHistoryCostMetadata;
+}
+
+export interface CreateFailedGenerationHistoryRecordInput {
+  kind: GenerationHistoryKind;
+  request: ProviderAdapterRequest;
+  response: ProviderAdapterResponse;
+  failedAt?: string;
 }
 
 export interface AppendGenerationHistoryOptions {
@@ -106,6 +116,35 @@ function sanitizeCost(cost: GenerationHistoryCostMetadata | undefined): Generati
   return out;
 }
 
+const failureKinds = new Set<GenerationHistoryFailureKind>([
+  'missing-credentials',
+  'rate-limit',
+  'quota-exceeded',
+  'budget-exceeded',
+  'timeout',
+  'unsupported-operation',
+  'provider-error',
+  'cancelled',
+]);
+
+function sanitizeFailure(response: ProviderAdapterResponse): GenerationHistoryFailureMetadata {
+  const rawKind = response.failure?.kind;
+  const kind = rawKind && failureKinds.has(rawKind) ? rawKind : 'provider-error';
+  const message = normalizeText(
+    response.failure?.message ?? response.error ?? 'Provider request failed.',
+    'Provider request failed.',
+  );
+  const retryAfterSeconds = normalizeCostNumber(response.failure?.retryAfterSeconds);
+  const out: GenerationHistoryFailureMetadata = { kind, message };
+
+  if (retryAfterSeconds !== undefined) out.retryAfterSeconds = retryAfterSeconds;
+  if (response.failure?.retryGuidance !== undefined) {
+    out.retryGuidance = normalizeText(response.failure.retryGuidance, '');
+  }
+
+  return out;
+}
+
 function normalizeHistory(history: GenerationHistoryData | undefined, maxRecords?: number): GenerationHistoryData {
   const records = Array.isArray(history?.records) ? history.records : [];
   const limit = Math.max(1, Math.floor(maxRecords ?? history?.maxRecords ?? DEFAULT_MAX_RECORDS));
@@ -135,6 +174,44 @@ export function createGenerationHistoryRecord(input: CreateGenerationHistoryReco
     reviewState: 'pending',
     linkedOutputs: [],
     acceptanceHistory: [],
+  };
+}
+
+export function createFailedGenerationHistoryRecord(
+  input: CreateFailedGenerationHistoryRecordInput,
+): GenerationHistoryRecord {
+  const failure = sanitizeFailure(input.response);
+  const createdAt = input.failedAt ?? input.request.createdAt;
+  const record = createGenerationHistoryRecord({
+    id: `failed:${input.request.id}`,
+    kind: input.kind,
+    operation: input.request.operation,
+    providerId: input.request.providerId,
+    modelId: input.request.modelId ?? 'unknown',
+    createdAt,
+    prompt: input.request.prompt ?? '',
+    inputContext: input.request.input,
+    output: input.response.output === undefined
+      ? undefined
+      : {
+          failedCandidate: true,
+          partialOutput: input.response.output,
+        },
+    outputSummary: `${input.request.operation} failed before acceptance.`,
+  });
+
+  return {
+    ...record,
+    reviewState: 'rejected',
+    failure,
+    linkedOutputs: [],
+    acceptanceHistory: [
+      {
+        status: 'rejected',
+        reviewedAt: record.createdAt,
+        notes: `${failure.kind}: ${failure.message}`,
+      },
+    ],
   };
 }
 

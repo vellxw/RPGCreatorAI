@@ -798,11 +798,12 @@ Primary Phase 11 sources:
   no API keys in provider output. Provider mock failure suites all pass.
   Security/provider docs verified. No code changes needed. Evidence in
   `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-119 — failed AI call recovery audit. mockProviderAdapter tests
-  pass (7/7). AIRequestQueuePanel tests pass (3/3). aiRequestQueueStore
-  failure/retry/cancellation states covered. AI workflows produce local
-  candidate assets, never overwrite until accepted. No code changes needed.
-  Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-119 — failed AI call recovery repaired. The earlier closeout
+  proved adapter failures and queue retry UI, but missed failed-call history.
+  Provider failures can now be recorded as rejected non-destructive generation
+  history with preserved/redacted prompt context, sanitized failure metadata,
+  and partial outputs marked as failed candidates with no accepted linked
+  outputs. Evidence is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-118 — rate-limit handling UX repaired. The earlier closeout
   verified rate-limit fixtures but missed the required quota fixture in the
   offline provider contract. The contract suite now requires

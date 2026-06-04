@@ -155,6 +155,15 @@ export interface GeneratedAssetMetadata {
 export type GenerationHistoryKind = 'text' | 'image' | 'asset' | 'structured-data';
 export type GenerationHistoryReviewState = 'pending' | 'accepted' | 'rejected';
 export type GenerationHistoryCostAvailability = 'free' | 'estimated' | 'unknown';
+export type GenerationHistoryFailureKind =
+  | 'missing-credentials'
+  | 'rate-limit'
+  | 'quota-exceeded'
+  | 'budget-exceeded'
+  | 'timeout'
+  | 'unsupported-operation'
+  | 'provider-error'
+  | 'cancelled';
 
 export interface GenerationHistoryCostMetadata {
   availability: GenerationHistoryCostAvailability;
@@ -164,6 +173,13 @@ export interface GenerationHistoryCostMetadata {
   confirmationThresholdUsd?: number;
   confirmedAt?: string;
   detail?: string;
+}
+
+export interface GenerationHistoryFailureMetadata {
+  kind: GenerationHistoryFailureKind;
+  message: string;
+  retryAfterSeconds?: number;
+  retryGuidance?: string;
 }
 
 export interface GenerationHistoryLinkedOutput {
@@ -196,6 +212,7 @@ export interface GenerationHistoryRecord {
   promptTemplateVersion?: number;
   promptTemplateKind?: string;
   cost?: GenerationHistoryCostMetadata;
+  failure?: GenerationHistoryFailureMetadata;
   reviewState: GenerationHistoryReviewState;
   linkedOutputs: GenerationHistoryLinkedOutput[];
   acceptanceHistory: GenerationHistoryReviewEvent[];

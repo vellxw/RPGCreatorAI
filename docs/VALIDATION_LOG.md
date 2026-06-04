@@ -861,6 +861,16 @@ Append-only log of major validation runs. Newest entries on top.
 - aiRequestQueueStore tests (from CP-118): PASS (5/5) — moves jobs through failure/retry/cancellation/success states, restores running work as failed/retryable after app restart without replaying writes.
 - From CP-087: "AI workflows produce local candidate assets, never overwrite project assets until explicitly accepted."
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 06:30:25 -03:00` — repair audit re-read Linear FRA-154 and found the prior closeout proved adapter failures and queue retry UI, but did not provide a generation-history contract for failed provider calls that preserves prompt/input context without accepting partial outputs.
+- TDD red: `npm test -- --run src/providers/__tests__/generationHistory.test.ts` — FAIL as expected; 1 test failed because `createFailedGenerationHistoryRecord` did not exist.
+- Fix applied: added failed-call history metadata and `createFailedGenerationHistoryRecord()`. Failed provider calls now preserve sanitized prompt/input context, store sanitized failure kind/message/retry guidance, mark partial outputs as `failedCandidate`, use `reviewState: rejected`, and create no accepted linked outputs. Updated `docs/PHASE_11_PROMPT_GENERATION_HISTORY.md` and `docs/GOAL_STACK.md`.
+- `npm test -- --run src/providers/__tests__/generationHistory.test.ts` — PASS; 1 test file / 7 tests.
+- `npm test -- --run src/providers/__tests__/generationHistory.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/stores/__tests__/aiRequestQueueStore.test.ts src/providers/__tests__/mapDraftGenerationWorkflow.test.ts src/providers/__tests__/validationRepairWorkflow.test.ts src/providers/__tests__/imageEditVariationWorkflow.test.ts src/providers/__tests__/portraitGenerationWorkflow.test.ts src/screens/__tests__/AssetsScreen.test.tsx` — PASS; 10 test files / 58 tests.
+- `npm run typecheck` — PASS.
+- `npm run build` — PASS; TypeScript and Vite production build completed, 1966 modules transformed, with the known non-fatal chunk-size warning.
+- Evidence grep for `createFailedGenerationHistoryRecord`, `GenerationHistoryFailureMetadata`, `failedCandidate`, rejected review state, failed provider docs, and CP-119 repair notes — PASS.
+- `git diff --check` — PASS with CRLF warnings only after the doc-log update.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 
