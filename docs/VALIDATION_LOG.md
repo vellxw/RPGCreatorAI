@@ -4,6 +4,25 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-134 / CP-099 — Responsive Layout Audit Evidence Repair
+
+- `2026-06-04 03:57:44 -03:00` — Responsive layout audit evidence repair —
+  PASS.
+- Audit finding: CP-099 had a real commit (`74ee0ab`) and valid screenshot
+  evidence, but the Linear closeout and three `docs/VALIDATION_LOG.md` entries
+  said 7 screenshots while the committed directory contains 6 PNG files. The
+  audit document itself enumerates 6 screenshots across 4 target viewport sizes.
+- Fix applied: updated `docs/RESPONSIVE_LAYOUT_AUDIT.md` to explicitly state
+  that six screenshots are stored under `docs/screenshots/phase11-cp099/`, and
+  corrected the stale CP-099 screenshot counts in `docs/VALIDATION_LOG.md`.
+- Validation:
+  `$doc = Test-Path -LiteralPath 'docs\RESPONSIVE_LAYOUT_AUDIT.md'; $shots = Get-ChildItem -LiteralPath 'docs\screenshots\phase11-cp099' -Filter '*.png' -ErrorAction Stop; $nonEmpty = @($shots | Where-Object { $_.Length -gt 0 }).Count; $sizes = @('768x600','1024x768','1280x800','1920x1080'); $sizeMentions = 0; foreach ($size in $sizes) { if (Select-String -LiteralPath 'docs\RESPONSIVE_LAYOUT_AUDIT.md' -Pattern $size -SimpleMatch) { $sizeMentions++ } }; $stale = Select-String -LiteralPath 'docs\VALIDATION_LOG.md' -Pattern 'CP-099 (7 screenshots','phase11-cp099: 7 files','7 screenshots stored under `docs/screenshots/phase11-cp099/`' -SimpleMatch; [pscustomobject]@{ DocumentExists = $doc; ScreenshotCount = $shots.Count; NonEmptyScreenshotCount = $nonEmpty; TargetViewportMentions = $sizeMentions; StaleSevenScreenshotReferences = @($stale).Count; CommitPresent = [bool](git rev-parse --verify 74ee0ab 2>$null) } | ConvertTo-Json`
+  — PASS: document exists; screenshots 6/6 non-empty; 4 target viewport sizes
+  mentioned; stale 7-screenshot references = 0; commit `74ee0ab` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-133 / CP-098 — Runtime Screenshot Audit Workflow Evidence Repair
 
 - `2026-06-04 03:53:47 -03:00` — Runtime screenshot audit workflow evidence
@@ -660,7 +679,7 @@ Append-only log of major validation runs. Newest entries on top.
 
 ### Phase 11 FRA-143 / CP-108 — Desktop Playwright Smoke Harness
 
-- `2026-06-03 23:50:00 -03:00` — browser automation smoke harness verification — PASS; Chrome DevTools MCP serves as equivalent browser automation for high-value editor workflows. Used successfully for CP-097 (8 screenshots), CP-099 (7 screenshots at 4 sizes), and CP-100 (automated button audit). No Playwright installation required. Harness is optional and documents limitations.
+- `2026-06-03 23:50:00 -03:00` — browser automation smoke harness verification — PASS; Chrome DevTools MCP serves as equivalent browser automation for high-value editor workflows. Used successfully for CP-097 (8 screenshots), CP-099 (6 screenshots at 4 sizes), and CP-100 (automated button audit). No Playwright installation required. Harness is optional and documents limitations.
 - Final pass/fail for this issue validation: PASS.
 
 ---
@@ -690,7 +709,7 @@ Append-only log of major validation runs. Newest entries on top.
 ### Phase 11 FRA-139 / CP-104 — Continuous Audit Integration Gate
 
 - `2026-06-03 23:15:00 -03:00` — audit workflow verification — PASS; all 7 audit documents exist and are properly integrated (EDITOR_SCREENSHOT_AUDIT, RUNTIME_SCREENSHOT_AUDIT, RESPONSIVE_LAYOUT_AUDIT, ACCESSIBILITY_AUDIT, UX_COPY_AUDIT, GENERATED_ASSET_QUALITY_AUDIT, REGRESSION_TRIAGE_WORKFLOW).
-- `2026-06-03 23:16:00 -03:00` — evidence storage verification — PASS; screenshot evidence directories confirmed (phase11-cp097: 8 files, phase11-cp099: 7 files, phase-7: 18 files, phase10-mvp: 3 files).
+- `2026-06-03 23:16:00 -03:00` — evidence storage verification — PASS; screenshot evidence directories confirmed (phase11-cp097: 8 files, phase11-cp099: 6 files, phase-7: 18 files, phase10-mvp: 3 files).
 - `2026-06-03 23:17:00 -03:00` — focused test — PASS; MapCanvasLayerWorkflow 3 tests passed.
 - `2026-06-03 23:18:00 -03:00` — follow-up issue verification — PASS; 1 blocking defect found and fixed (zoom button accessibility, commit 6d4926e), no remaining unfixed blocking defects.
 - Final pass/fail for this issue validation: PASS.
@@ -737,7 +756,7 @@ Append-only log of major validation runs. Newest entries on top.
 
 - `2026-06-03 22:00:00 -03:00` — responsive layout audit at 4 viewport sizes (768x600, 1024x768, 1280x800, 1920x1080) — PASS; Maps, Database, and Playtest workspaces all pass with no horizontal scroll, no tiny buttons (<20px), and all controls accessible. Canvas viewport zoom auto-adjusts as expected.
 - `2026-06-03 22:01:00 -03:00` — automated JS checks — PASS; `body.scrollWidth <= body.clientWidth` confirmed at all sizes, all button hit targets >= 20x20px.
-- `2026-06-03 22:02:00 -03:00` — screenshot evidence captured — PASS; 7 screenshots stored under `docs/screenshots/phase11-cp099/`.
+- `2026-06-03 22:02:00 -03:00` — screenshot evidence captured — PASS; 6 screenshots stored under `docs/screenshots/phase11-cp099/`.
 - Final pass/fail for this issue validation: PASS.
 
 ---

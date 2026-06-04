@@ -63,7 +63,7 @@ zoom or use Fit/100% controls.
 
 ## Screenshot Evidence
 
-Stored under `docs/screenshots/phase11-cp099/`.
+Six screenshots are stored under `docs/screenshots/phase11-cp099/`.
 
 ## Integration
 
