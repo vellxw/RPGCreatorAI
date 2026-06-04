@@ -4,6 +4,21 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-158 / CP-123 — AI Workflow Documentation
+
+- `2026-06-04 01:10:00 -03:00` — AI workflow documentation audit — PASS.
+- Provider setup: PHASE_11_PROVIDER_SETTINGS_UI.md, PHASE_11_PROVIDER_REGISTRY_ADAPTER.md, PHASE_11_PROVIDER_LEGAL_BASELINE.md.
+- Mock tests vs live diagnostics: PHASE_11_MOCK_PROVIDER_CONTRACTS.md, CI_READY_VALIDATION.md (provider mock policy).
+- Image/asset generation workflows: PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md, PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md, PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md, PHASE_11_AI_MAP_DRAFT_GENERATOR.md.
+- Character/animation workflows: PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md, PHASE_11_CHARACTER_CONCEPT_GENERATOR.md, PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md.
+- Content generation workflows: PHASE_11_AI_EVENT_COMMAND_GENERATOR.md, PHASE_11_AI_QUEST_GENERATOR.md, PHASE_11_AI_DATABASE_DRAFT_GENERATOR.md, PHASE_11_AI_BALANCING_ASSISTANT.md.
+- Opt-in/cost/rate-limit: PHASE_11_COST_RATE_LIMIT_BUDGET_STATES.md, PHASE_11_CREDENTIAL_STORAGE_POLICY.md.
+- Data boundaries: SECURITY_THREAT_MODEL.md referenced in AGENTS.md.
+- UI cross-check: Settings UI shows "Providers are optional editor tooling", "Provider is disabled", cost unknown, credential storage policy.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-157 / CP-122 — Build Run And Release Docs Final Pass
 
 - `2026-06-04 01:05:00 -03:00` — build/run/release docs final pass — PASS.
