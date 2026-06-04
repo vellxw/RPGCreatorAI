@@ -4,6 +4,51 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-162 / CP-127 - Linear Closeout Comments And Project Status
+
+- `2026-06-04 08:05:19 -03:00` - Linear closeout status review - PASS with
+  documented connector limitation.
+- Linear issue read: FRA-162 required closeout comments, milestone/project
+  status review, a final project status update with commit hash and known
+  limitations, and no project completion before the final gate.
+- `_get_project` for `RPGCreatorAI Complete Product Platform` - PASS; project
+  URL returned, project status is Backlog, `completedAt` is not set, and
+  milestones 00 through 14 are 100%.
+- `_list_milestones` for `RPGCreatorAI Complete Product Platform` - PASS;
+  milestone 15, `Docs Examples And Final Ship`, returned 78.13%.
+- `_list_issues` for Todo in the project - PASS; only FRA-163 / CP-128 was
+  returned.
+- `_list_issues` for In Progress in the project - PASS; only FRA-162 / CP-127
+  was returned.
+- `_list_issues` for Done in the project - PASS; completed project issues were
+  returned with `hasNextPage=false`.
+- `_get_status_updates` for the project - FAIL due to Linear connector backend
+  limitation: `MCP error -32602: Tool get_status_updates not found`.
+- `_save_status_update` for the project - FAIL due to Linear connector backend
+  limitation: `MCP error -32602: Tool save_status_update not found`.
+- Fix applied: do not claim a Linear status update object exists. Added
+  `docs/PHASE_11_LINEAR_CLOSEOUT_STATUS.md` and created project-linked Linear
+  document
+  `https://linear.app/franco-company/document/cp-127-pre-ship-linear-closeout-status-56b4d6f8148e`
+  plus a FRA-162 closure comment as durable closeout evidence.
+- `_list_documents` for the project and `CP-127 Pre-Ship Linear Closeout
+  Status` - PASS; document id
+  `05e9e29d-e53c-45c4-a5c9-0795d8c2f7f1`, `hasNextPage=false`.
+- Local reference check for
+  `docs/PHASE_11_LINEAR_CLOSEOUT_STATUS.md`,
+  `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md`,
+  `docs/GOAL_STACK.md`, and `docs/VALIDATION_LOG.md` - PASS.
+- `git diff --check` - PASS; only line-ending normalization warnings for
+  already tracked Markdown files were printed.
+- Added-line credential-shape scan across the CP-127 diff - PASS; no
+  key-like, bearer-header, provider-env-assignment, or credential-assignment
+  patterns in added lines.
+- New document credential-shape scan for
+  `docs\PHASE_11_LINEAR_CLOSEOUT_STATUS.md` - PASS; no matches.
+- Final pass/fail for this issue validation before commit: PASS.
+
+---
+
 ### Phase 11 FRA-161 / CP-126 - Complete Platform Final Validation Report
 
 - `2026-06-04 07:53:00 -03:00` - final validation report creation - PASS.

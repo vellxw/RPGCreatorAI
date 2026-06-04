@@ -772,6 +772,13 @@ Primary Phase 11 sources:
   92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
   PowerShell wrappers validate committed normalization, preview, and runtime
   manifests offline.
+- Phase 11 CP-127 — Linear closeout status recorded. FRA-162 was read from
+  Linear, the project URL and milestone state were checked, Todo/In Progress
+  issue counts were reviewed, and the Linear status-update wrapper limitation
+  was documented instead of hidden. `docs/PHASE_11_LINEAR_CLOSEOUT_STATUS.md`
+  now records the project state, open CP-128 handoff, final report link, known
+  limitations, and the rule that the project must not be completed until
+  CP-128 passes its final ship gate.
 - Phase 11 CP-126 — complete platform final validation report completed. Added
   `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md` with the validated
   baseline commit, canonical verify/package results, runtime screenshot
