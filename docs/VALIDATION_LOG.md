@@ -4,6 +4,42 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-142 / CP-107 — Asset Pipeline Regression Tests Repair
+
+- `2026-06-04 04:44:55 -03:00` — asset pipeline regression evidence repair
+  — PASS.
+- Audit finding: CP-107 had a real evidence commit (`647ceef`), but the Linear
+  closeout and `docs/GOAL_STACK.md` summary were too narrow. They recorded 10
+  files / 83 tests and did not explicitly capture current manifest integrity,
+  animation strip normalization, animation preview generation, or runtime export
+  wrapper validation.
+- Fix applied: updated `docs/GOAL_STACK.md` and this validation log with the
+  current CP-107 coverage and validation evidence.
+- Focused Vitest asset pipeline command:
+  `npm test -- --run src/validation/__tests__/validateProject.test.ts src/validation/__tests__/validateDatabases.test.ts src/adapters/__tests__/audioImport.test.ts src/adapters/__tests__/tilesetImport.test.ts src/assets/generated/__tests__/assetCatalog.test.ts src/assets/generated/__tests__/assetManifestIntegrity.test.ts src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts src/providers/__tests__/generatedImageVisualQa.test.ts`
+  — PASS, 10 files / 92 tests.
+- Runtime export Python validation: `python scripts/dev/export_runtime_assets.py
+  --validate-only` — PASS.
+- Python asset pipeline unittest coverage: `python -m unittest
+  tests.test_animation_strip_normalization tests.test_animation_preview_generation
+  tests.test_runtime_asset_export tests.test_visual_assets` — PASS, 10 tests.
+- PowerShell runtime export wrapper: `powershell -NoProfile -ExecutionPolicy
+  Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only` — PASS.
+- PowerShell normalization manifest wrapper: `powershell -NoProfile
+  -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1
+  --validate-manifest
+  assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json`
+  — PASS.
+- PowerShell preview manifest wrapper: `powershell -NoProfile -ExecutionPolicy
+  Bypass -File scripts/dev/generate-animation-preview.ps1
+  --validate-preview-manifest
+  assets/generated/source/phase11_animation_previews/player_adventurer_walk_down.json`
+  — PASS.
+- Original evidence commit `647ceef` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-141 / CP-106 — Provider Mock Contract Regression Suite Repair
 
 - `2026-06-04 04:35:40 -03:00` — provider mock contract regression suite repair

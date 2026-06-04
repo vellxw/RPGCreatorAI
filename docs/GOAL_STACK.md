@@ -764,10 +764,14 @@ Primary Phase 11 sources:
   tests, and the core contract suite (mockProviderContract, mockProviderAdapter,
   providerRegistry) passes offline with 20 tests. Already satisfied by CP-063
   and expanded by later provider adapter issues.
-- Phase 11 CP-107 — asset pipeline regression tests verified. Validation tests
-  (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
-  tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
-  regression tests from earlier phases.
+- Phase 11 CP-107 — asset pipeline regression tests verified. Current coverage
+  includes project/database validators, audio and tileset import adapters,
+  generated asset catalog and manifest integrity, generated image/tileset/sprite
+  workflows, animation strip normalization, animation preview generation, and
+  runtime asset export validation. Focused Vitest coverage passes at 10 files /
+  92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
+  PowerShell wrappers validate committed normalization, preview, and runtime
+  manifests offline.
 - Phase 11 CP-124 — asset pipeline documentation final pass. Asset pipeline
   docs already comprehensive: ASSET_PIPELINE.md, GAME_VISUAL_QA.md,
   GENERATED_ASSET_QUALITY_AUDIT.md, PHASE_11_ASSET_CATALOG_V2.md,
