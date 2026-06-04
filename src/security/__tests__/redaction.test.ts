@@ -23,4 +23,15 @@ describe('secret redaction', () => {
     expect(redacted).not.toContain('fixture-provider-token-value');
     expect(redacted.match(/\[REDACTED\]/g)?.length).toBeGreaterThanOrEqual(4);
   });
+
+  it('redacts provider-shaped secrets even when no label or known value is available', () => {
+    const redacted = redactSecrets([
+      'OpenAI rejected sk-test-unlabeled-provider-secret',
+      'upstream returned Bearer sk-proj-freeform-provider-secret',
+    ].join('\n'));
+
+    expect(redacted).not.toContain('sk-test-unlabeled-provider-secret');
+    expect(redacted).not.toContain('sk-proj-freeform-provider-secret');
+    expect(redacted.match(/\[REDACTED\]/g)?.length).toBeGreaterThanOrEqual(2);
+  });
 });

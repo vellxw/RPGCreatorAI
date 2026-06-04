@@ -826,11 +826,12 @@ Primary Phase 11 sources:
   secrets), Playtest panels (editor-preview only). Redaction tests pass.
   11 provider test files verify no API keys in output. No code changes needed.
   Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-113 — secret redaction everywhere audit. Shared redaction
-  helper exists in `src/security/redaction.ts`. 11 test files verify provider
-  requests don't contain API keys/secrets/tokens. Settings UI confirms
-  credentials not stored in project data. Threat model documented. No code
-  changes needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-113 — secret redaction everywhere repaired. The shared
+  `redactSecrets()` helper now also redacts freeform provider-shaped
+  `sk-...` secrets and generic `Bearer ...` values when no exact known-secret
+  list is available. Redaction, credential-store, Settings, generation
+  history, provider adapter, provider hub, and static audit checks pass.
+  Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-112 — QA automation integration gate remediated. The original
   evidence closed the issue despite typecheck/build failures from CP-086; the
   repaired gate now passes end to end. `verify.ps1` and

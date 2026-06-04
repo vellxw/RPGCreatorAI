@@ -928,7 +928,16 @@ Append-only log of major validation runs. Newest entries on top.
 - Grep-style audit for unsafe key output: 11 test files verify provider requests don't contain `apiKey`, `secret`, `token`, `sk-`, or `https://api` patterns. Tests include: characterConceptGenerationWorkflow, gptImageAssetPipelineIntegration, imageEditVariationWorkflow, imagePromptTemplates, itemIconGenerationWorkflow, mapDraftGenerationWorkflow, portraitGenerationWorkflow, questGenerationWorkflow, spriteSheetGenerationWorkflow, tilesetGenerationWorkflow, CharacterAnimationPipelineIntegration.
 - Settings UI: "Credential storage is only available in the desktop shell" and "Secret values are not stored in project data" (verified from snapshot).
 - Threat model: `docs/SECURITY_THREAT_MODEL.md` exists.
-- Final pass/fail for this issue validation: PASS.
+- Previous closeout result: PASS, later superseded by the repair audit below.
+- `2026-06-04 05:30:20 -03:00` — CP-113 repair audit found the shared helper did not redact freeform provider-shaped `sk-...` secrets unless the exact secret was provided in `knownSecrets` or appeared behind a labeled key. That left paths using `redactSecrets(message)` without a known value unable to redact a bare provider key embedded in upstream text.
+- TDD red: `npm test -- --run src/security/__tests__/redaction.test.ts` — FAIL as expected; the new freeform `sk-...` regression test leaked `sk-test-unlabeled-provider-secret`.
+- Fix applied: extended `src/security/redaction.ts` to redact generic `Bearer ...` values and `sk-...` provider-shaped secrets without a known-secret list. Added regression coverage in `src/security/__tests__/redaction.test.ts`.
+- `npm test -- --run src/security/__tests__/redaction.test.ts` — PASS; 1 test file / 3 tests.
+- `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/screens/__tests__/SettingsScreen.test.tsx src/providers/__tests__/generationHistory.test.ts src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/miniMaxProviderAdapter.test.ts src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/openCodeWorkflowAdapter.test.ts` — PASS; 13 test files / 60 tests.
+- `npm run typecheck` — PASS.
+- `npm test -- --run src/providers/__tests__ src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/screens/__tests__/SettingsScreen.test.tsx` — PASS; 33 test files / 160 tests.
+- Static redaction scan — first broad scan flagged legitimate adapter credential/header construction; refined production-path scan passed with explicit allowlist for local `apiKey` variables, authorization header construction, and redaction helper patterns. Unexpected unsafe key output matches: 0.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 

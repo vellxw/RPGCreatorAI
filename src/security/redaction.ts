@@ -1,5 +1,7 @@
 export const REDACTED_SECRET = '[REDACTED]';
 
+const PROVIDER_SECRET_PATTERN = /\bsk-[A-Za-z0-9][A-Za-z0-9_-]{8,}\b/g;
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -17,6 +19,11 @@ export function redactSecrets(input: string | undefined | null, knownSecrets: st
     /(authorization\s*:\s*bearer\s+)[^\s'",;]+/gi,
     `$1${REDACTED_SECRET}`,
   );
+  out = out.replace(
+    /\b(bearer\s+)[^\s'",;]+/gi,
+    `$1${REDACTED_SECRET}`,
+  );
+  out = out.replace(PROVIDER_SECRET_PATTERN, REDACTED_SECRET);
   out = out.replace(
     /\b(api[_-]?key|token|secret|credential)\b(\s*[:=]\s*)(["']?)[^\s"',;&]+(["']?)/gi,
     (_match, label: string, separator: string, openQuote: string, closeQuote: string) =>
