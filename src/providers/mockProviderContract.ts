@@ -9,6 +9,7 @@ export type MockProviderContractFixtureId =
   | 'malformed-response'
   | 'provider-error'
   | 'rate-limit'
+  | 'quota-exceeded'
   | 'timeout'
   | 'cancellation';
 
@@ -79,6 +80,11 @@ export const mockProviderContractFixtures: MockProviderContractFixture[] = [
     id: 'rate-limit',
     description: '429/rate-limit fixture with retry-after guidance.',
     request: contractRequest('rate-limit', { fixtureFailure: 'rate-limit', retryAfterSeconds: 90 }),
+  },
+  {
+    id: 'quota-exceeded',
+    description: 'Quota/billing fixture with local budget recovery guidance.',
+    request: contractRequest('quota-exceeded', { fixtureFailure: 'quota-exceeded' }),
   },
   {
     id: 'timeout',

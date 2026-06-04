@@ -37,6 +37,10 @@ The offline mock adapter can return deterministic fixture failures for
 `rate-limit` and `quota-exceeded`, including retry guidance, without any live
 provider call.
 
+The offline mock provider contract treats both `rate-limit` and
+`quota-exceeded` as required fixtures so provider recovery UI can be validated
+without paid calls.
+
 ## Settings UI
 
 Settings now includes a read-only `Cost & Budget` panel. The panel lists each

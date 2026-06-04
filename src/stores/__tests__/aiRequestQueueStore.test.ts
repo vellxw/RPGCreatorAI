@@ -99,6 +99,35 @@ describe('aiRequestQueueStore', () => {
     expect(state.jobs[0].progress).toBe(64);
   });
 
+  it('rejects new jobs that target an already completed write intent', () => {
+    const state = createAiRequestQueueState({
+      initialJobs: [
+        queuedJob({
+          id: 'done-1',
+          state: 'succeeded',
+          progress: 100,
+          idempotencyKey: 'done-1',
+          writeIntentId: 'preview-dialogue-town-intro',
+        }),
+      ],
+      now: () => '2026-06-02T13:00:00.000Z',
+    });
+
+    const next = aiRequestQueueReducer(state, {
+      type: 'enqueue',
+      job: queuedJob({
+        id: 'duplicate-write',
+        idempotencyKey: 'duplicate-write',
+        writeIntentId: 'preview-dialogue-town-intro',
+      }),
+    });
+
+    expect(next.jobs.map(job => job.id)).toEqual(['done-1']);
+    expect(next.rejected).toEqual([
+      { jobId: 'duplicate-write', reason: 'duplicate-succeeded-write-intent' },
+    ]);
+  });
+
   it('summarizes visible queue state for status UI', () => {
     const state = createAiRequestQueueState({
       initialJobs: [

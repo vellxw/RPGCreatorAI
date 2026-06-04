@@ -803,10 +803,12 @@ Primary Phase 11 sources:
   failure/retry/cancellation states covered. AI workflows produce local
   candidate assets, never overwrite until accepted. No code changes needed.
   Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-118 — rate-limit handling UX audit. mockProviderContract tests
-  pass (5/5). aiRequestQueueStore tests pass (5/5). Rate-limit fixtures
-  included in mock provider contract suite. No code changes needed. Evidence
-  in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-118 — rate-limit handling UX repaired. The earlier closeout
+  verified rate-limit fixtures but missed the required quota fixture in the
+  offline provider contract. The contract suite now requires
+  `quota-exceeded`, queue tests explicitly reject already completed write
+  intents, and the queue panel test covers retry-after guidance plus safe
+  write-intent retry copy. Evidence is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-117 — cost estimate UI repaired. The earlier closeout covered
   unknown cost display only and missed known-estimate metadata plus generation
   history persistence. Provider cost metadata can now carry a known USD

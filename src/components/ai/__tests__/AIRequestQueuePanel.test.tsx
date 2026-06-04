@@ -109,4 +109,36 @@ describe('AIRequestQueuePanel', () => {
     expect(onRetry).toHaveBeenCalledWith('failed-1');
     view.unmount();
   });
+
+  it('shows rate-limit retry timing and safe write-intent retry copy', () => {
+    const onRetry = vi.fn();
+    const view = renderPanel([
+      job({
+        id: 'rate-limited-1',
+        state: 'failed',
+        progress: 25,
+        title: 'Generate portrait',
+        error: 'Mock provider rate limit reached.',
+        rateLimit: {
+          status: 'rate-limited',
+          retryAfterSeconds: 90,
+          retryGuidance: 'Wait 90 seconds before retrying this provider request.',
+        },
+      }),
+    ], { onRetry });
+    const text = view.container.textContent ?? '';
+
+    expect(text).toContain('Rate limited; retry after 90s');
+    expect(text).toContain('Wait 90 seconds before retrying this provider request.');
+    expect(text).toContain('Retry keeps the same write intent.');
+
+    const retry = view.container.querySelector<HTMLButtonElement>('button[aria-label="Retry Generate portrait"]');
+    expect(retry).toBeDefined();
+    act(() => {
+      retry?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(onRetry).toHaveBeenCalledWith('rate-limited-1');
+    view.unmount();
+  });
 });

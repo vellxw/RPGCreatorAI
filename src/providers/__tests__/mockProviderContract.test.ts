@@ -32,6 +32,7 @@ describe('mocked provider contract suite', () => {
       'malformed-response',
       'provider-error',
       'rate-limit',
+      'quota-exceeded',
       'timeout',
       'cancellation',
     ]);
@@ -98,6 +99,7 @@ describe('mocked provider contract suite', () => {
       ['malformed-response', 'failed', 'provider-error'],
       ['provider-error', 'failed', 'provider-error'],
       ['rate-limit', 'failed', 'rate-limit'],
+      ['quota-exceeded', 'failed', 'quota-exceeded'],
       ['timeout', 'failed', 'timeout'],
       ['cancellation', 'cancelled', 'cancelled'],
     ]);
@@ -106,6 +108,7 @@ describe('mocked provider contract suite', () => {
       'mock://generated/mock-contract-image-success.png',
     ]);
     expect(results.find(result => result.fixtureId === 'rate-limit')?.response.failure?.retryGuidance).toContain('Wait');
+    expect(results.find(result => result.fixtureId === 'quota-exceeded')?.response.failure?.retryGuidance).toContain('quota');
     expect(results.find(result => result.fixtureId === 'timeout')?.response.failure?.retryGuidance).toContain('Retry after');
     expect(results.every(result => result.serializedRequest.includes('"providerId":"local"'))).toBe(true);
   });

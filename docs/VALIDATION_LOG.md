@@ -871,6 +871,15 @@ Append-only log of major validation runs. Newest entries on top.
 - aiRequestQueueStore tests: PASS (5/5) — bounds queued jobs and rejects duplicate idempotency keys, moves jobs through failure/retry/cancellation/success states, restores running work as failed/retryable after app restart without replaying writes, summarizes visible queue state for status UI, requires per-session confirmation before enqueueing expensive jobs.
 - Rate-limit fixtures included in mock provider contract suite (rate-limit is one of the 6 required fixture types per CP-063).
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 06:22:41 -03:00` — repair audit re-read Linear FRA-153 and found the prior closeout missed the issue's explicit quota fixture requirement in the offline provider contract. It also lacked direct regression coverage for already completed write-intent rejection and rate-limit retry-after UI guidance.
+- TDD red: `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx` — FAIL as expected; 2 mockProviderContract tests failed because `quota-exceeded` was not declared or executed as a required offline fixture. Queue and panel additions passed against existing behavior.
+- Fix applied: added `quota-exceeded` to `mockProviderContractFixtures`; added queue regression coverage for `duplicate-succeeded-write-intent`; added queue panel regression coverage for `Rate limited; retry after 90s`, provider retry guidance, and safe same-write-intent retry copy. Updated `docs/PHASE_11_COST_RATE_LIMIT_BUDGET_STATES.md` and `docs/GOAL_STACK.md`.
+- `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx` — PASS; 3 test files / 15 tests.
+- `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/miniMaxProviderAdapter.test.ts src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx` — PASS; 10 test files / 53 tests.
+- `npm run typecheck` — PASS.
+- `npm run build` — PASS; TypeScript and Vite production build completed, 1966 modules transformed, with the known non-fatal chunk-size warning.
+- Evidence grep for `quota-exceeded`, `duplicate-succeeded-write-intent`, `Rate limited; retry after`, same-write-intent retry copy, and offline contract docs — PASS.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 
