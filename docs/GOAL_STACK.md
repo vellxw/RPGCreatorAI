@@ -749,9 +749,9 @@ Primary Phase 11 sources:
   from CP-100, CP-101, and CP-102 repairs. Evidence is recorded in
   `docs/REGRESSION_TRIAGE_WORKFLOW.md`.
 - Phase 11 CP-104 — continuous audit integration gate completed. All 7 audit
-  workflows active and producing usable evidence. 1 blocking defect found and
-  fixed (zoom button accessibility, commit 6d4926e). Evidence is recorded in
-  `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md`.
+  workflows active and producing usable evidence. CP-100 through CP-103 repair
+  commits are integrated into the gate evidence; no blocking defects remain
+  unfixed. Evidence is recorded in `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md`.
 - Phase 11 CP-105 — verify script expansion for Phase 11 completed. The canonical
   verify.ps1 already covers 8 gates with 4 explicit skip flags. Phase 11 asset
   pipeline helpers (export-runtime-assets, normalize-animation-strip,

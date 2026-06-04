@@ -4,6 +4,28 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-139 / CP-104 — Continuous Audit Integration Gate Repair
+
+- `2026-06-04 04:22:02 -03:00` — continuous audit integration gate repair —
+  PASS.
+- Audit finding: CP-104 had a real integration-gate commit (`bf0b2ae`), but the
+  gate evidence was stale after CP-100 through CP-103 repairs. It still claimed
+  7 responsive screenshots, listed only the zoom-button fix, and did not mention
+  the CP-101 UX copy repair, CP-102 asset metadata repair, or CP-103 completed
+  issue repair workflow.
+- Fix applied: updated `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md` and
+  `docs/GOAL_STACK.md` so audit workflow status, follow-up repairs, screenshot
+  counts, validation commands, and validation-log scope match the current repo.
+- Focused `npm test -- --run src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx src/screens/__tests__/EventEditorSurface.test.tsx src/assets/generated/__tests__/assetManifestIntegrity.test.ts`
+  — PASS, 3 files / 13 tests.
+- Documentation/evidence check — PASS: missing audit docs = 0, CP-097
+  screenshots = 8 PNGs, CP-099 screenshots = 6 PNGs, Phase 7 runtime files = 18,
+  Phase 10 MVP files = 3, gate repair evidence mentions = 6, original gate
+  commit `bf0b2ae` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-138 / CP-103 — Regression Triage Workflow Repair
 
 - `2026-06-04 04:18:57 -03:00` — regression triage workflow repair — PASS.
