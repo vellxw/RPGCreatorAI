@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-151 / CP-116 — Provider Opt-In UX
+
+- `2026-06-04 00:35:00 -03:00` — provider opt-in UX audit — PASS.
+- ProviderCapabilityGatesPanel tests: PASS (2/2) — workflow availability driven by model capabilities; keeps workflows unavailable when providers have no configured data.
+- AIRequestQueuePanel tests: PASS (3/3) — honest empty state without live provider actions; running progress with cancellation; failure copy with retry.
+- Settings UI: All providers disabled by default with "Provider is disabled" state (verified from snapshot).
+- UI copy: "Providers are optional editor tooling. Maps, database, assets, and playtest stay available with no providers configured." (verified from snapshot).
+- Editor works fully without any providers configured (verified from snapshot — full editor with map, events, database, assets, playtest, settings all functional).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-150 / CP-115 — Local Data Boundary Audit
 
 - `2026-06-04 00:30:00 -03:00` — local data boundary audit — PASS.
