@@ -1,5 +1,11 @@
 import type { ProviderConfig } from '../types/project';
 import type { ProviderOperation } from './providerRegistry';
+import {
+  customEndpointCapabilitiesFromConfig,
+  modelCapabilitiesFromCustomEndpointCapabilities,
+  operationsFromCustomEndpointCapabilities,
+  validateCustomEndpointBaseUrl,
+} from './customOpenAiEndpointConfig';
 
 export type ModelCapability =
   | 'text'
@@ -384,11 +390,40 @@ function providerCanRoute(provider: ProviderConfig): boolean {
     (provider.model.trim().length > 0 || provider.id === 'opencode');
 }
 
+function customDescriptorForProvider(provider: ProviderConfig): ModelCapabilityDescriptor | undefined {
+  if (provider.id !== 'custom') return undefined;
+  const modelId = provider.model.trim();
+  if (!modelId) return undefined;
+  const baseUrl = validateCustomEndpointBaseUrl(provider.baseUrl);
+  if (!baseUrl.valid) return undefined;
+  const capabilities = customEndpointCapabilitiesFromConfig(provider.customCapabilities);
+  if (!capabilities.length) return undefined;
+  const operations = operationsFromCustomEndpointCapabilities(capabilities);
+  if (!operations.length) return undefined;
+
+  return {
+    providerId: 'custom',
+    modelId,
+    label: modelId,
+    capabilities: modelCapabilitiesFromCustomEndpointCapabilities(capabilities),
+    operations,
+    limits: {
+      supportsStreaming: false,
+    },
+    contextHints: [
+      'User-configured OpenAI-compatible endpoint; URL, model id, and capabilities are explicit editor settings',
+    ],
+  };
+}
+
 function routableDescriptorsForProvider(
   provider: ProviderConfig,
   registry: ModelCapabilityDescriptor[],
 ): ModelCapabilityDescriptor[] {
   const selectedModel = provider.model.trim();
+  const customDescriptor = customDescriptorForProvider(provider);
+  if (customDescriptor) return [customDescriptor];
+
   if (selectedModel.length > 0) {
     const descriptor = getModelCapabilityDescriptor(provider.id, selectedModel, registry);
     return descriptor ? [descriptor] : [];

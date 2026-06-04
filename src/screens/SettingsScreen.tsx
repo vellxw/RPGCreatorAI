@@ -12,6 +12,12 @@ import { Badge } from '../components/ui/Badge';
 import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import { ProviderCapabilityGatesPanel } from '../components/ai/ProviderCapabilityGatesPanel';
 import { ProviderCostBudgetPanel } from '../components/ai/ProviderCostBudgetPanel';
+import {
+  customEndpointCapabilitiesFromConfig,
+  customEndpointCapabilityLabels,
+  customEndpointCapabilityOptions,
+  validateCustomEndpointBaseUrl,
+} from '../providers/customOpenAiEndpointConfig';
 import { getProviderMetadata } from '../providers/providerRegistry';
 import {
   defaultOpenAiImageGenerationSettings,
@@ -26,7 +32,7 @@ import {
   type ProviderStoreValue,
 } from '../stores/providerStore';
 import { useAiRequestQueue, type AiRequestQueueState } from '../stores/aiRequestQueueStore';
-import type { ProviderConfig, ProviderImageGenerationSettings } from '../types/project';
+import type { ProviderConfig, ProviderCustomCapability, ProviderImageGenerationSettings } from '../types/project';
 import {
   getCredentialStoreAdapter,
   type CredentialStoreAdapter,
@@ -49,6 +55,7 @@ function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
   return providers.map(provider => ({
     ...provider,
     capabilities: [...provider.capabilities],
+    customCapabilities: provider.customCapabilities ? [...provider.customCapabilities] : undefined,
     imageSettings: provider.imageSettings ? { ...provider.imageSettings } : undefined,
   }));
 }
@@ -73,6 +80,14 @@ function capabilityClass(provider: ProviderConfig): string {
   if (status === 'configured') return 'border-green-100 bg-green-50 text-green-700';
   if (status === 'missing-credentials') return 'border-amber-100 bg-amber-50 text-amber-800';
   return 'border-gray-200 bg-gray-50 text-gray-500';
+}
+
+function capabilityLabelsFor(provider: ProviderConfig): string[] {
+  if (provider.id !== 'custom') return provider.capabilities;
+  const configured = customEndpointCapabilityLabels(
+    customEndpointCapabilitiesFromConfig(provider.customCapabilities),
+  );
+  return ['OpenAI-compatible endpoint', ...configured];
 }
 
 export function SettingsScreen({ providerStore, initialProviders, credentialStore, aiQueueStore }: SettingsScreenProps) {
@@ -146,6 +161,30 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
         : provider.imageSettings,
       status: providerStatusFor(provider),
     }));
+  };
+
+  const updateBaseUrl = (id: string, baseUrl: string) => {
+    updateProvider(id, provider => ({
+      ...provider,
+      baseUrl: baseUrl.trim(),
+    }));
+  };
+
+  const updateCustomCapability = (
+    id: string,
+    capability: ProviderCustomCapability,
+    enabled: boolean,
+  ) => {
+    updateProvider(id, provider => {
+      const current = customEndpointCapabilitiesFromConfig(provider.customCapabilities);
+      const next = enabled
+        ? [...current, capability]
+        : current.filter(item => item !== capability);
+      return {
+        ...provider,
+        customCapabilities: customEndpointCapabilitiesFromConfig(next),
+      };
+    });
   };
 
   const updateImageSetting = (
@@ -233,6 +272,12 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                 const credentialUnavailable = !activeCredentialStore.isAvailable();
                 const credentialValue = credentialInputs[provider.id] ?? '';
                 const providerMetadata = getProviderMetadata(provider.id);
+                const isCustomEndpoint = provider.id === 'custom';
+                const customBaseUrlValidation = isCustomEndpoint
+                  ? validateCustomEndpointBaseUrl(provider.baseUrl)
+                  : undefined;
+                const customCapabilities = customEndpointCapabilitiesFromConfig(provider.customCapabilities);
+                const capabilityLabels = capabilityLabelsFor(provider);
                 const supportsImageGeneration = providerMetadata?.operations.includes('image.generate') ?? false;
                 const imageSettings = normalizeImageGenerationSettings({
                   ...provider.imageSettings,
@@ -279,8 +324,8 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                       <div>
                         <div className="mb-2 text-[11px] font-semibold uppercase text-gray-500">Capabilities</div>
                         <div className="flex flex-wrap gap-1.5">
-                          {provider.capabilities.length > 0 ? (
-                            provider.capabilities.map(capability => (
+                          {capabilityLabels.length > 0 ? (
+                            capabilityLabels.map(capability => (
                               <span
                                 key={capability}
                                 className={`rounded border px-2 py-0.5 text-[11px] font-medium ${capabilityClass(provider)}`}
@@ -305,6 +350,58 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                         />
                       </label>
                     </div>
+
+                    {isCustomEndpoint && (
+                      <div className="mt-3 border-t border-gray-100 pt-3">
+                        <div className="mb-2">
+                          <div className="text-[11px] font-semibold uppercase text-gray-500">Advanced endpoint</div>
+                          <div className="mt-0.5 text-[11px] leading-4 text-gray-500">
+                            Use HTTPS for remote endpoints; HTTP is accepted only for localhost gateways.
+                          </div>
+                        </div>
+                        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+                          <label className="block">
+                            <span className="mb-1 block text-[11px] font-semibold uppercase text-gray-500">Base URL</span>
+                            <input
+                              aria-label={`Base URL for ${provider.name}`}
+                              value={provider.baseUrl ?? ''}
+                              disabled={!provider.enabled}
+                              onChange={event => updateBaseUrl(provider.id, event.target.value)}
+                              placeholder="https://gateway.example/v1"
+                              className="h-8 w-full rounded-md border border-gray-200 bg-white px-2 text-[12px] text-gray-700 disabled:bg-gray-50 disabled:text-gray-400"
+                            />
+                            <span className={`mt-1 block text-[11px] leading-4 ${
+                              customBaseUrlValidation?.valid ? 'text-green-700' : 'text-amber-700'
+                            }`}>
+                              {customBaseUrlValidation?.message}
+                            </span>
+                          </label>
+                          <div>
+                            <div className="mb-1 text-[11px] font-semibold uppercase text-gray-500">Capabilities</div>
+                            <div className="grid gap-1.5">
+                              {customEndpointCapabilityOptions.map(option => (
+                                <label key={option.id} className="flex items-start gap-2 text-[12px] text-gray-700">
+                                  <input
+                                    aria-label={`Enable ${option.label} for ${provider.name}`}
+                                    type="checkbox"
+                                    disabled={!provider.enabled}
+                                    checked={customCapabilities.includes(option.id)}
+                                    onChange={event =>
+                                      updateCustomCapability(provider.id, option.id, event.target.checked)
+                                    }
+                                    className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300"
+                                  />
+                                  <span>
+                                    <span className="block font-medium">{option.label}</span>
+                                    <span className="block text-[11px] leading-4 text-gray-500">{option.description}</span>
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {supportsImageGeneration && (
                       <div className="mt-3 border-t border-gray-100 pt-3">

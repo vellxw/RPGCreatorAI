@@ -4,6 +4,49 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-130 / CP-095 — Custom OpenAI-Compatible Endpoint Adapter Remediation
+
+- `2026-06-04 03:38:20 -03:00` — Custom OpenAI-compatible endpoint adapter
+  remediation — PASS.
+- Audit finding: Linear marked CP-095 Done, but the closeout cited commit
+  `a95e4cf` and described only custom provider registry metadata plus offline
+  mock contracts. Repo history had no CP-095/FRA-130 commit, no dedicated
+  custom endpoint adapter, and no settings controls for base URL or capability
+  config.
+- Official docs checked before implementation: OpenAI Chat Completions create
+  API reference, because custom OpenAI-compatible endpoints mimic that
+  `/chat/completions` request/response shape.
+- TDD evidence:
+  `npm test -- --run src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  was RED before implementation because `../customOpenAiCompatibleProviderAdapter`
+  did not exist, custom gates were unavailable, and Settings did not expose
+  custom endpoint controls.
+- Fix applied: added `src/providers/customOpenAiEndpointConfig.ts` for base URL
+  validation and capability mapping, added
+  `src/providers/customOpenAiCompatibleProviderAdapter.ts` over the reusable
+  OpenAI-compatible adapter, added explicit custom provider settings for base
+  URL/model/capabilities, and added dynamic capability routing only when URL,
+  model, credential state, and capabilities are configured.
+- Security fix: empty/malformed URLs fail closed; remote `http://` is rejected
+  unless the host is local; username/password in URLs are rejected; missing
+  model/capabilities/credentials fail closed; upstream errors are redacted.
+- Documentation: added
+  `docs/PHASE_11_CUSTOM_OPENAI_COMPATIBLE_ENDPOINT_ADAPTER.md`.
+- Focused `npm test -- --run src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS, 3 files / 22 tests.
+- Focused `npm test -- --run src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx`
+  — PASS, 11 files / 57 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (105 files / 554
+  tests), frontend build, native C++ configure/build/CTest, Tauri content check,
+  43 Rust desktop tests, runtime smoke, and editor-runtime screenshot roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-129 / CP-094 — OpenCode Workflow Adapter Remediation
 
 - `2026-06-04 03:25:36 -03:00` — OpenCode workflow adapter remediation —

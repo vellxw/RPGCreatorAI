@@ -297,4 +297,49 @@ describe('modelCapabilityRegistry', () => {
       available: false,
     });
   });
+
+  it('routes custom OpenAI-compatible endpoints only after URL, model, credential, and capability config exist', () => {
+    const customProvider: ProviderConfig = {
+      id: 'custom',
+      name: 'Custom OpenAI-compatible endpoint',
+      enabled: true,
+      status: 'configured',
+      model: 'local-rpg-model',
+      credentialEnvVar: 'CUSTOM_OPENAI_API_KEY',
+      credentialState: 'configured',
+      capabilities: ['OpenAI-compatible endpoint'],
+      baseUrl: 'http://localhost:11434/v1',
+      customCapabilities: ['text', 'structured-json', 'code'],
+    };
+
+    const gates = buildProviderCapabilityGates([customProvider]);
+
+    expect(gates.find(gate => gate.id === 'text-draft')).toMatchObject({
+      available: true,
+      providerId: 'custom',
+      modelId: 'local-rpg-model',
+    });
+    expect(gates.find(gate => gate.id === 'structured-json')).toMatchObject({
+      available: true,
+      providerId: 'custom',
+      modelId: 'local-rpg-model',
+    });
+    expect(gates.find(gate => gate.id === 'code-tooling')).toMatchObject({
+      available: true,
+      providerId: 'custom',
+      modelId: 'local-rpg-model',
+    });
+    expect(gates.find(gate => gate.id === 'image-generation')).toMatchObject({
+      available: false,
+    });
+
+    const missingConfig = buildProviderCapabilityGates([
+      { ...customProvider, model: '' },
+      { ...customProvider, model: 'missing-url', baseUrl: '' },
+      { ...customProvider, model: 'missing-capabilities', customCapabilities: [] },
+      { ...customProvider, model: 'remote-http', baseUrl: 'http://api.example.com/v1' },
+    ]);
+
+    expect(missingConfig.every(gate => gate.available === false)).toBe(true);
+  });
 });

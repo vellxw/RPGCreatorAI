@@ -929,15 +929,19 @@ export interface ValidationMessage {
   source?: string;
 }
 
+export type ProviderCustomCapability = 'text' | 'structured-json' | 'code' | 'tool';
+
 export interface ProviderConfig {
   id: string;
   name: string;
   enabled: boolean;
   status: 'disabled' | 'missing-credentials' | 'configured';
   model: string;
+  baseUrl?: string;
   credentialEnvVar?: string;
   credentialState: 'missing' | 'configured' | 'not-required';
   capabilities: string[];
+  customCapabilities?: ProviderCustomCapability[];
   costEstimateAvailability?: 'free' | 'estimated' | 'unknown';
   rateLimitStatus?: 'not-applicable' | 'provider-managed' | 'unknown';
   requiresPaidJobConfirmation?: boolean;

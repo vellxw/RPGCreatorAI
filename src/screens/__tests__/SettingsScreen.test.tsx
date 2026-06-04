@@ -38,6 +38,19 @@ const disabledOpenAi: ProviderConfig = {
   capabilities: ['Text generation', 'Image generation', 'Image editing'],
 };
 
+const disabledCustomEndpoint: ProviderConfig = {
+  id: 'custom',
+  name: 'Custom OpenAI-compatible endpoint',
+  enabled: false,
+  status: 'disabled',
+  model: '',
+  credentialEnvVar: 'CUSTOM_OPENAI_API_KEY',
+  credentialState: 'missing',
+  capabilities: ['OpenAI-compatible endpoint'],
+  baseUrl: '',
+  customCapabilities: [],
+};
+
 describe('SettingsScreen provider settings', () => {
   afterEach(() => {
     document.body.innerHTML = '';
@@ -203,6 +216,64 @@ describe('SettingsScreen provider settings', () => {
     expect(input?.value).toBe('');
     expect(view.container.textContent).toContain('Credential stored locally');
     expect(view.container.textContent).not.toContain(secret);
+
+    view.unmount();
+  });
+
+  it('requires custom endpoint base URL, model, and capability config in settings', () => {
+    const view = renderSettings([disabledCustomEndpoint]);
+    const text = view.container.textContent ?? '';
+
+    expect(text).toContain('Custom OpenAI-compatible endpoint');
+    expect(text).toContain('Advanced endpoint');
+    expect(text).toContain('Use HTTPS for remote endpoints');
+    expect(text).toContain('Model label');
+
+    const endpoint = view.container.querySelector<HTMLInputElement>(
+      'input[aria-label="Base URL for Custom OpenAI-compatible endpoint"]',
+    );
+    const model = view.container.querySelector<HTMLInputElement>(
+      'input[aria-label="Model for Custom OpenAI-compatible endpoint"]',
+    );
+    const textCapability = view.container.querySelector<HTMLInputElement>(
+      'input[aria-label="Enable Text generation for Custom OpenAI-compatible endpoint"]',
+    );
+    const codeCapability = view.container.querySelector<HTMLInputElement>(
+      'input[aria-label="Enable Code assistance for Custom OpenAI-compatible endpoint"]',
+    );
+
+    expect(endpoint).toBeDefined();
+    expect(endpoint?.disabled).toBe(true);
+    expect(model).toBeDefined();
+    expect(textCapability).toBeDefined();
+    expect(textCapability?.checked).toBe(false);
+    expect(codeCapability).toBeDefined();
+
+    const enable = view.container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Enable Custom OpenAI-compatible endpoint provider"]',
+    );
+    act(() => {
+      enable?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(endpoint?.disabled).toBe(false);
+    act(() => {
+      const endpointSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      endpointSetter?.call(endpoint, 'http://localhost:11434/v1');
+      endpoint!.dispatchEvent(new Event('input', { bubbles: true }));
+      const modelSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      modelSetter?.call(model, 'local-rpg-model');
+      model!.dispatchEvent(new Event('input', { bubbles: true }));
+      textCapability!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      codeCapability!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(endpoint?.value).toBe('http://localhost:11434/v1');
+    expect(model?.value).toBe('local-rpg-model');
+    expect(textCapability?.checked).toBe(true);
+    expect(codeCapability?.checked).toBe(true);
+    expect(view.container.textContent).toContain('Endpoint URL shape is valid.');
+    expect(view.container.textContent).not.toMatch(/Generate|Test Connection|Connect/i);
 
     view.unmount();
   });
