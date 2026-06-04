@@ -600,6 +600,17 @@ Primary Phase 11 sources:
   the CP-032 JSON assertion format. Representative screenshot evidence was
   captured via Chrome DevTools MCP under `docs/screenshots/phase11-cp097/`.
   Evidence is recorded in `docs/EDITOR_SCREENSHOT_AUDIT.md`.
+- Phase 11 CP-098 — runtime screenshot audit workflow completed. The repeatable
+  runtime screenshot audit checklist defines 33 required screenshots across
+  10 categories (map/movement, dialogue, interactions/state, pause menu,
+  inventory, party/status, quests, save/load slots, shop, battle), an audit
+  checklist covering text fit, composition, entity occlusion, viewport framing,
+  color/styling, state correctness, and responsive scaling, smoke script
+  alignment guidance so automated and visual evidence stay consistent, follow-up
+  issue filing guidance with severity classification, and integration with
+  existing RUNTIME_UI_DESIGN.md, EDITOR_SCREENSHOT_AUDIT.md, GAME_VISUAL_QA.md,
+  and EDITOR_RUNTIME_E2E_QA.md. Evidence is recorded in
+  `docs/RUNTIME_SCREENSHOT_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

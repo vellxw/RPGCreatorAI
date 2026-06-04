@@ -4,6 +4,15 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-133 / CP-098 — Runtime Screenshot Audit Workflow
+
+- `2026-06-03 21:45:00 -03:00` — docs review — PASS; `docs/RUNTIME_SCREENSHOT_AUDIT.md` created with 33 required screenshots across 10 categories (map/movement, dialogue, interactions/state, pause menu, inventory, party, quests, save/load, shop, battle), audit checklist covering text-fit/composition/entity-occlusion/viewport-framing/color-styling/state-correctness/responsive-scaling, evidence storage convention aligned with existing phase-7 and phase10-mvp screenshot dirs, smoke script alignment guidance, follow-up issue filing workflow, and integration with EDITOR_SCREENSHOT_AUDIT.md, GAME_VISUAL_QA.md, RUNTIME_UI_DESIGN.md, and EDITOR_RUNTIME_E2E_QA.md.
+- `2026-06-03 21:46:00 -03:00` — existing runtime screenshot evidence verified — PASS; `docs/screenshots/phase-7/` (18 screenshots) and `docs/screenshots/phase10-mvp/` (3 screenshots) confirmed as baseline evidence for audit history.
+- `2026-06-03 21:47:00 -03:00` — document structure verification — PASS; all required sections present (required screenshots table, audit checklist, evidence storage, smoke alignment, follow-up issue filing, audit execution steps, integration with existing gates, audit history).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-132 / CP-097 — Editor Screenshot Audit Workflow
 
 - `2026-06-03 21:30:00 -03:00` — docs review — PASS; `docs/EDITOR_SCREENSHOT_AUDIT.md` created with 67 required screenshots across 9 categories, audit checklist covering spacing/overlap/disabled-states/information-density/empty-states/responsive/viewport/accessibility, evidence storage convention, follow-up issue filing workflow, and integration with existing `GAME_VISUAL_QA.md`, `EDITOR_RUNTIME_E2E_QA.md`, `EMPTY_STATES.md`, `VALIDATION_LOG.md`, and CP-032 JSON assertion format.
