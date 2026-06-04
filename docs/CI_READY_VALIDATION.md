@@ -6,111 +6,161 @@ Issue: CP-111 / FRA-146
 
 ## Result
 
-PASS. Documented below: how the local validation suite maps to future CI,
-which commands are CI-safe, which require Windows desktop/runtime support,
-provider mock policy, cache expectations, and known nonfatal warnings.
+PASS. This runbook maps the local validation suite to future CI without adding
+CI infrastructure. It separates portable Node checks, Windows native/runtime
+checks, optional browser automation, provider mock policy, cache expectations,
+artifact cleanup, and known nonfatal warnings.
 
 ---
 
-## Command Map: Local → CI
+## Command Map
 
-### CI-Safe (Cross-Platform, No Desktop Required)
+### Portable Node Checks
 
-| Command | CI-Safe | Notes |
-|---------|---------|-------|
-| `npm run typecheck` | Yes | TypeScript compilation check; ~30s |
-| `npm test -- --run` | Yes | Vitest suite; ~60s; all provider mocks included |
-| `npm run build` | Yes | Vite production build; ~15s; output in `dist/` |
-| `scripts/dev/export-runtime-assets.ps1 --validate-only` | Yes | Validates committed runtime asset manifest paths without live APIs |
-| `cargo test` (src-tauri/) | Yes | Rust unit tests; ~30s |
-| `cmake --build build --config Release` | Yes | Native runtime build; requires CMake + C++ toolchain |
-| `ctest --test-dir build --build-config Release --output-on-failure` | Yes | Native runtime tests; ~10s |
+These commands do not require the Windows native runtime, Tauri shell, provider
+credentials, or live network calls.
 
-### CI-Safe with Script Wrapper (Cross-Platform)
+| Command | CI use | Notes |
+| --- | --- | --- |
+| `npm ci` | Required setup | Restores the locked Node dependency graph. |
+| `npm run typecheck` | Required | TypeScript compilation check via `tsc --noEmit`. |
+| `npm test -- --run` | Required | Full Vitest suite, including offline provider fixtures and mocked fetch adapters. |
+| `npm run build` | Required | Runs `tsc --noEmit && vite build`; output is regenerated under `dist/`. |
 
-| Command | CI-Safe | Notes |
-|---------|---------|-------|
-| `scripts/dev/smoke-runtime.ps1` | Yes | Requires built `rpg_creator_runtime.exe`; runs in hidden window; 3s timeout |
-| `scripts/dev/verify-editor-runtime-roundtrip.ps1` | Yes | Requires built runtime + Vite; runs frontend tests, Tauri content check, native build, smoke, roundtrip |
+### Windows Native And Desktop Checks
 
-### CI-Safe with Skip Flags
+These are CI-ready for a Windows runner with Node, Python, Rust/Cargo, CMake,
+Ninja, and Visual Studio C++ tools installed. They are not cross-platform shell
+commands because the repo wrappers are PowerShell/`.bat` and the runtime output
+is `rpg_creator_runtime.exe`.
 
-| Command | Skip Flag | What's Skipped |
-|---------|-----------|----------------|
-| `scripts/dev/verify.ps1 -SkipFrontend` | `-SkipFrontend` | npm typecheck, test, build |
-| `scripts/dev/verify.ps1 -SkipDesktop` | `-SkipDesktop` | Cargo test, native build/test |
-| `scripts/dev/verify.ps1 -SkipRuntime` | `-SkipRuntime` | CMake configure + build + CTest |
-| `scripts/dev/verify.ps1 -SkipSmoke` | `-SkipSmoke` | Runtime launch smoke |
-| `scripts/dev/verify.ps1 -SkipAssets` | `-SkipAssets` | Phase 11 asset pipeline validation |
+| Command | CI use | Notes |
+| --- | --- | --- |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1` | Full Windows gate | Runs frontend typecheck/tests/build, asset export validation, native configure/build/CTest, Tauri content check, Rust desktop tests, runtime smoke, and editor-runtime roundtrip. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke` | Desktop/native without runtime launch smoke | Useful when a runner can build and test but cannot launch the runtime process reliably. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke` | Native C++ + asset pipeline only | Mirrors `npm run verify:runtime:windows`; avoids duplicate frontend work in split CI jobs. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1` | Optional focused smoke | Requires a built runtime at the default `%LOCALAPPDATA%\RPGCreatorAI\build` location or an explicit `-BuildDir`. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1` | Optional focused roundtrip | Starts/reuses Vite on `127.0.0.1:1420`, runs frontend roundtrip fixtures, Rust desktop tests, native build/test, runtime smoke, and screenshot hash roundtrip. |
+| `cargo test --manifest-path src-tauri/Cargo.toml` | Optional focused desktop test | Runs Rust desktop shell unit tests without launching the Tauri app. |
 
-### Requires Windows Desktop/Tauri Shell (Not CI-Safe)
+### Asset Pipeline Checks
 
-| Command | Reason |
-|---------|--------|
-| Native runtime launch with window visible | Requires Windows display; `-WindowStyle Hidden` used in scripts |
-| Tauri desktop app launch | Requires Tauri shell + Windows display |
-| Desktop packaging (`npm run desktop:package:windows`) | Requires full Tauri + Windows build toolchain |
-| `scripts/dev/smoke-browser-editor.ps1` | Requires `npx`, Vite, and browser automation; exits with explicit `BROWSER SMOKE SKIPPED: <reason>` when unavailable |
+| Command | CI use | Notes |
+| --- | --- | --- |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only` | CI-safe on Windows/PowerShell runners | Validates committed generated-asset manifests and runtime export paths without live providers. |
+| `python scripts/dev/export_runtime_assets.py --validate-only` | Portable equivalent | Use when Python is available and PowerShell is not desired. |
 
-### Excluded from Normal CI (Live Provider Diagnostics)
+### Optional Browser Automation
 
-| Command | Reason |
-|---------|--------|
-| `npm run provider-diag` | Makes live API calls to Anthropic, OpenAI, xAI |
-| `npm run provider-diag-offline` | Safe for CI but verifies offline behavior only |
-| Any test with `MOCK_AI_` prefix | Safe for CI; these use mocked providers |
+| Command | CI use | Notes |
+| --- | --- | --- |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1` | Optional, browser-capable runner only | Starts/reuses Vite on `127.0.0.1:3000`, drives the editor through `npx @playwright/cli`, and writes artifacts under `output/playwright/cp108`. |
+| `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1 -SkipBrowser` | Capability probe / explicit skip | Exits 0 with `BROWSER SMOKE SKIPPED: SkipBrowser requested.` and writes `skip.txt`. |
+
+### Skip Flags
+
+| Command | Skips |
+| --- | --- |
+| `scripts/dev/verify.ps1 -SkipFrontend` | `npm run typecheck`, `npm test`, `npm run build` |
+| `scripts/dev/verify.ps1 -SkipAssets` | Phase 11 asset export validation |
+| `scripts/dev/verify.ps1 -SkipRuntime` | Native CMake configure/build/CTest, runtime smoke, editor-runtime roundtrip |
+| `scripts/dev/verify.ps1 -SkipDesktop` | Tauri content check and Rust desktop tests |
+| `scripts/dev/verify.ps1 -SkipSmoke` | Runtime launch smoke and editor-runtime roundtrip |
 
 ---
 
 ## Provider Mock Policy
 
-- All provider tests use mocked HTTP adapters.
-- No test performs network calls or reads real credentials.
-- Tests cover: success, malformed response, provider error, rate-limit, timeout, cancellation.
-- Provider tests are CI-safe by default.
+- Normal validation must stay offline and mock-backed.
+- The current `package.json` has no `provider-diag` or live-provider diagnostic
+  script. Do not add one to normal CI.
+- Live provider diagnostics, if introduced later, must be explicit opt-in,
+  credential-gated, redacted, and reported separately from normal validation.
+- Provider Vitest coverage lives under `src/providers/__tests__` and uses
+  injected mock fetch functions, local `offline-mock`,
+  `offline-image-mock`, and `offline-image-edit-mock` fixtures.
+- The provider contract suite checks success, malformed responses, provider
+  errors, rate-limit/quota style failures, timeouts/cancellation, disabled
+  provider routing, and missing credentials without using real API keys.
+- Fixture values that look like provider names, model names, URLs, or env var
+  names are metadata/test assertions only unless a live diagnostic is explicitly
+  authorized outside the normal gate.
 
 ---
 
-## Cache/Build Output Expectations
+## Cache And Artifact Expectations
 
-| Artifact | Location | CI Behavior |
-|----------|----------|-------------|
-| `node_modules/` | Project root | Cache in CI; restore on `npm ci` |
-| `dist/` | Project root | Vite build output; regenerated each run |
-| `build/` | Project root or `$LOCALAPPDATA/RPGCreatorAI/build` | CMake build; use `-BuildDir` override in CI |
-| `target/` (Rust) | `src-tauri/target/` | Cargo cache; large; cache in CI |
-| `docs/screenshots/phase10-mvp/` | Project root | Runtime smoke screenshots; ephemeral |
+| Artifact | Location | CI behavior |
+| --- | --- | --- |
+| `node_modules/` | repo root | Restore through `npm ci`; cache by `package-lock.json` if desired. |
+| `dist/` | repo root | Generated by `npm run build`; do not commit generated output. |
+| Native CMake build | `%LOCALAPPDATA%\RPGCreatorAI\build` by default | Cache only if runner isolation is reliable; otherwise regenerate. Use `-BuildDir` for custom CI paths. |
+| Rust/Tauri target | `%LOCALAPPDATA%\RPGCreatorAI\tauri-target` for package helper, or Cargo default when running focused tests | Cache by Cargo lock/toolchain when useful. |
+| Browser smoke artifacts | `output/playwright/cp108` and `.playwright-cli/` | Local evidence only; do not commit. Clean after CI job. |
+| Runtime smoke screenshots | `docs/screenshots/phase10-mvp/` | Smoke evidence files are tracked project evidence; CI should run in a clean checkout and fail if unexpected diffs appear. |
+| Runtime logs/build smoke output | `%LOCALAPPDATA%\RPGCreatorAI\build` and app-data runtime log folders | Job-local diagnostics; upload only after redacting accidental secrets. |
 
 ---
 
 ## Known Nonfatal Warnings
 
+Treat these as nonfatal only when the command exits 0 and prints its expected
+success marker.
+
 | Warning | Interpretation |
-|---------|----------------|
-| `LF will be replaced by CRLF` | Git line-ending normalization; nonfatal on Windows |
-| `warning: unused import` (Rust) | Nonfatal unless `-D warnings` is passed |
-| `npm warn deprecated` | Dependency deprecation; nonfatal unless it blocks install |
-| CMake policy compatibility | `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` handled in CMakePresets.json |
-| Vite HMR disconnect | Nonfatal when running tests against built output |
+| --- | --- |
+| `LF will be replaced by CRLF` | Git line-ending normalization on Windows. |
+| Vite chunk-size warning | Current bundle size warning; does not fail `npm run build`. |
+| `Could NOT find PkgConfig` during SDL/CMake configure | Expected on current Windows setup; SDL still configures. |
+| CMake FetchContent CMP0135 developer warnings | Dependency policy warnings from fetched third-party projects. |
+| Dependency `cmake_minimum_required` deprecation warnings | Third-party CMake compatibility warnings. |
+| Optional audio endpoint/sample WAV warnings during smoke | Nonfatal when runtime smoke still prints `SMOKE PASSED`. |
 
 ---
 
-## Recommended CI Pipeline
+## Recommended Future CI Shape
+
+No workflow file is created for CP-111. Future CI should be split so portable
+checks are fast and Windows-specific checks run only where the toolchain exists.
 
 ```yaml
-# Future GitHub Actions workflow (not yet implemented)
-steps:
-  - uses: actions/checkout@v4
-  - uses: actions/setup-node@v4
-    with: { node-version: '20' }
-  - uses: actions/setup-python@v5
-    with: { python-version: '3.12' }
-  - uses: lukka/get-cmake@latest
-  - run: npm ci
-  - run: npm run typecheck
-  - run: npm test -- --run
-  - run: npm run build
-  - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipSmoke
-  # Optional: runtime smoke if native build succeeds
-  - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
+# Sketch only - not committed as a workflow in CP-111.
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test -- --run
+      - run: npm run build
+
+  windows-native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: npm ci
+      - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke
+
+  windows-full-optional:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: npm ci
+      - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1
 ```
+
+Before enabling `windows-full-optional` as required CI, confirm the runner can
+launch the hidden native runtime and temporary Vite/Tauri-content checks
+reliably. Browser smoke should remain optional unless the runner has stable
+Playwright/browser support.

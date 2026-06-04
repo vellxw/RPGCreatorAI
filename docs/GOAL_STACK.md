@@ -838,9 +838,12 @@ Primary Phase 11 sources:
   verifier instead of relying on a single 5-second post-ready check, eliminating
   the repeated false timeout seen on Windows/Vite. Evidence in
   `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-111 — CI ready validation documentation. Created
-  `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,
-  cache expectations, known nonfatal warnings, and recommended CI pipeline.
+- Phase 11 CP-111 — CI ready validation documentation repaired.
+  `docs/CI_READY_VALIDATION.md` now maps the actual repo commands instead of
+  stale provider-diagnostic placeholders, separates portable Node checks from
+  Windows PowerShell/native runtime gates, documents optional browser smoke,
+  provider mock policy, cache/artifact expectations, known nonfatal warnings,
+  and a split future CI sketch.
 - Phase 11 CP-110 — editor-runtime roundtrip fixtures v2 repaired. The
   original docs-only closeout missed the accepted AI-content and asset-library
   memory roundtrip fixtures. `verify-editor-runtime-roundtrip.ps1` now runs

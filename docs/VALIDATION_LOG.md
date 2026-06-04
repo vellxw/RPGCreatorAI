@@ -948,7 +948,15 @@ Append-only log of major validation runs. Newest entries on top.
 ### Phase 11 FRA-146 / CP-111 — CI Ready Validation Documentation
 
 - `2026-06-04 00:10:00 -03:00` — CI readiness documentation — PASS; created `docs/CI_READY_VALIDATION.md` with command map (CI-safe, CI-safe with skip flags, Windows-only, excluded from CI), provider mock policy, cache expectations, known nonfatal warnings, and recommended CI pipeline.
-- Final pass/fail for this issue validation: PASS (docs-only).
+- Previous closeout result: PASS (docs-only), later superseded by the repair
+  audit below.
+- `2026-06-04 05:22:19 -03:00` — CP-111 repair audit found the previous CI runbook was stale/overbroad: it described PowerShell/native wrappers as cross-platform, referenced non-existent `provider-diag` package scripts, and described provider mock tests as `MOCK_AI_` prefixed tests even though current coverage lives under `src/providers/__tests__` with offline model fixtures and injected mock fetch functions.
+- Fix applied: rewrote `docs/CI_READY_VALIDATION.md` to separate portable Node checks, Windows native/desktop checks, asset pipeline checks, optional browser automation, skip flags, provider mock policy, cache/artifact expectations, known nonfatal warnings, and a split future CI sketch that does not add CI infrastructure.
+- Command review evidence: inspected `package.json`, `scripts/dev/verify.ps1`, `scripts/dev/verify-editor-runtime-roundtrip.ps1`, `scripts/dev/export-runtime-assets.ps1`, `scripts/dev/smoke-browser-editor.ps1`, `docs/BUILD_AND_RUN.md`, and provider test references. Confirmed `package.json` exposes `verify:windows` and `verify:runtime:windows` but no `provider-diag` or `provider-diag-offline` scripts.
+- `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` — PASS; 1 test file / 9 tests.
+- `git diff --check` — PASS; only expected CRLF normalization warnings.
+- CI runbook command review script — PASS; required sections present, stale `Cross-Platform` wrapper wording and `MOCK_AI_` test-prefix wording absent, and no provider diagnostic scripts in `package.json`.
+- Final pass/fail for repaired issue validation: PASS (docs-only plus command review).
 
 ---
 
