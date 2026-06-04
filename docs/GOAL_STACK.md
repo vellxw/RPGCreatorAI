@@ -50,13 +50,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_OPENAI_PROVIDER_ADAPTER.md`
 - `docs/PHASE_11_ANTHROPIC_PROVIDER_ADAPTER.md`
 - `docs/PHASE_11_KIMI_PROVIDER_ADAPTER.md`
+- `docs/PHASE_11_DEEPSEEK_PROVIDER_ADAPTER.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 11 — multi-provider integrations (CP-092 through
+- Phase 11 Linear milestone 11 — multi-provider integrations (CP-093 through
   CP-096 audit/remediation next).
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
 - Phase 11 Linear milestone 13 — QA automation and regression.
@@ -642,6 +643,15 @@ Primary Phase 11 sources:
   API, rate-limit, and quota/balance failures, redacted provider errors, and
   configurable Kimi/Moonshot capability metadata. Evidence is recorded in
   `docs/PHASE_11_KIMI_PROVIDER_ADAPTER.md` and `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-092 — DeepSeek Provider Adapter remediated. Linear's prior
+  closeout cited `a95e4cf` and only described registry/mock metadata. The
+  project now has a DeepSeek wrapper over the reusable OpenAI-compatible Chat
+  Completions adapter, with injected credential lookup, configurable base URL
+  support, DeepSeek `max_tokens` request mapping, JSON authoring mode,
+  structured missing-credential, API, rate-limit, and quota/balance failures,
+  redacted provider errors, and configurable DeepSeek V4 plus compatibility
+  alias capability metadata. Evidence is recorded in
+  `docs/PHASE_11_DEEPSEEK_PROVIDER_ADAPTER.md` and `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across
   9 categories (startup, map editor, events, database, assets, playtest, settings,

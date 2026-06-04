@@ -203,8 +203,30 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'code.assist'],
     capabilityLabels: ['Text generation', 'Code assistance', 'OpenAI-compatible endpoint'],
-    models: [],
+    models: [
+      {
+        id: 'deepseek-v4-flash',
+        label: 'DeepSeek V4 Flash',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-v4-pro',
+        label: 'DeepSeek V4 Pro',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-chat',
+        label: 'DeepSeek Chat',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-reasoner',
+        label: 'DeepSeek Reasoner',
+        operations: ['text.generate', 'code.assist'],
+      },
+    ],
     modelSelection: 'user-selected',
+    baseUrl: { configurable: true, defaultValue: 'https://api.deepseek.com' },
   },
   {
     id: 'minimax',

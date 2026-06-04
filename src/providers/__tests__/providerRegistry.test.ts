@@ -114,6 +114,39 @@ describe('providerRegistry', () => {
     ]);
   });
 
+  it('declares documented DeepSeek model options with configurable base URL', () => {
+    const deepseek = getProviderMetadata('deepseek');
+
+    expect(deepseek?.adapterKind).toBe('openai-compatible');
+    expect(deepseek?.modelSelection).toBe('user-selected');
+    expect(deepseek?.baseUrl).toEqual({
+      configurable: true,
+      defaultValue: 'https://api.deepseek.com',
+    });
+    expect(deepseek?.models).toEqual([
+      {
+        id: 'deepseek-v4-flash',
+        label: 'DeepSeek V4 Flash',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-v4-pro',
+        label: 'DeepSeek V4 Pro',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-chat',
+        label: 'DeepSeek Chat',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'deepseek-reasoner',
+        label: 'DeepSeek Reasoner',
+        operations: ['text.generate', 'code.assist'],
+      },
+    ]);
+  });
+
   it('derives settings provider configs from registry metadata', () => {
     const configs = providerConfigsFromRegistry(defaultProviderRegistry);
     const openai = configs.find(provider => provider.id === 'openai');

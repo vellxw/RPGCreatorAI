@@ -52,6 +52,7 @@ export interface CreateOpenAiCompatibleProviderAdapterOptions {
   providerLabel: string;
   defaultBaseUrl: string;
   defaultModelId: string;
+  maxTokensField?: 'max_completion_tokens' | 'max_tokens';
   fetch?: OpenAiCompatibleFetchLike;
   credentialResolver?: OpenAiCompatibleCredentialResolver;
   baseUrl?: string;
@@ -248,6 +249,7 @@ function messagesFor(request: ProviderAdapterRequest): unknown[] {
 function buildChatCompletionsBody(
   request: ProviderAdapterRequest,
   defaultModelId: string,
+  maxTokensField: 'max_completion_tokens' | 'max_tokens',
 ): Record<string, unknown> {
   const input = request.input ?? {};
   const body: Record<string, unknown> = {
@@ -256,7 +258,7 @@ function buildChatCompletionsBody(
   };
 
   const maxTokens = maxCompletionTokens(input);
-  if (maxTokens !== undefined) body.max_completion_tokens = maxTokens;
+  if (maxTokens !== undefined) body[maxTokensField] = maxTokens;
   if (isRecord(input.thinking)) body.thinking = input.thinking;
 
   if (isRecord(input.responseFormat)) {
@@ -390,7 +392,11 @@ class OpenAiCompatibleProviderAdapter implements ProviderAdapter {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(buildChatCompletionsBody(request, this.options.defaultModelId)),
+        body: JSON.stringify(buildChatCompletionsBody(
+          request,
+          this.options.defaultModelId,
+          this.options.maxTokensField ?? 'max_completion_tokens',
+        )),
         signal: options.signal,
       });
       const raw = await safeJson(response);

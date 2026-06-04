@@ -149,6 +149,37 @@ describe('modelCapabilityRegistry', () => {
     expect(modelSupportsCapability(v1!, 'code')).toBe(false);
   });
 
+  it('defines DeepSeek OpenAI-compatible text and code capabilities from current docs', () => {
+    const flash = getModelCapabilityDescriptor('deepseek', 'deepseek-v4-flash');
+    const pro = getModelCapabilityDescriptor('deepseek', 'deepseek-v4-pro');
+    const reasoner = getModelCapabilityDescriptor('deepseek', 'deepseek-reasoner');
+
+    expect(flash).toMatchObject({
+      providerId: 'deepseek',
+      modelId: 'deepseek-v4-flash',
+      capabilities: ['text', 'structured-json', 'code'],
+      operations: ['text.generate', 'code.assist'],
+      limits: {
+        maxOutputTokens: 32768,
+      },
+    });
+    expect(pro).toMatchObject({
+      providerId: 'deepseek',
+      modelId: 'deepseek-v4-pro',
+      capabilities: ['text', 'structured-json', 'code'],
+    });
+    expect(reasoner).toMatchObject({
+      providerId: 'deepseek',
+      modelId: 'deepseek-reasoner',
+      limits: {
+        maxOutputTokens: 64000,
+      },
+    });
+    expect(modelSupportsCapability(flash!, 'structured-json')).toBe(true);
+    expect(modelSupportsCapability(pro!, 'code')).toBe(true);
+    expect(modelSupportsCapability(reasoner!, 'image')).toBe(false);
+  });
+
   it('defines a separate offline image mock capability fixture', () => {
     const descriptor = getModelCapabilityDescriptor('local', 'offline-image-mock');
 
