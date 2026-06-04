@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-148 / CP-113 — Secret Redaction Everywhere
+
+- `2026-06-04 00:20:00 -03:00` — secret redaction audit — PASS.
+- `npx vitest run src/security/__tests__/redaction.test.ts` — PASS (2/2 tests).
+- Shared redaction helper: `src/security/redaction.ts` with `redactSecrets()` function that redacts known secrets, Bearer tokens, and API key/token/secret/credential patterns.
+- Grep-style audit for unsafe key output: 11 test files verify provider requests don't contain `apiKey`, `secret`, `token`, `sk-`, or `https://api` patterns. Tests include: characterConceptGenerationWorkflow, gptImageAssetPipelineIntegration, imageEditVariationWorkflow, imagePromptTemplates, itemIconGenerationWorkflow, mapDraftGenerationWorkflow, portraitGenerationWorkflow, questGenerationWorkflow, spriteSheetGenerationWorkflow, tilesetGenerationWorkflow, CharacterAnimationPipelineIntegration.
+- Settings UI: "Credential storage is only available in the desktop shell" and "Secret values are not stored in project data" (verified from snapshot).
+- Threat model: `docs/SECURITY_THREAT_MODEL.md` exists.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-147 / CP-112 — QA Automation Integration Gate
 
 - `2026-06-04 00:15:00 -03:00` — full canonical verification gate — PARTIAL PASS; documented pre-existing CP-086 blocker.
