@@ -12,6 +12,8 @@ beside each provider:
 
 - live/paid providers are marked as `estimateAvailability: unknown`
 - the offline mock provider is marked as `free`
+- providers or adapters that can estimate a job before execution may provide
+  `estimatedUsd` with `currency: USD`
 - provider-managed rate limits carry retry and quota guidance
 - paid or unknown-cost work requires explicit per-session confirmation before
   it can be queued
@@ -45,11 +47,21 @@ test-provider action.
 The AI Request Queue panel can also display job-level cost, rate-limit, quota,
 and budget-confirmation status when future provider workflows enqueue jobs.
 
+## Generation History
+
+Generation history records can store sanitized cost metadata when it is known
+at generation time. The stored metadata is limited to cost availability,
+non-negative USD estimate, confirmation requirement, confirmation threshold,
+confirmation timestamp, and redacted display detail. It must not store
+credentials, provider headers, raw API responses, or vendor account data.
+
 ## Validation
 
 Normal validation stays offline:
 
 - provider cost/budget state contract tests
+- known-estimate Settings panel regression tests
+- generation history cost metadata persistence and redaction tests
 - mock adapter rate-limit and quota fixture tests
 - queue budget-confirmation rejection tests
 - Settings and panel UI regression tests

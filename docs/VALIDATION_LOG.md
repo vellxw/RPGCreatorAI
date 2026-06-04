@@ -881,6 +881,17 @@ Append-only log of major validation runs. Newest entries on top.
 - ProviderCostBudgetPanel tests: PASS (1/1) — shows cost unknown, provider rate-limit guidance, and session confirmation without live actions.
 - Settings UI: "Cost & Budget" section shows "Cost unknown — cost is unavailable until the provider reports pricing for the configured model and usage." (verified from snapshot).
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 06:07:46 -03:00` — repair audit re-read Linear FRA-152 and found the prior closeout covered only unknown-cost Settings copy; it did not display known estimates from provider metadata and did not record known cost metadata in generation history.
+- TDD red: `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/generationHistory.test.ts` — FAIL as expected; 4 tests failed because `estimatedUsd` was not exposed to cost state/UI and generation history `record.cost` stayed undefined.
+- Fix applied: provider cost metadata can now carry sanitized non-negative USD estimates; Settings `Cost & Budget` displays `Estimated before execution` when a registry supplies a known estimate; generation history and generated asset metadata persist redacted cost metadata for accepted outputs. `docs/PHASE_11_COST_RATE_LIMIT_BUDGET_STATES.md` and `docs/GOAL_STACK.md` were updated.
+- `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/generationHistory.test.ts` — PASS; 3 test files / 11 tests.
+- `npm test -- --run src/providers/__tests__/providerCostBudget.test.ts src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/generationHistory.test.ts src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/screens/__tests__/SettingsScreen.test.tsx` — PASS; 6 test files / 26 tests.
+- `npm run typecheck` — PASS.
+- `npm run build` — PASS; TypeScript and Vite production build completed, 1966 modules transformed, with the known non-fatal chunk-size warning.
+- Evidence grep for `estimatedUsd`, `GenerationHistoryCostMetadata`, `Estimated before execution`, and known-estimate/history regression tests — PASS.
+- Chrome DevTools visual review at `http://127.0.0.1:3000` — PASS for CP-117 scope. Bundled sample opened, Settings showed `Cost & Budget`, live providers showed `Cost unknown`, local gateway showed `Free/offline`, no fetch/XHR/WebSocket/EventSource requests were recorded. Console had no warnings/errors; Chrome reported pre-existing form-field issues only.
+- `git diff --check` — PASS with CRLF warnings only after the doc-log update.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 

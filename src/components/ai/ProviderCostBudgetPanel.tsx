@@ -15,6 +15,10 @@ function costVariant(label: string): 'success' | 'warning' | 'muted' {
   return 'muted';
 }
 
+function formatEstimatedCost(estimatedUsd: number | undefined): string | null {
+  return estimatedUsd === undefined ? null : `$${estimatedUsd.toFixed(2)}`;
+}
+
 export function ProviderCostBudgetPanel({ providers, registry }: ProviderCostBudgetPanelProps) {
   const states = buildProviderCostBudgetStates(providers, registry);
   const confirmationCount = states.filter(state => state.budget.requiresConfirmation).length;
@@ -51,6 +55,12 @@ export function ProviderCostBudgetPanel({ providers, registry }: ProviderCostBud
                 <div className="min-w-0">
                   <p className="truncate text-[12px] font-semibold text-gray-800">{state.providerName}</p>
                   <p className="mt-1 text-[11px] leading-4 text-gray-500">{state.cost.detail}</p>
+                  {formatEstimatedCost(state.cost.estimatedUsd) && (
+                    <p className="mt-1 text-[11px] font-medium leading-4 text-gray-700">
+                      Estimated before execution: {formatEstimatedCost(state.cost.estimatedUsd)}
+                      {state.cost.currency ? ` ${state.cost.currency}` : ''}
+                    </p>
+                  )}
                 </div>
                 <Badge variant={costVariant(state.cost.label)}>{state.cost.label}</Badge>
               </div>

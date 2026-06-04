@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { ProjectData } from '../../types/project';
+import type { AssetCatalogEntry, ProjectData } from '../../types/project';
 import {
   appendGenerationHistoryRecord,
   clearGenerationHistory,
+  createHistoryRecordForGeneratedAsset,
   createGenerationHistoryRecord,
   exportGenerationHistory,
   linkGenerationHistoryOutput,
@@ -65,6 +66,37 @@ describe('generation history', () => {
     expect(record.output).toMatchObject({ questId: 'slime_hunt', secret: '[REDACTED]' });
     expect(record.outputSummary).toContain('[REDACTED]');
     expect(serialized).not.toMatch(/sk-test|fixture-token-value|provider-token|sk-provider-key|raw-secret-output/i);
+  });
+
+  it('records known generation cost metadata without leaking provider secrets', () => {
+    const record = createGenerationHistoryRecord({
+      id: 'history-cost',
+      kind: 'image',
+      operation: 'portrait.generate',
+      providerId: 'fixture-estimated',
+      modelId: 'fixture-image',
+      createdAt: '2026-06-04T04:12:00.000Z',
+      prompt: 'Portrait prompt',
+      cost: {
+        availability: 'estimated',
+        estimatedUsd: 0.08,
+        currency: 'USD',
+        confirmationRequired: true,
+        confirmationThresholdUsd: 0.1,
+        detail: 'Estimated from provider metadata with apiKey sk-provider-key',
+      },
+      outputSummary: 'Portrait candidate generated',
+    });
+
+    expect(record.cost).toEqual({
+      availability: 'estimated',
+      estimatedUsd: 0.08,
+      currency: 'USD',
+      confirmationRequired: true,
+      confirmationThresholdUsd: 0.1,
+      detail: 'Estimated from provider metadata with apiKey [REDACTED]',
+    });
+    expect(JSON.stringify(record)).not.toMatch(/sk-provider-key/i);
   });
 
   it('appends records to project history and trims oldest entries by retention limit', () => {
@@ -167,5 +199,45 @@ describe('generation history', () => {
 
     expect(project.generationHistory?.records[0].prompt).toBe('Tileset prompt');
     expect(clearGenerationHistory(project).generationHistory?.records).toEqual([]);
+  });
+
+  it('copies generated asset cost metadata into accepted generation history records', () => {
+    const asset: AssetCatalogEntry = {
+      id: 'hero_portrait',
+      name: 'Hero Portrait',
+      kind: 'image',
+      path: 'assets/generated/hero_portrait.png',
+      source: 'generated',
+      width: 128,
+      height: 128,
+      generated: {
+        prompt: 'Hero portrait prompt',
+        providerId: 'fixture-estimated',
+        modelId: 'fixture-image',
+        operation: 'portrait.generate',
+        createdAt: '2026-06-04T04:40:00.000Z',
+        cost: {
+          availability: 'estimated',
+          estimatedUsd: 0.08,
+          currency: 'USD',
+          confirmationRequired: true,
+          confirmationThresholdUsd: 0.1,
+        },
+      },
+    };
+
+    const record = createHistoryRecordForGeneratedAsset(asset);
+
+    expect(record).toMatchObject({
+      id: 'asset:hero_portrait:2026-06-04T04:40:00.000Z',
+      reviewState: 'accepted',
+      cost: {
+        availability: 'estimated',
+        estimatedUsd: 0.08,
+        currency: 'USD',
+        confirmationRequired: true,
+        confirmationThresholdUsd: 0.1,
+      },
+    });
   });
 });

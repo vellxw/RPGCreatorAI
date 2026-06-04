@@ -39,6 +39,7 @@ export interface ProviderCostMetadata {
   paidOperations: boolean;
   confirmationPolicy: ProviderCostConfirmationPolicy;
   currency?: 'USD';
+  estimatedUsd?: number;
   expensiveJobThresholdUsd?: number;
   detail?: string;
 }

@@ -807,10 +807,12 @@ Primary Phase 11 sources:
   pass (5/5). aiRequestQueueStore tests pass (5/5). Rate-limit fixtures
   included in mock provider contract suite. No code changes needed. Evidence
   in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-117 — cost estimate UI audit. providerCostBudget tests pass
-  (2/2). ProviderCostBudgetPanel tests pass (1/1). Settings UI shows cost
-  unknown honestly. No code changes needed. Evidence in
-  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-117 — cost estimate UI repaired. The earlier closeout covered
+  unknown cost display only and missed known-estimate metadata plus generation
+  history persistence. Provider cost metadata can now carry a known USD
+  estimate, Settings shows that estimate before execution when present, and
+  generation history records sanitized cost metadata for accepted provider
+  outputs. Evidence is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-116 — provider opt-in UX repaired. The earlier closeout proved
   disabled defaults but did not implement a first-use disclosure or declined
   state. Settings now requires accepting provider-bound context disclosure

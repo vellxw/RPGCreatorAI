@@ -149,10 +149,22 @@ export interface GeneratedAssetMetadata {
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
   visualContextVersion?: string;
+  cost?: GenerationHistoryCostMetadata;
 }
 
 export type GenerationHistoryKind = 'text' | 'image' | 'asset' | 'structured-data';
 export type GenerationHistoryReviewState = 'pending' | 'accepted' | 'rejected';
+export type GenerationHistoryCostAvailability = 'free' | 'estimated' | 'unknown';
+
+export interface GenerationHistoryCostMetadata {
+  availability: GenerationHistoryCostAvailability;
+  estimatedUsd?: number;
+  currency?: 'USD';
+  confirmationRequired?: boolean;
+  confirmationThresholdUsd?: number;
+  confirmedAt?: string;
+  detail?: string;
+}
 
 export interface GenerationHistoryLinkedOutput {
   kind: 'asset' | 'database' | 'map' | 'event';
@@ -183,6 +195,7 @@ export interface GenerationHistoryRecord {
   promptTemplateId?: string;
   promptTemplateVersion?: number;
   promptTemplateKind?: string;
+  cost?: GenerationHistoryCostMetadata;
   reviewState: GenerationHistoryReviewState;
   linkedOutputs: GenerationHistoryLinkedOutput[];
   acceptanceHistory: GenerationHistoryReviewEvent[];

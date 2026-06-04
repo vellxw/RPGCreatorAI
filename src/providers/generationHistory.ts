@@ -3,6 +3,7 @@ import type {
   AssetCatalogEntry,
   GeneratedAssetMetadata,
   GenerationHistoryData,
+  GenerationHistoryCostMetadata,
   GenerationHistoryKind,
   GenerationHistoryLinkedOutput,
   GenerationHistoryRecord,
@@ -33,6 +34,7 @@ export interface CreateGenerationHistoryRecordInput {
   promptTemplateId?: string;
   promptTemplateVersion?: number;
   promptTemplateKind?: string;
+  cost?: GenerationHistoryCostMetadata;
 }
 
 export interface AppendGenerationHistoryOptions {
@@ -82,6 +84,28 @@ function normalizeText(value: string, fallback: string): string {
   return clampText(trimmed || fallback);
 }
 
+function normalizeCostNumber(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : undefined;
+}
+
+function sanitizeCost(cost: GenerationHistoryCostMetadata | undefined): GenerationHistoryCostMetadata | undefined {
+  if (!cost) return undefined;
+  const out: GenerationHistoryCostMetadata = {
+    availability: cost.availability === 'free' || cost.availability === 'estimated' ? cost.availability : 'unknown',
+  };
+  const estimatedUsd = normalizeCostNumber(cost.estimatedUsd);
+  const confirmationThresholdUsd = normalizeCostNumber(cost.confirmationThresholdUsd);
+
+  if (estimatedUsd !== undefined) out.estimatedUsd = estimatedUsd;
+  if (cost.currency === 'USD') out.currency = 'USD';
+  if (typeof cost.confirmationRequired === 'boolean') out.confirmationRequired = cost.confirmationRequired;
+  if (confirmationThresholdUsd !== undefined) out.confirmationThresholdUsd = confirmationThresholdUsd;
+  if (cost.confirmedAt !== undefined) out.confirmedAt = normalizeText(cost.confirmedAt, '');
+  if (cost.detail !== undefined) out.detail = normalizeText(cost.detail, '');
+
+  return out;
+}
+
 function normalizeHistory(history: GenerationHistoryData | undefined, maxRecords?: number): GenerationHistoryData {
   const records = Array.isArray(history?.records) ? history.records : [];
   const limit = Math.max(1, Math.floor(maxRecords ?? history?.maxRecords ?? DEFAULT_MAX_RECORDS));
@@ -107,6 +131,7 @@ export function createGenerationHistoryRecord(input: CreateGenerationHistoryReco
     promptTemplateId: input.promptTemplateId,
     promptTemplateVersion: input.promptTemplateVersion,
     promptTemplateKind: input.promptTemplateKind,
+    cost: sanitizeCost(input.cost),
     reviewState: 'pending',
     linkedOutputs: [],
     acceptanceHistory: [],
@@ -224,6 +249,7 @@ export function createHistoryRecordForGeneratedAsset(asset: AssetCatalogEntry): 
     promptTemplateId: metadata.promptTemplateId,
     promptTemplateVersion: metadata.promptTemplateVersion,
     promptTemplateKind: metadata.promptTemplateKind,
+    cost: metadata.cost,
   });
   return {
     ...record,

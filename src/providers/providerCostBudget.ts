@@ -12,6 +12,7 @@ export interface ProviderCostState {
   label: string;
   detail: string;
   currency?: 'USD';
+  estimatedUsd?: number;
 }
 
 export interface ProviderRateLimitState {
@@ -58,18 +59,23 @@ function buildCost(provider: ProviderConfig, metadata?: ProviderMetadata): Provi
   const availability = metadata?.cost.estimateAvailability ??
     provider.costEstimateAvailability ??
     'unknown';
+  const estimatedUsd = typeof metadata?.cost.estimatedUsd === 'number' && Number.isFinite(metadata.cost.estimatedUsd)
+    ? Math.max(0, metadata.cost.estimatedUsd)
+    : undefined;
   const detail = metadata?.cost.detail ??
     (availability === 'unknown'
       ? 'Exact pricing is not stored in this local registry.'
       : availability === 'free'
         ? 'This provider has no remote paid operation in the local registry.'
         : 'The local registry can estimate this provider cost before execution.');
-  return {
+  const cost: ProviderCostState = {
     availability,
     label: costLabel(availability),
     detail,
     currency: metadata?.cost.currency,
   };
+  if (estimatedUsd !== undefined) cost.estimatedUsd = estimatedUsd;
+  return cost;
 }
 
 function buildRateLimit(provider: ProviderConfig, metadata?: ProviderMetadata): ProviderRateLimitState {
