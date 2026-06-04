@@ -4,6 +4,16 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-152 / CP-117 — Cost Estimate UI
+
+- `2026-06-04 00:40:00 -03:00` — cost estimate UI audit — PASS.
+- providerCostBudget tests: PASS (2/2) — reports unknown live-provider cost honestly and requires paid-work confirmation; marks offline mock provider as free.
+- ProviderCostBudgetPanel tests: PASS (1/1) — shows cost unknown, provider rate-limit guidance, and session confirmation without live actions.
+- Settings UI: "Cost & Budget" section shows "Cost unknown — cost is unavailable until the provider reports pricing for the configured model and usage." (verified from snapshot).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-151 / CP-116 — Provider Opt-In UX
 
 - `2026-06-04 00:35:00 -03:00` — provider opt-in UX audit — PASS.

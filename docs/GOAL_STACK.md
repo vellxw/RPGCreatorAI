@@ -652,6 +652,10 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-117 — cost estimate UI audit. providerCostBudget tests pass
+  (2/2). ProviderCostBudgetPanel tests pass (1/1). Settings UI shows cost
+  unknown honestly. No code changes needed. Evidence in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-116 — provider opt-in UX audit. ProviderCapabilityGatesPanel
   tests pass (2/2). AIRequestQueuePanel tests pass (3/3). Settings UI shows
   all providers disabled by default. Editor works fully without providers.
