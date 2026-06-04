@@ -227,7 +227,11 @@ function Invoke-RuntimeScreenshotRoundtrip {
 $resolvedBuildDir = Resolve-BuildDir -Override $BuildDir
 
 Invoke-Step 'FRONTEND ROUNDTRIP TESTS' {
-    & npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts
+    & npm test -- --run `
+        src/e2e/__tests__/editorRoundtrip.test.ts `
+        src/e2e/__tests__/aiContentPipelineIntegration.test.ts `
+        src/adapters/__tests__/PlaytestSessionAdapter.test.ts `
+        src/adapters/__tests__/BrowserMemoryAdapter.test.ts
     if ($LASTEXITCODE -ne 0) { throw "frontend roundtrip tests failed (exit $LASTEXITCODE)" }
 }
 

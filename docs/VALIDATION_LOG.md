@@ -955,7 +955,15 @@ Append-only log of major validation runs. Newest entries on top.
 ### Phase 11 FRA-145 / CP-110 — Editor Runtime Roundtrip Fixtures V2
 
 - `2026-06-04 00:05:00 -03:00` — editor-runtime roundtrip script coverage audit — PASS; verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths: frontend roundtrip tests (editorRoundtrip.test.ts, PlaytestSessionAdapter.test.ts), Tauri content check, Rust desktop tests, native build+test, runtime launch smoke, and runtime screenshot roundtrip with SHA256 hash comparison. Roundtrip copies data/ and assets/generated/runtime/ to temp dir, modifies town.json, verifies edited data loads and screenshots differ. Source project is unmutated. No script changes needed.
-- Final pass/fail for this issue validation: PASS (already well-covered).
+- Previous closeout result: PASS (already well-covered), later superseded by
+  the repair audit below.
+- `2026-06-04 05:16:00 -03:00` — CP-110 repair audit found the previous docs-only closeout was too narrow: the script did not execute the accepted AI-content pipeline fixture or BrowserMemoryAdapter asset/database memory roundtrip fixture. TDD red: `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts` failed 1/4 tests because `verify-editor-runtime-roundtrip.ps1` did not include `src/e2e/__tests__/aiContentPipelineIntegration.test.ts`.
+- Fix applied: expanded `scripts/dev/verify-editor-runtime-roundtrip.ps1` to run `src/e2e/__tests__/aiContentPipelineIntegration.test.ts` and `src/adapters/__tests__/BrowserMemoryAdapter.test.ts` with the existing editor roundtrip and PlaytestSessionAdapter suites. Updated the script contract test in `src/e2e/__tests__/editorRoundtrip.test.ts`.
+- `npm test -- --run src/e2e/__tests__/editorRoundtrip.test.ts` — PASS; 1 test file / 4 tests.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1` — PASS; frontend roundtrip tests passed (4 files / 17 tests), Tauri content check passed, Rust desktop tests passed (43 tests), native build+test passed through `verify.ps1 -SkipSmoke -SkipFrontend -SkipDesktop`, runtime launch smoke passed with `SMOKE PASSED`, and screenshot roundtrip passed with differing hashes: baseline `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944`, edited `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+- `npm run typecheck` — PASS.
+- Post-run cleanup checks: port 1420 had no listener, no leftover Vite/roundtrip process was found, and runtime smoke stderr had 0 `[ERROR]` lines. Known nonfatal warnings: CMake FetchContent/deprecation warnings.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 

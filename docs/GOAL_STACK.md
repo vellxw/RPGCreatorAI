@@ -841,12 +841,13 @@ Primary Phase 11 sources:
 - Phase 11 CP-111 — CI ready validation documentation. Created
   `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,
   cache expectations, known nonfatal warnings, and recommended CI pipeline.
-- Phase 11 CP-110 — editor-runtime roundtrip fixtures v2 audit.
-  verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths:
-  frontend roundtrip tests, Tauri content check, Rust desktop tests, native
-  build+test, runtime launch smoke, and runtime screenshot roundtrip with
-  SHA256 hash comparison. No script changes needed. Evidence in
-  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-110 — editor-runtime roundtrip fixtures v2 repaired. The
+  original docs-only closeout missed the accepted AI-content and asset-library
+  memory roundtrip fixtures. `verify-editor-runtime-roundtrip.ps1` now runs
+  `aiContentPipelineIntegration.test.ts` and `BrowserMemoryAdapter.test.ts`
+  alongside the existing editor roundtrip, playtest adapter, Tauri content,
+  Rust desktop, native build+test, runtime smoke, and screenshot-hash
+  roundtrip gates. Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-109 — runtime smoke expansion verified. `smoke-runtime.ps1`
   passes against the current native runtime, asserts choices, event-target
   movement routes, audio requests, plugin commands, clean smoke completion, and
