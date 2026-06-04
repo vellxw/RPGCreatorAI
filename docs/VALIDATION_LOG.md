@@ -4,6 +4,43 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-123 / CP-088 — AI Game Content Pipeline Integration Gate Remediation
+
+- `2026-06-04 01:47:06 -03:00` — AI game content pipeline integration gate
+  remediation — PASS.
+- Audit finding: Linear marked CP-088 Done, but the closeout cited commit
+  `a95e4cf`, which is the CP-086 validation repair assistant commit. Repo
+  history had no CP-088/FRA-123 commit and no integrated test proving map,
+  quest, event, database, balance, repair, and generation-history pipelines
+  compose into valid accepted project data.
+- TDD evidence: `npm test -- --run src/e2e/__tests__/aiContentPipelineIntegration.test.ts`
+  was RED before the fix. The new integration gate exposed
+  `TypeError: commands is not iterable` from `validateMap.ts` after an
+  incomplete generated map event entered composed project validation.
+- Fix applied: added a CP-088 integration test that runs all content pipelines
+  through the local mock provider, explicit approval, reducer insertion,
+  generation-history linking, project validation, save/reload, revalidation,
+  and selected-event playtest planning. Generated map events now include a
+  complete runtime/editor shape, map-draft candidate validation rejects
+  incomplete events before approval, and map validation reports malformed
+  command arrays instead of throwing.
+- Documentation: added
+  `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md`.
+- Focused `npm test -- --run src/e2e/__tests__/aiContentPipelineIntegration.test.ts`
+  — PASS, 1 file / 1 test.
+- Focused `npm test -- --run src/providers/__tests__/mapDraftGenerationWorkflow.test.ts src/validation/__tests__/validateMap.test.ts src/stores/__tests__/projectReducer.test.ts src/e2e/__tests__/editorRoundtrip.test.ts src/e2e/__tests__/aiContentPipelineIntegration.test.ts`
+  — PASS, 5 files / 63 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (98 files / 507 tests),
+  frontend build, native C++ configure/build/CTest, Tauri content check, 43
+  Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-122 / CP-087 — Prompt And Generation History Remediation
 
 - `2026-06-04 01:32:03 -03:00` — prompt/generation history remediation — PASS.

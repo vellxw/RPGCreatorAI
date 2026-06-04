@@ -226,7 +226,15 @@ export function validateEvent(event: GameEvent, map: MapData, allMapIds: string[
     });
   }
 
+  if (!Array.isArray(event.commands)) {
+    messages.push({
+      level: 'error',
+      message: `Event "${event.id}" commands must be an array`,
+      source: `${map.id}/${event.id}`,
+    });
+  } else {
     messages.push(...validateCommands(event.commands, event.id, map.id, allMapIds, map.events));
+  }
   if (event.pages) {
     messages.push(...validateEventPages(event, map, allMapIds));
   }
@@ -284,7 +292,15 @@ function validateEventPages(event: GameEvent, map: MapData, allMapIds: string[])
         });
       }
     }
-    messages.push(...validateCommands(page.commands, event.id, map.id, allMapIds, map.events));
+    if (!Array.isArray(page.commands)) {
+      messages.push({
+        level: 'error',
+        message: `Event "${event.id}" page "${page.id}" commands must be an array`,
+        source: `${map.id}/${event.id}/${page.id}`,
+      });
+    } else {
+      messages.push(...validateCommands(page.commands, event.id, map.id, allMapIds, map.events));
+    }
   }
   return messages;
 }

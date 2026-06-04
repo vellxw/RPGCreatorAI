@@ -46,13 +46,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`
 - `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`
 - `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`
+- `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-088 through
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-089 through
   CP-096 audit/remediation next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -603,6 +604,16 @@ Primary Phase 11 sources:
   retention cleanup, export cloning, accepted output links, and reducer
   auto-recording for generated assets accepted into the asset catalog. Evidence
   is recorded in `docs/PHASE_11_PROMPT_GENERATION_HISTORY.md` and
+  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-088 — AI Game Content Pipeline Integration Gate remediated.
+  Linear's prior closeout cited the CP-086 commit and had no integrated gate.
+  The new CP-088 test composes map, quest, event command, database draft,
+  balancing, validation repair, generation-history, save/reload, validation,
+  and selected-event playtest planning through local mocks. It found and fixed
+  incomplete generated map events that could crash project validation; map
+  draft validation now rejects incomplete events before approval, and map
+  validation reports malformed command arrays instead of throwing. Evidence is
+  recorded in `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md` and
   `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across

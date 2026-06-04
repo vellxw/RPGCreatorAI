@@ -1,6 +1,9 @@
 import { isSupportedCollisionTile, isSupportedRegionTile } from '../visual/tileCatalog';
 import type { ProviderAdapter } from './providerAdapter';
 
+const VALID_EVENT_TYPES = new Set(['npc', 'transfer', 'chest', 'object', 'trigger']);
+const VALID_TRIGGERS = new Set(['interact', 'touch', 'autorun', 'parallel']);
+
 export function buildMapDraftGenerationRequest(
   options: { prompt: string; mapId: string; mapName: string; templateId: string },
   context: { defaultTilesetId: string },
@@ -58,8 +61,50 @@ export async function generateMapDraftCandidate(
   ];
 
   const events = [
-    { id: 'draft_greeter', trigger: 'interact' },
-    { id: 'draft_hook', trigger: 'interact' },
+    {
+      id: 'draft_greeter',
+      type: 'npc' as const,
+      x: 4,
+      y: 4,
+      solid: false,
+      trigger: 'interact' as const,
+      commands: [{ type: 'showText' as const, speaker: 'Guide', text: 'The cave is ready for review.' }],
+      pages: [
+        {
+          id: 'page_1',
+          name: 'Page 1',
+          conditions: {},
+          graphic: {},
+          movement: { type: 'fixed' as const, speed: 'normal' as const },
+          options: { walking: true, stepping: false, directionFix: false, through: false },
+          priority: 'belowCharacters' as const,
+          trigger: 'interact' as const,
+          commands: [{ type: 'showText' as const, speaker: 'Guide', text: 'The cave is ready for review.' }],
+        },
+      ],
+    },
+    {
+      id: 'draft_hook',
+      type: 'trigger' as const,
+      x: 8,
+      y: 6,
+      solid: false,
+      trigger: 'interact' as const,
+      commands: [{ type: 'showText' as const, text: 'A draft encounter hook fires here.' }],
+      pages: [
+        {
+          id: 'page_1',
+          name: 'Page 1',
+          conditions: {},
+          graphic: {},
+          movement: { type: 'fixed' as const, speed: 'normal' as const },
+          options: { walking: false, stepping: false, directionFix: false, through: false },
+          priority: 'belowCharacters' as const,
+          trigger: 'interact' as const,
+          commands: [{ type: 'showText' as const, text: 'A draft encounter hook fires here.' }],
+        },
+      ],
+    },
   ];
 
   return {
@@ -217,6 +262,25 @@ export function validateMapDraftGenerationCandidate(candidate: any, context: any
             errors.push(`Duplicate event id "${event.id}" in map draft`);
           }
           seenEventIds.add(event.id);
+        }
+        const eventLabel = typeof event.id === 'string' && event.id.trim() ? event.id : 'unknown';
+        if (typeof event.type !== 'string' || !VALID_EVENT_TYPES.has(event.type)) {
+          errors.push(`Map event "${eventLabel}" type is required`);
+        }
+        if (!Number.isInteger(event.x) || event.x < 0 || event.x >= (map.width ?? 0)) {
+          errors.push(`Map event "${eventLabel}" x must be an in-bounds integer`);
+        }
+        if (!Number.isInteger(event.y) || event.y < 0 || event.y >= (map.height ?? 0)) {
+          errors.push(`Map event "${eventLabel}" y must be an in-bounds integer`);
+        }
+        if (typeof event.solid !== 'boolean') {
+          errors.push(`Map event "${eventLabel}" solid must be a boolean`);
+        }
+        if (typeof event.trigger !== 'string' || !VALID_TRIGGERS.has(event.trigger)) {
+          errors.push(`Map event "${eventLabel}" trigger is invalid`);
+        }
+        if (!Array.isArray(event.commands)) {
+          errors.push(`Map event "${eventLabel}" commands must be an array`);
         }
       }
     }
