@@ -652,6 +652,12 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-110 — editor-runtime roundtrip fixtures v2 audit.
+  verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths:
+  frontend roundtrip tests, Tauri content check, Rust desktop tests, native
+  build+test, runtime launch smoke, and runtime screenshot roundtrip with
+  SHA256 hash comparison. No script changes needed. Evidence in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-109 — runtime smoke expansion audit. smoke-runtime.ps1 already
   covers Phase 11 features: plugin command registry v2, audio authoring v1,
   movement routes, choices, and 3 screenshot assertions. C++ tests cover

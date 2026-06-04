@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-145 / CP-110 — Editor Runtime Roundtrip Fixtures V2
+
+- `2026-06-04 00:05:00 -03:00` — editor-runtime roundtrip script coverage audit — PASS; verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths: frontend roundtrip tests (editorRoundtrip.test.ts, PlaytestSessionAdapter.test.ts), Tauri content check, Rust desktop tests, native build+test, runtime launch smoke, and runtime screenshot roundtrip with SHA256 hash comparison. Roundtrip copies data/ and assets/generated/runtime/ to temp dir, modifies town.json, verifies edited data loads and screenshots differ. Source project is unmutated. No script changes needed.
+- Final pass/fail for this issue validation: PASS (already well-covered).
+
+---
+
 ### Phase 11 FRA-144 / CP-109 — Runtime Smoke Expansion
 
 - `2026-06-04 00:00:00 -03:00` — runtime smoke script coverage audit — PASS; smoke-runtime.ps1 already covers Phase 11 features: plugin command registry v2 (pluginCommand debug.log), audio authoring v1 (Audio requested: chest_open), movement routes (setMovementRoute with target=event), choices (showChoices with selected=0), and 3 screenshot assertions. C++ tests cover save/load, battle, diagnostics, and other Phase 11 features. Smoke script is deterministic, bounded (3s timeout), and documents expected markers.
