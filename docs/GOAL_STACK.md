@@ -617,6 +617,11 @@ Primary Phase 11 sources:
   no buttons below 20px, and all controls accessible. Screenshot evidence and
   automated JS checks recorded under `docs/screenshots/phase11-cp099/`. Evidence
   is recorded in `docs/RESPONSIVE_LAYOUT_AUDIT.md`.
+- Phase 11 CP-100 — accessibility audit completed. All 88 interactive buttons
+  audited for accessible names; 2 zoom control buttons in MapCanvas were missing
+  `aria-label` and `title` and were fixed. All 19 form inputs have proper labels.
+  14 decorative images without alt text identified as minor non-blocking items.
+  Evidence is recorded in `docs/ACCESSIBILITY_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

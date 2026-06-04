@@ -590,6 +590,8 @@ export function MapCanvas() {
       <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-md px-2 py-1 shadow-sm">
         <button
           onClick={() => dispatch({ type: 'SET_ZOOM', zoom: Math.max(50, state.zoom - 25) })}
+          aria-label="Zoom out"
+          title="Zoom out"
           className="p-1 hover:bg-gray-100 rounded cursor-pointer"
         >
           <ZoomOut size={14} className="text-gray-500" />
@@ -597,6 +599,8 @@ export function MapCanvas() {
         <span className="text-[12px] text-gray-600 font-medium px-2">{zoomReadout}%</span>
         <button
           onClick={() => dispatch({ type: 'SET_ZOOM', zoom: Math.min(200, state.zoom + 25) })}
+          aria-label="Zoom in"
+          title="Zoom in"
           className="p-1 hover:bg-gray-100 rounded cursor-pointer"
         >
           <ZoomIn size={14} className="text-gray-500" />

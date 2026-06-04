@@ -4,6 +4,17 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-135 / CP-100 — Accessibility Audit
+
+- `2026-06-03 22:15:00 -03:00` — automated button accessibility audit via Chrome DevTools MCP — PASS; 88 buttons audited, 2 found without accessible names (zoom out/in buttons in MapCanvas), both fixed with `aria-label` and `title` attributes.
+- `2026-06-03 22:16:00 -03:00` — form input accessibility audit — PASS; all 19 inputs have proper labels.
+- `2026-06-03 22:17:00 -03:00` — image alt text audit — 14 images without alt text identified (decorative icons inside labeled buttons), minor non-blocking issue.
+- `2026-06-03 22:18:00 -03:00` — keyboard navigation audit — PASS; all interactive elements are focusable, disabled states are correct.
+- Fix applied: added `aria-label="Zoom out"` + `title="Zoom out"` and `aria-label="Zoom in"` + `title="Zoom in"` to zoom control buttons in `src/components/editor/MapCanvas.tsx`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-134 / CP-099 — Responsive Layout Audit
 
 - `2026-06-03 22:00:00 -03:00` — responsive layout audit at 4 viewport sizes (768x600, 1024x768, 1280x800, 1920x1080) — PASS; Maps, Database, and Playtest workspaces all pass with no horizontal scroll, no tiny buttons (<20px), and all controls accessible. Canvas viewport zoom auto-adjusts as expected.
