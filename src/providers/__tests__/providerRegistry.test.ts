@@ -53,6 +53,29 @@ describe('providerRegistry', () => {
     });
   });
 
+  it('declares documented Claude model options without making them required defaults', () => {
+    const anthropic = getProviderMetadata('anthropic');
+
+    expect(anthropic?.modelSelection).toBe('user-selected');
+    expect(anthropic?.models).toEqual([
+      {
+        id: 'claude-opus-4-8',
+        label: 'Claude Opus 4.8',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'claude-sonnet-4-6',
+        label: 'Claude Sonnet 4.6',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'claude-haiku-4-5-20251001',
+        label: 'Claude Haiku 4.5',
+        operations: ['text.generate', 'code.assist'],
+      },
+    ]);
+  });
+
   it('derives settings provider configs from registry metadata', () => {
     const configs = providerConfigsFromRegistry(defaultProviderRegistry);
     const openai = configs.find(provider => provider.id === 'openai');

@@ -78,6 +78,42 @@ describe('modelCapabilityRegistry', () => {
     expect(modelSupportsCapability(descriptor!, 'video')).toBe(false);
   });
 
+  it('defines Claude text and structured authoring capabilities from current Anthropic docs', () => {
+    const opus = getModelCapabilityDescriptor('anthropic', 'claude-opus-4-8');
+    const sonnet = getModelCapabilityDescriptor('anthropic', 'claude-sonnet-4-6');
+    const haiku = getModelCapabilityDescriptor('anthropic', 'claude-haiku-4-5-20251001');
+
+    expect(opus).toMatchObject({
+      providerId: 'anthropic',
+      modelId: 'claude-opus-4-8',
+      capabilities: ['text', 'structured-json', 'code', 'tool'],
+      operations: ['text.generate', 'code.assist'],
+      limits: {
+        contextWindowTokens: 1000000,
+        maxOutputTokens: 128000,
+      },
+    });
+    expect(sonnet).toMatchObject({
+      providerId: 'anthropic',
+      modelId: 'claude-sonnet-4-6',
+      limits: {
+        contextWindowTokens: 1000000,
+        maxOutputTokens: 64000,
+      },
+    });
+    expect(haiku).toMatchObject({
+      providerId: 'anthropic',
+      modelId: 'claude-haiku-4-5-20251001',
+      limits: {
+        contextWindowTokens: 200000,
+        maxOutputTokens: 64000,
+      },
+    });
+    expect(modelSupportsCapability(opus!, 'structured-json')).toBe(true);
+    expect(modelSupportsCapability(sonnet!, 'code')).toBe(true);
+    expect(modelSupportsCapability(haiku!, 'image')).toBe(false);
+  });
+
   it('defines a separate offline image mock capability fixture', () => {
     const descriptor = getModelCapabilityDescriptor('local', 'offline-image-mock');
 

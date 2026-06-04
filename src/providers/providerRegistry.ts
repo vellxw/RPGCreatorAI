@@ -136,7 +136,23 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     rateLimit: providerManagedRateLimit,
     operations: ['text.generate', 'code.assist'],
     capabilityLabels: ['Text generation', 'Code assistance', 'Planning'],
-    models: [],
+    models: [
+      {
+        id: 'claude-opus-4-8',
+        label: 'Claude Opus 4.8',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'claude-sonnet-4-6',
+        label: 'Claude Sonnet 4.6',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'claude-haiku-4-5-20251001',
+        label: 'Claude Haiku 4.5',
+        operations: ['text.generate', 'code.assist'],
+      },
+    ],
     modelSelection: 'user-selected',
   },
   {

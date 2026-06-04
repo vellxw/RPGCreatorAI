@@ -4,6 +4,43 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-125 / CP-090 — Claude Provider Adapter Remediation
+
+- `2026-06-04 02:21:04 -03:00` — Claude provider adapter remediation —
+  PASS.
+- Audit finding: Linear marked CP-090 Done, but the closeout cited commit
+  `a95e4cf` and described only Anthropic/Claude registry metadata plus offline
+  mock contracts. Repo history had no CP-090/FRA-125 commit and no executable
+  Claude adapter through the shared provider interface.
+- Official docs checked before implementation: Anthropic Messages API
+  reference, Messages examples, structured outputs, errors, rate limits, and
+  model overview.
+- TDD evidence: `npm test -- --run src/providers/__tests__/anthropicProviderAdapter.test.ts`
+  was RED before implementation because `../anthropicProviderAdapter` did not
+  exist.
+- Fix applied: added `src/providers/anthropicProviderAdapter.ts` with injected
+  credential lookup, mocked-fetch execution, Messages API request mapping,
+  structured-output JSON schema mapping, Anthropic response normalization,
+  parsed JSON output data, structured missing-credential/API/rate-limit
+  failures, cancellation handling, retry-after parsing, and redacted provider
+  errors. Registered configurable Claude Opus/Sonnet/Haiku metadata and model
+  capability descriptors.
+- Documentation: added `docs/PHASE_11_ANTHROPIC_PROVIDER_ADAPTER.md`.
+- Focused `npm test -- --run src/providers/__tests__/anthropicProviderAdapter.test.ts`
+  — PASS, 1 file / 5 tests.
+- Focused `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 7 files / 38 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (100 files / 521
+  tests), frontend build, native C++ configure/build/CTest, Tauri content check,
+  43 Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-124 / CP-089 — OpenAI Provider Adapter Remediation
 
 - `2026-06-04 02:09:17 -03:00` — OpenAI provider adapter remediation —
