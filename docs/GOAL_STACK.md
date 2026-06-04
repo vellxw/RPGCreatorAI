@@ -772,6 +772,12 @@ Primary Phase 11 sources:
   92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
   PowerShell wrappers validate committed normalization, preview, and runtime
   manifests offline.
+- Phase 11 CP-126 — complete platform final validation report completed. Added
+  `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md` with the validated
+  baseline commit, canonical verify/package results, runtime screenshot
+  evidence, AI/provider mock-vs-live status, Linear milestone-15 status,
+  known limitations, and immediate CP-127/CP-128 next steps. Evidence is
+  recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-125 — sample project complete-platform expansion completed.
   The bundled sample now includes accepted local/mock generation evidence in
   `data/assets/catalog.json` for the runtime tileset and shopkeeper portrait,

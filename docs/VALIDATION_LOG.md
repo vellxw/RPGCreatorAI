@@ -4,6 +4,29 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-161 / CP-126 - Complete Platform Final Validation Report
+
+- `2026-06-04 07:53:00 -03:00` - final validation report creation - PASS.
+- Linear issue read: FRA-161 required a final report based on actual executed
+  commands, including canonical verify, screenshots, Linear status,
+  commit/push result, AI/provider diagnostic status, limitations, and next
+  phase.
+- Validation baseline used by the report:
+  `c596a79970a2b55238662c5c321e28f31d7c34e9`, pushed to `origin/main`.
+- Report added: `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md`.
+- Report content includes: implemented platform feature summary, exact
+  `scripts/dev/verify.ps1` result, exact `npm run desktop:package:windows`
+  result, runtime smoke screenshot evidence, editor-runtime roundtrip hashes,
+  mock-only AI/provider validation status, Linear status for FRA-161/FRA-162/
+  FRA-163, known limitations, and recommended CP-127/CP-128 next steps.
+- Report reference check - PASS; committed runtime screenshot paths and
+  referenced screenshot directories exist. The report distinguishes committed
+  evidence from additional transient screenshots generated during runtime
+  smoke.
+- Final pass/fail for this issue validation before commit: PASS.
+
+---
+
 ### Phase 11 FRA-160 / CP-125 - Sample Project Complete Platform Expansion
 
 - `2026-06-04 07:49:20 -03:00` - bundled sample complete-platform expansion -
