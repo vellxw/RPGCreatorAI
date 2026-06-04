@@ -393,7 +393,7 @@ function EventProperties({ event, mapId, page }: { event: GameEvent; mapId: stri
     { value: 'npc_shopkeeper', label: 'Shopkeeper' },
     { value: 'chest_closed', label: 'Closed Chest' },
     { value: 'transfer_door', label: 'Transfer Door' },
-    { value: 'npc_placeholder', label: 'Placeholder NPC' },
+    { value: 'npc_placeholder', label: 'Sample NPC' },
   ];
   const activeSpriteOptions = pageGraphic.sprite && !spriteOptions.some(option => option.value === pageGraphic.sprite)
     ? [...spriteOptions, { value: pageGraphic.sprite, label: `${pageGraphic.sprite} (unknown)` }]

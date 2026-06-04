@@ -6,8 +6,9 @@ Issue: CP-101 / FRA-136
 
 ## Result
 
-PASS. UI copy across the editor is clear, action-oriented, and honest about
-capabilities. No vague or placeholder copy was found. No changes required.
+PASS with one repair applied. UI copy across the editor is clear,
+action-oriented, and honest about capabilities after replacing one visible
+sample sprite label that used placeholder-facing wording.
 
 ## Audit Scope
 
@@ -56,6 +57,7 @@ Playtest, and Settings workspaces in browser mode at 1280x800 viewport.
 | "GAME VIEWPORT · 16:9" | Clear viewport info |
 | "Frame 1280×720" | Clear dimensions |
 | "Map Settings" | Clear section header |
+| "Sample NPC" | Clear bundled sample sprite choice |
 
 ### Events Workspace
 
@@ -131,8 +133,13 @@ Playtest, and Settings workspaces in browser mode at 1280x800 viewport.
 | Database forms | PASS | Standard RPG terminology |
 | Keyboard shortcuts | PASS | Clear, discoverable |
 
-## No Changes Required
+## Repair Applied
 
-The existing UI copy is well-written, action-oriented, and honest about
-capabilities. No vague, placeholder, or misleading copy was found. The
-EMPTY_STATES.md policy is followed consistently.
+The original CP-101 pass missed one visible event sprite option labeled
+"Placeholder NPC". The underlying sprite id remains `npc_placeholder` for data
+compatibility, but the production-facing label is now "Sample NPC". A focused
+EventEditorScreen regression test prevents the placeholder-facing label from
+returning.
+
+After this repair, the visible UI copy is action-oriented and honest about
+capabilities. The EMPTY_STATES.md policy is followed consistently.

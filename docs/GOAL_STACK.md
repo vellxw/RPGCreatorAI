@@ -729,10 +729,12 @@ Primary Phase 11 sources:
   CP-095 are covered by focused Settings accessibility regression tests. 14
   decorative images without alt text identified as minor non-blocking items.
   Evidence is recorded in `docs/ACCESSIBILITY_AUDIT.md`.
-- Phase 11 CP-101 — UX copy audit completed. All UI copy across toolbar,
+- Phase 11 CP-101 — UX copy audit completed. UI copy across toolbar,
   validation, errors, empty states, playtest, AI/provider states, and database
-  forms audited for clarity. No vague or placeholder copy found. No code changes
-  required. Evidence is recorded in `docs/UX_COPY_AUDIT.md`.
+  forms was audited for clarity. One missed visible event sprite label
+  ("Placeholder NPC") was repaired to "Sample NPC" while preserving the
+  underlying `npc_placeholder` data id for compatibility. Evidence is recorded
+  in `docs/UX_COPY_AUDIT.md`.
 - Phase 11 CP-102 — generated asset quality audit completed. All 5 cataloged
   assets, 6 runtime manifest entries, and 1 animation normalization manifest
   verified for dimensions, transparency, runtime outputs, and frame metadata.

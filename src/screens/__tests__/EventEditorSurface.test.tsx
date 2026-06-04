@@ -226,6 +226,14 @@ describe('EventEditorScreen surface polish', () => {
     });
   });
 
+  it('uses production-facing copy for bundled sample sprite choices', () => {
+    const view = renderScreen();
+    selectPageTwo(view.container);
+
+    expect(view.container.textContent).not.toContain('Placeholder NPC');
+    expect(view.container.textContent).toContain('Sample NPC');
+  });
+
   it('exposes page condition, movement, and option controls without JSON editing', () => {
     const view = renderScreen();
     selectPageTwo(view.container);

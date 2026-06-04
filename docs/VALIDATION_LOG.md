@@ -4,6 +4,30 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-136 / CP-101 — UX Copy Audit Repair
+
+- `2026-06-04 04:07:46 -03:00` — UX copy audit repair — PASS.
+- Audit finding: CP-101 had a real audit commit (`ccebfaf`), but it claimed no
+  vague or placeholder copy was found while the current Event editor still
+  exposed a visible sprite option labeled "Placeholder NPC".
+- TDD evidence:
+  `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx` was RED
+  after adding a regression assertion because the Event editor text still
+  contained "Placeholder NPC".
+- Fix applied: changed the production-facing event sprite option label from
+  "Placeholder NPC" to "Sample NPC" in `src/screens/EventEditorScreen.tsx`
+  while preserving the underlying `npc_placeholder` value for project data
+  compatibility. Updated `docs/UX_COPY_AUDIT.md` and `docs/GOAL_STACK.md` to
+  record the repair.
+- Focused `npm test -- --run src/screens/__tests__/EventEditorSurface.test.tsx src/screens/__tests__/EventEditorEmptyState.test.tsx src/__tests__/AppStartup.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx src/screens/__tests__/SettingsScreen.test.tsx`
+  — PASS, 5 files / 20 tests.
+- `npm run typecheck` — PASS.
+- Structured source/docs check — PASS: production `Placeholder NPC` matches = 0,
+  documentation evidence matches = 13, original audit commit `ccebfaf` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-135 / CP-100 — Accessibility Audit Evidence Repair
 
 - `2026-06-04 04:03:35 -03:00` — Accessibility audit evidence repair — PASS.
