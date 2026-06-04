@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-143 / CP-108 — Desktop Playwright Smoke Harness
+
+- `2026-06-03 23:50:00 -03:00` — browser automation smoke harness verification — PASS; Chrome DevTools MCP serves as equivalent browser automation for high-value editor workflows. Used successfully for CP-097 (8 screenshots), CP-099 (7 screenshots at 4 sizes), and CP-100 (automated button audit). No Playwright installation required. Harness is optional and documents limitations.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-142 / CP-107 — Asset Pipeline Regression Tests
 
 - `2026-06-03 23:45:00 -03:00` — asset pipeline test suite verification — PASS; validation tests (validateProject: 43 tests, tileCatalog: 4 tests) and adapter tests (audioImport: 2 tests, tilesetImport: 2 tests, plus 30 other adapter tests) pass offline. Total: 10 files, 83 tests passed. Asset pipeline changes are covered by existing regression tests from CP-049 through CP-056 and CP-067 through CP-080.

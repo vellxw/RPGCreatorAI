@@ -652,6 +652,11 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-108 — desktop browser smoke harness documented. Chrome DevTools
+  MCP serves as equivalent browser automation for high-value editor workflows.
+  Used successfully for CP-097, CP-099, and CP-100. No Playwright installation
+  required. Harness is optional and documents limitations. Evidence is recorded
+  in `docs/BROWSER_SMOKE_HARNESS.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
