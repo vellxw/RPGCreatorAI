@@ -652,6 +652,9 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-111 — CI ready validation documentation. Created
+  `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,
+  cache expectations, known nonfatal warnings, and recommended CI pipeline.
 - Phase 11 CP-110 — editor-runtime roundtrip fixtures v2 audit.
   verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths:
   frontend roundtrip tests, Tauri content check, Rust desktop tests, native

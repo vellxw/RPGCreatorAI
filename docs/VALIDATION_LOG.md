@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-146 / CP-111 — CI Ready Validation Documentation
+
+- `2026-06-04 00:10:00 -03:00` — CI readiness documentation — PASS; created `docs/CI_READY_VALIDATION.md` with command map (CI-safe, CI-safe with skip flags, Windows-only, excluded from CI), provider mock policy, cache expectations, known nonfatal warnings, and recommended CI pipeline.
+- Final pass/fail for this issue validation: PASS (docs-only).
+
+---
+
 ### Phase 11 FRA-145 / CP-110 — Editor Runtime Roundtrip Fixtures V2
 
 - `2026-06-04 00:05:00 -03:00` — editor-runtime roundtrip script coverage audit — PASS; verify-editor-runtime-roundtrip.ps1 already covers Phase 11 data paths: frontend roundtrip tests (editorRoundtrip.test.ts, PlaytestSessionAdapter.test.ts), Tauri content check, Rust desktop tests, native build+test, runtime launch smoke, and runtime screenshot roundtrip with SHA256 hash comparison. Roundtrip copies data/ and assets/generated/runtime/ to temp dir, modifies town.json, verifies edited data loads and screenshots differ. Source project is unmutated. No script changes needed.
