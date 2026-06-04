@@ -719,10 +719,12 @@ Primary Phase 11 sources:
   requests don't contain API keys/secrets/tokens. Settings UI confirms
   credentials not stored in project data. Threat model documented. No code
   changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-112 — QA automation integration gate. Original evidence recorded
-  a pre-existing CP-086 blocker. CP-086 remediation later restored the canonical
-  full verification gate to PASS; CP-112 remains scheduled for a focused audit
-  pass when the Phase 11 closeout sweep reaches milestone 13. Evidence in
+- Phase 11 CP-112 — QA automation integration gate remediated. The original
+  evidence closed the issue despite typecheck/build failures from CP-086; the
+  repaired gate now passes end to end. `verify.ps1` and
+  `verify-editor-runtime-roundtrip.ps1` also retry the actual Tauri content
+  verifier instead of relying on a single 5-second post-ready check, eliminating
+  the repeated false timeout seen on Windows/Vite. Evidence in
   `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-111 — CI ready validation documentation. Created
   `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,

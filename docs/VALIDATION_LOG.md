@@ -4,6 +4,36 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-147 / CP-112 — QA Automation Integration Gate Remediation
+
+- `2026-06-04 01:18:44 -03:00` — QA automation gate remediation — PASS.
+- Root cause: the previous CP-112 Linear closeout was invalid because it
+  closed the issue while `npm run typecheck` and `npm run build` were failing.
+  After CP-086 was repaired, repeated verification found a second QA harness
+  weakness: `verify.ps1` and `verify-editor-runtime-roundtrip.ps1` waited for a
+  generic HTTP 200 from Vite and then made a single
+  `verify-tauri-content.ps1 -TimeoutSeconds 5` call. On this Windows/OneDrive
+  workspace the Vite server can briefly stall even while alive, causing
+  intermittent false failures.
+- Fix applied: both scripts now wait for the actual Tauri content verifier to
+  pass, using a bounded retry loop, 10-second per-probe timeout, and retained
+  last-check/stdout/stderr diagnostics on failure. Existing port checks use the
+  same longer verifier timeout.
+- `git diff --check` — PASS; CRLF warnings only.
+- Focused `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-editor-runtime-roundtrip.ps1 -BuildDir $env:LOCALAPPDATA\RPGCreatorAI\build`
+  — PASS. Covered frontend roundtrip tests (2 files / 8 tests), Tauri content
+  check, 43 Rust desktop tests, native C++ configure/build/CTest, runtime
+  smoke, and screenshot roundtrip.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (96 files / 501 tests),
+  frontend build, native C++ configure/build/CTest, Tauri content check, 43
+  Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-121 / CP-086 — AI Validation Repair Assistant Remediation
 
 - `2026-06-04 00:48:16 -03:00` — CP-086 remediation validation — PASS.

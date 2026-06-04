@@ -48,7 +48,8 @@ function Get-Sha256FileHash {
 }
 
 function Test-TauriContentQuietly {
-    & (Join-Path $PSScriptRoot 'verify-tauri-content.ps1') -Port 1420 -TimeoutSeconds 2 *> $null
+    param([int]$TimeoutSeconds = 5)
+    & (Join-Path $PSScriptRoot 'verify-tauri-content.ps1') -Port 1420 -TimeoutSeconds $TimeoutSeconds *> $null
     return $LASTEXITCODE -eq 0
 }
 
@@ -73,8 +74,31 @@ function Wait-ForTauriDevServer {
     throw "Timed out waiting for Tauri dev server on http://127.0.0.1:1420/.`n--- stdout ---`n$(Read-ShortLog $StdoutPath)`n--- stderr ---`n$(Read-ShortLog $StderrPath)"
 }
 
+function Wait-ForTauriContent {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [string]$StdoutPath,
+        [string]$StderrPath
+    )
+    $deadline = (Get-Date).AddSeconds(60)
+    $lastCheck = ''
+    while ((Get-Date) -lt $deadline) {
+        if ($Process.HasExited) {
+            throw "Tauri dev server exited before content check passed.`n--- stdout ---`n$(Read-ShortLog $StdoutPath)`n--- stderr ---`n$(Read-ShortLog $StderrPath)"
+        }
+        $output = & (Join-Path $PSScriptRoot 'verify-tauri-content.ps1') -Port 1420 -TimeoutSeconds 10 *>&1
+        $lastCheck = ($output | ForEach-Object { "$_" }) -join [Environment]::NewLine
+        if ($LASTEXITCODE -eq 0) {
+            if ($lastCheck) { Write-Host $lastCheck }
+            return
+        }
+        Start-Sleep -Seconds 1
+    }
+    throw "Timed out waiting for Tauri content check on http://127.0.0.1:1420/.`n--- last content check ---`n$lastCheck`n--- stdout ---`n$(Read-ShortLog $StdoutPath)`n--- stderr ---`n$(Read-ShortLog $StderrPath)"
+}
+
 function Invoke-TauriContentCheck {
-    if (Test-TauriContentQuietly) {
+    if (Test-TauriContentQuietly -TimeoutSeconds 10) {
         Write-Host 'OK: existing port 1420 server is serving RPGCreatorAI.'
         return
     }
@@ -100,10 +124,7 @@ function Invoke-TauriContentCheck {
             -WindowStyle Hidden
 
         Wait-ForTauriDevServer -Process $server -StdoutPath $stdout -StderrPath $stderr
-        & (Join-Path $PSScriptRoot 'verify-tauri-content.ps1') -Port 1420 -TimeoutSeconds 5
-        if ($LASTEXITCODE -ne 0) {
-            throw "Tauri content check failed.`n--- stdout ---`n$(Read-ShortLog $stdout)`n--- stderr ---`n$(Read-ShortLog $stderr)"
-        }
+        Wait-ForTauriContent -Process $server -StdoutPath $stdout -StderrPath $stderr
     } finally {
         if ($server -and -not $server.HasExited) {
             Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
