@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-136 / CP-101 — UX Copy Audit
+
+- `2026-06-03 22:30:00 -03:00` — UX copy audit across all workspaces — PASS; toolbar, validation, errors, empty states, playtest guidance, AI/provider states, database forms, and keyboard shortcuts all have clear, action-oriented, honest copy. No vague or placeholder copy found. No changes required.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-135 / CP-100 — Accessibility Audit
 
 - `2026-06-03 22:15:00 -03:00` — automated button accessibility audit via Chrome DevTools MCP — PASS; 88 buttons audited, 2 found without accessible names (zoom out/in buttons in MapCanvas), both fixed with `aria-label` and `title` attributes.
