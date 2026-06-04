@@ -4,6 +4,15 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-134 / CP-099 — Responsive Layout Audit
+
+- `2026-06-03 22:00:00 -03:00` — responsive layout audit at 4 viewport sizes (768x600, 1024x768, 1280x800, 1920x1080) — PASS; Maps, Database, and Playtest workspaces all pass with no horizontal scroll, no tiny buttons (<20px), and all controls accessible. Canvas viewport zoom auto-adjusts as expected.
+- `2026-06-03 22:01:00 -03:00` — automated JS checks — PASS; `body.scrollWidth <= body.clientWidth` confirmed at all sizes, all button hit targets >= 20x20px.
+- `2026-06-03 22:02:00 -03:00` — screenshot evidence captured — PASS; 7 screenshots stored under `docs/screenshots/phase11-cp099/`.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-133 / CP-098 — Runtime Screenshot Audit Workflow
 
 - `2026-06-03 21:45:00 -03:00` — docs review — PASS; `docs/RUNTIME_SCREENSHOT_AUDIT.md` created with 33 required screenshots across 10 categories (map/movement, dialogue, interactions/state, pause menu, inventory, party, quests, save/load, shop, battle), audit checklist covering text-fit/composition/entity-occlusion/viewport-framing/color-styling/state-correctness/responsive-scaling, evidence storage convention aligned with existing phase-7 and phase10-mvp screenshot dirs, smoke script alignment guidance, follow-up issue filing workflow, and integration with EDITOR_SCREENSHOT_AUDIT.md, GAME_VISUAL_QA.md, RUNTIME_UI_DESIGN.md, and EDITOR_RUNTIME_E2E_QA.md.

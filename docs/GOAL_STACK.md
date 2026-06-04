@@ -611,6 +611,12 @@ Primary Phase 11 sources:
   existing RUNTIME_UI_DESIGN.md, EDITOR_SCREENSHOT_AUDIT.md, GAME_VISUAL_QA.md,
   and EDITOR_RUNTIME_E2E_QA.md. Evidence is recorded in
   `docs/RUNTIME_SCREENSHOT_AUDIT.md`.
+- Phase 11 CP-099 — responsive layout audit completed. The editor was tested
+  at 4 viewport sizes (768x600, 1024x768, 1280x800, 1920x1080) across Maps,
+  Database, and Playtest workspaces. All sizes pass with no horizontal scroll,
+  no buttons below 20px, and all controls accessible. Screenshot evidence and
+  automated JS checks recorded under `docs/screenshots/phase11-cp099/`. Evidence
+  is recorded in `docs/RESPONSIVE_LAYOUT_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
