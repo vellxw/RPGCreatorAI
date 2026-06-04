@@ -114,6 +114,41 @@ describe('modelCapabilityRegistry', () => {
     expect(modelSupportsCapability(haiku!, 'image')).toBe(false);
   });
 
+  it('defines Kimi OpenAI-compatible text and code capabilities from current Moonshot docs', () => {
+    const k26 = getModelCapabilityDescriptor('moonshot', 'kimi-k2.6');
+    const k25 = getModelCapabilityDescriptor('moonshot', 'kimi-k2.5');
+    const v1 = getModelCapabilityDescriptor('moonshot', 'moonshot-v1-128k');
+
+    expect(k26).toMatchObject({
+      providerId: 'moonshot',
+      modelId: 'kimi-k2.6',
+      capabilities: ['text', 'structured-json', 'code', 'tool'],
+      operations: ['text.generate', 'code.assist'],
+      limits: {
+        contextWindowTokens: 256000,
+        maxOutputTokens: 32768,
+      },
+    });
+    expect(k25).toMatchObject({
+      providerId: 'moonshot',
+      modelId: 'kimi-k2.5',
+      limits: {
+        contextWindowTokens: 256000,
+      },
+    });
+    expect(v1).toMatchObject({
+      providerId: 'moonshot',
+      modelId: 'moonshot-v1-128k',
+      capabilities: ['text', 'structured-json'],
+      operations: ['text.generate'],
+      limits: {
+        contextWindowTokens: 128000,
+      },
+    });
+    expect(modelSupportsCapability(k26!, 'code')).toBe(true);
+    expect(modelSupportsCapability(v1!, 'code')).toBe(false);
+  });
+
   it('defines a separate offline image mock capability fixture', () => {
     const descriptor = getModelCapabilityDescriptor('local', 'offline-image-mock');
 

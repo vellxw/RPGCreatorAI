@@ -76,6 +76,44 @@ describe('providerRegistry', () => {
     ]);
   });
 
+  it('declares documented Kimi model options with configurable base URL', () => {
+    const moonshot = getProviderMetadata('moonshot');
+
+    expect(moonshot?.adapterKind).toBe('openai-compatible');
+    expect(moonshot?.modelSelection).toBe('user-selected');
+    expect(moonshot?.baseUrl).toEqual({
+      configurable: true,
+      defaultValue: 'https://api.moonshot.ai/v1',
+    });
+    expect(moonshot?.models).toEqual([
+      {
+        id: 'kimi-k2.6',
+        label: 'Kimi K2.6',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'kimi-k2.5',
+        label: 'Kimi K2.5',
+        operations: ['text.generate', 'code.assist'],
+      },
+      {
+        id: 'moonshot-v1-128k',
+        label: 'Moonshot v1 128k',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'moonshot-v1-32k',
+        label: 'Moonshot v1 32k',
+        operations: ['text.generate'],
+      },
+      {
+        id: 'moonshot-v1-8k',
+        label: 'Moonshot v1 8k',
+        operations: ['text.generate'],
+      },
+    ]);
+  });
+
   it('derives settings provider configs from registry metadata', () => {
     const configs = providerConfigsFromRegistry(defaultProviderRegistry);
     const openai = configs.find(provider => provider.id === 'openai');
