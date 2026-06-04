@@ -652,6 +652,11 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-112 — QA automation integration gate. Full canonical verification
+  gate run. npm test: 500/500 tests pass (95/96 files; 1 pre-existing CP-086
+  failure). npm run typecheck: FAIL due to pre-existing CP-086 type errors.
+  npm run build: FAIL due to same CP-086 blocker. Known blocker documented.
+  No generated artifacts staged. Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-111 — CI ready validation documentation. Created
   `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,
   cache expectations, known nonfatal warnings, and recommended CI pipeline.

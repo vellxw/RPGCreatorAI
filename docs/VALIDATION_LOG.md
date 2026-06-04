@@ -4,6 +4,19 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-147 / CP-112 — QA Automation Integration Gate
+
+- `2026-06-04 00:15:00 -03:00` — full canonical verification gate — PARTIAL PASS; documented pre-existing CP-086 blocker.
+- `npm run typecheck` — FAIL (exit 2); pre-existing CP-086 typecheck errors in ValidationRepairIntegration.test.tsx (missing @testing-library/react dependency, missing exports, type mismatches) and validationRepairWorkflow.test.ts (actionType string literal mismatch). NOT introduced by QA automation work.
+- `npm test -- --run` — PARTIAL PASS; 500/500 tests pass across 95/96 test files. 1 file fails (ValidationRepairIntegration.test.tsx) due to missing @testing-library/react dependency. Pre-existing from CP-086.
+- `npm run build` — FAIL (exit 2); blocked by same CP-086 typecheck errors.
+- Focused QA commands not in full gate: smoke-runtime.ps1, verify-editor-runtime-roundtrip.ps1 (require native build); asset pipeline tests (covered by npm test); provider mock tests (covered by npm test). Documented in CI_READY_VALIDATION.md.
+- No generated artifacts staged. git status --short confirms only docs files staged.
+- Known blocker: CP-086 ValidationRepairIntegration.test.tsx needs @testing-library/react installed or test file fixed.
+- Final pass/fail for this issue validation: PARTIAL PASS (pre-existing blocker documented).
+
+---
+
 ### Phase 11 FRA-146 / CP-111 — CI Ready Validation Documentation
 
 - `2026-06-04 00:10:00 -03:00` — CI readiness documentation — PASS; created `docs/CI_READY_VALIDATION.md` with command map (CI-safe, CI-safe with skip flags, Windows-only, excluded from CI), provider mock policy, cache expectations, known nonfatal warnings, and recommended CI pipeline.
