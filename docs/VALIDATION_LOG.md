@@ -950,12 +950,24 @@ Append-only log of major validation runs. Newest entries on top.
 
 ### Phase 11 FRA-159 / CP-124 — Asset Pipeline Documentation Final Pass
 
-- `2026-06-04 01:15:00 -03:00` — asset pipeline documentation audit — PASS.
-- Asset classes and directories: ASSET_PIPELINE.md documents asset types, directory structure, and runtime/editor split.
-- Generated/imported/protected asset states: PHASE_11_ASSET_CATALOG_V2.md documents asset states, metadata editor, and catalog management.
-- QA rubric and runtime export checks: GAME_VISUAL_QA.md (7-category rubric), PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md (runtime export pipeline), GENERATED_ASSET_QUALITY_AUDIT.md (CP-102 audit).
-- Recovery steps for failed generation/import: ERROR_RECOVERY.md, individual workflow specs (PHASE_11_IMAGE_IMPORT_WORKFLOW.md, PHASE_11_TILESET_IMPORT_WORKFLOW.md, PHASE_11_AUDIO_IMPORT_WORKFLOW.md, PHASE_11_SPRITESHEET_IMPORT_WORKFLOW.md).
-- Asset pipeline tests: 47 tests pass (from CP-107).
+- `2026-06-04 07:29:33 -03:00` — asset pipeline documentation repair —
+  PASS. The prior CP-124 audit overstated coverage in scattered docs and did
+  not make `docs/ASSET_PIPELINE.md` reproducible on its own.
+- Fix applied: expanded `docs/ASSET_PIPELINE.md` with asset classes,
+  project-owned directories, imported/generated/protected operational states,
+  workflow-specific recovery steps, QA rubrics, and runtime export gates.
+- `python -m unittest tests.test_runtime_asset_export tests.test_animation_strip_normalization tests.test_animation_preview_generation tests.test_visual_assets`
+  — PASS; 10 tests passed.
+- `npm test -- --run src/assets/generated/__tests__/assetManifestIntegrity.test.ts src/assets/generated/__tests__/assetCatalog.test.ts src/stores/__tests__/assetCatalogReducer.test.ts src/screens/__tests__/AssetsScreen.test.tsx src/adapters/__tests__/BrowserMemoryAdapter.test.ts src/adapters/__tests__/audioImport.test.ts src/adapters/__tests__/tilesetImport.test.ts src/components/database/__tests__/AnimationPreview.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/TilesetEditor.test.tsx src/components/database/__tests__/CharacterAnimationPipelineIntegration.test.tsx src/components/database/__tests__/SetupProgressionEditors.test.tsx src/providers/__tests__/generatedImageVisualQa.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/providers/__tests__/imageEditVariationWorkflow.test.ts src/providers/__tests__/portraitGenerationWorkflow.test.ts src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/imagePromptTemplates.test.ts src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/providers/__tests__/generationHistory.test.ts`
+  — PASS; 21 files and 87 tests passed.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  — PASS; runtime asset export validation passed.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1 --validate-manifest assets/generated/source/phase11_animation_normalization/player_adventurer_walk_down.json`
+  — PASS; animation strip normalization manifest validation passed.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest assets/generated/source/phase11_animation_previews/player_adventurer_walk_down.json`
+  — PASS; animation preview manifest validation passed.
+- Asset pipeline doc reference check — PASS; all workflow docs linked from
+  `docs/ASSET_PIPELINE.md` exist.
 - Final pass/fail for this issue validation: PASS.
 
 ---

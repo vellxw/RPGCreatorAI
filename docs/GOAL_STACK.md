@@ -772,12 +772,12 @@ Primary Phase 11 sources:
   92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
   PowerShell wrappers validate committed normalization, preview, and runtime
   manifests offline.
-- Phase 11 CP-124 — asset pipeline documentation final pass. Asset pipeline
-  docs already comprehensive: ASSET_PIPELINE.md, GAME_VISUAL_QA.md,
-  GENERATED_ASSET_QUALITY_AUDIT.md, PHASE_11_ASSET_CATALOG_V2.md,
-  PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md, and individual workflow
-  specs. Asset pipeline tests pass (47/47). No changes needed. Evidence in
-  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-124 — asset pipeline documentation final pass repaired. The
+  earlier audit overstated coverage in scattered docs; `docs/ASSET_PIPELINE.md`
+  now acts as the reproducible operating guide for asset classes, project
+  directories, imported/generated/protected states, recovery paths, QA rubrics,
+  normalization, preview generation, and runtime export gates. Evidence is
+  recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-123 — AI workflow documentation repaired. The earlier closeout
   pointed at scattered spec files and missed that the direct `AI Tools` surface
   still described AI as a future MVP placeholder. Added
