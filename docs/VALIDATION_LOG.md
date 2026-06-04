@@ -905,6 +905,18 @@ Append-only log of major validation runs. Newest entries on top.
 - Data locations: project JSON in `data/`, generated assets in `assets/generated/`, saves in `saves/`, app data in `$LOCALAPPDATA/RPGCreatorAI/`. Documented in SECURITY_THREAT_MODEL.md.
 - Credential storage: "Credential storage is only available in the desktop shell" and "Secret values are not stored in project data" (verified from snapshot).
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 05:42:14 -03:00` — repair audit re-read Linear FRA-150 and found the prior closeout cited missing `docs/SECURITY_THREAT_MODEL.md` and did not make provider-bound request context explicit enough in visible Settings copy.
+- TDD red: `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx` — FAIL as expected; 1 test failed because Settings did not contain `Provider-backed actions can send selected prompts and project context only when you run them.`
+- Fix applied: added the Settings provider-bound context copy, added Safety copy that provider-bound context is scoped to the selected editor action, added `docs/SECURITY_THREAT_MODEL.md` with trust boundaries, local data locations, allowed provider-bound context, denied data classes, enforcement checklist, and updated `docs/GOAL_STACK.md`.
+- `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx` — PASS; 1 test file / 6 tests.
+- `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/stores/__tests__/providerStore.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/generationHistory.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts` — PASS; 7 test files / 30 tests.
+- `npm run typecheck` — PASS.
+- Native runtime source scan for provider/credential/key terms in C++/CMake files — PASS; no matches, so `rg` returned exit 1 with empty output.
+- Project/runtime data scan across `data`, `assets/generated`, and `saves` for provider credential/key patterns — PASS; no provider credential/key patterns found.
+- `Test-Path docs\SECURITY_THREAT_MODEL.md` — PASS; returned `True`.
+- UI/doc evidence grep for the new provider-bound context copy and threat-model headings — PASS.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1` — PASS; runtime stayed alive for 3 seconds, smoke shots completed, save/load ran from local runtime data, and final marker was `SMOKE PASSED`.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 

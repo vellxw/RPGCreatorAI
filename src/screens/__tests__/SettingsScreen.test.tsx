@@ -62,6 +62,7 @@ describe('SettingsScreen provider settings', () => {
 
     expect(text).toContain('Provider Settings');
     expect(text).toContain('Providers are optional');
+    expect(text).toContain('Provider-backed actions can send selected prompts and project context only when you run them.');
     expect(text).toContain('No providers configured');
     expect(text).toContain('Maps, database, assets, and playtest stay available');
     expect(view.container.querySelector('input[type="password"]')).toBeNull();

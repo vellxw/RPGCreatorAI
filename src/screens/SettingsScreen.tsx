@@ -246,6 +246,9 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
             <p className="max-w-2xl text-[12px] leading-5 text-gray-600">
               Providers are optional editor tooling. Maps, database, assets, and playtest stay available with no providers configured.
             </p>
+            <p className="mt-1 max-w-2xl text-[12px] leading-5 text-gray-600">
+              Provider-backed actions can send selected prompts and project context only when you run them.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="info" dot>Editor-only</Badge>
@@ -554,6 +557,7 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
               </div>
               <ul className="space-y-2 text-[12px] leading-5 text-gray-600">
                 <li>Secret values are not stored in project data.</li>
+                <li>Provider-bound context is scoped to the selected editor action.</li>
                 <li>Normal editor validation uses mocks and fixtures.</li>
                 <li>Native runtime stays provider-independent.</li>
               </ul>

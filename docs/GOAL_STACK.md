@@ -815,11 +815,13 @@ Primary Phase 11 sources:
   tests pass (2/2). AIRequestQueuePanel tests pass (3/3). Settings UI shows
   all providers disabled by default. Editor works fully without providers.
   No code changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-115 — local data boundary audit. Provider-disabled behavior
-  tests pass (9/9). UI copy confirms providers are optional, runtime is
-  independent, credentials not stored in project data. Data locations
-  documented in SECURITY_THREAT_MODEL.md. No code changes needed. Evidence
-  in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-115 — local data boundary audit repaired. The earlier closeout
+  cited a missing threat-model file and did not expose provider-bound context
+  clearly enough in Settings. `docs/SECURITY_THREAT_MODEL.md` now documents
+  trust boundaries, local data locations, allowed provider-bound context, and
+  denied data classes. Settings now tells users provider-backed actions can
+  send selected prompts/project context only when run, with regression
+  coverage. Evidence is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-114 — no-key logging audit revalidated after the CP-113
   redaction repair. Runtime stdout/stderr smoke logs, log-source inventory,
   provider/credential/Playtest log panels, production secret-shape scan, and
