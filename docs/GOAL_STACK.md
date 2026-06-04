@@ -652,6 +652,11 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-122 — build/run/release docs final pass. BUILD_AND_RUN.md
+  updated in CP-105 with Phase 11 focused helpers. README documents packaged
+  build and first-run behavior. CI_READY_VALIDATION.md documents known
+  nonfatal warnings. Browser/desktop capability differences explicitly
+  documented. No changes needed. Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-121 — README complete platform rewrite audit. README already
   accurate for current capabilities. Documents local-first runtime, optional
   AI tooling, complete workflow, validation commands, and troubleshooting

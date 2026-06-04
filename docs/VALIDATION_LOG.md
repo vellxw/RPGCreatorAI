@@ -4,6 +4,17 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-157 / CP-122 — Build Run And Release Docs Final Pass
+
+- `2026-06-04 01:05:00 -03:00` — build/run/release docs final pass — PASS.
+- BUILD_AND_RUN.md: Updated in CP-105 with Phase 11 focused helpers (54 entries). All documented commands verified current.
+- README.md: Documents packaged build and first-run behavior. Links to WINDOWS_BUILD_NOTES.md, PHASE_11_RELEASE_ARTIFACT_POLICY.md, FIRST_RUN_APP_DATA_POLICY.md, DIAGNOSTICS.md.
+- CI_READY_VALIDATION.md: Documents known nonfatal warnings (CRLF, Rust unused import, npm deprecated, CMake policy, Vite HMR).
+- Browser/desktop capability differences: Explicitly documented in README ("Browser mode: edits stay in browser adapter until exported, and native runtime launch, runtime logs, and runtime state snapshots are unavailable by design").
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-156 / CP-121 — README Complete Platform Rewrite
 
 - `2026-06-04 01:00:00 -03:00` — README accuracy audit — PASS.
