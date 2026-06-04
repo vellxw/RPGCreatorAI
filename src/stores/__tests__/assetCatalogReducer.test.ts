@@ -100,4 +100,54 @@ describe('asset catalog reducer', () => {
     });
     expect(updated.dirty).toBe(true);
   });
+
+  it('records accepted generated asset provenance in project generation history', () => {
+    const state: ProjectStoreState = {
+      ...initialProjectStoreState,
+      assets: {
+        schemaVersion: 1,
+        assets: [],
+      },
+    };
+
+    const updated = projectReducer(state, {
+      type: 'ADD_ASSET_CATALOG_ENTRY',
+      asset: {
+        id: 'forest_tileset_generated',
+        name: 'Forest Tileset',
+        kind: 'generated',
+        path: 'assets/generated/forest_tileset.png',
+        source: 'generated',
+        generated: {
+          prompt: 'Create a forest tileset with token fixture-token-value',
+          promptInputs: { biome: 'forest', apiKey: 'sk-test-secret' },
+          promptTemplateId: 'tileset-rpg-map-v1',
+          promptTemplateVersion: 1,
+          promptTemplateKind: 'tileset',
+          providerId: 'local',
+          modelId: 'offline-image-mock',
+          createdAt: '2026-06-04T04:40:00.000Z',
+          operation: 'image.generate',
+        },
+      },
+    });
+
+    expect(updated.project.generationHistory?.records).toHaveLength(1);
+    expect(updated.project.generationHistory?.records[0]).toMatchObject({
+      kind: 'asset',
+      operation: 'image.generate',
+      providerId: 'local',
+      modelId: 'offline-image-mock',
+      reviewState: 'accepted',
+      linkedOutputs: [
+        {
+          kind: 'asset',
+          id: 'forest_tileset_generated',
+          path: 'assets/generated/forest_tileset.png',
+          label: 'Forest Tileset',
+        },
+      ],
+    });
+    expect(JSON.stringify(updated.project.generationHistory)).not.toMatch(/fixture-token-value|sk-test-secret/i);
+  });
 });

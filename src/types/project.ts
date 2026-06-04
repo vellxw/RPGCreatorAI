@@ -13,6 +13,7 @@ export interface ProjectData {
   database: DatabasePaths;
   assetCatalog?: string;
   visualProfile?: import('../visual/visualProfile').VisualProfileInput;
+  generationHistory?: GenerationHistoryData;
 }
 
 export interface DatabasePaths {
@@ -148,6 +149,49 @@ export interface GeneratedAssetMetadata {
   imageSettings?: Partial<ProviderImageGenerationSettings>;
   visualContextSource?: string;
   visualContextVersion?: string;
+}
+
+export type GenerationHistoryKind = 'text' | 'image' | 'asset' | 'structured-data';
+export type GenerationHistoryReviewState = 'pending' | 'accepted' | 'rejected';
+
+export interface GenerationHistoryLinkedOutput {
+  kind: 'asset' | 'database' | 'map' | 'event';
+  id: string;
+  table?: string;
+  path?: string;
+  label?: string;
+}
+
+export interface GenerationHistoryReviewEvent {
+  status: GenerationHistoryReviewState;
+  reviewedAt: string;
+  output?: GenerationHistoryLinkedOutput;
+  notes?: string;
+}
+
+export interface GenerationHistoryRecord {
+  id: string;
+  kind: GenerationHistoryKind;
+  operation: string;
+  providerId: string;
+  modelId: string;
+  createdAt: string;
+  prompt: string;
+  inputContext?: unknown;
+  output?: unknown;
+  outputSummary?: string;
+  promptTemplateId?: string;
+  promptTemplateVersion?: number;
+  promptTemplateKind?: string;
+  reviewState: GenerationHistoryReviewState;
+  linkedOutputs: GenerationHistoryLinkedOutput[];
+  acceptanceHistory: GenerationHistoryReviewEvent[];
+}
+
+export interface GenerationHistoryData {
+  schemaVersion: 1;
+  maxRecords: number;
+  records: GenerationHistoryRecord[];
 }
 
 export type GeneratedImageVisualQaCheckId =

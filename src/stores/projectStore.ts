@@ -32,6 +32,7 @@ import { normalizeAssetCatalog } from '../adapters/defaultAssetCatalog';
 import { validateProject } from '../validation/validateProject';
 import { applyReferenceRepair, renameReferences, type ReferenceRepairAction } from '../validation/referenceIndex';
 import { withNormalizedVisualProfile } from '../visual/visualProfile';
+import { appendGenerationHistoryRecord, createHistoryRecordForGeneratedAsset } from '../providers/generationHistory';
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -1755,12 +1756,17 @@ function reduceProjectState(state: ProjectStoreState, action: Exclude<ProjectAct
     case 'ADD_ASSET_CATALOG_ENTRY': {
       const assetId = action.asset.id.trim();
       if (!assetId || state.assets.assets.some(asset => asset.id === assetId)) return state;
+      const asset = deepClone({ ...action.asset, id: assetId });
+      const historyRecord = createHistoryRecordForGeneratedAsset(asset);
       return {
         ...state,
         dirty: true,
+        project: historyRecord
+          ? appendGenerationHistoryRecord(state.project, historyRecord)
+          : state.project,
         assets: {
           ...state.assets,
-          assets: [...state.assets.assets, deepClone({ ...action.asset, id: assetId })],
+          assets: [...state.assets.assets, asset],
         },
       };
     }

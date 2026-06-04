@@ -4,6 +4,35 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-122 / CP-087 — Prompt And Generation History Remediation
+
+- `2026-06-04 01:32:03 -03:00` — prompt/generation history remediation — PASS.
+- Audit finding: Linear marked CP-087 Done, but the closeout cited commit
+  `a95e4cf`, which is a CP-086 validation repair assistant commit. Repo search
+  found only partial per-asset/per-candidate provenance, not a project-level
+  generation history store with cleanup/export behavior and accepted output
+  links.
+- Fix applied: added typed editor-owned `project.generationHistory` records for
+  `text`, `image`, `asset`, and `structured-data` jobs; added safe record
+  creation with recursive secret redaction, bounded text/context storage,
+  retention cleanup, export cloning, accepted output linking, and generated
+  asset auto-recording from the asset catalog reducer.
+- Documentation: added `docs/PHASE_11_PROMPT_GENERATION_HISTORY.md`.
+- TDD evidence: `npm test -- --run src/providers/__tests__/generationHistory.test.ts src/stores/__tests__/assetCatalogReducer.test.ts`
+  was RED before implementation (missing `generationHistory` module and missing
+  reducer history write), then PASS after implementation (2 files / 7 tests).
+- `npm run typecheck` — PASS.
+- `git diff --check` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (97 files / 506 tests),
+  frontend build, native C++ configure/build/CTest, Tauri content check, 43
+  Rust desktop tests, runtime smoke, and editor-runtime roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-147 / CP-112 — QA Automation Integration Gate Remediation
 
 - `2026-06-04 01:18:44 -03:00` — QA automation gate remediation — PASS.

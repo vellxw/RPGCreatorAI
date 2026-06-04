@@ -52,7 +52,7 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-087 through
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-088 through
   CP-096 audit/remediation next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
@@ -595,6 +595,14 @@ Primary Phase 11 sources:
   test uses the repo's supported `createRoot`/`ProjectContext` harness, runtime
   candidate approval validates unknown input before approval, and the canonical
   `scripts/dev/verify.ps1` gate passes again. Evidence is recorded in
+  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-087 — Prompt and Generation History remediated. Linear's prior
+  closeout cited the CP-086 commit and only partial provenance fields; the
+  project now has a typed editor-owned `project.generationHistory` model,
+  redacted record creation for prompt/provider/model/input/output metadata,
+  retention cleanup, export cloning, accepted output links, and reducer
+  auto-recording for generated assets accepted into the asset catalog. Evidence
+  is recorded in `docs/PHASE_11_PROMPT_GENERATION_HISTORY.md` and
   `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across
