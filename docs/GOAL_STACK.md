@@ -652,6 +652,11 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-119 — failed AI call recovery audit. mockProviderAdapter tests
+  pass (7/7). AIRequestQueuePanel tests pass (3/3). aiRequestQueueStore
+  failure/retry/cancellation states covered. AI workflows produce local
+  candidate assets, never overwrite until accepted. No code changes needed.
+  Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-118 — rate-limit handling UX audit. mockProviderContract tests
   pass (5/5). aiRequestQueueStore tests pass (5/5). Rate-limit fixtures
   included in mock provider contract suite. No code changes needed. Evidence

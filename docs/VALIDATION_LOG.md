@@ -4,6 +4,17 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-154 / CP-119 — Failed AI Call Recovery
+
+- `2026-06-04 00:50:00 -03:00` — failed AI call recovery audit — PASS.
+- mockProviderAdapter tests: PASS (7/7) — reports cancellation through shared response shape, rejects unsupported operations without mutating project data, reports fixture rate-limit and quota failures with retry guidance.
+- AIRequestQueuePanel tests: PASS (3/3) — shows failure copy and retry affordance.
+- aiRequestQueueStore tests (from CP-118): PASS (5/5) — moves jobs through failure/retry/cancellation/success states, restores running work as failed/retryable after app restart without replaying writes.
+- From CP-087: "AI workflows produce local candidate assets, never overwrite project assets until explicitly accepted."
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-153 / CP-118 — Rate Limit Handling UX
 
 - `2026-06-04 00:45:00 -03:00` — rate-limit handling UX audit — PASS.
