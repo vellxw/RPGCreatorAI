@@ -54,14 +54,13 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_MINIMAX_PROVIDER_ADAPTER.md`
 - `docs/PHASE_11_OPENCODE_WORKFLOW_ADAPTER.md`
 - `docs/PHASE_11_CUSTOM_OPENAI_COMPATIBLE_ENDPOINT_ADAPTER.md`
+- `docs/PHASE_11_MULTI_PROVIDER_INTEGRATION_GATE.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 11 — multi-provider integrations (CP-096
-  audit/remediation next).
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
 - Phase 11 Linear milestone 13 — QA automation and regression.
 - Phase 11 Linear milestone 14 — security, privacy, and cost controls.
@@ -683,6 +682,16 @@ Primary Phase 11 sources:
   capability config exists, and redacted mocked HTTP error handling. Evidence
   is recorded in
   `docs/PHASE_11_CUSTOM_OPENAI_COMPATIBLE_ENDPOINT_ADAPTER.md` and
+  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-096 — Multi-Provider Integration Gate remediated. Linear's
+  prior closeout cited `a95e4cf` and only described registry/mock metadata.
+  The project now has `src/providers/providerAdapterHub.ts`, a shared hub that
+  constructs adapters for every registry provider id. The gate verifies all
+  provider ids resolve through the hub, disabled providers do not route
+  workflow gates, credentialed adapters fail closed before HTTP when
+  credentials are missing, local mock stays offline, and OpenCode remains a
+  non-mutating handoff. Evidence is recorded in
+  `docs/PHASE_11_MULTI_PROVIDER_INTEGRATION_GATE.md` and
   `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across

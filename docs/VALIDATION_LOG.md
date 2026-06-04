@@ -4,6 +4,41 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-131 / CP-096 — Multi-Provider Integration Gate Remediation
+
+- `2026-06-04 03:48:02 -03:00` — Multi-provider integration gate
+  remediation — PASS.
+- Audit finding: Linear marked CP-096 Done, but the closeout cited commit
+  `a95e4cf` and described only registry metadata plus mock contracts. Repo
+  history had no CP-096/FRA-131 commit and no single hub that instantiated all
+  real provider adapters uniformly.
+- TDD evidence:
+  `npm test -- --run src/providers/__tests__/providerAdapterHub.test.ts` was
+  RED before implementation because `../providerAdapterHub` did not exist.
+- Fix applied: added `src/providers/providerAdapterHub.ts` to construct the
+  shared adapter surface for OpenAI, Anthropic Claude, Kimi/Moonshot, DeepSeek,
+  MiniMax, OpenCode, custom OpenAI-compatible endpoint, and local mock
+  provider.
+- Security/integration fix: hub tests verify every registry provider id has an
+  adapter, disabled providers do not route workflow gates, credentialed
+  adapters fail closed before HTTP when credentials are missing, local mock
+  remains offline, and OpenCode remains a non-mutating handoff.
+- Documentation: added `docs/PHASE_11_MULTI_PROVIDER_INTEGRATION_GATE.md`.
+- Focused `npm test -- --run src/providers/__tests__/providerAdapterHub.test.ts`
+  — PASS, 1 file / 4 tests.
+- Focused `npm test -- --run src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/miniMaxProviderAdapter.test.ts src/providers/__tests__/openCodeWorkflowAdapter.test.ts src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/security/__tests__/redaction.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx`
+  — PASS, 16 files / 83 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (106 files / 558
+  tests), frontend build, native C++ configure/build/CTest, Tauri content check,
+  43 Rust desktop tests, runtime smoke, and editor-runtime screenshot roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-130 / CP-095 — Custom OpenAI-Compatible Endpoint Adapter Remediation
 
 - `2026-06-04 03:38:20 -03:00` — Custom OpenAI-compatible endpoint adapter
