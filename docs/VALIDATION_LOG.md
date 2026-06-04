@@ -4,6 +4,16 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-137 / CP-102 — Generated Asset Quality Audit
+
+- `2026-06-03 22:45:00 -03:00` — asset catalog audit — PASS; 5 cataloged assets verified with proper metadata (dimensions, kind, source, path).
+- `2026-06-03 22:46:00 -03:00` — runtime manifest audit — PASS; 6 runtime assets verified with dimensions, transparency key (#ff00ff), and runtime BMP outputs.
+- `2026-06-03 22:47:00 -03:00` — animation normalization audit — PASS; player_adventurer_walk_down manifest has complete metadata (64x64 frames, 4 frames, 8 FPS, bottom-center anchor).
+- `2026-06-03 22:48:00 -03:00` — filesystem verification — PASS; 79 web PNGs, 80 runtime BMPs, all cataloged assets have corresponding outputs.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-136 / CP-101 — UX Copy Audit
 
 - `2026-06-03 22:30:00 -03:00` — UX copy audit across all workspaces — PASS; toolbar, validation, errors, empty states, playtest guidance, AI/provider states, database forms, and keyboard shortcuts all have clear, action-oriented, honest copy. No vague or placeholder copy found. No changes required.
