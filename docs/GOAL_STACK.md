@@ -772,6 +772,13 @@ Primary Phase 11 sources:
   92 tests, Python asset pipeline unittest coverage passes at 10 tests, and the
   PowerShell wrappers validate committed normalization, preview, and runtime
   manifests offline.
+- Phase 11 CP-128 — final ship gate completed locally. The canonical
+  `scripts/dev/verify.ps1` gate passed frontend typecheck, 108 Vitest files /
+  572 tests, frontend build, asset checks, native configure/build/CTest,
+  Tauri content, 43 Rust desktop tests, runtime smoke, and editor-runtime
+  screenshot roundtrip. The Windows package prototype passed
+  `npm run desktop:package:windows` with packaged smoke. Evidence is recorded
+  in `docs/PHASE_11_FINAL_SHIP_GATE.md` and `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-127 — Linear closeout status recorded. FRA-162 was read from
   Linear, the project URL and milestone state were checked, Todo/In Progress
   issue counts were reviewed, and the Linear status-update wrapper limitation

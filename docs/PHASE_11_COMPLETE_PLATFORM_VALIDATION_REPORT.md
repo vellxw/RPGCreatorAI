@@ -3,6 +3,10 @@
 Issue: CP-126 / FRA-161
 Date: 2026-06-04
 
+Superseded for final ship status by
+`docs/PHASE_11_FINAL_SHIP_GATE.md` (CP-128 / FRA-163). This report remains
+the detailed complete-platform feature and pre-ship validation summary.
+
 ## Result
 
 The Phase 11 complete-platform baseline is green on the local Windows

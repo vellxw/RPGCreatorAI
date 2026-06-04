@@ -4,6 +4,56 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-163 / CP-128 - Complete Platform Final Ship Gate
+
+- `2026-06-04 08:19:08 -03:00` - final ship gate validation - PASS.
+- Linear issue read: FRA-163 required final git-state confirmation, full
+  canonical verification, packaged app smoke, final docs/report review,
+  commit/push to `origin/main`, Linear closeout, and final project status.
+- Initial `git status --short --branch` before CP-128 validation - PASS;
+  `main` was aligned with `origin/main` and the only extra workspace entry was
+  existing unrelated untracked `.commandcode/taste/`.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - PASS. Gates passed: frontend typecheck, full Vitest suite (108 files /
+  572 tests), frontend build (1966 modules, known non-fatal chunk-size
+  warning), Phase 11 asset pipeline checks, native configure/build/CTest,
+  Tauri content check, Rust desktop tests (43 tests), runtime smoke, and
+  editor-runtime screenshot roundtrip.
+- Runtime smoke result from `verify.ps1` - PASS; native runtime launched,
+  validated command/event traces, exercised dialogue, choices, movement route,
+  audio request, plugin command, foreground occlusion, shop, battle, save/load,
+  and menu surfaces, and printed `SMOKE PASSED`.
+- Editor-runtime roundtrip from `verify.ps1` - PASS with baseline hash
+  `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944` and
+  edited hash
+  `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+- `npm run desktop:package:windows` - PASS. The package script passed runtime
+  asset export validation, native configure/build/CTest, Tauri debug
+  no-bundle build, packaged smoke launch, and printed `PACKAGED SMOKE PASSED`
+  plus `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- Packaged executable:
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`.
+- Colocated runtime copy:
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpg_creator_runtime.exe`.
+- Screenshot evidence review - PASS; committed canonical runtime screenshot
+  evidence remained under `docs/screenshots/phase10-mvp/`, and
+  `git status --short --branch` showed no tracked screenshot changes after
+  validation.
+- Fix/report applied: added `docs/PHASE_11_FINAL_SHIP_GATE.md`, marked
+  `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md` as superseded for
+  final ship status, and updated `docs/GOAL_STACK.md`.
+- Local reference check for the final ship report, CP-126 report, CP-127
+  closeout status, `docs/GOAL_STACK.md`, `docs/VALIDATION_LOG.md`, and the
+  three committed canonical runtime screenshots - PASS.
+- `git diff --check` after CP-128 report edits - PASS; only line-ending
+  normalization warnings for already tracked Markdown files were printed.
+- Added-line credential-shape scan across the CP-128 diff - PASS; no key-like,
+  bearer-header, provider-env-assignment, or credential-assignment patterns in
+  added lines.
+- Final pass/fail for this issue validation before commit: PASS.
+
+---
+
 ### Phase 11 FRA-162 / CP-127 - Linear Closeout Comments And Project Status
 
 - `2026-06-04 08:05:19 -03:00` - Linear closeout status review - PASS with
