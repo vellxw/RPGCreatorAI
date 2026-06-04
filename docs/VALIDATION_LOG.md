@@ -4,6 +4,18 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-150 / CP-115 — Local Data Boundary Audit
+
+- `2026-06-04 00:30:00 -03:00` — local data boundary audit — PASS.
+- Provider-disabled behavior tests: PASS (9/9 tests across providerRegistry.test.ts and SettingsScreen.test.tsx).
+- UI copy for provider-bound context: "Providers are optional editor tooling. Maps, database, assets, and playtest stay available with no providers configured." (verified from snapshot).
+- Runtime independence: "Runtime independent" badge in Settings UI. AGENTS.md: "Native runtime behavior remains independent of AI, network, cloud, provider credentials, and live APIs."
+- Data locations: project JSON in `data/`, generated assets in `assets/generated/`, saves in `saves/`, app data in `$LOCALAPPDATA/RPGCreatorAI/`. Documented in SECURITY_THREAT_MODEL.md.
+- Credential storage: "Credential storage is only available in the desktop shell" and "Secret values are not stored in project data" (verified from snapshot).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-149 / CP-114 — No-Key Logging Audit
 
 - `2026-06-04 00:25:00 -03:00` — no-key logging audit — PASS.
