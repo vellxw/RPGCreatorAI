@@ -792,12 +792,12 @@ Primary Phase 11 sources:
   accurate for current capabilities. Documents local-first runtime, optional
   AI tooling, complete workflow, validation commands, and troubleshooting
   links. No rewrite needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-120 — security privacy cost integration gate. Security-focused
-  tests pass (21/21 across 5 test files). No secret-like strings staged.
-  Local workflows work with providers disabled. Redaction audit confirms
-  no API keys in provider output. Provider mock failure suites all pass.
-  Security/provider docs verified. No code changes needed. Evidence in
-  `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-120 — security privacy cost integration gate repaired. The
+  earlier closeout cited a missing `docs/PRIVACY_COST_POLICY.md` and predated
+  the CP-117 through CP-119 repairs. The policy now ties together provider
+  opt-in, credential boundaries, cost disclosure, rate-limit/quota recovery,
+  and failed-call history. The gate was revalidated after the provider safety
+  repairs, with evidence recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-119 — failed AI call recovery repaired. The earlier closeout
   proved adapter failures and queue retry UI, but missed failed-call history.
   Provider failures can now be recorded as rejected non-destructive generation

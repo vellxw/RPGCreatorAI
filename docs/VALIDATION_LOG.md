@@ -850,6 +850,15 @@ Append-only log of major validation runs. Newest entries on top.
 - Provider mock failure suites: all pass (from CP-106, CP-118, CP-119).
 - Security/provider docs: SECURITY_THREAT_MODEL.md, PRIVACY_COST_POLICY.md, EMPTY_STATES.md all verified.
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 06:39:00 -03:00` — repair audit re-read Linear FRA-155 and found the prior closeout cited `docs/PRIVACY_COST_POLICY.md`, but that file did not exist. The closeout also predated the CP-117 cost-history repair, CP-118 quota fixture repair, and CP-119 failed-call history repair.
+- Fix applied: added `docs/PRIVACY_COST_POLICY.md` tying provider opt-in, credential boundaries, cost/unknown-cost disclosure, rate-limit/quota recovery, failed-call history, and no-live-provider validation into one policy. Updated `docs/GOAL_STACK.md`.
+- `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/stores/__tests__/providerStore.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/generationHistory.test.ts` — PASS; 12 test files / 52 tests.
+- `npm test -- --run` — PASS; full frontend Vitest suite passed with 108 test files / 571 tests.
+- `npm run typecheck` — PASS.
+- `npm run build` — PASS; TypeScript and Vite production build completed, 1966 modules transformed, with the known non-fatal chunk-size warning.
+- Targeted secret-shape scan excluding test fixtures and historical validation log: scanned `src` and `docs` outside `src/**/__tests__/**` and `docs/VALIDATION_LOG.md` for API-key/Bearer-token shapes plus known fixture sentinel strings — PASS; no matches.
+- Evidence grep across security/provider docs for provider opt-in, credential boundary, unknown-cost disclosure, `quota-exceeded`, and `failedCandidate` — PASS.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 
