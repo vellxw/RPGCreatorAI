@@ -28,9 +28,16 @@ workspaces in browser mode at 1280x800 viewport.
 | Zoom Out | MapCanvas viewport controls | `aria-label="Zoom out"` + `title="Zoom out"` |
 | Zoom In | MapCanvas viewport controls | `aria-label="Zoom in"` + `title="Zoom in"` |
 
-**Current state:** 0 buttons without accessible names. All 88 interactive
-buttons in the editor have text content, `aria-label`, `title`, or
+**CP-100 snapshot state:** 0 buttons without accessible names after the
+MapCanvas fix. The browser-mode audit counted 88 interactive buttons in the
+editor snapshot and each had text content, `aria-label`, `title`, or
 `description` attributes.
+
+**Maintenance note:** CP-095 later added custom OpenAI-compatible endpoint
+controls to Settings. Those additional controls are not part of the original
+88-button / 19-input snapshot count, but they are covered by focused Settings
+tests that assert accessible labels for the custom endpoint toggle, base URL,
+model label, and capability checkboxes.
 
 ### Images Without Alt Text
 
@@ -47,9 +54,13 @@ that does not block accessibility.
 
 ### Form Inputs
 
-All 19 form inputs (textboxes, spinbuttons, comboboxes, checkboxes) have
-proper accessible labels via `aria-label`, `<label>`, or `placeholder`
-attributes. No inputs are missing labels.
+All 19 form inputs in the CP-100 browser snapshot (textboxes, spinbuttons,
+comboboxes, checkboxes) have proper accessible labels via `aria-label`,
+`<label>`, or `placeholder` attributes. No inputs were missing labels.
+
+Current Settings regression coverage also verifies the later custom endpoint
+base URL, custom endpoint model field, and custom endpoint capability
+checkboxes by accessible label.
 
 ### Keyboard Navigation
 
@@ -93,3 +104,9 @@ have accessible names after the fix.
 This audit validates accessibility claims in `docs/EDITOR_SCREENSHOT_AUDIT.md`
 (CP-097) checklist item "Icon-only controls have `aria-label` or `title`
 attributes".
+
+## Maintenance Verification
+
+- 2026-06-04: focused UI tests revalidated the current Settings provider
+  controls, provider capability gate panel, and MapCanvas layer workflow after
+  CP-095 added custom endpoint controls.

@@ -722,10 +722,12 @@ Primary Phase 11 sources:
   no buttons below 20px, and all controls accessible. Screenshot evidence and
   automated JS checks recorded under `docs/screenshots/phase11-cp099/`. Evidence
   is recorded in `docs/RESPONSIVE_LAYOUT_AUDIT.md`.
-- Phase 11 CP-100 — accessibility audit completed. All 88 interactive buttons
-  audited for accessible names; 2 zoom control buttons in MapCanvas were missing
-  `aria-label` and `title` and were fixed. All 19 form inputs have proper labels.
-  14 decorative images without alt text identified as minor non-blocking items.
+- Phase 11 CP-100 — accessibility audit completed. The CP-100 browser snapshot
+  audited 88 interactive buttons for accessible names; 2 zoom control buttons in
+  MapCanvas were missing `aria-label` and `title` and were fixed. The same
+  snapshot verified 19 labeled form inputs. Later custom endpoint controls from
+  CP-095 are covered by focused Settings accessibility regression tests. 14
+  decorative images without alt text identified as minor non-blocking items.
   Evidence is recorded in `docs/ACCESSIBILITY_AUDIT.md`.
 - Phase 11 CP-101 — UX copy audit completed. All UI copy across toolbar,
   validation, errors, empty states, playtest, AI/provider states, and database

@@ -4,6 +4,24 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-135 / CP-100 — Accessibility Audit Evidence Repair
+
+- `2026-06-04 04:03:35 -03:00` — Accessibility audit evidence repair — PASS.
+- Audit finding: CP-100 had a real commit (`6d4926e`) and valid MapCanvas zoom
+  accessibility fix, but the audit document and goal stack described the 88
+  button / 19 input counts as current totals. CP-095 later added custom
+  OpenAI-compatible endpoint controls to Settings, making those exact totals a
+  historical CP-100 snapshot rather than the current UI count.
+- Fix applied: updated `docs/ACCESSIBILITY_AUDIT.md` and `docs/GOAL_STACK.md`
+  to identify the 88-button / 19-input values as the CP-100 browser snapshot
+  and to document current focused regression coverage for the custom endpoint
+  toggle, base URL, model field, and capability checkboxes.
+- Focused `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/editor/__tests__/MapCanvasLayerWorkflow.test.tsx`
+  — PASS, 3 files / 11 tests.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-134 / CP-099 — Responsive Layout Audit Evidence Repair
 
 - `2026-06-04 03:57:44 -03:00` — Responsive layout audit evidence repair —
