@@ -636,6 +636,10 @@ Primary Phase 11 sources:
   routing rules by audit source, duplicate and known-limitation handling, and a
   sample audit finding using the CP-100 zoom button accessibility fix. Evidence
   is recorded in `docs/REGRESSION_TRIAGE_WORKFLOW.md`.
+- Phase 11 CP-104 — continuous audit integration gate completed. All 7 audit
+  workflows active and producing usable evidence. 1 blocking defect found and
+  fixed (zoom button accessibility, commit 6d4926e). Evidence is recorded in
+  `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
