@@ -1,134 +1,116 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React, { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BottomPanel } from '../../editor/BottomPanel';
-import { ProjectStoreProvider } from '../../../stores/projectStore';
-import type { FullProjectState } from '../../../adapters/types';
-import { getDefaultDatabases } from '../../../adapters/defaultDatabases';
+import {
+  initialProjectStoreState,
+  ProjectContext,
+  type ProjectAction,
+  type ProjectStoreState,
+} from '../../../stores/projectStore';
 
-// Provide a minimal valid project state for the store
-function createTestProjectState(): FullProjectState {
+function stateWithValidationErrors(): ProjectStoreState {
   return {
-    project: {
-      id: 'test-project',
-      name: 'Test Project',
-      startMapId: 'map1',
-      startPosition: { x: 0, y: 0, direction: 'down' },
-      mapTree: [{ id: 'map1', name: 'Map 1', order: 0 }],
-      tilesets: [],
-      visualProfile: {
-        tileSize: 32,
-        baseResolution: { width: 640, height: 480 },
-        aspectRatio: '4:3',
-        cameraMode: 'clampedScroll',
+    ...initialProjectStoreState,
+    errors: [
+      {
+        level: 'error',
+        message: 'Map "missing_map" does not exist in project',
+        source: 'project.startMapId',
       },
-    },
-    maps: {
-      map1: {
-        id: 'map1',
-        name: 'Map 1',
-        width: 10,
-        height: 10,
-        tileSize: 32,
-        layers: [
-          { name: 'ground', visible: true, locked: false, tiles: new Array(100).fill(1) },
-          { name: 'collision', visible: true, locked: false, tiles: new Array(100).fill(0) },
-        ],
-        events: [],
+      {
+        level: 'error',
+        message: 'Actor HP must be a non-negative number',
+        source: 'actors.hero',
       },
-    },
-    items: { items: [] },
-    databases: getDefaultDatabases(),
+    ],
+    warnings: [
+      {
+        level: 'warning',
+        message: 'Empty drop list for enemy "slime"',
+        source: 'enemies.slime',
+      },
+    ],
   };
+}
+
+function renderBottomPanel(state: ProjectStoreState) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  let root: Root;
+  const dispatch = vi.fn<(action: ProjectAction) => void>();
+
+  act(() => {
+    root = createRoot(container);
+    root.render(
+      <ProjectContext.Provider value={{ state, dispatch }}>
+        <BottomPanel />
+      </ProjectContext.Provider>,
+    );
+  });
+
+  return {
+    container,
+    dispatch,
+    unmount() {
+      act(() => root.unmount());
+      container.remove();
+    },
+  };
+}
+
+async function click(button: HTMLButtonElement) {
+  await act(async () => {
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await Promise.resolve();
+  });
 }
 
 describe('AI Validation Repair Assistant UI Integration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   });
 
-  it('renders the Validation tab with sparkles button visible when there are errors', async () => {
-    const projectState = createTestProjectState();
-    // Add a broken reference to trigger validation errors
-    projectState.project.startMapId = 'non_existent_map';
-
-    render(
-      <ProjectStoreProvider initialState={projectState}>
-        <BottomPanel />
-      </ProjectStoreProvider>
-    );
-
-    // Click the Validation tab
-    const validationTab = screen.getByText(/Validation/i);
-    fireEvent.click(validationTab);
-
-    // Look for the AI Repair sparkles button
-    await waitFor(() => {
-      const repairButton = screen.queryByLabelText('AI Repair Assistant');
-      // The button should be present when there are validation messages
-      // (The BottomPanel renders validation content when errors exist)
-      expect(repairButton !== null || screen.queryByText(/Project passes validation/) !== null).toBe(true);
-    });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    document.body.innerHTML = '';
+    vi.restoreAllMocks();
   });
 
-  it('shows the repair assistant modal when sparkles button is clicked', async () => {
-    const projectState = createTestProjectState();
-    // Force a validation error
-    projectState.project.startMapId = 'missing_map_id';
+  it('opens from validation errors and generates reviewed offline suggestions', async () => {
+    const view = renderBottomPanel(stateWithValidationErrors());
 
-    render(
-      <ProjectStoreProvider initialState={projectState}>
-        <BottomPanel />
-      </ProjectStoreProvider>
+    const openButton = view.container.querySelector<HTMLButtonElement>(
+      'button[aria-label="AI Repair Assistant"]',
     );
+    expect(openButton).not.toBeNull();
+    await click(openButton!);
 
-    // Click the Validation tab
-    const validationTab = screen.getByText(/Validation/i);
-    fireEvent.click(validationTab);
+    expect(document.body.textContent).toContain('AI Repair Assistant');
+    expect(document.body.textContent).toContain('2 errors and 1 warning detected');
+    expect(document.body.textContent).toContain('no automatic project changes are made');
 
-    // Look for the AI repair button
-    await waitFor(() => {
-      const repairButton = screen.queryByLabelText('AI Repair Assistant');
-      if (repairButton) {
-        fireEvent.click(repairButton);
-      }
-    });
-
-    // If the modal opened, we should see the modal title
-    const modalTitle = screen.queryByText('AI Repair Assistant');
-    if (modalTitle) {
-      expect(modalTitle).toBeTruthy();
-    }
-  });
-
-  it('generates repair suggestions in the modal and displays them', async () => {
-    const projectState = createTestProjectState();
-    projectState.project.startMapId = 'broken_map_ref';
-
-    render(
-      <ProjectStoreProvider initialState={projectState}>
-        <BottomPanel />
-      </ProjectStoreProvider>
+    const generateButton = document.body.querySelector<HTMLButtonElement>(
+      'button[aria-label="Generate AI repair suggestions"]',
     );
+    expect(generateButton).not.toBeNull();
+    await click(generateButton!);
 
-    const validationTab = screen.getByText(/Validation/i);
-    fireEvent.click(validationTab);
+    expect(document.body.textContent).toContain('Generated 3 repair suggestions');
+    expect(document.body.textContent).toContain('Reference Repair');
+    expect(document.body.textContent).toContain('Data Fix');
+    expect(document.body.textContent).toContain('Provider: local/offline-mock');
+    expect(view.dispatch).not.toHaveBeenCalled();
 
-    await waitFor(() => {
-      const repairButton = screen.queryByLabelText('AI Repair Assistant');
-      if (repairButton) {
-        fireEvent.click(repairButton);
-      }
-    });
+    const acknowledgeButton = document.body.querySelector<HTMLButtonElement>(
+      'button[aria-label="Acknowledge AI repair suggestions"]',
+    );
+    expect(acknowledgeButton).not.toBeNull();
+    await click(acknowledgeButton!);
 
-    // Find and click the generate button if present
-    const generateButton = screen.queryByText('Generate Suggestions');
-    if (generateButton) {
-      fireEvent.click(generateButton);
-      // Wait for suggestions to appear
-      await waitFor(() => {
-        const suggestionItems = screen.queryAllByText(/suggestion/i);
-        expect(suggestionItems.length).toBeGreaterThanOrEqual(0);
-      });
-    }
+    expect(document.body.textContent).toContain('Acknowledged');
+    expect(view.dispatch).not.toHaveBeenCalled();
+
+    view.unmount();
   });
 });

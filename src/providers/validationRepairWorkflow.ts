@@ -179,18 +179,19 @@ export function validateRepairCandidate(
 }
 
 export function approveRepairCandidate(
-  candidate: ValidationRepairCandidate,
+  candidate: unknown,
   approvalMetadata: { reviewedAt: string }
 ): ValidationRepairCandidate {
   const errors = validateRepairCandidate(candidate);
   if (errors.length > 0) {
     throw new Error('Invalid validation repair candidate');
   }
+  const validCandidate = candidate as ValidationRepairCandidate;
   return {
-    ...candidate,
+    ...validCandidate,
     reviewState: 'approved' as const,
     provenance: {
-      ...candidate.provenance,
+      ...validCandidate.provenance,
       reviewedAt: approvalMetadata.reviewedAt,
     },
   };

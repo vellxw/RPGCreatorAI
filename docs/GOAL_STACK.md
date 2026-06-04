@@ -52,7 +52,8 @@ Primary Phase 11 sources:
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 10 — AI game content pipelines (CP-086 next).
+- Phase 11 Linear milestone 10 — AI game content pipelines (CP-087 through
+  CP-096 audit/remediation next).
 - Phase 11 Linear milestone 10 — AI game content pipelines.
 - Phase 11 Linear milestone 11 — multi-provider integrations.
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
@@ -588,6 +589,13 @@ Primary Phase 11 sources:
   opens a balancing modal supporting progression curve configuration, prompt inputs, proposed adjustments
   review lists across Actors, Enemies, and Items, reference validations, and accept apply updates.
   Evidence is recorded in `docs/PHASE_11_AI_BALANCING_ASSISTANT.md`.
+- Phase 11 CP-086 — AI Validation Repair Assistant remediated. The BottomPanel
+  now exposes reviewed local/offline repair suggestions for validation errors
+  and warnings without applying project mutations automatically, the integration
+  test uses the repo's supported `createRoot`/`ProjectContext` harness, runtime
+  candidate approval validates unknown input before approval, and the canonical
+  `scripts/dev/verify.ps1` gate passes again. Evidence is recorded in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across
   9 categories (startup, map editor, events, database, assets, playtest, settings,
@@ -711,11 +719,11 @@ Primary Phase 11 sources:
   requests don't contain API keys/secrets/tokens. Settings UI confirms
   credentials not stored in project data. Threat model documented. No code
   changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-112 — QA automation integration gate. Full canonical verification
-  gate run. npm test: 500/500 tests pass (95/96 files; 1 pre-existing CP-086
-  failure). npm run typecheck: FAIL due to pre-existing CP-086 type errors.
-  npm run build: FAIL due to same CP-086 blocker. Known blocker documented.
-  No generated artifacts staged. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-112 — QA automation integration gate. Original evidence recorded
+  a pre-existing CP-086 blocker. CP-086 remediation later restored the canonical
+  full verification gate to PASS; CP-112 remains scheduled for a focused audit
+  pass when the Phase 11 closeout sweep reaches milestone 13. Evidence in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-111 — CI ready validation documentation. Created
   `docs/CI_READY_VALIDATION.md` with command map, provider mock policy,
   cache expectations, known nonfatal warnings, and recommended CI pipeline.

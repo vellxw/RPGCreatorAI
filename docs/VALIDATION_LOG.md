@@ -4,6 +4,46 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-121 / CP-086 — AI Validation Repair Assistant Remediation
+
+- `2026-06-04 00:48:16 -03:00` — CP-086 remediation validation — PASS.
+- Root cause: previous CP-086 closeout evidence was contradicted by the current
+  gate. `ValidationRepairIntegration.test.tsx` imported unsupported
+  `@testing-library/react` helpers and stale project-store/default-database
+  APIs, and the invalid-candidate workflow test could not compile against a
+  typed-only approval API. The repair assistant UI integration also existed as
+  unstaged work and was not covered by a passing full gate.
+- Fix applied: integrated the BottomPanel AI Repair Assistant surface with the
+  local/offline mock provider, generated reviewed suggestions without automatic
+  project mutations, rewrote the integration test to the repo's
+  `createRoot`/`ProjectContext` pattern, and made
+  `approveRepairCandidate()` accept `unknown` then validate runtime shape before
+  approving.
+- `npm test -- --run src/providers/__tests__/validationRepairWorkflow.test.ts src/components/database/__tests__/ValidationRepairIntegration.test.tsx`
+  — PASS (2 files, 8 tests).
+- `npm run typecheck` — PASS.
+- `npm test -- --run` — PASS (96 files, 501 tests).
+- `npm run build` — PASS; known Vite chunk-size warning only.
+- `git diff --check` — PASS; CRLF warnings only.
+- First full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  run — FAIL at TAURI CONTENT CHECK after frontend and native gates passed.
+  Focused reproduction with `verify-tauri-content.ps1` passed against a fresh
+  Vite server on port 1420, so the failure was transient readiness/timing.
+- Rerun `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest, frontend build, native
+  C++ configure/build/CTest, Tauri content check, Rust desktop tests, runtime
+  smoke, and editor-runtime roundtrip. Runtime smoke and roundtrip screenshots
+  were generated under `docs/screenshots/phase10-mvp/`; roundtrip hashes were
+  baseline `6C65F8EF5028B064BA8694E005E752CD674861F2F553B7D49E78CD7B46D64944`
+  and edited `D845D8BBEE8D38C68819A6ECCC927CE357A2FAEA86F4FD604D6EAB394E62340E`.
+- Final rerun after documentation and UI polish:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS with the same full gate set; 96 Vitest files / 501 tests and 43 Rust
+  tests passed.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-159 / CP-124 — Asset Pipeline Documentation Final Pass
 
 - `2026-06-04 01:15:00 -03:00` — asset pipeline documentation audit — PASS.
