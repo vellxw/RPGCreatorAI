@@ -4,6 +4,24 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-138 / CP-103 — Regression Triage Workflow Repair
+
+- `2026-06-04 04:18:57 -03:00` — regression triage workflow repair — PASS.
+- Audit finding: CP-103 had a real workflow commit (`32f7fe6`), but the
+  workflow did not explicitly cover findings discovered while auditing an issue
+  already marked Done. CP-101 and CP-102 repairs showed this path is required
+  for stale closeout evidence and scoped deliverable defects.
+- Fix applied: updated `docs/REGRESSION_TRIAGE_WORKFLOW.md` with
+  completed-issue repair rules, required repair-comment evidence, criteria for
+  opening a new issue or reopening the Done issue, and concrete CP-101/CP-102
+  examples. Updated `docs/GOAL_STACK.md`.
+- Documentation check — PASS: `docs/REGRESSION_TRIAGE_WORKFLOW.md` exists,
+  required completed-issue repair workflow mentions = 7, goal stack mentions =
+  2, original workflow commit `32f7fe6` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-137 / CP-102 — Generated Asset Quality Audit Repair
 
 - `2026-06-04 04:14:38 -03:00` — generated asset quality audit repair —

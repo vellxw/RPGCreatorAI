@@ -92,6 +92,28 @@ Every audit finding filed as a Linear issue MUST include:
 - Add a comment to the existing issue with the new evidence (screenshot, viewport, context).
 - Update the existing issue's description if the new evidence adds information.
 
+### If found while auditing an issue already marked Done
+
+Use the existing Linear issue when the finding is evidence drift or a scoped
+defect in that issue's own deliverable, and the repair can be completed with
+the same issue context. This avoids filing duplicate audit-cleanup issues while
+still preserving evidence.
+
+The repair comment MUST include:
+
+- The original Linear issue id and original closeout commit.
+- The exact false, stale, or incomplete claim.
+- The files inspected or changed.
+- The validation command that failed before repair, when applicable.
+- The repair commit hash and push result.
+- The final validation commands and pass/fail counts.
+
+Open a new Linear issue instead when the finding is a new product defect outside
+the original issue scope, needs a separate owner/milestone, cannot be fixed
+immediately, or requires screenshots/reproduction work that should be tracked
+independently. If the Done state itself is materially false and the issue cannot
+be repaired immediately, reopen it before continuing.
+
 ### If known limitation
 
 - Document the limitation in the relevant audit document.
@@ -126,6 +148,17 @@ Every audit finding filed as a Linear issue MUST include:
 **Milestone:** 12 Continuous Visual/UX Audits
 **Resolution:** Fixed by adding `aria-label="Zoom out"`, `title="Zoom out"`, `aria-label="Zoom in"`, `title="Zoom in"` to the zoom buttons. Commit `6d4926e`.
 
+## Completed-Issue Repair Examples
+
+- **CP-101 / FRA-136:** Existing Done issue claimed no placeholder copy was
+  found. Audit repair found visible "Placeholder NPC" copy in the Event editor,
+  fixed it to "Sample NPC", added regression coverage, and commented evidence
+  back on FRA-136.
+- **CP-102 / FRA-137:** Existing Done issue claimed generated asset dimensions
+  were valid. Audit repair found catalog/runtime metadata drift, aligned the
+  JSON metadata to file headers, added manifest integrity coverage, and
+  commented evidence back on FRA-137.
+
 ## Audit-to-Issue Flow
 
 ```
@@ -133,6 +166,8 @@ Audit performed
     ↓
 Finding discovered
     ↓
+Is it inside an already-Done issue's deliverable? ─── Yes → Repair/comment on existing issue or reopen if not immediately repairable
+    ↓ No
 Is it a defect? ─── No → Document as known limitation in audit doc
     ↓ Yes
 Is it a duplicate? ─── Yes → Comment on existing issue with new evidence

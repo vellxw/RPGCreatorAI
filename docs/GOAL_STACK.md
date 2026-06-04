@@ -744,9 +744,10 @@ Primary Phase 11 sources:
   `docs/GENERATED_ASSET_QUALITY_AUDIT.md`.
 - Phase 11 CP-103 — regression triage workflow completed. The workflow defines
   severity classification (Blocking/Visible/Minor), required Linear issue fields,
-  routing rules by audit source, duplicate and known-limitation handling, and a
-  sample audit finding using the CP-100 zoom button accessibility fix. Evidence
-  is recorded in `docs/REGRESSION_TRIAGE_WORKFLOW.md`.
+  routing rules by audit source, duplicate and known-limitation handling,
+  completed-issue repair handling for stale Done evidence, and sample findings
+  from CP-100, CP-101, and CP-102 repairs. Evidence is recorded in
+  `docs/REGRESSION_TRIAGE_WORKFLOW.md`.
 - Phase 11 CP-104 — continuous audit integration gate completed. All 7 audit
   workflows active and producing usable evidence. 1 blocking defect found and
   fixed (zoom button accessibility, commit 6d4926e). Evidence is recorded in
