@@ -4,6 +4,36 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-144 / CP-109 — Runtime Smoke Expansion Repair
+
+- `2026-06-04 05:10:06 -03:00` — runtime smoke expansion evidence repair —
+  PASS.
+- Audit finding: CP-109 had a real evidence commit (`bc3088d`), but the closeout
+  was docs-only and recorded a coverage audit rather than a fresh runtime smoke
+  execution. The current script already covers the requested runtime/audio/
+  gameplay paths, so no script changes were needed.
+- Validation command: `powershell -NoProfile -ExecutionPolicy Bypass -File
+  scripts/dev/smoke-runtime.ps1` — PASS; final marker `SMOKE PASSED`.
+- Runtime launch smoke: PASS; runtime stayed alive for 3 seconds, then was
+  terminated cleanly by the smoke script.
+- Runtime feature smoke markers found in
+  `%LOCALAPPDATA%/RPGCreatorAI/build/runtime_smoke_shots_stdout.txt`: PASS for
+  `"commandType":"showChoices"`, `"result":"selected=0"`,
+  `"commandType":"setMovementRoute"`, `target=event`, `Audio requested:
+  chest_open`, `pluginCommand debug.log`, and `Smoke shots complete`.
+- Runtime smoke stderr check: PASS; 0 `[ERROR]` lines in
+  `%LOCALAPPDATA%/RPGCreatorAI/build/runtime_smoke_shots_stderr.txt`.
+- Screenshot check: PASS; exactly 3 retained BMP screenshots exist and are
+  non-empty under `docs/screenshots/phase10-mvp/`:
+  `phase10-01-route-coach-dialogue.bmp`,
+  `phase10-02-event-route-after.bmp`, and
+  `phase10-03-foreground-occlusion.bmp`.
+- Git worktree after smoke: PASS; no tracked files changed from the smoke run.
+- Original evidence commit `bc3088d` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-143 / CP-108 — Desktop Playwright Smoke Harness Repair
 
 - `2026-06-04 04:57:55 -03:00` — desktop browser smoke harness repair —

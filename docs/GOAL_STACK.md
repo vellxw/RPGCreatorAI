@@ -847,11 +847,12 @@ Primary Phase 11 sources:
   build+test, runtime launch smoke, and runtime screenshot roundtrip with
   SHA256 hash comparison. No script changes needed. Evidence in
   `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-109 — runtime smoke expansion audit. smoke-runtime.ps1 already
-  covers Phase 11 features: plugin command registry v2, audio authoring v1,
-  movement routes, choices, and 3 screenshot assertions. C++ tests cover
-  save/load, battle, diagnostics, and other Phase 11 features. No script
-  changes needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-109 — runtime smoke expansion verified. `smoke-runtime.ps1`
+  passes against the current native runtime, asserts choices, event-target
+  movement routes, audio requests, plugin commands, clean smoke completion, and
+  writes the three retained Phase 10/11 smoke screenshots under
+  `docs/screenshots/phase10-mvp/`. No script changes were needed; the repair
+  audit added current validation evidence to `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-108 — desktop browser smoke harness implemented and documented.
   `scripts/dev/smoke-browser-editor.ps1` and `.bat` start or reuse Vite, drive
   the editor through `@playwright/cli` via `npx`, verify startup, bundled
