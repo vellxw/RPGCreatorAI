@@ -1,12 +1,20 @@
 # RPGCreatorAI
 
-RPGCreatorAI is an experimental open source RPG creation toolkit: a React/Tauri editor paired with a native C++ runtime. The project starts from a professional RPG Maker-style workflow and is being built toward AI-assisted game creation while keeping the engine local, deterministic, and data-driven.
+RPGCreatorAI is an experimental open source RPG creation toolkit: a React/Tauri
+editor paired with a native C++ runtime. The project starts from a professional
+RPG Maker-style workflow and is being built into a local-first product platform
+with optional AI-assisted editor tooling. The native runtime stays local,
+deterministic, and data-driven.
 
 ![RPGCreatorAI editor screenshot](docs/screenshots/game-visual-design/01-editor-16x9-map.png)
 
 ## Why This Exists
 
-Most RPG creation tools are either closed, plugin-heavy, or hard to automate. RPGCreatorAI is designed as a hackable editor/runtime stack where game data stays in JSON, the runtime interprets data instead of hardcoding content, and future AI features can generate or edit projects without becoming a runtime dependency.
+Most RPG creation tools are either closed, plugin-heavy, or hard to automate.
+RPGCreatorAI is designed as a hackable editor/runtime stack where game data
+stays in JSON, the runtime interprets data instead of hardcoding content, and
+AI-assisted authoring can draft or review editor data without becoming a
+runtime dependency.
 
 The project is useful for:
 
@@ -24,17 +32,23 @@ Implemented foundations include:
 - React 19 + Vite editor UI
 - Tauri 2 desktop shell integration
 - native C++20 runtime built with CMake
+- startup flows for opening, creating, importing, and using sample projects
 - data-driven maps, layers, event pages, switches, variables, common events, database shards, shops, battles, and save state
 - local playtest sessions for project start, current map, and selected event modes
 - bounded runtime logs, deterministic event traces, and runtime state snapshots in the Playtest screen
 - shared JSON project format between editor and runtime
-- generated runtime/editor visual assets
+- generated runtime/editor visual assets and asset workflow helpers
+- optional editor-side Provider Hub surfaces, offline mock provider contracts,
+  generation queues, generation history, cost/rate-limit states, and provider
+  credential boundaries
 - C++ runtime tests, Vitest editor tests, and validation scripts
 
-AI is not required to run the editor or runtime today. The current product
-does not ship a scripting VM, cloud service, marketplace, proprietary importer,
-or runtime AI dependency. The future AI layer is planned as an authoring
-assistant above the deterministic project format.
+AI is not required to run the editor or runtime. Provider-backed tooling is
+optional, disabled by default, and validated with local mocks during normal
+development. The current product does not ship a scripting VM, cloud service,
+marketplace, proprietary importer, signed installer, or runtime AI dependency.
+Live paid provider calls are outside normal validation and require explicit
+credentials and opt-in.
 
 ## Screenshots
 
@@ -99,6 +113,11 @@ npm run desktop:dev
 
 Tauri starts the strict dev server on `http://localhost:1420`.
 
+For the normal creator loop, use desktop mode, open or create a project, edit
+maps/events/database/assets, run Validate, Save, then launch Playtest from the
+Playtest screen. For a local unsigned Windows package prototype, use
+`npm run desktop:package:windows`.
+
 ## Verify The Project
 
 Canonical Windows local gate:
@@ -138,10 +157,10 @@ Windows runtime build and C++ tests:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipFrontend -SkipDesktop -SkipSmoke
 ```
 
-Restricted-execution-policy fallback:
+Restricted-execution-policy fallback for the full local gate:
 
 ```cmd
-scripts\dev\build.bat
+scripts\dev\verify.bat
 ```
 
 Manual CMake diagnosis on Windows should use the out-of-OneDrive preset:
@@ -182,6 +201,12 @@ That helper builds the frontend, Tauri shell, and native runtime, copies
 packaged app. A successful run prints `PACKAGED SMOKE PASSED` and
 `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. It does not create an installer or
 require signing credentials.
+Restricted-execution-policy fallback:
+
+```cmd
+scripts\dev\package-windows.bat
+```
+
 The current release artifact and future installer policy is documented in
 [Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
 First-run directories and cleanup policy are documented in
@@ -192,7 +217,7 @@ in [Diagnostics And Logs](docs/DIAGNOSTICS.md).
 ## Current Editor Workflow
 
 1. Open the editor in the browser for quick preview or with `npm run desktop:dev` for real filesystem/runtime integration.
-2. Open or use the sample JSON project under `data/`.
+2. Open an existing project, create a new project, import a project bundle, or use the sample JSON project under `data/`.
 3. Edit maps with ground, decoration, foreground, collision, region, and event authoring layers.
 4. Edit event pages, commands, common events, and database shards from the editor screens.
 5. Use Validate, then Save. Desktop mode writes through the Tauri filesystem bridge; browser mode uses the browser adapter/export path.
@@ -202,16 +227,40 @@ in [Diagnostics And Logs](docs/DIAGNOSTICS.md).
    The Runtime Log tab displays the local diagnostics folder even before the
    first native log exists.
 
+## Optional AI Editor Tooling
+
+AI/provider features are editor tooling, not runtime requirements. Current
+Phase 11 infrastructure includes Provider Settings, capability gates, cost and
+budget states, rate-limit/quota recovery states, credential storage policy,
+mock provider contracts, generation history, and review-gated draft workflows
+for maps, events, database content, balancing suggestions, image assets, and
+validation repair guidance.
+
+Normal validation uses local mocks, fixtures, and contract tests. Provider
+credentials are not stored in project JSON, runtime data, committed docs,
+screenshots, diagnostics, or Linear evidence. Generated output remains a
+candidate until explicitly accepted.
+
+Start with:
+
+- [Provider Hub Foundation Gate](docs/PHASE_11_AI_PROVIDER_HUB_FOUNDATION_GATE.md)
+- [AI Game Content Pipeline Gate](docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md)
+- [Provider Settings UI](docs/PHASE_11_PROVIDER_SETTINGS_UI.md)
+- [Privacy, Cost, And Provider Safety Policy](docs/PRIVACY_COST_POLICY.md)
+- [Prompt And Generation History](docs/PHASE_11_PROMPT_GENERATION_HISTORY.md)
+
 ## Data Model
 
 Projects are plain JSON under `data/`. The editor reads and writes the same format the C++ runtime consumes.
 
 Start with:
 
+- [Build and Run](docs/BUILD_AND_RUN.md)
 - [Data Format](docs/DATA_FORMAT.md)
 - [Event System](docs/EVENT_SYSTEM.md)
 - [Editor Data Flow](docs/EDITOR_DATA_FLOW.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Diagnostics And Logs](docs/DIAGNOSTICS.md)
 - [Open Source Maintenance](docs/OPEN_SOURCE_MAINTENANCE.md)
 
 ## Roadmap
@@ -224,7 +273,7 @@ Near-term focus:
 - harden database editing and project validation
 - keep editor/runtime parity tight
 - improve release packaging and onboarding
-- introduce AI-assisted authoring only after the deterministic editor/runtime path is stable
+- continue hardening optional AI-assisted authoring without adding a runtime AI dependency
 
 ## Contributing
 

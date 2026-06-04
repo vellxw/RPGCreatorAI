@@ -788,10 +788,13 @@ Primary Phase 11 sources:
   build and first-run behavior. CI_READY_VALIDATION.md documents known
   nonfatal warnings. Browser/desktop capability differences explicitly
   documented. No changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-121 — README complete platform rewrite audit. README already
-  accurate for current capabilities. Documents local-first runtime, optional
-  AI tooling, complete workflow, validation commands, and troubleshooting
-  links. No rewrite needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-121 — README complete platform rewrite repaired. The earlier
+  closeout said no rewrite was needed, but the README still described AI as a
+  future layer and used the wrong restricted-policy verification wrapper. The
+  README now documents current local-first platform capabilities, optional
+  mocked/provider-gated AI editor tooling, complete creator workflow,
+  validation/package commands, troubleshooting links, and limitations. Evidence
+  is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-120 — security privacy cost integration gate repaired. The
   earlier closeout cited a missing `docs/PRIVACY_COST_POLICY.md` and predated
   the CP-117 through CP-119 repairs. The policy now ties together provider

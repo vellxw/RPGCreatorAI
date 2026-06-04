@@ -4,6 +4,44 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-156 / CP-121 - README Complete Platform Rewrite Repair
+
+- `2026-06-04 06:55:44 -03:00` - README platform documentation repair - PASS.
+- Audit finding: Linear marked CP-121 Done with a short "already accurate"
+  comment, but README still described AI as future-only/planned and pointed the
+  restricted-execution-policy verification fallback at `scripts\dev\build.bat`
+  instead of the full gate wrapper.
+- Fix applied: rewrote README status/workflow sections to document current
+  local-first platform capabilities, optional provider-gated AI editor tooling,
+  mock/fixture validation, credential and cost boundaries, creator workflow,
+  package prototype command, fallback wrappers, troubleshooting links, and
+  limitations. Updated `docs/GOAL_STACK.md`.
+- README stale-text/link audit:
+  `rg -n "future AI|planned as an authoring|scripts\\dev\\build\.bat|AI is not required|signed installer|Provider Hub|Privacy, Cost|Build and Run|desktop:package:windows|verify\.bat|package-windows\.bat" README.md`
+  - PASS; stale `future AI`, `planned as an authoring`, and
+  `scripts\dev\build.bat` README text no longer appears; new expected markers
+  are present.
+- README local markdown-link check with PowerShell path existence scan - PASS;
+  26 local README links resolved.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - PASS; final marker `=== ALL PASSED ===`. Gate summary: frontend
+  typecheck PASS, frontend Vitest PASS (108 files / 571 tests), frontend build
+  PASS, Phase 11 asset pipeline checks PASS, native configure/build/CTest
+  PASS (`RPGTests` 1/1), Tauri content check PASS, Rust desktop tests PASS
+  (43 tests), runtime smoke PASS, editor-runtime roundtrip PASS. Known
+  non-fatal warnings: Vite chunk-size warning, CMake FetchContent/deprecation
+  warnings, and missing PkgConfig during SDL/CMake configuration.
+- `npm run desktop:package:windows` - PASS; asset pipeline and native CTest
+  passed, Tauri debug/no-bundle build completed, packaged executable and
+  colocated `rpg_creator_runtime.exe` were created under
+  `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, packaged smoke launch
+  printed `PACKAGED SMOKE PASSED`, and final marker was
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. Known non-fatal warnings matched
+  the README policy.
+- Final pass/fail for repaired issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-144 / CP-109 — Runtime Smoke Expansion Repair
 
 - `2026-06-04 05:10:06 -03:00` — runtime smoke expansion evidence repair —
