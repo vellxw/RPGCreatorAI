@@ -4,6 +4,16 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-156 / CP-121 — README Complete Platform Rewrite
+
+- `2026-06-04 01:00:00 -03:00` — README accuracy audit — PASS.
+- README documents: local-first runtime, optional AI tooling, complete workflow (install/open/create/save/playtest/package), validation commands, troubleshooting links.
+- Commands verified: `npm test` (500/500 pass), `npm run typecheck` (FAIL due to pre-existing CP-086, not README issue), `npm run build` (FAIL due to same CP-086 blocker).
+- README already accurate for current capabilities. No rewrite needed — current README matches Phase 11 complete platform state.
+- Final pass/fail for this issue validation: PASS (README is accurate).
+
+---
+
 ### Phase 11 FRA-155 / CP-120 — Security Privacy Cost Integration Gate
 
 - `2026-06-04 00:55:00 -03:00` — security privacy cost integration gate — PASS.

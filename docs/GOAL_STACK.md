@@ -652,6 +652,10 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-121 — README complete platform rewrite audit. README already
+  accurate for current capabilities. Documents local-first runtime, optional
+  AI tooling, complete workflow, validation commands, and troubleshooting
+  links. No rewrite needed. Evidence in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-120 — security privacy cost integration gate. Security-focused
   tests pass (21/21 across 5 test files). No secret-like strings staged.
   Local workflows work with providers disabled. Redaction audit confirms
