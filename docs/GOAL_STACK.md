@@ -820,12 +820,12 @@ Primary Phase 11 sources:
   independent, credentials not stored in project data. Data locations
   documented in SECURITY_THREAT_MODEL.md. No code changes needed. Evidence
   in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-114 — no-key logging audit. All log sources verified safe:
-  runtime stdout/stderr (smoke checks for [ERROR]), Tauri/dev console (clean
-  in snapshots), provider adapter logs (redacted), validation output (no
-  secrets), Playtest panels (editor-preview only). Redaction tests pass.
-  11 provider test files verify no API keys in output. No code changes needed.
-  Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-114 — no-key logging audit revalidated after the CP-113
+  redaction repair. Runtime stdout/stderr smoke logs, log-source inventory,
+  provider/credential/Playtest log panels, production secret-shape scan, and
+  provider/redaction tests pass with no unexpected API key output. No CP-114
+  code changes were needed beyond the CP-113 helper hardening. Evidence in
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-113 — secret redaction everywhere repaired. The shared
   `redactSecrets()` helper now also redacts freeform provider-shaped
   `sk-...` secrets and generic `Bearer ...` values when no exact known-secret

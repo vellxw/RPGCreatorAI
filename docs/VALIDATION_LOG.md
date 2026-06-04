@@ -916,7 +916,16 @@ Append-only log of major validation runs. Newest entries on top.
 - 11 provider test files verify no API keys/secrets/tokens in output.
 - Console messages from editor snapshots: no API key leaks detected.
 - Runtime smoke script checks stderr for `[ERROR]` lines and fails if found.
-- Final pass/fail for this issue validation: PASS (logs are safe to share).
+- Previous closeout result: PASS (logs are safe to share), later revalidated
+  after the CP-113 freeform secret-redaction repair.
+- `2026-06-04 05:34:49 -03:00` — CP-114 repair audit re-read Linear and rechecked log sinks after CP-113 hardened `redactSecrets()` for freeform `sk-...` and generic `Bearer ...` values. No additional CP-114 code leak was found.
+- `npm test -- --run src/security/__tests__/redaction.test.ts src/adapters/__tests__/CredentialStoreAdapter.test.ts src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderContract.test.ts` — PASS; 7 test files / 30 tests.
+- Log-source inventory command reviewed runtime `Logger::` sinks, Tauri runtime diagnostics/log-tail commands, Playtest Runtime Log/Event Trace/Runtime State panels, and credential paths. Runtime logs contain local project/runtime identifiers only; provider credentials are not runtime inputs.
+- Production log/secret static scan — PASS; no unexpected matches for `sk-...`, `apiKey`, `Authorization: Bearer`, provider env var names, or freeform bearer key patterns outside tests/docs/metadata and explicit adapter header construction.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1` — PASS; runtime stayed alive for 3 seconds, smoke shots completed, and final marker was `SMOKE PASSED`.
+- Runtime smoke log secret scan — PASS across 4 generated files under `%LOCALAPPDATA%/RPGCreatorAI/build`; no API-key or bearer-token patterns found.
+- App-data runtime log scan — PASS; `%APPDATA%/RPGCreatorAI/runtime-logs` did not exist in this environment, so no desktop-launched runtime logs were present to scan.
+- Final pass/fail for revalidated issue: PASS.
 
 ---
 
