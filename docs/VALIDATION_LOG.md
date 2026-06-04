@@ -4,6 +4,16 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-153 / CP-118 — Rate Limit Handling UX
+
+- `2026-06-04 00:45:00 -03:00` — rate-limit handling UX audit — PASS.
+- mockProviderContract tests: PASS (5/5) — declares required offline fixtures, serializes requests with secret redaction, normalizes malformed responses, runs every fixture through offline mock adapter, classifies disabled/missing-credential providers.
+- aiRequestQueueStore tests: PASS (5/5) — bounds queued jobs and rejects duplicate idempotency keys, moves jobs through failure/retry/cancellation/success states, restores running work as failed/retryable after app restart without replaying writes, summarizes visible queue state for status UI, requires per-session confirmation before enqueueing expensive jobs.
+- Rate-limit fixtures included in mock provider contract suite (rate-limit is one of the 6 required fixture types per CP-063).
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-152 / CP-117 — Cost Estimate UI
 
 - `2026-06-04 00:40:00 -03:00` — cost estimate UI audit — PASS.

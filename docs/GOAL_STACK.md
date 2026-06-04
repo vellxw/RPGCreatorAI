@@ -652,6 +652,10 @@ Primary Phase 11 sources:
   (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
   tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
   regression tests from earlier phases.
+- Phase 11 CP-118 — rate-limit handling UX audit. mockProviderContract tests
+  pass (5/5). aiRequestQueueStore tests pass (5/5). Rate-limit fixtures
+  included in mock provider contract suite. No code changes needed. Evidence
+  in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-117 — cost estimate UI audit. providerCostBudget tests pass
   (2/2). ProviderCostBudgetPanel tests pass (1/1). Settings UI shows cost
   unknown honestly. No code changes needed. Evidence in
