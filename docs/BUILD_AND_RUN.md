@@ -60,6 +60,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnosti
 
 # Release branding metadata/icon checks.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
+
+# Asset export pipeline (cataloged assets to runtime BMP/WAV).
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1
+
+# Animation strip normalization (generated sprite sheets to runtime-ready strips).
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/normalize-animation-strip.ps1
+
+# Animation preview generation (GIF/sheet previews from normalization manifests).
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animation-preview.ps1
+
+# Screenshot analysis (audit helper for screenshot directories).
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/analyze-screenshots.ps1
 ```
 
 Equivalent `.bat` wrappers are available when direct PowerShell script
@@ -71,6 +83,9 @@ scripts\dev\test.bat
 scripts\dev\smoke-runtime.bat
 scripts\dev\verify-diagnostics.bat
 scripts\dev\verify-branding-assets.bat
+scripts\dev\export-runtime-assets.bat
+scripts\dev\normalize-animation-strip.bat
+scripts\dev\generate-animation-preview.bat
 ```
 
 Expected success markers:
@@ -85,6 +100,9 @@ Expected success markers:
 | `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
 | `npm run desktop:package:windows` | `PACKAGED SMOKE PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
 | `scripts/dev/smoke-first-run-app-data.ps1` | `FIRST-RUN APP DATA SMOKE PASSED` |
+| `scripts/dev/export-runtime-assets.ps1` | `RUNTIME EXPORT PASSED` |
+| `scripts/dev/normalize-animation-strip.ps1` | `NORMALIZATION PASSED` |
+| `scripts/dev/generate-animation-preview.ps1` | `PREVIEW GENERATION PASSED` |
 
 Known nonfatal warnings in the current Windows environment:
 

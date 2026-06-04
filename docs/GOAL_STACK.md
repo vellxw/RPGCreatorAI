@@ -640,6 +640,11 @@ Primary Phase 11 sources:
   workflows active and producing usable evidence. 1 blocking defect found and
   fixed (zoom button accessibility, commit 6d4926e). Evidence is recorded in
   `docs/PHASE_11_AUDIT_INTEGRATION_GATE.md`.
+- Phase 11 CP-105 — verify script expansion for Phase 11 completed. The canonical
+  verify.ps1 already covers 8 gates with 4 explicit skip flags. Phase 11 asset
+  pipeline helpers (export-runtime-assets, normalize-animation-strip,
+  generate-animation-preview, analyze-screenshots) were added to BUILD_AND_RUN.md
+  with .bat equivalents and success markers.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

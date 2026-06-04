@@ -4,6 +4,14 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-140 / CP-105 — Verify Script Expansion For Phase 11
+
+- `2026-06-03 23:30:00 -03:00` — verify.ps1 coverage audit — PASS; 8 gates already cover frontend typecheck/tests/build, native configure/build/test, Tauri content, Rust desktop, runtime smoke, and editor-runtime roundtrip. Skip flags (-SkipFrontend, -SkipDesktop, -SkipRuntime, -SkipSmoke) are explicit and documented.
+- `2026-06-03 23:31:00 -03:00` — focused helper audit — PASS; 40 scripts exist under scripts/dev/. Phase 11 asset pipeline helpers (export-runtime-assets, normalize-animation-strip, generate-animation-preview, analyze-screenshots) were missing from docs and have been added to BUILD_AND_RUN.md with .bat equivalents and success markers.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-139 / CP-104 — Continuous Audit Integration Gate
 
 - `2026-06-03 23:15:00 -03:00` — audit workflow verification — PASS; all 7 audit documents exist and are properly integrated (EDITOR_SCREENSHOT_AUDIT, RUNTIME_SCREENSHOT_AUDIT, RESPONSIVE_LAYOUT_AUDIT, ACCESSIBILITY_AUDIT, UX_COPY_AUDIT, GENERATED_ASSET_QUALITY_AUDIT, REGRESSION_TRIAGE_WORKFLOW).
