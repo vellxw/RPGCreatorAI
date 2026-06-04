@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-142 / CP-107 — Asset Pipeline Regression Tests
+
+- `2026-06-03 23:45:00 -03:00` — asset pipeline test suite verification — PASS; validation tests (validateProject: 43 tests, tileCatalog: 4 tests) and adapter tests (audioImport: 2 tests, tilesetImport: 2 tests, plus 30 other adapter tests) pass offline. Total: 10 files, 83 tests passed. Asset pipeline changes are covered by existing regression tests from CP-049 through CP-056 and CP-067 through CP-080.
+- Final pass/fail for this issue validation: PASS (already well-covered).
+
+---
+
 ### Phase 11 FRA-141 / CP-106 — Provider Mock Contract Regression Suite
 
 - `2026-06-03 23:41:00 -03:00` — provider mock test suite verification — PASS; 21 provider test files exist under `src/providers/__tests__/`. Core contract suite (mockProviderContract, mockProviderAdapter, providerRegistry) runs offline: 3 files, 16 tests passed. No network calls, no real credentials. Already satisfied by CP-063 (mocked provider contract test suite).

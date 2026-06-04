@@ -648,6 +648,10 @@ Primary Phase 11 sources:
 - Phase 11 CP-106 — provider mock contract regression suite verified. 21 provider
   test files exist; core contract suite (mockProviderContract, mockProviderAdapter,
   providerRegistry) passes offline with 16 tests. Already satisfied by CP-063.
+- Phase 11 CP-107 — asset pipeline regression tests verified. Validation tests
+  (validateProject: 43, tileCatalog: 4) and adapter tests (audioImport: 2,
+  tilesetImport: 2) pass offline. Asset pipeline is well-covered by existing
+  regression tests from earlier phases.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
