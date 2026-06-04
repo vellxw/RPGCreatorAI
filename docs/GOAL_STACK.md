@@ -631,6 +631,11 @@ Primary Phase 11 sources:
   verified for dimensions, transparency, runtime outputs, and frame metadata.
   No assets fail critical criteria. Evidence is recorded in
   `docs/GENERATED_ASSET_QUALITY_AUDIT.md`.
+- Phase 11 CP-103 — regression triage workflow completed. The workflow defines
+  severity classification (Blocking/Visible/Minor), required Linear issue fields,
+  routing rules by audit source, duplicate and known-limitation handling, and a
+  sample audit finding using the CP-100 zoom button accessibility fix. Evidence
+  is recorded in `docs/REGRESSION_TRIAGE_WORKFLOW.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

@@ -4,6 +4,14 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-138 / CP-103 — Regression Triage Workflow
+
+- `2026-06-03 23:00:00 -03:00` — docs review — PASS; `docs/REGRESSION_TRIAGE_WORKFLOW.md` created with severity classification (Blocking/Visible/Minor), required Linear issue fields (title, description, screenshot, viewport, reproduction steps, expected/actual behavior, audit reference), routing rules by finding source, duplicate/known-limitation handling, sample audit finding (zoom buttons accessibility fix from CP-100), and audit-to-issue flow diagram.
+- `2026-06-03 23:01:00 -03:00` — sample audit finding validation — PASS; the zoom button accessibility fix from CP-100 (commit 6d4926e) was used as the sample finding, demonstrating the complete triage workflow from discovery to resolution.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-137 / CP-102 — Generated Asset Quality Audit
 
 - `2026-06-03 22:45:00 -03:00` — asset catalog audit — PASS; 5 cataloged assets verified with proper metadata (dimensions, kind, source, path).
