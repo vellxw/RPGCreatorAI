@@ -4,6 +4,31 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-141 / CP-106 — Provider Mock Contract Regression Suite Repair
+
+- `2026-06-04 04:35:40 -03:00` — provider mock contract regression suite repair
+  — PASS.
+- Audit finding: CP-106 had a real evidence commit (`cae1ca0`), but its counts
+  were stale after CP-094 through CP-096 and later provider work. Linear and
+  `docs/GOAL_STACK.md` claimed 21 provider test files and 16 core tests, while
+  the current repo has 30 provider test files and the core suite now has 20
+  tests.
+- Fix applied: updated `docs/GOAL_STACK.md` and this validation log with the
+  current provider suite counts.
+- Focused `npm test -- --run src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts`
+  — PASS, 3 files / 20 tests.
+- Full provider `npm test -- --run src/providers/__tests__` — PASS, 30 files /
+  149 tests.
+- Provider test inventory check — PASS: 30 `*.test.ts` files under
+  `src/providers/__tests__/`.
+- Provider isolation check — PASS: no `process.env` reads or direct browser
+  network APIs were found in provider tests; apparent credential strings are
+  test fixtures used for redaction/env-var assertions.
+- Original evidence commit `cae1ca0` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-140 / CP-105 — Verify Script Expansion Repair
 
 - `2026-06-04 04:26:24 -03:00` — verify script expansion repair — PASS.
