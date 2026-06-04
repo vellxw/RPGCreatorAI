@@ -56,6 +56,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/test.ps1
 # Runtime smoke only.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1
 
+# Browser editor smoke harness. Starts/reuses Vite, drives the editor with
+# Playwright CLI through npx, and writes local artifacts under output/playwright/cp108.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1
+
 # Runtime diagnostics entry point and no-log failure-path coverage.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1
 
@@ -82,6 +86,7 @@ execution is blocked:
 scripts\dev\build.bat
 scripts\dev\test.bat
 scripts\dev\smoke-runtime.bat
+scripts\dev\smoke-browser-editor.bat
 scripts\dev\verify-diagnostics.bat
 scripts\dev\verify-branding-assets.bat
 scripts\dev\export-runtime-assets.bat
@@ -97,6 +102,7 @@ Expected success markers:
 | `scripts/dev/build.ps1` | native CTest reports `100% tests passed` |
 | `scripts/dev/test.ps1` | `=== TESTS PASSED ===` |
 | `scripts/dev/smoke-runtime.ps1` | `SMOKE PASSED` |
+| `scripts/dev/smoke-browser-editor.ps1` | `BROWSER SMOKE PASSED` or explicit `BROWSER SMOKE SKIPPED: <reason>` |
 | `scripts/dev/verify-diagnostics.ps1` | `RUNTIME DIAGNOSTICS VERIFY PASSED` |
 | `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
 | `npm run desktop:package:windows` | `PACKAGED SMOKE PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |

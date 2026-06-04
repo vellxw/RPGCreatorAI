@@ -4,6 +4,52 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-143 / CP-108 — Desktop Playwright Smoke Harness Repair
+
+- `2026-06-04 04:57:55 -03:00` — desktop browser smoke harness repair —
+  PASS.
+- Audit finding: CP-108 had a real evidence commit (`075ac65`), but it was
+  docs-only and treated manual Chrome DevTools MCP usage as the harness. The
+  Linear issue required a runnable optional browser automation smoke command
+  that passes locally or reports an explicit environment skip.
+- Fix applied: added `scripts/dev/smoke-browser-editor.ps1`,
+  `scripts/dev/smoke-browser-editor.bat`,
+  `src/e2e/__tests__/browserSmokeHarnessScript.test.ts`, and updated
+  `docs/BROWSER_SMOKE_HARNESS.md`, `docs/BUILD_AND_RUN.md`,
+  `docs/CI_READY_VALIDATION.md`, and `docs/GOAL_STACK.md`.
+- TDD red: `npm test -- --run src/e2e/__tests__/browserSmokeHarnessScript.test.ts`
+  — FAIL as expected because the executable harness did not exist.
+- TDD green: `npm test -- --run src/e2e/__tests__/browserSmokeHarnessScript.test.ts`
+  — PASS, 1 file / 1 test.
+- Publish-artifact regression red: same focused test — FAIL as expected because
+  `Copy-Item -LiteralPath "$artifactRoot\*"` did not publish artifacts.
+- Publish-artifact regression green: same focused test — PASS after enumerating
+  `Get-ChildItem -LiteralPath $artifactRoot` before copying.
+- Process-tree cleanup regression red: same focused test — FAIL as expected
+  because stopping only the `npm` process left a Vite `node.exe` child holding
+  local artifact logs.
+- Process-tree cleanup regression green: same focused test — PASS after adding
+  `Stop-HarnessProcessTree` using `Win32_Process` child enumeration.
+- Real harness:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1`
+  — PASS; printed `BROWSER SMOKE PASSED`; published 20 local artifact files
+  under `output/playwright/cp108`; console capture reported 9 total messages,
+  0 errors, 0 warnings.
+- Post-smoke process check: `netstat -ano | Select-String ':3000' |
+  Select-String 'LISTENING'` — PASS; no Vite listener remained after harness
+  cleanup.
+- Explicit skip path:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1 -SkipBrowser -OutputDir output/playwright/cp108-skip2`
+  — PASS; printed `BROWSER SMOKE SKIPPED: SkipBrowser requested.`
+- Focused E2E regression:
+  `npm test -- --run src/e2e/__tests__/browserSmokeHarnessScript.test.ts src/e2e/__tests__/verifyScript.test.ts src/e2e/__tests__/runtimeSmokeScript.test.ts`
+  — PASS, 3 files / 11 tests.
+- `npm run typecheck` — PASS.
+- Original evidence commit `075ac65` present.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-142 / CP-107 — Asset Pipeline Regression Tests Repair
 
 - `2026-06-04 04:44:55 -03:00` — asset pipeline regression evidence repair

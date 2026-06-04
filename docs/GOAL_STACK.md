@@ -852,11 +852,13 @@ Primary Phase 11 sources:
   movement routes, choices, and 3 screenshot assertions. C++ tests cover
   save/load, battle, diagnostics, and other Phase 11 features. No script
   changes needed. Evidence in `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-108 — desktop browser smoke harness documented. Chrome DevTools
-  MCP serves as equivalent browser automation for high-value editor workflows.
-  Used successfully for CP-097, CP-099, and CP-100. No Playwright installation
-  required. Harness is optional and documents limitations. Evidence is recorded
-  in `docs/BROWSER_SMOKE_HARNESS.md`.
+- Phase 11 CP-108 — desktop browser smoke harness implemented and documented.
+  `scripts/dev/smoke-browser-editor.ps1` and `.bat` start or reuse Vite, drive
+  the editor through `@playwright/cli` via `npx`, verify startup, bundled
+  sample load, Validate, Save, and Events/Database/Assets/Playtest/Settings
+  navigation, capture local artifacts under `output/playwright/cp108`, and
+  report explicit `BROWSER SMOKE SKIPPED: <reason>` when browser automation is
+  unavailable.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust

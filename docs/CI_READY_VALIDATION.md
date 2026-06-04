@@ -50,7 +50,7 @@ provider mock policy, cache expectations, and known nonfatal warnings.
 | Native runtime launch with window visible | Requires Windows display; `-WindowStyle Hidden` used in scripts |
 | Tauri desktop app launch | Requires Tauri shell + Windows display |
 | Desktop packaging (`npm run desktop:package:windows`) | Requires full Tauri + Windows build toolchain |
-| Playwright/E2E browser automation | Requires Chrome instance |
+| `scripts/dev/smoke-browser-editor.ps1` | Requires `npx`, Vite, and browser automation; exits with explicit `BROWSER SMOKE SKIPPED: <reason>` when unavailable |
 
 ### Excluded from Normal CI (Live Provider Diagnostics)
 
