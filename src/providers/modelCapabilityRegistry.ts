@@ -303,6 +303,21 @@ export const defaultModelCapabilityRegistry: ModelCapabilityDescriptor[] = [
     contextHints: ['MiniMax image generation model for text-to-image and subject-reference image generation'],
   },
   {
+    providerId: 'opencode',
+    modelId: 'opencode-workflow',
+    label: 'OpenCode controlled workflow',
+    capabilities: ['code', 'tool'],
+    operations: ['code.assist'],
+    limits: {
+      inputFileTypes: [],
+      outputFileTypes: [],
+      supportsStreaming: false,
+    },
+    contextHints: [
+      'Offline handoff descriptor for OpenCode CLI workflows; adapter prepares controlled prompts and never executes external tools directly',
+    ],
+  },
+  {
     providerId: 'local',
     modelId: 'offline-mock',
     label: 'Offline mock',
@@ -366,7 +381,25 @@ export function modelSupportsCapability(
 function providerCanRoute(provider: ProviderConfig): boolean {
   return provider.enabled &&
     (provider.credentialState === 'configured' || provider.credentialState === 'not-required') &&
-    provider.model.trim().length > 0;
+    (provider.model.trim().length > 0 || provider.id === 'opencode');
+}
+
+function routableDescriptorsForProvider(
+  provider: ProviderConfig,
+  registry: ModelCapabilityDescriptor[],
+): ModelCapabilityDescriptor[] {
+  const selectedModel = provider.model.trim();
+  if (selectedModel.length > 0) {
+    const descriptor = getModelCapabilityDescriptor(provider.id, selectedModel, registry);
+    return descriptor ? [descriptor] : [];
+  }
+
+  if (provider.id === 'opencode' && provider.credentialState === 'not-required') {
+    const workflowDescriptor = getModelCapabilityDescriptor(provider.id, 'opencode-workflow', registry);
+    return workflowDescriptor ? [workflowDescriptor] : [];
+  }
+
+  return [];
 }
 
 export function buildProviderCapabilityGates(
@@ -377,18 +410,19 @@ export function buildProviderCapabilityGates(
   return workflows.map(workflow => {
     for (const provider of providers) {
       if (!providerCanRoute(provider)) continue;
-      const descriptor = getModelCapabilityDescriptor(provider.id, provider.model, registry);
-      if (!descriptor || !modelSupportsCapability(descriptor, workflow.requiredCapability)) continue;
-      return {
-        id: workflow.id,
-        label: workflow.label,
-        requiredCapability: workflow.requiredCapability,
-        available: true,
-        providerId: provider.id,
-        providerName: provider.name,
-        modelId: descriptor.modelId,
-        reason: `${provider.name} / ${descriptor.label}`,
-      };
+      for (const descriptor of routableDescriptorsForProvider(provider, registry)) {
+        if (!modelSupportsCapability(descriptor, workflow.requiredCapability)) continue;
+        return {
+          id: workflow.id,
+          label: workflow.label,
+          requiredCapability: workflow.requiredCapability,
+          available: true,
+          providerId: provider.id,
+          providerName: provider.name,
+          modelId: descriptor.modelId,
+          reason: `${provider.name} / ${descriptor.label}`,
+        };
+      }
     }
 
     return {

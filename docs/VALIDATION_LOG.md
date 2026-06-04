@@ -4,6 +4,55 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 11 FRA-129 / CP-094 — OpenCode Workflow Adapter Remediation
+
+- `2026-06-04 03:25:36 -03:00` — OpenCode workflow adapter remediation —
+  PASS.
+- Audit finding: Linear marked CP-094 Done, but the closeout cited commit
+  `a95e4cf` and described only OpenCode provider registry metadata plus
+  offline mock contracts. Repo history had no CP-094/FRA-129 commit and no
+  dedicated OpenCode workflow adapter through the shared provider interface.
+- Official docs checked before implementation: OpenCode CLI docs, permissions
+  docs, and headless server docs.
+- TDD evidence: `npm test -- --run src/providers/__tests__/openCodeWorkflowAdapter.test.ts`
+  was RED before implementation because `../openCodeWorkflowAdapter` did not
+  exist.
+- Fix applied: added `src/providers/openCodeWorkflowAdapter.ts` for controlled
+  repo-local OpenCode handoffs, no direct external-tool execution, workspace
+  path validation, safe permission normalization, mocked workflow
+  status/failure states, cancellation handling, and secret redaction.
+- Registry/capability fix: OpenCode now has an `opencode-workflow` descriptor
+  in provider metadata and capability metadata; `providerConfigsFromRegistry`
+  still starts with no selected model, while `buildProviderCapabilityGates`
+  resolves the virtual workflow descriptor only for enabled OpenCode routing.
+- Documentation: added `docs/PHASE_11_OPENCODE_WORKFLOW_ADAPTER.md`.
+- Focused `npm test -- --run src/providers/__tests__/openCodeWorkflowAdapter.test.ts`
+  — PASS, 1 file / 5 tests.
+- Focused `npm test -- --run src/providers/__tests__/openCodeWorkflowAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 4 files / 26 tests.
+- `npm run typecheck` initially failed with TS2345 in
+  `src/providers/openCodeWorkflowAdapter.ts` because the permission/failure
+  union needed an explicit type guard. Fix applied: added
+  `isProviderFailure`.
+- First full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  failed in `src/stores/__tests__/providerStore.test.tsx` because the first
+  registry change preselected `opencode-workflow`, violating the no default
+  model invariant. Fix applied: kept config models empty and moved virtual
+  workflow routing into `modelCapabilityRegistry`.
+- Focused regression after fix:
+  `npm test -- --run src/stores/__tests__/providerStore.test.tsx src/providers/__tests__/openCodeWorkflowAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/security/__tests__/redaction.test.ts`
+  — PASS, 5 files / 27 tests.
+- `npm run typecheck` — PASS.
+- Full `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  — PASS. Gates passed: frontend typecheck, full Vitest (104 files / 548
+  tests), frontend build, native C++ configure/build/CTest, Tauri content check,
+  43 Rust desktop tests, runtime smoke, and editor-runtime screenshot roundtrip.
+- Known nonfatal warnings: Vite chunk-size warning and existing CMake
+  FetchContent/deprecation warnings.
+- Final pass/fail for this issue validation: PASS.
+
+---
+
 ### Phase 11 FRA-128 / CP-093 — MiniMax Provider Adapter Remediation
 
 - `2026-06-04 03:08:29 -03:00` — MiniMax provider adapter remediation —

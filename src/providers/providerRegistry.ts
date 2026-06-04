@@ -279,7 +279,13 @@ export const defaultProviderRegistry: ProviderMetadata[] = [
     },
     operations: ['code.assist'],
     capabilityLabels: ['Code assistance', 'External tool adapter'],
-    models: [],
+    models: [
+      {
+        id: 'opencode-workflow',
+        label: 'OpenCode controlled workflow',
+        operations: ['code.assist'],
+      },
+    ],
     modelSelection: 'not-required',
   },
   {

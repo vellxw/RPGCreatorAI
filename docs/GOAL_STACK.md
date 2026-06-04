@@ -52,13 +52,14 @@ Primary Phase 11 sources:
 - `docs/PHASE_11_KIMI_PROVIDER_ADAPTER.md`
 - `docs/PHASE_11_DEEPSEEK_PROVIDER_ADAPTER.md`
 - `docs/PHASE_11_MINIMAX_PROVIDER_ADAPTER.md`
+- `docs/PHASE_11_OPENCODE_WORKFLOW_ADAPTER.md`
 - `.kiro/specs/phase11-complete-product-platform/`
 - Linear project `RPGCreatorAI Complete Product Platform`
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 11 — multi-provider integrations (CP-094 through
+- Phase 11 Linear milestone 11 — multi-provider integrations (CP-095 through
   CP-096 audit/remediation next).
 - Phase 11 Linear milestone 12 — continuous visual/UX audits.
 - Phase 11 Linear milestone 13 — QA automation and regression.
@@ -663,6 +664,16 @@ Primary Phase 11 sources:
   provider errors, concrete MiniMax M3/M2.7/image-01 metadata, and no false
   audio/video execution gates. Evidence is recorded in
   `docs/PHASE_11_MINIMAX_PROVIDER_ADAPTER.md` and `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-094 — OpenCode Workflow Adapter remediated. Linear's prior
+  closeout cited `a95e4cf` and only described registry/mock metadata. The
+  project now has a dedicated OpenCode workflow adapter through the shared
+  provider interface. It prepares controlled repo-local handoffs, rejects
+  direct execution, validates workspace paths, forces safe permission
+  boundaries, models mocked workflow statuses and failure states, redacts
+  secrets, and exposes an `opencode-workflow` capability descriptor so
+  `code-tooling` can route without credentials or a user-selected model.
+  Evidence is recorded in `docs/PHASE_11_OPENCODE_WORKFLOW_ADAPTER.md` and
+  `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
   editor screenshot audit checklist now defines 67 required screenshots across
   9 categories (startup, map editor, events, database, assets, playtest, settings,
