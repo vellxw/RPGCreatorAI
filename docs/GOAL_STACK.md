@@ -588,6 +588,18 @@ Primary Phase 11 sources:
   opens a balancing modal supporting progression curve configuration, prompt inputs, proposed adjustments
   review lists across Actors, Enemies, and Items, reference validations, and accept apply updates.
   Evidence is recorded in `docs/PHASE_11_AI_BALANCING_ASSISTANT.md`.
+- Phase 11 CP-097 — editor screenshot audit workflow completed. The repeatable
+  editor screenshot audit checklist now defines 67 required screenshots across
+  9 categories (startup, map editor, events, database, assets, playtest, settings,
+  validation/save, error/recovery), an audit checklist covering spacing, overlap,
+  disabled states, information density, empty/loading/error states, responsive
+  viewport variants, and accessibility, a consistent evidence storage convention
+  under `docs/screenshots/`, follow-up issue filing guidance with severity
+  classification, and integration with existing `GAME_VISUAL_QA.md`,
+  `EDITOR_RUNTIME_E2E_QA.md`, `EMPTY_STATES.md`, `VALIDATION_LOG.md`, and
+  the CP-032 JSON assertion format. Representative screenshot evidence was
+  captured via Chrome DevTools MCP under `docs/screenshots/phase11-cp097/`.
+  Evidence is recorded in `docs/EDITOR_SCREENSHOT_AUDIT.md`.
 - Phase 10 INT-005 (FRA-35) — final MVP green gate passed. The canonical
   `scripts/dev/verify.ps1` gate passed frontend typecheck, full Vitest,
   frontend build, native C++ configure/build/CTest, Tauri content check, Rust
