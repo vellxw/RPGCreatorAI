@@ -89,11 +89,57 @@ describe('SettingsScreen provider settings', () => {
       enable?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
+    const accept = view.container.querySelector<HTMLButtonElement>('button[aria-label="Accept OpenAI provider disclosure"]');
+    expect(accept).toBeDefined();
+    act(() => {
+      accept?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
     expect(view.container.textContent).toContain('Needs credentials');
     const credential = view.container.querySelector<HTMLInputElement>('input[type="password"]');
     expect(credential).toBeDefined();
     expect(credential?.disabled).toBe(true);
     expect(view.container.textContent).toContain('Credential storage is only available in the desktop shell.');
+
+    view.unmount();
+  });
+
+  it('requires explicit provider disclosure before enabling and keeps local workflows available when declined', () => {
+    const view = renderSettings([disabledOpenAi]);
+
+    const enable = view.container.querySelector<HTMLButtonElement>('button[aria-label="Enable OpenAI provider"]');
+    expect(enable).toBeDefined();
+
+    act(() => {
+      enable?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.container.textContent).toContain('Provider opt-in disclosure');
+    expect(view.container.textContent).toContain('Provider-backed actions may send selected prompts and project context');
+    expect(view.container.textContent).toContain('Disabled');
+    expect(view.container.textContent).not.toContain('Needs credentials');
+
+    const decline = view.container.querySelector<HTMLButtonElement>('button[aria-label="Decline OpenAI provider disclosure"]');
+    expect(decline).toBeDefined();
+    act(() => {
+      decline?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.container.textContent).toContain('Provider opt-in declined. Local authoring remains available.');
+    expect(view.container.textContent).toContain('Disabled');
+    expect(view.container.textContent).not.toContain('Needs credentials');
+
+    act(() => {
+      enable?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    const accept = view.container.querySelector<HTMLButtonElement>('button[aria-label="Accept OpenAI provider disclosure"]');
+    expect(accept).toBeDefined();
+    act(() => {
+      accept?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(view.container.textContent).toContain('Needs credentials');
+    expect(view.container.textContent).not.toContain('Provider opt-in declined.');
 
     view.unmount();
   });
@@ -255,6 +301,13 @@ describe('SettingsScreen provider settings', () => {
     );
     act(() => {
       enable?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    const accept = view.container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Accept Custom OpenAI-compatible endpoint provider disclosure"]',
+    );
+    expect(accept).toBeDefined();
+    act(() => {
+      accept?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
     expect(endpoint?.disabled).toBe(false);

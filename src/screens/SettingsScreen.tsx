@@ -103,6 +103,8 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
   const [credentialStatuses, setCredentialStatuses] = useState<Record<string, CredentialStatus>>({});
   const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
   const [credentialFeedback, setCredentialFeedback] = useState<Record<string, string>>({});
+  const [pendingDisclosureProviderId, setPendingDisclosureProviderId] = useState<string | null>(null);
+  const [providerDisclosureFeedback, setProviderDisclosureFeedback] = useState<Record<string, string>>({});
   const internalAiQueue = useAiRequestQueue();
   const activeAiQueue = aiQueueStore ?? internalAiQueue;
 
@@ -149,7 +151,30 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
   };
 
   const toggleProvider = (id: string) => {
-    updateProvider(id, provider => providerWithEnabled(provider, !provider.enabled));
+    const provider = providers.find(item => item.id === id);
+    if (!provider) return;
+    if (provider.enabled) {
+      setPendingDisclosureProviderId(current => (current === id ? null : current));
+      setProviderDisclosureFeedback(prev => ({ ...prev, [id]: '' }));
+      updateProvider(id, current => providerWithEnabled(current, false));
+      return;
+    }
+    setPendingDisclosureProviderId(id);
+    setProviderDisclosureFeedback(prev => ({ ...prev, [id]: '' }));
+  };
+
+  const acceptProviderDisclosure = (id: string) => {
+    updateProvider(id, provider => providerWithEnabled(provider, true));
+    setPendingDisclosureProviderId(null);
+    setProviderDisclosureFeedback(prev => ({ ...prev, [id]: '' }));
+  };
+
+  const declineProviderDisclosure = (id: string) => {
+    setPendingDisclosureProviderId(null);
+    setProviderDisclosureFeedback(prev => ({
+      ...prev,
+      [id]: 'Provider opt-in declined. Local authoring remains available.',
+    }));
   };
 
   const updateModel = (id: string, model: string) => {
@@ -287,6 +312,8 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                   modelId: provider.model.trim() || provider.imageSettings?.modelId || defaultOpenAiImageGenerationSettings.modelId,
                 });
                 const imageReadiness = imageGenerationReadiness(provider);
+                const disclosurePending = pendingDisclosureProviderId === provider.id;
+                const disclosureFeedback = providerDisclosureFeedback[provider.id];
                 return (
                   <article key={provider.id} className="rounded-md border border-gray-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -322,6 +349,40 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
                         {provider.enabled ? 'Disable' : 'Enable'}
                       </button>
                     </div>
+
+                    {disclosurePending && (
+                      <div className="mt-3 rounded-md border border-indigo-100 bg-indigo-50 p-3">
+                        <p className="text-[12px] font-semibold text-indigo-900">Provider opt-in disclosure</p>
+                        <p className="mt-1 text-[12px] leading-5 text-indigo-800">
+                          Provider-backed actions may send selected prompts and project context to this provider API.
+                          Declining keeps local authoring, playtest, assets, and database editing available.
+                        </p>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => declineProviderDisclosure(provider.id)}
+                            aria-label={`Decline ${provider.name} provider disclosure`}
+                            className="inline-flex h-8 items-center justify-center rounded-md border border-indigo-200 bg-white px-2.5 text-[12px] font-medium text-indigo-800 hover:bg-indigo-100"
+                          >
+                            Decline
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => acceptProviderDisclosure(provider.id)}
+                            aria-label={`Accept ${provider.name} provider disclosure`}
+                            className="inline-flex h-8 items-center justify-center rounded-md border border-indigo-600 bg-indigo-600 px-2.5 text-[12px] font-medium text-white hover:bg-indigo-700"
+                          >
+                            Enable provider
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {disclosureFeedback && (
+                      <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-[12px] text-gray-600">
+                        {disclosureFeedback}
+                      </div>
+                    )}
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
                       <div>

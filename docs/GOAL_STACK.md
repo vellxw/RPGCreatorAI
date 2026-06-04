@@ -811,10 +811,12 @@ Primary Phase 11 sources:
   (2/2). ProviderCostBudgetPanel tests pass (1/1). Settings UI shows cost
   unknown honestly. No code changes needed. Evidence in
   `docs/VALIDATION_LOG.md`.
-- Phase 11 CP-116 — provider opt-in UX audit. ProviderCapabilityGatesPanel
-  tests pass (2/2). AIRequestQueuePanel tests pass (3/3). Settings UI shows
-  all providers disabled by default. Editor works fully without providers.
-  No code changes needed. Evidence in `docs/VALIDATION_LOG.md`.
+- Phase 11 CP-116 — provider opt-in UX repaired. The earlier closeout proved
+  disabled defaults but did not implement a first-use disclosure or declined
+  state. Settings now requires accepting provider-bound context disclosure
+  before enabling a provider, keeps providers disabled when the user declines,
+  and preserves local authoring/playtest/assets/database workflows. Evidence
+  is recorded in `docs/VALIDATION_LOG.md`.
 - Phase 11 CP-115 — local data boundary audit repaired. The earlier closeout
   cited a missing threat-model file and did not expose provider-bound context
   clearly enough in Settings. `docs/SECURITY_THREAT_MODEL.md` now documents

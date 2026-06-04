@@ -893,6 +893,16 @@ Append-only log of major validation runs. Newest entries on top.
 - UI copy: "Providers are optional editor tooling. Maps, database, assets, and playtest stay available with no providers configured." (verified from snapshot).
 - Editor works fully without any providers configured (verified from snapshot — full editor with map, events, database, assets, playtest, settings all functional).
 - Final pass/fail for this issue validation: PASS.
+- `2026-06-04 05:57:21 -03:00` — repair audit re-read Linear FRA-151 and found the prior closeout proved disabled defaults but did not implement first-use disclosure, declined state, or accepted enablement before provider-backed actions can become available.
+- TDD red: `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx` — FAIL as expected; 1 test failed because clicking `Enable OpenAI provider` immediately moved OpenAI to `Needs credentials` instead of showing `Provider opt-in disclosure`.
+- Fix applied: Settings now opens an inline provider opt-in disclosure before enabling a provider. Decline keeps the provider disabled and shows `Provider opt-in declined. Local authoring remains available.` Accept enables the provider and then shows the existing missing-credential/configured state. `docs/PHASE_11_PROVIDER_SETTINGS_UI.md` and `docs/GOAL_STACK.md` were updated.
+- `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx` — PASS; 1 test file / 7 tests.
+- `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/stores/__tests__/providerStore.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderContract.test.ts` — PASS; 7 test files / 30 tests.
+- `npm run typecheck` — PASS.
+- Evidence grep for provider opt-in disclosure, Decline/Accept aria labels, declined feedback, and provider-bound context copy — PASS.
+- `git diff --check` — PASS with CRLF warnings only after the doc-log update.
+- Chrome DevTools visual/a11y review at `http://localhost:3000` — PASS. Settings showed disabled provider defaults, inline provider opt-in disclosure, Decline kept OpenAI disabled, Accept changed OpenAI to `Needs credentials`, and console warning/error scan returned no messages. Screenshot was captured for review and then removed as a temporary untracked artifact.
+- Final pass/fail for repaired issue validation: PASS.
 
 ---
 

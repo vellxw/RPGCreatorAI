@@ -10,6 +10,9 @@ or any native runtime dependency.
 - `Settings` is now an implemented primary workspace route.
 - Provider rows expose enable/disable state, capability tags, model labels,
   credential source labels, and explicit missing-credential feedback.
+- Enabling a provider first opens an explicit opt-in disclosure. Accepting the
+  disclosure enables the provider; declining keeps the provider disabled and
+  leaves local authoring, playtest, assets, and database editing available.
 - The screen handles an empty provider list without blocking local authoring.
 - Enabled providers without credentials show `Needs credentials`; configured
   providers can be represented by credential availability metadata.
@@ -60,6 +63,7 @@ Focused UI/store coverage validates:
 
 - no-provider empty state
 - disabled provider state
+- first-use provider disclosure, declined state, and accepted enablement
 - enabled provider with missing credentials
 - configured-provider state
 - no raw credential value in rendered feedback after save
