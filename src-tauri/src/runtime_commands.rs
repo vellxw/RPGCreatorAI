@@ -87,12 +87,27 @@ pub struct RuntimeDiagnosticsInfo {
     pub error: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum RuntimeStatus {
     Unavailable,
     Ready,
     Running,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeAvailabilityInfo {
+    pub available: bool,
+    pub status: RuntimeStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub executable_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+fn runtime_not_found_message() -> String {
+    "rpg_creator_runtime executable not found. Build it first with scripts/dev/verify-runtime.bat or set RPG_RUNTIME_EXE.".to_string()
 }
 
 fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
@@ -140,6 +155,38 @@ fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
     }
 
     None
+}
+
+fn runtime_status_from_state(state: &AppState) -> RuntimeStatus {
+    let mut guard = state.runtime_process.lock().unwrap();
+    match guard.as_mut() {
+        None => RuntimeStatus::Ready,
+        Some(child) => match child.try_wait() {
+            Ok(Some(_)) => {
+                *guard = None;
+                RuntimeStatus::Ready
+            }
+            Ok(None) => RuntimeStatus::Running,
+            Err(_) => RuntimeStatus::Unavailable,
+        },
+    }
+}
+
+fn runtime_availability_for_status(
+    executable_search_root: Option<&str>,
+    status: RuntimeStatus,
+) -> RuntimeAvailabilityInfo {
+    let executable = locate_runtime_executable(executable_search_root);
+    let executable_path = executable
+        .as_ref()
+        .map(|path| path.to_string_lossy().to_string());
+    let available = matches!(status, RuntimeStatus::Running) || executable_path.is_some();
+    RuntimeAvailabilityInfo {
+        available,
+        status,
+        executable_path,
+        error: (!available).then(runtime_not_found_message),
+    }
 }
 
 fn runtime_logs_dir() -> Result<PathBuf, String> {
@@ -410,18 +457,16 @@ pub fn runtime_kill(state: State<'_, AppState>) -> Result<(), String> {
 
 #[tauri::command]
 pub fn runtime_status(state: State<'_, AppState>) -> RuntimeStatus {
-    let mut guard = state.runtime_process.lock().unwrap();
-    match guard.as_mut() {
-        None => RuntimeStatus::Ready,
-        Some(child) => match child.try_wait() {
-            Ok(Some(_)) => {
-                *guard = None;
-                RuntimeStatus::Ready
-            }
-            Ok(None) => RuntimeStatus::Running,
-            Err(_) => RuntimeStatus::Unavailable,
-        },
-    }
+    runtime_status_from_state(state.inner())
+}
+
+#[tauri::command]
+pub fn runtime_availability(
+    state: State<'_, AppState>,
+    executable_search_root: Option<String>,
+) -> RuntimeAvailabilityInfo {
+    let status = runtime_status_from_state(state.inner());
+    runtime_availability_for_status(executable_search_root.as_deref(), status)
 }
 
 #[cfg(test)]
@@ -496,6 +541,59 @@ mod tests {
         assert_eq!(result.as_deref(), Some(exe.as_path()));
 
         restore_runtime_env(previous);
+    }
+
+    #[test]
+    fn availability_reports_env_runtime_without_launching() {
+        let _guard = runtime_env_lock().lock().unwrap();
+        let previous = std::env::var_os("RPG_RUNTIME_EXE");
+        let tmp = tempfile::TempDir::new().unwrap();
+        let exe = tmp.path().join(if cfg!(windows) {
+            "rpg_creator_runtime.exe"
+        } else {
+            "rpg_creator_runtime"
+        });
+        std::fs::write(&exe, b"not a real exe").unwrap();
+        std::env::set_var("RPG_RUNTIME_EXE", &exe);
+
+        let result = runtime_availability_for_status(None, RuntimeStatus::Ready);
+
+        restore_runtime_env(previous);
+        assert!(result.available);
+        assert_eq!(result.status, RuntimeStatus::Ready);
+        assert_eq!(result.executable_path.as_deref(), Some(exe.to_string_lossy().as_ref()));
+        assert!(result.error.is_none());
+    }
+
+    #[test]
+    fn availability_reports_missing_runtime_with_recovery_copy() {
+        let _guard = runtime_env_lock().lock().unwrap();
+        let previous = std::env::var_os("RPG_RUNTIME_EXE");
+        let previous_local = std::env::var_os("LOCALAPPDATA");
+        let empty = tempfile::TempDir::new().unwrap();
+        let root = tempfile::TempDir::new().unwrap();
+        std::env::remove_var("RPG_RUNTIME_EXE");
+        std::env::set_var("LOCALAPPDATA", empty.path());
+
+        let result = runtime_availability_for_status(
+            Some(root.path().to_string_lossy().as_ref()),
+            RuntimeStatus::Ready,
+        );
+
+        restore_runtime_env(previous);
+        if let Some(value) = previous_local {
+            std::env::set_var("LOCALAPPDATA", value);
+        } else {
+            std::env::remove_var("LOCALAPPDATA");
+        }
+        assert!(!result.available);
+        assert_eq!(result.status, RuntimeStatus::Ready);
+        assert!(result.executable_path.is_none());
+        assert!(result
+            .error
+            .as_deref()
+            .unwrap()
+            .contains("rpg_creator_runtime executable not found"));
     }
 
     #[test]

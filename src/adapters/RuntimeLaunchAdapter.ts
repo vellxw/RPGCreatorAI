@@ -2,6 +2,7 @@
 // Tauri shell IPC. Browser mode keeps reporting unavailable honestly.
 
 import type {
+  RuntimeAvailabilityInfo,
   RuntimeDiagnosticsInfo,
   RuntimeLaunchAdapter,
   RuntimeLaunchOptions,
@@ -20,6 +21,15 @@ export class BrowserRuntimeAdapter implements RuntimeLaunchAdapter {
 
   getExecutablePath(): string | null {
     return null;
+  }
+
+  async checkAvailability(): Promise<RuntimeAvailabilityInfo> {
+    return {
+      available: false,
+      status: 'unavailable',
+      error:
+        'Native runtime unavailable in browser mode. Use the desktop app to launch playtests.',
+    };
   }
 
   async launch(_projectPath: string, _options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult> {
@@ -90,6 +100,38 @@ export class DesktopRuntimeAdapter implements RuntimeLaunchAdapter {
 
   getExecutablePath(): string | null {
     return this.cachedExePath;
+  }
+
+  async checkAvailability(options: RuntimeLaunchOptions = {}): Promise<RuntimeAvailabilityInfo> {
+    if (!this.canLaunch()) {
+      return {
+        available: false,
+        status: 'unavailable',
+        error: 'Desktop runtime bridge not detected. Run inside the Tauri shell.',
+      };
+    }
+    if (!window.rpgBridge!.runtime.availability) {
+      return {
+        available: false,
+        status: 'unavailable',
+        error: 'Desktop runtime availability check is not exposed by this shell.',
+      };
+    }
+    try {
+      const result = await window.rpgBridge!.runtime.availability(
+        options.executableSearchRoot ?? null,
+      );
+      this.cachedStatus = result.status;
+      if (result.executablePath) this.cachedExePath = result.executablePath;
+      return result;
+    } catch (e) {
+      this.cachedStatus = 'unavailable';
+      return {
+        available: false,
+        status: 'unavailable',
+        error: (e as Error).message,
+      };
+    }
   }
 
   async launch(projectRoot: string, options: RuntimeLaunchOptions = {}): Promise<RuntimeLaunchResult> {

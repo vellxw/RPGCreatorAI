@@ -60,6 +60,7 @@ The renderer never sees a generic `invoke()` function. Instead, a thin typed wra
 | `fs` | `listBackups(root, file)` | Lists `.backups/` entries for a given file |
 | `fs` | `closeProject()` | Releases the active root scope |
 | `fs` | `createPlaytestSession(sourceRoot, state, request)` | Writes a temporary playtest project for project-start/current-map/selected-event modes |
+| `runtime` | `availability(executableSearchRoot?)` | Resolves native runtime availability and process status without launching |
 | `runtime` | `launch(projectRoot, executableSearchRoot?)` | Spawns the C++ runtime; returns PID and resolved executable path |
 | `runtime` | `kill()` | Graceful kill + wait |
 | `runtime` | `status()` | `unavailable` / `ready` / `running` |

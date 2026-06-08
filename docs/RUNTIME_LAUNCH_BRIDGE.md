@@ -37,6 +37,9 @@ event trace, or runtime state snapshots.
 interface RuntimeLaunchAdapter {
   canLaunch(): boolean;
   getExecutablePath(): string | null;
+  checkAvailability(
+    options?: { executableSearchRoot?: string },
+  ): Promise<RuntimeAvailabilityInfo>;
   launch(
     projectRoot: string,
     options?: { executableSearchRoot?: string },
@@ -67,6 +70,12 @@ launches that can be the source project. For playtest sessions it is the
 temporary session root. `executableSearchRoot` lets the shell find the runtime
 under the source repository while still launching with `current_dir` set to
 the temp session root.
+
+`checkAvailability()` is startup-safe: it asks the shell to resolve the native
+runtime executable and reconcile process status without spawning a process. The
+startup screen can report `ready`, `running`, or unavailable runtime states,
+but it must not imply that a runtime launch has succeeded. Browser mode returns
+an unavailable availability result with browser-specific recovery copy.
 
 ## Playtest Session Modes
 
@@ -204,6 +213,9 @@ If `%APPDATA%` is unavailable, the shell uses `%LOCALAPPDATA%`, then
 
 The runtime bridge exposes narrow log and snapshot operations:
 
+- `runtime_availability`: returns executable availability, resolved executable
+  path when one is found, and current process status without launching the
+  runtime.
 - `runtime_latest_log`: returns the current in-memory log path, or the newest
   `runtime-*.log` file in the runtime log directory.
 - `runtime_diagnostics`: creates and reports the allowlisted diagnostics

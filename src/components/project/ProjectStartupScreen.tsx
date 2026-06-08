@@ -6,6 +6,7 @@ interface ProjectStartupScreenProps {
   desktop: boolean;
   sampleTitle: string;
   statusMessage?: string | null;
+  runtimeStatusMessage?: string | null;
   onUseSample(): void;
   onOpenProject(): void;
   onCreateProject(title: string): void;
@@ -16,6 +17,7 @@ export function ProjectStartupScreen({
   desktop,
   sampleTitle,
   statusMessage,
+  runtimeStatusMessage,
   onUseSample,
   onOpenProject,
   onCreateProject,
@@ -59,6 +61,12 @@ export function ProjectStartupScreen({
           {statusMessage && (
             <div className="mt-5 rounded-md border border-gray-200 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm">
               {statusMessage}
+            </div>
+          )}
+
+          {runtimeStatusMessage && (
+            <div className="mt-3 rounded-md border border-emerald-100 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm">
+              {runtimeStatusMessage}
             </div>
           )}
         </section>

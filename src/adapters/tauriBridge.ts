@@ -9,6 +9,7 @@ import type {
   PlaytestSessionResult,
   SaveResult,
   RuntimeStatus,
+  RuntimeAvailabilityInfo,
   RuntimeDiagnosticsInfo,
   RuntimeLaunchResult,
   RuntimeLogActionResult,
@@ -80,6 +81,10 @@ export async function installTauriBridgeIfPresent(): Promise<boolean> {
         }) as Promise<PlaytestSessionResult>,
     },
     runtime: {
+      availability: (executableSearchRoot?: string | null) =>
+        invoke('runtime_availability', {
+          executableSearchRoot: executableSearchRoot ?? null,
+        }) as Promise<RuntimeAvailabilityInfo>,
       launch: (projectRoot: string, executableSearchRoot?: string) =>
         invoke('runtime_launch', {
           projectRoot,

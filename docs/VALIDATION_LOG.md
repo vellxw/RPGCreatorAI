@@ -4,6 +4,65 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-451 / PX-017 - Runtime Availability Startup Check
+
+- `2026-06-08 01:49:06 -03:00` - issue intake and runtime/startup
+  inspection - PASS. Read Linear `FRA-451`, moved it to In Progress, posted
+  start evidence, and inspected `src/adapters/RuntimeLaunchAdapter.ts`,
+  `src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`,
+  `src/screens/PlaytestScreen.tsx`,
+  `src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx`,
+  `src-tauri/src/runtime_commands.rs`, `src-tauri/src/lib.rs`,
+  `src/adapters/tauriBridge.ts`, `src/types/rpgBridge.ts`,
+  `docs/RUNTIME_LAUNCH_BRIDGE.md`, `docs/DESKTOP_SHELL_ARCHITECTURE.md`, and
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- Existing behavior: Playtest could report launch availability later, and Rust
+  could locate the runtime during `runtime_launch`, but startup had no
+  non-launching availability query or startup-screen runtime copy.
+- TDD RED:
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - FAIL as expected; `checkAvailability()` did not exist and startup did not
+  show runtime ready/unavailable/browser-mode copy.
+- Initial Rust RED command used an invalid multi-filter Cargo invocation -
+  FAIL due command syntax, not product code. Reran with `availability_reports`.
+- TDD RED:
+  `cargo test --manifest-path src-tauri/Cargo.toml availability_reports -- --nocapture`
+  - FAIL as expected; `runtime_availability_for_status` did not exist.
+- Fix applied: added `RuntimeAvailabilityInfo`, optional
+  `window.rpgBridge.runtime.availability()`, and
+  `RuntimeLaunchAdapter.checkAvailability()` for browser and desktop adapters.
+- Fix applied: added Tauri `runtime_availability` IPC that reports executable
+  availability and process status without spawning the runtime.
+- Fix applied: added startup-screen runtime availability copy via a non-blocking
+  `App` effect. Ready copy states that Playtest can launch later and no runtime
+  process was started; unavailable copy preserves editing.
+- Fix applied: updated runtime bridge and desktop shell docs, plus the Phase 12
+  launcher/startup audit, to document the new non-launching availability check.
+- `2026-06-08 01:58:58 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 4 focused frontend files and 25 tests passed.
+- `2026-06-08 01:58:58 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 01:58:58 -03:00` -
+  `cargo test --manifest-path src-tauri/Cargo.toml availability_reports -- --nocapture`
+  - PASS; 2 focused runtime availability tests passed.
+- `2026-06-08 02:02:06 -03:00` -
+  `cargo test --manifest-path src-tauri/Cargo.toml runtime_commands::tests -- --nocapture`
+  - PASS; 8 runtime command tests passed.
+- `2026-06-08 02:02:06 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 02:02:06 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 5 frontend/doc alignment files and 34 tests passed.
+- `2026-06-08 02:03:21 -03:00` - PX-017 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-017 edited files.
+- `2026-06-08 02:03:21 -03:00` - PX-017 secret-like value scan - PASS; no
+  secret-like values in PX-017 edited files.
+- `2026-06-08 02:03:21 -03:00` -
+  `git diff --check -- src\App.tsx src\components\project\ProjectStartupScreen.tsx src\adapters\RuntimeLaunchAdapter.ts src\adapters\types.ts src\adapters\tauriBridge.ts src\types\rpgBridge.ts src\adapters\__tests__\DesktopRuntimeAdapter.test.ts src\__tests__\AppStartup.test.tsx src-tauri\src\runtime_commands.rs src-tauri\src\lib.rs docs\RUNTIME_LAUNCH_BRIDGE.md docs\DESKTOP_SHELL_ARCHITECTURE.md docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-017 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-450 / PX-016 - Recent Project Restore Startup Flow
 
 - `2026-06-08 01:36:34 -03:00` - issue intake and recent-project startup

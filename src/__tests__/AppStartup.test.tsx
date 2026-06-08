@@ -49,6 +49,8 @@ function desktopBridge(options: {
   recents?: string[];
   readProject?: RpgBridge['fs']['readProject'];
   addRecent?: RpgBridge['config']['addRecent'];
+  runtimeAvailability?: RpgBridge['runtime']['availability'];
+  runtimeLaunch?: RpgBridge['runtime']['launch'];
 }): RpgBridge {
   return {
     shell: { info: async () => ({ name: 'tauri' as const, version: 'test' }) },
@@ -70,7 +72,10 @@ function desktopBridge(options: {
       createPlaytestSession: async () => ({ success: false, error: 'not stubbed' }),
     },
     runtime: {
-      launch: async () => ({ success: false, error: 'not stubbed' }),
+      availability:
+        options.runtimeAvailability ??
+        (async () => ({ available: false, status: 'unavailable' as const, error: 'not stubbed' })),
+      launch: options.runtimeLaunch ?? (async () => ({ success: false, error: 'not stubbed' })),
       kill: async () => undefined,
       status: async () => 'unavailable' as const,
       getDiagnostics: async () => ({
@@ -245,6 +250,68 @@ describe('App startup project flow', () => {
     expect(view.container.textContent).toContain(recentRoot);
     expect(view.container.textContent).toContain('Choose an RPGCreatorAI project root');
     expect(view.container.textContent).not.toContain('Map Tree');
+
+    view.unmount();
+  });
+
+  it('reports desktop runtime availability during startup without launching it', async () => {
+    let launchCalled = false;
+    window.rpgBridge = desktopBridge({
+      recents: [],
+      runtimeAvailability: async () => ({
+        available: true,
+        status: 'ready',
+        executablePath: 'C:\\Tools\\rpg_creator_runtime.exe',
+      }),
+      runtimeLaunch: async () => {
+        launchCalled = true;
+        return { success: true, pid: 1234 };
+      },
+    });
+
+    const view = renderApp();
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Native runtime ready');
+    expect(view.container.textContent).toContain('Playtest can launch after you enter the editor');
+    expect(view.container.textContent).not.toContain('PID');
+    expect(launchCalled).toBe(false);
+
+    view.unmount();
+  });
+
+  it('reports desktop runtime unavailability while keeping editing available', async () => {
+    let launchCalled = false;
+    window.rpgBridge = desktopBridge({
+      recents: [],
+      runtimeAvailability: async () => ({
+        available: false,
+        status: 'unavailable',
+        error: 'rpg_creator_runtime executable not found',
+      }),
+      runtimeLaunch: async () => {
+        launchCalled = true;
+        return { success: false, error: 'should not launch during startup' };
+      },
+    });
+
+    const view = renderApp();
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Native runtime unavailable');
+    expect(view.container.textContent).toContain('rpg_creator_runtime executable not found');
+    expect(view.container.textContent).toContain('You can keep editing');
+    expect(launchCalled).toBe(false);
+
+    view.unmount();
+  });
+
+  it('reports browser runtime unavailability during startup', async () => {
+    const view = renderApp();
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Native runtime unavailable in browser mode');
+    expect(view.container.textContent).toContain('Use the desktop app to launch playtests');
 
     view.unmount();
   });

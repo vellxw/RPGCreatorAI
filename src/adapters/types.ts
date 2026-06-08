@@ -103,6 +103,13 @@ export interface ProjectDataAdapter {
 
 export type RuntimeStatus = 'unavailable' | 'ready' | 'running';
 
+export interface RuntimeAvailabilityInfo {
+  available: boolean;
+  status: RuntimeStatus;
+  executablePath?: string;
+  error?: string;
+}
+
 export interface RuntimeLaunchResult {
   success: boolean;
   error?: string;
@@ -172,6 +179,7 @@ export interface CredentialWriteResult {
 export interface RuntimeLaunchAdapter {
   canLaunch(): boolean;
   getExecutablePath(): string | null;
+  checkAvailability(options?: RuntimeLaunchOptions): Promise<RuntimeAvailabilityInfo>;
   launch(projectPath: string, options?: RuntimeLaunchOptions): Promise<RuntimeLaunchResult>;
   getStatus(): RuntimeStatus;
   kill(): Promise<void>;

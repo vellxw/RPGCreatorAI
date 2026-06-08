@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { DesktopRuntimeAdapter } from '../RuntimeLaunchAdapter';
+import { BrowserRuntimeAdapter, DesktopRuntimeAdapter } from '../RuntimeLaunchAdapter';
 import type { RpgBridge } from '../types';
 
 function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
@@ -20,6 +20,7 @@ function bridge(overrides: Partial<RpgBridge['runtime']>): RpgBridge {
     },
     runtime: {
       launch: async () => ({ success: true, pid: 1234 }),
+      availability: async () => ({ available: false, status: 'unavailable', error: 'not stubbed' }),
       kill: async () => undefined,
       status: async () => 'ready' as const,
       getLatestLog: async () => ({ success: false, error: 'not stubbed' }),
@@ -96,6 +97,49 @@ describe('DesktopRuntimeAdapter (Phase 5)', () => {
     const a = new DesktopRuntimeAdapter();
     const s = await a.getStatusAsync();
     expect(s).toBe('running');
+  });
+
+  it('checks runtime availability through the bridge without launching', async () => {
+    let launchCalled = false;
+    const calls: unknown[] = [];
+    window.rpgBridge = bridge({
+      availability: async executableSearchRoot => {
+        calls.push(executableSearchRoot);
+        return {
+          available: true,
+          status: 'ready',
+          executablePath: 'C:\\Tools\\rpg_creator_runtime.exe',
+        };
+      },
+      launch: async () => {
+        launchCalled = true;
+        return { success: true, pid: 4242 };
+      },
+    });
+    const a = new DesktopRuntimeAdapter();
+
+    const result = await a.checkAvailability({ executableSearchRoot: 'C:\\Games\\Recent' });
+
+    expect(result).toMatchObject({
+      available: true,
+      status: 'ready',
+      executablePath: 'C:\\Tools\\rpg_creator_runtime.exe',
+    });
+    expect(calls).toEqual(['C:\\Games\\Recent']);
+    expect(launchCalled).toBe(false);
+    expect(a.getStatus()).toBe('ready');
+    expect(a.getExecutablePath()).toBe('C:\\Tools\\rpg_creator_runtime.exe');
+  });
+
+  it('browser runtime availability is honest and non-launching', async () => {
+    const a = new BrowserRuntimeAdapter();
+
+    await expect(a.checkAvailability()).resolves.toMatchObject({
+      available: false,
+      status: 'unavailable',
+      error: expect.stringContaining('browser'),
+    });
+    expect(a.canLaunch()).toBe(false);
   });
 
   it('routes bounded log access through the bridge', async () => {

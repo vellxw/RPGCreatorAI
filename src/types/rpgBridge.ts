@@ -15,6 +15,7 @@ import type {
   PlaytestSessionResult,
   SaveResult,
   RuntimeStatus,
+  RuntimeAvailabilityInfo,
   RuntimeDiagnosticsInfo,
   RuntimeLaunchResult,
   RuntimeLogActionResult,
@@ -72,6 +73,7 @@ export interface RpgBridge {
     ): Promise<PlaytestSessionResult>;
   };
   runtime: {
+    availability?(executableSearchRoot?: string | null): Promise<RuntimeAvailabilityInfo>;
     launch(projectRoot: string, executableSearchRoot?: string): Promise<RuntimeLaunchResult>;
     kill(): Promise<void>;
     status(): Promise<RuntimeStatus>;

@@ -15,7 +15,12 @@ import {
   projectReducer,
 } from './stores/projectStore';
 import { EditorContext, editorReducer, initialEditorState } from './stores/editorStore';
-import { getProjectDataAdapter, isDesktopShell } from './adapters/adapterFactory';
+import {
+  getProjectDataAdapter,
+  getRuntimeLaunchAdapter,
+  isDesktopShell,
+} from './adapters/adapterFactory';
+import type { RuntimeAvailabilityInfo } from './adapters/types';
 import { getStartupPhase, type StartupPhaseId } from './startup/startupPhases';
 import {
   formatProjectFolderError,
@@ -37,6 +42,17 @@ export function recentProjectRestoreFailure(root: string | null, error?: string)
   return `Recent project restore failed${target}: ${detail} Open Project Folder, Create Project, and the bundled sample are still available.`;
 }
 
+export function runtimeStartupAvailabilityMessage(info: RuntimeAvailabilityInfo): string {
+  if (info.available) {
+    return 'Native runtime ready. Playtest can launch after you enter the editor. No runtime process has been started.';
+  }
+  const detail = info.error ?? 'No runtime executable was reported.';
+  const normalized = detail.toLowerCase().includes('native runtime unavailable')
+    ? detail
+    : `Native runtime unavailable: ${detail}`;
+  return `${normalized} You can keep editing; build or locate the runtime before launching native playtests.`;
+}
+
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
@@ -45,6 +61,7 @@ export default function App() {
   const [startupPhase, setStartupPhase] = useState<StartupPhaseId>('app-shell');
   const [showStartup, setShowStartup] = useState(true);
   const [startupStatus, setStartupStatus] = useState<string | null>(null);
+  const [runtimeStatusMessage, setRuntimeStatusMessage] = useState<string | null>(null);
 
   // Load project once via the active adapter.
   useEffect(() => {
@@ -90,6 +107,29 @@ export default function App() {
         setStartupStatus(startupFailure('Open', message));
       } finally {
         if (!cancelled) setLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const info = await getRuntimeLaunchAdapter().checkAvailability();
+        if (!cancelled) setRuntimeStatusMessage(runtimeStartupAvailabilityMessage(info));
+      } catch (error) {
+        if (cancelled) return;
+        const message = error instanceof Error ? error.message : String(error);
+        setRuntimeStatusMessage(
+          runtimeStartupAvailabilityMessage({
+            available: false,
+            status: 'unavailable',
+            error: message,
+          }),
+        );
       }
     })();
     return () => {
@@ -206,6 +246,7 @@ export default function App() {
             desktop={desktop}
             sampleTitle={projectState.project.title || 'bundled sample'}
             statusMessage={startupStatus}
+            runtimeStatusMessage={runtimeStatusMessage}
             onUseSample={() => setShowStartup(false)}
             onOpenProject={handleStartupOpen}
             onCreateProject={handleStartupCreate}

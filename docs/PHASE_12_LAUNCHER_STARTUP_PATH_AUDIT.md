@@ -81,6 +81,11 @@ evidence from committed docs.
 | Startup recovery is coarse. | `startupFailure()` formats Open/Create/Import failures as a single status message. | Users get a basic message but no phase-specific retry, path, permissions, or diagnostics flow. | `PX-022`, `PX-024` |
 | Packaged smoke exists but is not a permanent M01 launcher harness yet. | `package-windows.ps1` smoke-launches the packaged app for 5 seconds; Phase 11 docs record a pass. | Phase 12 needs launcher-specific smoke and screenshot evidence tied to M01 changes. | `PX-025`, `PX-026`, `PX-029`, `PX-030` |
 
+PX-017 update: startup now performs a non-launching runtime availability check
+through `runtime_availability` and surfaces ready/unavailable copy on the
+project startup screen. Editing remains available when the native runtime is
+missing, and the check does not spawn the runtime.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:
