@@ -4,6 +4,58 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-449 / PX-015 - Startup Loading Phase State Machine
+
+- `2026-06-08 01:27:33 -03:00` - issue intake and startup side-effect
+  inspection - PASS. Read Linear `FRA-449`, moved it to In Progress, posted
+  start evidence, and inspected `src/main.tsx`, `index.html`, `src/App.tsx`,
+  `src/components/project/AppSplashShell.tsx`,
+  `src/__tests__/AppStartup.test.tsx`, `src/adapters/adapterFactory.ts`,
+  `src/adapters/types.ts`, `src/adapters/BrowserMemoryAdapter.ts`, and
+  `src/stores/projectStore.ts`.
+- Decision: add a deterministic local startup phase model for the current
+  real work only: app shell, project data, and workspace ready. Runtime
+  availability, recent project restore, and provider/asset/diagnostics lazy
+  loading stay as later M01 issues.
+- Fix applied: added `src/startup/startupPhases.ts` with ordered phase
+  metadata, progress values, lookup fallback, and phase index helper.
+- Fix applied: bound `AppSplashShell` to phase metadata, including progressbar
+  ARIA values and real progress width.
+- Fix applied: updated `src/App.tsx` to advance phases while loading project
+  data, to mark workspace ready after data returns, and to fall back to the
+  startup screen with an actionable status if initial project load fails.
+- Fix applied: added `_setProjectDataAdapterForTest` in
+  `src/adapters/adapterFactory.ts` so startup tests can inject deterministic
+  adapters without live providers or runtime mutation.
+- Fix applied: updated `index.html` static splash progressbar ARIA and width
+  to match the app-shell phase.
+- Fix applied: added `src/startup/__tests__/startupPhases.test.ts` and updated
+  `src/__tests__/AppStartup.test.tsx` for phase metadata order, unknown-phase
+  fallback, splash phase binding, and initial-load failure fallback.
+- Initial `npm run typecheck` - FAIL; `FailingAdapter.loadProject()` in the new
+  test inferred `Promise<void>` instead of `Promise<FullProjectState>`.
+- Fix applied: explicitly typed the failing test adapter override as
+  `Promise<FullProjectState>`.
+- `2026-06-08 01:25:40 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 01:25:40 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 3 test files and 9 tests passed.
+- `2026-06-08 01:27:33 -03:00` - PX-015 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-015 edited source/test/html
+  files.
+- `2026-06-08 01:27:33 -03:00` - PX-015 secret-like value scan - PASS; no
+  secret-like values in PX-015 edited source/test/html files.
+- `2026-06-08 01:27:33 -03:00` -
+  `git diff --check -- index.html src\App.tsx src\adapters\adapterFactory.ts src\components\project\AppSplashShell.tsx src\startup\startupPhases.ts src\startup\__tests__\startupPhases.test.ts src\__tests__\AppStartup.test.tsx docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-015 diff. Git emitted existing
+  line-ending warnings for touched text files.
+- `2026-06-08 01:32:25 -03:00` - fresh pre-commit validation rerun - PASS:
+  `npm run typecheck` completed with `tsc --noEmit`; focused startup tests
+  passed with 3 files and 9 tests; PX-015 placeholder scan passed; PX-015
+  secret-like value scan passed; and the same scoped `git diff --check`
+  passed with line-ending warnings only.
+
 ### Phase 12 FRA-448 / PX-014 - Instant Splash Screen Shell
 
 - `2026-06-08 01:13:38 -03:00` - issue intake and startup/source inspection -

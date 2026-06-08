@@ -51,3 +51,7 @@ export function _resetAdaptersForTest(): void {
   runtimeAdapter = null;
   playtestSessionAdapter = null;
 }
+
+export function _setProjectDataAdapterForTest(adapter: ProjectDataAdapter): void {
+  dataAdapter = adapter;
+}

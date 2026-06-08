@@ -4,7 +4,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App, { startupFailure } from '../App';
-import { _resetAdaptersForTest } from '../adapters/adapterFactory';
+import { _resetAdaptersForTest, _setProjectDataAdapterForTest } from '../adapters/adapterFactory';
+import { BrowserMemoryAdapter } from '../adapters/BrowserMemoryAdapter';
+import type { FullProjectState } from '../adapters/types';
 
 function renderApp() {
   const container = document.createElement('div');
@@ -79,8 +81,9 @@ describe('App startup project flow', () => {
     expect(splash).not.toBeNull();
     expect(view.container.textContent).toContain('RPGCreatorAI');
     expect(view.container.textContent).toContain('Preparing your workspace');
-    expect(view.container.textContent).toContain('Loading project data and editor state.');
+    expect(view.container.textContent).toContain('Reading project files and editor state.');
     expect(view.container.textContent).not.toContain('provider');
+    expect(view.container.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('58');
 
     view.unmount();
   });
@@ -91,8 +94,26 @@ describe('App startup project flow', () => {
     expect(html).toContain('data-rpg-splash-shell');
     expect(html).toContain('Preparing your workspace');
     expect(html).toContain('Loading project data and editor state.');
+    expect(html).toContain('aria-valuenow="20"');
     expect(html).toContain('pre-react-splash');
     expect(html).not.toContain('provider');
+  });
+
+  it('falls back to the startup screen when initial project load fails', async () => {
+    class FailingAdapter extends BrowserMemoryAdapter {
+      override async loadProject(): Promise<FullProjectState> {
+        throw new Error('Fixture load failed.');
+      }
+    }
+    _setProjectDataAdapterForTest(new FailingAdapter());
+
+    const view = renderApp();
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Start a project');
+    expect(view.container.textContent).toContain('Open failed: Fixture load failed.');
+
+    view.unmount();
   });
 
   it('formats startup failures without vague unknown-error copy', () => {

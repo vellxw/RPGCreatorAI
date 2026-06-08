@@ -83,7 +83,7 @@
 
       .pre-react-splash__bar {
         height: 100%;
-        width: 40%;
+        width: 20%;
         border-radius: inherit;
         background: #51b788;
         animation: pre-react-splash-pulse 1.35s ease-in-out infinite;
@@ -118,7 +118,14 @@
             </div>
           </div>
           <p class="pre-react-splash__detail">Loading project data and editor state.</p>
-          <div class="pre-react-splash__track" aria-hidden="true">
+          <div
+            class="pre-react-splash__track"
+            role="progressbar"
+            aria-label="Startup progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="20"
+          >
             <div class="pre-react-splash__bar"></div>
           </div>
         </main>

@@ -16,6 +16,7 @@ import {
 } from './stores/projectStore';
 import { EditorContext, editorReducer, initialEditorState } from './stores/editorStore';
 import { getProjectDataAdapter, isDesktopShell } from './adapters/adapterFactory';
+import { getStartupPhase, type StartupPhaseId } from './startup/startupPhases';
 import {
   performCreateProject,
   performImport,
@@ -33,6 +34,7 @@ export default function App() {
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
   const providerStore = useProviderStore();
   const [loaded, setLoaded] = useState(false);
+  const [startupPhase, setStartupPhase] = useState<StartupPhaseId>('app-shell');
   const [showStartup, setShowStartup] = useState(true);
   const [startupStatus, setStartupStatus] = useState<string | null>(null);
 
@@ -40,11 +42,21 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const adapter = getProjectDataAdapter();
-      const data = await adapter.loadProject();
-      if (cancelled) return;
-      projectDispatch({ type: 'LOAD_PROJECT', payload: data });
-      setLoaded(true);
+      try {
+        const adapter = getProjectDataAdapter();
+        setStartupPhase('project-data');
+        const data = await adapter.loadProject();
+        if (cancelled) return;
+        setStartupPhase('workspace-ready');
+        projectDispatch({ type: 'LOAD_PROJECT', payload: data });
+      } catch (error) {
+        if (cancelled) return;
+        setStartupPhase('workspace-ready');
+        const message = error instanceof Error ? error.message : String(error);
+        setStartupStatus(startupFailure('Open', message));
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
     })();
     return () => {
       cancelled = true;
@@ -118,7 +130,7 @@ export default function App() {
   }, [editorState, projectState.maps]);
 
   if (!loaded) {
-    return <AppSplashShell />;
+    return <AppSplashShell phase={getStartupPhase(startupPhase)} />;
   }
 
   const desktop = isDesktopShell();
