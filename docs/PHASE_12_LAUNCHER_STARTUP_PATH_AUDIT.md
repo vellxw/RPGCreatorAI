@@ -91,6 +91,10 @@ The provider store and model capability registry are not imported or
 initialized from the startup path, so first paint does not require provider
 credentials, model metadata, or live provider calls.
 
+PX-019 update: the Assets workspace now loads through a lazy asset boundary.
+Generated asset preview imports and asset thumbnail/catalog rendering stay out
+of the startup module graph until the creator opens Assets.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:
