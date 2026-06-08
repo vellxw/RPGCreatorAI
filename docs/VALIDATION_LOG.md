@@ -4,6 +4,31 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-436 / PX-002 - Current Provider And Model Settings UX Audit
+
+- `2026-06-07 23:26:12 -03:00` - issue intake and provider/model source
+  inspection - PASS. Read Linear `FRA-436`, moved it to In Progress, posted
+  start evidence, confirmed working tree still had unrelated pre-existing
+  changes, and inspected provider/model docs, UI, stores, registry, credential
+  boundaries, and tests without reading `.env` or app-data credential values.
+- `rg -n "Provider Settings|Model label|Credential source|Advanced endpoint|Base URL|Capabilities|Image Model Settings|Cost & Budget|Capability Gates|Enable provider|Provider opt-in|Save Credential|Forget" src/screens/SettingsScreen.tsx src/components/ai src/screens/__tests__/SettingsScreen.test.tsx`
+  - PASS; located current provider UX labels, controls, and focused tests.
+- `rg -n "credentials_|Credential|provider_id|providerId|secret|redact|DPAPI|provider-credentials|envVar|apiKey" src-tauri/src/credential_commands.rs src/adapters/CredentialStoreAdapter.ts src/adapters/tauriBridge.ts src/security/redaction.ts src/security/__tests__/redaction.test.ts`
+  - PASS; reviewed credential boundary code/test references only. Matches
+  were implementation identifiers and fixture secret strings, not live
+  credentials.
+- Fix applied: added `docs/PHASE_12_PROVIDER_MODEL_SETTINGS_UX_AUDIT.md`
+  separating beginner UX gaps from advanced provider controls and mapping
+  follow-up work to M04 (`PX-086` through `PX-105`).
+- `2026-06-07 23:29:02 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-07 23:29:02 -03:00` -
+  `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/stores/__tests__/providerStore.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/adapters/__tests__/CredentialStoreAdapter.test.ts src/security/__tests__/redaction.test.ts`
+  - PASS; focused provider/model/settings/credential suites passed 8 files and
+  37 tests.
+- `2026-06-07 23:29:02 -03:00` -
+  `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_PROVIDER_MODEL_SETTINGS_UX_AUDIT.md`
+  - PASS; no secret-like matches in the PX-002 audit document.
 ### Phase 12 FRA-435 / PX-001 - Product UX Audit From User Feedback
 
 - `2026-06-07 23:15:18 -03:00` - issue intake and source/docs inspection -
