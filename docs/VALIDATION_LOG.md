@@ -4,6 +4,49 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-459 / PX-025 - Packaged Prototype Launch Smoke
+
+- `2026-06-08 04:01:56 -03:00` - issue intake and package smoke inspection -
+  PASS. Read Linear `FRA-459`, moved it to In Progress, posted start evidence,
+  and inspected `scripts/dev/package-windows.ps1` and
+  `scripts/dev/smoke-packaged-executable-launch.ps1`.
+- `2026-06-08 04:01:56 -03:00` - `npm run desktop:package:windows` - PASS.
+  The command executed the Windows package prototype flow, skipped the optional
+  frontend/native gate segments marked by the script as `SkipFrontend`,
+  `SkipDesktop`, and `SkipSmoke`, passed `PHASE 11 ASSET PIPELINE CHECKS`,
+  passed `NATIVE CONFIGURE BUILD TEST`, built frontend production assets, built
+  `rpgcreator-shell` in the Cargo `dev` profile, copied
+  `rpg_creator_runtime.exe` beside
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`,
+  and launched from
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug`.
+- Package smoke markers:
+  `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED pid=24944`,
+  `PACKAGED SMOKE PASSED`, and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
+- Known warnings recorded honestly: CMake developer warnings for `CMP0135`,
+  CMake deprecation warnings from fetched `doctest` and `SDL2` sources,
+  `Could NOT find PkgConfig`, and Vite's chunk-size warning for the main
+  bundle. None stopped the package build or launch smoke.
+- Screenshot evidence was not captured for PX-025 because the packaged smoke
+  script intentionally launches hidden; PX-026 is the dedicated desktop launch
+  screenshot evidence issue.
+- Fix applied: updated `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md` with
+  fresh PX-025 package paths, smoke markers, warnings, and the screenshot
+  evidence boundary.
+- Initial broad placeholder scan - FAIL; it matched historical validation-log
+  entries that quote previous scan commands and pass/fail text. Fix applied:
+  reran scans against the full launcher audit plus only the isolated PX-025
+  validation-log block.
+- `2026-06-08 04:05:04 -03:00` - PX-025 placeholder scan - PASS; no
+  unresolved placeholder markers in the launcher audit or PX-025
+  validation-log block.
+- `2026-06-08 04:05:04 -03:00` - PX-025 secret-like value scan - PASS; no
+  secret-like values in the launcher audit or PX-025 validation-log block.
+- `2026-06-08 04:05:04 -03:00` -
+  `git diff --check -- docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-025 docs diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-458 / PX-024 - Startup Project Selection Loading Feedback
 
 - `2026-06-08 03:52:39 -03:00` - issue intake and startup project action

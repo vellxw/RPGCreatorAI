@@ -124,6 +124,18 @@ specific busy feedback (`Opening project folder...`, `Creating project...`,
 local project work is pending. Failure paths return to the structured recovery
 copy from PX-022.
 
+PX-025 update: the current Windows packaged prototype launch path was
+revalidated on 2026-06-08 with `npm run desktop:package:windows`. The command
+built the native runtime from `C:\Users\franc\AppData\Local\RPGCreatorAI\build`,
+built the Tauri debug shell at
+`C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`,
+copied `rpg_creator_runtime.exe` beside the shell, and passed the packaged
+launch smoke from the package directory outside the repo. The smoke emitted
+`PACKAGED EXECUTABLE LAUNCH SMOKE PASSED pid=24944`, `PACKAGED SMOKE PASSED`,
+and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. Screenshot evidence was not
+captured in PX-025 because the package smoke intentionally launches hidden;
+PX-026 remains the dedicated desktop launch screenshot evidence issue.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:
@@ -135,6 +147,19 @@ Existing committed Phase 11 evidence:
   and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`.
 - `docs/BROWSER_SMOKE_HARNESS.md` documents the browser startup smoke harness
   and its `Start a project` assertion.
+
+Fresh Phase 12 package launch evidence:
+
+- `2026-06-08`: `npm run desktop:package:windows` passed. The command built
+  frontend production assets, compiled `rpgcreator-shell` in the Cargo `dev`
+  profile, copied the native runtime into the package directory, and
+  smoke-launched
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`
+  from its package directory.
+- Known warnings in that run: CMake developer warnings for `CMP0135`, CMake
+  deprecation warnings from fetched `doctest` and `SDL2` sources, missing
+  `PkgConfig`, and Vite's chunk-size warning for the main bundle. None stopped
+  the package build or launch smoke.
 
 Safe validation commands for later launcher work:
 
