@@ -5,9 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RPGCreatorAI — Visual Editor</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%236366f1'/><text x='16' y='22' text-anchor='middle' font-size='16' fill='white'>⚔</text></svg>" />
+    <style>
+      html,
+      body {
+        background: #f5f5f7;
+      }
+
+      .pre-react-splash {
+        min-height: 100vh;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        color: #111827;
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      .pre-react-splash__inner {
+        width: min(760px, 100%);
+      }
+
+      .pre-react-splash__brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .pre-react-splash__mark {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: #12202d;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+        display: grid;
+        place-items: center;
+        color: #f7f5ea;
+        font-weight: 800;
+        font-size: 34px;
+      }
+
+      .pre-react-splash__name {
+        color: #2a6f66;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .pre-react-splash__title {
+        margin: 4px 0 0;
+        font-size: 28px;
+        line-height: 1.12;
+        font-weight: 650;
+      }
+
+      .pre-react-splash__detail {
+        margin: 20px 0 0;
+        max-width: 520px;
+        color: #4b5563;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .pre-react-splash__track {
+        margin-top: 28px;
+        width: min(420px, 100%);
+        height: 6px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #e5e7eb;
+      }
+
+      .pre-react-splash__bar {
+        height: 100%;
+        width: 40%;
+        border-radius: inherit;
+        background: #51b788;
+        animation: pre-react-splash-pulse 1.35s ease-in-out infinite;
+      }
+
+      @keyframes pre-react-splash-pulse {
+        0%,
+        100% {
+          opacity: 0.52;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .pre-react-splash__bar {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="pre-react-splash" data-rpg-splash-shell role="status" aria-live="polite">
+        <main class="pre-react-splash__inner">
+          <div class="pre-react-splash__brand">
+            <div class="pre-react-splash__mark" aria-hidden="true">R</div>
+            <div>
+              <div class="pre-react-splash__name">RPGCreatorAI</div>
+              <h1 class="pre-react-splash__title">Preparing your workspace</h1>
+            </div>
+          </div>
+          <p class="pre-react-splash__detail">Loading project data and editor state.</p>
+          <div class="pre-react-splash__track" aria-hidden="true">
+            <div class="pre-react-splash__bar"></div>
+          </div>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

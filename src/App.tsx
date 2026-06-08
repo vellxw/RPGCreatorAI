@@ -7,6 +7,7 @@ import { DatabaseScreen } from './screens/DatabaseScreen';
 import { AssetsScreen } from './screens/AssetsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { AppSplashShell } from './components/project/AppSplashShell';
 import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
   ProjectContext,
@@ -117,11 +118,7 @@ export default function App() {
   }, [editorState, projectState.maps]);
 
   if (!loaded) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-500 text-sm">
-        Loading project…
-      </div>
-    );
+    return <AppSplashShell />;
   }
 
   const desktop = isDesktopShell();

@@ -4,6 +4,63 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-448 / PX-014 - Instant Splash Screen Shell
+
+- `2026-06-08 01:13:38 -03:00` - issue intake and startup/source inspection -
+  PASS. Read Linear `FRA-448`, moved it to In Progress, posted start evidence,
+  and inspected `src/main.tsx`, `index.html`, `src/App.tsx`,
+  `src/index.css`, `src/components/project/ProjectStartupScreen.tsx`,
+  `src/__tests__/AppStartup.test.tsx`,
+  `src/components/project/__tests__/ProjectStartupScreen.test.tsx`,
+  `docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md`, and
+  `docs/PHASE_12_APP_ICON_BRANDING_AUDIT.md`.
+- Design decision: add a narrow splash shell in two layers. `index.html`
+  contains a static pre-React shell so the first visible state is not blank
+  while the Tauri bridge installs; React uses `AppSplashShell` while project
+  data loads. This avoids provider/asset/diagnostics copy and keeps later lazy
+  loading work out of PX-014 scope.
+- Fix applied: added `src/components/project/AppSplashShell.tsx`, using the
+  tracked `src-tauri/icons/icon-source.svg` branding source in the React splash
+  shell.
+- Fix applied: updated `src/App.tsx` to render `AppSplashShell` while
+  `loaded === false` instead of the plain `Loading project...` text.
+- Fix applied: updated `index.html` with an inline static splash shell,
+  accessible `role="status"`, creator-friendly loading copy, reduced-motion
+  handling for the progress pulse, and stable first-paint markup before React
+  mounts.
+- Fix applied: updated `src/__tests__/AppStartup.test.tsx` to verify immediate
+  React splash visibility and static `index.html` pre-React splash markup.
+- `2026-06-08 01:06:53 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 01:06:53 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 2 test files and 6 tests passed.
+- `2026-06-08 01:08:40 -03:00` -
+  `npx playwright screenshot --browser chromium --viewport-size "1280,800" --wait-for-selector "[data-rpg-splash-shell]" file:///C:/Users/franc/OneDrive/Escritorio/RPGCreatorAI/index.html docs\screenshots\phase12-px014\instant-splash-shell.png`
+  - PASS; screenshot written to
+  `docs/screenshots/phase12-px014/instant-splash-shell.png`.
+- `2026-06-08 01:09:10 -03:00` - visual inspection of
+  `docs/screenshots/phase12-px014/instant-splash-shell.png` - PASS; splash is
+  nonblank, centered, readable, and has no text overlap.
+- `2026-06-08 01:10:12 -03:00` - in-app browser/devtools file-page snapshot -
+  PASS; accessible tree showed `RPGCreatorAI`, `Preparing your workspace`, and
+  `Loading project data and editor state.` under a polite status region.
+- `2026-06-08 01:11:20 -03:00` - `npm run build` - PASS; Vite transformed
+  1969 modules and built successfully. Known Vite chunk-size warning remained.
+- Initial PX-014 placeholder scan including `??` - FAIL as a scan false
+  positive; it matched legitimate TypeScript nullish coalescing operators in
+  `src/App.tsx`.
+- Fix applied: reran the placeholder scan for real unresolved markers
+  `TBD|TODO|FIXME`.
+- `2026-06-08 01:13:38 -03:00` - refined PX-014 placeholder scan - PASS; no
+  unresolved placeholder markers in PX-014 edited source/test/html files.
+- `2026-06-08 01:13:38 -03:00` - PX-014 secret-like value scan - PASS; no
+  secret-like values in PX-014 edited source/test/html files.
+- `2026-06-08 01:13:38 -03:00` -
+  `git diff --check -- index.html src\App.tsx src\components\project\AppSplashShell.tsx src\__tests__\AppStartup.test.tsx docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-014 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-447 / PX-013 - Desktop Shortcut And Start Menu Guidance Prototype
 
 - `2026-06-08 00:57:35 -03:00` - issue intake and shortcut/start-menu source

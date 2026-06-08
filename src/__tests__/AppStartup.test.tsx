@@ -1,5 +1,7 @@
 import React, { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App, { startupFailure } from '../App';
 import { _resetAdaptersForTest } from '../adapters/adapterFactory';
@@ -68,6 +70,29 @@ describe('App startup project flow', () => {
     expect(view.container.textContent).not.toContain('Start a project');
 
     view.unmount();
+  });
+
+  it('shows a branded splash shell before project data resolves', () => {
+    const view = renderApp();
+
+    const splash = view.container.querySelector('[data-testid="app-splash-shell"]');
+    expect(splash).not.toBeNull();
+    expect(view.container.textContent).toContain('RPGCreatorAI');
+    expect(view.container.textContent).toContain('Preparing your workspace');
+    expect(view.container.textContent).toContain('Loading project data and editor state.');
+    expect(view.container.textContent).not.toContain('provider');
+
+    view.unmount();
+  });
+
+  it('ships a static splash shell before React mounts', () => {
+    const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+    expect(html).toContain('data-rpg-splash-shell');
+    expect(html).toContain('Preparing your workspace');
+    expect(html).toContain('Loading project data and editor state.');
+    expect(html).toContain('pre-react-splash');
+    expect(html).not.toContain('provider');
   });
 
   it('formats startup failures without vague unknown-error copy', () => {
