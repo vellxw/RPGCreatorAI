@@ -118,6 +118,12 @@ keyboard focus to the first available action, keep project-name labels
 associated with inputs, announce status/recovery updates, and avoid folder-open
 recovery options in browser mode.
 
+PX-024 update: startup open, create, and import actions now show immediate,
+specific busy feedback (`Opening project folder...`, `Creating project...`,
+`Importing project bundle...`) and temporarily disable startup controls while
+local project work is pending. Failure paths return to the structured recovery
+copy from PX-022.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

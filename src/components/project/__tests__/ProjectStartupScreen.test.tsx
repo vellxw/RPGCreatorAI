@@ -163,6 +163,33 @@ describe('ProjectStartupScreen', () => {
     view.unmount();
   });
 
+  it('shows specific busy feedback and disables startup controls while an action is pending', () => {
+    const view = render(
+      <ProjectStartupScreen
+        desktop
+        sampleTitle="My First RPG"
+        pendingAction="import"
+        onUseSample={vi.fn()}
+        onOpenProject={vi.fn()}
+        onCreateProject={vi.fn()}
+        onImportProject={vi.fn()}
+      />,
+    );
+
+    expect(view.container.textContent).toContain('Importing project bundle...');
+    const pending = view.container.querySelector('[data-testid="startup-action-pending"]');
+    expect(pending?.getAttribute('aria-busy')).toBe('true');
+
+    for (const candidate of Array.from(view.container.querySelectorAll('button'))) {
+      expect(candidate.disabled).toBe(true);
+    }
+    expect((view.container.querySelector('input[type="text"]') as HTMLInputElement).disabled).toBe(
+      true,
+    );
+
+    view.unmount();
+  });
+
   it('renders recovery guidance without hiding startup actions', () => {
     const view = render(
       <ProjectStartupScreen

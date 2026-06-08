@@ -3,11 +3,14 @@ import { Download, FilePlus2, FolderOpen, PackageOpen, Play } from 'lucide-react
 import { Button } from '../ui/Button';
 import type { StartupRecoveryState } from '../../startup/startupRecovery';
 
+export type StartupPendingAction = 'open' | 'create' | 'import';
+
 interface ProjectStartupScreenProps {
   desktop: boolean;
   sampleTitle: string;
   statusMessage?: string | null;
   recoveryState?: StartupRecoveryState | null;
+  pendingAction?: StartupPendingAction | null;
   runtimeStatusMessage?: string | null;
   onUseSample(): void;
   onOpenProject(): void;
@@ -20,6 +23,7 @@ export function ProjectStartupScreen({
   sampleTitle,
   statusMessage,
   recoveryState,
+  pendingAction,
   runtimeStatusMessage,
   onUseSample,
   onOpenProject,
@@ -30,6 +34,12 @@ export function ProjectStartupScreen({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const titleInputId = 'startup-project-title';
   const createLabel = desktop ? 'Create Project' : 'Create Browser Project';
+  const busy = pendingAction != null;
+  const pendingCopy: Record<StartupPendingAction, string> = {
+    open: 'Opening project folder...',
+    create: 'Creating project...',
+    import: 'Importing project bundle...',
+  };
   const recoveryOptions =
     recoveryState?.options
       .filter(option => desktop || option !== 'Open Project Folder')
@@ -37,6 +47,7 @@ export function ProjectStartupScreen({
     [];
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (busy) return;
     const file = e.target.files?.[0];
     if (file) onImportProject(file);
     e.target.value = '';
@@ -64,6 +75,21 @@ export function ProjectStartupScreen({
             <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-900">
               Browser mode cannot open folders or write project files. New projects are saved to
               browser memory until you export a bundle.
+            </div>
+          )}
+
+          {pendingAction && (
+            <div
+              data-testid="startup-action-pending"
+              className="mt-5 rounded-md border border-indigo-100 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm"
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <span className="font-semibold text-gray-900">{pendingCopy[pendingAction]}</span>
+              <span className="ml-1 text-gray-600">
+                Keep this window open while RPGCreatorAI finishes the local project action.
+              </span>
             </div>
           )}
 
@@ -111,7 +137,12 @@ export function ProjectStartupScreen({
               <div className="text-[12px] font-semibold text-gray-500 mb-2">Existing project</div>
               <div className="flex flex-wrap gap-2">
                 {desktop && (
-                  <Button icon={<FolderOpen size={14} />} onClick={onOpenProject} autoFocus>
+                  <Button
+                    icon={<FolderOpen size={14} />}
+                    onClick={onOpenProject}
+                    autoFocus
+                    disabled={busy}
+                  >
                     Open Project Folder
                   </Button>
                 )}
@@ -119,6 +150,7 @@ export function ProjectStartupScreen({
                   icon={<Download size={14} />}
                   onClick={() => fileInputRef.current?.click()}
                   autoFocus={!desktop}
+                  disabled={busy}
                 >
                   Import Project Bundle
                 </Button>
@@ -138,12 +170,14 @@ export function ProjectStartupScreen({
                   type="text"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
+                  disabled={busy}
                   className="h-8 min-w-0 flex-1 rounded-md border border-gray-200 px-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
                 <Button
                   variant="primary"
                   icon={<FilePlus2 size={14} />}
                   onClick={() => onCreateProject(title)}
+                  disabled={busy}
                 >
                   {createLabel}
                 </Button>
@@ -152,7 +186,7 @@ export function ProjectStartupScreen({
 
             <div className="border-t border-gray-100 pt-5">
               <div className="text-[12px] font-semibold text-gray-500 mb-2">Bundled sample</div>
-              <Button icon={<Play size={14} />} onClick={onUseSample}>
+              <Button icon={<Play size={14} />} onClick={onUseSample} disabled={busy}>
                 Use {sampleTitle}
               </Button>
             </div>
@@ -165,6 +199,7 @@ export function ProjectStartupScreen({
         type="file"
         accept="application/json,.json"
         className="hidden"
+        disabled={busy}
         onChange={handleImport}
       />
     </div>

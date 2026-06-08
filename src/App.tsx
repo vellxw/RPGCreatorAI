@@ -5,7 +5,10 @@ import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
 import { AppSplashShell } from './components/project/AppSplashShell';
-import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
+import {
+  ProjectStartupScreen,
+  type StartupPendingAction,
+} from './components/project/ProjectStartupScreen';
 import {
   ProjectContext,
   initialProjectStoreState,
@@ -66,6 +69,8 @@ export default function App() {
   const [showStartup, setShowStartup] = useState(true);
   const [startupStatus, setStartupStatus] = useState<string | null>(null);
   const [startupRecovery, setStartupRecovery] = useState<StartupRecoveryState | null>(null);
+  const [startupPendingAction, setStartupPendingAction] =
+    useState<StartupPendingAction | null>(null);
   const [runtimeStatusMessage, setRuntimeStatusMessage] = useState<string | null>(null);
 
   // Load project once via the active adapter.
@@ -222,41 +227,65 @@ export default function App() {
   const desktop = isDesktopShell();
 
   const handleStartupOpen = async () => {
-    const outcome = await performOpenProject(projectDispatch);
-    if (outcome.cancelled) return;
-    if (!outcome.success) {
-      setStartupRecovery(projectStartupRecovery('Open', outcome.error));
-      setStartupStatus(null);
-      return;
-    }
+    if (startupPendingAction) return;
+    setStartupPendingAction('open');
     setStartupRecovery(null);
     setStartupStatus(null);
-    setShowStartup(false);
+    try {
+      const outcome = await performOpenProject(projectDispatch);
+      if (outcome.cancelled) return;
+      if (!outcome.success) {
+        setStartupRecovery(projectStartupRecovery('Open', outcome.error));
+        setStartupStatus(null);
+        return;
+      }
+      setStartupRecovery(null);
+      setStartupStatus(null);
+      setShowStartup(false);
+    } finally {
+      setStartupPendingAction(null);
+    }
   };
 
   const handleStartupCreate = async (title: string) => {
-    const outcome = await performCreateProject(projectDispatch, { title });
-    if (outcome.cancelled) return;
-    if (!outcome.success) {
-      setStartupRecovery(projectStartupRecovery('Create', outcome.error));
-      setStartupStatus(null);
-      return;
-    }
+    if (startupPendingAction) return;
+    setStartupPendingAction('create');
     setStartupRecovery(null);
     setStartupStatus(null);
-    setShowStartup(false);
+    try {
+      const outcome = await performCreateProject(projectDispatch, { title });
+      if (outcome.cancelled) return;
+      if (!outcome.success) {
+        setStartupRecovery(projectStartupRecovery('Create', outcome.error));
+        setStartupStatus(null);
+        return;
+      }
+      setStartupRecovery(null);
+      setStartupStatus(null);
+      setShowStartup(false);
+    } finally {
+      setStartupPendingAction(null);
+    }
   };
 
   const handleStartupImport = async (file: File) => {
-    const result = await performImport(file, projectDispatch);
-    if (!result.success) {
-      setStartupRecovery(projectStartupRecovery('Import', result.error));
-      setStartupStatus(null);
-      return;
-    }
+    if (startupPendingAction) return;
+    setStartupPendingAction('import');
     setStartupRecovery(null);
     setStartupStatus(null);
-    setShowStartup(false);
+    try {
+      const result = await performImport(file, projectDispatch);
+      if (!result.success) {
+        setStartupRecovery(projectStartupRecovery('Import', result.error));
+        setStartupStatus(null);
+        return;
+      }
+      setStartupRecovery(null);
+      setStartupStatus(null);
+      setShowStartup(false);
+    } finally {
+      setStartupPendingAction(null);
+    }
   };
 
   if (showStartup) {
@@ -268,6 +297,7 @@ export default function App() {
             sampleTitle={projectState.project.title || 'bundled sample'}
             statusMessage={startupStatus}
             recoveryState={startupRecovery}
+            pendingAction={startupPendingAction}
             runtimeStatusMessage={runtimeStatusMessage}
             onUseSample={() => {
               setStartupRecovery(null);

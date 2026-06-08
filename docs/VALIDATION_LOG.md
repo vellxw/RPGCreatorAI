@@ -4,6 +4,44 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-458 / PX-024 - Startup Project Selection Loading Feedback
+
+- `2026-06-08 03:52:39 -03:00` - issue intake and startup project action
+  inspection - PASS. Read Linear `FRA-458`, moved it to In Progress, posted
+  start evidence, and inspected `src/App.tsx`,
+  `src/components/project/ProjectStartupScreen.tsx`,
+  `src/components/project/__tests__/ProjectStartupScreen.test.tsx`,
+  `src/__tests__/AppStartup.test.tsx`, and `src/stores/saveActions.ts`.
+- TDD RED:
+  `npm test -- --run src/components/project/__tests__/ProjectStartupScreen.test.tsx src/__tests__/AppStartup.test.tsx`
+  - FAIL as expected; startup actions had no `pendingAction` feedback, no
+  specific busy copy, and controls were not disabled while open/create work was
+  pending.
+- Fix applied: added `pendingAction` feedback to `ProjectStartupScreen` with
+  specific open/create/import messages, `role=status`, `aria-busy=true`, and
+  disabled startup controls while local project work is pending.
+- Fix applied: updated `App.tsx` to set pending state for manual open, create,
+  and import actions, clear stale recovery/status copy before a new action, and
+  return to structured recovery copy after failures.
+- Fix applied: updated the launcher/startup audit with the PX-024 pending
+  feedback behavior.
+- `2026-06-08 03:51:20 -03:00` -
+  `npm test -- --run src/components/project/__tests__/ProjectStartupScreen.test.tsx src/__tests__/AppStartup.test.tsx`
+  - PASS; 2 focused startup action files and 22 tests passed.
+- `2026-06-08 03:52:25 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 03:52:25 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 1 docs/script alignment file and 9 tests passed.
+- `2026-06-08 03:53:10 -03:00` - PX-024 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-024 edited files.
+- `2026-06-08 03:53:10 -03:00` - PX-024 secret-like value scan - PASS; no
+  secret-like values in PX-024 edited files.
+- `2026-06-08 03:53:10 -03:00` -
+  `git diff --check -- src\App.tsx src\components\project\ProjectStartupScreen.tsx src\components\project\__tests__\ProjectStartupScreen.test.tsx src\__tests__\AppStartup.test.tsx docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-024 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-457 / PX-023 - Startup Splash Accessibility And Keyboard Behavior
 
 - `2026-06-08 03:45:45 -03:00` - issue intake and startup accessibility

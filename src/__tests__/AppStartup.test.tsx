@@ -47,6 +47,8 @@ async function fixtureProject(title: string): Promise<FullProjectState> {
 
 function desktopBridge(options: {
   recents?: string[];
+  openProjectDialog?: RpgBridge['fs']['openProjectDialog'];
+  createProjectDialog?: RpgBridge['fs']['createProjectDialog'];
   readProject?: RpgBridge['fs']['readProject'];
   addRecent?: RpgBridge['config']['addRecent'];
   runtimeAvailability?: RpgBridge['runtime']['availability'];
@@ -55,8 +57,10 @@ function desktopBridge(options: {
   return {
     shell: { info: async () => ({ name: 'tauri' as const, version: 'test' }) },
     fs: {
-      openProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
-      createProjectDialog: async () => ({ root: null, cancelled: true, state: null }),
+      openProjectDialog:
+        options.openProjectDialog ?? (async () => ({ root: null, cancelled: true, state: null })),
+      createProjectDialog:
+        options.createProjectDialog ?? (async () => ({ root: null, cancelled: true, state: null })),
       readProject:
         options.readProject ??
         (async () => {
@@ -289,6 +293,79 @@ describe('App startup project flow', () => {
     expect(view.container.textContent).toContain('Choose another project folder');
     expect(view.container.textContent).toContain('Recovery options');
     expect(view.container.textContent).not.toContain('Map Tree');
+
+    view.unmount();
+  });
+
+  it('shows pending feedback while opening a desktop project and clears it after success', async () => {
+    const openedState = await fixtureProject('Opened Quest');
+    let resolveOpen:
+      | ((result: { root: string; cancelled: false; state: FullProjectState }) => void)
+      | undefined;
+    window.rpgBridge = desktopBridge({
+      recents: [],
+      openProjectDialog: async () =>
+        new Promise(resolve => {
+          resolveOpen = resolve;
+        }),
+    });
+
+    const view = renderApp();
+    await view.flush();
+
+    act(() => button(view.container, 'Open Project Folder').click());
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Opening project folder...');
+    expect(button(view.container, 'Open Project Folder').disabled).toBe(true);
+    expect(button(view.container, 'Create Project').disabled).toBe(true);
+
+    expect(resolveOpen).toBeDefined();
+    (resolveOpen as (result: { root: string; cancelled: false; state: FullProjectState }) => void)({
+      root: 'C:\\Games\\Opened Quest',
+      cancelled: false,
+      state: openedState,
+    });
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Map Tree');
+    expect(view.container.textContent).not.toContain('Opening project folder...');
+
+    view.unmount();
+  });
+
+  it('returns from create-project loading feedback to recovery copy after failure', async () => {
+    let rejectCreate: ((error: Error) => void) | undefined;
+    window.rpgBridge = desktopBridge({
+      recents: [],
+      createProjectDialog: async () =>
+        new Promise((_, reject) => {
+          rejectCreate = reject;
+        }),
+    });
+
+    const view = renderApp();
+    await view.flush();
+
+    act(() => button(view.container, 'Create Project').click());
+    await view.flush();
+
+    expect(view.container.textContent).toContain('Creating project...');
+    expect(button(view.container, 'Create Project').disabled).toBe(true);
+
+    expect(rejectCreate).toBeDefined();
+    await act(async () => {
+      (rejectCreate as (error: Error) => void)(
+        new Error('selected folder does not contain data/project.json'),
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(view.container.textContent).toContain('Create project failed');
+    expect(view.container.textContent).toContain('Recovery options');
+    expect(view.container.textContent).not.toContain('Creating project...');
+    expect(button(view.container, 'Create Project').disabled).toBe(false);
 
     view.unmount();
   });
