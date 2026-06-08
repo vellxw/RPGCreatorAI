@@ -95,6 +95,11 @@ PX-019 update: the Assets workspace now loads through a lazy asset boundary.
 Generated asset preview imports and asset thumbnail/catalog rendering stay out
 of the startup module graph until the creator opens Assets.
 
+PX-020 update: the Playtest workspace now loads through a lazy diagnostics
+boundary. Runtime log, event trace, runtime snapshot, and diagnostic recovery
+panels stay out of the startup module graph until the creator opens Playtest,
+while their runtime commands remain available from Playtest user actions.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

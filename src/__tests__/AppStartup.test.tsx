@@ -173,6 +173,13 @@ describe('App startup project flow', () => {
     expect(source).toContain("lazy(() => import('./screens/AssetWorkspaceBoundary'))");
   });
 
+  it('keeps playtest diagnostics behind a lazy startup boundary', () => {
+    const source = readFileSync(join(process.cwd(), 'src', 'App.tsx'), 'utf8');
+
+    expect(source).not.toContain("import { PlaytestScreen } from './screens/PlaytestScreen'");
+    expect(source).toContain("lazy(() => import('./screens/PlaytestWorkspaceBoundary'))");
+  });
+
   it('falls back to the startup screen when initial project load fails', async () => {
     class FailingAdapter extends BrowserMemoryAdapter {
       override async loadProject(): Promise<FullProjectState> {

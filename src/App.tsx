@@ -4,7 +4,6 @@ import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
 import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
-import { PlaytestScreen } from './screens/PlaytestScreen';
 import { AppSplashShell } from './components/project/AppSplashShell';
 import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
@@ -31,6 +30,7 @@ import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
 
 const ProviderSettingsBoundary = lazy(() => import('./screens/ProviderSettingsBoundary'));
 const AssetWorkspaceBoundary = lazy(() => import('./screens/AssetWorkspaceBoundary'));
+const PlaytestWorkspaceBoundary = lazy(() => import('./screens/PlaytestWorkspaceBoundary'));
 
 export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: string): string {
   return `${label} failed: ${error ?? 'No details were returned. Try again, or use the bundled sample while you inspect the project file.'}`;
@@ -271,7 +271,17 @@ export default function App() {
         <AssetWorkspaceBoundary />
       </Suspense>
     ),
-    playtest: <PlaytestScreen />,
+    playtest: (
+      <Suspense
+        fallback={
+          <div className="flex-1 bg-white px-6 py-5 text-[13px] text-gray-600">
+            Loading playtest workspace...
+          </div>
+        }
+      >
+        <PlaytestWorkspaceBoundary />
+      </Suspense>
+    ),
     settings: (
       <Suspense
         fallback={

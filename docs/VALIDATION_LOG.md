@@ -4,6 +4,44 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-454 / PX-020 - Diagnostics Panels Lazy Load Boundary
+
+- `2026-06-08 02:34:10 -03:00` - issue intake and Playtest diagnostics
+  startup inspection - PASS. Read Linear `FRA-454`, moved it to In Progress,
+  posted start evidence, and inspected `src/App.tsx`,
+  `src/screens/PlaytestScreen.tsx`, Playtest diagnostics panel tests,
+  `src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`, and
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- Existing behavior: `App.tsx` statically imported `PlaytestScreen`, which
+  imported Runtime Log, Event Trace, Runtime State, runtime adapter, and
+  diagnostics recovery UI from the startup module graph.
+- TDD RED:
+  `npm test -- --run src/__tests__/AppStartup.test.tsx`
+  - FAIL as expected; `App.tsx` still had a static `PlaytestScreen` import and
+  no `PlaytestWorkspaceBoundary` lazy import.
+- Fix applied: added `src/screens/PlaytestWorkspaceBoundary.tsx` and changed
+  `App.tsx` to load it through `React.lazy()` and `Suspense` with a stable
+  Playtest workspace loading placeholder.
+- Fix applied: updated the Phase 12 launcher/startup audit to record that
+  Runtime Log, Event Trace, Runtime State, and diagnostics recovery panels now
+  load only after opening Playtest.
+- `2026-06-08 02:31:48 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx`
+  - PASS; 1 startup file and 14 tests passed.
+- `2026-06-08 02:32:36 -03:00` -
+  `npm test -- --run src/components/playtest/__tests__/RuntimeLogPanel.test.tsx src/components/playtest/__tests__/EventTracePanel.test.tsx src/components/playtest/__tests__/RuntimeStatePanel.test.tsx src/components/playtest/__tests__/RuntimeLaunchFeedback.test.tsx src/adapters/__tests__/DesktopRuntimeAdapter.test.ts`
+  - PASS; 5 focused Playtest diagnostics/runtime files and 24 tests passed.
+- `2026-06-08 02:34:10 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 02:35:09 -03:00` - PX-020 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-020 edited files.
+- `2026-06-08 02:35:09 -03:00` - PX-020 secret-like value scan - PASS; no
+  secret-like values in PX-020 edited files.
+- `2026-06-08 02:35:09 -03:00` -
+  `git diff --check -- src\App.tsx src\screens\PlaytestWorkspaceBoundary.tsx src\__tests__\AppStartup.test.tsx docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-020 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-453 / PX-019 - Asset Thumbnail Lazy Load Boundary
 
 - `2026-06-08 02:17:24 -03:00` - issue intake and asset startup inspection -
