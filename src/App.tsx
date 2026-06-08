@@ -18,8 +18,10 @@ import { EditorContext, editorReducer, initialEditorState } from './stores/edito
 import { getProjectDataAdapter, isDesktopShell } from './adapters/adapterFactory';
 import { getStartupPhase, type StartupPhaseId } from './startup/startupPhases';
 import {
+  formatProjectFolderError,
   performCreateProject,
   performImport,
+  performOpenRecent,
   performOpenProject,
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
@@ -27,6 +29,12 @@ import { useProviderStore } from './stores/providerStore';
 
 export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: string): string {
   return `${label} failed: ${error ?? 'No details were returned. Try again, or use the bundled sample while you inspect the project file.'}`;
+}
+
+export function recentProjectRestoreFailure(root: string | null, error?: string): string {
+  const target = root ? ` for ${root}` : '';
+  const detail = error ?? 'No details were returned.';
+  return `Recent project restore failed${target}: ${detail} Open Project Folder, Create Project, and the bundled sample are still available.`;
 }
 
 export default function App() {
@@ -44,6 +52,32 @@ export default function App() {
     (async () => {
       try {
         const adapter = getProjectDataAdapter();
+        setStartupPhase('project-data');
+        if (isDesktopShell() && window.rpgBridge) {
+          let recentRoot: string | null = null;
+          try {
+            const recents = await window.rpgBridge.config.getRecents();
+            if (cancelled) return;
+            recentRoot = recents.find(root => root.trim().length > 0) ?? null;
+          } catch (error) {
+            if (cancelled) return;
+            const message = error instanceof Error ? error.message : String(error);
+            setStartupStatus(recentProjectRestoreFailure(null, formatProjectFolderError(message)));
+          }
+
+          if (recentRoot) {
+            setStartupPhase('recent-project');
+            const outcome = await performOpenRecent(recentRoot, projectDispatch);
+            if (cancelled) return;
+            if (outcome.success) {
+              setStartupPhase('workspace-ready');
+              setShowStartup(false);
+              return;
+            }
+            setStartupStatus(recentProjectRestoreFailure(recentRoot, outcome.error));
+          }
+        }
+
         setStartupPhase('project-data');
         const data = await adapter.loadProject();
         if (cancelled) return;

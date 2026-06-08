@@ -4,6 +4,61 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-450 / PX-016 - Recent Project Restore Startup Flow
+
+- `2026-06-08 01:36:34 -03:00` - issue intake and recent-project startup
+  inspection - PASS. Read Linear `FRA-450`, moved it to In Progress, posted
+  start evidence, and inspected `src/App.tsx`,
+  `src/components/project/ProjectStartupScreen.tsx`,
+  `src/stores/saveActions.ts`, `src/adapters/FileSystemAdapter.ts`,
+  `src/adapters/BrowserMemoryAdapter.ts`, `src/adapters/adapterFactory.ts`,
+  `src/types/rpgBridge.ts`, `src/__tests__/AppStartup.test.tsx`,
+  `src/stores/__tests__/projectStartupActions.test.ts`,
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`,
+  `docs/FIRST_RUN_APP_DATA_POLICY.md`, and `docs/DESKTOP_SHELL_ARCHITECTURE.md`.
+- Existing behavior: desktop recents already existed in the bridge and
+  `performOpenRecent()`, but `App` did not query `config.getRecents()` during
+  startup, did not attempt restore before the manual project screen, and did
+  not show restore-attempt feedback.
+- TDD RED:
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - FAIL as expected; valid recent restore did not call `readProject`, failed
+  restore did not show recovery copy, and the startup phase model lacked
+  `recent-project`.
+- Fix applied: added a `recent-project` startup phase with deterministic
+  ordering and progress metadata.
+- Fix applied: updated `App.tsx` to query desktop recents during startup,
+  attempt the most recent root through `performOpenRecent()`, enter the editor
+  directly on success, and fall back to the manual startup screen with explicit
+  recovery copy on restore/config failure.
+- Fix applied: added `recentProjectRestoreFailure()` copy so failed restores
+  name the attempted root when available and preserve Open/Create/Sample
+  recovery actions.
+- Fix applied: added App startup tests for valid recent restore, pending
+  restore feedback, failed restore recovery, and the updated phase order.
+- `2026-06-08 01:42:11 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 3 focused startup files and 12 tests passed.
+- Initial `npm run typecheck` - FAIL; the new desktop bridge test helper was
+  missing asset import method stubs and TypeScript could not narrow the pending
+  read resolver after async assignment.
+- Fix applied: added canceled asset-import stubs to the test bridge and used
+  an explicit resolver assertion before completing the pending restore.
+- `2026-06-08 01:44:12 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 01:44:12 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/startup/__tests__/startupPhases.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 3 focused startup files and 12 tests passed.
+- `2026-06-08 01:45:01 -03:00` - PX-016 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-016 edited source/test
+  files.
+- `2026-06-08 01:45:01 -03:00` - PX-016 secret-like value scan - PASS; no
+  secret-like values in PX-016 edited source/test files.
+- `2026-06-08 01:45:01 -03:00` -
+  `git diff --check -- src\App.tsx src\startup\startupPhases.ts src\startup\__tests__\startupPhases.test.ts src\__tests__\AppStartup.test.tsx docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-016 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-449 / PX-015 - Startup Loading Phase State Machine
 
 - `2026-06-08 01:27:33 -03:00` - issue intake and startup side-effect

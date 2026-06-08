@@ -1,4 +1,9 @@
-export const STARTUP_PHASE_SEQUENCE = ['app-shell', 'project-data', 'workspace-ready'] as const;
+export const STARTUP_PHASE_SEQUENCE = [
+  'app-shell',
+  'project-data',
+  'recent-project',
+  'workspace-ready',
+] as const;
 
 export type StartupPhaseId = (typeof STARTUP_PHASE_SEQUENCE)[number];
 
@@ -20,7 +25,13 @@ const STARTUP_PHASES: Record<StartupPhaseId, StartupPhase> = {
     id: 'project-data',
     title: 'Preparing your workspace',
     detail: 'Reading project files and editor state.',
-    progress: 58,
+    progress: 48,
+  },
+  'recent-project': {
+    id: 'recent-project',
+    title: 'Restoring your recent project',
+    detail: 'Opening your most recent local project.',
+    progress: 72,
   },
   'workspace-ready': {
     id: 'workspace-ready',
