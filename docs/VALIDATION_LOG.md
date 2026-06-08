@@ -4,6 +4,37 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-441 / PX-007 - Product UX Principles For Creator-First AI
+
+- `2026-06-08 00:08:04 -03:00` - issue intake and UX principles source
+  inspection - PASS. Read Linear `FRA-441`, moved it to In Progress, posted
+  start evidence, loaded the brainstorming skill in repo-autonomous mode, and
+  inspected Phase 12 UX/provider/baseline inventories plus Phase 11 AI
+  workflow, provider settings, credential, cost, queue, generation history,
+  and OpenCode handoff docs.
+- Fix applied: added
+  `docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md` defining the creator-first
+  AI product approach, concrete principles, anti-patterns, beginner vs
+  advanced examples, copy conventions, and validation expectations for M01
+  through M07.
+- `2026-06-08 00:09:02 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:09:02 -03:00` -
+  `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md`
+  - FAIL as a scan false positive; `sk-[A-Za-z0-9]` matched the `sk-o`
+  substring in `task-oriented`, not a secret value.
+- Fix applied: refined the document secret scan to require secret-like value
+  lengths or explicit assignment syntax.
+- `2026-06-08 00:09:18 -03:00` -
+  `rg -n "fixture-provider-token-value|\\bsk-[A-Za-z0-9]{12,}|Bearer [A-Za-z0-9]{12,}|apiKey\\s*=|secret\\s*=|token\\s*=" docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md`
+  - PASS; no secret-like values in the PX-007 principles document.
+- `2026-06-08 00:09:02 -03:00` -
+  `rg -n "TBD|TODO|FIXME|\\?\\?" docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md`
+  - PASS; no placeholder markers in the PX-007 principles document.
+- `2026-06-08 00:09:02 -03:00` -
+  `git diff --check -- docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-007 documentation diff.
+
 ### Phase 12 FRA-440 / PX-006 - Phase 11 Baseline Verification
 
 - `2026-06-07 23:57:25 -03:00` - issue intake and baseline inspection - PASS.
