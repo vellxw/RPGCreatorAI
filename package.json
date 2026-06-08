@@ -42,7 +42,8 @@
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build --debug --no-bundle",
     "desktop:package:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/package-windows.ps1",
-    "desktop:verify-content": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-tauri-content.ps1"
+    "desktop:verify-content": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-tauri-content.ps1",
+    "measure:first-paint:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

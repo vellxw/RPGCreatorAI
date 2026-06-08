@@ -100,6 +100,12 @@ boundary. Runtime log, event trace, runtime snapshot, and diagnostic recovery
 panels stay out of the startup module graph until the creator opens Playtest,
 while their runtime commands remain available from Playtest user actions.
 
+PX-021 update: M01 launcher work now has a repeatable first-paint performance
+budget in `docs/FIRST_PAINT_PERFORMANCE_BUDGET.md` and a repo-local
+measurement command, `scripts/dev/measure-first-paint.ps1`. Future startup
+changes should record splash-visible, first-contentful-paint, and
+DOMContentLoaded evidence before closing related issues.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:
@@ -118,6 +124,7 @@ Safe validation commands for later launcher work:
 npm run typecheck
 npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1
 npm run desktop:verify-content
 npm run desktop:package:windows

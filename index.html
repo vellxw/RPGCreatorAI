@@ -131,6 +131,12 @@
         </main>
       </div>
     </div>
+    <script>
+      window.__RPG_STARTUP_MARKS__ = {
+        staticSplashDomReadyMs: Math.round(performance.now()),
+      };
+      performance.mark?.("rpg-static-splash-dom-ready");
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

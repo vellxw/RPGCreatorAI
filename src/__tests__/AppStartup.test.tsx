@@ -154,6 +154,8 @@ describe('App startup project flow', () => {
     expect(html).toContain('Loading project data and editor state.');
     expect(html).toContain('aria-valuenow="20"');
     expect(html).toContain('pre-react-splash');
+    expect(html).toContain('__RPG_STARTUP_MARKS__');
+    expect(html).toContain('rpg-static-splash-dom-ready');
     expect(html).not.toContain('provider');
   });
 

@@ -60,6 +60,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps
 # Playwright CLI through npx, and writes local artifacts under output/playwright/cp108.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1
 
+# First-paint startup budget measurement. Starts/reuses Vite, reads browser
+# paint/navigation timing, and writes local artifacts under
+# output/playwright/phase12-px021-first-paint.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1
+
 # Runtime diagnostics entry point and no-log failure-path coverage.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-diagnostics.ps1
 
@@ -102,6 +107,7 @@ scripts\dev\build.bat
 scripts\dev\test.bat
 scripts\dev\smoke-runtime.bat
 scripts\dev\smoke-browser-editor.bat
+scripts\dev\measure-first-paint.bat
 scripts\dev\verify-diagnostics.bat
 scripts\dev\verify-branding-assets.bat
 scripts\dev\export-runtime-assets.bat
@@ -121,6 +127,7 @@ Expected success markers:
 | `scripts/dev/test.ps1` | `=== TESTS PASSED ===` |
 | `scripts/dev/smoke-runtime.ps1` | `SMOKE PASSED` |
 | `scripts/dev/smoke-browser-editor.ps1` | `BROWSER SMOKE PASSED` or explicit `BROWSER SMOKE SKIPPED: <reason>` |
+| `scripts/dev/measure-first-paint.ps1` | `FIRST PAINT MEASURE PASSED` or explicit `FIRST PAINT MEASURE SKIPPED: <reason>` |
 | `scripts/dev/verify-diagnostics.ps1` | `RUNTIME DIAGNOSTICS VERIFY PASSED` |
 | `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
 | `npm run desktop:package:windows` | `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |

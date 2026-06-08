@@ -4,6 +4,65 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-455 / PX-021 - First Paint Performance Budget
+
+- `2026-06-08 03:20:57 -03:00` - issue intake and startup measurement
+  inspection - PASS. Read Linear `FRA-455`, moved it to In Progress, posted
+  start evidence, and inspected `package.json`, `index.html`,
+  `scripts/dev/smoke-browser-editor.ps1`, browser smoke harness tests,
+  startup tests, `docs/BROWSER_SMOKE_HARNESS.md`, `docs/BUILD_AND_RUN.md`,
+  `docs/CI_READY_VALIDATION.md`, and
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- TDD RED:
+  `npm test -- --run src/e2e/__tests__/firstPaintPerformanceBudgetScript.test.ts`
+  - FAIL as expected; `scripts/dev/measure-first-paint.ps1`,
+  `scripts/dev/measure-first-paint.bat`, and
+  `docs/FIRST_PAINT_PERFORMANCE_BUDGET.md` did not exist yet.
+- Fix applied: added `scripts/dev/measure-first-paint.ps1` and `.bat` wrapper.
+  The script starts or reuses Vite, drives the startup route through
+  `@playwright/cli` via `npx`, reads browser paint/navigation timings, enforces
+  splash/FCP/DOMContentLoaded budgets, writes local artifacts under
+  `output/playwright/phase12-px021-first-paint`, and emits explicit pass/skip
+  markers.
+- Fix applied: added a static `window.__RPG_STARTUP_MARKS__` mark in
+  `index.html` immediately after the pre-React splash shell, allowing the
+  measurement command to record splash-visible timing even after React advances.
+- Fix applied: documented the budget and evidence workflow in
+  `docs/FIRST_PAINT_PERFORMANCE_BUDGET.md`, added the npm alias
+  `measure:first-paint:windows`, and linked the command from build/run,
+  CI-ready validation, and launcher/startup audit docs.
+- Initial measurement attempt:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1`
+  - SKIPPED; Vite became ready just after the initial 60-second readiness
+  timeout. Fix applied: increased the startup readiness timeout to 120 seconds.
+- Intermediate script validation - FAIL; multiline/async `eval` payloads and
+  long JS arguments failed through `playwright-cli`/`npx.cmd` with parser and
+  argument-splitting errors. Fix applied: switched to a simple synchronous
+  `eval` expression and launched `npx` through `ProcessStartInfo`, with a
+  Windows PowerShell 5.1-compatible quoted-argument fallback.
+- `2026-06-08 03:20:57 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1`
+  - PASS; `FIRST PAINT MEASURE PASSED`, `splashVisibleMs=52`,
+  `firstPaintMs=352`, `firstContentfulPaintMs=352`,
+  `domContentLoadedMs=1283`, `loadEventEndMs=1296`, output artifacts under
+  `output/playwright/phase12-px021-first-paint`.
+- `2026-06-08 03:21:43 -03:00` -
+  `npm test -- --run src/e2e/__tests__/firstPaintPerformanceBudgetScript.test.ts src/__tests__/AppStartup.test.tsx src/e2e/__tests__/browserSmokeHarnessScript.test.ts`
+  - PASS; 3 focused startup/browser tooling files and 16 tests passed.
+- `2026-06-08 03:23:41 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 03:23:41 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 1 docs/script alignment file and 9 tests passed.
+- `2026-06-08 03:24:46 -03:00` - PX-021 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-021 edited files.
+- `2026-06-08 03:24:46 -03:00` - PX-021 secret-like value scan - PASS; no
+  secret-like values in PX-021 edited files.
+- `2026-06-08 03:24:46 -03:00` -
+  `git diff --check -- index.html package.json scripts\dev\measure-first-paint.ps1 scripts\dev\measure-first-paint.bat src\e2e\__tests__\firstPaintPerformanceBudgetScript.test.ts src\__tests__\AppStartup.test.tsx docs\FIRST_PAINT_PERFORMANCE_BUDGET.md docs\BUILD_AND_RUN.md docs\CI_READY_VALIDATION.md docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-021 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-454 / PX-020 - Diagnostics Panels Lazy Load Boundary
 
 - `2026-06-08 02:34:10 -03:00` - issue intake and Playtest diagnostics
