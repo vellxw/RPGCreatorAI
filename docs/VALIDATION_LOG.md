@@ -4,6 +4,43 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-440 / PX-006 - Phase 11 Baseline Verification
+
+- `2026-06-07 23:57:25 -03:00` - issue intake and baseline inspection - PASS.
+  Read Linear `FRA-440`, moved it to In Progress, posted start evidence, and
+  inspected branch/origin, dirty worktree state, Phase 11 final ship docs,
+  Phase 11 complete-platform validation docs, Linear closeout docs,
+  `docs/BUILD_AND_RUN.md`, `docs/GOAL_STACK.md`, `scripts/dev/verify.ps1`,
+  `package.json`, and `CMakePresets.json`.
+- `git status --short --branch` - PASS for inspection; branch is
+  `main...origin/main`, with preserved unstaged modifications in
+  `docs/VALIDATION_LOG.md`, several `src-tauri/src/*.rs` files,
+  `src/adapters/projectTemplates.ts`,
+  `src/stores/__tests__/projectStartupActions.test.ts`, plus untracked
+  `.commandcode/taste/` and `output/`.
+- `git remote -v` - PASS; fetch and push remotes are
+  `https://github.com/vellxw/RPGCreatorAI.git`.
+- Fix applied: added
+  `docs/PHASE_12_PHASE_11_BASELINE_VERIFICATION.md` recording the current
+  commit, branch/origin, dirty worktree, Phase 11 final docs, canonical
+  validation commands, known nonfatal warnings, and current baseline result.
+- `2026-06-08 00:03:33 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1`
+  - PASS; canonical gate passed frontend typecheck, full Vitest suite (108
+  files / 572 tests), frontend build (1966 modules transformed), Phase 11
+  asset pipeline checks, native C++ configure/build/CTest (`RPGTests` 1/1),
+  Tauri content check, Rust desktop tests (43 tests), runtime smoke, and
+  editor-runtime screenshot roundtrip. The gate printed `=== ALL PASSED ===`.
+- `2026-06-08 00:04:32 -03:00` -
+  `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_PHASE_11_BASELINE_VERIFICATION.md`
+  - PASS; no secret-like matches in the PX-006 baseline document.
+- `2026-06-08 00:04:32 -03:00` -
+  `git diff --check -- docs/PHASE_12_PHASE_11_BASELINE_VERIFICATION.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-006 documentation diff.
+- Package smoke was not rerun for PX-006; Phase 11 package smoke remains
+  documented in `docs/PHASE_11_FINAL_SHIP_GATE.md`, and PX-006 used the
+  narrowest practical canonical repo-local validation for current baseline.
+
 ### Phase 12 FRA-439 / PX-005 - Existing Asset And Animation Pipeline Inventory
 
 - `2026-06-08 00:05:22 -03:00` - issue intake and asset/animation source
