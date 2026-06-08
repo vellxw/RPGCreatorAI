@@ -4,6 +4,29 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-443 / PX-009 - Phase 12 Risk Register
+
+- `2026-06-08 00:19:25 -03:00` - issue intake and risk source inspection -
+  PASS. Read Linear `FRA-443`, moved it to In Progress, posted start evidence,
+  and inspected Phase 11 risk, provider/legal, privacy/cost, security threat
+  model, credential, cost, release artifact, generated asset quality,
+  diagnostics, error recovery, and Phase 12 principles/roadmap/baseline docs.
+- Fix applied: added `docs/PHASE_12_RISK_REGISTER.md` covering UX, provider,
+  cost, privacy, security, asset provenance, validation, launch, implementation
+  workflow, stop conditions, escalation triggers, and milestone-specific risk
+  checks.
+- `2026-06-08 00:20:22 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:20:22 -03:00` -
+  `rg -n "TBD|TODO|FIXME|\\?\\?" docs/PHASE_12_RISK_REGISTER.md`
+  - PASS; no placeholder markers in the PX-009 risk register.
+- `2026-06-08 00:20:22 -03:00` -
+  `rg -n "fixture-provider-token-value|\\bsk-[A-Za-z0-9]{12,}|Bearer [A-Za-z0-9]{12,}|apiKey\\s*=|secret\\s*=|token\\s*=" docs/PHASE_12_RISK_REGISTER.md`
+  - PASS; no secret-like values in the PX-009 risk register.
+- `2026-06-08 00:20:22 -03:00` -
+  `git diff --check -- docs/PHASE_12_RISK_REGISTER.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-009 documentation diff.
+
 ### Phase 12 FRA-442 / PX-008 - Phase 12 Roadmap And Success Metrics
 
 - `2026-06-08 00:13:45 -03:00` - issue intake and roadmap source inspection
