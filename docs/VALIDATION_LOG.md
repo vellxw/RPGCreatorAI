@@ -4,6 +4,35 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-435 / PX-001 - Product UX Audit From User Feedback
+
+- `2026-06-07 23:15:18 -03:00` - issue intake and source/docs inspection -
+  PASS. Read Linear `FRA-435`, moved it to In Progress, posted start
+  evidence, confirmed `main`, confirmed `origin` is
+  `https://github.com/vellxw/RPGCreatorAI.git`, and inspected current dirty
+  workspace state without reverting unrelated changes.
+- `rg --files docs`, `rg --files .kiro`,
+  `rg -n "Phase 12|PX-|Product UX|AI Studio|provider|model|startup|launcher|first-run|Settings|Phase 11|final" docs .kiro src src-tauri -g '!node_modules' -g '!build' -g '!dist'`
+  - PASS; located Phase 11 evidence, Phase 12 Linear context, startup,
+  Settings, provider/model, and AI workflow surfaces.
+- Inspected `AGENTS.md`, `docs/GOAL_STACK.md`,
+  `docs/PHASE_11_COMPLETE_PLATFORM_VALIDATION_REPORT.md`,
+  `docs/PHASE_11_FINAL_SHIP_GATE.md`, `docs/AI_WORKFLOWS.md`, `src/App.tsx`,
+  `src/components/project/ProjectStartupScreen.tsx`,
+  `src/components/layout/Sidebar.tsx`, `src/screens/SettingsScreen.tsx`,
+  `src/screens/AIToolsScreen.tsx`, `src/stores/providerStore.ts`,
+  `src/providers/providerRegistry.ts`, `src/providers/modelCapabilityRegistry.ts`,
+  and focused startup/Settings/AI gating tests.
+- Fix applied: added `docs/PHASE_12_PRODUCT_UX_AUDIT.md` mapping current
+  strengths and UX gaps to Phase 12 milestones M00 through M12 without
+  claiming runtime or provider behavior that was not executed.
+- `2026-06-07 23:18:56 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-07 23:18:56 -03:00` -
+  `npm test -- --run src/components/project/__tests__/ProjectStartupScreen.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
+  - PASS; focused startup, Settings/provider, and AI gating suites passed 3
+  files and 12 tests.
+
 ### Phase 11 FRA-163 / CP-128 - Complete Platform Final Ship Gate
 
 - `2026-06-04 08:19:08 -03:00` - final ship gate validation - PASS.
