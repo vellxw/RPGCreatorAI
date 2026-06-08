@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { lazy, Suspense, useEffect, useReducer, useState } from 'react';
 import { TopToolbar } from './components/layout/TopToolbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
@@ -6,7 +6,6 @@ import { EventEditorScreen } from './screens/EventEditorScreen';
 import { DatabaseScreen } from './screens/DatabaseScreen';
 import { AssetsScreen } from './screens/AssetsScreen';
 import { PlaytestScreen } from './screens/PlaytestScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
 import { AppSplashShell } from './components/project/AppSplashShell';
 import { ProjectStartupScreen } from './components/project/ProjectStartupScreen';
 import {
@@ -30,7 +29,8 @@ import {
   performOpenProject,
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
-import { useProviderStore } from './stores/providerStore';
+
+const ProviderSettingsBoundary = lazy(() => import('./screens/ProviderSettingsBoundary'));
 
 export function startupFailure(label: 'Open' | 'Create' | 'Import', error?: string): string {
   return `${label} failed: ${error ?? 'No details were returned. Try again, or use the bundled sample while you inspect the project file.'}`;
@@ -56,7 +56,6 @@ export function runtimeStartupAvailabilityMessage(info: RuntimeAvailabilityInfo)
 export default function App() {
   const [projectState, projectDispatch] = useReducer(projectReducer, initialProjectStoreState);
   const [editorState, editorDispatch] = useReducer(editorReducer, initialEditorState);
-  const providerStore = useProviderStore();
   const [loaded, setLoaded] = useState(false);
   const [startupPhase, setStartupPhase] = useState<StartupPhaseId>('app-shell');
   const [showStartup, setShowStartup] = useState(true);
@@ -263,7 +262,17 @@ export default function App() {
     database: <DatabaseScreen />,
     assets: <AssetsScreen />,
     playtest: <PlaytestScreen />,
-    settings: <SettingsScreen providerStore={providerStore} />,
+    settings: (
+      <Suspense
+        fallback={
+          <div className="flex-1 bg-[#f5f5f7] px-6 py-5 text-[13px] text-gray-600">
+            Loading provider settings...
+          </div>
+        }
+      >
+        <ProviderSettingsBoundary />
+      </Suspense>
+    ),
   };
 
   return (

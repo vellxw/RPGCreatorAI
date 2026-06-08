@@ -86,6 +86,11 @@ through `runtime_availability` and surfaces ready/unavailable copy on the
 project startup screen. Editing remains available when the native runtime is
 missing, and the check does not spawn the runtime.
 
+PX-018 update: provider settings now load through a lazy Settings boundary.
+The provider store and model capability registry are not imported or
+initialized from the startup path, so first paint does not require provider
+credentials, model metadata, or live provider calls.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

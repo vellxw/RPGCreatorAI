@@ -4,6 +4,50 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-452 / PX-018 - Provider Hub Lazy Load Boundary
+
+- `2026-06-08 02:07:44 -03:00` - issue intake and provider startup
+  inspection - PASS. Read Linear `FRA-452`, moved it to In Progress, posted
+  start evidence, and inspected `src/App.tsx`, `src/stores/providerStore.ts`,
+  `src/screens/SettingsScreen.tsx`, `src/__tests__/AppStartup.test.tsx`,
+  provider UI tests, provider registry/adapter tests, `docs/AI_WORKFLOWS.md`,
+  `docs/CI_READY_VALIDATION.md`, and
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- Existing behavior: `App.tsx` statically imported `SettingsScreen`, imported
+  `useProviderStore`, and called `useProviderStore()` during startup even
+  though provider configuration is optional Settings-only tooling.
+- TDD RED:
+  `npm test -- --run src/__tests__/AppStartup.test.tsx`
+  - FAIL as expected; `App.tsx` still had static Settings/provider-store
+  imports and a startup `useProviderStore()` call.
+- Fix applied: added `src/screens/ProviderSettingsBoundary.tsx`, which owns
+  the provider store only after Settings is requested.
+- Fix applied: changed `App.tsx` to load `ProviderSettingsBoundary` through
+  `React.lazy()` and `Suspense`, removing the static Settings/provider-store
+  imports and the startup provider-store hook.
+- Fix applied: updated the Phase 12 launcher/startup audit to record that the
+  provider hub no longer participates in the startup path.
+- `2026-06-08 02:10:29 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx`
+  - PASS; 1 startup file and 12 tests passed.
+- `2026-06-08 02:10:29 -03:00` -
+  `npm test -- --run src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerAdapterHub.test.ts`
+  - PASS; 5 focused provider files and 23 tests passed with offline mocks and
+  no live provider calls.
+- `2026-06-08 02:11:14 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 02:11:14 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/providerAdapterHub.test.ts src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 7 startup/provider/doc alignment files and 44 tests passed.
+- `2026-06-08 02:12:43 -03:00` - PX-018 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-018 edited files.
+- `2026-06-08 02:12:43 -03:00` - PX-018 secret-like value scan - PASS; no
+  secret-like values in PX-018 edited files.
+- `2026-06-08 02:12:43 -03:00` -
+  `git diff --check -- src\App.tsx src\screens\ProviderSettingsBoundary.tsx src\__tests__\AppStartup.test.tsx docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-018 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-451 / PX-017 - Runtime Availability Startup Check
 
 - `2026-06-08 01:49:06 -03:00` - issue intake and runtime/startup
