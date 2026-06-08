@@ -82,6 +82,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-
 # to validate the exact executable path a user can double-click.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1
 
+# Current-user desktop/Start Menu shortcut plan. Dry-run by default; pass
+# -Apply only when you intentionally want to create .lnk files.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1
+
 # Screenshot analysis audit helper. Prints palette metrics; it is not a pass/fail gate.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/analyze-screenshots.ps1
 ```
@@ -105,6 +109,7 @@ scripts\dev\normalize-animation-strip.bat
 scripts\dev\generate-animation-preview.bat
 scripts\dev\smoke-first-run-app-data.bat
 scripts\dev\smoke-packaged-executable-launch.bat
+scripts\dev\create-windows-shortcuts.bat
 ```
 
 Expected success markers:
@@ -121,6 +126,7 @@ Expected success markers:
 | `npm run desktop:package:windows` | `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
 | `scripts/dev/smoke-first-run-app-data.ps1` | `FIRST-RUN APP DATA SMOKE PASSED` |
 | `scripts/dev/smoke-packaged-executable-launch.ps1` | `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED` |
+| `scripts/dev/create-windows-shortcuts.ps1` | `WINDOWS SHORTCUT PLAN PASSED` by default, or `WINDOWS SHORTCUT CREATION PASSED` with `-Apply` |
 | `scripts/dev/export-runtime-assets.ps1 --validate-only` | `Runtime asset export validation passed.` |
 | `scripts/dev/normalize-animation-strip.ps1 --validate-manifest ...` | `Animation strip normalization validation passed.` |
 | `scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest ...` | `Animation preview generation validation passed.` |
@@ -213,6 +219,25 @@ desktop bridge can resolve the native runtime from the shell executable
 directory, and runtime playtests still launch with the selected project root as
 their working directory.
 
+Optional current-user shortcuts:
+
+```powershell
+# Dry-run: prints Desktop and Start Menu targets without writing .lnk files.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1
+
+# Create current-user Desktop and Start Menu shortcuts.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1 -Apply
+
+# Create only one target.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1 -Desktop -Apply
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1 -StartMenu -Apply
+```
+
+This helper is not an installer. It does not write to Program Files, all-users
+Start Menu folders, the registry, or an uninstaller entry. It only creates
+current-user `.lnk` files when `-Apply` is present, and refuses to overwrite an
+existing shortcut unless `-Force` is also provided.
+
 Current release metadata is aligned at version `0.5.0` across npm, Tauri, and
 Cargo. Future Windows installer work should target unsigned NSIS first, with
 MSI as a later secondary target and code signing deferred until credentials or
@@ -248,6 +273,7 @@ Restricted-policy fallback:
 ```cmd
 scripts\dev\smoke-first-run-app-data.bat
 scripts\dev\smoke-packaged-executable-launch.bat
+scripts\dev\create-windows-shortcuts.bat
 ```
 
 Diagnostics and failed-launch troubleshooting are documented in

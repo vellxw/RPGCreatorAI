@@ -139,6 +139,22 @@ Explorer and double-click `rpgcreator-shell.exe`. Do not move
 `rpg_creator_runtime.exe` away from that directory; Playtest runtime discovery
 uses the shell executable directory as the packaged fallback.
 
+For a current-user shortcut plan, run:
+
+```powershell
+.\scripts\dev\create-windows-shortcuts.ps1
+```
+
+That command is a dry-run and prints the Desktop and Start Menu `.lnk` targets.
+To create shortcuts intentionally, add `-Apply`; to limit the target, add
+`-Desktop` or `-StartMenu`; to replace an existing shortcut, add `-Force`.
+The helper stays user-scoped and does not require admin rights.
+
+The unsigned no-bundle prototype does not create Start Menu entries
+automatically. Automatic Start Menu entries, uninstallers, publisher identity,
+and signed installer behavior belong to future NSIS/MSI installer work and
+must not be claimed for this local prototype.
+
 Useful options:
 
 ```powershell
@@ -147,6 +163,7 @@ Useful options:
 .\scripts\dev\package-windows.ps1 -BuildDir D:\rpg-build
 .\scripts\dev\package-windows.ps1 -CargoTargetDir D:\rpg-tauri-target
 .\scripts\dev\smoke-packaged-executable-launch.ps1
+.\scripts\dev\create-windows-shortcuts.ps1
 ```
 
 Prototype artifacts are local developer output, not source files:

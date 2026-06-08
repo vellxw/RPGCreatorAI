@@ -31,6 +31,12 @@ the frontend bundle loads without a dev server, the Tauri executable starts,
 and the native runtime executable is colocated where the runtime bridge can
 find it.
 
+The local prototype does not automatically create Start Menu entries, Desktop
+shortcuts, registry entries, Program Files installs, or uninstallers. A
+current-user `.lnk` helper may be used for local QA, but installer-like shortcut
+creation remains explicit and user-scoped until a future installer issue
+defines NSIS/MSI behavior.
+
 For future Windows installer work, the preferred first installer target is
 NSIS. The local Tauri CLI supports both `nsis` and `msi`, but NSIS is the
 default Phase 11 installer direction because it produces a familiar `.exe`

@@ -4,6 +4,52 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-447 / PX-013 - Desktop Shortcut And Start Menu Guidance Prototype
+
+- `2026-06-08 00:57:35 -03:00` - issue intake and shortcut/start-menu source
+  inspection - PASS. Read Linear `FRA-447`, moved it to In Progress, posted
+  start evidence, and inspected current packaging docs, release artifact
+  policy, PX-003/PX-012 launch guidance, package output paths, packaged launch
+  smoke helper, first-run smoke helper, and script/docs alignment tests.
+- Decision: implement a repo-local current-user shortcut helper plus docs,
+  rather than package metadata or installer behavior. PX-013 does not create
+  automatic Start Menu entries because the current artifact is an unsigned
+  debug no-bundle prototype, not an installer.
+- Fix applied: added `scripts/dev/create-windows-shortcuts.ps1` and `.bat`
+  wrapper. The helper defaults to dry-run, validates the packaged shell and
+  colocated `rpg_creator_runtime.exe`, prints current-user Desktop and Start
+  Menu `.lnk` targets, and only writes shortcuts when `-Apply` is explicitly
+  passed. It refuses to overwrite existing shortcuts unless `-Force` is also
+  passed.
+- Fix applied: updated `README.md`, `docs/BUILD_AND_RUN.md`,
+  `docs/WINDOWS_BUILD_NOTES.md`, and
+  `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md` with shortcut/start-menu
+  guidance, no-admin/current-user boundaries, and unsigned prototype
+  limitations.
+- Fix applied: updated `src/e2e/__tests__/verifyScript.test.ts` so script and
+  docs alignment covers the shortcut helper, wrapper, dry-run marker, and
+  creation marker.
+- `2026-06-08 00:56:41 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:56:41 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` - PASS; 1 test
+  file and 9 tests passed.
+- `2026-06-08 00:56:41 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1`
+  - PASS; dry-run printed the packaged executable path, colocated runtime copy,
+  package dir, current-user Desktop shortcut target, current-user Start Menu
+  shortcut target, and `WINDOWS SHORTCUT PLAN PASSED`. No `.lnk` files were
+  created because `-Apply` was not used.
+- `2026-06-08 00:57:35 -03:00` - wrapped PX-013 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, `FIXME`, or unexpected `??` markers in PX-013
+  edited docs/scripts/tests.
+- `2026-06-08 00:57:35 -03:00` - wrapped PX-013 secret-like value scan - PASS;
+  no secret-like values in PX-013 edited docs/scripts/tests.
+- `2026-06-08 00:57:35 -03:00` -
+  `git diff --check -- README.md docs\BUILD_AND_RUN.md docs\WINDOWS_BUILD_NOTES.md docs\PHASE_11_RELEASE_ARTIFACT_POLICY.md scripts\dev\create-windows-shortcuts.ps1 scripts\dev\create-windows-shortcuts.bat src\e2e\__tests__\verifyScript.test.ts docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-013 documentation/script/test diff.
+  Git emitted existing line-ending warnings for touched text files.
+
 ### Phase 12 FRA-446 / PX-012 - Windows Double-Click Executable Path
 
 - `2026-06-08 00:50:58 -03:00` - issue intake and launch-path source

@@ -212,6 +212,17 @@ opened from File Explorer by double-clicking:
 
 Keep `rpg_creator_runtime.exe` beside that shell executable so Playtest can
 resolve the native runtime from a desktop launch context.
+
+To preview current-user Desktop and Start Menu shortcut targets without
+creating files:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1
+```
+
+Add `-Apply` only when you intentionally want to create user-scoped `.lnk`
+files for the unsigned prototype. This is not an installer and does not create
+all-users Start Menu entries or an uninstaller.
 Restricted-execution-policy fallback:
 
 ```cmd

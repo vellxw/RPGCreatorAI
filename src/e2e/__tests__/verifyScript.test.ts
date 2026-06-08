@@ -93,6 +93,8 @@ describe('MVP verify script', () => {
       join(process.cwd(), 'scripts/dev/smoke-packaged-executable-launch.bat'),
       'utf8',
     );
+    const shortcutHelper = readFileSync(join(process.cwd(), 'scripts/dev/create-windows-shortcuts.ps1'), 'utf8');
+    const shortcutHelperWrapper = readFileSync(join(process.cwd(), 'scripts/dev/create-windows-shortcuts.bat'), 'utf8');
     const packageJson = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
       scripts: Record<string, string>;
     };
@@ -139,6 +141,22 @@ describe('MVP verify script', () => {
     expect(packageWrapper).toContain('exit /b %ERRORLEVEL%');
     expect(packagedLaunchSmokeWrapper).toContain('smoke-packaged-executable-launch.ps1');
     expect(packagedLaunchSmokeWrapper).toContain('exit /b %ERRORLEVEL%');
+
+    for (const expected of [
+      'WINDOWS SHORTCUT GUIDANCE',
+      'WINDOWS SHORTCUT PLAN PASSED',
+      'WINDOWS SHORTCUT CREATION PASSED',
+      'WScript.Shell',
+      'DesktopDirectory',
+      'Start Menu\\Programs',
+      '-Apply',
+      '-Force',
+      'rpg_creator_runtime.exe',
+    ]) {
+      expect(shortcutHelper).toContain(expected);
+    }
+    expect(shortcutHelperWrapper).toContain('create-windows-shortcuts.ps1');
+    expect(shortcutHelperWrapper).toContain('exit /b %ERRORLEVEL%');
   });
 
   it('keeps release version metadata aligned across npm, Tauri, and Cargo', () => {
@@ -273,6 +291,7 @@ describe('MVP verify script', () => {
       '=== ALL PASSED ===',
       'PACKAGED EXECUTABLE LAUNCH SMOKE PASSED',
       'PACKAGED SMOKE PASSED',
+      'WINDOWS SHORTCUT PLAN PASSED',
       'RUNTIME DIAGNOSTICS VERIFY PASSED',
       'Known nonfatal warnings',
       'Current Editor Workflow',
@@ -287,6 +306,7 @@ describe('MVP verify script', () => {
       'BRANDING ASSETS PASSED',
       'FIRST-RUN APP DATA SMOKE PASSED',
       'smoke-packaged-executable-launch.bat',
+      'create-windows-shortcuts.bat',
     ]) {
       expect(buildRun + windowsNotes).toContain(expected);
     }
