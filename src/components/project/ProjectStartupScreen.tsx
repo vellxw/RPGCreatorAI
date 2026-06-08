@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 import { Download, FilePlus2, FolderOpen, PackageOpen, Play } from 'lucide-react';
 import { Button } from '../ui/Button';
+import type { StartupRecoveryState } from '../../startup/startupRecovery';
 
 interface ProjectStartupScreenProps {
   desktop: boolean;
   sampleTitle: string;
   statusMessage?: string | null;
+  recoveryState?: StartupRecoveryState | null;
   runtimeStatusMessage?: string | null;
   onUseSample(): void;
   onOpenProject(): void;
@@ -17,6 +19,7 @@ export function ProjectStartupScreen({
   desktop,
   sampleTitle,
   statusMessage,
+  recoveryState,
   runtimeStatusMessage,
   onUseSample,
   onOpenProject,
@@ -26,6 +29,11 @@ export function ProjectStartupScreen({
   const [title, setTitle] = useState('Untitled RPG');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const createLabel = desktop ? 'Create Project' : 'Create Browser Project';
+  const recoveryOptions =
+    recoveryState?.options
+      .filter(option => desktop || option !== 'Open Project Folder')
+      .map(option => (!desktop && option === 'Create Project' ? 'Create Browser Project' : option)) ??
+    [];
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,7 +66,24 @@ export function ProjectStartupScreen({
             </div>
           )}
 
-          {statusMessage && (
+          {recoveryState && (
+            <div
+              className="mt-5 rounded-md border border-rose-200 bg-white px-3 py-3 text-[12px] leading-5 text-gray-700 shadow-sm"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="font-semibold text-rose-900">{recoveryState.title}</div>
+              <p className="mt-1">{recoveryState.detail}</p>
+              <div className="mt-2 font-semibold text-gray-700">Recovery options</div>
+              <ul className="mt-1 list-disc space-y-1 pl-4">
+                {recoveryOptions.map(option => (
+                  <li key={option}>{option}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {!recoveryState && statusMessage && (
             <div className="mt-5 rounded-md border border-gray-200 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm">
               {statusMessage}
             </div>

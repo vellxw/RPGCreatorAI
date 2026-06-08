@@ -27,6 +27,11 @@ import {
   performOpenProject,
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
+import {
+  projectStartupRecovery,
+  recentProjectStartupRecovery,
+  type StartupRecoveryState,
+} from './startup/startupRecovery';
 
 const ProviderSettingsBoundary = lazy(() => import('./screens/ProviderSettingsBoundary'));
 const AssetWorkspaceBoundary = lazy(() => import('./screens/AssetWorkspaceBoundary'));
@@ -60,6 +65,7 @@ export default function App() {
   const [startupPhase, setStartupPhase] = useState<StartupPhaseId>('app-shell');
   const [showStartup, setShowStartup] = useState(true);
   const [startupStatus, setStartupStatus] = useState<string | null>(null);
+  const [startupRecovery, setStartupRecovery] = useState<StartupRecoveryState | null>(null);
   const [runtimeStatusMessage, setRuntimeStatusMessage] = useState<string | null>(null);
 
   // Load project once via the active adapter.
@@ -78,7 +84,10 @@ export default function App() {
           } catch (error) {
             if (cancelled) return;
             const message = error instanceof Error ? error.message : String(error);
-            setStartupStatus(recentProjectRestoreFailure(null, formatProjectFolderError(message)));
+            setStartupRecovery(
+              recentProjectStartupRecovery(null, formatProjectFolderError(message)),
+            );
+            setStartupStatus(null);
           }
 
           if (recentRoot) {
@@ -87,10 +96,13 @@ export default function App() {
             if (cancelled) return;
             if (outcome.success) {
               setStartupPhase('workspace-ready');
+              setStartupRecovery(null);
+              setStartupStatus(null);
               setShowStartup(false);
               return;
             }
-            setStartupStatus(recentProjectRestoreFailure(recentRoot, outcome.error));
+            setStartupRecovery(recentProjectStartupRecovery(recentRoot, outcome.error));
+            setStartupStatus(null);
           }
         }
 
@@ -103,7 +115,8 @@ export default function App() {
         if (cancelled) return;
         setStartupPhase('workspace-ready');
         const message = error instanceof Error ? error.message : String(error);
-        setStartupStatus(startupFailure('Open', message));
+        setStartupRecovery(projectStartupRecovery('Open', message));
+        setStartupStatus(null);
       } finally {
         if (!cancelled) setLoaded(true);
       }
@@ -212,9 +225,12 @@ export default function App() {
     const outcome = await performOpenProject(projectDispatch);
     if (outcome.cancelled) return;
     if (!outcome.success) {
-      setStartupStatus(startupFailure('Open', outcome.error));
+      setStartupRecovery(projectStartupRecovery('Open', outcome.error));
+      setStartupStatus(null);
       return;
     }
+    setStartupRecovery(null);
+    setStartupStatus(null);
     setShowStartup(false);
   };
 
@@ -222,18 +238,24 @@ export default function App() {
     const outcome = await performCreateProject(projectDispatch, { title });
     if (outcome.cancelled) return;
     if (!outcome.success) {
-      setStartupStatus(startupFailure('Create', outcome.error));
+      setStartupRecovery(projectStartupRecovery('Create', outcome.error));
+      setStartupStatus(null);
       return;
     }
+    setStartupRecovery(null);
+    setStartupStatus(null);
     setShowStartup(false);
   };
 
   const handleStartupImport = async (file: File) => {
     const result = await performImport(file, projectDispatch);
     if (!result.success) {
-      setStartupStatus(startupFailure('Import', result.error));
+      setStartupRecovery(projectStartupRecovery('Import', result.error));
+      setStartupStatus(null);
       return;
     }
+    setStartupRecovery(null);
+    setStartupStatus(null);
     setShowStartup(false);
   };
 
@@ -245,8 +267,13 @@ export default function App() {
             desktop={desktop}
             sampleTitle={projectState.project.title || 'bundled sample'}
             statusMessage={startupStatus}
+            recoveryState={startupRecovery}
             runtimeStatusMessage={runtimeStatusMessage}
-            onUseSample={() => setShowStartup(false)}
+            onUseSample={() => {
+              setStartupRecovery(null);
+              setStartupStatus(null);
+              setShowStartup(false);
+            }}
             onOpenProject={handleStartupOpen}
             onCreateProject={handleStartupCreate}
             onImportProject={handleStartupImport}

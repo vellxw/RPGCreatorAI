@@ -106,6 +106,12 @@ measurement command, `scripts/dev/measure-first-paint.ps1`. Future startup
 changes should record splash-visible, first-contentful-paint, and
 DOMContentLoaded evidence before closing related issues.
 
+PX-022 update: startup project failures now use structured recovery states.
+Missing recent projects, missing `data/project.json`, invalid project data,
+permission failures, and generic open/create/import failures render a clear
+recovery panel with available open, create, import, and sample options instead
+of only a technical status string.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

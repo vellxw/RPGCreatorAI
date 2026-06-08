@@ -99,4 +99,39 @@ describe('ProjectStartupScreen', () => {
 
     view.unmount();
   });
+
+  it('renders recovery guidance without hiding startup actions', () => {
+    const view = render(
+      <ProjectStartupScreen
+        desktop
+        sampleTitle="My First RPG"
+        recoveryState={{
+          title: 'Open project failed',
+          detail:
+            'This folder does not look like an RPGCreatorAI project. Choose a folder containing data/project.json.',
+          options: [
+            'Open Project Folder',
+            'Create Project',
+            'Import Project Bundle',
+            'Use bundled sample',
+          ],
+        }}
+        onUseSample={vi.fn()}
+        onOpenProject={vi.fn()}
+        onCreateProject={vi.fn()}
+        onImportProject={vi.fn()}
+      />,
+    );
+
+    const text = view.container.textContent ?? '';
+    expect(text).toContain('Open project failed');
+    expect(text).toContain('Recovery options');
+    expect(text).toContain('data/project.json');
+    expect(text).toContain('Open Project Folder');
+    expect(text).toContain('Create Project');
+    expect(text).toContain('Import Project Bundle');
+    expect(text).toContain('Use My First RPG');
+
+    view.unmount();
+  });
 });

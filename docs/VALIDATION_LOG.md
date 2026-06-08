@@ -4,6 +4,50 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-456 / PX-022 - Startup Error Recovery States
+
+- `2026-06-08 03:36:43 -03:00` - issue intake and startup recovery inspection
+  - PASS. Read Linear `FRA-456`, moved it to In Progress, posted start
+  evidence, and inspected `src/App.tsx`,
+  `src/components/project/ProjectStartupScreen.tsx`,
+  `src/components/project/__tests__/ProjectStartupScreen.test.tsx`,
+  `src/__tests__/AppStartup.test.tsx`, adapter/runtime unavailable states,
+  `src/stores/saveActions.ts`, and
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- TDD RED:
+  `npm test -- --run src/startup/__tests__/startupRecovery.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - FAIL as expected; `src/startup/startupRecovery.ts` did not exist and
+  `ProjectStartupScreen` ignored the new `recoveryState` prop.
+- Fix applied: added `src/startup/startupRecovery.ts` with structured recovery
+  states for missing `data/project.json`, invalid project data, permission
+  failures, generic open/create/import failures, and missing recent projects.
+- Fix applied: updated `ProjectStartupScreen` to render a recovery panel with
+  title, detail, and available startup options while preserving the existing
+  Open/Create/Import/Sample controls. Browser mode filters folder-opening
+  recovery copy and labels create as `Create Browser Project`.
+- Fix applied: updated `App.tsx` to use structured recovery states for initial
+  project load, recent-project restore, manual open, create, and import
+  failures, and to clear recovery only after successful explicit startup
+  actions.
+- Fix applied: updated the launcher/startup audit with the PX-022 recovery
+  behavior.
+- `2026-06-08 03:35:11 -03:00` -
+  `npm test -- --run src/startup/__tests__/startupRecovery.test.ts src/components/project/__tests__/ProjectStartupScreen.test.tsx src/__tests__/AppStartup.test.tsx`
+  - PASS; 3 focused startup recovery files and 20 tests passed.
+- `2026-06-08 03:36:23 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 03:36:23 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 1 docs/script alignment file and 9 tests passed.
+- `2026-06-08 03:37:18 -03:00` - PX-022 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-022 edited files.
+- `2026-06-08 03:37:18 -03:00` - PX-022 secret-like value scan - PASS; no
+  secret-like values in PX-022 edited files.
+- `2026-06-08 03:37:18 -03:00` -
+  `git diff --check -- src\App.tsx src\startup\startupRecovery.ts src\startup\__tests__\startupRecovery.test.ts src\components\project\ProjectStartupScreen.tsx src\components\project\__tests__\ProjectStartupScreen.test.tsx src\__tests__\AppStartup.test.tsx docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-022 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-455 / PX-021 - First Paint Performance Budget
 
 - `2026-06-08 03:20:57 -03:00` - issue intake and startup measurement

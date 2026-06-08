@@ -194,7 +194,11 @@ describe('App startup project flow', () => {
     await view.flush();
 
     expect(view.container.textContent).toContain('Start a project');
-    expect(view.container.textContent).toContain('Open failed: Fixture load failed.');
+    expect(view.container.textContent).toContain('Open project failed');
+    expect(view.container.textContent).toContain('Fixture load failed.');
+    expect(view.container.textContent).toContain('Recovery options');
+    expect(view.container.textContent).toContain('Import Project Bundle');
+    expect(view.container.textContent).toContain('Use bundled sample');
 
     view.unmount();
   });
@@ -271,9 +275,10 @@ describe('App startup project flow', () => {
     expect(view.container.textContent).toContain('Start a project');
     expect(view.container.textContent).toContain('Open Project Folder');
     expect(view.container.textContent).toContain('Create Project');
-    expect(view.container.textContent).toContain('Recent project restore failed');
+    expect(view.container.textContent).toContain('Recent project could not be restored');
     expect(view.container.textContent).toContain(recentRoot);
-    expect(view.container.textContent).toContain('Choose an RPGCreatorAI project root');
+    expect(view.container.textContent).toContain('Choose another project folder');
+    expect(view.container.textContent).toContain('Recovery options');
     expect(view.container.textContent).not.toContain('Map Tree');
 
     view.unmount();
