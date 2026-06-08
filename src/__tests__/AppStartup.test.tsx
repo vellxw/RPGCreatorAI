@@ -137,11 +137,17 @@ describe('App startup project flow', () => {
 
     const splash = view.container.querySelector('[data-testid="app-splash-shell"]');
     expect(splash).not.toBeNull();
+    expect(splash?.getAttribute('aria-busy')).toBe('true');
+    expect(splash?.getAttribute('aria-label')).toBe('RPGCreatorAI startup status');
     expect(view.container.textContent).toContain('RPGCreatorAI');
     expect(view.container.textContent).toContain('Preparing your workspace');
     expect(view.container.textContent).toContain('Reading project files and editor state.');
     expect(view.container.textContent).not.toContain('provider');
-    expect(view.container.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('48');
+    const progress = view.container.querySelector('[role="progressbar"]');
+    expect(progress?.getAttribute('aria-valuenow')).toBe('48');
+    expect(progress?.getAttribute('aria-valuetext')).toBe(
+      'Reading project files and editor state. 48 percent complete.',
+    );
 
     view.unmount();
   });
@@ -150,9 +156,12 @@ describe('App startup project flow', () => {
     const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
 
     expect(html).toContain('data-rpg-splash-shell');
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain('aria-label="RPGCreatorAI startup status"');
     expect(html).toContain('Preparing your workspace');
     expect(html).toContain('Loading project data and editor state.');
     expect(html).toContain('aria-valuenow="20"');
+    expect(html).toContain('aria-valuetext="Loading project data and editor state. 20 percent complete."');
     expect(html).toContain('pre-react-splash');
     expect(html).toContain('__RPG_STARTUP_MARKS__');
     expect(html).toContain('rpg-static-splash-dom-ready');

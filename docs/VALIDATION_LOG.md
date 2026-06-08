@@ -4,6 +4,47 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-457 / PX-023 - Startup Splash Accessibility And Keyboard Behavior
+
+- `2026-06-08 03:45:45 -03:00` - issue intake and startup accessibility
+  inspection - PASS. Read Linear `FRA-457`, moved it to In Progress, posted
+  start evidence, loaded the accessibility audit/frontend design guidance, and
+  inspected `index.html`, `src/components/project/AppSplashShell.tsx`,
+  `src/components/project/ProjectStartupScreen.tsx`,
+  `src/components/ui/Button.tsx`, startup tests, and the M01 launcher/startup
+  audit.
+- TDD RED:
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - FAIL as expected; the React/static splash shells lacked `aria-busy`,
+  startup status labels, progress `aria-valuetext`, and the startup input label
+  was not associated with the text input.
+- Fix applied: added `aria-busy`, startup status labels, progress
+  `aria-valuetext`, and reduced-motion-safe React splash animation.
+- Fix applied: added startup focus behavior through the first available action:
+  desktop focuses `Open Project Folder`; browser mode focuses
+  `Import Project Bundle`.
+- Fix applied: associated the project-name label/input, added status roles to
+  startup and runtime status messages, and hid decorative button icons from
+  assistive technology.
+- Fix applied: updated the launcher/startup audit with the PX-023
+  accessibility and keyboard behavior.
+- `2026-06-08 03:44:12 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx`
+  - PASS; 2 focused startup accessibility files and 19 tests passed.
+- `2026-06-08 03:45:28 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 03:45:28 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts`
+  - PASS; 1 docs/script alignment file and 9 tests passed.
+- `2026-06-08 03:46:20 -03:00` - PX-023 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in PX-023 edited files.
+- `2026-06-08 03:46:20 -03:00` - PX-023 secret-like value scan - PASS; no
+  secret-like values in PX-023 edited files.
+- `2026-06-08 03:46:20 -03:00` -
+  `git diff --check -- index.html src\components\project\AppSplashShell.tsx src\components\project\ProjectStartupScreen.tsx src\components\project\__tests__\ProjectStartupScreen.test.tsx src\components\ui\Button.tsx src\__tests__\AppStartup.test.tsx docs\PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-023 diff. Git emitted existing
+  line-ending warnings for touched text files.
+
 ### Phase 12 FRA-456 / PX-022 - Startup Error Recovery States
 
 - `2026-06-08 03:36:43 -03:00` - issue intake and startup recovery inspection

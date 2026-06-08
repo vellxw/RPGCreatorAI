@@ -11,6 +11,8 @@ export function AppSplashShell({ phase }: AppSplashShellProps) {
       data-testid="app-splash-shell"
       role="status"
       aria-live="polite"
+      aria-busy="true"
+      aria-label="RPGCreatorAI startup status"
       className="h-screen w-full overflow-hidden bg-[#f5f5f7] text-gray-900 flex items-center justify-center px-6"
     >
       <main className="w-full max-w-[760px]">
@@ -42,10 +44,11 @@ export function AppSplashShell({ phase }: AppSplashShellProps) {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={phase.progress}
+          aria-valuetext={`${phase.detail} ${phase.progress} percent complete.`}
           className="mt-7 h-1.5 w-full max-w-[420px] overflow-hidden rounded-full bg-gray-200"
         >
           <div
-            className="h-full rounded-full bg-[#51b788] animate-pulse"
+            className="h-full rounded-full bg-[#51b788] motion-safe:animate-pulse"
             style={{ width: `${phase.progress}%` }}
           />
         </div>

@@ -108,7 +108,14 @@
   </head>
   <body>
     <div id="root">
-      <div class="pre-react-splash" data-rpg-splash-shell role="status" aria-live="polite">
+      <div
+        class="pre-react-splash"
+        data-rpg-splash-shell
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        aria-label="RPGCreatorAI startup status"
+      >
         <main class="pre-react-splash__inner">
           <div class="pre-react-splash__brand">
             <div class="pre-react-splash__mark" aria-hidden="true">R</div>
@@ -125,6 +132,7 @@
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow="20"
+            aria-valuetext="Loading project data and editor state. 20 percent complete."
           >
             <div class="pre-react-splash__bar"></div>
           </div>

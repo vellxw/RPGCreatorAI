@@ -22,7 +22,11 @@ export function Button({ variant = 'default', size = 'md', children, icon, class
 
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>
-      {icon && <span className="flex-shrink-0">{icon}</span>}
+      {icon && (
+        <span className="flex-shrink-0" aria-hidden="true">
+          {icon}
+        </span>
+      )}
       {children}
     </button>
   );

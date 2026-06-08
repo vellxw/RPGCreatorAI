@@ -28,6 +28,7 @@ export function ProjectStartupScreen({
 }: ProjectStartupScreenProps) {
   const [title, setTitle] = useState('Untitled RPG');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const titleInputId = 'startup-project-title';
   const createLabel = desktop ? 'Create Project' : 'Create Browser Project';
   const recoveryOptions =
     recoveryState?.options
@@ -84,13 +85,21 @@ export function ProjectStartupScreen({
           )}
 
           {!recoveryState && statusMessage && (
-            <div className="mt-5 rounded-md border border-gray-200 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm">
+            <div
+              className="mt-5 rounded-md border border-gray-200 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm"
+              role="status"
+              aria-live="polite"
+            >
               {statusMessage}
             </div>
           )}
 
           {runtimeStatusMessage && (
-            <div className="mt-3 rounded-md border border-emerald-100 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm">
+            <div
+              className="mt-3 rounded-md border border-emerald-100 bg-white px-3 py-2 text-[12px] leading-5 text-gray-700 shadow-sm"
+              role="status"
+              aria-live="polite"
+            >
               {runtimeStatusMessage}
             </div>
           )}
@@ -102,13 +111,14 @@ export function ProjectStartupScreen({
               <div className="text-[12px] font-semibold text-gray-500 mb-2">Existing project</div>
               <div className="flex flex-wrap gap-2">
                 {desktop && (
-                  <Button icon={<FolderOpen size={14} />} onClick={onOpenProject}>
+                  <Button icon={<FolderOpen size={14} />} onClick={onOpenProject} autoFocus>
                     Open Project Folder
                   </Button>
                 )}
                 <Button
                   icon={<Download size={14} />}
                   onClick={() => fileInputRef.current?.click()}
+                  autoFocus={!desktop}
                 >
                   Import Project Bundle
                 </Button>
@@ -116,11 +126,15 @@ export function ProjectStartupScreen({
             </div>
 
             <div className="border-t border-gray-100 pt-5">
-              <label className="block text-[12px] font-semibold text-gray-500 mb-2">
+              <label
+                htmlFor={titleInputId}
+                className="block text-[12px] font-semibold text-gray-500 mb-2"
+              >
                 New project name
               </label>
               <div className="flex gap-2">
                 <input
+                  id={titleInputId}
                   type="text"
                   value={title}
                   onChange={e => setTitle(e.target.value)}

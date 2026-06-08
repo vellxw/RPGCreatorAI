@@ -100,6 +100,69 @@ describe('ProjectStartupScreen', () => {
     view.unmount();
   });
 
+  it('starts keyboard focus on the first available startup action', () => {
+    const desktopView = render(
+      <ProjectStartupScreen
+        desktop
+        sampleTitle="My First RPG"
+        onUseSample={vi.fn()}
+        onOpenProject={vi.fn()}
+        onCreateProject={vi.fn()}
+        onImportProject={vi.fn()}
+      />,
+    );
+
+    expect(document.activeElement?.tagName).toBe('BUTTON');
+    expect(document.activeElement?.textContent).toContain('Open Project Folder');
+    desktopView.unmount();
+
+    const browserView = render(
+      <ProjectStartupScreen
+        desktop={false}
+        sampleTitle="My First RPG"
+        onUseSample={vi.fn()}
+        onOpenProject={vi.fn()}
+        onCreateProject={vi.fn()}
+        onImportProject={vi.fn()}
+      />,
+    );
+
+    expect(document.activeElement?.tagName).toBe('BUTTON');
+    expect(document.activeElement?.textContent).toContain('Import Project Bundle');
+    browserView.unmount();
+  });
+
+  it('associates the project-name input and announces startup status messages', () => {
+    const view = render(
+      <ProjectStartupScreen
+        desktop
+        sampleTitle="My First RPG"
+        statusMessage="Open failed with a recoverable status."
+        runtimeStatusMessage="Native runtime unavailable but editing is available."
+        onUseSample={vi.fn()}
+        onOpenProject={vi.fn()}
+        onCreateProject={vi.fn()}
+        onImportProject={vi.fn()}
+      />,
+    );
+
+    const label = Array.from(view.container.querySelectorAll('label')).find(
+      candidate => candidate.textContent === 'New project name',
+    );
+    const input = view.container.querySelector('input[type="text"]') as HTMLInputElement;
+    expect(label?.getAttribute('for')).toBe(input.id);
+
+    const statuses = Array.from(view.container.querySelectorAll('[role="status"]'));
+    expect(statuses.map(status => status.textContent).join(' ')).toContain(
+      'Open failed with a recoverable status.',
+    );
+    expect(statuses.map(status => status.textContent).join(' ')).toContain(
+      'Native runtime unavailable but editing is available.',
+    );
+
+    view.unmount();
+  });
+
   it('renders recovery guidance without hiding startup actions', () => {
     const view = render(
       <ProjectStartupScreen

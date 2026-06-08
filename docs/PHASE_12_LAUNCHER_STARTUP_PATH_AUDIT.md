@@ -112,6 +112,12 @@ permission failures, and generic open/create/import failures render a clear
 recovery panel with available open, create, import, and sample options instead
 of only a technical status string.
 
+PX-023 update: static and React splash shells now expose busy status labels,
+progress value text, and reduced-motion-safe animation. Startup controls move
+keyboard focus to the first available action, keep project-name labels
+associated with inputs, announce status/recovery updates, and avoid folder-open
+recovery options in browser mode.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:
