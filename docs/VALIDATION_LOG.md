@@ -4,6 +4,52 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-439 / PX-005 - Existing Asset And Animation Pipeline Inventory
+
+- `2026-06-08 00:05:22 -03:00` - issue intake and asset/animation source
+  inspection - PASS. Read Linear `FRA-439`, moved it to In Progress, posted
+  start evidence, inspected Phase 11 asset pipeline docs, generated image and
+  animation docs, project asset catalog data, runtime manifest data, import
+  adapters, asset catalog reducers, generated asset workflows, QA modules,
+  local pipeline scripts, editor UI tests, and native runtime asset tests.
+- `rg --files docs | rg -i "(asset|animation|sprite|spritesheet|tileset|image|portrait|concept|bmp|import|export|catalog|runtime|qa|generated)"`,
+  `rg --files src src-tauri scripts | rg -i "(asset|animation|sprite|spritesheet|tileset|image|portrait|concept|bmp|import|export|catalog|runtime|generated|manifest|qa)"`,
+  and focused reads of `docs/ASSET_PIPELINE.md`,
+  `docs/PHASE_11_ASSET_OPTIMIZATION_RUNTIME_EXPORT.md`,
+  generated image workflow docs, animation normalization/preview/QA docs,
+  `data/assets/catalog.json`, `data/assets/runtime-manifest.json`,
+  `scripts/dev/export_runtime_assets.py`,
+  `scripts/dev/normalize_animation_strip.py`, and runtime sprite tests - PASS
+  for inventory scope.
+- Linear milestone inspection with
+  `mcp__codex_apps__linear._list_milestones` - PASS; confirmed M08 through
+  M11 are Generated Asset And Animation Research, Animation Quality Rubric And
+  Fixtures, Multi-Round Asset Refinement Pipeline, and Sprite Sheet And
+  Animation Pipeline Optimization.
+- Fix applied: added
+  `docs/PHASE_12_ASSET_ANIMATION_PIPELINE_INVENTORY.md` distinguishing
+  implemented asset workflows, mock-only generated asset validation, local
+  animation tools, runtime export boundaries, current gaps, and M08-M11
+  backlog mapping.
+- `2026-06-08 00:05:55 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:05:55 -03:00` -
+  `npm test -- --run src/screens/__tests__/AssetsScreen.test.tsx src/stores/__tests__/assetCatalogReducer.test.ts src/adapters/__tests__/tilesetImport.test.ts src/adapters/__tests__/audioImport.test.ts src/components/database/__tests__/TilesetEditor.test.tsx src/components/database/__tests__/AnimationsEditor.test.tsx src/components/database/__tests__/AnimationPreview.test.tsx src/components/database/__tests__/CharacterAnimationPipelineIntegration.test.tsx src/assets/generated/__tests__/assetCatalog.test.ts src/assets/generated/__tests__/assetManifestIntegrity.test.ts src/providers/__tests__/tilesetGenerationWorkflow.test.ts src/providers/__tests__/itemIconGenerationWorkflow.test.ts src/providers/__tests__/portraitGenerationWorkflow.test.ts src/providers/__tests__/characterConceptGenerationWorkflow.test.ts src/providers/__tests__/imageEditVariationWorkflow.test.ts src/providers/__tests__/spriteSheetGenerationWorkflow.test.ts src/providers/__tests__/generatedImageVisualQa.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - PASS; focused asset screen, catalog, import, database animation/tileset,
+  generated asset, visual QA, and integration suites passed 18 files and 64
+  tests.
+- `2026-06-08 00:05:55 -03:00` -
+  `python -m unittest tests.test_runtime_asset_export tests.test_animation_strip_normalization tests.test_animation_preview_generation tests.test_visual_assets`
+  - PASS; local runtime export, animation normalization, animation preview,
+  and visual asset script suites passed 10 tests.
+- `2026-06-08 00:05:55 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/export-runtime-assets.ps1 --validate-only`
+  - PASS; runtime asset export manifest validation printed `Runtime asset
+  export validation passed.`
+- `2026-06-08 00:05:55 -03:00` -
+  `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_ASSET_ANIMATION_PIPELINE_INVENTORY.md`
+  - PASS; no secret-like matches in the PX-005 inventory document.
+
 ### Phase 12 FRA-438 / PX-004 - Existing AI Pipeline Inventory
 
 - `2026-06-07 23:42:47 -03:00` - issue intake and AI/provider/content
