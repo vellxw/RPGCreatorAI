@@ -4,6 +4,33 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-437 / PX-003 - Current Launcher And Startup Path Audit
+
+- `2026-06-07 23:31:17 -03:00` - issue intake and launcher/startup source
+  inspection - PASS. Read Linear `FRA-437`, moved it to In Progress, posted
+  start evidence, and inspected launch scripts, package metadata, Tauri config,
+  startup UI, runtime launch lookup, build/run docs, packaging evidence, and
+  M01 Linear issue titles.
+- `rg --files scripts`, `Get-Content package.json`,
+  `Get-Content src-tauri/tauri.conf.json`, and focused reads of startup UI,
+  package scripts, docs, runtime launch adapter, and Rust runtime launch
+  command code - PASS for audit scope.
+- Fix applied: added `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`
+  documenting browser dev, Tauri dev, packaged prototype, React startup,
+  runtime lookup, launch gaps, safe validation commands, and M01 mapping.
+- `2026-06-07 23:36:24 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-07 23:36:24 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx src/e2e/__tests__/browserSmokeHarnessScript.test.ts src/e2e/__tests__/verifyScript.test.ts src/adapters/__tests__/RuntimeLaunchAdapter.test.ts src/adapters/__tests__/PlaytestSessionAdapter.test.ts`
+  - PASS; focused startup, project chooser, smoke harness, runtime adapter,
+  and playtest session adapter suites passed 6 files and 22 tests.
+- `2026-06-07 23:36:24 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  - PASS; branding metadata/assets check printed `BRANDING ASSETS PASSED`.
+- Packaged executable launch, desktop screenshot capture, runtime smoke, and
+  first-run app-data smoke were not run for PX-003 because this issue is an
+  audit and does not change packaged launch behavior.
+
 ### Phase 12 FRA-436 / PX-002 - Current Provider And Model Settings UX Audit
 
 - `2026-06-07 23:26:12 -03:00` - issue intake and provider/model source
