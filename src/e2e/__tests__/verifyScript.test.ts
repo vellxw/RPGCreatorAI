@@ -85,6 +85,14 @@ describe('MVP verify script', () => {
   it('keeps the Windows packaged-build prototype wired to runtime copy and smoke launch', () => {
     const packageScript = readFileSync(join(process.cwd(), 'scripts/dev/package-windows.ps1'), 'utf8');
     const packageWrapper = readFileSync(join(process.cwd(), 'scripts/dev/package-windows.bat'), 'utf8');
+    const packagedLaunchSmoke = readFileSync(
+      join(process.cwd(), 'scripts/dev/smoke-packaged-executable-launch.ps1'),
+      'utf8',
+    );
+    const packagedLaunchSmokeWrapper = readFileSync(
+      join(process.cwd(), 'scripts/dev/smoke-packaged-executable-launch.bat'),
+      'utf8',
+    );
     const packageJson = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
       scripts: Record<string, string>;
     };
@@ -108,17 +116,29 @@ describe('MVP verify script', () => {
       'npm run desktop:build',
       'rpg_creator_runtime.exe',
       'Copy-Item',
-      'Start-Process',
-      '-WindowStyle Hidden',
+      'smoke-packaged-executable-launch.ps1',
       'PACKAGED SMOKE PASSED',
     ]) {
       expect(packageScript).toContain(expected);
+    }
+
+    for (const expected of [
+      'PACKAGED EXECUTABLE LAUNCH SMOKE',
+      'rpg_creator_runtime.exe',
+      'Start-Process',
+      '-WindowStyle Hidden',
+      'LaunchWorkingDirectory',
+      'PACKAGED EXECUTABLE LAUNCH SMOKE PASSED',
+    ]) {
+      expect(packagedLaunchSmoke).toContain(expected);
     }
 
     expect(packageWrapper).toContain('-ExecutionPolicy Bypass');
     expect(packageWrapper).toContain('package-windows.ps1');
     expect(packageWrapper).toContain('%*');
     expect(packageWrapper).toContain('exit /b %ERRORLEVEL%');
+    expect(packagedLaunchSmokeWrapper).toContain('smoke-packaged-executable-launch.ps1');
+    expect(packagedLaunchSmokeWrapper).toContain('exit /b %ERRORLEVEL%');
   });
 
   it('keeps release version metadata aligned across npm, Tauri, and Cargo', () => {
@@ -251,6 +271,7 @@ describe('MVP verify script', () => {
       'Canonical Windows local gate',
       'npm run verify:windows',
       '=== ALL PASSED ===',
+      'PACKAGED EXECUTABLE LAUNCH SMOKE PASSED',
       'PACKAGED SMOKE PASSED',
       'RUNTIME DIAGNOSTICS VERIFY PASSED',
       'Known nonfatal warnings',
@@ -265,6 +286,7 @@ describe('MVP verify script', () => {
       'Known nonfatal warnings',
       'BRANDING ASSETS PASSED',
       'FIRST-RUN APP DATA SMOKE PASSED',
+      'smoke-packaged-executable-launch.bat',
     ]) {
       expect(buildRun + windowsNotes).toContain(expected);
     }

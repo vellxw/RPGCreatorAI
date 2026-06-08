@@ -198,9 +198,20 @@ npm run desktop:package:windows
 That helper builds the frontend, Tauri shell, and native runtime, copies
 `rpg_creator_runtime.exe` beside the packaged Tauri executable under
 `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug`, and smoke-launches the
-packaged app. A successful run prints `PACKAGED SMOKE PASSED` and
+packaged app through the packaged executable launch smoke. A successful run
+prints `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and
 `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. It does not create an installer or
 require signing credentials.
+
+After the package helper succeeds, the current unsigned prototype can be
+opened from File Explorer by double-clicking:
+
+```text
+%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe
+```
+
+Keep `rpg_creator_runtime.exe` beside that shell executable so Playtest can
+resolve the native runtime from a desktop launch context.
 Restricted-execution-policy fallback:
 
 ```cmd

@@ -4,6 +4,58 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-446 / PX-012 - Windows Double-Click Executable Path
+
+- `2026-06-08 00:50:58 -03:00` - issue intake and launch-path source
+  inspection - PASS. Read Linear `FRA-446`, moved it to In Progress, posted
+  start evidence, and inspected `scripts/dev/package-windows.ps1`,
+  `scripts/dev/smoke-first-run-app-data.ps1`,
+  `scripts/dev/verify-tauri-content.ps1`, `src-tauri/src/runtime_commands.rs`,
+  `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`, `README.md`,
+  `docs/BUILD_AND_RUN.md`, `docs/WINDOWS_BUILD_NOTES.md`, and existing
+  package/runtime discovery tests.
+- Fix applied: added `scripts/dev/smoke-packaged-executable-launch.ps1` and
+  `.bat` wrapper. The smoke checks the packaged shell executable, colocated
+  `rpg_creator_runtime.exe`, package working directory, and hidden launch from
+  the package directory instead of relying on the repository terminal cwd.
+- Fix applied: updated `scripts/dev/package-windows.ps1` to call the new
+  packaged executable launch smoke before printing `PACKAGED SMOKE PASSED`.
+- Fix applied: updated `README.md`, `docs/BUILD_AND_RUN.md`, and
+  `docs/WINDOWS_BUILD_NOTES.md` with the exact current double-click path:
+  `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`, plus
+  the runtime colocation requirement and new smoke helper.
+- Fix applied: updated `src/e2e/__tests__/verifyScript.test.ts` so package
+  script/docs alignment covers the new launch smoke and restricted-policy
+  wrapper.
+- `2026-06-08 00:47:46 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:47:46 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` - PASS; 1 test
+  file and 9 tests passed.
+- `2026-06-08 00:48:18 -03:00` - `npm run desktop:package:windows` - PASS;
+  native build/test, frontend build, Tauri debug no-bundle build, runtime copy,
+  and packaged executable launch smoke passed. Key markers:
+  `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and
+  `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. Packaged executable path:
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`;
+  runtime copy:
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpg_creator_runtime.exe`.
+  Known non-fatal warnings matched existing docs: CMake FetchContent/dependency
+  warnings, missing PkgConfig, and Vite chunk-size warning.
+- `2026-06-08 00:50:28 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1`
+  - PASS; packaged shell launched against fresh temporary `APPDATA`,
+  `LOCALAPPDATA`, and `HOME` roots with `FIRST-RUN APP DATA SMOKE PASSED`.
+- `2026-06-08 00:50:58 -03:00` - wrapped PX-012 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, `FIXME`, or unexpected `??` markers in PX-012
+  edited docs/scripts/tests.
+- `2026-06-08 00:50:58 -03:00` - wrapped PX-012 secret-like value scan - PASS;
+  no secret-like values in PX-012 edited docs/scripts/tests.
+- `2026-06-08 00:50:58 -03:00` -
+  `git diff --check -- README.md docs\BUILD_AND_RUN.md docs\WINDOWS_BUILD_NOTES.md scripts\dev\package-windows.ps1 scripts\dev\smoke-packaged-executable-launch.ps1 scripts\dev\smoke-packaged-executable-launch.bat src\e2e\__tests__\verifyScript.test.ts docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-012 documentation/script/test diff.
+  Git emitted existing line-ending warnings for touched text files.
+
 ### Phase 12 FRA-445 / PX-011 - App Icon And Branding Asset Audit
 
 - `2026-06-08 00:38:46 -03:00` - issue intake and source inspection - PASS.

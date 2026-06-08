@@ -117,23 +117,12 @@ Write-Host "Packaged exe:  $packagedExe"
 Write-Host "Runtime copy:  $packagedRuntime"
 
 if (-not $SkipSmoke) {
-    Write-Host '=== PACKAGED SMOKE LAUNCH ==='
-    $process = Start-Process -FilePath $packagedExe `
-        -WorkingDirectory $packageDir `
-        -PassThru `
-        -WindowStyle Hidden
-    try {
-        Start-Sleep -Seconds 5
-        if ($process.HasExited) {
-            throw "Packaged app exited during smoke launch with code $($process.ExitCode)"
-        }
-        Write-Host "PACKAGED SMOKE PASSED pid=$($process.Id)"
-    } finally {
-        if ($process -and -not $process.HasExited) {
-            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-            $process.WaitForExit()
-        }
+    $launchSmoke = Join-Path $PSScriptRoot 'smoke-packaged-executable-launch.ps1'
+    & $launchSmoke -PackagedExe $packagedExe -HoldSeconds 5
+    if ($LASTEXITCODE -ne 0) {
+        throw "packaged executable launch smoke failed (exit $LASTEXITCODE)"
     }
+    Write-Host 'PACKAGED SMOKE PASSED'
 } else {
     Write-Host 'PACKAGED SMOKE SKIPPED'
 }

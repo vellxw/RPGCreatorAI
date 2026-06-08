@@ -124,7 +124,20 @@ The helper:
    and uses `src-tauri/tauri.conf.json` `frontendDist = ../dist`.
 4. Copies `rpg_creator_runtime.exe` next to the produced Tauri executable so
    the runtime bridge can resolve it from the shell binary directory.
-5. Smoke-launches the packaged executable, waits 5 seconds, and terminates it.
+5. Runs `scripts/dev/smoke-packaged-executable-launch.ps1`, which verifies the
+   shell executable, colocated runtime copy, package working directory, and
+   hidden launch without depending on the repository terminal cwd.
+
+The current user-facing double-click path for the unsigned prototype is:
+
+```text
+%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe
+```
+
+After `npm run desktop:package:windows` succeeds, open that folder in File
+Explorer and double-click `rpgcreator-shell.exe`. Do not move
+`rpg_creator_runtime.exe` away from that directory; Playtest runtime discovery
+uses the shell executable directory as the packaged fallback.
 
 Useful options:
 
@@ -133,6 +146,7 @@ Useful options:
 .\scripts\dev\package-windows.ps1 -SkipSmoke
 .\scripts\dev\package-windows.ps1 -BuildDir D:\rpg-build
 .\scripts\dev\package-windows.ps1 -CargoTargetDir D:\rpg-tauri-target
+.\scripts\dev\smoke-packaged-executable-launch.ps1
 ```
 
 Prototype artifacts are local developer output, not source files:

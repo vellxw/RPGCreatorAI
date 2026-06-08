@@ -78,6 +78,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/generate-animati
 # First-run packaged-shell app-data smoke. Run after `npm run desktop:package:windows`.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
 
+# Packaged executable launch smoke. Run after `npm run desktop:package:windows`
+# to validate the exact executable path a user can double-click.
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1
+
 # Screenshot analysis audit helper. Prints palette metrics; it is not a pass/fail gate.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/analyze-screenshots.ps1
 ```
@@ -100,6 +104,7 @@ scripts\dev\export-runtime-assets.bat
 scripts\dev\normalize-animation-strip.bat
 scripts\dev\generate-animation-preview.bat
 scripts\dev\smoke-first-run-app-data.bat
+scripts\dev\smoke-packaged-executable-launch.bat
 ```
 
 Expected success markers:
@@ -113,8 +118,9 @@ Expected success markers:
 | `scripts/dev/smoke-browser-editor.ps1` | `BROWSER SMOKE PASSED` or explicit `BROWSER SMOKE SKIPPED: <reason>` |
 | `scripts/dev/verify-diagnostics.ps1` | `RUNTIME DIAGNOSTICS VERIFY PASSED` |
 | `scripts/dev/verify-branding-assets.ps1` | `BRANDING ASSETS PASSED` |
-| `npm run desktop:package:windows` | `PACKAGED SMOKE PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
+| `npm run desktop:package:windows` | `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===` |
 | `scripts/dev/smoke-first-run-app-data.ps1` | `FIRST-RUN APP DATA SMOKE PASSED` |
+| `scripts/dev/smoke-packaged-executable-launch.ps1` | `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED` |
 | `scripts/dev/export-runtime-assets.ps1 --validate-only` | `Runtime asset export validation passed.` |
 | `scripts/dev/normalize-animation-strip.ps1 --validate-manifest ...` | `Animation strip normalization validation passed.` |
 | `scripts/dev/generate-animation-preview.ps1 --validate-preview-manifest ...` | `Animation preview generation validation passed.` |
@@ -188,10 +194,24 @@ npm run desktop:package:windows
 The helper builds the native runtime, runs `tauri build --debug --no-bundle`,
 sets `CARGO_TARGET_DIR` to `%LOCALAPPDATA%\RPGCreatorAI\tauri-target`, copies
 `rpg_creator_runtime.exe` next to the produced Tauri executable, and
-smoke-launches the packaged app. A successful run prints `PACKAGED SMOKE
-PASSED` and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. This prototype
+smoke-launches the packaged app through
+`scripts/dev/smoke-packaged-executable-launch.ps1`. A successful run prints
+`PACKAGED EXECUTABLE LAUNCH SMOKE PASSED`, `PACKAGED SMOKE PASSED`, and
+`=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. This prototype
 intentionally does not create an installer; the installer/signing policy is defined in
 `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`.
+
+The user-facing executable path for the current unsigned prototype is:
+
+```text
+%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe
+```
+
+Users can double-click that executable from File Explorer after the package
+helper has run. Keep `rpg_creator_runtime.exe` in the same directory; the
+desktop bridge can resolve the native runtime from the shell executable
+directory, and runtime playtests still launch with the selected project root as
+their working directory.
 
 Current release metadata is aligned at version `0.5.0` across npm, Tauri, and
 Cargo. Future Windows installer work should target unsigned NSIS first, with
@@ -216,10 +236,18 @@ temporary `APPDATA` and `LOCALAPPDATA` roots:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-first-run-app-data.ps1
 ```
 
+To rerun only the executable launch assumption check against an existing
+packaged prototype:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1
+```
+
 Restricted-policy fallback:
 
 ```cmd
 scripts\dev\smoke-first-run-app-data.bat
+scripts\dev\smoke-packaged-executable-launch.bat
 ```
 
 Diagnostics and failed-launch troubleshooting are documented in
