@@ -4,6 +4,40 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-438 / PX-004 - Existing AI Pipeline Inventory
+
+- `2026-06-07 23:42:47 -03:00` - issue intake and AI/provider/content
+  pipeline inspection - PASS. Read Linear `FRA-438`, moved it to In Progress,
+  posted start evidence, and inspected provider docs, provider modules,
+  workflow modules, Settings/AI UI, queue store, credential commands, Tauri IPC
+  registration, integration tests, and Phase 11 AI pipeline gate docs.
+- `rg --files docs | rg -i "(ai|provider|model|pipeline|quest|event|asset|balance|database|studio|workflow|phase_11|phase_12)"`,
+  `rg --files src src-tauri | rg -i "(ai|provider|model|pipeline|quest|event|asset|balance|database|studio|credential|mock)"`,
+  and focused `rg -n` inspections across `src/providers`, `src/components/ai`,
+  `src/screens/SettingsScreen.tsx`, `src/screens/AIToolsScreen.tsx`, and
+  `src-tauri/src` - PASS for inventory scope.
+- Fix applied: added `docs/PHASE_12_AI_PIPELINE_INVENTORY.md` distinguishing
+  implemented local tooling, mock-only validation, optional provider adapters,
+  docs-only/future boundaries, reusable Phase 12 seams, and safe offline
+  validation commands.
+- `2026-06-07 23:45:32 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-07 23:45:32 -03:00` -
+  `npm test -- --run src/providers/__tests__/providerAdapterHub.test.ts src/providers/__tests__/mockProviderContract.test.ts src/providers/__tests__/mockProviderAdapter.test.ts src/providers/__tests__/providerRegistry.test.ts src/providers/__tests__/modelCapabilityRegistry.test.ts src/providers/__tests__/providerCostBudget.test.ts src/stores/__tests__/providerStore.test.tsx src/stores/__tests__/aiRequestQueueStore.test.ts src/components/ai/__tests__/AIRequestQueuePanel.test.tsx src/components/ai/__tests__/ProviderCapabilityGatesPanel.test.tsx src/components/ai/__tests__/ProviderCostBudgetPanel.test.tsx`
+  - PASS; provider hub, mock contracts, registry, capability/cost, provider
+  store, queue, and AI panels passed 11 files and 54 tests.
+- `2026-06-07 23:45:32 -03:00` -
+  `npm test -- --run src/e2e/__tests__/aiContentPipelineIntegration.test.ts src/providers/__tests__/gptImageAssetPipelineIntegration.test.ts`
+  - PASS; mock-backed AI content and GPT Image asset pipeline integration
+  suites passed 2 files and 3 tests.
+- `2026-06-07 23:45:32 -03:00` -
+  `npm test -- --run src/providers/__tests__/openAiProviderAdapter.test.ts src/providers/__tests__/anthropicProviderAdapter.test.ts src/providers/__tests__/kimiProviderAdapter.test.ts src/providers/__tests__/deepSeekProviderAdapter.test.ts src/providers/__tests__/miniMaxProviderAdapter.test.ts src/providers/__tests__/customOpenAiCompatibleProviderAdapter.test.ts src/providers/__tests__/openCodeWorkflowAdapter.test.ts`
+  - PASS; mocked remote-provider adapter and OpenCode handoff suites passed
+  7 files and 36 tests.
+- `2026-06-07 23:45:32 -03:00` -
+  `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_AI_PIPELINE_INVENTORY.md`
+  - PASS; no secret-like matches in the PX-004 inventory document.
+
 ### Phase 12 FRA-437 / PX-003 - Current Launcher And Startup Path Audit
 
 - `2026-06-07 23:31:17 -03:00` - issue intake and launcher/startup source
