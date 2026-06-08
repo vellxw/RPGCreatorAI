@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-444 / PX-010 - Phase 12 Baseline Integration Gate
+
+- `2026-06-08 00:24:54 -03:00` - issue intake and M00 Linear evidence review
+  - PASS. Read Linear `FRA-444`, moved it to In Progress, posted start
+  evidence, confirmed `PX-001` through `PX-009` are Done in Linear, and
+  reviewed final evidence comments for `FRA-435` through `FRA-443`.
+- `git status --short --branch`, `git rev-parse HEAD`, and
+  `git log --oneline -10` - PASS for inspection; branch is
+  `main...origin/main`, current HEAD is `41c7efb`, and commits `1ff9ef8`
+  through `41c7efb` cover PX-001 through PX-009. Preserved unstaged and
+  untracked workspace residue remains outside the staged PX-010 scope.
+- M00 artifact inspection - PASS; Phase 12 docs for PX-001 through PX-009 are
+  present, and validation-log headings for PX-001 through PX-009 exist.
+- Initial `rg` inspection using `docs/PHASE_12_*.md` path syntax - FAIL on
+  Windows path glob syntax after partial output; no repo data changed.
+- Fix applied: reran the Phase 12 docs inspection with `rg --files docs |
+  rg 'PHASE_12_.*\\.md$'` and explicit file arguments.
+- Corrected Phase 12 docs inspection - PASS; confirmed Phase 12 docs and
+  `docs/GOAL_STACK.md` contain the expected M00/Phase 12 references.
+- Fix applied: updated `AGENTS.md` phase framing from Phase 11 to Phase 12 and
+  pointed future agents to the Phase 12 roadmap and risk register.
+- Fix applied: added `docs/PHASE_12_BASELINE_INTEGRATION_GATE.md` documenting
+  M00 Linear evidence review, artifact presence, coherence checks, known
+  limitations, and gate decision.
+- `2026-06-08 00:27:24 -03:00` - `git status --short --branch` - PASS for
+  inspection; branch is `main...origin/main`, with PX-010 docs unstaged and
+  preserved unrelated unstaged/untracked workspace residue still visible.
+- `2026-06-08 00:27:24 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:27:24 -03:00` - M00 artifact presence check - PASS; all
+  expected Phase 12 baseline docs from PX-001 through PX-010 are present.
+- `2026-06-08 00:27:24 -03:00` - validation-log coverage check - PASS;
+  `docs/VALIDATION_LOG.md` contains PX-001 through PX-010 entries.
+- `2026-06-08 00:27:24 -03:00` - baseline placeholder scan including `??` -
+  FAIL as a scan false positive; it matched documented `git status` untracked
+  lines (`?? .commandcode/taste/` and `?? output/`) in the PX-006 baseline
+  report.
+- Fix applied: refined placeholder scan to target `TBD|TODO|FIXME` plus
+  unexpected `??`, allowing documented `git status` evidence lines.
+- `2026-06-08 00:27:43 -03:00` - refined placeholder scan - PASS; no
+  unresolved placeholder markers in Phase 12 baseline docs.
+- `2026-06-08 00:27:24 -03:00` - PX-010 edited-doc secret-like value scan -
+  FAIL as a scan false positive; it matched recorded secret-scan command
+  patterns in `docs/VALIDATION_LOG.md`, not secret values.
+- Fix applied: refined secret scan to check PX-010 edited docs and ignore
+  recorded `rg -n` scan-command lines in `docs/VALIDATION_LOG.md`.
+- `2026-06-08 00:27:43 -03:00` - refined PX-010 secret-like value scan -
+  PASS; no secret-like values in PX-010 edited docs outside recorded scan
+  commands.
+- `2026-06-08 00:28:15 -03:00` -
+  `git diff --check -- AGENTS.md docs/PHASE_12_BASELINE_INTEGRATION_GATE.md docs/VALIDATION_LOG.md`
+  - PASS; final rerun found no whitespace errors in the PX-010 documentation
+  diff after validation-log updates.
+
 ### Phase 12 FRA-443 / PX-009 - Phase 12 Risk Register
 
 - `2026-06-08 00:19:25 -03:00` - issue intake and risk source inspection -
