@@ -4,6 +4,39 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-445 / PX-011 - App Icon And Branding Asset Audit
+
+- `2026-06-08 00:38:46 -03:00` - issue intake and source inspection - PASS.
+  Read Linear `FRA-445`, moved it to In Progress, posted start evidence, and
+  inspected tracked icon assets, Tauri bundle metadata, npm/Cargo/package-lock
+  metadata, README/build/package docs, icon generation script, branding
+  validation script, and prior Phase 11 packaged executable icon evidence.
+- Fix applied: added `docs/PHASE_12_APP_ICON_BRANDING_AUDIT.md` documenting
+  the current icon source, generated icon set, Windows square logo files,
+  package metadata baseline, exact inspected dimensions, launcher/splash
+  follow-up gaps, and M01 validation checklist. No branding assets or package
+  metadata were changed.
+- `2026-06-08 00:38:46 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  - PASS; focused branding metadata/icon check completed with
+  `BRANDING ASSETS PASSED`. Packaged executable associated-icon extraction was
+  skipped because no packaged executable path was required for this audit.
+- `2026-06-08 00:38:46 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- Initial raw `rg` placeholder and secret-like value scans returned exit code
+  `1` with no output because no matches were found.
+- Fix applied: reran both scans with explicit wrappers that treat no matches
+  as a passing audit result.
+- `2026-06-08 00:38:46 -03:00` - wrapped PX-011 placeholder scan - PASS;
+  no `TBD`, `TODO`, `FIXME`, or unexpected `??` markers in the PX-011 audit.
+- `2026-06-08 00:38:46 -03:00` - wrapped PX-011 secret-like value scan - PASS;
+  no secret-like values in the PX-011 audit.
+- `2026-06-08 00:38:46 -03:00` -
+  `git diff --check -- docs\PHASE_12_APP_ICON_BRANDING_AUDIT.md docs\VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-011 documentation diff. Git emitted
+  the existing line-ending warning that `docs/VALIDATION_LOG.md` will be
+  normalized to CRLF when touched.
+
 ### Phase 12 FRA-444 / PX-010 - Phase 12 Baseline Integration Gate
 
 - `2026-06-08 00:24:54 -03:00` - issue intake and M00 Linear evidence review
