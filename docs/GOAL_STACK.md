@@ -2,16 +2,16 @@
 
 ## Current Goal
 
-Phase 11 — Complete Product Platform — ACTIVE.
+Phase 12 — Product UX And AI Studio — ACTIVE.
 
 ## Active Phase
 
-Phase 11 extends the completed Phase 10 MVP into a complete local-first
-RPGCreatorAI product platform. The active priority is usable-first release
-readiness: Windows dev reliability, packaged builds, onboarding, end-to-end
-authoring workflows, editor/runtime/database polish, asset import and
-generation pipelines, optional AI editor tooling, provider safety, audits, QA,
-docs, and final ship evidence.
+Phase 12 builds on the completed Phase 11 local-first product platform. The
+active priority is product UX completion: launcher/startup polish, AI Studio,
+pipeline-aware AI command routing, creator-friendly provider/model UX,
+review-gated AI candidates, Developer Mode, first-run onboarding, generated
+asset and animation research, deterministic asset refinement, sprite sheet
+optimization, docs, QA evidence, and final ship readiness.
 
 The native runtime remains local, deterministic, data-driven, and independent
 of AI providers, network, cloud services, provider credentials, marketplace
@@ -19,53 +19,35 @@ systems, and arbitrary scripting. AI may be added only as optional
 editor/tooling infrastructure above the runtime boundary, with mocks and
 fixtures for normal validation.
 
-Primary Phase 11 sources:
+Primary Phase 12 sources:
 
-- `docs/PHASE_11_PRODUCT_CHARTER.md`
-- `docs/superpowers/plans/2026-06-01-phase11-complete-platform-backlog.md`
-- `docs/PHASE_11_EXECUTION_PROTOCOL.md`
-- `docs/PHASE_11_PLANNING_INTEGRATION_GATE.md`
-- `docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md`
-- `docs/RELEASE_BRANDING_ASSETS.md`
-- `docs/FIRST_RUN_APP_DATA_POLICY.md`
-- `docs/DIAGNOSTICS.md`
-- `docs/PHASE_11_PACKAGING_INTEGRATION_GATE.md`
-- `docs/PHASE_11_GPT_IMAGE_MODEL_CONFIGURATION.md`
-- `docs/PHASE_11_IMAGE_PROMPT_TEMPLATE_LIBRARY.md`
-- `docs/PHASE_11_AI_TILESET_GENERATION_WORKFLOW.md`
-- `docs/PHASE_11_AI_ITEM_ICON_GENERATION_WORKFLOW.md`
-- `docs/PHASE_11_AI_PORTRAIT_GENERATION_WORKFLOW.md`
-- `docs/PHASE_11_IMAGE_EDIT_VARIATION_WORKFLOW.md`
-- `docs/PHASE_11_GENERATED_IMAGE_VISUAL_QA_SCORING.md`
-- `docs/PHASE_11_GPT_IMAGE_ASSET_PIPELINE_INTEGRATION_GATE.md`
-- `docs/PHASE_11_CHARACTER_CONCEPT_GENERATOR.md`
-- `docs/PHASE_11_SPRITE_SHEET_GENERATION_PIPELINE.md`
-- `docs/PHASE_11_ANIMATION_STRIP_NORMALIZATION.md`
-- `docs/PHASE_11_ANIMATION_COVERAGE_VALIDATOR.md`
-- `docs/PHASE_11_ANIMATION_PREVIEW_GENERATION.md`
-- `docs/PHASE_11_RUNTIME_BMP_EXPORT_GENERATED_CHARACTERS.md`
-- `docs/PHASE_11_CHARACTER_ANIMATION_QA_REVIEW.md`
-- `docs/PHASE_11_AI_CHARACTER_ANIMATION_INTEGRATION_GATE.md`
-- `docs/PHASE_11_AI_GAME_CONTENT_PIPELINE_INTEGRATION_GATE.md`
-- `docs/PHASE_11_OPENAI_PROVIDER_ADAPTER.md`
-- `docs/PHASE_11_ANTHROPIC_PROVIDER_ADAPTER.md`
-- `docs/PHASE_11_KIMI_PROVIDER_ADAPTER.md`
-- `docs/PHASE_11_DEEPSEEK_PROVIDER_ADAPTER.md`
-- `docs/PHASE_11_MINIMAX_PROVIDER_ADAPTER.md`
-- `docs/PHASE_11_OPENCODE_WORKFLOW_ADAPTER.md`
-- `docs/PHASE_11_CUSTOM_OPENAI_COMPATIBLE_ENDPOINT_ADAPTER.md`
-- `docs/PHASE_11_MULTI_PROVIDER_INTEGRATION_GATE.md`
-- `.kiro/specs/phase11-complete-product-platform/`
-- Linear project `RPGCreatorAI Complete Product Platform`
+- Linear project `RPGCreatorAI Phase 12 — Product UX And AI Studio`
+- `docs/PHASE_12_PRODUCT_UX_AUDIT.md`
+- `docs/PHASE_12_PROVIDER_MODEL_SETTINGS_UX_AUDIT.md`
+- `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`
+- `docs/PHASE_12_AI_PIPELINE_INVENTORY.md`
+- `docs/PHASE_12_ASSET_ANIMATION_PIPELINE_INVENTORY.md`
+- `docs/PHASE_12_PHASE_11_BASELINE_VERIFICATION.md`
+- `docs/PHASE_12_CREATOR_FIRST_AI_UX_PRINCIPLES.md`
+- `docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md`
+- `docs/PHASE_11_FINAL_SHIP_GATE.md` as the completed Phase 11 baseline
 - `docs/GAME_VISUAL_DESIGN.md` for authored game visual rules
 
 ## Open subgoals (top of stack first)
 
-- Phase 11 Linear milestone 12 — continuous visual/UX audits.
-- Phase 11 Linear milestone 13 — QA automation and regression.
-- Phase 11 Linear milestone 14 — security, privacy, and cost controls.
-- Phase 11 Linear milestone 15 — docs, examples, Linear closeout, and final
-  ship gate.
+- Phase 12 M00 — baseline recovery and product framing.
+- Phase 12 M01 — launcher, desktop entry, splash, and startup UX.
+- Phase 12 M02 — AI Studio shell and project-aware chat.
+- Phase 12 M03 — pipeline-aware AI command router.
+- Phase 12 M04 — creator-friendly provider and model UX.
+- Phase 12 M05 — AI action review inbox and candidate lifecycle.
+- Phase 12 M06 — Developer Mode code assistant.
+- Phase 12 M07 — first-run onboarding and starter project flow.
+- Phase 12 M08 — generated asset and animation research.
+- Phase 12 M09 — animation quality rubric and fixtures.
+- Phase 12 M10 — multi-round asset refinement pipeline.
+- Phase 12 M11 — sprite sheet and animation pipeline optimization.
+- Phase 12 M12 — integration, release, docs, and final gate.
 
 ## Closed subgoals
 

@@ -4,6 +4,41 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-442 / PX-008 - Phase 12 Roadmap And Success Metrics
+
+- `2026-06-08 00:13:45 -03:00` - issue intake and roadmap source inspection
+  - PASS. Read Linear `FRA-442`, moved it to In Progress, posted start
+  evidence, consulted Linear milestones M00 through M12 with
+  `mcp__codex_apps__linear._list_milestones`, and inspected Phase 12 baseline
+  audit/principles docs plus `docs/GOAL_STACK.md`.
+- Fix applied: added `docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md`, translating
+  `PX-001` through `PX-250` into milestone outcomes, testable success
+  metrics, evidence requirements, validation policy, no-live-provider-call
+  policy, and final Phase 12 definition of done.
+- Fix applied: updated the top of `docs/GOAL_STACK.md` from Phase 11 active to
+  Phase 12 active, with Phase 12 sources and M00 through M12 open subgoals,
+  while preserving the historical Phase 11 closed-subgoal record.
+- `2026-06-08 00:15:08 -03:00` - `npm run typecheck` - PASS;
+  TypeScript compile check completed with `tsc --noEmit`.
+- `2026-06-08 00:15:08 -03:00` -
+  `rg -n "TBD|TODO|FIXME|\\?\\?" docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md docs/GOAL_STACK.md`
+  - PASS; no placeholder markers in the PX-008 docs.
+- `2026-06-08 00:15:08 -03:00` -
+  `rg -n "fixture-provider-token-value|\\bsk-[A-Za-z0-9]{12,}|Bearer [A-Za-z0-9]{12,}|apiKey\\s*=|secret\\s*=|token\\s*=" docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md docs/GOAL_STACK.md`
+  - PASS; no secret-like values in the PX-008 docs.
+- `2026-06-08 00:15:08 -03:00` -
+  `rg -n "world[- ]class|best[- ]in[- ]class|revolutionary|magical|marketing claim|industry[- ]leading" docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md`
+  - FAIL as a scan false positive; it matched the control sentence saying
+  metrics are not marketing claims.
+- Fix applied: refined the marketing-claim scan to target unverifiable
+  superlatives instead of the control phrase.
+- `2026-06-08 00:15:20 -03:00` -
+  `rg -n "world[- ]class|best[- ]in[- ]class|revolutionary|magical|industry[- ]leading|unmatched|unparalleled" docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md`
+  - PASS; no unverifiable marketing superlatives in the PX-008 roadmap.
+- `2026-06-08 00:15:08 -03:00` -
+  `git diff --check -- docs/PHASE_12_ROADMAP_SUCCESS_METRICS.md docs/GOAL_STACK.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors in the PX-008 documentation diff.
+
 ### Phase 12 FRA-441 / PX-007 - Product UX Principles For Creator-First AI
 
 - `2026-06-08 00:08:04 -03:00` - issue intake and UX principles source
