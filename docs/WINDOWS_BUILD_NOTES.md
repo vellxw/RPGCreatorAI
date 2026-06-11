@@ -139,6 +139,22 @@ Explorer and double-click `rpgcreator-shell.exe`. Do not move
 `rpg_creator_runtime.exe` away from that directory; Playtest runtime discovery
 uses the shell executable directory as the packaged fallback.
 
+The user-visible startup sequence is:
+
+1. The branded `Preparing your workspace` splash appears while local project
+   and editor state are loaded.
+2. The project-selection screen offers Open Project Folder, Import Project
+   Bundle, Create Project, and the bundled sample.
+3. The screen reports whether the colocated native runtime is ready. Missing
+   runtime state does not block editor access, but Playtest remains unavailable
+   until runtime discovery is repaired.
+
+A non-terminal user does not need the repository or build tools to reopen an
+already-prepared prototype on the same Windows account. They can use the File
+Explorer path above or a current-user shortcut prepared by a maintainer. The
+package output is local and can disappear if `%LOCALAPPDATA%` build output is
+cleaned, so it is not equivalent to an installed application.
+
 For a current-user shortcut plan, run:
 
 ```powershell

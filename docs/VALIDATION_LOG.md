@@ -4,6 +4,58 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-461 / PX-027 - Launch Docs For Non-Terminal Users
+
+- `2026-06-11 01:22:43 -03:00` - issue intake and launch documentation audit -
+  PASS. Read Linear `FRA-461`, moved it to In Progress, posted start evidence,
+  and inspected `README.md`, `docs/BUILD_AND_RUN.md`,
+  `docs/WINDOWS_BUILD_NOTES.md`, the packaged launch/screenshot evidence,
+  shortcut helper, launcher audit, and docs-alignment tests.
+- Finding: the repository already documented the correct executable path,
+  runtime colocation, unsigned boundary, and shortcut helper, but creator
+  guidance was embedded inside build/verification command sections.
+- Fix applied: added a no-terminal File Explorer launch path to README and the
+  top of `docs/BUILD_AND_RUN.md`; documented splash, project selection, runtime
+  readiness, optional maintainer-created shortcuts, and trusted-local-build
+  expectations; kept packaging and shortcut creation in maintainer sections.
+- Fix applied: updated `docs/WINDOWS_BUILD_NOTES.md` with the visible startup
+  sequence and clarified that local package output is not an installed app.
+- Constraint preserved: docs do not claim installer, signing, verified
+  publisher, automatic update, uninstaller, all-users Start Menu, or automatic
+  shortcut support.
+- Fix applied: updated the launcher/startup audit with the PX-027 documentation
+  boundary.
+- `2026-06-11 01:24:42 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` - PASS; 1
+  docs/script alignment file and 9 tests passed.
+- `2026-06-11 01:24:42 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-11 01:24:42 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/create-windows-shortcuts.ps1`
+  - PASS; dry-run resolved the packaged shell, colocated runtime, current-user
+  Desktop and Start Menu targets, and emitted `WINDOWS SHORTCUT PLAN PASSED`.
+  No shortcut was created.
+- `2026-06-11 01:24:42 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1`
+  - PASS; the documented executable remained alive through the five-second
+  hold and emitted `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED pid=13108`.
+- Initial PX-027 guidance assertion - FAIL; the literal assertion did not
+  tolerate a Markdown line break inside `not an installed Windows
+  application`. Fix applied: changed the validation expression to allow
+  whitespace between wrapped words, then reran the complete control block.
+- `2026-06-11 01:25:56 -03:00` - PX-027 documentation guidance assertions -
+  PASS; README, build/run guidance, and Windows notes contain the required
+  no-terminal path, startup expectation, and non-installer boundaries.
+- `2026-06-11 01:25:56 -03:00` - PX-027 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in the edited docs or isolated
+  PX-027 validation-log block.
+- `2026-06-11 01:25:56 -03:00` - PX-027 secret-like value scan - PASS; no
+  secret-like assignments or credential patterns in the same scoped text.
+- `2026-06-11 01:25:56 -03:00` -
+  `git diff --check -- README.md docs/BUILD_AND_RUN.md docs/WINDOWS_BUILD_NOTES.md docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs/VALIDATION_LOG.md`
+  and residual process check - PASS; no whitespace errors and no packaged
+  shell process remained. Git emitted existing line-ending warnings.
+
 ### Phase 12 FRA-460 / PX-026 - Desktop Launch Screenshot Evidence
 
 - `2026-06-11 01:16:35 -03:00` - issue intake and capture-path inspection -

@@ -1,5 +1,31 @@
 # Build and Run Instructions
 
+## For Creators: Open An Existing Windows Prototype
+
+These steps require no terminal, developer tools, or repository checkout. They
+apply only after a maintainer has prepared the unsigned local prototype on the
+same Windows account.
+
+1. Open File Explorer.
+2. Paste `%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug` into the address bar.
+3. Confirm that `rpgcreator-shell.exe` and `rpg_creator_runtime.exe` are both
+   present.
+4. Double-click `rpgcreator-shell.exe`, or use an RPGCreatorAI Desktop/Start
+   Menu shortcut that a maintainer previously created.
+5. Wait for the branded `Preparing your workspace` splash to advance to the
+   project-selection screen.
+6. Open, import, or create a project, or start with the bundled sample.
+
+Do not separate the two executable files: the desktop shell uses its own folder
+as the packaged runtime fallback. The startup screen reports native runtime
+readiness before Playtest is opened.
+
+The current artifact is an unsigned Tauri debug no-bundle prototype, not an
+installed Windows application. It does not provide an installer, uninstaller,
+automatic updates, automatic Start Menu registration, or a verified publisher.
+Only open a local build from a trusted maintainer. The remaining sections are
+for contributors and maintainers who build or validate the project.
+
 ## Requirements
 
 - Node.js 22 recommended and npm 10+.
@@ -197,6 +223,10 @@ server. The full `scripts/dev/verify.ps1` gate manages that temporary server
 automatically when no correct 1420 server is already running.
 
 ## Packaged Windows prototype
+
+This section prepares the artifact used by the creator steps at the top of this
+document. It is a maintainer/developer workflow and is not required each time a
+creator opens an already-built prototype.
 
 For a local unsigned packaged prototype, run:
 

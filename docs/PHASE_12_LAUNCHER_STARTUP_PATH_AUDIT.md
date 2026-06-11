@@ -145,6 +145,14 @@ project-selection evidence is committed under
 `docs/PHASE_12_DESKTOP_STARTUP_SCREENSHOT_EVIDENCE.md`. The clean first-run
 path did not enter recovery, so no recovery screenshot was fabricated.
 
+PX-027 update: launch documentation now starts with a non-terminal creator
+path instead of requiring readers to discover the executable inside developer
+commands. README and build notes explain File Explorer launch, the required
+colocated runtime, optional maintainer-created current-user shortcuts, branded
+splash/project-selection expectations, runtime-readiness copy, and the exact
+unsigned debug prototype limitations. Build, package, and shortcut creation
+commands remain in contributor/maintainer sections.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

@@ -60,6 +60,34 @@ credentials and opt-in.
 | --- | --- |
 | ![Town scene template](docs/screenshots/game-visual-design/06-scene-template-town.png) | ![Playtest preview](docs/screenshots/phase-9-animation-hotfix/editor-preview-playtest.png) |
 
+## Open The Windows Prototype Without A Terminal
+
+RPGCreatorAI does not currently ship an installer. If a maintainer has already
+built the local Windows prototype on this computer, open File Explorer, paste
+this folder into the address bar, and press Enter:
+
+```text
+%LOCALAPPDATA%\RPGCreatorAI\tauri-target\debug
+```
+
+Confirm that both `rpgcreator-shell.exe` and `rpg_creator_runtime.exe` are in
+that folder, then double-click `rpgcreator-shell.exe`. Keep the two executable
+files together so Playtest can find the native runtime. A current-user Desktop
+or Start Menu shortcut created by the repository helper opens the same shell
+and can be used instead.
+
+Startup first shows the branded `Preparing your workspace` splash, then the
+project-selection screen. From there, open a project folder, import a project
+bundle, create a project, or use the bundled sample. The startup screen reports
+whether the native runtime is ready; editor work remains available if Playtest
+runtime discovery fails.
+
+This artifact is an unsigned debug prototype. It has no automatic installer,
+uninstaller, update service, all-users Start Menu entry, or verified publisher
+identity. Only run a local build you trust. Building the prototype and creating
+optional shortcuts are maintainer tasks documented in
+[Build And Run Instructions](docs/BUILD_AND_RUN.md).
+
 ## Repository Layout
 
 ```text
