@@ -136,6 +136,15 @@ and `=== WINDOWS PACKAGE PROTOTYPE PASSED ===`. Screenshot evidence was not
 captured in PX-025 because the package smoke intentionally launches hidden;
 PX-026 remains the dedicated desktop launch screenshot evidence issue.
 
+PX-026 update: the packaged Windows shell was launched on 2026-06-11 with a
+fresh temporary app-data home and captured without Computer Use. A
+PowerShell/.NET harness selected the shell's largest visible top-level window
+and retained only its 1440 x 900 client area. Current branded splash and stable
+project-selection evidence is committed under
+`docs/screenshots/phase12-px026/` and documented in
+`docs/PHASE_12_DESKTOP_STARTUP_SCREENSHOT_EVIDENCE.md`. The clean first-run
+path did not enter recovery, so no recovery screenshot was fabricated.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

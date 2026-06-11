@@ -4,6 +4,70 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-460 / PX-026 - Desktop Launch Screenshot Evidence
+
+- `2026-06-11 01:16:35 -03:00` - issue intake and capture-path inspection -
+  PASS. Read Linear `FRA-460`, kept it In Progress, posted start evidence, and
+  inspected the packaged launch scripts, startup source, launcher audit, and
+  existing screenshot conventions. Computer Use was not used.
+- Initial inline capture setup - FAIL before launch because PowerShell rejected
+  assignment to the read-only automatic `$HOME` variable. Fix applied: renamed
+  the local path variable and reran the harness.
+- Initial `PrintWindow` selection - FAIL; `MainWindowHandle` resolved to a
+  16 x 16 helper window rather than the 1456 x 939 product window. Fix applied:
+  enumerated top-level windows owned by the process and selected the largest
+  visible window.
+- `2026-06-11 01:16:35 -03:00` - packaged client-area capture harness - PASS.
+  Launched
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug\rpgcreator-shell.exe`
+  with fresh temporary `APPDATA`, `LOCALAPPDATA`, and `HOME` paths; found the
+  product window after 107 ms; captured 45 client-area frames; and stopped the
+  process after the isolated run.
+- Privacy handling - PASS. Discarded the first pre-paint frame because it
+  contained background desktop content, discarded white/black compositor
+  transition frames, and retained only app-painted client-area screenshots.
+- `docs/screenshots/phase12-px026/01-packaged-desktop-splash.png` - PASS;
+  1440 x 900, 20,069 bytes, SHA-256
+  `C4C72F0AB3B3CDD5EA0038EA5079C1134D4CAA87A431B04316D3610759D42796`.
+  Visual inspection shows the branded `Preparing your workspace` splash at
+  1,265 ms after launch.
+- `docs/screenshots/phase12-px026/02-packaged-desktop-project-selection.png` -
+  PASS; 1440 x 900, 33,951 bytes, SHA-256
+  `7A7131220615ABC367AB254BD827FD15C3B6379C3C818F6729AA39006F85D11A`.
+  Visual inspection shows the stable project-selection actions and native
+  runtime-ready status at 1,392 ms after launch.
+- The clean first-run launch did not enter recovery. No recovery screenshot was
+  fabricated; PX-022 retains focused recovery-state test evidence.
+- Fix applied: added the two packaged desktop screenshots, documented their
+  capture integrity in `docs/PHASE_12_DESKTOP_STARTUP_SCREENSHOT_EVIDENCE.md`,
+  and updated `docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md`.
+- `2026-06-11 01:19:08 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1`
+  - PASS. The shell launched from
+  `C:\Users\franc\AppData\Local\RPGCreatorAI\tauri-target\debug`, remained
+  alive for the five-second hold, found the colocated runtime, and emitted
+  `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED pid=14248`.
+- `2026-06-11 01:19:08 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx src/startup/__tests__/startupRecovery.test.ts`
+  - PASS; 3 focused startup files and 25 tests passed.
+- `2026-06-11 01:19:08 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-11 01:19:08 -03:00` - PNG signature, dimensions, and SHA-256
+  verification - PASS; exactly two evidence PNGs passed their committed
+  1440 x 900 dimensions and expected hashes.
+- `2026-06-11 01:19:50 -03:00` - PX-026 placeholder scan - PASS; no
+  unresolved `TBD`, `TODO`, or `FIXME` markers in the evidence document,
+  launcher audit, or isolated PX-026 validation-log block.
+- `2026-06-11 01:19:50 -03:00` - PX-026 secret-like value scan - PASS; no
+  API-key, bearer-token, secret, or token assignment patterns in the same
+  scoped text.
+- `2026-06-11 01:19:50 -03:00` -
+  `git diff --check -- docs/PHASE_12_DESKTOP_STARTUP_SCREENSHOT_EVIDENCE.md docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors. Git emitted existing line-ending warnings for
+  the two previously tracked Markdown files.
+- `2026-06-11 01:19:50 -03:00` - residual process check - PASS; no
+  `rpgcreator-shell` process remained after capture or smoke validation.
+
 ### Phase 12 FRA-459 / PX-025 - Packaged Prototype Launch Smoke
 
 - `2026-06-08 04:01:56 -03:00` - issue intake and package smoke inspection -
