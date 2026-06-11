@@ -19,6 +19,10 @@ function Assert-True {
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $iconDir = Join-Path $repoRoot "src-tauri\icons"
 $tauriConfigPath = Join-Path $repoRoot "src-tauri\tauri.conf.json"
+$packageJsonPath = Join-Path $repoRoot "package.json"
+$packageLockPath = Join-Path $repoRoot "package-lock.json"
+$cargoTomlPath = Join-Path $repoRoot "src-tauri\Cargo.toml"
+$indexHtmlPath = Join-Path $repoRoot "index.html"
 $brandingDocPath = Join-Path $repoRoot "docs\RELEASE_BRANDING_ASSETS.md"
 $sourcePath = Join-Path $iconDir "icon-source.svg"
 $expectedIcons = @(
@@ -52,11 +56,29 @@ Assert-True (Test-Path -LiteralPath $sourcePath) "Missing tracked icon source: $
 Assert-True (Test-Path -LiteralPath $brandingDocPath) "Missing release branding document: $brandingDocPath"
 
 $tauriConfig = Get-Content -LiteralPath $tauriConfigPath -Raw | ConvertFrom-Json
+$packageJson = Get-Content -LiteralPath $packageJsonPath -Raw | ConvertFrom-Json
+$packageLock = Get-Content -LiteralPath $packageLockPath -Raw
+$cargoToml = Get-Content -LiteralPath $cargoTomlPath -Raw
+$indexHtml = Get-Content -LiteralPath $indexHtmlPath -Raw
+$cargoPackageName = [regex]::Match($cargoToml, '(?m)^name = "([^"]+)"').Groups[1].Value
+$cargoVersion = [regex]::Match($cargoToml, '(?m)^version = "([^"]+)"').Groups[1].Value
+$packageLockName = [regex]::Match($packageLock, '"name"\s*:\s*"([^"]+)"').Groups[1].Value
+$packageLockVersion = [regex]::Match($packageLock, '"version"\s*:\s*"([^"]+)"').Groups[1].Value
+
+Assert-True ($packageJson.name -eq "rpgcreator-ai-editor") "Unexpected npm package name: $($packageJson.name)"
+Assert-True ($packageLockName -eq $packageJson.name) "package-lock name does not match package.json"
+Assert-True ($cargoPackageName -eq "rpgcreator-shell") "Unexpected Cargo package name: $cargoPackageName"
+Assert-True ($tauriConfig.identifier -eq "com.rpgcreatorai.editor") "Unexpected app identifier: $($tauriConfig.identifier)"
+Assert-True ($packageJson.version -eq $tauriConfig.version) "npm and Tauri versions do not match"
+Assert-True ($packageLockVersion -eq $tauriConfig.version) "package-lock and Tauri versions do not match"
+Assert-True ($cargoVersion -eq $tauriConfig.version) "Cargo and Tauri versions do not match"
 Assert-True ($tauriConfig.productName -eq "RPGCreatorAI") "Unexpected productName: $($tauriConfig.productName)"
 Assert-True ($tauriConfig.app.windows[0].title -eq "RPGCreatorAI") "Unexpected window title: $($tauriConfig.app.windows[0].title)"
 Assert-True ($tauriConfig.bundle.category -eq "DeveloperTool") "Unexpected bundle category: $($tauriConfig.bundle.category)"
 Assert-True ($tauriConfig.bundle.shortDescription -like "*RPGCreatorAI*") "Bundle shortDescription must mention RPGCreatorAI"
 Assert-True ($tauriConfig.bundle.longDescription -like "*filesystem persistence*") "Bundle longDescription must describe the desktop bridge"
+Assert-True ($indexHtml -like "*<title>RPGCreatorAI</title>*") "index.html title must match RPGCreatorAI"
+Assert-True ($indexHtml -like "*href=`"/src-tauri/icons/icon-source.svg`"*") "index.html favicon must use icon-source.svg"
 
 $configuredIcons = @($tauriConfig.bundle.icon)
 foreach ($icon in $expectedIcons) {

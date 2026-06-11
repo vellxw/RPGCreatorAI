@@ -58,6 +58,13 @@ not committed because Phase 11 release packaging targets desktop.
 - bundle category: `DeveloperTool`
 - release version: aligned with npm and Cargo at `0.5.0`
 - bundle icons: the generated desktop icon files under `src-tauri/icons/`
+- browser/Tauri document title: `RPGCreatorAI`
+- browser/Tauri favicon source: `/src-tauri/icons/icon-source.svg`
+
+Technical package names remain intentionally distinct from the human-facing
+product name: npm uses `rpgcreator-ai-editor` and Cargo produces
+`rpgcreator-shell`. The branding check validates those names, version alignment,
+the Tauri identifier/title, and the HTML title/favicon reference together.
 
 ## Validation
 

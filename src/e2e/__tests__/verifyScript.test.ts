@@ -179,6 +179,26 @@ describe('MVP verify script', () => {
     expect(cargoVersion).toBe(tauriConfig.version);
   });
 
+  it('keeps product identity metadata aligned across web and desktop shells', () => {
+    const indexHtml = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+    const brandingCheck = readFileSync(
+      join(process.cwd(), 'scripts/dev/verify-branding-assets.ps1'),
+      'utf8',
+    );
+
+    expect(indexHtml).toContain('<title>RPGCreatorAI</title>');
+    expect(indexHtml).toContain('href="/src-tauri/icons/icon-source.svg"');
+    for (const expected of [
+      'rpgcreator-ai-editor',
+      'rpgcreator-shell',
+      'com.rpgcreatorai.editor',
+      '<title>RPGCreatorAI</title>',
+      'icon-source.svg',
+    ]) {
+      expect(brandingCheck).toContain(expected);
+    }
+  });
+
   it('keeps release branding assets generated from a tracked source', () => {
     const tauriConfig = JSON.parse(readFileSync(join(process.cwd(), 'src-tauri/tauri.conf.json'), 'utf8')) as {
       productName: string;

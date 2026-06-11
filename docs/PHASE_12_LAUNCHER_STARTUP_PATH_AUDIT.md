@@ -153,6 +153,11 @@ splash/project-selection expectations, runtime-readiness copy, and the exact
 unsigned debug prototype limitations. Build, package, and shortcut creation
 commands remain in contributor/maintainer sections.
 
+PX-028 update: product identity metadata is now checked across npm, Cargo,
+Tauri, and the HTML shell. The stale inline sword favicon and alternate web
+title were replaced by the tracked RPGCreatorAI icon source and exact product
+name; the focused branding verifier enforces the aligned values.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

@@ -4,6 +4,40 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-462 / PX-028 - App Logo Icon Metadata Verification
+
+- `2026-06-11 01:28:08 -03:00` - issue intake and metadata inspection - PASS.
+  Read Linear `FRA-462`, moved it to In Progress, posted start evidence, and
+  inspected npm, package-lock, Cargo, Tauri, HTML, icon, branding docs, and the
+  focused branding verifier.
+- Finding: Tauri/package metadata used `RPGCreatorAI` and the tracked monogram,
+  but `index.html` retained the alternate `RPGCreatorAI — Visual Editor` title
+  and an unrelated inline purple sword favicon.
+- TDD RED: `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` - FAIL as
+  expected; the HTML title/favicon and cross-shell metadata assertions were not
+  satisfied.
+- Fix applied: aligned the HTML title to `RPGCreatorAI`, referenced the tracked
+  `src-tauri/icons/icon-source.svg`, and expanded
+  `scripts/dev/verify-branding-assets.ps1` to verify npm/Cargo names, version
+  alignment, Tauri identifier/product/window metadata, HTML title, and favicon.
+- First branding verification - FAIL; Windows PowerShell 5 could not parse the
+  package-lock root with `ConvertFrom-Json`. Second attempt - FAIL because the
+  replacement regex incorrectly expected `name` before the opening JSON brace.
+  Fix applied: read the first package-lock `name` and `version` fields with
+  compatible regexes, then reran the full validation set.
+- `2026-06-11 01:31:36 -03:00` -
+  `npm test -- --run src/e2e/__tests__/verifyScript.test.ts` - PASS; 1 file and
+  10 tests passed.
+- `2026-06-11 01:31:36 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify-branding-assets.ps1`
+  - PASS; emitted `BRANDING ASSETS PASSED` and inspected the packaged
+  executable-associated icon.
+- `2026-06-11 01:31:36 -03:00` - `npm run build` - PASS; TypeScript and Vite
+  production build passed, and Vite emitted `icon-source-CRj6fJCZ.svg` into
+  `dist/assets`. The existing main-chunk size warning remained nonfatal.
+- Fix applied: updated release branding, icon audit, launcher audit, and this
+  validation log with the verified identity boundary.
+
 ### Phase 12 FRA-461 / PX-027 - Launch Docs For Non-Terminal Users
 
 - `2026-06-11 01:22:43 -03:00` - issue intake and launch documentation audit -

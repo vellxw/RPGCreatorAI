@@ -115,3 +115,12 @@ enough to pass the existing metadata check.
 PX-011 is green as a baseline audit. Existing branding assets are sufficient
 for M01 implementation, and the required follow-up is validation/evidence on
 launcher, splash, and shortcut surfaces rather than asset creation.
+
+## PX-028 Metadata Verification Update
+
+PX-028 removed the stale inline purple sword favicon and the alternate
+`RPGCreatorAI — Visual Editor` document title. `index.html` now uses the
+human-facing `RPGCreatorAI` title and the tracked `icon-source.svg` identity.
+The focused branding script now also verifies npm/Cargo technical names,
+npm/package-lock/Cargo/Tauri version alignment, the Tauri app identifier,
+window/product title, HTML title, and favicon source.
