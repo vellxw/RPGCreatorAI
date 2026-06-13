@@ -158,6 +158,12 @@ Tauri, and the HTML shell. The stale inline sword favicon and alternate web
 title were replaced by the tracked RPGCreatorAI icon source and exact product
 name; the focused branding verifier enforces the aligned values.
 
+PX-029 update: the browser smoke now verifies the static pre-React splash HTML
+before opening the app and asserts the complete browser startup choice surface,
+including filesystem limitations, import, create, and bundled sample actions.
+Focused Vitest coverage remains the deterministic source for pending-action,
+recent-restore, runtime-readiness, and recovery-state behavior.
+
 ## Existing Evidence And Safe Commands
 
 Existing committed Phase 11 evidence:

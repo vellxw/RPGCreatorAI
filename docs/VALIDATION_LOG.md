@@ -4,6 +4,60 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-463 / PX-029 - Startup UX Tests And Smoke Harness
+
+- `2026-06-12 22:29:28 -03:00` - issue resume and coverage audit - PASS. Read
+  Linear `FRA-463` and its existing start comment, confirmed it remained In
+  Progress, and inspected splash, startup phase, project action, recent restore,
+  runtime availability, recovery, browser smoke, first-paint, and packaged
+  launch coverage. No Computer Use or live provider call was used.
+- Finding: focused Vitest coverage already exercised static/React splash,
+  deterministic startup phases, pending open/create/import feedback, recent
+  restore, runtime readiness, and recovery. The browser smoke only asserted
+  `Start a project` and the bundled sample after React loaded, leaving the
+  pre-React splash and complete first-screen choices outside the smoke gate.
+- TDD RED:
+  `npm test -- --run src/e2e/__tests__/browserSmokeHarnessScript.test.ts` -
+  FAIL as expected because the harness did not produce
+  `00-static-splash.html` or assert the new startup markers/actions.
+- Fix applied: the browser harness now fetches and validates the static splash
+  HTML before browser interaction, stores it as `00-static-splash.html`, and
+  requires the browser-mode limitation, import, create, and bundled sample
+  choices in the startup snapshot. Browser smoke docs and the launcher audit
+  now describe this split from deterministic recovery tests.
+- TDD GREEN:
+  `npm test -- --run src/e2e/__tests__/browserSmokeHarnessScript.test.ts` -
+  PASS; 1 file and 1 test passed.
+- `2026-06-12 22:29:28 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-browser-editor.ps1 -OutputDir output/playwright/phase12-px029`
+  - PASS; emitted `BROWSER SMOKE PASSED` and produced the static splash HTML,
+  startup/workspace snapshots, PNG screenshots, transcript, and console-error
+  artifact. Artifact inspection confirmed all required splash/startup strings
+  and reported 0 browser console errors. Local `output/` artifacts remain
+  untracked and are not part of the commit.
+- `2026-06-12 22:29:28 -03:00` -
+  `npm test -- --run src/__tests__/AppStartup.test.tsx src/components/project/__tests__/ProjectStartupScreen.test.tsx src/startup/__tests__/startupPhases.test.ts src/startup/__tests__/startupRecovery.test.ts src/e2e/__tests__/browserSmokeHarnessScript.test.ts src/e2e/__tests__/firstPaintPerformanceBudgetScript.test.ts`
+  - PASS; 6 startup/smoke files and 29 tests passed.
+- `2026-06-12 22:29:28 -03:00` - `npm run typecheck` - PASS; TypeScript
+  compile check completed with `tsc --noEmit`.
+- `2026-06-12 22:29:28 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/measure-first-paint.ps1 -OutputDir output/playwright/phase12-px029-first-paint`
+  - PASS; emitted `FIRST PAINT MEASURE PASSED`: splash visible 66 ms <= 1000
+  ms, first contentful paint 284 ms <= 1500 ms, and DOMContentLoaded 601 ms <=
+  2500 ms.
+- `2026-06-12 22:29:28 -03:00` -
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-packaged-executable-launch.ps1`
+  - PASS; the documented shell and colocated runtime were present and the
+  command emitted `PACKAGED EXECUTABLE LAUNCH SMOKE PASSED pid=3076`.
+- `2026-06-12 22:29:28 -03:00` - PX-029 placeholder and secret-like value
+  scans - PASS; no unresolved markers or credential-like assignments in the
+  edited harness, test, docs, or isolated PX-029 validation block.
+- `2026-06-12 22:29:28 -03:00` -
+  `git diff --check -- scripts/dev/smoke-browser-editor.ps1 src/e2e/__tests__/browserSmokeHarnessScript.test.ts docs/BROWSER_SMOKE_HARNESS.md docs/PHASE_12_LAUNCHER_STARTUP_PATH_AUDIT.md docs/VALIDATION_LOG.md`
+  - PASS; no whitespace errors. Git emitted existing line-ending warnings.
+- `2026-06-12 22:29:28 -03:00` - residual process check - PASS; no packaged
+  shell process or Vite listener remained after validation.
+
 ### Phase 12 FRA-462 / PX-028 - App Logo Icon Metadata Verification
 
 - `2026-06-11 01:28:08 -03:00` - issue intake and metadata inspection - PASS.

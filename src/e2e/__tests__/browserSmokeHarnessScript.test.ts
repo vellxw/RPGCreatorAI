@@ -20,6 +20,12 @@ describe('CP-108 browser smoke harness script', () => {
       'BROWSER SMOKE SKIPPED',
       '@playwright/cli',
       'playwright-cli',
+      '00-static-splash.html',
+      'data-rpg-splash-shell',
+      'Preparing your workspace',
+      'Import Project Bundle',
+      'Create Browser Project',
+      'Browser mode cannot open folders',
       'Use My First RPG',
       'Validate',
       'Save',
@@ -44,5 +50,8 @@ describe('CP-108 browser smoke harness script', () => {
     expect(docs).toContain('scripts/dev/smoke-browser-editor.ps1');
     expect(docs).toContain('BROWSER SMOKE SKIPPED');
     expect(docs).toContain('output/playwright/cp108');
+    expect(docs).toContain('00-static-splash.html');
+    expect(docs).toContain('Create Browser Project');
+    expect(docs).toContain('startup recovery');
   });
 });

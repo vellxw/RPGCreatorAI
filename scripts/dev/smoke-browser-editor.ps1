@@ -171,11 +171,26 @@ try {
         Write-HarnessSkip "editor dev server did not become ready at $Url within $StartupTimeoutSeconds seconds."
     }
 
+    $startupHtml = (Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 10).Content
+    Assert-SmokeText -Text $startupHtml -Expected @(
+        'data-rpg-splash-shell',
+        'aria-busy="true"',
+        'Preparing your workspace',
+        'Loading project data and editor state.'
+    )
+    Set-Content -LiteralPath (Join-Path $artifactRoot '00-static-splash.html') -Value $startupHtml -Encoding utf8
+
     Invoke-PwCli -Arguments @('delete-data') | Out-Null
     Invoke-PwCli -Arguments @('open', $Url) | Out-Null
 
     $startupSnapshot = Invoke-PwCli -Arguments @('snapshot')
-    Assert-SmokeText -Text $startupSnapshot -Expected @('Start a project', 'Use My First RPG')
+    Assert-SmokeText -Text $startupSnapshot -Expected @(
+        'Start a project',
+        'Browser mode cannot open folders',
+        'Import Project Bundle',
+        'Create Browser Project',
+        'Use My First RPG'
+    )
     Set-Content -LiteralPath (Join-Path $artifactRoot '01-startup.snapshot.txt') -Value $startupSnapshot -Encoding utf8
     Save-HarnessScreenshot -Name '01-startup.png'
 
