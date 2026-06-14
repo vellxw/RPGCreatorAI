@@ -4,6 +4,13 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 - Critical Bug Fixes and Quick Wins
+
+- `2026-06-14 05:00:00 -03:00` - Critical Bug Fixes and Quick Wins Validation - PASS.
+  Successfully implemented 10 critical bug fixes (integer overflows, memory leaks, path traversal prevention, division by zero) and 10 quick wins (case-insensitivity, file verification, constants centralization).
+  Configured, compiled, and ran tests via `build_bootstrap.bat` and verified all tests pass (`1/1 Test #1: RPGTests ... Passed`).
+  Validated with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/verify.ps1 -SkipDesktop` - PASS; frontend typechecks, tests, builds, asset pipeline checks, native configure/build/tests, and runtime smoke checks passed successfully.
+
 ### Phase 12 FRA-463 / PX-029 - Startup UX Tests And Smoke Harness
 
 - `2026-06-12 22:29:28 -03:00` - issue resume and coverage audit - PASS. Read
@@ -1223,6 +1230,7 @@ Append-only log of major validation runs. Newest entries on top.
 - `2026-06-07 23:29:02 -03:00` -
   `rg -n "fixture-provider-token-value|sk-[A-Za-z0-9]|Bearer [A-Za-z0-9]|apiKey=|secret=|token=" docs/PHASE_12_PROVIDER_MODEL_SETTINGS_UX_AUDIT.md`
   - PASS; no secret-like matches in the PX-002 audit document.
+
 ### Phase 12 FRA-435 / PX-001 - Product UX Audit From User Feedback
 
 - `2026-06-07 23:15:18 -03:00` - issue intake and source/docs inspection -
@@ -1251,6 +1259,38 @@ Append-only log of major validation runs. Newest entries on top.
   `npm test -- --run src/components/project/__tests__/ProjectStartupScreen.test.tsx src/screens/__tests__/SettingsScreen.test.tsx src/components/layout/__tests__/MvpPlaceholderGating.test.tsx`
   - PASS; focused startup, Settings/provider, and AI gating suites passed 3
   files and 12 tests.
+
+### Created-project Project Start visual hotfix
+
+- `2026-06-04 20:57:49 -03:00` - created-project Project Start visual
+  hotfix validation - PASS.
+- Root cause: desktop-created projects used an empty 20x15 starter map and did
+  not seed runtime BMP assets into the new project folder, so Project Start
+  launched a small centered map and `Renderer2D` fell back to purple placeholder
+  rectangles when `assets/generated/runtime/*.bmp` could not be loaded.
+- `npm test -- --run src/stores/__tests__/projectStartupActions.test.ts src/templates/__tests__/sceneTemplates.test.ts`
+  - PASS; 2 files and 8 tests passed. Verified the new project starter state
+  validates and uses a filled 16:9 scene template instead of the old empty
+  20x15 starter map.
+- `cargo test --manifest-path src-tauri/Cargo.toml fs_commands::tests::create_new_project_writes_required_files_and_reloads -- --exact --nocapture`
+  - PASS; focused Rust create-project test passed after preserving
+  `visualProfile` and verifying bundled runtime BMP assets are copied when
+  available.
+- `npm test -- --run src/stores/__tests__/projectStartupActions.test.ts`
+  - PASS; 1 file and 5 tests passed after adding regression assertions for
+  40x23 starter dimensions and interaction events.
+- `cargo test --manifest-path src-tauri/Cargo.toml` - PASS; 43 Rust tests
+  passed.
+- `npm run typecheck` - PASS; TypeScript compile check passed.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/smoke-runtime.ps1 -DurationSeconds 1 -ScreenshotDir output\smoke-runtime-created-project-fix`
+  - PASS; runtime launch stayed alive, feature smoke wrote screenshots, and
+  logs included expected event, audio, shop, battle, and smoke completion
+  markers.
+- Fix applied: desktop-created projects now preserve `visualProfile`, seed
+  their first map from the authored `town-street-16x9` scene, and copy bundled
+  runtime assets when no project assets folder exists. Playtest temp sessions
+  also fall back to bundled assets when an older source project has no
+  `assets/` folder, preventing renderer fallback purple tiles/sprites.
 
 ### Phase 11 FRA-163 / CP-128 - Complete Platform Final Ship Gate
 

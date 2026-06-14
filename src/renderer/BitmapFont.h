@@ -9,6 +9,7 @@ class BitmapFont {
 public:
     static constexpr int GlyphWidth  = 5;
     static constexpr int GlyphHeight = 7;
+    static constexpr int ColSpace    = 1;
 
     // Renders `text` at pixel position (x, y) in the given color, scaled
     // by `scale` (1 = native 5x7). Unknown glyphs render as blank space.

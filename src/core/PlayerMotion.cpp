@@ -7,8 +7,8 @@ void PlayerMotion::snapToTile(int tileX, int tileY, int tileSize) {
     targetTileX_ = tileX;
     targetTileY_ = tileY;
     tileSize_ = tileSize > 0 ? tileSize : 32;
-    visualX_ = static_cast<float>(tileX * tileSize_);
-    visualY_ = static_cast<float>(tileY * tileSize_);
+    visualX_ = static_cast<float>(tileX) * static_cast<float>(tileSize_);
+    visualY_ = static_cast<float>(tileY) * static_cast<float>(tileSize_);
     startX_ = visualX_;
     startY_ = visualY_;
     targetX_ = visualX_;
@@ -27,8 +27,8 @@ void PlayerMotion::startMove(int targetTileX, int targetTileY, Direction dir, in
     tileSize_ = tileSize > 0 ? tileSize : 32;
     startX_ = visualX_;
     startY_ = visualY_;
-    targetX_ = static_cast<float>(targetTileX_ * tileSize_);
-    targetY_ = static_cast<float>(targetTileY_ * tileSize_);
+    targetX_ = static_cast<float>(targetTileX_) * static_cast<float>(tileSize_);
+    targetY_ = static_cast<float>(targetTileY_) * static_cast<float>(tileSize_);
     elapsed_ = 0.0f;
     duration_ = tilesPerSecond > 0.0f ? 1.0f / tilesPerSecond : 0.0f;
     completedStep_ = false;

@@ -35,8 +35,8 @@ AnimationClip parseClip(const json& j) {
     clip.loop = j.value("loop", true);
     if (j.contains("anchor")) {
         const auto& anchor = j.at("anchor");
-        clip.anchor.x = anchor.value("x", clip.frameSize.width / 2);
-        clip.anchor.y = anchor.value("y", clip.frameSize.height);
+        clip.anchor.x = anchor.value("x", clip.frameSize.width > 0 ? clip.frameSize.width / 2 : 32);
+        clip.anchor.y = anchor.value("y", clip.frameSize.height > 0 ? clip.frameSize.height : 32);
     }
     return clip;
 }

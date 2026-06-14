@@ -4,6 +4,7 @@
 #include "types/ProjectTypes.h"
 #include "world/MapLoader.h"
 #include "world/ProjectLoader.h"
+#include "core/GameConstants.h"
 
 #include <algorithm>
 #include <cctype>
@@ -1425,7 +1426,7 @@ void validateMapJson(const LoadedMap& loaded,
         } else if (const MapLayer* collision = findLayer(map, "collision")) {
             const int index = y * map.width + x;
             if (index >= 0 && index < static_cast<int>(collision->tiles.size()) &&
-                collision->tiles[index] == 9) {
+                collision->tiles[index] == GameConstants::kCollisionTileId) {
                 addError(report, mapSource,
                          "Start position is blocked by the collision layer");
             }

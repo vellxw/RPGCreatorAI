@@ -91,6 +91,12 @@ SaveManager::LoadResult makeLoadFailure(SaveManager::LoadStatus status,
 } // namespace
 
 std::string SaveManager::getSavePath(const std::string& slotId) {
+    if (slotId.empty() ||
+        slotId.find("..") != std::string::npos ||
+        slotId.find('/') != std::string::npos ||
+        slotId.find('\\') != std::string::npos) {
+        return "";
+    }
     return "saves/" + slotId + ".json";
 }
 
@@ -123,6 +129,11 @@ SaveManager::SaveResult SaveManager::saveDetailed(const std::string& slotId, con
     std::string path = getSavePath(slotId);
     SaveResult result;
     result.path = path;
+    if (path.empty()) {
+        result.error = "Invalid slotId: " + slotId;
+        Logger::error(result.error);
+        return result;
+    }
     if (FileSystem::writeFile(path, j.dump(2))) {
         Logger::info("Game saved to " + path);
         result.ok = true;
@@ -140,6 +151,11 @@ bool SaveManager::save(const std::string& slotId, const GameState& state) {
 
 SaveManager::LoadResult SaveManager::loadDetailed(const std::string& slotId) {
     std::string path = getSavePath(slotId);
+    if (path.empty()) {
+        const std::string error = "Invalid slotId: " + slotId;
+        Logger::error(error);
+        return makeLoadFailure(LoadStatus::Invalid, path, error);
+    }
     auto content = FileSystem::readFile(path);
     if (!content) {
         const std::string error = "No save found at " + path;
@@ -238,7 +254,9 @@ std::optional<GameState> SaveManager::load(const std::string& slotId) {
 }
 
 bool SaveManager::hasSave(const std::string& slotId) {
-    return FileSystem::exists(getSavePath(slotId));
+    std::string path = getSavePath(slotId);
+    if (path.empty()) return false;
+    return FileSystem::exists(path);
 }
 
 std::vector<SaveManager::SlotMetadata> SaveManager::listSlots(int maxSlots) {

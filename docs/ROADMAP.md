@@ -2,7 +2,7 @@
 
 ## Active Direction
 
-- **Phase 11 (Current):** Complete Product Platform. Focus: release hardening,
+- **Phase 12 (Current):** Product UX And AI Studio. Focus: launcher/startup polish,
   Windows packaging, onboarding, end-to-end authoring workflows, professional
   editor/runtime/database polish, asset import and generation pipelines,
   optional AI editor tooling, provider safety, continuous audits, QA

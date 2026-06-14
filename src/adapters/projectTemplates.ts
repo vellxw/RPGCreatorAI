@@ -2,6 +2,7 @@ import type { FullProjectState } from './types';
 import { mergeDatabases } from './defaultDatabases';
 import { EMPTY_ASSET_CATALOG } from './defaultAssetCatalog';
 import type { MapData } from '../types/project';
+import { getSceneTemplate } from '../templates/sceneTemplates';
 import { DEFAULT_VISUAL_PROFILE } from '../visual/visualProfile';
 
 import tilesetsJson from '../../data/database/tilesets.json';
@@ -16,10 +17,14 @@ function projectTitle(input: string | undefined): string {
 }
 
 function createStarterMap(): MapData {
-  const width = 20;
-  const height = 15;
+  const template = getSceneTemplate('town-street-16x9');
+  const source = deepClone(template.map);
+  const width = source.width;
+  const height = source.height;
   const tileSize = DEFAULT_VISUAL_PROFILE.tileSize;
   const count = width * height;
+  const sourceGround = source.layers.find(layer => layer.name === 'ground')?.tiles ?? new Array(count).fill(1);
+  const sourceCollision = source.layers.find(layer => layer.name === 'collision')?.tiles ?? new Array(count).fill(0);
   return {
     schemaVersion: 1,
     id: 'town',
@@ -35,13 +40,13 @@ function createStarterMap(): MapData {
     height,
     tileSize,
     layers: [
-      { name: 'ground', type: 'visual', role: 'ground', visible: true, locked: false, tiles: new Array(count).fill(1) },
+      { name: 'ground', type: 'visual', role: 'ground', visible: true, locked: false, tiles: sourceGround },
       { name: 'decoration', type: 'visual', role: 'decoration', visible: true, locked: false, tiles: new Array(count).fill(0) },
       { name: 'foreground', type: 'visual', role: 'foreground', visible: true, locked: false, tiles: new Array(count).fill(0) },
-      { name: 'collision', type: 'collision', role: 'collision', visible: true, locked: false, tiles: new Array(count).fill(0) },
+      { name: 'collision', type: 'collision', role: 'collision', visible: true, locked: false, tiles: sourceCollision },
       { name: 'region', type: 'region', role: 'region', visible: true, locked: false, tiles: new Array(count).fill(0) },
     ],
-    events: [],
+    events: source.events,
   };
 }
 
@@ -52,7 +57,7 @@ export function createNewProjectState(title?: string): FullProjectState {
       schemaVersion: 1,
       title: projectTitle(title),
       startMapId: map.id,
-      startPosition: { x: 10, y: 7, direction: 'down' },
+      startPosition: deepClone(getSceneTemplate('town-street-16x9').startPosition),
       maps: [{ id: map.id, path: 'data/maps/town.json', parentId: null, order: 0, expanded: true }],
       database: {
         items: 'data/database/items.json',

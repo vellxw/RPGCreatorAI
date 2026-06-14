@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 namespace {
 
@@ -93,25 +94,25 @@ private:
         for (int i = 0; i < repeatCount; ++i) {
             if (cvt.needed) {
                 cvt.len = static_cast<int>(wavLength);
-                cvt.buf = static_cast<Uint8*>(SDL_malloc(cvt.len * cvt.len_mult));
-                if (!cvt.buf) {
+                Uint8* tempBuf = static_cast<Uint8*>(SDL_malloc(cvt.len * cvt.len_mult));
+                if (!tempBuf) {
                     Logger::warning("AudioSystem: failed to allocate audio conversion buffer");
                     return false;
                 }
+                std::unique_ptr<Uint8, decltype(&SDL_free)> bufferGuard(tempBuf, SDL_free);
+                cvt.buf = tempBuf;
+
                 std::memcpy(cvt.buf, wavBuffer, wavLength);
                 if (SDL_ConvertAudio(&cvt) != 0) {
                     Logger::warning(std::string("AudioSystem: SDL_ConvertAudio failed: ") +
                                     SDL_GetError());
-                    SDL_free(cvt.buf);
                     return false;
                 }
                 if (SDL_QueueAudio(device_, cvt.buf, static_cast<Uint32>(cvt.len_cvt)) != 0) {
                     Logger::warning(std::string("AudioSystem: SDL_QueueAudio failed: ") +
                                     SDL_GetError());
-                    SDL_free(cvt.buf);
                     return false;
                 }
-                SDL_free(cvt.buf);
             } else if (SDL_QueueAudio(device_, wavBuffer, wavLength) != 0) {
                 Logger::warning(std::string("AudioSystem: SDL_QueueAudio failed: ") +
                                 SDL_GetError());

@@ -78,6 +78,9 @@ describe('project startup actions', () => {
     expect(state.project.title).toBe('Crystal Garden');
     expect(state.project.startMapId).toBe('town');
     expect(Object.keys(state.maps)).toEqual(['town']);
+    expect(state.maps.town.width).toBe(40);
+    expect(state.maps.town.height).toBe(23);
+    expect(state.maps.town.events.length).toBeGreaterThan(0);
     expect(state.maps.town.layers.map(layer => layer.role)).toEqual([
       'ground',
       'decoration',

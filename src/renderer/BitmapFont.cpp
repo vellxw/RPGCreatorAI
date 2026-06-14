@@ -117,7 +117,6 @@ void BitmapFont::drawText(SDL_Renderer* renderer,
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
     int cursor = x;
-    const int colSpace = 1; // 1px gap between glyphs at scale 1
     for (char c : text) {
         const Glyph* glyph = findGlyph(c);
         if (glyph) {
@@ -137,11 +136,11 @@ void BitmapFont::drawText(SDL_Renderer* renderer,
                 }
             }
         }
-        cursor += (GlyphWidth + colSpace) * scale;
+        cursor += (GlyphWidth + ColSpace) * scale;
     }
 }
 
 int BitmapFont::measureWidth(const std::string& text, int scale) {
     if (text.empty() || scale < 1) return 0;
-    return static_cast<int>(text.size()) * (GlyphWidth + 1) * scale;
+    return static_cast<int>(text.size()) * (GlyphWidth + ColSpace) * scale;
 }

@@ -18,7 +18,7 @@ bool FileSystem::writeFile(const std::string& path, const std::string& content) 
         return false;
     }
     file << content;
-    return true;
+    return !file.fail();
 }
 
 bool FileSystem::exists(const std::string& path) {

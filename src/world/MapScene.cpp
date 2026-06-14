@@ -1,4 +1,5 @@
 #include "world/MapScene.h"
+#include "core/GameConstants.h"
 #include <algorithm>
 
 namespace {
@@ -52,7 +53,7 @@ bool MapScene::isSolidAt(int x, int y) const {
     }
 
     int collisionTile = getTileAt("collision", x, y);
-    if (collisionTile == 9) {
+    if (collisionTile == GameConstants::kCollisionTileId) {
         return true;
     }
 

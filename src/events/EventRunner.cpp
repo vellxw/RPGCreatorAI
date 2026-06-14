@@ -39,22 +39,20 @@ void EventRunner::runCommandList(const std::vector<std::shared_ptr<EventCommand>
     }
 
     // Push commands in reverse order so we process them front-to-back via pop_back.
-    for (size_t index = commands.size(); index > 0; --index) {
-        const size_t commandIndex = index - 1;
-        commandStack.push_back({commands[commandIndex], std::to_string(commandIndex)});
+    for (size_t i = commands.size(); i-- > 0; ) {
+        commandStack.push_back({commands[i], std::to_string(i)});
     }
     executing = !commandStack.empty();
 }
 
 void EventRunner::pushFront(const std::vector<std::shared_ptr<EventCommand>>& branch,
                             const std::string& parentPath) {
-    for (size_t index = branch.size(); index > 0; --index) {
-        const size_t commandIndex = index - 1;
+    for (size_t i = branch.size(); i-- > 0; ) {
         const std::string childPath =
             parentPath.empty()
-                ? std::to_string(commandIndex)
-                : parentPath + "." + std::to_string(commandIndex);
-        commandStack.push_back({branch[commandIndex], childPath});
+                ? std::to_string(i)
+                : parentPath + "." + std::to_string(i);
+        commandStack.push_back({branch[i], childPath});
     }
 }
 
@@ -250,8 +248,9 @@ void EventRunner::traceCommandType(const std::string& commandType,
     entry.action = action;
     entry.result = result;
     traceBuffer->record(std::move(entry));
-    if (!traceBuffer->entries().empty()) {
-        std::cout << formatEventTraceLine(traceBuffer->entries().back()) << '\n';
+    auto& entries = traceBuffer->entries();
+    if (!entries.empty()) {
+        std::cout << formatEventTraceLine(entries.back()) << '\n';
     }
 }
 

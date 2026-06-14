@@ -1,8 +1,9 @@
 #include "renderer/SpriteCatalog.h"
 #include "types/EventTypes.h"
+#include "core/GameConstants.h"
 
 std::string SpriteCatalog::tileAssetFor(int groundTile, int collisionTile) {
-    if (collisionTile == 9) {
+    if (collisionTile == GameConstants::kCollisionTileId) {
         if (groundTile == 5) return "tile_tree";
         if (groundTile == 7) return "tile_interior_wall";
         return "tile_wall";

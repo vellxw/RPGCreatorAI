@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <algorithm>
+#include <cctype>
 
 enum class Direction {
     Up,
@@ -19,8 +21,12 @@ inline std::string directionToString(Direction dir) {
 }
 
 inline Direction stringToDirection(const std::string& str) {
-    if (str == "up") return Direction::Up;
-    if (str == "left") return Direction::Left;
-    if (str == "right") return Direction::Right;
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+    if (lower == "up") return Direction::Up;
+    if (lower == "left") return Direction::Left;
+    if (lower == "right") return Direction::Right;
     return Direction::Down;
 }

@@ -272,6 +272,18 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
         map.height = j.at("height").get<int>();
         map.tileSize = j.at("tileSize").get<int>();
 
+        if (map.width <= 0 || map.height <= 0 || map.tileSize <= 0) {
+            Logger::error("Invalid map dimensions in " + path);
+            return std::nullopt;
+        }
+
+        const int64_t expected64 = static_cast<int64_t>(map.width) * static_cast<int64_t>(map.height);
+        if (expected64 > INT_MAX) {
+            Logger::error("Map dimensions too large in " + path);
+            return std::nullopt;
+        }
+        const int expected = static_cast<int>(expected64);
+
         for (const auto& layer : j.at("layers")) {
             MapLayer ml;
             ml.name = layer.at("name").get<std::string>();
@@ -282,7 +294,6 @@ std::optional<MapData> MapLoader::load(const std::string& path) {
             for (int tileId : layer.at("tiles")) {
                 ml.tiles.push_back(tileId);
             }
-            const int expected = map.width * map.height;
             if (static_cast<int>(ml.tiles.size()) != expected) {
                 Logger::error("Layer '" + ml.name + "' tile count mismatch in " + path +
                               ": expected " + std::to_string(expected) +

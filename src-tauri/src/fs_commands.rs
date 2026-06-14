@@ -105,6 +105,12 @@ pub struct ProjectData {
     pub database: DatabaseRefs,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub asset_catalog: Option<String>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "visualProfile"
+    )]
+    pub visual_profile: Option<serde_json::Value>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -416,8 +422,9 @@ pub fn fs_import_spritesheet_asset_dialog(
     match source
         .into_path()
         .map_err(|e| e.to_string())
-        .and_then(|path| import_spritesheet_asset_file(&canonical, &path, &existing_asset_ids, metadata))
-    {
+        .and_then(|path| {
+            import_spritesheet_asset_file(&canonical, &path, &existing_asset_ids, metadata)
+        }) {
         Ok(asset) => Ok(SpritesheetImportResult {
             success: true,
             cancelled: false,
@@ -460,8 +467,9 @@ pub fn fs_import_tileset_asset_dialog(
     match source
         .into_path()
         .map_err(|e| e.to_string())
-        .and_then(|path| import_tileset_asset_file(&canonical, &path, &existing_asset_ids, metadata))
-    {
+        .and_then(|path| {
+            import_tileset_asset_file(&canonical, &path, &existing_asset_ids, metadata)
+        }) {
         Ok(asset) => Ok(TilesetImportResult {
             success: true,
             cancelled: false,
@@ -740,7 +748,11 @@ fn create_playtest_session_at(
 
     write_project_snapshot(&session_root, &project, project_state)?;
     copy_optional_dir(&source_root.join("assets"), &session_root.join("assets"))?;
-    let pruned = prune_playtest_sessions(sessions_base, MAX_PLAYTEST_SESSIONS, Some(&session_root))?;
+    if !session_root.join("assets").exists() {
+        copy_bundled_assets_if_available(&session_root)?;
+    }
+    let pruned =
+        prune_playtest_sessions(sessions_base, MAX_PLAYTEST_SESSIONS, Some(&session_root))?;
 
     Ok(PlaytestSessionResult {
         success: true,
@@ -911,7 +923,8 @@ fn import_image_asset_file(
     let source = source
         .canonicalize()
         .map_err(|e| format!("source image {}: {e}", source.display()))?;
-    let metadata = fs::metadata(&source).map_err(|e| format!("source image {}: {e}", source.display()))?;
+    let metadata =
+        fs::metadata(&source).map_err(|e| format!("source image {}: {e}", source.display()))?;
     if !metadata.is_file() {
         return Err(format!("source image {} is not a file", source.display()));
     }
@@ -999,7 +1012,10 @@ fn import_spritesheet_asset_file(
     let file_metadata = fs::metadata(&source)
         .map_err(|e| format!("source spritesheet {}: {e}", source.display()))?;
     if !file_metadata.is_file() {
-        return Err(format!("source spritesheet {} is not a file", source.display()));
+        return Err(format!(
+            "source spritesheet {} is not a file",
+            source.display()
+        ));
     }
 
     let extension = source
@@ -1323,6 +1339,18 @@ fn copy_optional_dir(source: &Path, target: &Path) -> Result<(), String> {
     Ok(())
 }
 
+fn copy_bundled_assets_if_available(project_root: &Path) -> Result<(), String> {
+    let bundled_assets = Path::new("assets");
+    if !bundled_assets.is_dir() {
+        return Ok(());
+    }
+    let target = project_root.join("assets");
+    if target.exists() {
+        return Ok(());
+    }
+    copy_optional_dir(bundled_assets, &target)
+}
+
 fn prune_playtest_sessions(
     base: &Path,
     keep: usize,
@@ -1497,7 +1525,12 @@ fn ensure_new_project_target(root: &Path) -> Result<(), String> {
             ));
         }
         let mut entries = fs::read_dir(&data_dir).map_err(|e| e.to_string())?;
-        if entries.next().transpose().map_err(|e| e.to_string())?.is_some() {
+        if entries
+            .next()
+            .transpose()
+            .map_err(|e| e.to_string())?
+            .is_some()
+        {
             return Err(format!(
                 "selected folder has a non-empty data directory at {}",
                 data_dir.display()
@@ -1513,7 +1546,10 @@ fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
     serde_json::from_slice(&bytes).map_err(|e| format!("parse {}: {e}", path.display()))
 }
 
-fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result<SaveResult, String> {
+fn write_new_project_at(
+    root: &Path,
+    project_state: &FullProjectState,
+) -> Result<SaveResult, String> {
     ensure_new_project_target(root)?;
 
     let mut map_paths = HashSet::new();
@@ -1542,7 +1578,11 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
         let map_value = project_state.maps.get(&map_ref.id).unwrap();
         write_new_json(root, &map_ref.path, map_value)?;
     }
-    write_new_json(root, &project_state.project.database.items, &project_state.items)?;
+    write_new_json(
+        root,
+        &project_state.project.database.items,
+        &project_state.items,
+    )?;
     if let Some(rel) = project_state.project.asset_catalog.as_ref() {
         write_new_json(root, rel, &project_state.assets)?;
     }
@@ -1605,6 +1645,9 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
     if let Err(e) = ensure_gitignore_mentions_backups(root) {
         warnings.push(format!("could not update .gitignore: {e}"));
     }
+    if let Err(e) = copy_bundled_assets_if_available(root) {
+        warnings.push(format!("could not copy bundled runtime assets: {e}"));
+    }
 
     Ok(SaveResult {
         success: true,
@@ -1617,7 +1660,10 @@ fn write_new_project_at(root: &Path, project_state: &FullProjectState) -> Result
 fn write_new_json<T: Serialize>(root: &Path, relative: &str, value: &T) -> Result<(), String> {
     let target = join_inside(root, relative).map_err(|e| e.to_string())?;
     if target.exists() {
-        return Err(format!("refusing to overwrite existing file {}", target.display()));
+        return Err(format!(
+            "refusing to overwrite existing file {}",
+            target.display()
+        ));
     }
 
     let pretty =
@@ -1636,7 +1682,8 @@ fn write_new_json<T: Serialize>(root: &Path, relative: &str, value: &T) -> Resul
         .map_err(|e| format!("create {}: {e}", target.display()))?;
     f.write_all(pretty.as_bytes())
         .map_err(|e| format!("write {}: {e}", target.display()))?;
-    f.sync_all().map_err(|e| format!("fsync {}: {e}", target.display()))?;
+    f.sync_all()
+        .map_err(|e| format!("fsync {}: {e}", target.display()))?;
 
     Ok(())
 }
@@ -1857,6 +1904,15 @@ mod tests {
                 audio: None,
             },
             asset_catalog: Some("data/assets/catalog.json".into()),
+            visual_profile: Some(serde_json::json!({
+                "aspectRatio": "16:9",
+                "baseResolution": { "width": 1280, "height": 720 },
+                "tileSize": 32,
+                "cameraMode": "follow-player",
+                "mapPresentation": "full-scene",
+                "zoom": 1,
+                "integerScale": true
+            })),
         };
         let mut maps = HashMap::new();
         maps.insert(
@@ -1915,6 +1971,19 @@ mod tests {
         assert!(root.join("data/database/system.json").is_file());
         assert!(root.join("data/database/tilesets.json").is_file());
         assert!(root.join("data/assets/catalog.json").is_file());
+        assert!(root.join("data/project.json").is_file());
+        let project_json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(root.join("data/project.json")).unwrap())
+                .unwrap();
+        assert_eq!(
+            project_json["visualProfile"]["aspectRatio"].as_str(),
+            Some("16:9")
+        );
+        if Path::new("assets/generated/runtime/tile_grass.bmp").exists() {
+            assert!(root
+                .join("assets/generated/runtime/tile_grass.bmp")
+                .is_file());
+        }
         let reloaded = read_project_at(&root).unwrap();
         assert_eq!(reloaded.project.title, "New Game");
         assert!(reloaded.maps.contains_key("town"));
@@ -1922,7 +1991,9 @@ mod tests {
             reloaded.assets["assets"][0]["id"].as_str(),
             Some("starter_asset")
         );
-        assert!(fs::read_to_string(root.join(".gitignore")).unwrap().contains(".backups/"));
+        assert!(fs::read_to_string(root.join(".gitignore"))
+            .unwrap()
+            .contains(".backups/"));
     }
 
     #[test]
@@ -1933,7 +2004,11 @@ mod tests {
         let source = source_tmp.path().join("Castle Gate.PNG");
         fs::write(&source, b"fixture image").unwrap();
         fs::create_dir_all(root.join("assets/imported/images")).unwrap();
-        fs::write(root.join("assets/imported/images/castle-gate.png"), b"existing").unwrap();
+        fs::write(
+            root.join("assets/imported/images/castle-gate.png"),
+            b"existing",
+        )
+        .unwrap();
 
         let imported = import_image_asset_file(&root, &source, &["castle_gate".into()]).unwrap();
 
@@ -2025,7 +2100,11 @@ mod tests {
         let source = source_tmp.path().join("Forest Pack.PNG");
         fs::write(&source, b"tileset fixture").unwrap();
         fs::create_dir_all(root.join("assets/imported/tilesets")).unwrap();
-        fs::write(root.join("assets/imported/tilesets/forest-pack.png"), b"existing").unwrap();
+        fs::write(
+            root.join("assets/imported/tilesets/forest-pack.png"),
+            b"existing",
+        )
+        .unwrap();
 
         let imported = import_tileset_asset_file(
             &root,
@@ -2093,7 +2172,9 @@ mod tests {
                 tile_count: 64,
             },
         );
-        assert!(bad_extension.unwrap_err().contains("Unsupported tileset type"));
+        assert!(bad_extension
+            .unwrap_err()
+            .contains("Unsupported tileset type"));
         assert!(!root.join("assets/imported/tilesets/forest.txt").exists());
     }
 
@@ -2105,7 +2186,11 @@ mod tests {
         let source = source_tmp.path().join("Town Loop.WAV");
         fs::write(&source, b"audio fixture").unwrap();
         fs::create_dir_all(root.join("assets/imported/audio")).unwrap();
-        fs::write(root.join("assets/imported/audio/town-loop.wav"), b"existing").unwrap();
+        fs::write(
+            root.join("assets/imported/audio/town-loop.wav"),
+            b"existing",
+        )
+        .unwrap();
 
         let imported = import_audio_asset_file(
             &root,
@@ -2159,7 +2244,9 @@ mod tests {
                 usage: "sfx".into(),
             },
         );
-        assert!(bad_extension.unwrap_err().contains("Unsupported audio type"));
+        assert!(bad_extension
+            .unwrap_err()
+            .contains("Unsupported audio type"));
         assert!(!root.join("assets/imported/audio/theme.mp3").exists());
     }
 
@@ -2275,10 +2362,17 @@ mod tests {
         let session_root = PathBuf::from(result.session_root.unwrap());
         let session_project: ProjectData =
             read_json(&session_root.join("data/project.json")).unwrap();
-        let source_project: ProjectData = read_json(&source_root.join("data/project.json")).unwrap();
+        let source_project: ProjectData =
+            read_json(&source_root.join("data/project.json")).unwrap();
         assert_eq!(session_project.start_map_id, source_project.start_map_id);
-        assert_eq!(session_project.start_position.x, source_project.start_position.x);
-        assert_eq!(session_project.start_position.y, source_project.start_position.y);
+        assert_eq!(
+            session_project.start_position.x,
+            source_project.start_position.x
+        );
+        assert_eq!(
+            session_project.start_position.y,
+            source_project.start_position.y
+        );
         assert_eq!(
             session_project.start_position.direction,
             source_project.start_position.direction
@@ -2410,6 +2504,7 @@ mod tests {
                 audio: None,
             },
             asset_catalog: None,
+            visual_profile: None,
         };
 
         let json = serde_json::to_value(project).unwrap();

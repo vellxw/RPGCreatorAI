@@ -1,6 +1,8 @@
 #include "renderer/Renderer2D.h"
 #include "renderer/BitmapFont.h"
 #include "renderer/SpriteCatalog.h"
+#include "platform/FileSystem.h"
+#include "core/Logger.h"
 #include <SDL.h>
 #include <algorithm>
 #include <cmath>
@@ -79,8 +81,9 @@ void Renderer2D::renderMap(const MapScene& scene, const Camera2D& camera, MapRen
 
         for (int y = firstY; y <= lastY; ++y) {
             for (int x = firstX; x <= lastX; ++x) {
-                const int index = y * width + x;
-                if (index < 0 || index >= static_cast<int>(layer->tiles.size())) continue;
+                const int64_t index64 = static_cast<int64_t>(y) * static_cast<int64_t>(width) + static_cast<int64_t>(x);
+                if (index64 < 0 || index64 >= static_cast<int64_t>(layer->tiles.size())) continue;
+                const int index = static_cast<int>(index64);
 
                 const int tileId = layer->tiles[index];
                 if (transparentZero && tileId == 0) continue;
@@ -236,7 +239,14 @@ SDL_Texture* Renderer2D::textureFor(const std::string& assetKey) {
     auto it = textures.find(assetKey);
     if (it != textures.end()) return it->second;
 
-    SDL_Surface* surface = SDL_LoadBMP(SpriteCatalog::runtimePathFor(assetKey).c_str());
+    const std::string path = SpriteCatalog::runtimePathFor(assetKey);
+    if (!FileSystem::exists(path)) {
+        Logger::warning("Sprite asset file does not exist: " + path);
+        textures[assetKey] = nullptr;
+        return nullptr;
+    }
+
+    SDL_Surface* surface = SDL_LoadBMP(path.c_str());
     if (!surface) {
         textures[assetKey] = nullptr;
         return nullptr;

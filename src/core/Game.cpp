@@ -1,6 +1,7 @@
 #include "core/Game.h"
 #include "core/Logger.h"
 #include "core/MovementSpeed.h"
+#include "core/GameConstants.h"
 #include "events/EventPageEvaluator.h"
 #include "world/MapLoader.h"
 #include "world/CollisionSystem.h"
@@ -59,7 +60,9 @@ EntityRenderPriority renderPriorityFromEventPriority(const std::string& priority
 } // namespace
 
 Game::Game() = default;
-Game::~Game() = default;
+Game::~Game() {
+    audioSystem = nullptr;
+}
 
 bool Game::initialize(Window& window, const ProjectData& projectData,
                       rpg::AudioSystem* audioSystemIn) {
@@ -339,7 +342,7 @@ bool Game::canPlayerMoveTo(int targetX, int targetY) const {
         }
     }
 
-    return currentScene.getTileAt("collision", targetX, targetY) != 9;
+    return currentScene.getTileAt("collision", targetX, targetY) != GameConstants::kCollisionTileId;
 }
 
 void Game::finalizeSmoothStepIfNeeded() {
@@ -641,7 +644,7 @@ bool Game::canEventMoveTo(const std::string& eventId, int targetX, int targetY) 
     const bool through = activeMovingPage && activeMovingPage->options.through;
     if (through) return true;
 
-    if (currentScene.getTileAt("collision", targetX, targetY) == 9) {
+    if (currentScene.getTileAt("collision", targetX, targetY) == GameConstants::kCollisionTileId) {
         return false;
     }
 
