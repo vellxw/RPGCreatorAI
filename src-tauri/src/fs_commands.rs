@@ -748,9 +748,7 @@ fn create_playtest_session_at(
 
     write_project_snapshot(&session_root, &project, project_state)?;
     copy_optional_dir(&source_root.join("assets"), &session_root.join("assets"))?;
-    if !session_root.join("assets").exists() {
-        copy_bundled_assets_if_available(&session_root)?;
-    }
+    copy_bundled_assets_if_available(&session_root)?;
     let pruned =
         prune_playtest_sessions(sessions_base, MAX_PLAYTEST_SESSIONS, Some(&session_root))?;
 
