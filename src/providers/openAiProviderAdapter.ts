@@ -511,6 +511,17 @@ class OpenAiProviderAdapter implements ProviderAdapter {
       });
     }
     if (!this.metadata.operations.includes(request.operation)) return unsupportedResponse(request);
+
+    const modelId = modelFor(request, '');
+    const modelDescriptor = this.metadata.models.find(m => m.id === modelId);
+    if (modelId && modelDescriptor && !modelDescriptor.operations.includes(request.operation)) {
+      return failedResponse(request, {
+        kind: 'unsupported-operation',
+        message: `Model '${modelId}' does not support '${request.operation}'. Supported operations: ${modelDescriptor.operations.join(', ') || 'none'}.`,
+        retryGuidance: 'Select a model that declares this operation before retrying.',
+      });
+    }
+
     if (!this.fetcher) {
       return providerErrorResponse(request, 'Fetch API is unavailable for OpenAI provider execution.');
     }
