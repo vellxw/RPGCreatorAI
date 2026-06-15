@@ -748,7 +748,7 @@ fn create_playtest_session_at(
 
     write_project_snapshot(&session_root, &project, project_state)?;
     copy_optional_dir(&source_root.join("assets"), &session_root.join("assets"))?;
-    copy_bundled_assets_if_available(&session_root)?;
+    copy_bundled_assets_if_available(&session_root, source_root)?;
     let pruned =
         prune_playtest_sessions(sessions_base, MAX_PLAYTEST_SESSIONS, Some(&session_root))?;
 
@@ -1337,13 +1337,13 @@ fn copy_optional_dir(source: &Path, target: &Path) -> Result<(), String> {
     Ok(())
 }
 
-fn copy_bundled_assets_if_available(project_root: &Path) -> Result<(), String> {
-    let bundled_assets = Path::new("assets");
+fn copy_bundled_assets_if_available(project_root: &Path, source_root: &Path) -> Result<(), String> {
+    let bundled_assets = source_root.join("..").join("assets");
     if !bundled_assets.is_dir() {
         return Ok(());
     }
     let target = project_root.join("assets");
-    copy_optional_dir(bundled_assets, &target)
+    copy_optional_dir(&bundled_assets, &target)
 }
 
 fn prune_playtest_sessions(
@@ -1640,7 +1640,7 @@ fn write_new_project_at(
     if let Err(e) = ensure_gitignore_mentions_backups(root) {
         warnings.push(format!("could not update .gitignore: {e}"));
     }
-    if let Err(e) = copy_bundled_assets_if_available(root) {
+    if let Err(e) = copy_bundled_assets_if_available(root, root) {
         warnings.push(format!("could not copy bundled runtime assets: {e}"));
     }
 
