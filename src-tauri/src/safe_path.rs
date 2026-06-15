@@ -22,15 +22,17 @@ fn user_home() -> Option<PathBuf> {
 
 /// Canonicalise `input` and reject anything that resolves outside the user's
 /// home directory. Symlink escape is handled by the canonicalize() call.
+/// Uses dunce::canonicalize to avoid Windows UNC \\?\ prefix issues with
+/// OneDrive and other filesystem mini-filter drivers.
 pub fn canonicalize_inside_user_space<P: AsRef<Path>>(input: P) -> Result<PathBuf, SafePathError> {
-    let canonical = std::fs::canonicalize(input.as_ref())
+    let canonical = dunce::canonicalize(input.as_ref())
         .map_err(|e| match e.kind() {
             std::io::ErrorKind::NotFound => SafePathError::NotFound(input.as_ref().display().to_string()),
             _ => SafePathError::Io(e.to_string()),
         })?;
 
     if let Some(home) = user_home() {
-        let home_canonical = std::fs::canonicalize(&home).unwrap_or(home);
+        let home_canonical = dunce::canonicalize(&home).unwrap_or(home);
         if !canonical.starts_with(&home_canonical) {
             return Err(SafePathError::OutsideUserSpace);
         }
