@@ -1338,7 +1338,7 @@ fn copy_optional_dir(source: &Path, target: &Path) -> Result<(), String> {
 }
 
 fn copy_bundled_assets_if_available(project_root: &Path, source_root: &Path) -> Result<(), String> {
-    let bundled_assets = source_root.join("..").join("assets");
+    let bundled_assets = source_root.join("assets");
     if !bundled_assets.is_dir() {
         return Ok(());
     }
