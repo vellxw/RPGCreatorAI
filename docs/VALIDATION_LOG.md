@@ -4,6 +4,30 @@ Append-only log of major validation runs. Newest entries on top.
 
 ---
 
+### Phase 12 FRA-464 / PX-030 - M01 Launcher Startup Integration Gate
+
+- `2026-06-15 18:52:00 -03:00` - M01 gate validation - PASS.
+  Resumed the In Progress FRA-464 / PX-030, audited all PX-011 through
+  PX-029 closure comments and commit hashes against git log and
+  origin/main, and ran the final M01-wide validation set. No Computer
+  Use or live paid provider call was used.
+- `git status --short --branch` - clean except for `.commandcode/taste/`,
+  `.playwright-cli/`, `output/`, and the untracked `docs/analysis/`
+  technical audit directory. None of those are M01 scope.
+- `git rev-parse HEAD` = `cbca94eca48501ffae8df9d16ce275608188b60c`
+  matches `git rev-parse origin/main`; no divergence.
+- `git log --oneline -30` confirms all 19 M01 leaf commits
+  (`b22ca09` PX-011 through `0de184a` PX-029) are present in
+  `origin/main`.
+- `npm run typecheck` - PASS; `tsc --noEmit` completed with no
+  diagnostics.
+- `npm test -- --run src/__tests__/AppStartup.test.tsx
+  src/components/project/__tests__/ProjectStartupScreen.test.tsx
+  src/startup/__tests__/startupRecovery.test.ts` - PASS, 3 files /
+  25 tests.
+- Linear evidence table and coherence checks recorded in
+  `docs/PHASE_12_M01_INTEGRATION_GATE.md`.
+
 ### Phase 12 - Critical Bug Fixes and Quick Wins
 
 - `2026-06-14 05:00:00 -03:00` - Critical Bug Fixes and Quick Wins Validation - PASS.
