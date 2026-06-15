@@ -1343,9 +1343,6 @@ fn copy_bundled_assets_if_available(project_root: &Path) -> Result<(), String> {
         return Ok(());
     }
     let target = project_root.join("assets");
-    if target.exists() {
-        return Ok(());
-    }
     copy_optional_dir(bundled_assets, &target)
 }
 
