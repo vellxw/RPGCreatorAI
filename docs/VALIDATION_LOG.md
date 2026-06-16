@@ -1,3 +1,24 @@
+## FRA-481 / PX-047 — AI Studio Sidebar Navigation Entry
+- timestamp: 2026-06-16 21:02 UTC
+- commands:
+  - npx tsc --noEmit                            -> PASS (0 errors)
+  - npx vitest run PrimaryNavigation            -> PASS (2/2 tests)
+  - npx vitest run                              -> PASS (720/720, 0 regressions)
+- files staged (scoped): 7
+  - src/types/project.ts (Screen union: add 'ai-studio')
+  - src/stores/editorStore.ts (activeProjectId + SET_ACTIVE_PROJECT action)
+  - src/components/layout/Sidebar.tsx (AI Studio nav item with Bot icon)
+  - src/components/layout/TopToolbar.tsx (renderAIStudioToolbar + toolbar map entry)
+  - src/components/ai/AIStudioScreen.tsx (new shell component, presentational only)
+  - src/App.tsx (route wiring with defaultProviderConfigs, fixed named import)
+  - src/components/layout/__tests__/PrimaryNavigation.test.tsx (asserts AI Studio entry + click dispatch)
+- commit: 84b1a2f feat(ai-studio): integrate AI Studio screen into primary navigation and add code-analysis docs
+- push:    814483b..84b1a2f main -> main
+- Linear: FRA-481 -> In Progress at 2026-06-16T21:02:06.488Z, -> Done (pending evidence comment)
+- nav order: Maps, Events, Database, Assets, Playtest, AI Studio, Settings (does not displace core workflows)
+- active state: handled by existing Sidebar active-screen check
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+
 ## FRA-480 / PX-046 — Safe Context Boundary Redaction
 - timestamp: 2026-06-16 00:42 UTC
 - commands:
