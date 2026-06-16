@@ -1,3 +1,21 @@
+## FRA-472 / PX-038 — Disabled Provider State
+- timestamp: 2026-06-15 23:40 UTC
+- commands:
+  - npm test -- --run ProviderAvailabilityBanner -> PASS (10/10 new tests)
+  - npm run typecheck                          -> PASS (0 errors)
+  - npm test -- --run                          -> PASS (630/630, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/ProviderAvailabilityBanner.tsx (new, 175 lines)
+  - src/components/ai/__tests__/ProviderAvailabilityBanner.test.tsx (new, 179 lines)
+- commit: 1a8ecc2 feat(ai-studio): add provider availability banner and selector
+- push:    5e97f29..1a8ecc2 main -> main
+- Linear: FRA-472 -> Done at 2026-06-16T02:39:12.287Z
+- Linear comment: 06815290-21de-4cb5-bfdc-64ae5691d0e8
+- TDD path: RED (no module) -> RED x2 (mock-only + ready-vs-mock semantics) -> GREEN 10/10
+- secret-leak guards: copy asserted against /sk-|api_key|secret|password/ in tests
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending (re-run after this commit)
+
 ## FRA-471 / PX-037 — AI Studio Empty State
 - timestamp: 2026-06-15 23:30 UTC
 - commands:
