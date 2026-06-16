@@ -11,9 +11,9 @@
   - src/components/ai/ChatTranscript.tsx (new, 122 lines, presentational)
   - src/components/ai/__tests__/ChatTranscript.test.tsx (new, 6 tests)
   - src/components/ai/AIStudioScreen.tsx (host: useReducer, host-driven mock loop on starter click, no auto-mutation)
-- commit: <pending>
-- push:    <pending>
-- Linear: FRA-482 -> In Progress at <pending>
+- commit: 9f9a46f feat(ai-studio): add loading and streaming states for chat requests
+- push:    fcd8cdc..9f9a46f main -> main
+- Linear: FRA-482 update pending (Linear MCP returned HTTP 401 during session; requires re-auth via `cmd mcp auth linear` before comment + state transition can be posted)
 - phases: pending | streaming | completed | canceled | failed
 - accessibility: role=status + aria-live=polite (default) or assertive (failed only); data-state and data-request-id for downstream code
 - copy: non-technical ("Preparing your draft", "Drafting your outline", "Your draft is ready below", "You canceled this draft", "Try again"); no model/token/api jargon
