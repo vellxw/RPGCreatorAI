@@ -1,3 +1,55 @@
+## FRA-471 / PX-037 — AI Studio Empty State
+- timestamp: 2026-06-15 23:30 UTC
+- commands:
+  - npm test -- --run AIStudioEmptyState  -> PASS (7/7 new tests)
+  - npm run typecheck                     -> PASS (0 errors)
+  - npm test -- --run                     -> PASS (620/620, 0 regressions)
+- files staged (scoped): 3
+  - src/components/ai/AIStudioEmptyState.tsx (new, 110 lines)
+  - src/components/ai/__tests__/AIStudioEmptyState.test.tsx (new, 88 lines)
+  - scripts/dev/snapshot-ai-studio-empty-state.mjs (new, 60 lines)
+- commit: b3e0fba feat(ai-studio): add AI Studio empty state component
+- push:    3576a23..b3e0fba main -> main
+- Linear: FRA-471 -> Done at 2026-06-16T02:29:44.669Z
+- Linear comment: f12f8c15-9113-4965-8027-ea665d4bdea7
+- visual snapshot: output/autoprompt/run/20260615-1848/evidence/FRA-471/screenshot.html
+- TDD path: RED (no module) -> RED 3 (variant guards + copy + click) -> GREEN 7/7
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending (re-run after this commit)
+
+## FRA-470 / PX-036 — Database Context Binding (foundation)
+- timestamp: 2026-06-15 23:21 UTC
+- commands:
+  - npm run typecheck                          -> PASS (0 errors)
+  - npm test -- --run databaseContextStore     -> PASS (14/14 new tests)
+  - npm test -- --run                          -> PASS (613/613, 0 regressions)
+- files staged (scoped): 2
+  - src/stores/databaseContextStore.tsx        (new, 229 lines)
+  - src/stores/__tests__/databaseContextStore.test.ts (new, 213 lines)
+- commit: 3576a23 feat(ai-studio): add bounded database context store foundation
+- push:    22515e0..3576a23 main -> main
+- Linear: FRA-470 -> Done at 2026-06-16T02:21:05.406Z
+- Linear comment: 71593f9c-3933-4095-9757-0eb2c3348f4b
+- scope note: foundation only; UI panel + AIRequestQueuePanel wire split to follow-up issue (quit-guard #11)
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: ALL CHECKS PASSED
+
+## FRA-470 / PX-036 — Database Context Binding (foundation)
+- timestamp: 2026-06-15 23:21 UTC
+- commands:
+  - npm run typecheck                          -> PASS (0 errors)
+  - npm test -- --run databaseContextStore     -> PASS (14/14 new tests)
+  - npm test -- --run                          -> PASS (613/613, 0 regressions)
+- files staged (scoped): 2
+  - src/stores/databaseContextStore.tsx        (new, 229 lines)
+  - src/stores/__tests__/databaseContextStore.test.ts (new, 213 lines)
+- commit: 3576a23 feat(ai-studio): add bounded database context store foundation
+- push:    22515e0..3576a23 main -> main
+- Linear: FRA-470 -> Done at 2026-06-16T02:21:05.406Z
+- Linear comment: 71593f9c-3933-4095-9757-0eb2c3348f4b
+- scope note: foundation only; UI panel + AIRequestQueuePanel wire split to follow-up issue (quit-guard #11)
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: ALL CHECKS PASSED
 # Validation Log
 
 Append-only log of major validation runs. Newest entries on top.
