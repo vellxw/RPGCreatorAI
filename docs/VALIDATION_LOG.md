@@ -1,3 +1,20 @@
+## FRA-476 / PX-042 — Preview Apply Reject Controls
+- timestamp: 2026-06-16 00:22 UTC
+- commands:
+  - npm test -- --run previewControls       -> PASS (10/10 new tests)
+  - npm run typecheck                       -> PASS (0 errors)
+  - npm test -- --run                       -> PASS (670/670, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/previewControls.ts (new, 91 lines)
+  - src/components/ai/__tests__/previewControls.test.ts (new, 100 lines)
+- commit: e894608 feat(ai-studio): add preview controls state machine reducer
+- push:    3e3ca2c..e894608 main -> main
+- Linear: FRA-476 -> Done at 2026-06-16T03:22:38.104Z
+- Linear comment: c0bd64d8-c66b-4bde-a727-04d6b533e3b3
+- TDD path: RED (no module) -> GREEN 10/10 (after dropping the @testing-library/react test by reflex)
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending
+
 ## FRA-475 / PX-041 — Action Card Preview UI
 - timestamp: 2026-06-16 00:18 UTC
 - commands:
