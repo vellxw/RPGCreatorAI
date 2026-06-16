@@ -1,3 +1,21 @@
+## FRA-477 / PX-043 — Chat History Persistence Boundary
+- timestamp: 2026-06-16 00:28 UTC
+- commands:
+  - npm test -- --run chatHistoryPolicy     -> PASS (22/22 new tests)
+  - npm run typecheck                       -> PASS (0 errors)
+  - npm test -- --run                       -> PASS (692/692, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/chatHistoryPolicy.ts (new, 130 lines)
+  - src/components/ai/__tests__/chatHistoryPolicy.test.ts (new, 120 lines)
+- commit: d6e5f77 feat(ai-studio): add chat history persistence boundary with secret redaction
+- push:    ae13d40..d6e5f77 main -> main
+- Linear: FRA-477 -> Done at 2026-06-16T03:28:01.915Z
+- Linear comment: 99b6532a-8c2f-4994-a77a-4ba1f3dc38bc
+- TDD path: RED (no module) -> RED x2 (sk-proj, AIza regex too strict) -> GREEN 22/22
+- secret-leak guards: 12 patterns (OpenAI sk-*, sk-proj-*, sk_live_*, Google AIza*, GitHub ghp_*, Bearer, password=/api_key=/secret=, JSON "apiKey"/"secret", env-var assignments)
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending
+
 ## FRA-476 / PX-042 — Preview Apply Reject Controls
 - timestamp: 2026-06-16 00:22 UTC
 - commands:
