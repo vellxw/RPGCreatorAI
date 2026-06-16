@@ -1,3 +1,22 @@
+## FRA-480 / PX-046 — Safe Context Boundary Redaction
+- timestamp: 2026-06-16 00:42 UTC
+- commands:
+  - npm test -- --run contextRedaction      -> PASS (11/11 new tests)
+  - npm run typecheck                       -> PASS (0 errors)
+  - npm test -- --run                       -> PASS (720/720, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/contextRedaction.ts (new, 109 lines)
+  - src/components/ai/__tests__/contextRedaction.test.ts (new, 112 lines)
+- commit: c0a8e42 feat(ai-studio): add safe context boundary redaction for provider requests
+- push:    a4f4c9b..c0a8e42 main -> main
+- Linear: FRA-480 -> Done at 2026-06-16T03:42:53.844Z
+- Linear comment: f68b3c3e-b430-40df-b729-0371653ccf62
+- TDD path: RED (no module) -> RED x2 (allowlist comparison + ellipsis char) -> GREEN 11/11
+- allowlist: 7 fields (projectId, projectTitle, selectedRecordIds, recentMapIds, databaseTables, filesystemPathHint, sanitizedLogLines)
+- redaction: 7 secret patterns + path abbreviation + array cap
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending
+
 ## FRA-479 / PX-045 — Prompt Template Library Surface
 - timestamp: 2026-06-16 00:36 UTC
 - commands:
