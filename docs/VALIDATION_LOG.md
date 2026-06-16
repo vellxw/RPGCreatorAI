@@ -1,3 +1,21 @@
+## FRA-473 / PX-039 — Mock Provider Conversation Loop
+- timestamp: 2026-06-15 23:47 UTC
+- commands:
+  - npm test -- --run mockChatLoop           -> PASS (11/11 new tests)
+  - npm run typecheck                        -> PASS (0 errors)
+  - npm test -- --run                        -> PASS (641/641, 0 regressions)
+- files staged (scoped): 2
+  - src/providers/mockChatLoop.ts                    (new, 200 lines)
+  - src/providers/__tests__/mockChatLoop.test.ts     (new, 129 lines)
+- commit: 888824b feat(ai-studio): add deterministic mock chat conversation loop
+- push:    113db4d..888824b main -> main
+- Linear: FRA-473 -> Done at 2026-06-16T02:47:51.624Z
+- Linear comment: fb6f2c34-aa0d-4781-9a8b-40dfd6f6432a
+- TDD path: RED (no module) -> GREEN 11/11 (spec was clear, no red-2)
+- determinism guards: response id is FNV-1a hash, no providerId/modelId, no clock input
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending (re-run after this commit)
+
 ## FRA-472 / PX-038 — Disabled Provider State
 - timestamp: 2026-06-15 23:40 UTC
 - commands:
