@@ -1,3 +1,20 @@
+## FRA-475 / PX-041 — Action Card Preview UI
+- timestamp: 2026-06-16 00:18 UTC
+- commands:
+  - npm test -- --run AIActionCardPreview  -> PASS (11/11 new tests)
+  - npm run typecheck                      -> PASS (0 errors)
+  - npm test -- --run                      -> PASS (660/660, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/AIActionCardPreview.tsx (new, 152 lines)
+  - src/components/ai/__tests__/AIActionCardPreview.test.tsx (new, 122 lines)
+- commit: 99d8bf5 feat(ai-studio): add action card preview UI
+- push:    fa8c415..99d8bf5 main -> main
+- Linear: FRA-475 -> Done at 2026-06-16T03:18:17.665Z
+- Linear comment: c97b1f83-530a-4b2b-ae2c-8c8f944c2d62
+- TDD path: RED (no module) -> RED x3 (hide not disable) -> GREEN 11/11
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending
+
 ## FRA-474 / PX-040 — Task Card UI
 - timestamp: 2026-06-16 00:11 UTC
 - commands:
