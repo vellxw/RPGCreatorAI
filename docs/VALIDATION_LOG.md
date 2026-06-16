@@ -1,3 +1,26 @@
+## FRA-482 / PX-048 — AI Studio Loading And Streaming States
+- timestamp: 2026-06-16 21:25 UTC
+- commands:
+  - npx tsc --noEmit                            -> PASS (0 errors)
+  - npx vitest run chatRequest                  -> PASS (13/13 new tests)
+  - npx vitest run ChatTranscript               -> PASS (6/6 new tests)
+  - npx vitest run                              -> PASS (739/739, 0 regressions, +19 new)
+- files staged (scoped): 4
+  - src/components/ai/chatRequest.ts (new, 84 lines, pure state machine)
+  - src/components/ai/chatRequest.test.ts (new, 13 tests)
+  - src/components/ai/ChatTranscript.tsx (new, 122 lines, presentational)
+  - src/components/ai/__tests__/ChatTranscript.test.tsx (new, 6 tests)
+  - src/components/ai/AIStudioScreen.tsx (host: useReducer, host-driven mock loop on starter click, no auto-mutation)
+- commit: <pending>
+- push:    <pending>
+- Linear: FRA-482 -> In Progress at <pending>
+- phases: pending | streaming | completed | canceled | failed
+- accessibility: role=status + aria-live=polite (default) or assertive (failed only); data-state and data-request-id for downstream code
+- copy: non-technical ("Preparing your draft", "Drafting your outline", "Your draft is ready below", "You canceled this draft", "Try again"); no model/token/api jargon
+- inert by default: type=button on all buttons, no form, no programmatic navigation, no provider/store/mutation inside the component
+- TDD path: RED (chatRequest module) -> RED x2 (terminal cancel/fail) -> GREEN 13/13 -> RED (ChatTranscript) -> RED x2 (cancel button type) -> GREEN 6/6
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+
 ## FRA-481 / PX-047 — AI Studio Sidebar Navigation Entry
 - timestamp: 2026-06-16 21:02 UTC
 - commands:

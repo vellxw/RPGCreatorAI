@@ -1,9 +1,15 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import { AIStudioEmptyState } from './AIStudioEmptyState';
+import { ChatTranscript } from './ChatTranscript';
 import {
   ProviderAvailabilityBanner,
   selectProviderAvailability,
 } from './ProviderAvailabilityBanner';
+import {
+  chatRequestReducer,
+  defaultChatRequestState,
+  type ChatRequestState,
+} from './chatRequest';
 import type { ProviderConfig } from '../../types/project';
 
 export interface AIStudioScreenProps {
@@ -13,6 +19,19 @@ export interface AIStudioScreenProps {
   onSelectProvider?: (providerId: string) => void;
 }
 
+const MOCK_DRAFT_TOKENS = [
+  'Here is a draft ',
+  'outline for your ',
+  'starter task. ',
+  'Review, edit, and ',
+  'accept to continue.',
+];
+
+function nextMockToken(index: number): string | null {
+  if (index < 0 || index >= MOCK_DRAFT_TOKENS.length) return null;
+  return MOCK_DRAFT_TOKENS[index];
+}
+
 export function AIStudioScreen({
   providers,
   projectId,
@@ -20,6 +39,9 @@ export function AIStudioScreen({
   onSelectProvider = () => undefined,
 }: AIStudioScreenProps): ReactNode {
   const [lastStarterTask, setLastStarterTask] = useState<string | null>(null);
+  const [request, dispatchRequest] = useReducer(chatRequestReducer, defaultChatRequestState);
+  const tokenIndexRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const view = useMemo(() => selectProviderAvailability([...providers]), [providers]);
   const hasProject = projectId !== null;
@@ -34,6 +56,55 @@ export function AIStudioScreen({
     variant = 'project-loaded';
   }
 
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  useEffect(() => clearTimer, []);
+
+  const handleSelectStarterTask = (taskId: string) => {
+    setLastStarterTask(taskId);
+    tokenIndexRef.current = 0;
+    dispatchRequest({ type: 'reset' });
+    dispatchRequest({ type: 'start' });
+  };
+
+  const handleCancel = () => {
+    clearTimer();
+    dispatchRequest({ type: 'cancel' });
+  };
+
+  const handleReset = () => {
+    clearTimer();
+    dispatchRequest({ type: 'reset' });
+    setLastStarterTask(null);
+  };
+
+  useEffect(() => {
+    if (request.phase !== 'streaming') return undefined;
+    timerRef.current = setTimeout(() => {
+      const next = nextMockToken(tokenIndexRef.current);
+      if (next === null) {
+        dispatchRequest({ type: 'complete' });
+        clearTimer();
+        return;
+      }
+      dispatchRequest({ type: 'appendToken', token: next });
+      tokenIndexRef.current += 1;
+    }, 120);
+    return () => {
+      clearTimer();
+    };
+  }, [request]);
+
+  const showTranscript = lastStarterTask !== null && request.phase !== 'pending';
+  const userMessage = lastStarterTask
+    ? `Starter task: ${lastStarterTask}`
+    : '';
+
   return (
     <div className="flex h-full w-full flex-col gap-3 p-4" data-testid="ai-studio-screen">
       <header className="flex items-center gap-2">
@@ -46,13 +117,23 @@ export function AIStudioScreen({
         onSelectProvider={onSelectProvider}
       />
       <div className="flex-1 overflow-auto">
-        <AIStudioEmptyState
-          variant={variant}
-          hasProject={hasProject}
-          hasAnyConfiguredProvider={hasAnyConfiguredProvider}
-          onSelectStarterTask={(taskId) => setLastStarterTask(taskId)}
-        />
-        {lastStarterTask && (
+        {showTranscript ? (
+          <ChatTranscript
+            request={request as ChatRequestState}
+            userMessage={userMessage}
+            onCancel={handleCancel}
+            onReset={handleReset}
+            dataRequestId={lastStarterTask ?? 'ai-studio'}
+          />
+        ) : (
+          <AIStudioEmptyState
+            variant={variant}
+            hasProject={hasProject}
+            hasAnyConfiguredProvider={hasAnyConfiguredProvider}
+            onSelectStarterTask={handleSelectStarterTask}
+          />
+        )}
+        {!showTranscript && lastStarterTask && (
           <p
             data-testid="ai-studio-last-starter"
             className="mt-3 text-[12px] text-gray-500"
