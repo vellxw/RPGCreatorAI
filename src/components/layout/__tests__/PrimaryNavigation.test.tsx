@@ -80,9 +80,14 @@ describe('Primary navigation', () => {
     const buttons = Array.from(view.container.querySelectorAll('button'));
     const labels = buttons.map(button => button.textContent?.trim()).filter(Boolean);
 
-    expect(labels).toEqual(['Maps', 'Events', 'Database', 'Assets', 'Playtest', 'Settings']);
+    expect(labels).toEqual(['Maps', 'Events', 'Database', 'Assets', 'Playtest', 'AI Studio', 'Settings']);
     expect(view.container.textContent).not.toContain('Project');
     expect(view.container.textContent).not.toContain('Dialogue');
+
+    act(() => {
+      buttons.find(button => button.textContent?.includes('AI Studio'))?.click();
+    });
+    expect(view.editorDispatch).toHaveBeenCalledWith({ type: 'SET_SCREEN', screen: 'ai-studio' });
 
     act(() => {
       buttons.find(button => button.textContent?.includes('Assets'))?.click();

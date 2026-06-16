@@ -16,6 +16,7 @@ export type AuthoringLayer = 'ground' | 'decoration' | 'foreground' | 'collision
 
 export interface EditorState {
   activeScreen: Screen;
+  activeProjectId: string | null;
   selectedMapId: string;
   selectedEvent: GameEvent | null;
   selectedEventMapId: string | null;
@@ -32,6 +33,7 @@ export interface EditorState {
 
 export type EditorAction =
   | { type: 'SET_SCREEN'; screen: Screen }
+  | { type: 'SET_ACTIVE_PROJECT'; projectId: string | null }
   | { type: 'SELECT_MAP'; mapId: string }
   | { type: 'SELECT_EVENT'; event: GameEvent | null; mapId: string | null }
   | { type: 'SET_ZOOM'; zoom: number }
@@ -48,6 +50,7 @@ export type EditorAction =
 
 export const initialEditorState: EditorState = {
   activeScreen: 'editor',
+  activeProjectId: 'town',
   selectedMapId: 'town',
   selectedEvent: null,
   selectedEventMapId: null,
@@ -143,6 +146,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, saved: true };
     case 'MARK_DIRTY':
       return { ...state, saved: false };
+    case 'SET_ACTIVE_PROJECT':
+      return { ...state, activeProjectId: action.projectId };
     default:
       return state;
   }

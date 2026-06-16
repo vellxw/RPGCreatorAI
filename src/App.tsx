@@ -1,3 +1,4 @@
+import { AIStudioScreen } from './components/ai/AIStudioScreen';
 import { lazy, Suspense, useEffect, useReducer, useState } from 'react';
 import { TopToolbar } from './components/layout/TopToolbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -14,7 +15,12 @@ import {
   initialProjectStoreState,
   projectReducer,
 } from './stores/projectStore';
-import { EditorContext, editorReducer, initialEditorState } from './stores/editorStore';
+import {
+  EditorContext,
+  editorReducer,
+  initialEditorState,
+} from './stores/editorStore';
+import { defaultProviderConfigs } from './stores/providerStore';
 import {
   getProjectDataAdapter,
   getRuntimeLaunchAdapter,
@@ -317,6 +323,7 @@ export default function App() {
     editor: <MainEditorScreen />,
     events: <EventEditorScreen />,
     database: <DatabaseScreen />,
+    'ai-studio': <AIStudioScreen providers={defaultProviderConfigs} projectId={editorState.activeProjectId} />,
     assets: (
       <Suspense
         fallback={

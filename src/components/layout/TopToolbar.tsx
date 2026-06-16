@@ -454,10 +454,17 @@ export function TopToolbar() {
     </>
   );
 
+  const renderAIStudioToolbar = () => (
+    <div className="flex items-center gap-2" data-testid="ai-studio-toolbar">
+      <span className="text-[12px] text-gray-500">AI Studio</span>
+    </div>
+  );
+
   const toolbarContent: Record<Screen, () => React.ReactNode> = {
     editor: renderEditorToolbar,
     events: renderEventToolbar,
     database: renderDatabaseToolbar,
+    'ai-studio': renderAIStudioToolbar,
     assets: renderAssetsToolbar,
     playtest: renderPlaytestToolbar,
     settings: renderSettingsToolbar,

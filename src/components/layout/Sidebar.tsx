@@ -1,4 +1,4 @@
-import { Play, Settings2 } from 'lucide-react';
+import { Bot, Play, Settings2 } from 'lucide-react';
 import { useEditor } from '../../stores/editorStore';
 import type { Screen } from '../../types/project';
 import { editorAssets } from '../../assets/generated/assetCatalog';
@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { id: 'database', label: 'Database', icon: <img src={editorAssets.database} alt="" className="w-[18px] h-[18px]" />, screen: 'database' },
   { id: 'assets', label: 'Assets', icon: <img src={editorAssets.assets} alt="" className="w-[18px] h-[18px]" />, screen: 'assets' },
   { id: 'playtest', label: 'Playtest', icon: <Play size={18} />, screen: 'playtest' },
+  { id: 'ai-studio', label: 'AI Studio', icon: <Bot size={18} />, screen: 'ai-studio' },
   { id: 'settings', label: 'Settings', icon: <Settings2 size={18} />, screen: 'settings' },
 ];
 

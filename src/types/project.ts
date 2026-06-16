@@ -951,7 +951,7 @@ export type DatabaseListKey = Exclude<
 >;
 
 // Editor-specific types
-export type Screen = 'editor' | 'events' | 'database' | 'assets' | 'playtest' | 'settings';
+export type Screen = 'editor' | 'events' | 'database' | 'assets' | 'playtest' | 'settings' | 'ai-studio';
 
 export interface ValidationMessage {
   level: 'error' | 'warning' | 'info';
