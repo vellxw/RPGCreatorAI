@@ -1,3 +1,21 @@
+## FRA-478 / PX-044 — Session And Project Scoping
+- timestamp: 2026-06-16 00:32 UTC
+- commands:
+  - npm test -- --run projectScopedSession  -> PASS (9/9 new tests)
+  - npm run typecheck                       -> PASS (0 errors)
+  - npm test -- --run                       -> PASS (701/701, 0 regressions)
+- files staged (scoped): 2
+  - src/components/ai/projectScopedSession.ts (new, 96 lines)
+  - src/components/ai/__tests__/projectScopedSession.test.ts (new, 87 lines)
+- commit: dc8bd32 feat(ai-studio): add project-scoped AI Studio session
+- push:    223f59e..dc8bd32 main -> main
+- Linear: FRA-478 -> Done at 2026-06-16T03:32:19.862Z
+- Linear comment: d36f3db7-266c-409c-b842-536fe4dd3095
+- TDD path: RED (no module) -> GREEN 9/9 (spec was clear)
+- privacy guards: projectId filter on append, archive on switch, no cross-project leaks
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+- verify_all.py --mode evidence: pending
+
 ## FRA-477 / PX-043 — Chat History Persistence Boundary
 - timestamp: 2026-06-16 00:28 UTC
 - commands:
