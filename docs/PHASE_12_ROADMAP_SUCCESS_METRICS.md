@@ -88,6 +88,7 @@ M05 evidence:
 - Candidate data model persists provenance and review state safely.
 - Accept/reject/archive actions are tested.
 - Rejected and failed candidates cannot enter runtime data.
+- Closed at commit a95ea1e; see `docs/PHASE_12_M05_INTEGRATION_GATE.md`.
 
 M06 evidence:
 
