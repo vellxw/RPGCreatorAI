@@ -13,6 +13,8 @@ import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import { CreatorModeSelector } from '../components/ai/CreatorModeSelector';
 import { PerPipelineModelDefaults } from '../components/ai/PerPipelineModelDefaults';
 import { AdvancedProviderPanel } from '../components/ai/AdvancedProviderPanel';
+import { DeveloperModeSettings } from '../components/ai/DeveloperModeSettings';
+import { useDeveloperMode } from '../devMode/devModeStore';
 import { ProviderCapabilityGatesPanel } from '../components/ai/ProviderCapabilityGatesPanel';
 import { ProviderCostBudgetPanel } from '../components/ai/ProviderCostBudgetPanel';
 import {
@@ -171,6 +173,15 @@ export function SettingsScreen({
   const [providerDisclosureFeedback, setProviderDisclosureFeedback] = useState<Record<string, string>>({});
   const internalAiQueue = useAiRequestQueue();
   const activeAiQueue = aiQueueStore ?? internalAiQueue;
+  const developerMode = useDeveloperMode();
+  const developerModeDisclaimer = useMemo(
+    () =>
+      'Developer Mode is OFF by default. The host will never execute shell commands, ' +
+      'commit changes, push to a remote, or write files outside the project folder. ' +
+      'Enabling Developer Mode unlocks code assistant workflows, runtime diagnostics, ' +
+      'and developer handoff bundles only. Toggle it off at any time.',
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -362,6 +373,30 @@ export function SettingsScreen({
               onSetOverride={setWorkflowOverride}
               onClearOverride={clearWorkflowOverride}
               onClearAll={clearAllWorkflowOverrides}
+            />
+            <DeveloperModeSettings
+              state={developerMode.state}
+              capabilities={developerMode.capabilities}
+              enabledAt={developerMode.preferences.enabledAt}
+              disclaimerText={developerModeDisclaimer}
+              onEnable={(acknowledgedDisclaimer) => {
+                const result = developerMode.enable(acknowledgedDisclaimer);
+                if (!result.ok) {
+                  setProviderDisclosureFeedback(prev => ({
+                    ...prev,
+                    'developer-mode': result.error?.message ?? 'Unable to enable Developer Mode.',
+                  }));
+                  return;
+                }
+                setProviderDisclosureFeedback(prev => {
+                  const next = { ...prev };
+                  delete next['developer-mode'];
+                  return next;
+                });
+              }}
+              onDisable={() => {
+                developerMode.disable();
+              }}
             />
             {providers.length === 0 ? (
               <div role="status" className="rounded-md border border-dashed border-gray-300 bg-white px-4 py-5">
