@@ -23,6 +23,7 @@ function renderDock(
         contextPane={<div>context content</div>}
         chatPane={<div>chat content</div>}
         queuePane={<div>queue content</div>}
+        candidatesPane={<div>candidates content</div>}
         activityPane={<div>activity content</div>}
         onKeyDown={onKeyDown}
       />,
@@ -47,7 +48,7 @@ describe('AIStudioDockLayout', () => {
       expect(id).toBeTruthy();
       seen.add(id as string);
     });
-    expect(seen.size).toBe(4);
+    expect(seen.size).toBe(5);
     const dock = container.querySelector('[data-testid="ai-studio-dock"]');
     expect(dock?.getAttribute('data-active-pane')).toBe('chat');
     unmount();

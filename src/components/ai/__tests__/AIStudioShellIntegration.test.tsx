@@ -61,6 +61,29 @@ describe('AIStudioShellIntegration', () => {
     unmount();
   });
 
+  it('exposes the candidate review pane in the dock and stays inert on seed', () => {
+    const { container, unmount } = renderStudio({
+      projectId: 'project-1',
+      projectTitle: 'Sample RPG',
+      selectedMap: { id: 'map-1', name: 'Town', width: 20, height: 15, tilesetId: 'tileset-1' },
+    });
+    const candidatesTab = container.querySelector(
+      '[data-pane="candidates"]',
+    ) as HTMLButtonElement;
+    expect(candidatesTab).toBeTruthy();
+    act(() => candidatesTab.click());
+    const panel = container.querySelector('[data-pane-panel="candidates"]');
+    expect(panel).toBeTruthy();
+    const seedButton = panel?.querySelector(
+      '[data-testid="ai-studio-seed-event-draft"]',
+    ) as HTMLButtonElement;
+    expect(seedButton).toBeTruthy();
+    act(() => seedButton.click());
+    const reviewPanel = panel?.querySelector('[data-testid="ai-candidate-review-panel"]');
+    expect(reviewPanel?.getAttribute('data-reviewable-count')).toBe('1');
+    unmount();
+  });
+
   it('surfaces the bounded project context inside the context pane', () => {
     const { container, unmount } = renderStudio({
       projectId: 'project-1',

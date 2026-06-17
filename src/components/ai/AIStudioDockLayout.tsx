@@ -1,6 +1,6 @@
 import { type KeyboardEvent, type ReactNode } from 'react';
 
-export type AIStudioDockPane = 'context' | 'chat' | 'queue' | 'activity';
+export type AIStudioDockPane = 'context' | 'chat' | 'queue' | 'candidates' | 'activity';
 
 export interface AIStudioDockLayoutProps {
   activePane: AIStudioDockPane;
@@ -8,6 +8,7 @@ export interface AIStudioDockLayoutProps {
   contextPane: ReactNode;
   chatPane: ReactNode;
   queuePane: ReactNode;
+  candidatesPane: ReactNode;
   activityPane: ReactNode;
   onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   'data-testid'?: string;
@@ -40,6 +41,12 @@ const PANES: PaneDescriptor[] = [
     description: 'Pending and running AI request jobs with progress, cancel, and rate-limit feedback.',
   },
   {
+    id: 'candidates',
+    label: 'Candidate review',
+    shortLabel: 'Candidates',
+    description: 'Draft candidates waiting for accept or reject. Nothing is written to the project until you accept.',
+  },
+  {
     id: 'activity',
     label: 'Session activity',
     shortLabel: 'Activity',
@@ -53,6 +60,7 @@ export function AIStudioDockLayout({
   contextPane,
   chatPane,
   queuePane,
+  candidatesPane,
   activityPane,
   onKeyDown,
   'data-testid': testId = 'ai-studio-dock',
@@ -108,6 +116,13 @@ export function AIStudioDockLayout({
         </PanePanel>
         <PanePanel id="queue" active={activePane === 'queue'} description={paneDescription('queue')}>
           {queuePane}
+        </PanePanel>
+        <PanePanel
+          id="candidates"
+          active={activePane === 'candidates'}
+          description={paneDescription('candidates')}
+        >
+          {candidatesPane}
         </PanePanel>
         <PanePanel
           id="activity"

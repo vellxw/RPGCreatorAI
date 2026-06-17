@@ -32,6 +32,9 @@ import { RouterResultCard } from '../../commandRouter/RouterResultCard';
 import { useRouteCreatorRequest } from '../../commandRouter/useRouteCreatorRequest';
 import type { CommandRouterInput } from '../../commandRouter/router';
 import type { CommandRouterIntent } from '../../commandRouter/intentContract';
+import { AICandidateReviewPanel } from './AICandidateReviewPanel';
+import { useCandidateStore, makeCandidateId } from '../../aiCandidates/candidateStore';
+import type { Candidate, CandidateKind } from '../../aiCandidates/candidateTypes';
 
 export interface AIStudioScreenProps {
   providers: readonly ProviderConfig[];
@@ -45,6 +48,7 @@ export interface AIStudioScreenProps {
   database?: ProjectContext['database'];
   onOpenSettings?: () => void;
   onSelectProvider?: (providerId: string) => void;
+  onApplyCandidate?: (candidate: Candidate) => void;
 }
 
 const MOCK_DRAFT_TOKENS = [
@@ -72,6 +76,7 @@ export function AIStudioScreen({
   database,
   onOpenSettings = () => undefined,
   onSelectProvider = () => undefined,
+  onApplyCandidate = () => undefined,
 }: AIStudioScreenProps): ReactNode {
   const [activePane, setActivePane] = useState<AIStudioDockPane>('chat');
   const [lastStarterTask, setLastStarterTask] = useState<string | null>(null);
@@ -79,6 +84,7 @@ export function AIStudioScreen({
   const [activity, setActivity] = useState<AIStudioActivityEntry[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const router = useRouteCreatorRequest();
+  const candidateStore = useCandidateStore();
   const tokenIndexRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -205,7 +211,7 @@ export function AIStudioScreen({
   const handleDockKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    const panes: AIStudioDockPane[] = ['context', 'chat', 'queue', 'activity'];
+    const panes: AIStudioDockPane[] = ['context', 'chat', 'queue', 'candidates', 'activity'];
     const currentIndex = panes.indexOf(activePane);
     if (currentIndex === -1) return;
     const direction = event.key === 'ArrowRight' ? 1 : -1;
@@ -225,6 +231,70 @@ export function AIStudioScreen({
     dispatchRequest({ type: 'reset' });
     setLastStarterTask(null);
     recordActivity('reset', 'Cleared the current draft.');
+  };
+
+  const handleAcceptCandidate = (candidateId: string) => {
+    const result = candidateStore.acceptCandidate(candidateId);
+    if ('error' in result) {
+      recordActivity('reject', `Cannot accept: ${result.message}`);
+      return;
+    }
+    onApplyCandidate(result.candidate);
+    recordActivity('apply', `Accepted candidate "${result.candidate.title}".`);
+  };
+
+  const handleRejectCandidate = (candidateId: string) => {
+    const result = candidateStore.rejectCandidate(candidateId);
+    if ('error' in result) {
+      recordActivity('reject', `Cannot reject: ${result.message}`);
+      return;
+    }
+    recordActivity('reject', `Rejected candidate "${result.candidate.title}".`);
+  };
+
+  const handleSeedCandidate = (kind: CandidateKind, title: string, summary: string) => {
+    const id = makeCandidateId(kind);
+    const now = new Date().toISOString();
+    const applyActions: Candidate['payload']['applyActions'] = kind === 'event-draft' && selectedMap
+      ? [
+          {
+            type: 'ADD_EVENT',
+            mapId: selectedMap.id,
+            event: {
+              id: id,
+              type: 'npc',
+              x: 0,
+              y: 0,
+              solid: false,
+              commands: [],
+              trigger: 'interact',
+            },
+          },
+        ]
+      : [];
+    candidateStore.addCandidate({
+      id,
+      kind,
+      title,
+      payload: {
+        summary,
+        applyActions,
+        output: { candidateId: id },
+      },
+      provenance: {
+        providerId: 'local',
+        modelId: 'offline-mock',
+        operation: kind,
+        createdAt: now,
+      },
+      reviewState: 'review',
+      validation: applyActions.length > 0 ? { errors: [], warnings: [] } : { errors: ['No project map selected.'], warnings: [] },
+      projectId,
+      historyRecordId: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    recordActivity('route', `Drafted candidate "${title}" awaiting review.`);
   };
 
   const recordActivity = (kind: AIStudioActivityEntry['kind'], message: string) => {
@@ -370,6 +440,47 @@ export function AIStudioScreen({
     </div>
   );
 
+  const candidatesPane = (
+    <div data-testid="ai-studio-candidates-pane" className="flex h-full w-full flex-col gap-2">
+      <p className="text-[12px] text-gray-600">
+        Draft candidates are reviewable here. Accepting a candidate only writes to the project
+        if the host integration opts in; rejecting never mutates the project.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          data-testid="ai-studio-seed-event-draft"
+          onClick={() =>
+            handleSeedCandidate(
+              'event-draft',
+              'Bridge event draft',
+              'Adds a bridge event to the active map.',
+            )
+          }
+          disabled={!hasProject}
+          className="rounded border border-indigo-300 bg-indigo-50 px-2 py-1 text-[12px] text-indigo-700 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-500"
+        >
+          Draft event candidate
+        </button>
+        <button
+          type="button"
+          data-testid="ai-studio-clear-resolved"
+          onClick={() => candidateStore.clearResolved()}
+          className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px] text-gray-700"
+        >
+          Clear resolved
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto">
+        <AICandidateReviewPanel
+          candidates={candidateStore.state.candidates}
+          onAccept={handleAcceptCandidate}
+          onReject={handleRejectCandidate}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div
       className="flex h-full w-full flex-col gap-3 p-4"
@@ -389,6 +500,7 @@ export function AIStudioScreen({
         chatPane={chatPane}
         queuePane={queuePane}
         activityPane={activityPane}
+        candidatesPane={candidatesPane}
         onKeyDown={handleDockKeyDown}
       />
     </div>
