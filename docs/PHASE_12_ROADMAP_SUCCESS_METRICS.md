@@ -81,6 +81,7 @@ M04 evidence:
 - Custom advanced mode retains provider/model/base URL/capability settings.
 - Credential, cost, rate-limit, quota, and unavailable states have beginner and
   advanced copy coverage.
+- Closed at commit a7e7ddf; see `docs/PHASE_12_M04_INTEGRATION_GATE.md`.
 
 M05 evidence:
 
