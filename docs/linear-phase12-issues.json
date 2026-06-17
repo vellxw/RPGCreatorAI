@@ -1,0 +1,2261 @@
+[
+  {
+    "id": "FRA-532",
+    "px": "PX-098",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-098 - Advanced Provider Panel",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-532/px-098-advanced-provider-panel"
+  },
+  {
+    "id": "FRA-533",
+    "px": "PX-099",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-099 - Model Capability Matrix Surface",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-533/px-099-model-capability-matrix-surface"
+  },
+  {
+    "id": "FRA-534",
+    "px": "PX-100",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-100 - Provider Settings Persistence Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-534/px-100-provider-settings-persistence-tests"
+  },
+  {
+    "id": "FRA-535",
+    "px": "PX-101",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-101 - Beginner Advanced Copy Audit",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-535/px-101-beginner-advanced-copy-audit"
+  },
+  {
+    "id": "FRA-536",
+    "px": "PX-102",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-102 - Provider Selection Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-536/px-102-provider-selection-screenshot-evidence"
+  },
+  {
+    "id": "FRA-537",
+    "px": "PX-103",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-103 - Provider UX Accessibility",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-537/px-103-provider-ux-accessibility"
+  },
+  {
+    "id": "FRA-538",
+    "px": "PX-104",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-104 - Provider UX Contract Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-538/px-104-provider-ux-contract-tests"
+  },
+  {
+    "id": "FRA-539",
+    "px": "PX-105",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-105 - Provider Model UX Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-539/px-105-provider-model-ux-integration-gate"
+  },
+  {
+    "id": "FRA-540",
+    "px": "PX-106",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-106 - AI Action Inbox Shell",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-540/px-106-ai-action-inbox-shell"
+  },
+  {
+    "id": "FRA-541",
+    "px": "PX-107",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-107 - Candidate Data Model",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-541/px-107-candidate-data-model"
+  },
+  {
+    "id": "FRA-542",
+    "px": "PX-108",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-108 - Candidate Provenance Metadata",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-542/px-108-candidate-provenance-metadata"
+  },
+  {
+    "id": "FRA-543",
+    "px": "PX-109",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-109 - Map Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-543/px-109-map-candidate-preview"
+  },
+  {
+    "id": "FRA-544",
+    "px": "PX-110",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-110 - Event Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-544/px-110-event-candidate-preview"
+  },
+  {
+    "id": "FRA-545",
+    "px": "PX-111",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-111 - Database Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-545/px-111-database-candidate-preview"
+  },
+  {
+    "id": "FRA-546",
+    "px": "PX-112",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-112 - Asset Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-546/px-112-asset-candidate-preview"
+  },
+  {
+    "id": "FRA-547",
+    "px": "PX-113",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-113 - Animation Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-547/px-113-animation-candidate-preview"
+  },
+  {
+    "id": "FRA-548",
+    "px": "PX-114",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-114 - Code Patch Candidate Preview",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-548/px-114-code-patch-candidate-preview"
+  },
+  {
+    "id": "FRA-549",
+    "px": "PX-115",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-115 - Accept Candidate Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-549/px-115-accept-candidate-flow"
+  },
+  {
+    "id": "FRA-550",
+    "px": "PX-116",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-116 - Reject Candidate Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-550/px-116-reject-candidate-flow"
+  },
+  {
+    "id": "FRA-551",
+    "px": "PX-117",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-117 - Archive Candidate Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-551/px-117-archive-candidate-flow"
+  },
+  {
+    "id": "FRA-552",
+    "px": "PX-118",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-118 - Candidate Validation Status",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-552/px-118-candidate-validation-status"
+  },
+  {
+    "id": "FRA-553",
+    "px": "PX-119",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-119 - Candidate Lineage",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-553/px-119-candidate-lineage"
+  },
+  {
+    "id": "FRA-554",
+    "px": "PX-120",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-120 - Candidate Search Filter",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-554/px-120-candidate-search-filter"
+  },
+  {
+    "id": "FRA-555",
+    "px": "PX-121",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-121 - Project Candidate Persistence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-555/px-121-project-candidate-persistence"
+  },
+  {
+    "id": "FRA-556",
+    "px": "PX-122",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-122 - Rejected Candidate Runtime Exclusion",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-556/px-122-rejected-candidate-runtime-exclusion"
+  },
+  {
+    "id": "FRA-557",
+    "px": "PX-123",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-123 - Review Inbox Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-557/px-123-review-inbox-tests"
+  },
+  {
+    "id": "FRA-558",
+    "px": "PX-124",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-124 - Review Inbox Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-558/px-124-review-inbox-screenshot-evidence"
+  },
+  {
+    "id": "FRA-559",
+    "px": "PX-125",
+    "milestone": "M05",
+    "milestoneName": "M05 — AI Action Review Inbox And Candidate Lifecycle",
+    "title": "PX-125 - Review Inbox Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-559/px-125-review-inbox-integration-gate"
+  },
+  {
+    "id": "FRA-466",
+    "px": "PX-032",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-032 - OpenCode-Style Creator Chat Layout",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-466/px-032-opencode-style-creator-chat-layout"
+  },
+  {
+    "id": "FRA-482",
+    "px": "PX-048",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-048 - AI Studio Loading And Streaming States",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-482/px-048-ai-studio-loading-and-streaming-states"
+  },
+  {
+    "id": "FRA-483",
+    "px": "PX-049",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-049 - AI Studio Error Recovery States",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-483/px-049-ai-studio-error-recovery-states"
+  },
+  {
+    "id": "FRA-484",
+    "px": "PX-050",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-050 - Project-Aware Response Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-484/px-050-project-aware-response-contract"
+  },
+  {
+    "id": "FRA-486",
+    "px": "PX-052",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-052 - AI Studio Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-486/px-052-ai-studio-screenshot-evidence"
+  },
+  {
+    "id": "FRA-680",
+    "px": "PX-246",
+    "milestone": "M12",
+    "milestoneName": "M12 — Integration, Release, Docs, And Final Gate",
+    "title": "PX-246 - Phase 12 AI Studio Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-680/px-246-phase-12-ai-studio-integration-gate"
+  },
+  {
+    "id": "FRA-681",
+    "px": "PX-247",
+    "milestone": "M12",
+    "milestoneName": "M12 — Integration, Release, Docs, And Final Gate",
+    "title": "PX-247 - Phase 12 Product UX Screenshot Audit",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-681/px-247-phase-12-product-ux-screenshot-audit"
+  },
+  {
+    "id": "FRA-682",
+    "px": "PX-248",
+    "milestone": "M12",
+    "milestoneName": "M12 — Integration, Release, Docs, And Final Gate",
+    "title": "PX-248 - Phase 12 Documentation And README Update",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-682/px-248-phase-12-documentation-and-readme-update"
+  },
+  {
+    "id": "FRA-683",
+    "px": "PX-249",
+    "milestone": "M12",
+    "milestoneName": "M12 — Integration, Release, Docs, And Final Gate",
+    "title": "PX-249 - Phase 12 Validation Report",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-683/px-249-phase-12-validation-report"
+  },
+  {
+    "id": "FRA-684",
+    "px": "PX-250",
+    "milestone": "M12",
+    "milestoneName": "M12 — Integration, Release, Docs, And Final Gate",
+    "title": "PX-250 - Phase 12 Final Ship Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-684/px-250-phase-12-final-ship-gate"
+  },
+  {
+    "id": "FRA-685",
+    "px": "PX-251",
+    "milestone": "",
+    "milestoneName": "",
+    "title": "PX-251 — AI Studio Database Context UI Panel + AIRequestQueuePanel wire",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-685/px-251-ai-studio-database-context-ui-panel-airequestqueuepanel-wire"
+  },
+  {
+    "id": "FRA-640",
+    "px": "PX-206",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-206 - User Request Asset Spec Intake",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-640/px-206-user-request-asset-spec-intake"
+  },
+  {
+    "id": "FRA-641",
+    "px": "PX-207",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-207 - Asset Planner Spec Checklist",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-641/px-207-asset-planner-spec-checklist"
+  },
+  {
+    "id": "FRA-642",
+    "px": "PX-208",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-208 - Generator Candidate Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-642/px-208-generator-candidate-contract"
+  },
+  {
+    "id": "FRA-643",
+    "px": "PX-209",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-209 - Checker Evaluation Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-643/px-209-checker-evaluation-contract"
+  },
+  {
+    "id": "FRA-644",
+    "px": "PX-210",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-210 - Refiner Correction Proposal Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-644/px-210-refiner-correction-proposal-contract"
+  },
+  {
+    "id": "FRA-645",
+    "px": "PX-211",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-211 - Revised Candidate Creation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-645/px-211-revised-candidate-creation"
+  },
+  {
+    "id": "FRA-646",
+    "px": "PX-212",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-212 - Verifier Accept Reject Decision",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-646/px-212-verifier-accept-reject-decision"
+  },
+  {
+    "id": "FRA-647",
+    "px": "PX-213",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-213 - User Final Review Handoff",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-647/px-213-user-final-review-handoff"
+  },
+  {
+    "id": "FRA-648",
+    "px": "PX-214",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-214 - Max Round Limits",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-648/px-214-max-round-limits"
+  },
+  {
+    "id": "FRA-649",
+    "px": "PX-215",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-215 - Cost Guardrails",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-649/px-215-cost-guardrails"
+  },
+  {
+    "id": "FRA-650",
+    "px": "PX-216",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-216 - Cancellation Controls",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-650/px-216-cancellation-controls"
+  },
+  {
+    "id": "FRA-651",
+    "px": "PX-217",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-217 - Retry Controls",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-651/px-217-retry-controls"
+  },
+  {
+    "id": "FRA-652",
+    "px": "PX-218",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-218 - Candidate Lineage Integration",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-652/px-218-candidate-lineage-integration"
+  },
+  {
+    "id": "FRA-653",
+    "px": "PX-219",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-219 - Review Inbox Integration",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-653/px-219-review-inbox-integration"
+  },
+  {
+    "id": "FRA-654",
+    "px": "PX-220",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-220 - Rejected Candidate Runtime Exclusion",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-654/px-220-rejected-candidate-runtime-exclusion"
+  },
+  {
+    "id": "FRA-655",
+    "px": "PX-221",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-221 - Refinement Mock Contracts",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-655/px-221-refinement-mock-contracts"
+  },
+  {
+    "id": "FRA-656",
+    "px": "PX-222",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-222 - Refinement Failure Fixtures",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-656/px-222-refinement-failure-fixtures"
+  },
+  {
+    "id": "FRA-657",
+    "px": "PX-223",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-223 - Refinement Pipeline Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-657/px-223-refinement-pipeline-tests"
+  },
+  {
+    "id": "FRA-658",
+    "px": "PX-224",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-224 - Refinement Pipeline Docs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-658/px-224-refinement-pipeline-docs"
+  },
+  {
+    "id": "FRA-659",
+    "px": "PX-225",
+    "milestone": "M10",
+    "milestoneName": "M10 — Multi-Round Asset Refinement Pipeline",
+    "title": "PX-225 - Multi-Round Refinement Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-659/px-225-multi-round-refinement-integration-gate"
+  },
+  {
+    "id": "FRA-660",
+    "px": "PX-226",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-226 - Sprite Sheet Prompt Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-660/px-226-sprite-sheet-prompt-spec"
+  },
+  {
+    "id": "FRA-661",
+    "px": "PX-227",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-227 - Character Identity Preservation Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-661/px-227-character-identity-preservation-spec"
+  },
+  {
+    "id": "FRA-662",
+    "px": "PX-228",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-228 - Art Style Constraint Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-662/px-228-art-style-constraint-spec"
+  },
+  {
+    "id": "FRA-663",
+    "px": "PX-229",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-229 - Actions Directions Matrix",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-663/px-229-actions-directions-matrix"
+  },
+  {
+    "id": "FRA-664",
+    "px": "PX-230",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-230 - Frame Count Constraint Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-664/px-230-frame-count-constraint-spec"
+  },
+  {
+    "id": "FRA-665",
+    "px": "PX-231",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-231 - Anchor Constraint Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-665/px-231-anchor-constraint-spec"
+  },
+  {
+    "id": "FRA-666",
+    "px": "PX-232",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-232 - Palette Lighting Constraint Spec",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-666/px-232-palette-lighting-constraint-spec"
+  },
+  {
+    "id": "FRA-667",
+    "px": "PX-233",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-233 - Normalization Integration",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-667/px-233-normalization-integration"
+  },
+  {
+    "id": "FRA-668",
+    "px": "PX-234",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-234 - Preview GIF Generation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-668/px-234-preview-gif-generation"
+  },
+  {
+    "id": "FRA-669",
+    "px": "PX-235",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-235 - Preview Sheet Generation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-669/px-235-preview-sheet-generation"
+  },
+  {
+    "id": "FRA-670",
+    "px": "PX-236",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-236 - Runtime BMP Export Validate Only",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-670/px-236-runtime-bmp-export-validate-only"
+  },
+  {
+    "id": "FRA-671",
+    "px": "PX-237",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-237 - Repair Guidance Generation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-671/px-237-repair-guidance-generation"
+  },
+  {
+    "id": "FRA-672",
+    "px": "PX-238",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-238 - Mock Success Outputs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-672/px-238-mock-success-outputs"
+  },
+  {
+    "id": "FRA-673",
+    "px": "PX-239",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-239 - Mock Failure Outputs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-673/px-239-mock-failure-outputs"
+  },
+  {
+    "id": "FRA-674",
+    "px": "PX-240",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-240 - Generated Animation Docs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-674/px-240-generated-animation-docs"
+  },
+  {
+    "id": "FRA-675",
+    "px": "PX-241",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-241 - Sprite Sheet Visual QA",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-675/px-241-sprite-sheet-visual-qa"
+  },
+  {
+    "id": "FRA-676",
+    "px": "PX-242",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-242 - Sprite Pipeline Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-676/px-242-sprite-pipeline-tests"
+  },
+  {
+    "id": "FRA-677",
+    "px": "PX-243",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-243 - Runtime Export Compatibility Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-677/px-243-runtime-export-compatibility-tests"
+  },
+  {
+    "id": "FRA-678",
+    "px": "PX-244",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-244 - Sprite Sheet Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-678/px-244-sprite-sheet-screenshot-evidence"
+  },
+  {
+    "id": "FRA-679",
+    "px": "PX-245",
+    "milestone": "M11",
+    "milestoneName": "M11 — Sprite Sheet And Animation Pipeline Optimization",
+    "title": "PX-245 - Sprite Sheet Optimization Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-679/px-245-sprite-sheet-optimization-integration-gate"
+  },
+  {
+    "id": "FRA-600",
+    "px": "PX-166",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-166 - OpenAI GPT Image Current Capabilities Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-600/px-166-openai-gpt-image-current-capabilities-research"
+  },
+  {
+    "id": "FRA-601",
+    "px": "PX-167",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-167 - OpenAI Image Editing Variations Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-601/px-167-openai-image-editing-variations-research"
+  },
+  {
+    "id": "FRA-602",
+    "px": "PX-168",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-168 - Qwen Image Official Capability Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-602/px-168-qwen-image-official-capability-research"
+  },
+  {
+    "id": "FRA-603",
+    "px": "PX-169",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-169 - Qwen Image 2.x Availability Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-603/px-169-qwen-image-2x-availability-research"
+  },
+  {
+    "id": "FRA-604",
+    "px": "PX-170",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-170 - MiniMax Image Video Model Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-604/px-170-minimax-image-video-model-research"
+  },
+  {
+    "id": "FRA-605",
+    "px": "PX-171",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-171 - MiniMax M3 Candidate Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-605/px-171-minimax-m3-candidate-research"
+  },
+  {
+    "id": "FRA-606",
+    "px": "PX-172",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-172 - Other Image Animation Tools Scan",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-606/px-172-other-image-animation-tools-scan"
+  },
+  {
+    "id": "FRA-607",
+    "px": "PX-173",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-173 - Transparent Background Workflow Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-607/px-173-transparent-background-workflow-research"
+  },
+  {
+    "id": "FRA-610",
+    "px": "PX-176",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-176 - Pixel Art Suitability Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-610/px-176-pixel-art-suitability-research"
+  },
+  {
+    "id": "FRA-612",
+    "px": "PX-178",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-178 - Item Icon Generation Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-612/px-178-item-icon-generation-research"
+  },
+  {
+    "id": "FRA-614",
+    "px": "PX-180",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-180 - Character Sprite Generation Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-614/px-180-character-sprite-generation-research"
+  },
+  {
+    "id": "FRA-615",
+    "px": "PX-181",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-181 - Animation Strip Generation Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-615/px-181-animation-strip-generation-research"
+  },
+  {
+    "id": "FRA-616",
+    "px": "PX-182",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-182 - Cost Latency API Availability Matrix",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-616/px-182-cost-latency-api-availability-matrix"
+  },
+  {
+    "id": "FRA-618",
+    "px": "PX-184",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-184 - Mock Testing Strategy For Asset Providers",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-618/px-184-mock-testing-strategy-for-asset-providers"
+  },
+  {
+    "id": "FRA-619",
+    "px": "PX-185",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-185 - Provider Capability Matrix And Recommendation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-619/px-185-provider-capability-matrix-and-recommendation"
+  },
+  {
+    "id": "FRA-620",
+    "px": "PX-186",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-186 - Animation Frame Count Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-620/px-186-animation-frame-count-check"
+  },
+  {
+    "id": "FRA-621",
+    "px": "PX-187",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-187 - Frame Dimension Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-621/px-187-frame-dimension-check"
+  },
+  {
+    "id": "FRA-622",
+    "px": "PX-188",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-188 - Non Empty Frame Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-622/px-188-non-empty-frame-check"
+  },
+  {
+    "id": "FRA-623",
+    "px": "PX-189",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-189 - Character Identity Consistency Fixture",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-623/px-189-character-identity-consistency-fixture"
+  },
+  {
+    "id": "FRA-624",
+    "px": "PX-190",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-190 - Consistent Scale Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-624/px-190-consistent-scale-check"
+  },
+  {
+    "id": "FRA-625",
+    "px": "PX-191",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-191 - Consistent Direction Action Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-625/px-191-consistent-direction-action-check"
+  },
+  {
+    "id": "FRA-626",
+    "px": "PX-193",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-193 - Silhouette Readability Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-626/px-193-silhouette-readability-check"
+  },
+  {
+    "id": "FRA-627",
+    "px": "PX-194",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-194 - Anchor Stability Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-627/px-194-anchor-stability-check"
+  },
+  {
+    "id": "FRA-628",
+    "px": "PX-195",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-195 - Limb Drift Threshold Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-628/px-195-limb-drift-threshold-check"
+  },
+  {
+    "id": "FRA-629",
+    "px": "PX-196",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-196 - Loop Smoothness Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-629/px-196-loop-smoothness-check"
+  },
+  {
+    "id": "FRA-630",
+    "px": "PX-197",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-197 - Runtime Suitability Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-630/px-197-runtime-suitability-check"
+  },
+  {
+    "id": "FRA-631",
+    "px": "PX-198",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-198 - Accepted Fixture Set",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-631/px-198-accepted-fixture-set"
+  },
+  {
+    "id": "FRA-632",
+    "px": "PX-199",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-199 - Rejected Fixture Set",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-632/px-199-rejected-fixture-set"
+  },
+  {
+    "id": "FRA-633",
+    "px": "PX-200",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-200 - Preview Evidence Generator",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-633/px-200-preview-evidence-generator"
+  },
+  {
+    "id": "FRA-634",
+    "px": "PX-201",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-201 - Deterministic Local Validation CLI",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-634/px-201-deterministic-local-validation-cli"
+  },
+  {
+    "id": "FRA-635",
+    "px": "PX-202",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-202 - Animation Rubric Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-635/px-202-animation-rubric-tests"
+  },
+  {
+    "id": "FRA-636",
+    "px": "PX-203",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-203 - Animation QA Docs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-636/px-203-animation-qa-docs"
+  },
+  {
+    "id": "FRA-637",
+    "px": "PX-204",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-204 - Animation Rubric Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-637/px-204-animation-rubric-screenshot-evidence"
+  },
+  {
+    "id": "FRA-638",
+    "px": "PX-205",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-205 - Animation Quality Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-638/px-205-animation-quality-integration-gate"
+  },
+  {
+    "id": "FRA-639",
+    "px": "PX-192",
+    "milestone": "M09",
+    "milestoneName": "M09 — Animation Quality Rubric And Fixtures",
+    "title": "PX-192 - Transparency Background Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-639/px-192-transparency-background-check"
+  },
+  {
+    "id": "FRA-580",
+    "px": "PX-146",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-146 - First Run Screen",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-580/px-146-first-run-screen"
+  },
+  {
+    "id": "FRA-581",
+    "px": "PX-147",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-147 - Open Sample Project Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-581/px-147-open-sample-project-flow"
+  },
+  {
+    "id": "FRA-582",
+    "px": "PX-148",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-148 - Create Blank Project Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-582/px-148-create-blank-project-flow"
+  },
+  {
+    "id": "FRA-583",
+    "px": "PX-149",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-149 - Generate Starter Idea With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-583/px-149-generate-starter-idea-with-mock-provider"
+  },
+  {
+    "id": "FRA-584",
+    "px": "PX-150",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-150 - Generate First Map With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-584/px-150-generate-first-map-with-mock-provider"
+  },
+  {
+    "id": "FRA-585",
+    "px": "PX-151",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-151 - Generate First Event With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-585/px-151-generate-first-event-with-mock-provider"
+  },
+  {
+    "id": "FRA-586",
+    "px": "PX-152",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-152 - Generate First NPC With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-586/px-152-generate-first-npc-with-mock-provider"
+  },
+  {
+    "id": "FRA-587",
+    "px": "PX-153",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-153 - Generate First Item With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-587/px-153-generate-first-item-with-mock-provider"
+  },
+  {
+    "id": "FRA-588",
+    "px": "PX-154",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-154 - Generate First Shop With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-588/px-154-generate-first-shop-with-mock-provider"
+  },
+  {
+    "id": "FRA-589",
+    "px": "PX-155",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-155 - Generate First Battle With Mock Provider",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-589/px-155-generate-first-battle-with-mock-provider"
+  },
+  {
+    "id": "FRA-590",
+    "px": "PX-156",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-156 - Save Validate Playtest Checklist",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-590/px-156-save-validate-playtest-checklist"
+  },
+  {
+    "id": "FRA-591",
+    "px": "PX-157",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-157 - Desktop Capability Explanation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-591/px-157-desktop-capability-explanation"
+  },
+  {
+    "id": "FRA-592",
+    "px": "PX-158",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-158 - Browser Capability Explanation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-592/px-158-browser-capability-explanation"
+  },
+  {
+    "id": "FRA-593",
+    "px": "PX-159",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-159 - First Run Recovery States",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-593/px-159-first-run-recovery-states"
+  },
+  {
+    "id": "FRA-594",
+    "px": "PX-160",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-160 - Quick Start Progress Tracker",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-594/px-160-quick-start-progress-tracker"
+  },
+  {
+    "id": "FRA-595",
+    "px": "PX-161",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-161 - Onboarding State Persistence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-595/px-161-onboarding-state-persistence"
+  },
+  {
+    "id": "FRA-596",
+    "px": "PX-162",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-162 - Onboarding Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-596/px-162-onboarding-screenshot-evidence"
+  },
+  {
+    "id": "FRA-597",
+    "px": "PX-163",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-163 - Onboarding Docs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-597/px-163-onboarding-docs"
+  },
+  {
+    "id": "FRA-598",
+    "px": "PX-164",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-164 - Onboarding Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-598/px-164-onboarding-tests"
+  },
+  {
+    "id": "FRA-599",
+    "px": "PX-165",
+    "milestone": "M07",
+    "milestoneName": "M07 — First-Run Onboarding And Starter Project Flow",
+    "title": "PX-165 - Onboarding Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-599/px-165-onboarding-integration-gate"
+  },
+  {
+    "id": "FRA-560",
+    "px": "PX-126",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-126 - Developer Mode Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-560/px-126-developer-mode-gate"
+  },
+  {
+    "id": "FRA-561",
+    "px": "PX-127",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-127 - Developer Mode Warning Onboarding",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-561/px-127-developer-mode-warning-onboarding"
+  },
+  {
+    "id": "FRA-562",
+    "px": "PX-128",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-128 - Code Assistant Shell",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-562/px-128-code-assistant-shell"
+  },
+  {
+    "id": "FRA-563",
+    "px": "PX-129",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-129 - File Context Selection",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-563/px-129-file-context-selection"
+  },
+  {
+    "id": "FRA-564",
+    "px": "PX-130",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-130 - Source Context Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-564/px-130-source-context-boundary"
+  },
+  {
+    "id": "FRA-565",
+    "px": "PX-131",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-131 - Diff Proposal UI",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-565/px-131-diff-proposal-ui"
+  },
+  {
+    "id": "FRA-566",
+    "px": "PX-132",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-132 - Test Command Suggestions",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-566/px-132-test-command-suggestions"
+  },
+  {
+    "id": "FRA-567",
+    "px": "PX-133",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-133 - No Auto Commit Guard",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-567/px-133-no-auto-commit-guard"
+  },
+  {
+    "id": "FRA-568",
+    "px": "PX-134",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-134 - No Auto Push Guard",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-568/px-134-no-auto-push-guard"
+  },
+  {
+    "id": "FRA-569",
+    "px": "PX-135",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-135 - Patch Safety Boundaries",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-569/px-135-patch-safety-boundaries"
+  },
+  {
+    "id": "FRA-570",
+    "px": "PX-136",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-136 - Source Code Candidate Lifecycle",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-570/px-136-source-code-candidate-lifecycle"
+  },
+  {
+    "id": "FRA-571",
+    "px": "PX-137",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-137 - Review Inbox Developer Integration",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-571/px-137-review-inbox-developer-integration"
+  },
+  {
+    "id": "FRA-572",
+    "px": "PX-138",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-138 - Developer Mode Disabled Default",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-572/px-138-developer-mode-disabled-default"
+  },
+  {
+    "id": "FRA-573",
+    "px": "PX-139",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-139 - Developer Mode Settings Persistence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-573/px-139-developer-mode-settings-persistence"
+  },
+  {
+    "id": "FRA-574",
+    "px": "PX-140",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-140 - Code Assistant Mock Conversation",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-574/px-140-code-assistant-mock-conversation"
+  },
+  {
+    "id": "FRA-575",
+    "px": "PX-141",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-141 - Developer Mode Docs",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-575/px-141-developer-mode-docs"
+  },
+  {
+    "id": "FRA-576",
+    "px": "PX-142",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-142 - Developer Mode Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-576/px-142-developer-mode-tests"
+  },
+  {
+    "id": "FRA-577",
+    "px": "PX-143",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-143 - Developer Mode Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-577/px-143-developer-mode-screenshot-evidence"
+  },
+  {
+    "id": "FRA-578",
+    "px": "PX-144",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-144 - Source Patch Security Review",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-578/px-144-source-patch-security-review"
+  },
+  {
+    "id": "FRA-579",
+    "px": "PX-145",
+    "milestone": "M06",
+    "milestoneName": "M06 — Developer Mode Code Assistant",
+    "title": "PX-145 - Developer Mode Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-579/px-145-developer-mode-integration-gate"
+  },
+  {
+    "id": "FRA-490",
+    "px": "PX-056",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-056 - Command Router Intent Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-490/px-056-command-router-intent-contract"
+  },
+  {
+    "id": "FRA-491",
+    "px": "PX-057",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-057 - Create Map Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-491/px-057-create-map-intent"
+  },
+  {
+    "id": "FRA-492",
+    "px": "PX-058",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-058 - Create Dungeon Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-492/px-058-create-dungeon-intent"
+  },
+  {
+    "id": "FRA-493",
+    "px": "PX-059",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-059 - Create Town Village Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-493/px-059-create-town-village-intent"
+  },
+  {
+    "id": "FRA-494",
+    "px": "PX-060",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-060 - Create Event Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-494/px-060-create-event-intent"
+  },
+  {
+    "id": "FRA-495",
+    "px": "PX-061",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-061 - Create NPC Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-495/px-061-create-npc-intent"
+  },
+  {
+    "id": "FRA-496",
+    "px": "PX-062",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-062 - Create Quest Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-496/px-062-create-quest-intent"
+  },
+  {
+    "id": "FRA-497",
+    "px": "PX-063",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-063 - Create Item Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-497/px-063-create-item-intent"
+  },
+  {
+    "id": "FRA-498",
+    "px": "PX-064",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-064 - Create Skill Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-498/px-064-create-skill-intent"
+  },
+  {
+    "id": "FRA-499",
+    "px": "PX-065",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-065 - Create Enemy Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-499/px-065-create-enemy-intent"
+  },
+  {
+    "id": "FRA-500",
+    "px": "PX-066",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-066 - Create Shop Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-500/px-066-create-shop-intent"
+  },
+  {
+    "id": "FRA-501",
+    "px": "PX-067",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-067 - Create Battle Troop Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-501/px-067-create-battle-troop-intent"
+  },
+  {
+    "id": "FRA-502",
+    "px": "PX-068",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-068 - Generate Portrait Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-502/px-068-generate-portrait-intent"
+  },
+  {
+    "id": "FRA-503",
+    "px": "PX-069",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-069 - Generate Icon Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-503/px-069-generate-icon-intent"
+  },
+  {
+    "id": "FRA-504",
+    "px": "PX-070",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-070 - Generate Tileset Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-504/px-070-generate-tileset-intent"
+  },
+  {
+    "id": "FRA-505",
+    "px": "PX-071",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-071 - Generate Character Sprite Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-505/px-071-generate-character-sprite-intent"
+  },
+  {
+    "id": "FRA-506",
+    "px": "PX-072",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-072 - Generate Animation Strip Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-506/px-072-generate-animation-strip-intent"
+  },
+  {
+    "id": "FRA-507",
+    "px": "PX-073",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-073 - Repair Validation Issue Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-507/px-073-repair-validation-issue-intent"
+  },
+  {
+    "id": "FRA-508",
+    "px": "PX-074",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-074 - Explain Project Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-508/px-074-explain-project-intent"
+  },
+  {
+    "id": "FRA-509",
+    "px": "PX-075",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-075 - Improve Balance Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-509/px-075-improve-balance-intent"
+  },
+  {
+    "id": "FRA-510",
+    "px": "PX-076",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-076 - Create Mechanic Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-510/px-076-create-mechanic-intent"
+  },
+  {
+    "id": "FRA-511",
+    "px": "PX-077",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-077 - Add Common Event Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-511/px-077-add-common-event-intent"
+  },
+  {
+    "id": "FRA-512",
+    "px": "PX-078",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-078 - Transfer Door Pattern Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-512/px-078-transfer-door-pattern-intent"
+  },
+  {
+    "id": "FRA-513",
+    "px": "PX-079",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-079 - Chest Pattern Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-513/px-079-chest-pattern-intent"
+  },
+  {
+    "id": "FRA-514",
+    "px": "PX-080",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-080 - Sign Pattern Intent",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-514/px-080-sign-pattern-intent"
+  },
+  {
+    "id": "FRA-515",
+    "px": "PX-081",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-081 - Ambiguous Intent Clarification",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-515/px-081-ambiguous-intent-clarification"
+  },
+  {
+    "id": "FRA-516",
+    "px": "PX-082",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-082 - Preview Before Apply Contract",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-516/px-082-preview-before-apply-contract"
+  },
+  {
+    "id": "FRA-517",
+    "px": "PX-083",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-083 - No Silent Mutation Guard",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-517/px-083-no-silent-mutation-guard"
+  },
+  {
+    "id": "FRA-518",
+    "px": "PX-084",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-084 - Router Test Fixtures",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-518/px-084-router-test-fixtures"
+  },
+  {
+    "id": "FRA-519",
+    "px": "PX-085",
+    "milestone": "M03",
+    "milestoneName": "M03 — Pipeline-Aware AI Command Router",
+    "title": "PX-085 - Command Router Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-519/px-085-command-router-integration-gate"
+  },
+  {
+    "id": "FRA-520",
+    "px": "PX-086",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-086 - Creator Mode Model Presets",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-520/px-086-creator-mode-model-presets"
+  },
+  {
+    "id": "FRA-522",
+    "px": "PX-088",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-088 - Fast Cheap Mode",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-522/px-088-fast-cheap-mode"
+  },
+  {
+    "id": "FRA-523",
+    "px": "PX-089",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-089 - Best Quality Mode",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-523/px-089-best-quality-mode"
+  },
+  {
+    "id": "FRA-524",
+    "px": "PX-090",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-090 - Local Mock Mode",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-524/px-090-local-mock-mode"
+  },
+  {
+    "id": "FRA-525",
+    "px": "PX-091",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-091 - Custom Advanced Mode Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-525/px-091-custom-advanced-mode-boundary"
+  },
+  {
+    "id": "FRA-526",
+    "px": "PX-092",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-092 - Per-Pipeline Model Defaults",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-526/px-092-per-pipeline-model-defaults"
+  },
+  {
+    "id": "FRA-527",
+    "px": "PX-093",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-093 - Credential Boundary UX",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-527/px-093-credential-boundary-ux"
+  },
+  {
+    "id": "FRA-528",
+    "px": "PX-094",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-094 - Missing Credential State",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-528/px-094-missing-credential-state"
+  },
+  {
+    "id": "FRA-529",
+    "px": "PX-095",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-095 - Disabled Provider State",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-529/px-095-disabled-provider-state"
+  },
+  {
+    "id": "FRA-530",
+    "px": "PX-096",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-096 - Rate Limit Quota State",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-530/px-096-rate-limit-quota-state"
+  },
+  {
+    "id": "FRA-531",
+    "px": "PX-097",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-097 - Cost Warning Surface",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-531/px-097-cost-warning-surface"
+  },
+  {
+    "id": "FRA-521",
+    "px": "PX-087",
+    "milestone": "M04",
+    "milestoneName": "M04 — Creator-Friendly Provider And Model UX",
+    "title": "PX-087 - Auto Recommended Mode",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-521/px-087-auto-recommended-mode"
+  },
+  {
+    "id": "FRA-465",
+    "px": "PX-031",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-031 - AI Studio Dock Shell",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-465/px-031-ai-studio-dock-shell"
+  },
+  {
+    "id": "FRA-469",
+    "px": "PX-035",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-035 - Selected Event Context Binding",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-469/px-035-selected-event-context-binding"
+  },
+  {
+    "id": "FRA-485",
+    "px": "PX-051",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-051 - AI Studio Keyboard Accessibility",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-485/px-051-ai-studio-keyboard-accessibility"
+  },
+  {
+    "id": "FRA-489",
+    "px": "PX-055",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-055 - AI Studio Shell Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-489/px-055-ai-studio-shell-integration-gate"
+  },
+  {
+    "id": "FRA-487",
+    "px": "PX-053",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-053 - AI Studio Component Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-487/px-053-ai-studio-component-tests"
+  },
+  {
+    "id": "FRA-488",
+    "px": "PX-054",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-054 - AI Studio Provider-Mock Integration Tests",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-488/px-054-ai-studio-provider-mock-integration-tests"
+  },
+  {
+    "id": "FRA-467",
+    "px": "PX-033",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-033 - Project Context Summary Source",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-467/px-033-project-context-summary-source"
+  },
+  {
+    "id": "FRA-468",
+    "px": "PX-034",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-034 - Selected Map Context Binding",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-468/px-034-selected-map-context-binding"
+  },
+  {
+    "id": "FRA-481",
+    "px": "PX-047",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-047 - AI Studio Sidebar Navigation Entry",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-481/px-047-ai-studio-sidebar-navigation-entry"
+  },
+  {
+    "id": "FRA-480",
+    "px": "PX-046",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-046 - Safe Context Boundary Redaction",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-480/px-046-safe-context-boundary-redaction"
+  },
+  {
+    "id": "FRA-479",
+    "px": "PX-045",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-045 - Prompt Template Library Surface",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-479/px-045-prompt-template-library-surface"
+  },
+  {
+    "id": "FRA-478",
+    "px": "PX-044",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-044 - Session And Project Scoping",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-478/px-044-session-and-project-scoping"
+  },
+  {
+    "id": "FRA-477",
+    "px": "PX-043",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-043 - Chat History Persistence Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-477/px-043-chat-history-persistence-boundary"
+  },
+  {
+    "id": "FRA-475",
+    "px": "PX-041",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-041 - Action Card Preview UI",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-475/px-041-action-card-preview-ui"
+  },
+  {
+    "id": "FRA-476",
+    "px": "PX-042",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-042 - Preview Apply Reject Controls",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-476/px-042-preview-apply-reject-controls"
+  },
+  {
+    "id": "FRA-474",
+    "px": "PX-040",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-040 - Task Card UI",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-474/px-040-task-card-ui"
+  },
+  {
+    "id": "FRA-473",
+    "px": "PX-039",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-039 - Mock Provider Conversation Loop",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-473/px-039-mock-provider-conversation-loop"
+  },
+  {
+    "id": "FRA-472",
+    "px": "PX-038",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-038 - Disabled Provider State",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-472/px-038-disabled-provider-state"
+  },
+  {
+    "id": "FRA-471",
+    "px": "PX-037",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-037 - AI Studio Empty State",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-471/px-037-ai-studio-empty-state"
+  },
+  {
+    "id": "FRA-470",
+    "px": "PX-036",
+    "milestone": "M02",
+    "milestoneName": "M02 — AI Studio Shell And Project-Aware Chat",
+    "title": "PX-036 - Database Context Binding",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-470/px-036-database-context-binding"
+  },
+  {
+    "id": "FRA-617",
+    "px": "PX-183",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-183 - Legal Provenance Constraints",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-617/px-183-legal-provenance-constraints"
+  },
+  {
+    "id": "FRA-611",
+    "px": "PX-177",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-177 - Portrait Generation Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-611/px-177-portrait-generation-research"
+  },
+  {
+    "id": "FRA-608",
+    "px": "PX-174",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-174 - Sprite Consistency Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-608/px-174-sprite-consistency-research"
+  },
+  {
+    "id": "FRA-609",
+    "px": "PX-175",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-175 - Frame Consistency Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-609/px-175-frame-consistency-research"
+  },
+  {
+    "id": "FRA-613",
+    "px": "PX-179",
+    "milestone": "M08",
+    "milestoneName": "M08 — Generated Asset And Animation Research",
+    "title": "PX-179 - Tileset Generation Research",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-613/px-179-tileset-generation-research"
+  },
+  {
+    "id": "FRA-464",
+    "px": "PX-030",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-030 - Launcher Startup Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-464/px-030-launcher-startup-integration-gate"
+  },
+  {
+    "id": "FRA-463",
+    "px": "PX-029",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-029 - Startup UX Tests And Smoke Harness",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-463/px-029-startup-ux-tests-and-smoke-harness"
+  },
+  {
+    "id": "FRA-462",
+    "px": "PX-028",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-028 - App Logo Icon Metadata Verification",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-462/px-028-app-logo-icon-metadata-verification"
+  },
+  {
+    "id": "FRA-461",
+    "px": "PX-027",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-027 - Launch Docs For Non-Terminal Users",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-461/px-027-launch-docs-for-non-terminal-users"
+  },
+  {
+    "id": "FRA-460",
+    "px": "PX-026",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-026 - Desktop Launch Screenshot Evidence",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-460/px-026-desktop-launch-screenshot-evidence"
+  },
+  {
+    "id": "FRA-459",
+    "px": "PX-025",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-025 - Packaged Prototype Launch Smoke",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-459/px-025-packaged-prototype-launch-smoke"
+  },
+  {
+    "id": "FRA-458",
+    "px": "PX-024",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-024 - Startup Project Selection Loading Feedback",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-458/px-024-startup-project-selection-loading-feedback"
+  },
+  {
+    "id": "FRA-457",
+    "px": "PX-023",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-023 - Startup Splash Accessibility And Keyboard Behavior",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-457/px-023-startup-splash-accessibility-and-keyboard-behavior"
+  },
+  {
+    "id": "FRA-456",
+    "px": "PX-022",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-022 - Startup Error Recovery States",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-456/px-022-startup-error-recovery-states"
+  },
+  {
+    "id": "FRA-455",
+    "px": "PX-021",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-021 - First Paint Performance Budget",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-455/px-021-first-paint-performance-budget"
+  },
+  {
+    "id": "FRA-454",
+    "px": "PX-020",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-020 - Diagnostics Panels Lazy Load Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-454/px-020-diagnostics-panels-lazy-load-boundary"
+  },
+  {
+    "id": "FRA-453",
+    "px": "PX-019",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-019 - Asset Thumbnail Lazy Load Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-453/px-019-asset-thumbnail-lazy-load-boundary"
+  },
+  {
+    "id": "FRA-452",
+    "px": "PX-018",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-018 - Provider Hub Lazy Load Boundary",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-452/px-018-provider-hub-lazy-load-boundary"
+  },
+  {
+    "id": "FRA-451",
+    "px": "PX-017",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-017 - Runtime Availability Startup Check",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-451/px-017-runtime-availability-startup-check"
+  },
+  {
+    "id": "FRA-450",
+    "px": "PX-016",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-016 - Recent Project Restore Startup Flow",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-450/px-016-recent-project-restore-startup-flow"
+  },
+  {
+    "id": "FRA-449",
+    "px": "PX-015",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-015 - Startup Loading Phase State Machine",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-449/px-015-startup-loading-phase-state-machine"
+  },
+  {
+    "id": "FRA-448",
+    "px": "PX-014",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-014 - Instant Splash Screen Shell",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-448/px-014-instant-splash-screen-shell"
+  },
+  {
+    "id": "FRA-447",
+    "px": "PX-013",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-013 - Desktop Shortcut And Start Menu Guidance Prototype",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-447/px-013-desktop-shortcut-and-start-menu-guidance-prototype"
+  },
+  {
+    "id": "FRA-446",
+    "px": "PX-012",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-012 - Windows Double-Click Executable Path",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-446/px-012-windows-double-click-executable-path"
+  },
+  {
+    "id": "FRA-445",
+    "px": "PX-011",
+    "milestone": "M01",
+    "milestoneName": "M01 — Launcher, Desktop Entry, Splash, And Startup UX",
+    "title": "PX-011 - App Icon And Branding Asset Audit",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-445/px-011-app-icon-and-branding-asset-audit"
+  },
+  {
+    "id": "FRA-444",
+    "px": "PX-010",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-010 - Phase 12 Baseline Integration Gate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-444/px-010-phase-12-baseline-integration-gate"
+  },
+  {
+    "id": "FRA-443",
+    "px": "PX-009",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-009 - Phase 12 Risk Register",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-443/px-009-phase-12-risk-register"
+  },
+  {
+    "id": "FRA-442",
+    "px": "PX-008",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-008 - Phase 12 Roadmap And Success Metrics",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-442/px-008-phase-12-roadmap-and-success-metrics"
+  },
+  {
+    "id": "FRA-441",
+    "px": "PX-007",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-007 - Product UX Principles For Creator-First AI",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-441/px-007-product-ux-principles-for-creator-first-ai"
+  },
+  {
+    "id": "FRA-440",
+    "px": "PX-006",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-006 - Phase 11 Baseline Verification",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-440/px-006-phase-11-baseline-verification"
+  },
+  {
+    "id": "FRA-439",
+    "px": "PX-005",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-005 - Existing Asset And Animation Pipeline Inventory",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-439/px-005-existing-asset-and-animation-pipeline-inventory"
+  },
+  {
+    "id": "FRA-438",
+    "px": "PX-004",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-004 - Existing AI Pipeline Inventory",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-438/px-004-existing-ai-pipeline-inventory"
+  },
+  {
+    "id": "FRA-437",
+    "px": "PX-003",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-003 - Current Launcher And Startup Path Audit",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-437/px-003-current-launcher-and-startup-path-audit"
+  },
+  {
+    "id": "FRA-436",
+    "px": "PX-002",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-002 - Current Provider And Model Settings UX Audit",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-436/px-002-current-provider-and-model-settings-ux-audit"
+  },
+  {
+    "id": "FRA-435",
+    "px": "PX-001",
+    "milestone": "M00",
+    "milestoneName": "M00 — Baseline Recovery And Product Framing",
+    "title": "PX-001 - Product UX Audit From User Feedback",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-435/px-001-product-ux-audit-from-user-feedback"
+  }
+]
