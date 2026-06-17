@@ -1,3 +1,30 @@
+## FRA-490/515/516/517/518 — M03 Pipeline-Aware AI Command Router Integration Gate
+- timestamp: 2026-06-17 23:30 UTC
+- issues closed: FRA-490 (PX-056 Router Kernel), FRA-515 (PX-081 Ambiguity), FRA-516 (PX-082 Preview-Before-Apply), FRA-517 (PX-083 Clarification UI), FRA-518 (PX-084 Intent Preview UI), plus PX-085 (M03 Gate) and FRA-519/520 (router pipeline scoring) covered as part of the kernel.
+- commands:
+  - npx tsc --noEmit                                                  -> PASS (0 errors)
+  - npx vitest run src/commandRouter/__tests__/                       -> PASS (40/40, +14 new component tests)
+  - npx vitest run src/components/ai/__tests__/AIStudioCommandRouterIntegration.test.tsx -> PASS (7/7, +7 new tests)
+  - npx vitest run                                                    -> PASS (805/805, +23 new tests, 0 regressions)
+- files staged (scoped): 9
+  - src/commandRouter/ClarificationCard.tsx (new, presentational clarification card, type=button, no provider/navigation calls)
+  - src/commandRouter/IntentPreviewCard.tsx (new, presentational intent preview with read-only / preview-only / mutation badges, no-apply note for read+preview intents)
+  - src/commandRouter/RouterResultCard.tsx (new, dispatcher that renders the right sub-card for each CommandRouterResult kind)
+  - src/commandRouter/useRouteCreatorRequest.ts (new, host hook with useRef-mirrored state so state always reflects the latest route())
+  - src/commandRouter/__tests__/routerComponents.test.tsx (new, 14 tests)
+  - src/commandRouter/__tests__/router.test.ts (added 2 regression tests for multi-word tiebreak and longest-keyword tiebreak)
+  - src/components/ai/AIStudioScreen.tsx (router form, buildRouterInput from project context, route/clarify/clarify-pick/apply/reject handlers, RouterResultCard mount, activity entry types extended)
+  - src/components/ai/AIStudioSessionActivity.tsx (extended AIStudioActivityKind with clarify, route, clarify-pick, apply)
+  - src/components/ai/__tests__/AIStudioCommandRouterIntegration.test.tsx (new, 7 tests)
+  - docs/PHASE_12_M03_INTEGRATION_GATE.md (new gate report)
+- tied to PX-056..PX-085 (30 issues, M03 scope)
+- capabilities: read | preview | mutation (never silent apply)
+- target types: project | map | event | database | asset
+- tiebreak: multi-word hits > single-word hits > longest single keyword
+- writeIntentId: stable per mutation intent
+- preview guard: mutationGuard fails closed when preview is invalid
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+
 ## FRA-465/467/468/469/485/487/488/489 — M02 AI Studio Shell Integration Gate
 - timestamp: 2026-06-17 22:40 UTC
 - issues closed: FRA-465 (PX-031 Dock Shell), FRA-467 (PX-033 Project Context), FRA-468 (PX-034 Selected Map), FRA-469 (PX-035 Selected Event), FRA-485 (PX-051 Keyboard A11y), FRA-487 (PX-053 Component Tests), FRA-488 (PX-054 Integration Tests), FRA-489 (PX-055 M02 Gate)

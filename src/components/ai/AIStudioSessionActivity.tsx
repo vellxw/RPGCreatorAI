@@ -1,6 +1,15 @@
 import { type ReactNode } from 'react';
 
-export type AIStudioActivityKind = 'accept' | 'reject' | 'archive' | 'cancel' | 'reset';
+export type AIStudioActivityKind =
+  | 'accept'
+  | 'reject'
+  | 'archive'
+  | 'cancel'
+  | 'reset'
+  | 'clarify'
+  | 'route'
+  | 'clarify-pick'
+  | 'apply';
 
 export interface AIStudioActivityEntry {
   id: string;
@@ -20,6 +29,10 @@ const KIND_LABEL: Record<AIStudioActivityKind, string> = {
   archive: 'Archived',
   cancel: 'Canceled',
   reset: 'Reset',
+  clarify: 'Asked for clarification',
+  route: 'Routed',
+  'clarify-pick': 'Picked an option',
+  apply: 'Recorded accept',
 };
 
 export function AIStudioSessionActivity({

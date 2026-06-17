@@ -28,6 +28,10 @@ import {
   type AiRequestQueueState,
 } from '../../stores/aiRequestQueueStore';
 import { buildProjectContext, type ProjectContext } from './projectContext';
+import { RouterResultCard } from '../../commandRouter/RouterResultCard';
+import { useRouteCreatorRequest } from '../../commandRouter/useRouteCreatorRequest';
+import type { CommandRouterInput } from '../../commandRouter/router';
+import type { CommandRouterIntent } from '../../commandRouter/intentContract';
 
 export interface AIStudioScreenProps {
   providers: readonly ProviderConfig[];
@@ -73,6 +77,8 @@ export function AIStudioScreen({
   const [lastStarterTask, setLastStarterTask] = useState<string | null>(null);
   const [request, dispatchRequest] = useReducer(chatRequestReducer, defaultChatRequestState);
   const [activity, setActivity] = useState<AIStudioActivityEntry[]>([]);
+  const [draftMessage, setDraftMessage] = useState('');
+  const router = useRouteCreatorRequest();
   const tokenIndexRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -131,6 +137,69 @@ export function AIStudioScreen({
     dispatchRequest({ type: 'reset' });
     dispatchRequest({ type: 'start' });
     setActivePane('chat');
+  };
+
+  const buildRouterInput = (message: string): CommandRouterInput => {
+    const input: CommandRouterInput = {
+      message,
+      projectId: projectId,
+    };
+    if (projectContext?.selectedMap) {
+      input.selectedMapId = projectContext.selectedMap.id;
+      if (projectContext.selectedEvent) {
+        input.selectedEventId = projectContext.selectedEvent.id;
+      }
+    }
+    if (projectContext?.database?.selectedTables[0]) {
+      input.selectedDatabaseTable = projectContext.database.selectedTables[0];
+    }
+    return input;
+  };
+
+  const handleSubmitMessage = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = draftMessage.trim();
+    if (trimmed.length === 0) return;
+    const result = router.route(buildRouterInput(trimmed));
+    if (result.kind === 'clarification') {
+      recordActivity('clarify', `Asked for clarification on: "${trimmed}".`);
+    } else {
+      recordActivity(
+        'route',
+        `Routed "${trimmed}" to ${result.intent.pipeline} (${result.intent.capability}).`,
+      );
+    }
+    setDraftMessage('');
+  };
+
+  const handleSelectClarification = (optionId: string, pipeline: string) => {
+    const last = router.state.lastInput;
+    if (!last) return;
+    const result = router.route({
+      ...last,
+      message: `Apply the ${pipeline} workflow (${optionId}).`,
+    });
+    if (result.kind === 'intent') {
+      recordActivity(
+        'clarify-pick',
+        `Picked ${optionId}; routed to ${result.intent.pipeline} (${result.intent.capability}).`,
+      );
+    } else {
+      recordActivity('clarify-pick', `Picked ${optionId}; still needs clarification.`);
+    }
+  };
+
+  const handleAcceptIntent = (intent: CommandRouterIntent) => {
+    recordActivity(
+      'apply',
+      `Recorded acceptance for ${intent.pipeline} (${intent.id}); the host is responsible for any apply step.`,
+    );
+    router.clear();
+  };
+
+  const handleRejectIntent = (intent: CommandRouterIntent) => {
+    recordActivity('reject', `Discarded draft for ${intent.pipeline} (${intent.id}).`);
+    router.clear();
   };
 
   const handleDockKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -228,7 +297,48 @@ export function AIStudioScreen({
             Last starter: {lastStarterTask}
           </p>
         )}
+        {router.state.result ? (
+          <div className="mt-3" data-testid="ai-studio-router-result">
+            <RouterResultCard
+              result={router.state.result}
+              onSelectClarification={handleSelectClarification}
+              onAcceptIntent={handleAcceptIntent}
+              onRejectIntent={handleRejectIntent}
+            />
+          </div>
+        ) : null}
       </div>
+      <form
+        data-testid="ai-studio-router-form"
+        onSubmit={handleSubmitMessage}
+        className="flex items-end gap-2 rounded-md border border-gray-200 bg-white p-2"
+      >
+        <label className="flex-1">
+          <span className="sr-only">Describe what you want to draft</span>
+          <textarea
+            data-testid="ai-studio-router-input"
+            value={draftMessage}
+            onChange={(event) => setDraftMessage(event.target.value)}
+            placeholder={
+              hasProject
+                ? 'Describe what you want to draft. The router will route it to the right pipeline or ask for clarification.'
+                : 'Open a project to start routing creator messages through the AI Studio router.'
+            }
+            rows={2}
+            disabled={!hasProject}
+            className="block w-full resize-none rounded border border-gray-200 p-2 text-[12px] text-gray-800 focus:border-indigo-300 focus:outline-none"
+          />
+        </label>
+        <button
+          type="submit"
+          data-testid="ai-studio-router-submit"
+          data-action="submit"
+          disabled={!hasProject || draftMessage.trim().length === 0}
+          className="rounded border border-indigo-300 bg-indigo-600 px-3 py-1.5 text-[12px] font-medium text-white disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-200 disabled:text-gray-500"
+        >
+          Route request
+        </button>
+      </form>
     </>
   );
 
