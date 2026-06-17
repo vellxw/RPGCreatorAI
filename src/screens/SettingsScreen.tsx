@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
+import { CreatorModeSelector } from '../components/ai/CreatorModeSelector';
+import { PerPipelineModelDefaults } from '../components/ai/PerPipelineModelDefaults';
+import { AdvancedProviderPanel } from '../components/ai/AdvancedProviderPanel';
 import { ProviderCapabilityGatesPanel } from '../components/ai/ProviderCapabilityGatesPanel';
 import { ProviderCostBudgetPanel } from '../components/ai/ProviderCostBudgetPanel';
 import {
@@ -19,6 +22,13 @@ import {
   validateCustomEndpointBaseUrl,
 } from '../providers/customOpenAiEndpointConfig';
 import { getProviderMetadata } from '../providers/providerRegistry';
+import {
+  defaultModelCapabilityRegistry,
+} from '../providers/modelCapabilityRegistry';
+import {
+  defaultProviderRegistry,
+} from '../providers/providerRegistry';
+import { resolveCreatorModeRoutes } from '../providers/providerMode';
 import {
   defaultOpenAiImageGenerationSettings,
   imageGenerationReadiness,
@@ -49,6 +59,14 @@ interface SettingsScreenProps {
     cancel: (jobId: string) => void;
     retry: (jobId: string) => void;
   };
+  creatorMode?: ProviderStoreValue['creatorMode'];
+  setCreatorMode?: ProviderStoreValue['setCreatorMode'];
+  workflowOverrides?: ProviderStoreValue['workflowOverrides'];
+  setWorkflowOverride?: ProviderStoreValue['setWorkflowOverride'];
+  clearWorkflowOverride?: ProviderStoreValue['clearWorkflowOverride'];
+  clearAllWorkflowOverrides?: ProviderStoreValue['clearAllWorkflowOverrides'];
+  isAdvancedPanelOpen?: ProviderStoreValue['isAdvancedPanelOpen'];
+  setAdvancedPanelOpen?: ProviderStoreValue['setAdvancedPanelOpen'];
 }
 
 function cloneProviders(providers: ProviderConfig[]): ProviderConfig[] {
@@ -90,16 +108,62 @@ function capabilityLabelsFor(provider: ProviderConfig): string[] {
   return ['OpenAI-compatible endpoint', ...configured];
 }
 
-export function SettingsScreen({ providerStore, initialProviders, credentialStore, aiQueueStore }: SettingsScreenProps) {
+export function SettingsScreen({
+  providerStore,
+  initialProviders,
+  credentialStore,
+  aiQueueStore,
+  creatorMode: creatorModeProp,
+  setCreatorMode: setCreatorModeProp,
+  workflowOverrides: workflowOverridesProp,
+  setWorkflowOverride: setWorkflowOverrideProp,
+  clearWorkflowOverride: clearWorkflowOverrideProp,
+  clearAllWorkflowOverrides: clearAllWorkflowOverridesProp,
+  isAdvancedPanelOpen: isAdvancedPanelOpenProp,
+  setAdvancedPanelOpen: setAdvancedPanelOpenProp,
+}: SettingsScreenProps) {
   const [localProviders, setLocalProviders] = useState<ProviderConfig[]>(() =>
     cloneProviders(initialProviders ?? defaultProviderConfigs),
   );
+  const [localCreatorMode, setLocalCreatorMode] = useState<ProviderStoreValue['creatorMode']>(creatorModeProp ?? 'recommended');
+  const [localOverrides, setLocalOverrides] = useState<ProviderStoreValue['workflowOverrides']>(workflowOverridesProp ?? []);
+  const [localAdvancedOpen, setLocalAdvancedOpen] = useState<boolean>(isAdvancedPanelOpenProp ?? false);
+  const creatorMode = creatorModeProp ?? localCreatorMode;
+  const setCreatorMode = setCreatorModeProp ?? ((mode) => {
+    setLocalCreatorMode(mode);
+    setLocalAdvancedOpen(mode === 'custom-advanced');
+  });
+  const workflowOverrides = workflowOverridesProp ?? localOverrides;
+  const setWorkflowOverride = setWorkflowOverrideProp ?? ((override) => {
+    setLocalOverrides(current => {
+      const without = current.filter(o => o.workflowId !== override.workflowId);
+      return [...without, override];
+    });
+  });
+  const clearWorkflowOverride = clearWorkflowOverrideProp ?? ((workflowId) => {
+    setLocalOverrides(current => current.filter(o => o.workflowId !== workflowId));
+  });
+  const clearAllWorkflowOverrides = clearAllWorkflowOverridesProp ?? (() => {
+    setLocalOverrides([]);
+  });
+  const isAdvancedPanelOpen = isAdvancedPanelOpenProp ?? localAdvancedOpen;
+  const setAdvancedPanelOpen = setAdvancedPanelOpenProp ?? setLocalAdvancedOpen;
   const activeCredentialStore = useMemo(
     () => credentialStore ?? getCredentialStoreAdapter(),
     [credentialStore],
   );
   const providers = providerStore?.providers ?? localProviders;
   const setProviders = providerStore?.setProviders ?? setLocalProviders;
+  const resolvedCreatorRoutes = useMemo(
+    () => resolveCreatorModeRoutes({
+      mode: creatorMode,
+      providers,
+      registry: defaultModelCapabilityRegistry,
+      providerRegistry: defaultProviderRegistry,
+      overrides: workflowOverrides,
+    }),
+    [creatorMode, providers, workflowOverrides],
+  );
   const [credentialStatuses, setCredentialStatuses] = useState<Record<string, CredentialStatus>>({});
   const [credentialInputs, setCredentialInputs] = useState<Record<string, string>>({});
   const [credentialFeedback, setCredentialFeedback] = useState<Record<string, string>>({});
@@ -283,6 +347,22 @@ export function SettingsScreen({ providerStore, initialProviders, credentialStor
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
           <section className="flex min-w-0 flex-col gap-3">
+            <CreatorModeSelector
+              selectedMode={creatorMode}
+              onSelect={setCreatorMode}
+              resolvedRoutes={resolvedCreatorRoutes}
+            />
+            <PerPipelineModelDefaults routes={resolvedCreatorRoutes} />
+            <AdvancedProviderPanel
+              providers={providers}
+              registry={defaultProviderRegistry}
+              overrides={workflowOverrides}
+              isOpen={isAdvancedPanelOpen}
+              onToggle={setAdvancedPanelOpen}
+              onSetOverride={setWorkflowOverride}
+              onClearOverride={clearWorkflowOverride}
+              onClearAll={clearAllWorkflowOverrides}
+            />
             {providers.length === 0 ? (
               <div role="status" className="rounded-md border border-dashed border-gray-300 bg-white px-4 py-5">
                 <p className="text-[13px] font-semibold text-gray-800">No providers configured</p>
