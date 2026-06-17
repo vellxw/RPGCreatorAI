@@ -1,3 +1,27 @@
+## FRA-465/467/468/469/485/487/488/489 — M02 AI Studio Shell Integration Gate
+- timestamp: 2026-06-17 22:40 UTC
+- issues closed: FRA-465 (PX-031 Dock Shell), FRA-467 (PX-033 Project Context), FRA-468 (PX-034 Selected Map), FRA-469 (PX-035 Selected Event), FRA-485 (PX-051 Keyboard A11y), FRA-487 (PX-053 Component Tests), FRA-488 (PX-054 Integration Tests), FRA-489 (PX-055 M02 Gate)
+- commands:
+  - npx tsc --noEmit                            -> PASS (0 errors)
+  - npx vitest run src/components/ai/__tests__/  -> PASS (129/129, +19 new tests)
+  - npx vitest run                              -> PASS (758/758, 0 regressions, +19 new)
+- files staged (scoped): 9
+  - src/components/ai/AIStudioDockLayout.tsx (new, dock with role=tablist + role=tab + role=tabpanel + onKeyDown)
+  - src/components/ai/AIStudioContextPanel.tsx (new, bounded context view with data-state + data-context-section)
+  - src/components/ai/projectContext.ts (new, ProjectContext type + buildProjectContext helper)
+  - src/components/ai/AIStudioSessionActivity.tsx (new, activity list with data-activity-id + data-activity-kind)
+  - src/components/ai/AIStudioScreen.tsx (host: dock state, selected map/event/database context props, keyboard arrow navigation, session activity recording)
+  - src/components/ai/__tests__/AIStudioDockLayout.test.tsx (new, 6 tests)
+  - src/components/ai/__tests__/AIStudioContextPanel.test.tsx (new, 4 tests)
+  - src/components/ai/__tests__/AIStudioSessionActivity.test.tsx (new, 2 tests)
+  - src/components/ai/__tests__/AIStudioShellIntegration.test.tsx (new, 7 tests)
+  - docs/PHASE_12_M02_INTEGRATION_GATE.md (new gate report)
+- dock panes: context, chat, queue, activity
+- project context props: projectId, projectTitle, mapCount, eventCount, validationStatus, selectedMap, selectedEvent, database
+- keyboard: ArrowRight / ArrowLeft cycle through panes when the host is focused
+- inert: no provider, store, or programmatic navigation calls inside the new components
+- secret scan: 0 hits, no .env, no .commandcode/, no build/, no output/ staged
+
 ## FRA-482 / PX-048 — AI Studio Loading And Streaming States
 - timestamp: 2026-06-16 21:25 UTC
 - commands:
