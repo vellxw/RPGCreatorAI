@@ -22,6 +22,7 @@ import {
 } from '../../stores/saveActions';
 import { isDesktopShell } from '../../adapters/adapterFactory';
 import { SaveIndicator } from './SaveIndicator';
+import { decideSaveAndPlaytest } from '../../firstRun/saveAndPlaytest';
 import type { Screen } from '../../types/project';
 import type { PlaytestSessionMode } from '../../adapters/types';
 import { uiAssets } from '../../assets/generated/assetCatalog';
@@ -106,6 +107,52 @@ export function TopToolbar() {
           : `Saved via ${outcome.adapterName}`,
         detail: outcome.recovery,
       });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveAndPlaytest = async () => {
+    if (isSaving) return;
+    setStatusMessage(null);
+    setIsSaving(true);
+    try {
+      const outcome = await performSave(projectState, projectDispatch, { exportAfterSave: false });
+      const decision = decideSaveAndPlaytest({
+        dirty: outcome.success ? false : projectState.dirty,
+        errorCount: outcome.validationErrorCount,
+        warningCount: outcome.validationWarningCount,
+        runtimeAvailable: desktop,
+      });
+
+      if (!outcome.success && outcome.blockedByValidation) {
+        setSaveFeedback({
+          tone: 'danger',
+          title: decision.message,
+          detail: `${outcome.errors[0] ?? ''} ${outcome.recovery}`.trim(),
+        });
+        return;
+      }
+      if (!outcome.success) {
+        setSaveFeedback({
+          tone: 'danger',
+          title: 'Save failed before playtest',
+          detail: `${outcome.errors[0] ?? 'Unknown write error'}. ${outcome.recovery}`,
+        });
+        return;
+      }
+
+      setSaveFeedback({
+        tone: decision.warningCount > 0 ? 'warning' : 'success',
+        title: decision.message,
+        detail:
+          decision.kind === 'saved-and-routed'
+            ? 'In-editor playtest view is now open.'
+            : decision.kind === 'saved-and-playtested'
+              ? 'The native runtime received the project and the playtest view is open.'
+              : outcome.recovery,
+      });
+      dispatch({ type: 'SET_SCREEN', screen: 'playtest' });
     } finally {
       setIsSaving(false);
     }
@@ -241,6 +288,19 @@ export function TopToolbar() {
           title={isSaving ? 'Save is already writing project data' : 'Validate and save project data'}
         >
           Save
+        </Button>
+        <Button
+          icon={<Play size={14} />}
+          onClick={handleSaveAndPlaytest}
+          disabled={isSaving}
+          data-testid="save-and-playtest"
+          title={
+            isSaving
+              ? 'Save is already writing project data'
+              : 'Save the project, then open the playtest view'
+          }
+        >
+          Save & Playtest
         </Button>
         <Button icon={<CheckCircle2 size={14} />} onClick={handleValidate}>
           Validate
