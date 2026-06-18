@@ -10,6 +10,12 @@ import {
   ProjectStartupScreen,
   type StartupPendingAction,
 } from './components/project/ProjectStartupScreen';
+import { useFirstRun } from './firstRun/firstRunStore';
+import { FirstRunGate } from './components/onboarding/FirstRunGate';
+import {
+  getFirstRunPath,
+  type FirstRunStarterPath,
+} from './firstRun/firstRunTypes';
 import {
   ProjectContext,
   initialProjectStoreState,
@@ -78,6 +84,7 @@ export default function App() {
   const [startupPendingAction, setStartupPendingAction] =
     useState<StartupPendingAction | null>(null);
   const [runtimeStatusMessage, setRuntimeStatusMessage] = useState<string | null>(null);
+  const firstRun = useFirstRun();
 
   // Load project once via the active adapter.
   useEffect(() => {
@@ -230,6 +237,19 @@ export default function App() {
     return <AppSplashShell phase={getStartupPhase(startupPhase)} />;
   }
 
+  const handleFirstRunConfirm = async (pathId: FirstRunStarterPath) => {
+    firstRun.selectPath(pathId);
+    firstRun.complete();
+    if (pathId === 'bundled-sample') {
+      // The adapter has already loaded the bundled sample in the load
+      // effect above; just dismiss the gate.
+      return;
+    }
+    const path = getFirstRunPath(pathId);
+    await performCreateProject(projectDispatch, { title: path.defaultTitle });
+    setShowStartup(false);
+  };
+
   const desktop = isDesktopShell();
 
   const handleStartupOpen = async () => {
@@ -298,22 +318,31 @@ export default function App() {
     return (
       <ProjectContext.Provider value={{ state: projectState, dispatch: projectDispatch }}>
         <EditorContext.Provider value={{ state: editorState, dispatch: editorDispatch }}>
-          <ProjectStartupScreen
-            desktop={desktop}
-            sampleTitle={projectState.project.title || 'bundled sample'}
-            statusMessage={startupStatus}
-            recoveryState={startupRecovery}
-            pendingAction={startupPendingAction}
-            runtimeStatusMessage={runtimeStatusMessage}
-            onUseSample={() => {
-              setStartupRecovery(null);
-              setStartupStatus(null);
-              setShowStartup(false);
+          <FirstRunGate
+            isFirstRun={firstRun.isFirstRun}
+            selectedPath={firstRun.preferences.selectedPath}
+            onSelectPath={firstRun.selectPath}
+            onConfirm={(pathId) => {
+              void handleFirstRunConfirm(pathId);
             }}
-            onOpenProject={handleStartupOpen}
-            onCreateProject={handleStartupCreate}
-            onImportProject={handleStartupImport}
-          />
+          >
+            <ProjectStartupScreen
+              desktop={desktop}
+              sampleTitle={projectState.project.title || 'bundled sample'}
+              statusMessage={startupStatus}
+              recoveryState={startupRecovery}
+              pendingAction={startupPendingAction}
+              runtimeStatusMessage={runtimeStatusMessage}
+              onUseSample={() => {
+                setStartupRecovery(null);
+                setStartupStatus(null);
+                setShowStartup(false);
+              }}
+              onOpenProject={handleStartupOpen}
+              onCreateProject={handleStartupCreate}
+              onImportProject={handleStartupImport}
+            />
+          </FirstRunGate>
         </EditorContext.Provider>
       </ProjectContext.Provider>
     );

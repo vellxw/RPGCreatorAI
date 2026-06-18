@@ -3,6 +3,26 @@ import { createRoot, type Root } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// First-run onboarding is gated separately from project startup. The startup
+// tests assert the post-onboarding flow, so we force `useFirstRun` to report
+// "already completed" for the duration of this suite.
+vi.mock('../firstRun/firstRunStore', async () => {
+  const actual = await vi.importActual<typeof import('../firstRun/firstRunStore')>(
+    '../firstRun/firstRunStore',
+  );
+  return {
+    ...actual,
+    useFirstRun: () => ({
+      isFirstRun: false,
+      preferences: { selectedPath: 'bundled-sample' as const, completedAt: '2026-06-17' },
+      selectPath: vi.fn(),
+      complete: vi.fn(),
+      reset: vi.fn(),
+    }),
+  };
+});
+
 import App, { startupFailure } from '../App';
 import { _resetAdaptersForTest, _setProjectDataAdapterForTest } from '../adapters/adapterFactory';
 import { BrowserMemoryAdapter } from '../adapters/BrowserMemoryAdapter';
