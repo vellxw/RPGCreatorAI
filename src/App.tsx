@@ -1,5 +1,5 @@
-import { AIStudioScreen } from './components/ai/AIStudioScreen';
 import { lazy, Suspense, useEffect, useReducer, useState } from 'react';
+const AIStudioBoundary = lazy(() => import('./components/ai/AIStudioBoundary').then(m => ({ default: m.AIStudioBoundary })));
 import { TopToolbar } from './components/layout/TopToolbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MainEditorScreen } from './screens/MainEditorScreen';
@@ -352,7 +352,20 @@ export default function App() {
     editor: <MainEditorScreen />,
     events: <EventEditorScreen />,
     database: <DatabaseScreen />,
-    'ai-studio': <AIStudioScreen providers={defaultProviderConfigs} projectId={editorState.activeProjectId} />,
+    'ai-studio': (
+      <Suspense
+        fallback={
+          <div className="flex-1 bg-white px-6 py-5 text-[13px] text-gray-600">
+            Loading AI Studio...
+          </div>
+        }
+      >
+        <AIStudioBoundary
+          providers={defaultProviderConfigs}
+          projectId={editorState.activeProjectId}
+        />
+      </Suspense>
+    ),
     assets: (
       <Suspense
         fallback={
