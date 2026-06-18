@@ -1,0 +1,114 @@
+// Creates 4 Linear issues for Phase 13 follow-ups and closes them with
+// evidence comments. Run: node scripts/dev/linear-create-m13.mjs
+//
+// Each issue is created with a stable FRA-* ID pattern (FRA-686..689) and
+// closed with a comment that links to the implementing commit and the
+// validation evidence.
+
+import { LinearClient } from '@linear/sdk';
+
+const client = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
+if (!process.env.LINEAR_API_KEY) {
+  console.error('LINEAR_API_KEY env var is required');
+  process.exit(1);
+}
+
+async function getOrCreateM13Project() {
+  const teams = await client.teams();
+  const team = teams.nodes[0];
+  if (!team) throw new Error('No Linear team found');
+
+  // Find the Phase 12 project to ensure we add the issues to the same scope.
+  const projects = await client.projects({ first: 50 });
+  const phase12 = projects.nodes.find(
+    p => p.name.toLowerCase().includes('phase 12') || p.name.toLowerCase().includes('phase-12'),
+  );
+  const projectId = phase12?.id;
+
+  return { teamId: team.id, projectId };
+}
+
+const issues = [
+  {
+    title: 'FRA-686 - M13 - Wire FirstRunPathSelector into App.tsx via FirstRunGate',
+    description:
+      'Phase 13 follow-up. M07 declared FirstRunPathSelector + firstRunStore as a Phase 13 follow-up because they were not mounted in the host. This issue tracks the wire-up: a new FirstRunGate (presentational, inert) that wraps ProjectStartupScreen and renders the starter-path selector when useFirstRun().isFirstRun is true. On confirm the host calls useFirstRun().complete() and dispatches performCreateProject for the project-creating paths.',
+    evidence:
+      'Closed by commit c417dc8 (feat(onboarding): wire FirstRunPathSelector into App.tsx via FirstRunGate). New tests in src/components/onboarding/__tests__/FirstRunGate.test.tsx (4): (1) selector renders on first run, (2) host children render when not first run, (3) callbacks are forwarded, (4) gate is inert (no fetch, no programmatic navigation). AppStartup.test.tsx updated to mock useFirstRun as already-completed. Validation: npx tsc --noEmit clean, npx vitest run 908/908, npm run build clean. See docs/PHASE_13_FOLLOWUP_INTEGRATION_GATE.md for the full deliverable.',
+  },
+  {
+    title: 'FRA-687 - M13 - Code-split AI Studio into AIStudioBoundary chunk',
+    description:
+      'Phase 13 follow-up. The main bundle carried the entire AI Studio tree (880.60 kB, gzip 229.31 kB). This issue tracks the code-split: a new AIStudioBoundary wrapper around AIStudioScreen loaded via React.lazy and Suspense, matching the convention used by ProviderSettingsBoundary, AssetWorkspaceBoundary, and PlaytestWorkspaceBoundary.',
+    evidence:
+      'Closed by commit 9035c64 (feat(perf): code-split AI Studio into AIStudioBoundary chunk). New tests in src/components/ai/__tests__/AIStudioBoundary.test.tsx (3): (1) boundary renders the inner screen and forwards providers + projectId, (2) is a plain function component, (3) does not call any network APIs on mount. Bundle diff: index-*.js 880.60 kB -> 829.48 kB (gzip 229.31 kB -> 215.99 kB). New AIStudioBoundary chunk 46.22 kB (gzip 12.87 kB). Net cold-start savings: -51 kB raw / -13 kB gzip on main. Validation: npx tsc --noEmit clean, npx vitest run 911/911, npm run build clean. See docs/PHASE_13_FOLLOWUP_INTEGRATION_GATE.md for the full deliverable.',
+  },
+  {
+    title: 'FRA-688 - M13 - Add Save & Playtest affordance to editor toolbar',
+    description:
+      'Phase 13 follow-up. decideSaveAndPlaytest + saveAndPlaytest helper in src/firstRun/saveAndPlaytest.ts existed with 5 outcome kinds and tests covering each, but no UI surfaced the decision. A creator who wanted to save and playtest in one step had to click Save, then Validate, then Playtest, in three separate steps. This issue tracks the toolbar affordance.',
+    evidence:
+      'Closed by commit 45a88ad (feat(toolbar): add Save & Playtest affordance to editor toolbar). New tests in src/components/layout/__tests__/TopToolbarSaveAndPlaytest.test.tsx (5): (1) button renders on editor toolbar, (2) not present on AI Studio toolbar, (3) on saved-and-playtested calls performSave and switches to playtest, (4) on save-blocked does not switch to playtest and shows danger feedback, (5) on saved-and-routed (no desktop runtime) still switches to playtest. Validation: npx tsc --noEmit clean, npx vitest run 916/916, npm run build clean. See docs/PHASE_13_FOLLOWUP_INTEGRATION_GATE.md for the full deliverable.',
+  },
+  {
+    title: 'FRA-689 - M13 - Add CHANGELOG.md consolidating Phase 12 and Phase 13',
+    description:
+      'Phase 13 follow-up. Phase 12 delivered 13 milestones across 200+ commits and 29 individual gate reports under docs/. There was no single human-readable summary of the public-facing history. This issue tracks the new CHANGELOG.md at the repo root in the Keep a Changelog 1.1.0 format with one entry per release.',
+    evidence:
+      'Closed by commit 1b413ee (docs: add CHANGELOG.md consolidating Phase 12 and Phase 13). New tests in tests/CHANGELOG.test.mjs: header, sections for Unreleased/0.13.0/0.12.0/0.11.0, M00..M12 listed, Keep a Changelog and Semantic Versioning attributions, >= 20 commit hashes in Phase 12 section. Test output: PASS (56 commit hashes referenced). Validation: node tests/CHANGELOG.test.mjs PASS, npx tsc --noEmit clean, npx vitest run 920/920, npm run build clean. See docs/PHASE_13_FOLLOWUP_INTEGRATION_GATE.md for the full deliverable.',
+  },
+];
+
+async function main() {
+  const { teamId, projectId } = await getOrCreateM13Project();
+  console.log(`Linear team: ${teamId}, project: ${projectId ?? 'none'}`);
+
+  for (const issue of issues) {
+    const created = await client.createIssue({
+      teamId,
+      title: issue.title,
+      description: issue.description,
+      ...(projectId ? { projectId } : {}),
+    });
+    const issueId = created.issue?.id ?? created.issue?._id;
+    if (!issueId) {
+      console.error(`FAIL: could not create ${issue.title}`);
+      process.exit(1);
+    }
+    console.log(`Created: ${issue.title} (${issueId})`);
+
+    // Post the evidence comment immediately.
+    const comment = await client.createComment({
+      issueId,
+      body: issue.evidence,
+    });
+    if (!comment.comment) {
+      console.error(`FAIL: could not comment on ${issueId}`);
+      process.exit(1);
+    }
+    console.log(`  Comment posted: ${comment.comment.id}`);
+
+    // Move to Done.
+    const teams = await client.teams();
+    const team = teams.nodes[0];
+    const states = await team?.states();
+    const doneState = states?.nodes.find(s => s.name === 'Done' || s.type === 'completed');
+    if (!doneState) {
+      console.error(`FAIL: no Done state for ${issueId}`);
+      process.exit(1);
+    }
+    const updateRes = await client.updateIssue(issueId, { stateId: doneState.id });
+    if (!updateRes.issue) {
+      console.error(`FAIL: could not move ${issueId} to Done`);
+      process.exit(1);
+    }
+    console.log(`  Moved to Done: ${doneState.name}`);
+  }
+
+  console.log(`\nAll ${issues.length} Phase 13 issues created, commented, and moved to Done.`);
+}
+
+main().catch(e => {
+  console.error(e);
+  process.exit(1);
+});

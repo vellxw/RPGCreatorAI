@@ -1,5 +1,41 @@
 [
   {
+    "id": "FRA-689",
+    "px": "",
+    "milestone": "",
+    "milestoneName": "",
+    "title": "FRA-689 - M13 - Add CHANGELOG.md consolidating Phase 12 and Phase 13",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-689/fra-689-m13-add-changelogmd-consolidating-phase-12-and-phase-13"
+  },
+  {
+    "id": "FRA-688",
+    "px": "",
+    "milestone": "",
+    "milestoneName": "",
+    "title": "FRA-688 - M13 - Add Save & Playtest affordance to editor toolbar",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-688/fra-688-m13-add-save-and-playtest-affordance-to-editor-toolbar"
+  },
+  {
+    "id": "FRA-687",
+    "px": "",
+    "milestone": "",
+    "milestoneName": "",
+    "title": "FRA-687 - M13 - Code-split AI Studio into AIStudioBoundary chunk",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-687/fra-687-m13-code-split-ai-studio-into-aistudioboundary-chunk"
+  },
+  {
+    "id": "FRA-686",
+    "px": "",
+    "milestone": "",
+    "milestoneName": "",
+    "title": "FRA-686 - M13 - Wire FirstRunPathSelector into App.tsx via FirstRunGate",
+    "status": "Done",
+    "url": "https://linear.app/franco-company/issue/FRA-686/fra-686-m13-wire-firstrunpathselector-into-apptsx-via-firstrungate"
+  },
+  {
     "id": "FRA-532",
     "px": "PX-098",
     "milestone": "M04",
