@@ -1,4 +1,4 @@
-import type { FullProjectState } from './types';
+import type { FullProjectState, ProjectTemplateId } from './types';
 import { mergeDatabases } from './defaultDatabases';
 import { EMPTY_ASSET_CATALOG } from './defaultAssetCatalog';
 import type { MapData } from '../types/project';
@@ -53,6 +53,7 @@ function createStarterMap(): MapData {
 export function createNewProjectState(title?: string): FullProjectState {
   const map = createStarterMap();
   return {
+    templateId: 'blank',
     project: {
       schemaVersion: 1,
       title: projectTitle(title),
@@ -98,4 +99,31 @@ export function createNewProjectState(title?: string): FullProjectState {
     }),
     assets: deepClone(EMPTY_ASSET_CATALOG),
   };
+}
+
+/**
+ * Creates the starter data for a named project template. The template's
+ * documentation/assets live under `templates/<id>` and are copied by the
+ * desktop shell during project creation; the marker is also safe to carry in
+ * browser bundles where no filesystem exists.
+ */
+export function createProjectStateFromTemplate(
+  templateId: ProjectTemplateId,
+  title?: string,
+): FullProjectState {
+  const state = createNewProjectState(title);
+  state.templateId = templateId;
+  if (templateId === 'horror-bl') {
+    state.project.title = (title ?? '').trim() || 'La Novena Promesa';
+    state.project.visualProfile = {
+      aspectRatio: '16:9',
+      baseResolution: { width: 960, height: 540 },
+      tileSize: 48,
+      cameraMode: 'fixed-room',
+      mapPresentation: 'full-scene',
+      zoom: 1,
+      integerScale: true,
+    };
+  }
+  return state;
 }

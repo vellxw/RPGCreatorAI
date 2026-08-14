@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "id": "archive_sublevel",
+  "name": "Archivo Subnivel D",
+  "displayName": "Archivo Subnivel D",
+  "width": 22,
+  "height": 12,
+  "tileSize": 48,
+  "layers": [
+    {
+      "name": "ground",
+      "type": "visual",
+      "role": "ground",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+      ]
+    },
+    {
+      "name": "collision",
+      "type": "collision",
+      "role": "collision",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9
+      ]
+    },
+    {
+      "name": "region",
+      "type": "region",
+      "role": "region",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "archive_lift",
+      "type": "transfer",
+      "x": 1,
+      "y": 6,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        { "type": "transferMap", "mapId": "facility_lobby", "x": 17, "y": 6, "direction": "left" }
+      ]
+    },
+    {
+      "id": "maintenance_binder",
+      "type": "object",
+      "x": 5,
+      "y": 3,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unread_log",
+          "name": "Registro sin leer",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "El circuito seguro exige norte, memoria y D-09; la secuencia contradice el diagrama oficial." },
+            { "type": "addItem", "itemId": "maintenance_log", "amount": 1 },
+            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "recorded_log",
+          "name": "Registro documentado",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "El circuito seguro exige norte, memoria y D-09; la secuencia contradice el diagrama oficial." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "consent_drawer",
+      "type": "object",
+      "x": 14,
+      "y": 3,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unsigned_form",
+          "name": "Consentimiento sin registrar",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "La firma de Elian fue copiada después de la clausura y Damián figura como testigo sin haber firmado." },
+            { "type": "addItem", "itemId": "d09_consent_form", "amount": 1 },
+            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "recorded_form",
+          "name": "Consentimiento documentado",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "La firma de Elian fue copiada después de la clausura y Damián figura como testigo sin haber firmado." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power_console",
+      "type": "object",
+      "x": 10,
+      "y": 8,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unpowered_console",
+          "name": "Consola sin resolver",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "La consola ofrece energía a cambio de reproducir un recuerdo que ninguno reconoce como propio." },
+            {
+              "type": "showChoices",
+              "prompt": "Restablecé la energía sin alimentar el banco de recuerdos.",
+              "choices": [
+                {
+                  "label": "Norte → Memoria → D-09",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+                    { "type": "controlSwitch", "switchId": "archive_open", "value": true },
+                    { "type": "showText", "speaker": "Elian Varela", "text": "Yo recuerdo salir. También recuerdo quedarme en esa camilla. Las dos cosas duelen igual." },
+                    { "type": "showText", "speaker": "Damián Ferreyra", "text": "Entonces no voy a decidir cuál de los dos merece existir." },
+                    {
+                      "type": "showChoices",
+                      "prompt": "¿Aceptás que la entidad guíe el camino?",
+                      "choices": [
+                        {
+                          "label": "Escuchar la voz y atravesar el recuerdo.",
+                          "commands": [
+                            { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": -25 },
+                            { "type": "controlSwitch", "switchId": "heard_the_ninth", "value": true }
+                          ]
+                        },
+                        {
+                          "label": "Seguir las marcas físicas de mantenimiento.",
+                          "commands": [
+                            { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": 5 },
+                            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 }
+                          ]
+                        }
+                      ]
+                    },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                },
+                {
+                  "label": "Usar el puente de emergencia",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": -15 },
+                    { "type": "controlSwitch", "switchId": "archive_open", "value": true },
+                    { "type": "controlSwitch", "switchId": "used_emergency_bypass", "value": true },
+                    { "type": "showText", "speaker": "Elian Varela", "text": "Yo recuerdo salir. También recuerdo quedarme en esa camilla. Las dos cosas duelen igual." },
+                    { "type": "showText", "speaker": "Damián Ferreyra", "text": "Entonces no voy a decidir cuál de los dos merece existir." },
+                    {
+                      "type": "showChoices",
+                      "prompt": "¿Aceptás que la entidad guíe el camino?",
+                      "choices": [
+                        {
+                          "label": "Escuchar la voz y atravesar el recuerdo.",
+                          "commands": [
+                            { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": -25 },
+                            { "type": "controlSwitch", "switchId": "heard_the_ninth", "value": true }
+                          ]
+                        },
+                        {
+                          "label": "Seguir las marcas físicas de mantenimiento.",
+                          "commands": [
+                            { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": 5 },
+                            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 }
+                          ]
+                        }
+                      ]
+                    },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "powered_console",
+          "name": "Consola resuelta",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "El archivo revela que Elian salió de la clínica; quien pidió ayuda fue una copia de su memoria." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sterile_door",
+      "type": "transfer",
+      "x": 20,
+      "y": 6,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        {
+          "type": "ifSwitch",
+          "switchId": "archive_open",
+          "equals": true,
+          "then": [
+            { "type": "transferMap", "mapId": "service_corridor", "x": 2, "y": 5, "direction": "right" }
+          ],
+          "else": [
+            { "type": "showText", "text": "Restablecé la energía sin alimentar el banco de recuerdos." }
+          ]
+        }
+      ]
+    }
+  ]
+}

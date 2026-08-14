@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.chapter-1.android",
+  "title": "La Novena Promesa — Capítulo 1",
+  "applicationId": "ai.rpgcreator.player",
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "gameReleasePath": "release-input/game-release.v1.json",
+  "target": "android-player",
+  "gameBundlePath": "release-input/game-bundle.v1.json",
+  "assetManifestPath": "data/assets/assets-manifest.json",
+  "assetAllowlistPath": "release-input/asset-allowlist.json",
+  "assetProvenancePath": "release-input/asset-provenance.v1.json",
+  "assetApprovalGatePath": "release-input/asset-approval-gate.v1.json",
+  "runtimeConfigPath": "data/technical/runtime-config.json",
+  "gateContractPath": "src/platform/android/toolchain/android-release-gates.v1.json",
+  "toolchainContractPath": "src/platform/android/toolchain/android-toolchain.v1.json",
+  "networkAllowed": false,
+  "signing": {
+    "debugAllowed": true,
+    "releaseKeyStoredInProject": false
+  }
+}

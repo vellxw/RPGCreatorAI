@@ -3,7 +3,11 @@ import { mergeDatabases } from '../../adapters/defaultDatabases';
 import type { FullProjectState } from '../../adapters/types';
 import type { EditorState } from '../../stores/editorStore';
 import { initialEditorState } from '../../stores/editorStore';
-import { buildPlaytestLaunchPlan, pickLaunchValidationError } from '../playtestLaunchRequest';
+import {
+  buildPlaytestLaunchPlan,
+  buildPlaytestProjectState,
+  pickLaunchValidationError,
+} from '../playtestLaunchRequest';
 
 function makeProjectState(): FullProjectState {
   return {
@@ -52,12 +56,39 @@ function makeProjectState(): FullProjectState {
     },
     items: { items: [] },
     databases: mergeDatabases(undefined),
+    assets: {
+      schemaVersion: 1,
+      assets: [
+        {
+          id: 'hero_sheet',
+          name: 'Hero Sheet',
+          kind: 'spritesheet',
+          path: 'assets/imported/spritesheets/hero-sheet.png',
+          source: 'imported',
+        },
+      ],
+    },
   };
 }
 
 function makeEditorState(changes: Partial<EditorState>): EditorState {
   return { ...initialEditorState, ...changes };
 }
+
+describe('buildPlaytestProjectState', () => {
+  it('preserves the asset catalog in the native playtest snapshot', () => {
+    const project = makeProjectState();
+    const snapshot = buildPlaytestProjectState({
+      project: project.project,
+      maps: project.maps,
+      items: project.items,
+      databases: project.databases,
+      assets: project.assets!,
+    });
+
+    expect(snapshot.assets?.assets.map(asset => asset.id)).toEqual(['hero_sheet']);
+  });
+});
 
 describe('buildPlaytestLaunchPlan', () => {
   it('builds a current-map request for the selected map and describes the iteration spawn', () => {
@@ -69,7 +100,7 @@ describe('buildPlaytestLaunchPlan', () => {
     expect(plan.blocker).toBeUndefined();
     expect(plan.request).toEqual({ mode: 'currentMap', currentMapId: 'house' });
     expect(plan.targetLabel).toBe('House Interior (house)');
-    expect(plan.spawnDescription).toContain('0,0,down');
+    expect(plan.spawnDescription).toContain('nearest open tile');
   });
 
   it('keeps authored start position when current-map is already the project start map', () => {
@@ -118,7 +149,8 @@ describe('buildPlaytestLaunchPlan', () => {
       selectedEventId: 'npc_1',
     });
     expect(plan.targetLabel).toBe('npc_1 on House Interior (house)');
-    expect(plan.spawnDescription).toContain('2,3,down');
+    expect(plan.spawnDescription).toContain('selected event 2,3');
+    expect(plan.spawnDescription).toContain('adjacent open tile');
     expect(plan.eventDebugContext).toEqual({ mapId: 'house', eventId: 'npc_1' });
   });
 

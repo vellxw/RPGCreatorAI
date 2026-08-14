@@ -38,5 +38,19 @@ saves/*.json
 src-tauri/target/
 src-tauri/gen/schemas/
 
+# Android toolchain and private signing material
+.gradle/
+local.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+
 # Playwright MCP scratch
 .playwright-mcp/
+
+# Generated release packets, manifests, staging and local validation output
+output/
+.playwright-cli/
+.tmp-gradle-wrapper/
+.commandcode/

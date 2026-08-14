@@ -1,9 +1,9 @@
-import { AIStudioScreen } from './AIStudioScreen';
+import { AIStudioScreen, type AIStudioScreenProps } from './AIStudioScreen';
+import { defaultProviderConfigs } from '../../stores/providerStore';
 import type { ProviderConfig } from '../../types/project';
 
-export interface AIStudioBoundaryProps {
-  providers: readonly ProviderConfig[];
-  projectId: string | null;
+export interface AIStudioBoundaryProps extends Omit<AIStudioScreenProps, 'providers'> {
+  providers?: readonly ProviderConfig[];
 }
 
 /**
@@ -12,6 +12,9 @@ export interface AIStudioBoundaryProps {
  * established by `ProviderSettingsBoundary`, `AssetWorkspaceBoundary`, and
  * `PlaytestWorkspaceBoundary`.
  */
-export function AIStudioBoundary(props: AIStudioBoundaryProps) {
-  return <AIStudioScreen {...props} />;
+export function AIStudioBoundary({
+  providers = defaultProviderConfigs,
+  ...props
+}: AIStudioBoundaryProps) {
+  return <AIStudioScreen {...props} providers={providers} />;
 }

@@ -857,6 +857,11 @@ export interface SystemData {
   startingParty: string[];
   startingGold: number;
   defaultBgm?: string;
+  /**
+   * Semantic runtime-cue names resolved to stable Asset Catalog ids. The
+   * legacy `audio` registry remains path-based for project compatibility.
+   */
+  audioAssetIds?: Record<string, string>;
   audio?: Record<string, string>;
   windowTint?: string;
   battleBackground?: string;

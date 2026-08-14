@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Download, FilePlus2, FolderOpen, PackageOpen, Play } from 'lucide-react';
 import { Button } from '../ui/Button';
 import type { StartupRecoveryState } from '../../startup/startupRecovery';
+import type { ProjectTemplateId } from '../../adapters/types';
 
 export type StartupPendingAction = 'open' | 'create' | 'import';
 
@@ -15,6 +16,7 @@ interface ProjectStartupScreenProps {
   onUseSample(): void;
   onOpenProject(): void;
   onCreateProject(title: string): void;
+  onCreateProjectTemplate?(title: string, templateId: ProjectTemplateId): void;
   onImportProject(file: File): void;
 }
 
@@ -28,6 +30,7 @@ export function ProjectStartupScreen({
   onUseSample,
   onOpenProject,
   onCreateProject,
+  onCreateProjectTemplate,
   onImportProject,
 }: ProjectStartupScreenProps) {
   const [title, setTitle] = useState('Untitled RPG');
@@ -181,6 +184,26 @@ export function ProjectStartupScreen({
                 >
                   {createLabel}
                 </Button>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    if (onCreateProjectTemplate) {
+                      onCreateProjectTemplate(title, 'horror-bl');
+                    } else {
+                      onCreateProject(title);
+                    }
+                  }}
+                  disabled={busy}
+                >
+                  Start Horror / BL Template
+                </Button>
+                <span className="text-[11px] text-gray-500">
+                  {desktop
+                    ? 'Copies a complete chapter blueprint: 3 maps, 4 choices, a puzzle, a chase, 2 endings, docs, and schema.'
+                    : 'Starts with the horror visual profile; the desktop wizard also copies the complete chapter docs and data.'}
+                </span>
               </div>
             </div>
 

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "horror-bl.chapter-1.imagegen.2026-08-14",
+  "templateId": "horror-bl",
+  "chapterId": "la-novena-promesa.chapter-1.vertical-slice",
+  "execution": {
+    "mode": "built-in",
+    "tool": "image_gen.imagegen",
+    "provider": "OpenAI built-in image generation",
+    "model": null,
+    "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+    "inputImages": [],
+    "generatedInThisSession": true
+  },
+  "rightsAndReview": {
+    "originalPromptedWork": true,
+    "realPersonReferenceUsed": false,
+    "thirdPartyVisualReferenceUsed": false,
+    "licenseStatus": "unconfirmed",
+    "commercialUseStatus": "unconfirmed",
+    "redistributionStatus": "unconfirmed",
+    "note": "These are newly generated original candidates. This report does not grant or invent a license. Confirm the applicable OpenAI service terms and complete human anatomy, continuity, consent, runtime-readability, and redistribution review before promotion."
+  },
+  "assets": [
+    {
+      "assetId": "portrait.damian",
+      "kind": "portrait",
+      "reviewState": "candidate",
+      "pipelineState": "review",
+      "releaseEligible": false,
+      "sourceMasterPath": "templates/horror-bl/assets/source/generated/portrait-damian.png",
+      "runtimeCandidatePath": "assets/generated/runtime/portraits/damian.png",
+      "builtInArtifactName": "exec-9c0bf8f5-8479-4af2-a735-9dc61116f37f.png",
+      "generatedAt": "2026-08-14T04:52:55.0302700Z",
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": false,
+      "sizeBytes": 2258645,
+      "sha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304",
+      "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Damián Ferreyra, an adult 35-year-old Argentine night archivist. He has a strong, weary face, short tousled black hair, dark brown eyes, subtle beard stubble, and a guarded expression that still suggests tenderness. He wears a practical off-white archivist shirt over a charcoal undershirt, slightly rain-damp and worn, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows and one blurred surgical-teal fluorescent light; the background must remain subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, strong silhouette, generous safe margin.\nLighting/mood: restrained cold teal rim light and soft warning-amber key light, tense psychological horror mood, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained warning amber #E4A24A, bone highlights #F1E8D6; no bright saturated backdrop.\nConstraints: Damián is clearly an adult; anatomy must be coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy armor."
+    },
+    {
+      "assetId": "portrait.elian",
+      "kind": "portrait",
+      "reviewState": "candidate",
+      "pipelineState": "review",
+      "releaseEligible": false,
+      "sourceMasterPath": "templates/horror-bl/assets/source/generated/portrait-elian.png",
+      "runtimeCandidatePath": "assets/generated/runtime/portraits/elian.png",
+      "builtInArtifactName": "exec-c14559d4-14bf-4ad5-be0d-4a06dafe1042.png",
+      "generatedAt": "2026-08-14T04:53:38.1693414Z",
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": false,
+      "sizeBytes": 2079660,
+      "sha256": "b7e5e7a5410bd293b6a8fced8fa768f9f6210c611bae7a2a27571a8cb6128245",
+      "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Elian Varela, an adult 39-year-old Argentine former clinical-memory nurse. He has a lean mature face, warm olive skin, dark wavy shoulder-length hair tied loosely at the nape with a few silver strands at the temples, gray-green eyes, and a composed but haunted expression. His gaze conveys intelligence, hurt, and deliberate affection without helplessness. He wears a worn desaturated-teal medical overshirt over a dark high-collar shirt, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows, a defocused amber emergency light and a faint surgical-teal reflection; background subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise. Match the visual language of a serious psychological-horror visual novel.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, distinctive slender silhouette, generous safe margin.\nLighting/mood: soft surgical-teal key light and restrained crimson reflected edge light, intimate melancholy and psychological unease, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood-crimson #A62F45, bone highlights #F1E8D6.\nConstraints: Elian is clearly an adult; anatomy coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy clothing, hospital logos."
+    },
+    {
+      "assetId": "threat.ninth-witness",
+      "kind": "threat",
+      "reviewState": "candidate",
+      "pipelineState": "review",
+      "releaseEligible": false,
+      "sourceMasterPath": "templates/horror-bl/assets/source/generated/threat-ninth-witness.png",
+      "runtimeCandidatePath": "assets/generated/runtime/sprites/ninth-witness.png",
+      "builtInArtifactName": "exec-d92c2d24-91a6-46ba-a44a-3e214f3fa79f.png",
+      "generatedAt": "2026-08-14T04:54:27.8911415Z",
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "hasAlpha": false,
+      "sizeBytes": 1934611,
+      "sha256": "b3a4b1cdbb0158623c8fb995a4d526dd960ab75241b563e1b6783fa03b164a64",
+      "prompt": "Use case: stylized-concept\nAsset type: square runtime threat illustration / chase sprite source for a 2D psychological-horror RPG\nPrimary request: Create an original full-body design for “The Ninth Witness,” a collective clinical-memory entity that imitates familiar voices and rebuilds a humanoid body from incomplete records. Its silhouette is tall, narrow, and immediately readable: one main adult humanoid form wrapped in nine offset translucent memory-echo contours, with a smooth face interrupted by subtle mismatched adult facial fragments, and restrained crimson surgical threads tracing safe-route patterns across its graphite body. Suggest body horror through impossible memory layers and seams, not exposed organs.\nScene/backdrop: near-black wet-graphite clinical void with only a faint floor reflection and a dim teal fluorescent halo; simple uncluttered backdrop that strongly separates the silhouette.\nStyle/medium: premium dark Anime HD game creature illustration, painterly concept render with clean readable edges and realistic horror anatomy; original design, not based on any franchise.\nComposition/framing: 1:1 square, entire creature visible from crown to feet, centered, front three-quarter stance, generous padding on every edge, feet grounded, unmistakable silhouette at small runtime scale.\nLighting/mood: cold surgical-teal rim light, restrained crimson thread highlights and a faint warning-amber core; ominous, tragic, clinical, psychologically disturbing rather than chaotic.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood crimson #A62F45, warning amber #E4A24A, bone #F1E8D6.\nConstraints: one coherent main body; body horror is suggestive and legible, no exposed organs, no fetishized injury, no sexual content; no childlike features; no text, numbers, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: gore splatter wall, dismemberment, photorealism, zombie cliché, skull head, tentacle pile, extra independent characters, cropped feet, cropped head, busy scenery, low-contrast silhouette, chibi, fantasy armor."
+    }
+  ]
+}

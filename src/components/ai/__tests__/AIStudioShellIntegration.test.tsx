@@ -25,6 +25,7 @@ function renderStudio(props: Partial<React.ComponentProps<typeof AIStudioScreen>
         projectId="project-1"
         onOpenSettings={vi.fn()}
         onSelectProvider={vi.fn()}
+        onApplyCandidate={() => ({ ok: false, code: 'commit-rejected', message: 'Test host is inert.' })}
         {...props}
       />,
     );

@@ -20,7 +20,32 @@ export interface CandidateProvenance {
   promptTemplateId?: string;
   promptTemplateVersion?: number;
   requestId?: string;
+  promptHash?: string;
+  outputHash?: string;
+  sourceAssetIds?: string[];
+  license?: string;
+  consent?: string;
   createdAt: string;
+}
+
+export type CandidatePipelineStatus =
+  | 'requested'
+  | 'generating'
+  | 'quarantined'
+  | 'normalized'
+  | 'review'
+  | 'approved'
+  | 'frozen'
+  | 'packaged';
+
+export type CandidateResourceChangeKind = 'add' | 'modify' | 'delete';
+
+export interface CandidateResourceDiff {
+  path: string;
+  kind: CandidateResourceChangeKind;
+  summary: string;
+  beforeHash?: string;
+  afterHash?: string;
 }
 
 export interface CandidateValidation {
@@ -42,6 +67,8 @@ export interface Candidate {
   provenance: CandidateProvenance;
   reviewState: CandidateReviewState;
   validation: CandidateValidation;
+  /** Concrete project resources shown to the reviewer before commit. */
+  resourceDiff: CandidateResourceDiff[];
   projectId: string | null;
   historyRecordId: string | null;
   reviewedAt?: string;
@@ -53,8 +80,12 @@ export interface Candidate {
 export type CandidateStoreError =
   | 'already-resolved'
   | 'missing-apply-actions'
+  | 'missing-diff'
+  | 'invalid-diff'
+  | 'missing-lineage'
   | 'invalid-validation'
   | 'unknown-candidate'
+  | 'commit-failed'
   | 'blocked-by-provenance';
 
 export interface CandidateReviewEvent {

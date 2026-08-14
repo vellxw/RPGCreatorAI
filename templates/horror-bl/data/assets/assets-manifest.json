@@ -1,0 +1,1050 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "portrait.damian",
+      "name": "Retrato de Damián Ferreyra",
+      "kind": "image",
+      "path": "assets/generated/runtime/portraits/damian.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "sizeBytes": 2258645,
+      "sha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "portrait",
+        "damian",
+        "adult"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14.v1.json",
+      "runtimeNotes": "Frozen after delegated visual, adult-character, originality, and runtime-readability review. External distribution remains subject to applicable OpenAI terms and law.",
+      "generated": {
+        "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Damián Ferreyra, an adult 35-year-old Argentine night archivist. He has a strong, weary face, short tousled black hair, dark brown eyes, subtle beard stubble, and a guarded expression that still suggests tenderness. He wears a practical off-white archivist shirt over a charcoal undershirt, slightly rain-damp and worn, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows and one blurred surgical-teal fluorescent light; the background must remain subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, strong silhouette, generous safe margin.\nLighting/mood: restrained cold teal rim light and soft warning-amber key light, tense psychological horror mood, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained warning amber #E4A24A, bone highlights #F1E8D6; no bright saturated backdrop.\nConstraints: Damián is clearly an adult; anatomy must be coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy armor.",
+        "tool": "image_gen.imagegen",
+        "createdAt": "2026-08-14T04:52:55.0302700Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate",
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "ownerName": "Damián Ferreyra",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "portrait.elian",
+      "name": "Retrato de Elian Varela",
+      "kind": "image",
+      "path": "assets/generated/runtime/portraits/elian.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "sizeBytes": 2079660,
+      "sha256": "b7e5e7a5410bd293b6a8fced8fa768f9f6210c611bae7a2a27571a8cb6128245",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "portrait",
+        "elian",
+        "adult"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14.v1.json",
+      "runtimeNotes": "Frozen after delegated visual, adult-character, originality, and runtime-readability review. External distribution remains subject to applicable OpenAI terms and law.",
+      "generated": {
+        "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Elian Varela, an adult 39-year-old Argentine former clinical-memory nurse. He has a lean mature face, warm olive skin, dark wavy shoulder-length hair tied loosely at the nape with a few silver strands at the temples, gray-green eyes, and a composed but haunted expression. His gaze conveys intelligence, hurt, and deliberate affection without helplessness. He wears a worn desaturated-teal medical overshirt over a dark high-collar shirt, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows, a defocused amber emergency light and a faint surgical-teal reflection; background subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise. Match the visual language of a serious psychological-horror visual novel.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, distinctive slender silhouette, generous safe margin.\nLighting/mood: soft surgical-teal key light and restrained crimson reflected edge light, intimate melancholy and psychological unease, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood-crimson #A62F45, bone highlights #F1E8D6.\nConstraints: Elian is clearly an adult; anatomy coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy clothing, hospital logos.",
+        "tool": "image_gen.imagegen",
+        "createdAt": "2026-08-14T04:53:38.1693414Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate",
+        "ownerKind": "character",
+        "ownerId": "elian",
+        "ownerName": "Elian Varela",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "threat.ninth-witness",
+      "name": "El Noveno Testigo",
+      "kind": "image",
+      "path": "assets/generated/runtime/sprites/ninth-witness.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1254,
+      "height": 1254,
+      "sizeBytes": 1934611,
+      "sha256": "b3a4b1cdbb0158623c8fb995a4d526dd960ab75241b563e1b6783fa03b164a64",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "threat",
+        "ninth-witness",
+        "body-horror"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14.v1.json",
+      "runtimeNotes": "Frozen after delegated visual, adult-character, originality, and runtime-readability review. External distribution remains subject to applicable OpenAI terms and law.",
+      "generated": {
+        "prompt": "Use case: stylized-concept\nAsset type: square runtime threat illustration / chase sprite source for a 2D psychological-horror RPG\nPrimary request: Create an original full-body design for “The Ninth Witness,” a collective clinical-memory entity that imitates familiar voices and rebuilds a humanoid body from incomplete records. Its silhouette is tall, narrow, and immediately readable: one main adult humanoid form wrapped in nine offset translucent memory-echo contours, with a smooth face interrupted by subtle mismatched adult facial fragments, and restrained crimson surgical threads tracing safe-route patterns across its graphite body. Suggest body horror through impossible memory layers and seams, not exposed organs.\nScene/backdrop: near-black wet-graphite clinical void with only a faint floor reflection and a dim teal fluorescent halo; simple uncluttered backdrop that strongly separates the silhouette.\nStyle/medium: premium dark Anime HD game creature illustration, painterly concept render with clean readable edges and realistic horror anatomy; original design, not based on any franchise.\nComposition/framing: 1:1 square, entire creature visible from crown to feet, centered, front three-quarter stance, generous padding on every edge, feet grounded, unmistakable silhouette at small runtime scale.\nLighting/mood: cold surgical-teal rim light, restrained crimson thread highlights and a faint warning-amber core; ominous, tragic, clinical, psychologically disturbing rather than chaotic.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood crimson #A62F45, warning amber #E4A24A, bone #F1E8D6.\nConstraints: one coherent main body; body horror is suggestive and legible, no exposed organs, no fetishized injury, no sexual content; no childlike features; no text, numbers, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: gore splatter wall, dismemberment, photorealism, zombie cliché, skull head, tentacle pile, extra independent characters, cropped feet, cropped head, busy scenery, low-contrast silhouette, chibi, fantasy armor.",
+        "tool": "image_gen.imagegen",
+        "createdAt": "2026-08-14T04:54:27.8911415Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate",
+        "ownerKind": "threat",
+        "ownerId": "the_ninth_witness",
+        "ownerName": "El Noveno Testigo",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "seed.damian.full-body",
+      "name": "Damián — seed canónico de cuerpo completo",
+      "kind": "image",
+      "path": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 1536,
+      "sizeBytes": 922124,
+      "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "character-seed",
+        "damian",
+        "alpha"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+      "protected": true,
+      "runtimeNotes": "Canonical alpha seed only. It is not a spritesheet and cannot satisfy idle/walk/interact clips until real direction-consistent strips are produced.",
+      "generated": {
+        "tool": "image_gen.imagegen + remove_chroma_key.py",
+        "createdAt": "2026-08-14T06:00:09.3692860Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate+chroma-key-normalize",
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "ownerName": "Damián Ferreyra",
+        "sourceAssetId": "portrait.damian",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "background.facility-lobby",
+      "name": "Vestíbulo de Santa Ágata",
+      "kind": "image",
+      "path": "assets/generated/runtime/backgrounds/facility-lobby-v1.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "sizeBytes": 2041582,
+      "sha256": "31bd655743e88d3eab275ba77588c888833cb09ad4000f61f3cc2b097a91062e",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "background",
+        "facility-lobby",
+        "16:9"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+      "protected": true,
+      "runtimeNotes": "Frozen 16:9 runtime crop; retained source master is 1672x941.",
+      "generated": {
+        "tool": "image_gen.imagegen + Pillow",
+        "createdAt": "2026-08-14T06:08:13.0529389Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate+center-crop",
+        "ownerKind": "map",
+        "ownerId": "facility_lobby",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "background.archive-sublevel",
+      "name": "Archivo Subnivel D",
+      "kind": "image",
+      "path": "assets/generated/runtime/backgrounds/archive-sublevel-v1.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "sizeBytes": 2082722,
+      "sha256": "1c44ec66e4d95b9e8b94051a2d0f48da16bb105b8e6cf632d8f48bf304337c97",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "background",
+        "archive-sublevel",
+        "16:9"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+      "protected": true,
+      "runtimeNotes": "Frozen 16:9 runtime crop; retained source master is 1672x941.",
+      "generated": {
+        "tool": "image_gen.imagegen + Pillow",
+        "createdAt": "2026-08-14T06:09:24.6554439Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate+center-crop",
+        "ownerKind": "map",
+        "ownerId": "archive_sublevel",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "background.service-corridor",
+      "name": "Corredor de Servicio Nueve",
+      "kind": "image",
+      "path": "assets/generated/runtime/backgrounds/service-corridor-v1.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "sizeBytes": 1864946,
+      "sha256": "9be0963d60138ad7535a843bb8ce6e1669fd060a00d8dc4f3759dc9bf3ab3ca8",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "background",
+        "service-corridor",
+        "16:9"
+      ],
+      "provenance": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+      "protected": true,
+      "runtimeNotes": "Frozen 16:9 runtime crop; retained source master is 1672x941.",
+      "generated": {
+        "tool": "image_gen.imagegen + Pillow",
+        "createdAt": "2026-08-14T06:11:01.1071780Z",
+        "providerId": "openai-built-in-image-generation",
+        "operation": "image.generate+center-crop",
+        "ownerKind": "map",
+        "ownerId": "service_corridor",
+        "visualContextSource": "GAME_STYLE.md"
+      }
+    },
+    {
+      "id": "audio.ambience.facility-lobby",
+      "name": "Ambiente — Vestíbulo de Santa Ágata",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ambience-facility-lobby.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 12000,
+      "sizeBytes": 529244,
+      "sha256": "9e523150c7915b15255dc9ffaa8de9823d697e4f37b8c4bc1c39f4476b2407b2",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ambience",
+        "facility-lobby",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.ambience.archive-sublevel",
+      "name": "Ambiente — Archivo Subnivel D",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ambience-archive-sublevel.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 12000,
+      "sizeBytes": 529244,
+      "sha256": "a4409ec0b7a3043e8c587b95310f5ef1a83300cb356d8b73961a3ad8bf9590ff",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ambience",
+        "archive-sublevel",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.ambience.service-corridor",
+      "name": "Ambiente — Corredor de Servicio Nueve",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ambience-service-corridor.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 12000,
+      "sizeBytes": 529244,
+      "sha256": "a838d85ee789e9b3eaae9f1d93274fc7b93b5c5bdaeeab5c080e1a32821857e3",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ambience",
+        "service-corridor",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.stinger.ninth-witness",
+      "name": "Stinger — El Noveno Testigo",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ninth-witness-stinger.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 1800,
+      "sizeBytes": 79424,
+      "sha256": "98b615ae2e41f82f66b6629db2bfc612991da7b90c9170085b5e4e7042347ac6",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "stinger",
+        "ninth-witness",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.ui.confirm",
+      "name": "UI — Confirmar",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ui-confirm.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 180,
+      "sizeBytes": 7982,
+      "sha256": "4b397c7011b04a76b88f3c82fb584f8726d343170e3069ea86bf18c8f78c0ef8",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ui",
+        "confirm",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.ui.cancel",
+      "name": "UI — Cancelar",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ui-cancel.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 210,
+      "sizeBytes": 9306,
+      "sha256": "e6349368de9d985deb30bfe2c0b8002aff269ce785b47dcd410036c32ca24863",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ui",
+        "cancel",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.footstep.concrete",
+      "name": "Paso — Hormigón Clínico",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/footstep-concrete.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 240,
+      "sizeBytes": 10628,
+      "sha256": "2d8100369c8e779d94dca4ac3e74d952cba4ff771a201b766603c00091028c31",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "footstep",
+        "concrete",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "audio.ending.memory-release",
+      "name": "Final — Liberación de Memoria",
+      "kind": "audio",
+      "path": "assets/audio/horror-bl/ending-memory-release.wav",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "audio/wav",
+      "durationMs": 4200,
+      "sizeBytes": 185264,
+      "sha256": "380d3b735a573c5554ee60d8939ea09e45c4e2bc7d874c49a65b1a4a493df69a",
+      "tags": [
+        "horror-bl",
+        "audio",
+        "ending",
+        "memory-release",
+        "procedural"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAudio",
+      "runtimeNotes": "Frozen technical byte record for offline packaging; this does not constitute recorded human acceptance."
+    },
+    {
+      "id": "sprite.damian.idle.down",
+      "name": "Damián · idle · down",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_idle_down.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 110374,
+      "sha256": "412a6e6c3e4b18b91386804fda45face3a88473678cbdfade0e660583c0149ec",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "idle",
+        "down",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "idle",
+          "direction": "down",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 6,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.idle.left",
+      "name": "Damián · idle · left",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_idle_left.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 72502,
+      "sha256": "d52fd1a93f4a71b671b4b2bda1e71f4d4a1635f78e2a935dd380631ca3b1b8f6",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "idle",
+        "left",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "idle",
+          "direction": "left",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 6,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.idle.right",
+      "name": "Damián · idle · right",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_idle_right.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 78900,
+      "sha256": "ecf50e8fc0e1e8f6e77b6eb7f6849cae875a72171d75c58c894a9beca9203532",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "idle",
+        "right",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "idle",
+          "direction": "right",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 6,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.idle.up",
+      "name": "Damián · idle · up",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_idle_up.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 97949,
+      "sha256": "af568462fea6adf5b83d8c24aee3bcf7ea888dd05a439a6c3221010b1b19c812",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "idle",
+        "up",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "idle",
+          "direction": "up",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 6,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.walk.down",
+      "name": "Damián · walk · down",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_walk_down.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 100601,
+      "sha256": "b6b60020913e6548b75b0b421c1538087d9366d4d222212f6719c640129fdcfe",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "walk",
+        "down",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "walk",
+          "direction": "down",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.walk.left",
+      "name": "Damián · walk · left",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_walk_left.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 96077,
+      "sha256": "c7d1b98fc7a45708af7ccbb2399c8252a43704fbc59ac4e88325d35542e12088",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "walk",
+        "left",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "walk",
+          "direction": "left",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.walk.right",
+      "name": "Damián · walk · right",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_walk_right.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 96046,
+      "sha256": "d3a2d9bc06e97dee0a412a155e935237d02eab9806cbac67729787709db2aba2",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "walk",
+        "right",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "walk",
+          "direction": "right",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.walk.up",
+      "name": "Damián · walk · up",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_walk_up.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 91356,
+      "sha256": "0f39472c3ea36f62a4cae19866a65c5907d00e8544c1c2664ae96b1deb8dfb1d",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "walk",
+        "up",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "walk",
+          "direction": "up",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.interact.down",
+      "name": "Damián · interact · down",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_interact_down.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 264064,
+      "sha256": "3ae58179202963ce76ce3b2729a08fe63d9d40d7d72495ad6b48e448f2947461",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "interact",
+        "down",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "interact",
+          "direction": "down",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.interact.left",
+      "name": "Damián · interact · left",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_interact_left.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 206197,
+      "sha256": "1daf6af9d14bd91626dbb38283fd003464f1f9329fe8b623855f983dc9ff0f00",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "interact",
+        "left",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "interact",
+          "direction": "left",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.interact.right",
+      "name": "Damián · interact · right",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_interact_right.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 137917,
+      "sha256": "b3bfed25f7166e28658d380912764d43827e72c068b7f8852cb42f4ac49276c9",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "interact",
+        "right",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "interact",
+          "direction": "right",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    },
+    {
+      "id": "sprite.damian.interact.up",
+      "name": "Damián · interact · up",
+      "kind": "spritesheet",
+      "path": "assets/generated/runtime/sprites/damian_interact_up.png",
+      "source": "generated",
+      "status": "frozen",
+      "releaseEligible": true,
+      "runtimeCompatible": true,
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frames": 4,
+      "sizeBytes": 211420,
+      "sha256": "2ea57b01492fdba638641e6bcc5767bd28162cd1df4e6416dab6db2d651d6711",
+      "tags": [
+        "horror-bl",
+        "chapter-1",
+        "animation-strip",
+        "damian",
+        "interact",
+        "up",
+        "adult"
+      ],
+      "provenance": "release-input/asset-provenance.v1.json#supplementalAnimation",
+      "runtimeNotes": "Technically frozen generated strip; human acceptance remains pending under the separate G4 evidence gate.",
+      "generated": {
+        "ownerKind": "character",
+        "ownerId": "damian",
+        "sourceAssetPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "spriteSheet": {
+          "frameWidth": 256,
+          "frameHeight": 384,
+          "frameCount": 4,
+          "action": "interact",
+          "direction": "up",
+          "frameLayout": "horizontal-strip",
+          "transparentBackgroundRequired": true,
+          "animationSetId": "damian",
+          "fps": 8,
+          "anchor": {
+            "x": 128,
+            "y": 376
+          }
+        }
+      }
+    }
+  ],
+  "policy": {
+    "approvedStatuses": [
+      "approved",
+      "frozen"
+    ],
+    "sourceRoots": [
+      "assets/source"
+    ],
+    "candidateFixtureRoots": [
+      "assets/generated/web"
+    ],
+    "generatedCandidateRoots": [
+      "assets/source/generated",
+      "assets/generated/runtime"
+    ],
+    "runtimeRoots": [
+      "assets/generated/runtime",
+      "assets/audio/horror-bl"
+    ],
+    "supplementalAudioRoots": [
+      "assets/audio/horror-bl"
+    ],
+    "candidateReviewGate": "release-input/asset-approval-gate.v1.json",
+    "remoteUrlsAllowed": false,
+    "thirdPartyDemoAssetsAllowed": false,
+    "fixtureCandidatesAreReleaseEligible": false,
+    "unconfirmedLicensesAreReleaseEligible": false,
+    "approvalGateOverridesCandidateReviewForLocalPackaging": true,
+    "approvalGateOverrideNote": "A delegated frozen approval with conservative rights evidence may supersede a generation session's earlier candidate status for local packaging; it does not grant unrestricted public redistribution."
+  }
+}

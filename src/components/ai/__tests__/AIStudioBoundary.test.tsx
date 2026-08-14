@@ -13,7 +13,12 @@ function renderBoundary(props: { providers: readonly ProviderConfig[]; projectId
   document.body.appendChild(container);
   const root = createRoot(container);
   flushSync(() => {
-    root.render(<AIStudioBoundary {...props} />);
+    root.render(
+      <AIStudioBoundary
+        onApplyCandidate={() => ({ ok: false, code: 'commit-rejected', message: 'Test host is inert.' })}
+        {...props}
+      />,
+    );
   });
   return {
     container,

@@ -98,9 +98,11 @@ export function AICandidateReviewPanel({
           data-testid="ai-candidate-review-panel-reviewable"
         >
           {reviewable.map(candidate => {
+            const resourceDiff = candidate.resourceDiff ?? [];
+            const hasCommitContract = resourceDiff.length > 0 && Boolean(candidate.historyRecordId);
             const cardState = reviewStateToAIActionCardState(
               candidate.reviewState,
-              candidate.validation.errors.length > 0,
+              candidate.validation.errors.length > 0 || !hasCommitContract,
             );
             return (
               <li
@@ -113,6 +115,7 @@ export function AICandidateReviewPanel({
                   data-kind={candidate.kind}
                   data-review-state={candidate.reviewState}
                   data-candidate-id={candidate.id}
+                  data-diff-count={resourceDiff.length}
                   onClick={() => onSelectCandidate?.(candidate.id)}
                 >
                   <header>
@@ -143,6 +146,32 @@ export function AICandidateReviewPanel({
                       ))}
                     </ul>
                   ) : null}
+                  <section
+                    data-testid="ai-candidate-resource-diff"
+                    aria-label="Reviewed project changes"
+                  >
+                    <h4>Project changes</h4>
+                    {resourceDiff.length > 0 ? (
+                      <ul>
+                        {resourceDiff.map((entry, index) => (
+                          <li
+                            key={`${entry.kind}:${entry.path}:${index}`}
+                            data-testid="ai-candidate-resource-change"
+                            data-change-kind={entry.kind}
+                            data-resource-path={entry.path}
+                          >
+                            <strong>{entry.kind}</strong>{' '}
+                            <code>{entry.path}</code>
+                            <span>{entry.summary}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p data-testid="ai-candidate-resource-diff-missing">
+                        No reviewable project diff is attached. This candidate cannot be accepted.
+                      </p>
+                    )}
+                  </section>
                   <footer>
                     <button
                       type="button"
@@ -152,7 +181,8 @@ export function AICandidateReviewPanel({
                       data-state={cardState}
                       disabled={
                         !isCandidateReviewable(candidate) ||
-                        candidate.validation.errors.length > 0
+                        candidate.validation.errors.length > 0 ||
+                        !hasCommitContract
                       }
                       onClick={event => {
                         event.stopPropagation();

@@ -1,0 +1,1247 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "assetId": "portrait.damian",
+      "runtimePath": "assets/generated/runtime/portraits/damian.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 OpenAI built-in image generation session; no input image, real-person identity, or third-party visual reference was supplied.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted for this generated output; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate",
+        "createdAt": "2026-08-14T04:52:55.0302700Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14.v1.json",
+        "sourceMasterPath": "assets/source/generated/portrait-damian.png",
+        "promptSha256": "a20429cfd05dd9ea174213c660923b1c5b42d81bf6b1fda88f1bf8d75de91cf4",
+        "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Damián Ferreyra, an adult 35-year-old Argentine night archivist. He has a strong, weary face, short tousled black hair, dark brown eyes, subtle beard stubble, and a guarded expression that still suggests tenderness. He wears a practical off-white archivist shirt over a charcoal undershirt, slightly rain-damp and worn, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows and one blurred surgical-teal fluorescent light; the background must remain subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, strong silhouette, generous safe margin.\nLighting/mood: restrained cold teal rim light and soft warning-amber key light, tense psychological horror mood, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained warning amber #E4A24A, bone highlights #F1E8D6; no bright saturated backdrop.\nConstraints: Damián is clearly an adult; anatomy must be coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy armor.",
+        "outputSha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304",
+        "outputSizeBytes": 2258645,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": false,
+        "referenceImages": [],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or reference image was supplied; Damián is a fictional adult original to this project."
+        }
+      }
+    },
+    {
+      "assetId": "portrait.elian",
+      "runtimePath": "assets/generated/runtime/portraits/elian.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 OpenAI built-in image generation session; no input image, real-person identity, or third-party visual reference was supplied.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted for this generated output; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate",
+        "createdAt": "2026-08-14T04:53:38.1693414Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14.v1.json",
+        "sourceMasterPath": "assets/source/generated/portrait-elian.png",
+        "promptSha256": "8a35d429c64b193526a079f52081c0fdd8a3e5af517a6dcc3a4d176fda12d1ba",
+        "prompt": "Use case: stylized-concept\nAsset type: square visual-novel dialogue portrait for a 2D horror RPG\nPrimary request: Create an original portrait of Elian Varela, an adult 39-year-old Argentine former clinical-memory nurse. He has a lean mature face, warm olive skin, dark wavy shoulder-length hair tied loosely at the nape with a few silver strands at the temples, gray-green eyes, and a composed but haunted expression. His gaze conveys intelligence, hurt, and deliberate affection without helplessness. He wears a worn desaturated-teal medical overshirt over a dark high-collar shirt, with no insignia.\nScene/backdrop: abstract, non-detailed clinical darkness with wet graphite shadows, a defocused amber emergency light and a faint surgical-teal reflection; background subordinate to the character.\nStyle/medium: premium dark Anime HD game illustration, painterly rendering with clean readable linework and realistic adult proportions; original character design, not based on any real person or franchise. Match the visual language of a serious psychological-horror visual novel.\nComposition/framing: 1:1 square, chest-up three-quarter portrait, full head and both shoulders entirely inside frame, face large and readable for dialogue UI, gaze slightly toward camera, distinctive slender silhouette, generous safe margin.\nLighting/mood: soft surgical-teal key light and restrained crimson reflected edge light, intimate melancholy and psychological unease, no glamorized injury.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood-crimson #A62F45, bone highlights #F1E8D6.\nConstraints: Elian is clearly an adult; anatomy coherent; both visible shoulders and neck connect naturally; no gore on this portrait; no sexual content; no text, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: celebrity likeness, childlike features, exaggerated muscles, duplicate facial features, extra limbs, cropped head, photorealism, chibi, generic fantasy clothing, hospital logos.",
+        "outputSha256": "b7e5e7a5410bd293b6a8fced8fa768f9f6210c611bae7a2a27571a8cb6128245",
+        "outputSizeBytes": 2079660,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": false,
+        "referenceImages": [],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or reference image was supplied; Elian is a fictional adult original to this project."
+        }
+      }
+    },
+    {
+      "assetId": "threat.ninth-witness",
+      "runtimePath": "assets/generated/runtime/sprites/ninth-witness.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 OpenAI built-in image generation session; no input image, real-person identity, or third-party visual reference was supplied.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted for this generated output; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate",
+        "createdAt": "2026-08-14T04:54:27.8911415Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14.v1.json",
+        "sourceMasterPath": "assets/source/generated/threat-ninth-witness.png",
+        "promptSha256": "6e4903f445a5823ccccb0c84589ac2dbb3f5ce8bdc6df3775865678921277e6a",
+        "prompt": "Use case: stylized-concept\nAsset type: square runtime threat illustration / chase sprite source for a 2D psychological-horror RPG\nPrimary request: Create an original full-body design for “The Ninth Witness,” a collective clinical-memory entity that imitates familiar voices and rebuilds a humanoid body from incomplete records. Its silhouette is tall, narrow, and immediately readable: one main adult humanoid form wrapped in nine offset translucent memory-echo contours, with a smooth face interrupted by subtle mismatched adult facial fragments, and restrained crimson surgical threads tracing safe-route patterns across its graphite body. Suggest body horror through impossible memory layers and seams, not exposed organs.\nScene/backdrop: near-black wet-graphite clinical void with only a faint floor reflection and a dim teal fluorescent halo; simple uncluttered backdrop that strongly separates the silhouette.\nStyle/medium: premium dark Anime HD game creature illustration, painterly concept render with clean readable edges and realistic horror anatomy; original design, not based on any franchise.\nComposition/framing: 1:1 square, entire creature visible from crown to feet, centered, front three-quarter stance, generous padding on every edge, feet grounded, unmistakable silhouette at small runtime scale.\nLighting/mood: cold surgical-teal rim light, restrained crimson thread highlights and a faint warning-amber core; ominous, tragic, clinical, psychologically disturbing rather than chaotic.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, restrained blood crimson #A62F45, warning amber #E4A24A, bone #F1E8D6.\nConstraints: one coherent main body; body horror is suggestive and legible, no exposed organs, no fetishized injury, no sexual content; no childlike features; no text, numbers, letters, logos, signatures, trademarks, UI, border, or watermark.\nAvoid: gore splatter wall, dismemberment, photorealism, zombie cliché, skull head, tentacle pile, extra independent characters, cropped feet, cropped head, busy scenery, low-contrast silhouette, chibi, fantasy armor.",
+        "outputSha256": "b3a4b1cdbb0158623c8fb995a4d526dd960ab75241b563e1b6783fa03b164a64",
+        "outputSizeBytes": 1934611,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "hasAlpha": false,
+        "referenceImages": [],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or reference image was supplied; the Ninth Witness is a fictional entity original to this project."
+        }
+      }
+    },
+    {
+      "assetId": "seed.damian.full-body",
+      "runtimePath": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 G2 OpenAI built-in image generation session; only fictional, project-generated assets from the same retained pipeline were used as identity or style references.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "08/14/2026 06:14:21"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate+chroma-key-normalize",
+        "createdAt": "2026-08-14T06:00:09.3692860Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+        "sourceMasterPath": "assets/source/generated/character-damian-fullbody-seed-v1-chroma.png",
+        "builtInArtifactName": "exec-e5999aad-8c5c-4eb6-99c0-4dd78f471b2d.png",
+        "promptSha256": "258c18f415e91fe644dbcb9a6202cc2e6af7404ac15b6584fd4edbd48a09c927",
+        "prompt": "Use case: identity-preserve\nAsset type: canonical full-body character seed for a 2D top-down horror RPG animation pipeline\nInput images: Image 1 is the approved identity and costume reference for Damián Ferreyra; preserve his recognizable adult face, short tousled black hair, dark brown eyes, beard stubble, skin tone, off-white archivist shirt, and charcoal undershirt.\nPrimary request: Create one original full-body standing seed of the same Damián Ferreyra, clearly a 35-year-old Argentine adult night archivist, ready to be used as the master reference for later idle, walk, and interact sprites.\nSubject: coherent realistic adult proportions; practical dark slate work trousers with visible belt, worn brown-black work boots, sleeves rolled to the forearms; both complete arms, hands, legs, feet, neck, head, and hair fully visible and naturally connected.\nStyle/medium: premium dark Anime HD game character illustration with painterly texture and clean, stable readable linework, matching Image 1 exactly in visual language and identity.\nComposition/framing: single character only, straight-on neutral standing pose, head-to-toe centered, arms held slightly away from torso, feet shoulder-width apart and aligned on the same baseline, symmetrical readable silhouette, generous padding on every edge. No perspective distortion and no cropped anatomy.\nScene/backdrop: perfectly flat solid #00ff00 chroma-key background for local background removal.\nLighting/mood: neutral soft frontal studio light on the character only; preserve subtle graphite-and-amber shading but no colored spill from the backdrop.\nConstraints: preserve identity and outfit from Image 1; background must be one uniform #00ff00 color with no shadows, gradients, texture, reflections, floor plane, or lighting variation; do not use #00ff00 anywhere in the subject; no cast shadow, contact shadow, reflection, weapon, prop, text, letters, logos, signature, watermark, UI, blood, gore, sexual content, or childlike features.\nAvoid: extra limbs, hidden hands, cropped feet, duplicate character, dynamic pose, foreshortening, loose coat tails, translucent elements, smoke, hair crossing the outer silhouette excessively, photorealism, chibi, fantasy armor.",
+        "outputSha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3",
+        "outputSizeBytes": 922124,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": true,
+        "referenceImages": [
+          {
+            "assetId": "portrait.damian",
+            "role": "fictional identity and costume reference",
+            "path": "assets/generated/runtime/portraits/damian.png",
+            "sha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304"
+          }
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity was supplied; Damián is a fictional adult and the only identity reference was the project-owned generated portrait."
+        },
+        "sourceMaster": {
+          "width": 1024,
+          "height": 1536,
+          "hasAlpha": false,
+          "sizeBytes": 1686812,
+          "sha256": "64bfc54e60cf5ec51e09df94e1e3b15fec5c52f3d416c8e61a15a7d357bd0fb9"
+        },
+        "normalization": {
+          "operation": "remove-chroma-key",
+          "tool": "imagegen/scripts/remove_chroma_key.py",
+          "runtime": "shared Codex primary Python runtime with Pillow 12.3.0",
+          "keyColor": "#03f807",
+          "autoKey": "border",
+          "softMatte": true,
+          "transparentThreshold": 12,
+          "opaqueThreshold": 220,
+          "despill": true,
+          "transparentPixels": 1159345,
+          "partiallyTransparentPixels": 6950,
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "alphaBoundingBox": [
+            262,
+            41,
+            754,
+            1457
+          ],
+          "transparentCorners": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "background.facility-lobby",
+      "runtimePath": "assets/generated/runtime/backgrounds/facility-lobby-v1.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 G2 OpenAI built-in image generation session; only fictional, project-generated assets from the same retained pipeline were used as identity or style references.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "08/14/2026 06:14:21"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate+center-crop",
+        "createdAt": "2026-08-14T06:08:13.0529389Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+        "sourceMasterPath": "assets/source/generated/background-facility-lobby-v1.png",
+        "builtInArtifactName": "exec-1523477e-53f2-4c4c-a16d-f49f6409b298.png",
+        "promptSha256": "ac962f2088ceb5d999923a7df883e51e664c019327d15431cac077b33981c4c0",
+        "prompt": "Use case: stylized-concept\nAsset type: 16:9 fixed-room exploration background for a 2D top-down psychological-horror RPG\nPrimary request: Create the empty “Vestíbulo de Santa Ágata,” the abandoned entrance lobby of a sealed Argentine clinical-memory facility at night.\nScene/backdrop: rain lashes tall reinforced windows along one wall; incomplete fluorescent tubes; a broad reception counter covered with damp anonymous forms; wall-mounted intake terminal; emergency cable leading toward a closed freight lift; stained ceramic-and-concrete surfaces; subtle clinical neglect. No readable writing.\nSubject: the room itself, designed as a navigable game space with a large clear central floor, obvious reception interaction zone, visible lift destination, and safe readable paths.\nStyle/medium: premium dark Anime HD environment painting with painterly texture, crisp architectural silhouettes, grounded materials, and restrained detail; visually consistent with a serious RPG Maker-style horror game.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down view with near-orthographic fixed-room perspective, entire playable room visible, stable geometry, level horizon, no fisheye, no cutaway labels. Keep the middle floor comparatively uncluttered for player sprites and interaction markers.\nLighting/mood: motivated broken fluorescent pools, cold surgical-teal reflections from wet glass, warning-amber emergency accents, deep but readable graphite corners, restrained bloom, oppressive rain-soaked stillness.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, warning amber #E4A24A, tiny restrained blood-crimson #A62F45 accents, bone #F1E8D6 highlights.\nConstraints: empty environment; no people, creatures, bodies, gore, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, map markers, or remote-world scenery; maintain clear floor contrast so dark character sprites remain readable.\nAvoid: photorealism, fantasy architecture, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, duplicate doors, impossible stairs, bright daylight, generic hotel lobby.",
+        "outputSha256": "31bd655743e88d3eab275ba77588c888833cb09ad4000f61f3cc2b097a91062e",
+        "outputSizeBytes": 2041582,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "hasAlpha": false,
+        "referenceImages": [],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity was supplied; references, when present, are project-owned generated environment images used only for style continuity."
+        },
+        "sourceMaster": {
+          "width": 1672,
+          "height": 941,
+          "sizeBytes": 2061179,
+          "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+        },
+        "normalization": {
+          "operation": "center-crop",
+          "tool": "Pillow 12.3.0",
+          "sourceRect": [
+            4,
+            2,
+            1668,
+            938
+          ],
+          "targetAspectRatio": "16:9"
+        }
+      }
+    },
+    {
+      "assetId": "background.archive-sublevel",
+      "runtimePath": "assets/generated/runtime/backgrounds/archive-sublevel-v1.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 G2 OpenAI built-in image generation session; only fictional, project-generated assets from the same retained pipeline were used as identity or style references.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "08/14/2026 06:14:21"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate+center-crop",
+        "createdAt": "2026-08-14T06:09:24.6554439Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+        "sourceMasterPath": "assets/source/generated/background-archive-sublevel-v1.png",
+        "builtInArtifactName": "exec-a3642986-00f9-440a-bf51-5e31f5f61a44.png",
+        "promptSha256": "b2c101b935d43620241f2b91c598e1bf01d18517879a5303542ef6950b4bd267",
+        "prompt": "Use case: style-transfer\nAsset type: 16:9 fixed-room exploration background for a 2D top-down psychological-horror RPG\nInput images: Image 1 is only the approved visual-style, camera, palette, material, and readability reference for this same game; do not copy its room layout or objects.\nPrimary request: Create the empty “Archivo Subnivel D,” a subterranean clinical-memory records archive beneath Santa Ágata.\nScene/backdrop: tall mobile archive shelves and cold metal evidence cabinets form readable aisles; condensation beads on pipes and walls; sealed translucent evidence bags subtly bulge as if breathing; a maintenance binder station, a locked consent drawer, a prominent power console with three unlabeled physical controls, an elevator entry, and a sterile door toward the service corridor. No readable writing.\nSubject: the archive room itself, designed as a navigable game space with a broad clear central route, obvious side aisles, visible console interaction zone, and two distinct exit points.\nStyle/medium: preserve Image 1’s premium dark Anime HD environment painting, painterly texture, crisp architectural silhouettes, grounded materials, restrained detail, and fixed-room RPG readability.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down near-orthographic fixed-room view matching Image 1’s camera height and lens; entire playable room visible; stable geometry; no fisheye. Keep traversal paths uncluttered for player sprites.\nLighting/mood: sparse cold fluorescent pools, surgical-teal reflections on steel and condensation, one restrained warning-amber console glow, deep but readable graphite shadows; claustrophobic archival stillness.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, warning amber #E4A24A, tiny restrained blood-crimson #A62F45 thread accents, bone #F1E8D6 highlights.\nConstraints: empty environment; no people, creatures, bodies, gore splatter, organs, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, or map markers; no reuse of Image 1’s reception counter/windows/lobby geometry; maintain clear floor contrast.\nAvoid: photorealism, library wood aesthetic, fantasy archive, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, endless impossible shelves, bright daylight.",
+        "outputSha256": "1c44ec66e4d95b9e8b94051a2d0f48da16bb105b8e6cf632d8f48bf304337c97",
+        "outputSizeBytes": 2082722,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "hasAlpha": false,
+        "referenceImages": [
+          {
+            "assetId": "background.facility-lobby",
+            "role": "project-owned style, camera, palette, and readability reference",
+            "path": "assets/source/generated/background-facility-lobby-v1.png",
+            "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+          }
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity was supplied; references, when present, are project-owned generated environment images used only for style continuity."
+        },
+        "sourceMaster": {
+          "width": 1672,
+          "height": 941,
+          "sizeBytes": 2105550,
+          "sha256": "283e89514b66c0175ee6c4d4d48955ada60b299601e875099404ed186a1abd23"
+        },
+        "normalization": {
+          "operation": "center-crop",
+          "tool": "Pillow 12.3.0",
+          "sourceRect": [
+            4,
+            2,
+            1668,
+            938
+          ],
+          "targetAspectRatio": "16:9"
+        }
+      }
+    },
+    {
+      "assetId": "background.service-corridor",
+      "runtimePath": "assets/generated/runtime/backgrounds/service-corridor-v1.png",
+      "source": "generated",
+      "origin": "Generated during the retained 2026-08-14 G2 OpenAI built-in image generation session; only fictional, project-generated assets from the same retained pipeline were used as identity or style references.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "08/14/2026 06:14:21"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "tool": "image_gen.imagegen",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+        "operation": "generate+center-crop",
+        "createdAt": "2026-08-14T06:11:01.1071780Z",
+        "generationRecordPath": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+        "sourceMasterPath": "assets/source/generated/background-service-corridor-v1.png",
+        "builtInArtifactName": "exec-c3f45ed4-324f-4366-adfd-ac1488fc83d0.png",
+        "promptSha256": "d3d53e27ce71a3b4de7c9e0b4fea7f67424214f663a61a2da65d8f47f91750ca",
+        "prompt": "Use case: style-transfer\nAsset type: 16:9 fixed-room chase background for a 2D top-down psychological-horror RPG\nInput images: Images 1 and 2 are only approved visual-style, camera, palette, material, scale, and traversal-readability references for this same game; do not copy either room layout or their signature objects.\nPrimary request: Create the empty “Corredor de Servicio Nueve,” a long sealed service and autopsy corridor inside the Santa Ágata clinical-memory facility.\nScene/backdrop: a broad horizontal industrial corridor with nine repeating but visibly distinct sealed autopsy doors, low steam drifting from floor vents, exposed pipes, intermittent alarm fixtures with no readable symbols, a tissue-sample inspection alcove with a dark mirror panel, one archive door at the entry end, and a heavy incinerator safety threshold at the far end. Surgical thread traces appear sparingly on one wall and floor, suggesting the chase route without forming text.\nSubject: the corridor itself, built for a 45-second pursuit; one continuous clear traversal lane, readable cover/light pools, obvious start and destination, no obstacles that fully block movement.\nStyle/medium: preserve the references’ premium dark Anime HD environment painting, painterly texture, crisp architectural silhouettes, grounded wet materials, restrained detail, and fixed-room RPG readability.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down near-orthographic fixed-room view matching the references’ camera and lens; show the full usable corridor segment, strong horizontal motion path, stable geometry, no fisheye, enough floor around the route for player and threat sprites.\nLighting/mood: alternating cold surgical-teal fluorescent pools and dark intervals; small restrained blood-crimson alarm points; warning-amber glow at the incinerator threshold; steam remains thin and never hides collision boundaries; escalating clinical dread.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, blood crimson #A62F45, warning amber #E4A24A, bone #F1E8D6.\nConstraints: empty environment; no people, creatures, bodies, gore splatter, organs, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, or map markers; do not reuse the lobby windows/reception desk or archive shelving; maintain clear floor contrast for dark sprites.\nAvoid: photorealism, medieval dungeon, subway tunnel, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, opaque fog, duplicate impossible doors, bright daylight.",
+        "outputSha256": "9be0963d60138ad7535a843bb8ce6e1669fd060a00d8dc4f3759dc9bf3ab3ca8",
+        "outputSizeBytes": 1864946,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "hasAlpha": false,
+        "referenceImages": [
+          {
+            "assetId": "background.facility-lobby",
+            "role": "project-owned style and camera reference",
+            "path": "assets/source/generated/background-facility-lobby-v1.png",
+            "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+          },
+          {
+            "assetId": "background.archive-sublevel",
+            "role": "project-owned style and material reference",
+            "path": "assets/source/generated/background-archive-sublevel-v1.png",
+            "sha256": "283e89514b66c0175ee6c4d4d48955ada60b299601e875099404ed186a1abd23"
+          }
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity was supplied; references, when present, are project-owned generated environment images used only for style continuity."
+        },
+        "sourceMaster": {
+          "width": 1672,
+          "height": 941,
+          "sizeBytes": 1880122,
+          "sha256": "1587e152fc75d2fd9b29c91a1f718551e8c692b34419b4f5f764ee1844ae0ab8"
+        },
+        "normalization": {
+          "operation": "center-crop",
+          "tool": "Pillow 12.3.0",
+          "sourceRect": [
+            4,
+            2,
+            1668,
+            938
+          ],
+          "targetAspectRatio": "16:9"
+        }
+      }
+    }
+  ],
+  "supplementalAudio": [
+    {
+      "assetId": "audio.ambience.facility-lobby",
+      "runtimePath": "assets/audio/horror-bl/ambience-facility-lobby.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x15a04d11",
+        "recipe": "Low ventilation drone, distant fluorescent pulse, and sparse glass resonance.",
+        "sampleRateHz": 22050,
+        "outputSha256": "9e523150c7915b15255dc9ffaa8de9823d697e4f37b8c4bc1c39f4476b2407b2",
+        "outputSizeBytes": 529244,
+        "durationMs": 12000
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.ambience.archive-sublevel",
+      "runtimePath": "assets/audio/horror-bl/ambience-archive-sublevel.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x2c6f53a7",
+        "recipe": "Paper-like filtered noise, archive HVAC drone, and slow unstable harmonics.",
+        "sampleRateHz": 22050,
+        "outputSha256": "a4409ec0b7a3043e8c587b95310f5ef1a83300cb356d8b73961a3ad8bf9590ff",
+        "outputSizeBytes": 529244,
+        "durationMs": 12000
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.ambience.service-corridor",
+      "runtimePath": "assets/audio/horror-bl/ambience-service-corridor.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x39b21c4e",
+        "recipe": "Narrow metallic corridor hum with periodic alarm-adjacent resonances.",
+        "sampleRateHz": 22050,
+        "outputSha256": "a838d85ee789e9b3eaae9f1d93274fc7b93b5c5bdaeeab5c080e1a32821857e3",
+        "outputSizeBytes": 529244,
+        "durationMs": 12000
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.stinger.ninth-witness",
+      "runtimePath": "assets/audio/horror-bl/ninth-witness-stinger.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x4f77de92",
+        "recipe": "Rising clustered tone, granular breath, and abrupt memory-shear hit.",
+        "sampleRateHz": 22050,
+        "outputSha256": "98b615ae2e41f82f66b6629db2bfc612991da7b90c9170085b5e4e7042347ac6",
+        "outputSizeBytes": 79424,
+        "durationMs": 1800
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.ui.confirm",
+      "runtimePath": "assets/audio/horror-bl/ui-confirm.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x51a9cc37",
+        "recipe": "Short ascending two-tone interface confirmation.",
+        "sampleRateHz": 22050,
+        "outputSha256": "4b397c7011b04a76b88f3c82fb584f8726d343170e3069ea86bf18c8f78c0ef8",
+        "outputSizeBytes": 7982,
+        "durationMs": 180
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.ui.cancel",
+      "runtimePath": "assets/audio/horror-bl/ui-cancel.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x68e342a5",
+        "recipe": "Short descending muted interface cancellation.",
+        "sampleRateHz": 22050,
+        "outputSha256": "e6349368de9d985deb30bfe2c0b8002aff269ce785b47dcd410036c32ca24863",
+        "outputSizeBytes": 9306,
+        "durationMs": 210
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.footstep.concrete",
+      "runtimePath": "assets/audio/horror-bl/footstep-concrete.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x7b0d91f4",
+        "recipe": "Dry concrete heel-toe impact with a restrained room reflection.",
+        "sampleRateHz": 22050,
+        "outputSha256": "2d8100369c8e779d94dca4ac3e74d952cba4ff771a201b766603c00091028c31",
+        "outputSizeBytes": 10628,
+        "durationMs": 240
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "audio.ending.memory-release",
+      "runtimePath": "assets/audio/horror-bl/ending-memory-release.wav",
+      "source": "generated",
+      "origin": "Synthesized offline from deterministic mathematical oscillators and seeded pseudo-random noise; no source recording, third-party sample, voice, or input media was used.",
+      "license": "Project-authored procedural output. No third-party audio license is claimed or required by this record; human release and distribution acceptance remains pending.",
+      "generation": {
+        "tool": "Node.js standard library",
+        "script": "scripts/dev/generate-horror-bl-audio.mjs",
+        "algorithm": "PCM16 procedural synthesis v1",
+        "seed": "0x8ea25bb9",
+        "recipe": "Quiet resolving chord and fading ventilation noise for a chapter ending.",
+        "sampleRateHz": 22050,
+        "outputSha256": "380d3b735a573c5554ee60d8939ea09e45c4e2bc7d874c49a65b1a4a493df69a",
+        "outputSizeBytes": 185264,
+        "durationMs": 4200
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    }
+  ],
+  "supplementalAnimation": [
+    {
+      "assetId": "sprite.damian.idle.down",
+      "runtimePath": "assets/generated/runtime/sprites/damian_idle_down.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "412a6e6c3e4b18b91386804fda45face3a88473678cbdfade0e660583c0149ec",
+        "outputSizeBytes": 110374,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.idle.left",
+      "runtimePath": "assets/generated/runtime/sprites/damian_idle_left.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "d52fd1a93f4a71b671b4b2bda1e71f4d4a1635f78e2a935dd380631ca3b1b8f6",
+        "outputSizeBytes": 72502,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.idle.right",
+      "runtimePath": "assets/generated/runtime/sprites/damian_idle_right.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "ecf50e8fc0e1e8f6e77b6eb7f6849cae875a72171d75c58c894a9beca9203532",
+        "outputSizeBytes": 78900,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.idle.up",
+      "runtimePath": "assets/generated/runtime/sprites/damian_idle_up.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "af568462fea6adf5b83d8c24aee3bcf7ea888dd05a439a6c3221010b1b19c812",
+        "outputSizeBytes": 97949,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.walk.down",
+      "runtimePath": "assets/generated/runtime/sprites/damian_walk_down.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "b6b60020913e6548b75b0b421c1538087d9366d4d222212f6719c640129fdcfe",
+        "outputSizeBytes": 100601,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.walk.left",
+      "runtimePath": "assets/generated/runtime/sprites/damian_walk_left.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "c7d1b98fc7a45708af7ccbb2399c8252a43704fbc59ac4e88325d35542e12088",
+        "outputSizeBytes": 96077,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.walk.right",
+      "runtimePath": "assets/generated/runtime/sprites/damian_walk_right.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "d3a2d9bc06e97dee0a412a155e935237d02eab9806cbac67729787709db2aba2",
+        "outputSizeBytes": 96046,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.walk.up",
+      "runtimePath": "assets/generated/runtime/sprites/damian_walk_up.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "0f39472c3ea36f62a4cae19866a65c5907d00e8544c1c2664ae96b1deb8dfb1d",
+        "outputSizeBytes": 91356,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.interact.down",
+      "runtimePath": "assets/generated/runtime/sprites/damian_interact_down.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "3ae58179202963ce76ce3b2729a08fe63d9d40d7d72495ad6b48e448f2947461",
+        "outputSizeBytes": 264064,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.interact.left",
+      "runtimePath": "assets/generated/runtime/sprites/damian_interact_left.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "1daf6af9d14bd91626dbb38283fd003464f1f9329fe8b623855f983dc9ff0f00",
+        "outputSizeBytes": 206197,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.interact.right",
+      "runtimePath": "assets/generated/runtime/sprites/damian_interact_right.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "b3bfed25f7166e28658d380912764d43827e72c068b7f8852cb42f4ac49276c9",
+        "outputSizeBytes": 137917,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    },
+    {
+      "assetId": "sprite.damian.interact.up",
+      "runtimePath": "assets/generated/runtime/sprites/damian_interact_up.png",
+      "source": "generated",
+      "origin": "Generated from the retained adult Damián animation session with OpenAI built-in image generation, then normalized into a transparent four-frame strip by the RPGCreatorAI animation pipeline.",
+      "license": "No standalone copyright license or unrestricted public-redistribution right is asserted. Prompts, source masters, normalization metadata, hashes, and human-acceptance status are retained for project-local packaging.",
+      "review": {
+        "state": "frozen",
+        "reviewer": "Codex automated technical sprite review (delegated by project creator)",
+        "decidedAt": "2026-08-14T07:28:00.000Z"
+      },
+      "generated": {
+        "providerId": "openai-built-in-image-generation",
+        "providerDisplayName": "OpenAI built-in image generation",
+        "modelId": "not-disclosed",
+        "modelDisclosure": "The built-in image generation session did not expose a model identifier.",
+        "tool": "image_gen.imagegen + Pillow",
+        "operation": "image.generate+normalize-sprite-strip",
+        "createdAt": "2026-08-14T07:28:00.000Z",
+        "generationRecordPath": "data/assets/animation-packages/damian.provenance.v1.json",
+        "sourceMasterPath": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+        "promptSha256": "1ad9af36fe27d0a45f38a1f77cd02ed081090499d8f8c641f9bd0f8d41ac292e",
+        "prompt": "{\"styleSource\":\"GAME_STYLE.md\",\"promptPolicy\":{\"layout\":\"one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip\",\"identity\":\"preserve approved Damián seed identity, outfit, palette, anatomy, and proportions\",\"background\":\"uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text\",\"anatomy\":\"head, both arms, both hands, both legs, and both feet fully visible in every frame\"},\"normalization\":{\"pipeline\":\"rpgcreatorai-damian-animation-v2\",\"frameSize\":{\"width\":256,\"height\":384},\"frameCountPerClip\":4,\"sharedScale\":0.397838,\"anchor\":{\"x\":128,\"y\":376},\"resampling\":\"lanczos\",\"alphaThreshold\":8}}",
+        "outputSha256": "2ea57b01492fdba638641e6bcc5767bd28162cd1df4e6416dab6db2d651d6711",
+        "outputSizeBytes": 211420,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 384,
+        "hasAlpha": true,
+        "referenceImages": [
+          "assets/generated/runtime/characters/damian-fullbody-seed-v1.png"
+        ],
+        "identityConsent": {
+          "status": "not-applicable",
+          "basis": "No real-person identity or user-supplied reference image was used."
+        },
+        "sourceAssetIds": [
+          "seed.damian.full-body"
+        ]
+      },
+      "technicalReview": {
+        "state": "generated-verified",
+        "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+        "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+      },
+      "humanAcceptance": {
+        "state": "accepted",
+        "evidence": "release-input/editor-acceptance-evidence.v1.json",
+        "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+        "reviewer": "Codex (delegado explícitamente por el creador)",
+        "reviewedAt": "2026-08-14T12:02:55.844Z"
+      }
+    }
+  ]
+}

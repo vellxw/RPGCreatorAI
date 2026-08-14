@@ -6,7 +6,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -116,6 +116,8 @@ pub struct ProjectData {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FullProjectState {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub template_id: Option<String>,
     pub project: ProjectData,
     pub maps: HashMap<String, serde_json::Value>,
     pub items: serde_json::Value,
@@ -174,6 +176,8 @@ pub struct ImportedSpritesheetAsset {
     pub path: String,
     pub source: String,
     pub tags: Vec<String>,
+    pub width: u32,
+    pub height: u32,
     pub frame_width: u32,
     pub frame_height: u32,
     pub frames: u32,
@@ -772,18 +776,28 @@ fn apply_playtest_request(
                 .current_map_id
                 .as_deref()
                 .ok_or_else(|| "currentMap playtest requires currentMapId".to_string())?;
-            if !project_state.maps.contains_key(map_id) {
-                return Err(format!("current map '{map_id}' is not loaded"));
-            }
+            let map = project_state
+                .maps
+                .get(map_id)
+                .ok_or_else(|| format!("current map '{map_id}' is not loaded"))?;
             let original_start = project.start_map_id.clone();
             project.start_map_id = map_id.to_string();
-            if original_start != map_id {
-                project.start_position = StartPosition {
-                    x: 0,
-                    y: 0,
-                    direction: "down".into(),
-                };
-            }
+            let preferred = if original_start == map_id {
+                (project.start_position.x, project.start_position.y)
+            } else {
+                (0, 0)
+            };
+            let spawn = nearest_open_tile(map, preferred)
+                .ok_or_else(|| format!("current map '{map_id}' has no open tile for playtest"))?;
+            project.start_position = StartPosition {
+                x: spawn.0,
+                y: spawn.1,
+                direction: if original_start == map_id {
+                    project.start_position.direction.clone()
+                } else {
+                    "down".into()
+                },
+            };
             Ok(())
         }
         "selectedEvent" => {
@@ -803,15 +817,138 @@ fn apply_playtest_request(
             let event = find_event(map, event_id)
                 .ok_or_else(|| format!("selected event '{event_id}' was not found"))?;
             project.start_map_id = map_id.to_string();
-            project.start_position = StartPosition {
-                x: event.0,
-                y: event.1,
-                direction: "down".into(),
-            };
+            let spawn = selected_event_spawn(map, event).ok_or_else(|| {
+                format!("selected event map '{map_id}' has no open tile for playtest")
+            })?;
+            project.start_position = spawn;
             Ok(())
         }
         other => Err(format!("unsupported playtest mode '{other}'")),
     }
+}
+
+fn nearest_open_tile(map: &serde_json::Value, preferred: (i64, i64)) -> Option<(i64, i64)> {
+    nearest_open_tile_excluding(map, preferred, None)
+}
+
+fn nearest_open_tile_excluding(
+    map: &serde_json::Value,
+    preferred: (i64, i64),
+    excluded: Option<(i64, i64)>,
+) -> Option<(i64, i64)> {
+    let (width, height) = map_dimensions(map)?;
+    if width <= 0 || height <= 0 {
+        return None;
+    }
+
+    let origin = (
+        preferred.0.clamp(0, width - 1),
+        preferred.1.clamp(0, height - 1),
+    );
+    let max_distance = width + height - 2;
+    for distance in 0..=max_distance {
+        for y in 0..height {
+            for x in 0..width {
+                if (x - origin.0).abs() + (y - origin.1).abs() == distance
+                    && excluded != Some((x, y))
+                    && !is_playtest_tile_blocked(map, x, y)
+                {
+                    return Some((x, y));
+                }
+            }
+        }
+    }
+    None
+}
+
+fn selected_event_spawn(
+    map: &serde_json::Value,
+    event: (i64, i64),
+) -> Option<StartPosition> {
+    let (width, height) = map_dimensions(map)?;
+    // Prefer standing below the event, then left, right, and above. This
+    // guarantees that an action-trigger event is in front of the player.
+    let candidates = [
+        (event.0, event.1 + 1),
+        (event.0 - 1, event.1),
+        (event.0 + 1, event.1),
+        (event.0, event.1 - 1),
+    ];
+    for (x, y) in candidates {
+        if x >= 0
+            && x < width
+            && y >= 0
+            && y < height
+            && !is_playtest_tile_blocked(map, x, y)
+        {
+            return Some(StartPosition {
+                x,
+                y,
+                direction: direction_toward((x, y), event),
+            });
+        }
+    }
+
+    // Crowded maps may have no immediately adjacent opening. Fall back to
+    // the closest traversable cell, but never overlap the selected event.
+    let (x, y) = nearest_open_tile_excluding(map, event, Some(event))?;
+    Some(StartPosition {
+        x,
+        y,
+        direction: direction_toward((x, y), event),
+    })
+}
+
+fn map_dimensions(map: &serde_json::Value) -> Option<(i64, i64)> {
+    let width = map.get("width")?.as_i64()?;
+    let height = map.get("height")?.as_i64()?;
+    (width > 0 && height > 0).then_some((width, height))
+}
+
+fn direction_toward(from: (i64, i64), target: (i64, i64)) -> String {
+    let dx = target.0 - from.0;
+    let dy = target.1 - from.1;
+    if dx.abs() >= dy.abs() && dx != 0 {
+        (if dx > 0 { "right" } else { "left" }).into()
+    } else if dy > 0 {
+        "down".into()
+    } else {
+        "up".into()
+    }
+}
+
+fn is_playtest_tile_blocked(map: &serde_json::Value, x: i64, y: i64) -> bool {
+    let Some((width, height)) = map_dimensions(map) else {
+        return true;
+    };
+    if x < 0 || x >= width || y < 0 || y >= height {
+        return true;
+    }
+    let collision_blocked = map
+        .get("layers")
+        .and_then(|layers| layers.as_array())
+        .and_then(|layers| {
+            layers.iter().find(|layer| {
+                layer.get("type").and_then(|value| value.as_str()) == Some("collision")
+                    || layer.get("name").and_then(|value| value.as_str()) == Some("collision")
+            })
+        })
+        .and_then(|layer| layer.get("tiles"))
+        .and_then(|tiles| tiles.as_array())
+        .and_then(|tiles| tiles.get((y * width + x) as usize))
+        .and_then(|tile| tile.as_i64())
+        == Some(9);
+    let solid_event = map
+        .get("events")
+        .and_then(|events| events.as_array())
+        .is_some_and(|events| {
+            events.iter().any(|event| {
+                event.get("solid").and_then(|value| value.as_bool()) == Some(true)
+                    && event.get("x").and_then(|value| value.as_i64()) == Some(x)
+                    && event.get("y").and_then(|value| value.as_i64()) == Some(y)
+            })
+        });
+    collision_blocked || solid_event
 }
 
 fn find_event(map: &serde_json::Value, event_id: &str) -> Option<(i64, i64)> {
@@ -911,6 +1048,121 @@ const SPRITESHEET_IMPORT_DIR: &str = "assets/imported/spritesheets";
 const TILESET_IMPORT_DIR: &str = "assets/imported/tilesets";
 const AUDIO_IMPORT_DIR: &str = "assets/imported/audio";
 const ALLOWED_IMAGE_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "bmp", "webp"];
+
+fn read_u24_le(bytes: &[u8]) -> u32 {
+    u32::from(bytes[0]) | (u32::from(bytes[1]) << 8) | (u32::from(bytes[2]) << 16)
+}
+
+fn read_image_dimensions(path: &Path, extension: &str) -> Result<(u32, u32), String> {
+    let mut file = fs::File::open(path)
+        .map_err(|e| format!("read spritesheet dimensions {}: {e}", path.display()))?;
+
+    match extension {
+        "png" => {
+            let mut header = [0u8; 24];
+            file.read_exact(&mut header)
+                .map_err(|_| "Invalid PNG spritesheet header.".to_string())?;
+            if &header[..8] != b"\x89PNG\r\n\x1a\n" || &header[12..16] != b"IHDR" {
+                return Err("Invalid PNG spritesheet header.".into());
+            }
+            Ok((
+                u32::from_be_bytes(header[16..20].try_into().unwrap()),
+                u32::from_be_bytes(header[20..24].try_into().unwrap()),
+            ))
+        }
+        "bmp" => {
+            let mut header = [0u8; 26];
+            file.read_exact(&mut header)
+                .map_err(|_| "Invalid BMP spritesheet header.".to_string())?;
+            if &header[..2] != b"BM" {
+                return Err("Invalid BMP spritesheet header.".into());
+            }
+            let width = i32::from_le_bytes(header[18..22].try_into().unwrap());
+            let height = i32::from_le_bytes(header[22..26].try_into().unwrap());
+            if width <= 0 || height == 0 || height == i32::MIN {
+                return Err("BMP spritesheet dimensions must be positive.".into());
+            }
+            Ok((width as u32, height.unsigned_abs()))
+        }
+        "jpg" | "jpeg" => {
+            let mut signature = [0u8; 2];
+            file.read_exact(&mut signature)
+                .map_err(|_| "Invalid JPEG spritesheet header.".to_string())?;
+            if signature != [0xff, 0xd8] {
+                return Err("Invalid JPEG spritesheet header.".into());
+            }
+            loop {
+                let mut marker_start = [0u8; 1];
+                file.read_exact(&mut marker_start)
+                    .map_err(|_| "JPEG spritesheet has no readable size marker.".to_string())?;
+                if marker_start[0] != 0xff {
+                    continue;
+                }
+                let mut marker = [0u8; 1];
+                loop {
+                    file.read_exact(&mut marker)
+                        .map_err(|_| "JPEG spritesheet has no readable size marker.".to_string())?;
+                    if marker[0] != 0xff {
+                        break;
+                    }
+                }
+                if marker[0] == 0xd8 || marker[0] == 0x01 {
+                    continue;
+                }
+                if marker[0] == 0xd9 || marker[0] == 0xda {
+                    return Err("JPEG spritesheet has no readable size marker.".into());
+                }
+                let mut length_bytes = [0u8; 2];
+                file.read_exact(&mut length_bytes)
+                    .map_err(|_| "Invalid JPEG spritesheet segment.".to_string())?;
+                let length = u16::from_be_bytes(length_bytes);
+                if length < 2 {
+                    return Err("Invalid JPEG spritesheet segment length.".into());
+                }
+                let is_size_marker = matches!(
+                    marker[0],
+                    0xc0 | 0xc1 | 0xc2 | 0xc3 | 0xc5 | 0xc6 | 0xc7 | 0xc9 | 0xca | 0xcb | 0xcd | 0xce | 0xcf
+                );
+                if is_size_marker {
+                    let mut dimensions = [0u8; 5];
+                    file.read_exact(&mut dimensions)
+                        .map_err(|_| "Invalid JPEG spritesheet size marker.".to_string())?;
+                    return Ok((
+                        u32::from(u16::from_be_bytes([dimensions[3], dimensions[4]])),
+                        u32::from(u16::from_be_bytes([dimensions[1], dimensions[2]])),
+                    ));
+                }
+                file.seek(SeekFrom::Current(i64::from(length) - 2))
+                    .map_err(|_| "Invalid JPEG spritesheet segment.".to_string())?;
+            }
+        }
+        "webp" => {
+            let mut header = [0u8; 30];
+            file.read_exact(&mut header)
+                .map_err(|_| "Invalid WebP spritesheet header.".to_string())?;
+            if &header[..4] != b"RIFF" || &header[8..12] != b"WEBP" {
+                return Err("Invalid WebP spritesheet header.".into());
+            }
+            match &header[12..16] {
+                b"VP8X" => Ok((read_u24_le(&header[24..27]) + 1, read_u24_le(&header[27..30]) + 1)),
+                b"VP8L" if header[20] == 0x2f => {
+                    let width = 1 + u32::from(header[21]) + ((u32::from(header[22]) & 0x3f) << 8);
+                    let height = 1
+                        + (u32::from(header[22]) >> 6)
+                        + (u32::from(header[23]) << 2)
+                        + ((u32::from(header[24]) & 0x0f) << 10);
+                    Ok((width, height))
+                }
+                b"VP8 " if header[23..26] == [0x9d, 0x01, 0x2a] => Ok((
+                    u32::from(u16::from_le_bytes([header[26], header[27]]) & 0x3fff),
+                    u32::from(u16::from_le_bytes([header[28], header[29]]) & 0x3fff),
+                )),
+                _ => Err("Unsupported or invalid WebP spritesheet header.".into()),
+            }
+        }
+        _ => Err(format!("Unsupported spritesheet type \".{extension}\".")),
+    }
+}
 const ALLOWED_AUDIO_EXTENSIONS: &[&str] = &["wav"];
 
 fn import_image_asset_file(
@@ -1025,6 +1277,24 @@ fn import_spritesheet_asset_file(
         return Err(format!("Unsupported spritesheet type \".{}\".", extension));
     }
 
+    let (image_width, image_height) = read_image_dimensions(&source, &extension)?;
+    let expected_width = metadata
+        .frame_width
+        .checked_mul(metadata.frame_count)
+        .ok_or_else(|| "Spritesheet frame width * frame count exceeds the supported size.".to_string())?;
+    if image_width != expected_width || image_height != metadata.frame_height {
+        return Err(format!(
+            "Spritesheet dimensions are {}x{}, but metadata requires {}x{} (frameWidth {} * frameCount {}, frameHeight {}).",
+            image_width,
+            image_height,
+            expected_width,
+            metadata.frame_height,
+            metadata.frame_width,
+            metadata.frame_count,
+            metadata.frame_height,
+        ));
+    }
+
     let raw_stem = source
         .file_stem()
         .and_then(|value| value.to_str())
@@ -1067,6 +1337,8 @@ fn import_spritesheet_asset_file(
         path: relative_path,
         source: "imported".into(),
         tags: vec!["imported".into(), "spritesheet".into()],
+        width: image_width,
+        height: image_height,
         frame_width: metadata.frame_width,
         frame_height: metadata.frame_height,
         frames: metadata.frame_count,
@@ -1456,7 +1728,15 @@ fn read_project_at(root: &Path) -> Result<FullProjectState, String> {
         }
     }
 
+    let template_id = root
+        .join("game/template.json")
+        .is_file()
+        .then(|| read_json::<serde_json::Value>(&root.join("game/template.json")).ok())
+        .flatten()
+        .and_then(|value| value.get("templateId").and_then(|id| id.as_str()).map(str::to_string));
+
     Ok(FullProjectState {
+        template_id,
         project,
         maps,
         items,
@@ -1637,6 +1917,8 @@ fn write_new_project_at(
         }
     }
 
+    write_project_documentation(root, project_state.template_id.as_deref())?;
+
     if let Err(e) = ensure_gitignore_mentions_backups(root) {
         warnings.push(format!("could not update .gitignore: {e}"));
     }
@@ -1650,6 +1932,71 @@ fn write_new_project_at(
         warnings,
         backup_path: None,
     })
+}
+
+fn write_project_documentation(root: &Path, template_id: Option<&str>) -> Result<(), String> {
+    let (id, docs): (&str, &[(&str, &str)]) = match template_id.unwrap_or("blank") {
+        "horror-bl" => (
+            "horror-bl",
+            &[
+                ("README.md", include_str!("../../templates/horror-bl/README.md")),
+                ("GAME_DESIGN.md", include_str!("../../templates/horror-bl/GAME_DESIGN.md")),
+                ("GAME_STYLE.md", include_str!("../../templates/horror-bl/GAME_STYLE.md")),
+                ("TECHNICAL.md", include_str!("../../templates/horror-bl/TECHNICAL.md")),
+                ("ASSETS.md", include_str!("../../templates/horror-bl/ASSETS.md")),
+                ("data/design/game-design.json", include_str!("../../templates/horror-bl/data/design/game-design.json")),
+                ("data/style/game-style.json", include_str!("../../templates/horror-bl/data/style/game-style.json")),
+                ("data/technical/runtime-config.json", include_str!("../../templates/horror-bl/data/technical/runtime-config.json")),
+                ("data/assets/assets-manifest.json", include_str!("../../templates/horror-bl/data/assets/assets-manifest.json")),
+                ("data/content/vertical-slice.json", include_str!("../../templates/horror-bl/data/content/vertical-slice.json")),
+                ("data/schema/vertical-slice.schema.json", include_str!("../../templates/horror-bl/data/schema/vertical-slice.schema.json")),
+            ],
+        ),
+        _ => (
+            "blank",
+            &[
+                ("README.md", include_str!("../../templates/project/README.md")),
+                ("GAME_DESIGN.md", include_str!("../../templates/project/GAME_DESIGN.md")),
+                ("GAME_STYLE.md", include_str!("../../templates/project/GAME_STYLE.md")),
+                ("TECHNICAL.md", include_str!("../../templates/project/TECHNICAL.md")),
+                ("ASSETS.md", include_str!("../../templates/project/ASSETS.md")),
+                ("data/design/game-design.json", "{\n  \"schemaVersion\": 1,\n  \"status\": \"draft\",\n  \"premise\": \"\"\n}\n"),
+                ("data/style/game-style.json", "{\n  \"schemaVersion\": 1,\n  \"status\": \"draft\",\n  \"sourceOfTruth\": \"GAME_STYLE.md\"\n}\n"),
+                ("data/technical/runtime-config.json", "{\n  \"schemaVersion\": 1,\n  \"tickRateHz\": 60,\n  \"networkAllowed\": false\n}\n"),
+                ("data/assets/assets-manifest.json", "{\n  \"schemaVersion\": 1,\n  \"assets\": []\n}\n"),
+            ],
+        ),
+    };
+
+    for (name, contents) in docs {
+        write_new_text(root, &format!("game/{name}"), contents)?;
+    }
+    write_new_json(
+        root,
+        "game/template.json",
+        &serde_json::json!({ "schemaVersion": 1, "templateId": id }),
+    )?;
+    Ok(())
+}
+
+fn write_new_text(root: &Path, relative: &str, contents: &str) -> Result<(), String> {
+    let target = join_inside(root, relative).map_err(|e| e.to_string())?;
+    if target.exists() {
+        return Err(format!("refusing to overwrite existing file {}", target.display()));
+    }
+    if let Some(parent) = target.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("mkdir {}: {e}", parent.display()))?;
+    }
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&target)
+        .map_err(|e| format!("create {}: {e}", target.display()))?;
+    file.write_all(contents.as_bytes())
+        .map_err(|e| format!("write {}: {e}", target.display()))?;
+    file.sync_all()
+        .map_err(|e| format!("fsync {}: {e}", target.display()))?;
+    Ok(())
 }
 
 fn write_new_json<T: Serialize>(root: &Path, relative: &str, value: &T) -> Result<(), String> {
@@ -1927,6 +2274,7 @@ mod tests {
             }),
         );
         FullProjectState {
+            template_id: Some("blank".into()),
             project,
             maps,
             items: serde_json::json!({ "items": [] }),
@@ -1967,6 +2315,13 @@ mod tests {
         assert!(root.join("data/database/tilesets.json").is_file());
         assert!(root.join("data/assets/catalog.json").is_file());
         assert!(root.join("data/project.json").is_file());
+        assert!(root.join("game/GAME_DESIGN.md").is_file());
+        assert!(root.join("game/GAME_STYLE.md").is_file());
+        assert!(root.join("game/TECHNICAL.md").is_file());
+        assert_eq!(
+            read_json::<serde_json::Value>(&root.join("game/template.json")).unwrap()["templateId"],
+            "blank"
+        );
         let project_json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(root.join("data/project.json")).unwrap())
                 .unwrap();
@@ -2043,7 +2398,12 @@ mod tests {
         let source_tmp = TempDir::new().unwrap();
         let root = project_tmp.path().canonicalize().unwrap();
         let source = source_tmp.path().join("Hero Run Sheet.PNG");
-        fs::write(&source, b"spritesheet fixture").unwrap();
+        let spritesheet_fixture = [
+            0x89, b'P', b'N', b'G', 0x0d, 0x0a, 0x1a, 0x0a,
+            0x00, 0x00, 0x00, 0x0d, b'I', b'H', b'D', b'R',
+            0x00, 0x00, 0x01, 0x80, 0x00, 0x00, 0x00, 0x40,
+        ];
+        fs::write(&source, spritesheet_fixture).unwrap();
         fs::create_dir_all(root.join("assets/imported/spritesheets")).unwrap();
         fs::write(
             root.join("assets/imported/spritesheets/hero-run-sheet.png"),
@@ -2074,6 +2434,8 @@ mod tests {
             "assets/imported/spritesheets/hero-run-sheet-2.png"
         );
         assert_eq!(imported.tags, vec!["imported", "spritesheet"]);
+        assert_eq!(imported.width, 384);
+        assert_eq!(imported.height, 64);
         assert_eq!(imported.frame_width, 64);
         assert_eq!(imported.frame_height, 64);
         assert_eq!(imported.frames, 6);
@@ -2083,8 +2445,43 @@ mod tests {
         );
         assert_eq!(
             fs::read(root.join("assets/imported/spritesheets/hero-run-sheet-2.png")).unwrap(),
-            b"spritesheet fixture"
+            spritesheet_fixture
         );
+    }
+
+    #[test]
+    fn import_spritesheet_asset_file_rejects_dimension_mismatch_before_copy() {
+        let project_tmp = TempDir::new().unwrap();
+        let source_tmp = TempDir::new().unwrap();
+        let root = project_tmp.path().canonicalize().unwrap();
+        let source = source_tmp.path().join("wrong-size.png");
+        fs::write(
+            &source,
+            [
+                0x89, b'P', b'N', b'G', 0x0d, 0x0a, 0x1a, 0x0a,
+                0x00, 0x00, 0x00, 0x0d, b'I', b'H', b'D', b'R',
+                0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x40,
+            ],
+        )
+        .unwrap();
+
+        let error = import_spritesheet_asset_file(
+            &root,
+            &source,
+            &[],
+            SpritesheetImportMetadata {
+                id_base: "hero_run".into(),
+                name: "Hero Run".into(),
+                frame_width: 64,
+                frame_height: 64,
+                frame_count: 4,
+            },
+        )
+        .unwrap_err();
+
+        assert!(error.contains("128x64"));
+        assert!(error.contains("256x64"));
+        assert!(!root.join("assets/imported/spritesheets").exists());
     }
 
     #[test]
@@ -2299,6 +2696,40 @@ mod tests {
     }
 
     #[test]
+    fn nearest_open_tile_skips_collision_and_solid_events() {
+        let map = serde_json::json!({
+            "width": 3,
+            "height": 2,
+            "layers": [
+                { "name": "collision", "type": "collision", "tiles": [9, 0, 0, 0, 0, 0] }
+            ],
+            "events": [
+                { "id": "guard", "x": 1, "y": 0, "solid": true }
+            ]
+        });
+
+        assert_eq!(nearest_open_tile(&map, (0, 0)), Some((0, 1)));
+    }
+
+    #[test]
+    fn selected_event_spawn_is_adjacent_and_faces_the_event() {
+        let map = serde_json::json!({
+            "width": 3,
+            "height": 3,
+            "layers": [
+                { "name": "collision", "type": "collision", "tiles": [0,0,0,0,0,0,0,0,0] }
+            ],
+            "events": [
+                { "id": "npc", "x": 1, "y": 1, "solid": true }
+            ]
+        });
+
+        let spawn = selected_event_spawn(&map, (1, 1)).unwrap();
+        assert_eq!((spawn.x, spawn.y), (1, 2));
+        assert_eq!(spawn.direction, "up");
+    }
+
+    #[test]
     fn playtest_current_map_creates_temp_project_without_mutating_source() {
         let source = TempDir::new().unwrap();
         let source_root = source.path().canonicalize().unwrap();
@@ -2388,7 +2819,7 @@ mod tests {
     }
 
     #[test]
-    fn playtest_selected_event_starts_at_event_position() {
+    fn playtest_selected_event_starts_adjacent_and_faces_event() {
         let source = TempDir::new().unwrap();
         let source_root = source.path().canonicalize().unwrap();
         make_playtest_project(&source_root);
@@ -2409,8 +2840,84 @@ mod tests {
             read_json(&session_root.join("data/project.json")).unwrap();
         assert_eq!(session_project.start_map_id, "house");
         assert_eq!(session_project.start_position.x, 1);
-        assert_eq!(session_project.start_position.y, 0);
-        assert_eq!(session_project.start_position.direction, "down");
+        assert_eq!(session_project.start_position.y, 1);
+        assert_eq!(session_project.start_position.direction, "up");
+    }
+
+    #[test]
+    fn playtest_current_map_uses_nearest_open_tile() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let mut state = read_project_at(&source_root).unwrap();
+        state.maps.get_mut("house").unwrap()["layers"][1]["tiles"] =
+            serde_json::json!([9, 0, 0, 0]);
+        state.maps.get_mut("house").unwrap()["events"] = serde_json::json!([
+            { "id": "guard", "x": 1, "y": 0, "solid": true }
+        ]);
+        let sessions = TempDir::new().unwrap();
+
+        let result = create_playtest_session_at(
+            sessions.path(),
+            &source_root,
+            &state,
+            PlaytestSessionRequest {
+                mode: "currentMap".into(),
+                current_map_id: Some("house".into()),
+                selected_event_map_id: None,
+                selected_event_id: None,
+            },
+        )
+        .unwrap();
+
+        let session_project: ProjectData = read_json(
+            &PathBuf::from(result.session_root.unwrap()).join("data/project.json"),
+        )
+        .unwrap();
+        assert_eq!(
+            (
+                session_project.start_position.x,
+                session_project.start_position.y
+            ),
+            (0, 1)
+        );
+    }
+
+    #[test]
+    fn playtest_selected_solid_event_uses_adjacent_open_tile() {
+        let source = TempDir::new().unwrap();
+        let source_root = source.path().canonicalize().unwrap();
+        make_playtest_project(&source_root);
+        let mut state = read_project_at(&source_root).unwrap();
+        state.maps.get_mut("house").unwrap()["events"][0]["solid"] =
+            serde_json::json!(true);
+        let sessions = TempDir::new().unwrap();
+
+        let result = create_playtest_session_at(
+            sessions.path(),
+            &source_root,
+            &state,
+            PlaytestSessionRequest {
+                mode: "selectedEvent".into(),
+                current_map_id: None,
+                selected_event_map_id: Some("house".into()),
+                selected_event_id: Some("npc_1".into()),
+            },
+        )
+        .unwrap();
+
+        let session_project: ProjectData = read_json(
+            &PathBuf::from(result.session_root.unwrap()).join("data/project.json"),
+        )
+        .unwrap();
+        assert_eq!(
+            (
+                session_project.start_position.x,
+                session_project.start_position.y
+            ),
+            (1, 1)
+        );
+        assert_eq!(session_project.start_position.direction, "up");
     }
 
     #[test]

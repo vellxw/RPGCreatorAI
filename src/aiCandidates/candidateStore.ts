@@ -1,18 +1,28 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import {
   CANDIDATE_REVIEWABLE_STATES,
   CANDIDATE_TERMINAL_STATES,
   type Candidate,
+  type CandidateKind,
   type CandidateProvenance,
+  type CandidateResourceDiff,
   type CandidateReviewEvent,
+  type CandidateReviewState,
   type CandidateStoreError,
   type CandidateStoreState,
   type CandidateValidation,
 } from './candidateTypes';
 import type { ProjectAction } from '../stores/projectStore';
+import { validateCandidateResourceDiff } from './candidateLifecycle';
+import type { CandidateProjectApplyResult } from './candidateProjectCommit';
 
-const STORAGE_KEY = 'rpgcreatorai:phase12:candidate-store:v1';
+const STORAGE_KEY_PREFIX = 'rpgcreatorai:phase12:candidate-store:v2';
 const DEFAULT_MAX_CANDIDATES = 50;
+
+export interface CanonicalCandidateCommit {
+  historyRecordId: string;
+  committedAt: string;
+}
 
 export type CandidateAction =
   | {
@@ -63,6 +73,11 @@ export type CandidateAction =
       candidates: Candidate[];
       events: CandidateReviewEvent[];
       now?: string;
+    }
+  | {
+      type: 'reconcile-commits';
+      commits: CanonicalCandidateCommit[];
+      now?: string;
     };
 
 export const CANDIDATE_STORE_INITIAL: CandidateStoreState = {
@@ -75,6 +90,8 @@ export interface CandidateAcceptResult {
   candidate: Candidate;
   applyActions: ProjectAction[];
 }
+
+export type CandidateCommitter = (candidate: Candidate) => CandidateProjectApplyResult;
 
 export interface CandidateAcceptError {
   candidateId: string;
@@ -142,6 +159,47 @@ function recordTransition(
     reviewedAt: now,
   };
   return pushEvent(updateCandidate(state, candidate.id, () => candidate), event);
+}
+
+const UNCONFIRMED_LOCAL_ACCEPTANCE_WARNING =
+  'A previous local acceptance had no matching commit in the open project and must be reviewed again.';
+
+function reconcileCandidateCommits(
+  candidates: readonly Candidate[],
+  commits: readonly CanonicalCandidateCommit[],
+  now: string,
+): Candidate[] {
+  const byHistoryId = new Map(commits.map(commit => [commit.historyRecordId, commit]));
+  return candidates.map(candidate => {
+    const commit = candidate.historyRecordId
+      ? byHistoryId.get(candidate.historyRecordId)
+      : undefined;
+    if (commit) {
+      if (candidate.reviewState === 'accepted' && candidate.reviewedAt === commit.committedAt) {
+        return candidate;
+      }
+      return {
+        ...candidate,
+        reviewState: 'accepted',
+        reviewedAt: commit.committedAt,
+        updatedAt: now,
+      };
+    }
+    if (candidate.reviewState !== 'accepted') return candidate;
+    return {
+      ...candidate,
+      reviewState: 'review',
+      reviewedAt: undefined,
+      reviewerNote: undefined,
+      updatedAt: now,
+      validation: {
+        ...candidate.validation,
+        warnings: candidate.validation.warnings.includes(UNCONFIRMED_LOCAL_ACCEPTANCE_WARNING)
+          ? candidate.validation.warnings
+          : [...candidate.validation.warnings, UNCONFIRMED_LOCAL_ACCEPTANCE_WARNING],
+      },
+    };
+  });
 }
 
 export function candidateStoreReducer(
@@ -232,6 +290,12 @@ export function candidateStoreReducer(
         events: clipByMax([...action.events], 200),
       };
     }
+    case 'reconcile-commits': {
+      const candidates = reconcileCandidateCommits(state.candidates, action.commits, now);
+      return candidates.every((candidate, index) => candidate === state.candidates[index])
+        ? state
+        : { ...state, candidates };
+    }
   }
 }
 
@@ -283,6 +347,39 @@ export function tryAcceptCandidate(
         candidateId,
         error: 'missing-apply-actions',
         message: `Candidate "${candidate.title}" has no apply actions queued.`,
+      },
+    };
+  }
+  if (!candidate.historyRecordId?.trim()) {
+    return {
+      ok: false,
+      error: {
+        candidateId,
+        error: 'missing-lineage',
+        message: `Candidate "${candidate.title}" has no generation-history lineage id.`,
+      },
+    };
+  }
+  if (!candidate.resourceDiff || candidate.resourceDiff.length === 0) {
+    return {
+      ok: false,
+      error: {
+        candidateId,
+        error: 'missing-diff',
+        message: `Candidate "${candidate.title}" has no project-resource diff to review.`,
+      },
+    };
+  }
+  const diffErrors = validateCandidateResourceDiff(candidate.resourceDiff, {
+    requireIntegrityHashes: false,
+  });
+  if (diffErrors.length > 0) {
+    return {
+      ok: false,
+      error: {
+        candidateId,
+        error: 'invalid-diff',
+        message: `Candidate "${candidate.title}" has an invalid project-resource diff: ${diffErrors[0]}`,
       },
     };
   }
@@ -351,13 +448,19 @@ export function tryRejectCandidate(
 export interface UseCandidateStoreOptions {
   storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | null;
   initial?: CandidateStoreState;
+  projectId?: string | null;
+  canonicalCommits?: readonly CanonicalCandidateCommit[];
 }
 
 export interface CandidateStoreApi {
   state: CandidateStoreState;
   addCandidate: (candidate: Candidate) => void;
   markReview: (candidateId: string) => void;
-  acceptCandidate: (candidateId: string, options?: AcceptCandidateOptions) => CandidateAcceptResult | CandidateAcceptError;
+  acceptCandidate: (
+    candidateId: string,
+    commit: CandidateCommitter,
+    options?: AcceptCandidateOptions,
+  ) => CandidateAcceptResult | CandidateAcceptError;
   rejectCandidate: (candidateId: string, options?: AcceptCandidateOptions) => CandidateAcceptResult | CandidateAcceptError;
   archiveCandidate: (candidateId: string) => void;
   setValidation: (candidateId: string, validation: CandidateValidation) => void;
@@ -365,19 +468,114 @@ export interface CandidateStoreApi {
   clearResolved: () => void;
 }
 
+const CANDIDATE_KINDS = new Set<CandidateKind>([
+  'map-draft',
+  'event-draft',
+  'event-commands',
+  'database-draft-actor',
+  'database-draft-item',
+  'asset-draft',
+  'validation-repair',
+  'balancing',
+  'quest-draft',
+]);
+const CANDIDATE_REVIEW_STATES = new Set<CandidateReviewState>([
+  'draft',
+  'review',
+  'accepted',
+  'rejected',
+  'expired',
+]);
+
+export function candidateStorageKey(projectId: string | null): string {
+  return `${STORAGE_KEY_PREFIX}:${encodeURIComponent(projectId ?? 'no-project')}`;
+}
+
+function textField(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+}
+
+function normalizeStoredCandidate(value: unknown, projectId: string | null): Candidate | null {
+  if (!value || typeof value !== 'object') return null;
+  const candidate = value as Partial<Candidate>;
+  if (
+    typeof candidate.id !== 'string'
+    || typeof candidate.title !== 'string'
+    || !CANDIDATE_KINDS.has(candidate.kind as CandidateKind)
+    || !CANDIDATE_REVIEW_STATES.has(candidate.reviewState as CandidateReviewState)
+    || candidate.projectId !== projectId
+    || !candidate.payload
+    || typeof candidate.payload !== 'object'
+    || !candidate.provenance
+    || typeof candidate.provenance !== 'object'
+  ) {
+    return null;
+  }
+  const createdAt = textField(candidate.createdAt, defaultNow());
+  const validation = candidate.validation && typeof candidate.validation === 'object'
+    ? candidate.validation
+    : { errors: [], warnings: [] };
+  return {
+    ...candidate,
+    id: candidate.id,
+    kind: candidate.kind as CandidateKind,
+    title: candidate.title,
+    payload: {
+      summary: textField(candidate.payload.summary),
+      applyActions: Array.isArray(candidate.payload.applyActions)
+        ? candidate.payload.applyActions
+        : [],
+      output: candidate.payload.output,
+    },
+    provenance: {
+      ...candidate.provenance,
+      providerId: textField(candidate.provenance.providerId, 'unknown'),
+      modelId: textField(candidate.provenance.modelId, 'unknown'),
+      operation: textField(candidate.provenance.operation, 'unknown'),
+      createdAt: textField(candidate.provenance.createdAt, createdAt),
+    },
+    reviewState: candidate.reviewState as CandidateReviewState,
+    validation: {
+      errors: stringArray(validation.errors),
+      warnings: stringArray(validation.warnings),
+    },
+    resourceDiff: Array.isArray(candidate.resourceDiff)
+      ? candidate.resourceDiff.filter((entry): entry is CandidateResourceDiff => Boolean(entry && typeof entry === 'object'))
+      : [],
+    projectId,
+    historyRecordId: typeof candidate.historyRecordId === 'string'
+      ? candidate.historyRecordId
+      : null,
+    createdAt,
+    updatedAt: textField(candidate.updatedAt, createdAt),
+  } as Candidate;
+}
+
 function safeRead(
   storage: Pick<Storage, 'getItem'> | null | undefined,
   key: string,
+  projectId: string | null,
+  canonicalCommits: readonly CanonicalCandidateCommit[],
 ): { candidates: Candidate[]; events: CandidateReviewEvent[] } | null {
   if (!storage) return null;
   try {
     const raw = storage.getItem(key);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { candidates?: Candidate[]; events?: CandidateReviewEvent[] };
+    const parsed = JSON.parse(raw) as { candidates?: unknown[]; events?: CandidateReviewEvent[] };
     if (!parsed || typeof parsed !== 'object') return null;
+    const candidates = (Array.isArray(parsed.candidates) ? parsed.candidates : [])
+      .map(candidate => normalizeStoredCandidate(candidate, projectId))
+      .filter((candidate): candidate is Candidate => candidate !== null);
+    const candidateIds = new Set(candidates.map(candidate => candidate.id));
+    const events = (Array.isArray(parsed.events) ? parsed.events : [])
+      .filter(event => event && typeof event === 'object' && candidateIds.has(event.candidateId));
     return {
-      candidates: Array.isArray(parsed.candidates) ? parsed.candidates : [],
-      events: Array.isArray(parsed.events) ? parsed.events : [],
+      candidates: reconcileCandidateCommits(candidates, canonicalCommits, defaultNow()),
+      events,
     };
   } catch {
     return null;
@@ -402,33 +600,71 @@ function safeWrite(
 
 export function useCandidateStore(options: UseCandidateStoreOptions = {}): CandidateStoreApi {
   const storage = options.storage ?? (typeof window !== 'undefined' ? window.localStorage : null);
+  const projectId = options.projectId ?? null;
+  const storageKey = candidateStorageKey(projectId);
+  const canonicalCommits = [...(options.canonicalCommits ?? [])];
+  const canonicalCommitSignature = canonicalCommits
+    .map(commit => `${commit.historyRecordId}:${commit.committedAt}`)
+    .sort()
+    .join('|');
   const [state, dispatch] = useReducer(
     candidateStoreReducer,
     options.initial ?? CANDIDATE_STORE_INITIAL,
   );
+  const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !storage) return;
-    const restored = safeRead(storage, STORAGE_KEY);
-    if (restored) {
-      dispatch({ type: 'restore', candidates: restored.candidates, events: restored.events });
-    }
-    // intentional one-shot hydration
+    setHydratedStorageKey(null);
+    const restored = safeRead(storage, storageKey, projectId, canonicalCommits);
+    dispatch({
+      type: 'restore',
+      candidates: restored?.candidates ?? [],
+      events: restored?.events ?? [],
+    });
+    setHydratedStorageKey(storageKey);
+    // Canonical changes are reconciled separately so they cannot rehydrate
+    // stale local data over the current in-memory review session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [projectId, storage, storageKey]);
 
   useEffect(() => {
-    safeWrite(storage, STORAGE_KEY, state);
-  }, [state, storage]);
+    dispatch({ type: 'reconcile-commits', commits: canonicalCommits });
+    // canonicalCommitSignature is a stable value dependency for caller arrays.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canonicalCommitSignature]);
+
+  useEffect(() => {
+    if (hydratedStorageKey !== storageKey) return;
+    safeWrite(storage, storageKey, state);
+  }, [hydratedStorageKey, state, storage, storageKey]);
 
   const api: CandidateStoreApi = {
     state,
     addCandidate: candidate => dispatch({ type: 'add', candidate }),
     markReview: candidateId => dispatch({ type: 'mark-review', candidateId }),
-    acceptCandidate: (candidateId, opts) => {
+    acceptCandidate: (candidateId, commit, opts) => {
       const result = tryAcceptCandidate(state, candidateId, opts);
       if (result.ok) {
-        dispatch({ type: 'accept', candidateId, reviewerNote: opts?.reviewerNote, now: result.event.reviewedAt });
+        let commitResult: CandidateProjectApplyResult;
+        try {
+          commitResult = commit(result.candidate);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'The project commit failed.';
+          return { candidateId, error: 'commit-failed', message };
+        }
+        if (!commitResult.ok) {
+          return {
+            candidateId,
+            error: 'commit-failed',
+            message: commitResult.message,
+          };
+        }
+        dispatch({
+          type: 'accept',
+          candidateId,
+          reviewerNote: opts?.reviewerNote,
+          now: commitResult.committedAt,
+        });
         return { candidate: result.candidate, applyActions: result.candidate.payload.applyActions };
       }
       return result.error;

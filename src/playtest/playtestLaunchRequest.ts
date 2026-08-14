@@ -1,5 +1,6 @@
 import type { FullProjectState, PlaytestSessionRequest } from '../adapters/types';
 import type { EditorState } from '../stores/editorStore';
+import type { ProjectStoreState } from '../stores/projectStore';
 import type { EventPage, GameEvent, ValidationMessage } from '../types/project';
 import { playtestModeLabel } from './playtestMode';
 
@@ -14,6 +15,23 @@ export interface PlaytestLaunchPlan {
   };
   request?: PlaytestSessionRequest;
   blocker?: string;
+}
+
+/**
+ * Capture every runtime-facing project shard from the editor store. Keeping
+ * this pure prevents native playtest from silently dropping the asset catalog
+ * while building its temporary project session.
+ */
+export function buildPlaytestProjectState(
+  state: Pick<ProjectStoreState, 'project' | 'maps' | 'items' | 'databases' | 'assets'>,
+): FullProjectState {
+  return {
+    project: state.project,
+    maps: state.maps,
+    items: state.items,
+    databases: state.databases,
+    assets: state.assets,
+  };
 }
 
 function mapLabel(state: FullProjectState, mapId: string): string {
@@ -90,8 +108,8 @@ export function buildPlaytestLaunchPlan(
       modeLabel,
       targetLabel: mapLabel(projectState, mapId),
       spawnDescription: usesAuthoredStart
-        ? `Uses authored project start ${start.x},${start.y},${start.direction}.`
-        : 'Spawns at 0,0,down for map iteration without changing project start data.',
+        ? `Uses authored project start ${start.x},${start.y},${start.direction}, or the nearest open tile if occupied.`
+        : 'Spawns at or near 0,0 on the nearest open tile without changing project start data.',
       warnings: [],
       request: {
         mode: 'currentMap',
@@ -124,7 +142,7 @@ export function buildPlaytestLaunchPlan(
   return {
     modeLabel,
     targetLabel: `${freshEvent.id} on ${mapLabel(projectState, mapId)}`,
-    spawnDescription: `Spawns at selected event ${freshEvent.x},${freshEvent.y},down.`,
+    spawnDescription: `Spawns on an adjacent open tile facing selected event ${freshEvent.x},${freshEvent.y}, with a nearest-open fallback.`,
     warnings: selectedEventWarnings(freshEvent),
     eventDebugContext: { mapId, eventId: freshEvent.id },
     request: {

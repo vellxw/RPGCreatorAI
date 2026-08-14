@@ -10,6 +10,7 @@ import type {
   EventCommand,
   EventPage,
   GameEvent,
+  GenerationHistoryRecord,
   ItemDatabase,
   ItemData,
   MapData,
@@ -61,6 +62,18 @@ export interface ProjectStoreState {
 
 export type ProjectAction =
   | { type: 'LOAD_PROJECT'; payload: FullProjectState }
+  | {
+      /**
+       * Applies a reviewed AI candidate as one reducer transaction. The
+       * nested actions either all apply or the canonical project is left
+       * unchanged, and the accepted generation-history record is written in
+       * the same undo step.
+       */
+      type: 'COMMIT_AI_CANDIDATE';
+      candidateId: string;
+      historyRecord: GenerationHistoryRecord;
+      actions: ProjectAction[];
+    }
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'BEGIN_STROKE' }
@@ -400,6 +413,23 @@ export type AssetCatalogMetadataChanges = Partial<Pick<
   | 'durationMs'
 >>;
 
+export type CandidateProjectCommitErrorCode =
+  | 'empty-transaction'
+  | 'project-busy'
+  | 'invalid-history-record'
+  | 'already-committed'
+  | 'unsafe-action'
+  | 'action-rejected';
+
+export type CandidateProjectCommitResult =
+  | { ok: true; state: ProjectStoreState; appliedActionCount: number }
+  | {
+      ok: false;
+      code: CandidateProjectCommitErrorCode;
+      message: string;
+      actionIndex?: number;
+    };
+
 export interface ProjectSnapshot {
   project: ProjectData;
   maps: Record<string, MapData>;
@@ -685,6 +715,94 @@ function withHistory(state: ProjectStoreState, next: ProjectStoreState): Project
     canUndo: history.length > 0,
     canRedo: false,
   };
+}
+
+const CANDIDATE_COMMIT_CONTROL_ACTIONS = new Set<ProjectAction['type']>([
+  'LOAD_PROJECT',
+  'COMMIT_AI_CANDIDATE',
+  'UNDO',
+  'REDO',
+  'BEGIN_STROKE',
+  'END_STROKE',
+  'MARK_SAVED',
+  'VALIDATE',
+]);
+
+/**
+ * Preflights and reduces an accepted candidate without mutating the source
+ * state. Every nested action must produce a change; otherwise the whole
+ * transaction is rejected. The caller can therefore preview this result and
+ * dispatch the exact same COMMIT_AI_CANDIDATE action knowing it is atomic.
+ */
+export function tryApplyCandidateProjectCommit(
+  state: ProjectStoreState,
+  input: Pick<Extract<ProjectAction, { type: 'COMMIT_AI_CANDIDATE' }>, 'candidateId' | 'historyRecord' | 'actions'>,
+): CandidateProjectCommitResult {
+  if (state.strokeSnapshot) {
+    return {
+      ok: false,
+      code: 'project-busy',
+      message: 'Finish the current map stroke before accepting an AI candidate.',
+    };
+  }
+  if (input.actions.length === 0) {
+    return {
+      ok: false,
+      code: 'empty-transaction',
+      message: 'The candidate has no canonical project actions to commit.',
+    };
+  }
+  if (
+    !input.candidateId.trim()
+    || !input.historyRecord.id.trim()
+    || input.historyRecord.reviewState !== 'accepted'
+    || input.historyRecord.acceptanceHistory.length === 0
+  ) {
+    return {
+      ok: false,
+      code: 'invalid-history-record',
+      message: 'The candidate acceptance record is incomplete.',
+    };
+  }
+  if (state.project.generationHistory?.records.some(record => record.id === input.historyRecord.id)) {
+    return {
+      ok: false,
+      code: 'already-committed',
+      message: `Candidate "${input.candidateId}" is already committed to this project.`,
+    };
+  }
+
+  let next = state;
+  for (let index = 0; index < input.actions.length; index += 1) {
+    const action = input.actions[index];
+    if (CANDIDATE_COMMIT_CONTROL_ACTIONS.has(action.type)) {
+      return {
+        ok: false,
+        code: 'unsafe-action',
+        actionIndex: index,
+        message: `Project control action "${action.type}" is not allowed in an AI candidate commit.`,
+      };
+    }
+    const applied = reduceProjectState(
+      next,
+      action as Exclude<ProjectAction, { type: 'UNDO' } | { type: 'REDO' }>,
+    );
+    if (applied === next) {
+      return {
+        ok: false,
+        code: 'action-rejected',
+        actionIndex: index,
+        message: `Candidate action ${index + 1} (${action.type}) does not apply to the current project.`,
+      };
+    }
+    next = applied;
+  }
+
+  next = withValidation({
+    ...next,
+    project: appendGenerationHistoryRecord(next.project, input.historyRecord),
+  });
+  return { ok: true, state: next, appliedActionCount: input.actions.length };
 }
 
 function restoreSnapshot(
@@ -1092,6 +1210,11 @@ export const initialProjectStoreState: ProjectStoreState = {
 };
 
 export function projectReducer(state: ProjectStoreState, action: ProjectAction): ProjectStoreState {
+  if (action.type === 'COMMIT_AI_CANDIDATE') {
+    const result = tryApplyCandidateProjectCommit(state, action);
+    return result.ok ? withHistory(state, result.state) : state;
+  }
+
   if (action.type === 'UNDO') {
     if (state.history.length === 0) return state;
     const previous = state.history[state.history.length - 1];

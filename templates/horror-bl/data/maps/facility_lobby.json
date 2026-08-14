@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "id": "facility_lobby",
+  "name": "Vestíbulo de Santa Ágata",
+  "displayName": "Vestíbulo de Santa Ágata",
+  "width": 20,
+  "height": 12,
+  "tileSize": 48,
+  "layers": [
+    {
+      "name": "ground",
+      "type": "visual",
+      "role": "ground",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+      ]
+    },
+    {
+      "name": "collision",
+      "type": "collision",
+      "role": "collision",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9
+      ]
+    },
+    {
+      "name": "region",
+      "type": "region",
+      "role": "region",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "arrival_message",
+      "type": "trigger",
+      "x": 1,
+      "y": 1,
+      "solid": false,
+      "trigger": "autorun",
+      "commands": [],
+      "pages": [
+        {
+          "id": "initialize_chapter",
+          "name": "Inicializar capítulo",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "autorun",
+          "commands": [
+            { "type": "controlVariable", "variableId": "bond", "op": "set", "value": 1 },
+            { "type": "controlVariable", "variableId": "lucidity", "op": "set", "value": 70 },
+            { "type": "controlVariable", "variableId": "evidence", "op": "set", "value": 0 },
+            { "type": "showText", "speaker": "Damián Ferreyra", "text": "Si sos vos, decime algo que la clínica no pueda recordar por nosotros." },
+            { "type": "showText", "speaker": "Elian Varela", "text": "La novena promesa no fue quedarnos. Fue volver cuando pudiéramos elegir." },
+            { "type": "showText", "text": "Inspeccioná el mostrador y seguí el cable de emergencia hasta el ascensor." },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "chapter_initialized",
+          "name": "Capítulo inicializado",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "interact",
+          "commands": []
+        }
+      ]
+    },
+    {
+      "id": "rain_streaked_photo",
+      "type": "object",
+      "x": 6,
+      "y": 4,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unseen_photo",
+          "name": "Fotografía sin revisar",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "Una fotografía muestra a ambos antes de la clausura, pero la fecha fue alterada." },
+            {
+              "type": "showChoices",
+              "prompt": "¿Qué hace Damián con la fotografía?",
+              "choices": [
+                {
+                  "label": "Mostrársela a Elian y admitir que todavía la conservaba.",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "bond", "op": "add", "value": 1 },
+                    { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+                    { "type": "controlSwitch", "switchId": "showed_photo", "value": true },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                },
+                {
+                  "label": "Guardarla y concentrarse en encontrar una salida.",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "bond", "op": "add", "value": -1 },
+                    { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": 5 },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "reviewed_photo",
+          "name": "Fotografía revisada",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "Una fotografía muestra a ambos antes de la clausura, pero la fecha fue alterada." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reception_terminal",
+      "type": "object",
+      "x": 12,
+      "y": 4,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unread_recording",
+          "name": "Grabación sin registrar",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "El expediente D-09 fue abierto nueve minutos antes de que Elian ingresara a la clínica." },
+            { "type": "addItem", "itemId": "intake_recording", "amount": 1 },
+            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "recorded_recording",
+          "name": "Grabación registrada",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "El expediente D-09 fue abierto nueve minutos antes de que Elian ingresara a la clínica." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "freight_lift",
+      "type": "transfer",
+      "x": 18,
+      "y": 6,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        { "type": "transferMap", "mapId": "archive_sublevel", "x": 2, "y": 6, "direction": "right" }
+      ]
+    }
+  ]
+}

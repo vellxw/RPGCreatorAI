@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "title": "La Novena Promesa — Capítulo I",
+  "startMapId": "facility_lobby",
+  "startPosition": {
+    "x": 2,
+    "y": 9,
+    "direction": "up"
+  },
+  "maps": [
+    {
+      "id": "facility_lobby",
+      "path": "data/maps/facility_lobby.json",
+      "parentId": null,
+      "order": 0,
+      "expanded": true
+    },
+    {
+      "id": "archive_sublevel",
+      "path": "data/maps/archive_sublevel.json",
+      "parentId": "facility_lobby",
+      "order": 0,
+      "expanded": true
+    },
+    {
+      "id": "service_corridor",
+      "path": "data/maps/service_corridor.json",
+      "parentId": "archive_sublevel",
+      "order": 0,
+      "expanded": true
+    }
+  ],
+  "database": {
+    "items": "data/database/items.json",
+    "switches": "data/database/switches.json",
+    "variables": "data/database/variables.json"
+  },
+  "visualProfile": {
+    "tileSize": 48,
+    "cameraMode": "follow-player"
+  }
+}

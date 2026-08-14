@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RPGCreatorAI</string>
+    <string name="webview_starting_title">Opening the offline workspace</string>
+    <string name="webview_starting_message">RPGCreatorAI is loading its packaged editor. No network connection is required.</string>
+    <string name="webview_unavailable_title">Android WebView is unavailable</string>
+    <string name="webview_unavailable_message">The system WebView provider is missing, disabled, or damaged. Enable or update Android System WebView, then retry.</string>
+    <string name="webview_asset_error_title">The offline workspace could not open</string>
+    <string name="webview_asset_error_message">The packaged editor did not load correctly. Retry once; if this continues, reinstall this build.</string>
+    <string name="webview_timeout_title">The offline workspace took too long</string>
+    <string name="webview_timeout_message">The local start page did not become visible. Retry, or close the app and inspect device logs before distributing this build.</string>
+    <string name="renderer_recovering_title">Recovering the editor</string>
+    <string name="renderer_recovering_message">Android stopped the rendering process. Reopening the packaged workspace (attempt %1$d of %2$d)…</string>
+    <string name="renderer_failed_title">The renderer stopped repeatedly</string>
+    <string name="renderer_failed_message">Automatic recovery was stopped to avoid a crash loop. This screen does not delete previously committed local saves.</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_close">Close</string>
+</resources>

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "assetAllowlist": [
+    "portrait.damian",
+    "portrait.elian",
+    "threat.ninth-witness",
+    "seed.damian.full-body",
+    "background.facility-lobby",
+    "background.archive-sublevel",
+    "background.service-corridor"
+  ],
+  "supplementalAudioAssetAllowlist": [
+    "audio.ambience.facility-lobby",
+    "audio.ambience.archive-sublevel",
+    "audio.ambience.service-corridor",
+    "audio.stinger.ninth-witness",
+    "audio.ui.confirm",
+    "audio.ui.cancel",
+    "audio.footstep.concrete",
+    "audio.ending.memory-release"
+  ],
+  "supplementalAudioPolicy": {
+    "technicalOnly": true,
+    "humanAcceptance": "accepted",
+    "includedInVisualApprovalGate": false,
+    "evidence": "release-input/editor-acceptance-evidence.v1.json",
+    "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+    "reviewer": "Codex (delegado explícitamente por el creador)",
+    "reviewedAt": "2026-08-14T12:02:55.844Z"
+  },
+  "supplementalAnimationAssetAllowlist": [
+    "sprite.damian.idle.down",
+    "sprite.damian.idle.left",
+    "sprite.damian.idle.right",
+    "sprite.damian.idle.up",
+    "sprite.damian.walk.down",
+    "sprite.damian.walk.left",
+    "sprite.damian.walk.right",
+    "sprite.damian.walk.up",
+    "sprite.damian.interact.down",
+    "sprite.damian.interact.left",
+    "sprite.damian.interact.right",
+    "sprite.damian.interact.up"
+  ],
+  "supplementalAnimationPolicy": {
+    "technicalOnly": true,
+    "humanAcceptance": "accepted",
+    "includedInVisualApprovalGate": false,
+    "package": "data/assets/animation-packages/damian.animation-package.v1.json",
+    "evidence": "release-input/editor-acceptance-evidence.v1.json",
+    "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+    "reviewer": "Codex (delegado explícitamente por el creador)",
+    "reviewedAt": "2026-08-14T12:02:55.844Z"
+  }
+}

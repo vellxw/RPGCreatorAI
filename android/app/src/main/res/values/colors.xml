@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rpg_background">#F5F5F7</color>
+    <color name="rpg_surface">#FFFFFF</color>
+    <color name="rpg_text">#111827</color>
+    <color name="rpg_muted">#4B5563</color>
+    <color name="rpg_accent">#2A6F66</color>
+    <color name="rpg_status_bar">#F5F5F7</color>
+</resources>

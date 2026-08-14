@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "id": "actor.damian.animation.generation-session.v2",
+  "provider": "OpenAI",
+  "model": "GPT Image via built-in imagegen",
+  "generatedAt": "2026-08-14T04:28:00-03:00",
+  "seedAsset": {
+    "assetId": "seed.damian.full-body",
+    "path": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+    "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3"
+  },
+  "styleSource": "GAME_STYLE.md",
+  "promptPolicy": {
+    "layout": "one direction per generated sheet; idle/walk in a 2x4 grid and interact in a 1x4 strip",
+    "identity": "preserve approved Damián seed identity, outfit, palette, anatomy, and proportions",
+    "background": "uniform #00FF00 chroma key; no shadows, scenery, labels, props, or text",
+    "anatomy": "head, both arms, both hands, both legs, and both feet fully visible in every frame"
+  },
+  "sources": [
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-down-v2-alpha.png",
+      "sha256": "653fc87b11557c481cb8b284feabf1c38fc4f39e734401cc3e4c3c6f43f64710",
+      "width": 1448,
+      "height": 1086,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-down-v2-chroma.png",
+        "sha256": "aeb01240c9ece73d7eec54fd65247667ad9bfd725075bece3b4648963c86d803",
+        "width": 1448,
+        "height": 1086,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-down-v2-alpha.png",
+        "sha256": "653fc87b11557c481cb8b284feabf1c38fc4f39e734401cc3e4c3c6f43f64710",
+        "width": 1448,
+        "height": 1086,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1448,
+        "height": 1086,
+        "rows": 2,
+        "rowHeight": 543,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-left-v2-alpha.png",
+      "sha256": "ea26ae3965fec6fdf2b2d09be83e8d777ce3aa233421074fad52dd153be1f889",
+      "width": 1448,
+      "height": 1086,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-left-v2-chroma.png",
+        "sha256": "22c0a7e2dbacd45bdafcd488acbfc6a07e05f68d9165a1ffb3b13d46b76dd39d",
+        "width": 1448,
+        "height": 1086,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-left-v2-alpha.png",
+        "sha256": "ea26ae3965fec6fdf2b2d09be83e8d777ce3aa233421074fad52dd153be1f889",
+        "width": 1448,
+        "height": 1086,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1448,
+        "height": 1086,
+        "rows": 2,
+        "rowHeight": 543,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-right-v2-alpha.png",
+      "sha256": "d1c1baa22b5a709e20697807b058fa600c99c0f5ecbf0660755b7dadd81a65a2",
+      "width": 1448,
+      "height": 1086,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-right-v2-chroma.png",
+        "sha256": "7fdb1c89c6bbfc921a3646c6dd45970546c2b7d543a7514eedfd9b74f239c48f",
+        "width": 1448,
+        "height": 1086,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-right-v2-alpha.png",
+        "sha256": "d1c1baa22b5a709e20697807b058fa600c99c0f5ecbf0660755b7dadd81a65a2",
+        "width": 1448,
+        "height": 1086,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1448,
+        "height": 1086,
+        "rows": 2,
+        "rowHeight": 543,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-up-v2-alpha.png",
+      "sha256": "0b76acad7193b6a7831fd44f25f7f28a11a3ab8ebb0617ed66cd426f2aff54b8",
+      "width": 1448,
+      "height": 1086,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-up-v2-chroma.png",
+        "sha256": "7c131d01885c1f2a11deba22deb1325a19f1721e3d35119f7f692e66ecda7f44",
+        "width": 1448,
+        "height": 1086,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-idle-walk-up-v2-alpha.png",
+        "sha256": "0b76acad7193b6a7831fd44f25f7f28a11a3ab8ebb0617ed66cd426f2aff54b8",
+        "width": 1448,
+        "height": 1086,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1448,
+        "height": 1086,
+        "rows": 2,
+        "rowHeight": 543,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-interact-down-v2-alpha.png",
+      "sha256": "16ab4a017b67438f0826c07298f6b245580d1a9ff4e2e598b6f221545fe1fce2",
+      "width": 1672,
+      "height": 941,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-down-v2-chroma.png",
+        "sha256": "9582c0efdb4cbb358c3e0b9caf304e8e8b77125d961bffefbfbd9986230963a2",
+        "width": 1672,
+        "height": 941,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-down-v2-alpha.png",
+        "sha256": "16ab4a017b67438f0826c07298f6b245580d1a9ff4e2e598b6f221545fe1fce2",
+        "width": 1672,
+        "height": 941,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1672,
+        "height": 941,
+        "rows": 1,
+        "rowHeight": 941,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-interact-left-v2-alpha.png",
+      "sha256": "a683d15aedc8e66e52f8d8e0f3f1ea7f621a637ceeaa2119789804f26c2c291f",
+      "width": 1448,
+      "height": 1086,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-left-v2-chroma.png",
+        "sha256": "ec13e2f953276e283866994ff7342afc6e4bd62edc6d9cf98638d684f41a5449",
+        "width": 1448,
+        "height": 1086,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-left-v2-alpha.png",
+        "sha256": "a683d15aedc8e66e52f8d8e0f3f1ea7f621a637ceeaa2119789804f26c2c291f",
+        "width": 1448,
+        "height": 1086,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1448,
+        "height": 1086,
+        "rows": 1,
+        "rowHeight": 1086,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-interact-right-v2-alpha.png",
+      "sha256": "e9d93343cd8a1e6c4fb5f78dde45a345e10118b06d8913a07f3cd4b17e734611",
+      "width": 1983,
+      "height": 793,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-right-v2-chroma.png",
+        "sha256": "be85f713b1f5fc9ee449d457bc088a23c7c51908e1951defe1c108fb9918d0cb",
+        "width": 1983,
+        "height": 793,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-right-v2-alpha.png",
+        "sha256": "e9d93343cd8a1e6c4fb5f78dde45a345e10118b06d8913a07f3cd4b17e734611",
+        "width": 1983,
+        "height": 793,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1983,
+        "height": 793,
+        "rows": 1,
+        "rowHeight": 793,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    },
+    {
+      "path": "assets/source/generated/animation/damian-v2/damian-interact-up-v2-alpha.png",
+      "sha256": "4ec01cba91a513f53053d492e6bc2e644227f736411e9530a283daf61944a8b2",
+      "width": 1526,
+      "height": 1031,
+      "providerOutput": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-up-v2-chroma.png",
+        "sha256": "92acf2890bbfa42d6a90fcf8c9721c2b98291a17cc825760b5ac9731ee2fa46d",
+        "width": 1526,
+        "height": 1031,
+        "background": "generated flat chroma key"
+      },
+      "normalizedAlpha": {
+        "path": "assets/source/generated/animation/damian-v2/damian-interact-up-v2-alpha.png",
+        "sha256": "4ec01cba91a513f53053d492e6bc2e644227f736411e9530a283daf61944a8b2",
+        "width": 1526,
+        "height": 1031,
+        "pipeline": "imagegen/remove_chroma_key.py"
+      },
+      "normalizedGridCrop": {
+        "width": 1526,
+        "height": 1031,
+        "rows": 1,
+        "rowHeight": 1031,
+        "horizontalSegmentation": "four separated alpha-subject spans"
+      }
+    }
+  ],
+  "normalization": {
+    "pipeline": "rpgcreatorai-damian-animation-v2",
+    "frameSize": {
+      "width": 256,
+      "height": 384
+    },
+    "frameCountPerClip": 4,
+    "sharedScale": 0.397838,
+    "anchor": {
+      "x": 128,
+      "y": 376
+    },
+    "resampling": "lanczos",
+    "alphaThreshold": 8
+  },
+  "technicalReview": {
+    "state": "generated-verified",
+    "coverage": [
+      "idle.down",
+      "idle.left",
+      "idle.right",
+      "idle.up",
+      "walk.down",
+      "walk.left",
+      "walk.right",
+      "walk.up",
+      "interact.down",
+      "interact.left",
+      "interact.right",
+      "interact.up"
+    ],
+    "checks": [
+      "exact four-frame horizontal strips",
+      "transparent corners and non-empty alpha",
+      "shared scale and bottom-center anchor",
+      "full-body anatomy visible in all 48 frames",
+      "consistent direction within every clip"
+    ],
+    "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+  },
+  "humanAcceptance": {
+    "state": "accepted",
+    "evidence": "release-input/editor-acceptance-evidence.v1.json",
+    "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+    "reviewer": "Codex (delegado explícitamente por el creador)",
+    "reviewedAt": "2026-08-14T12:02:55.844Z"
+  },
+  "license": "project-owned generated asset; provenance retained separately from MIT code"
+}

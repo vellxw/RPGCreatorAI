@@ -33,8 +33,19 @@ import { useRouteCreatorRequest } from '../../commandRouter/useRouteCreatorReque
 import type { CommandRouterInput } from '../../commandRouter/router';
 import type { CommandRouterIntent } from '../../commandRouter/intentContract';
 import { AICandidateReviewPanel } from './AICandidateReviewPanel';
-import { useCandidateStore, makeCandidateId } from '../../aiCandidates/candidateStore';
+import {
+  useCandidateStore,
+  makeCandidateId,
+  type CanonicalCandidateCommit,
+} from '../../aiCandidates/candidateStore';
 import type { Candidate, CandidateKind } from '../../aiCandidates/candidateTypes';
+import {
+  candidateResourceDiffForActions,
+  type CandidateProjectApplyResult,
+} from '../../aiCandidates/candidateProjectCommit';
+import { AIStudioProviderGenerationPanel } from './AIStudioProviderGenerationPanel';
+import { useAiStudioGenerationController } from './useAiStudioGenerationController';
+import type { AiStudioGenerationGateway } from '../../providers/aiStudio';
 
 export interface AIStudioScreenProps {
   providers: readonly ProviderConfig[];
@@ -48,7 +59,9 @@ export interface AIStudioScreenProps {
   database?: ProjectContext['database'];
   onOpenSettings?: () => void;
   onSelectProvider?: (providerId: string) => void;
-  onApplyCandidate?: (candidate: Candidate) => void;
+  onApplyCandidate: (candidate: Candidate) => CandidateProjectApplyResult;
+  canonicalCommits?: readonly CanonicalCandidateCommit[];
+  generationGateway?: AiStudioGenerationGateway;
 }
 
 const MOCK_DRAFT_TOKENS = [
@@ -76,7 +89,9 @@ export function AIStudioScreen({
   database,
   onOpenSettings = () => undefined,
   onSelectProvider = () => undefined,
-  onApplyCandidate = () => undefined,
+  onApplyCandidate,
+  canonicalCommits = [],
+  generationGateway,
 }: AIStudioScreenProps): ReactNode {
   const [activePane, setActivePane] = useState<AIStudioDockPane>('chat');
   const [lastStarterTask, setLastStarterTask] = useState<string | null>(null);
@@ -84,7 +99,7 @@ export function AIStudioScreen({
   const [activity, setActivity] = useState<AIStudioActivityEntry[]>([]);
   const [draftMessage, setDraftMessage] = useState('');
   const router = useRouteCreatorRequest();
-  const candidateStore = useCandidateStore();
+  const candidateStore = useCandidateStore({ projectId, canonicalCommits });
   const tokenIndexRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -234,12 +249,11 @@ export function AIStudioScreen({
   };
 
   const handleAcceptCandidate = (candidateId: string) => {
-    const result = candidateStore.acceptCandidate(candidateId);
+    const result = candidateStore.acceptCandidate(candidateId, onApplyCandidate);
     if ('error' in result) {
       recordActivity('reject', `Cannot accept: ${result.message}`);
       return;
     }
-    onApplyCandidate(result.candidate);
     recordActivity('apply', `Accepted candidate "${result.candidate.title}".`);
   };
 
@@ -289,8 +303,9 @@ export function AIStudioScreen({
       },
       reviewState: 'review',
       validation: applyActions.length > 0 ? { errors: [], warnings: [] } : { errors: ['No project map selected.'], warnings: [] },
+      resourceDiff: candidateResourceDiffForActions(applyActions),
       projectId,
-      historyRecordId: null,
+      historyRecordId: `ai-studio:${id}`,
       createdAt: now,
       updatedAt: now,
     });
@@ -308,6 +323,16 @@ export function AIStudioScreen({
       ...current,
     ].slice(0, 25));
   };
+
+  const generation = useAiStudioGenerationController({
+    projectId,
+    selectedMap: projectContext?.selectedMap ?? null,
+    queue: queueStore,
+    candidates: candidateStore,
+    gateway: generationGateway,
+    onActivity: message => recordActivity('route', message),
+    onCandidateReady: () => setActivePane('candidates'),
+  });
 
   useEffect(() => {
     if (request.phase !== 'streaming') return undefined;
@@ -341,6 +366,17 @@ export function AIStudioScreen({
         view={view}
         onOpenSettings={onOpenSettings}
         onSelectProvider={onSelectProvider}
+      />
+      <AIStudioProviderGenerationPanel
+        disabled={!hasProject}
+        isGenerating={generation.isGenerating}
+        outcome={generation.outcome}
+        selectedMapName={projectContext?.selectedMap?.name}
+        onGenerate={(kind, prompt) => {
+          const jobId = generation.generate(kind, prompt);
+          if (jobId) setActivePane('queue');
+          return jobId;
+        }}
       />
       <div className="flex-1 overflow-auto" data-testid="ai-studio-chat-pane">
         {showTranscript ? (
@@ -421,8 +457,8 @@ export function AIStudioScreen({
       <div className="flex-1 overflow-auto">
         <AIRequestQueuePanel
           queue={queueSnapshot}
-          onCancel={queueStore.cancel}
-          onRetry={queueStore.retry}
+          onCancel={generation.cancel}
+          onRetry={generation.retry}
         />
       </div>
     </div>
@@ -443,8 +479,8 @@ export function AIStudioScreen({
   const candidatesPane = (
     <div data-testid="ai-studio-candidates-pane" className="flex h-full w-full flex-col gap-2">
       <p className="text-[12px] text-gray-600">
-        Draft candidates are reviewable here. Accepting a candidate only writes to the project
-        if the host integration opts in; rejecting never mutates the project.
+        Draft candidates are reviewable here. Accept commits the displayed changes to the open
+        project as one undoable transaction; rejecting never mutates the project.
       </p>
       <div className="flex flex-wrap gap-2">
         <button

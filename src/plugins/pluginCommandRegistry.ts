@@ -22,6 +22,28 @@ export interface PluginCommandDefinition {
 
 export const PLUGIN_COMMAND_REGISTRY: PluginCommandDefinition[] = [
   {
+    pluginId: 'vn',
+    command: 'start',
+    label: 'VN: Start Scene',
+    description: 'Starts a validated visual-novel scene at its entry or an optional authored node.',
+    args: [
+      {
+        key: 'sceneId',
+        label: 'Scene ID',
+        kind: 'string',
+        required: true,
+        defaultValue: '',
+      },
+      {
+        key: 'nodeId',
+        label: 'Start Node ID (optional)',
+        kind: 'string',
+        required: false,
+        defaultValue: '',
+      },
+    ],
+  },
+  {
     pluginId: 'debug',
     command: 'log',
     label: 'Debug Log',
@@ -109,7 +131,11 @@ export function createPluginCommand(definition: PluginCommandDefinition): Plugin
 }
 
 export function defaultPluginCommand(): PluginCommand {
-  return createPluginCommand(PLUGIN_COMMAND_REGISTRY[0]);
+  return createPluginCommand(
+    PLUGIN_COMMAND_REGISTRY.find(definition =>
+      definition.pluginId === 'debug' && definition.command === 'log')
+      ?? PLUGIN_COMMAND_REGISTRY[0],
+  );
 }
 
 export function pluginCommandOptions(): Array<{ value: string; label: string }> {

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="color-scheme" content="dark" />
+    <title>RPGCreatorAI Player</title>
+  </head>
+  <body>
+    <main class="runtime-shell">
+      <div class="runtime-stage" data-rpg-runtime></div>
+      <p class="runtime-status" role="status" aria-live="assertive" data-rpg-status>Loading local GameBundle…</p>
+      <section class="touch-layer" aria-label="Game controls">
+        <div class="dpad" aria-label="Movement controls">
+          <button class="up" data-android-control="dpad-up" aria-label="Move up">▲</button>
+          <button class="left" data-android-control="dpad-left" aria-label="Move left">◀</button>
+          <button class="right" data-android-control="dpad-right" aria-label="Move right">▶</button>
+          <button class="down" data-android-control="dpad-down" aria-label="Move down">▼</button>
+        </div>
+        <div class="actions">
+          <button data-android-control="menu" aria-label="Open menu">Menu</button>
+          <button data-android-control="secondary" aria-label="Cancel">B</button>
+          <button class="primary" data-android-control="primary" aria-label="Interact">A</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

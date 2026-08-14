@@ -1,0 +1,24 @@
+:root { color: #f7f2e7; background: #090b10; font-family: system-ui, sans-serif; touch-action: none; }
+* { box-sizing: border-box; }
+html, body, .runtime-shell { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+.runtime-shell { position: relative; background: #090b10; }
+.runtime-stage { width: 100%; height: 100%; }
+.runtime-status { position: absolute; inset: 50% auto auto 50%; margin: 0; padding: .8rem 1rem; transform: translate(-50%, -50%); background: #100d12ee; text-align: center; }
+.touch-layer { position: absolute; inset: auto 0 0; display: flex; align-items: end; justify-content: space-between; padding: 1rem max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); pointer-events: none; }
+.touch-layer button { width: 3.4rem; height: 3.4rem; border: 1px solid #ffffff61; border-radius: 50%; color: inherit; background: #12131bb8; font-weight: 700; pointer-events: auto; touch-action: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.touch-layer button:active, .touch-layer .primary { background: #702735d9; }
+.dpad { display: grid; grid-template: repeat(3, 3.4rem) / repeat(3, 3.4rem); gap: .25rem; }
+.dpad .up { grid-area: 1 / 2; } .dpad .left { grid-area: 2 / 1; } .dpad .right { grid-area: 2 / 3; } .dpad .down { grid-area: 3 / 2; }
+.actions { display: flex; align-items: end; gap: .65rem; }
+.actions .primary { width: 4.3rem; height: 4.3rem; }
+@media (orientation: landscape) and (max-height: 700px) {
+  /* Keep the DOM VN panel between the d-pad and A/B controls. */
+  .runtime-stage [data-rpg-creator-dialogue] {
+    left: clamp(185px, 23vw, 310px) !important;
+    right: clamp(185px, 23vw, 310px) !important;
+    bottom: max(.5rem, env(safe-area-inset-bottom)) !important;
+    min-height: clamp(86px, 30vh, 142px) !important;
+    padding: clamp(10px, 1.8vw, 18px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

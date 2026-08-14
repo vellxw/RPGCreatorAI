@@ -261,8 +261,13 @@ bool isValidTrigger(const std::string& value) {
 }
 
 bool isValidPriority(const std::string& value) {
-    return value == "below" || value == "same" ||
-           value == "sameAsCharacters" || value == "above";
+    // The editor's canonical EventPriority union uses the explicit
+    // *Characters names; the legacy native runtime also accepts the short
+    // aliases. Keep both spellings valid so materialized projects produced
+    // by the editor can launch in the portable runtime.
+    return value == "below" || value == "belowCharacters" ||
+           value == "same" || value == "sameAsCharacters" ||
+           value == "above" || value == "aboveCharacters";
 }
 
 bool isValidSelfSwitch(const std::string& value) {

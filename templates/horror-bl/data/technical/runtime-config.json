@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tickRateHz": 60,
+  "maxFrameDeltaMs": 250,
+  "renderer": { "preferred": "auto", "fallback": "canvas" },
+  "save": { "schemaVersion": 2, "maxSlots": 3, "autosaveEnabled": true },
+  "plugins": { "enabled": false, "permissions": "deny-by-default" },
+  "network": { "allowed": false }
+}

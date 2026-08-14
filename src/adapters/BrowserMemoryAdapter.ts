@@ -125,11 +125,20 @@ function extractSystem(json: Record<string, unknown>): SystemData {
           ) as Array<[string, string]>,
         )
       : undefined;
+  const audioAssetIds =
+    json.audioAssetIds && typeof json.audioAssetIds === 'object'
+      ? Object.fromEntries(
+          Object.entries(json.audioAssetIds as Record<string, unknown>).filter(
+            ([, value]) => typeof value === 'string',
+          ) as Array<[string, string]>,
+        )
+      : undefined;
   return {
     startingParty: Array.isArray(json.startingParty) ? (json.startingParty as string[]) : [],
     startingGold: typeof json.startingGold === 'number' ? (json.startingGold as number) : 0,
     defaultBgm: typeof json.defaultBgm === 'string' ? (json.defaultBgm as string) : undefined,
     audio,
+    audioAssetIds,
     windowTint: typeof json.windowTint === 'string' ? (json.windowTint as string) : undefined,
     battleBackground:
       typeof json.battleBackground === 'string' ? (json.battleBackground as string) : undefined,

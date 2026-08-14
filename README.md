@@ -259,6 +259,9 @@ scripts\dev\package-windows.bat
 
 The current release artifact and future installer policy is documented in
 [Phase 11 Release Artifact Policy](docs/PHASE_11_RELEASE_ARTIFACT_POLICY.md).
+The factual Windows/Android handoff for the La Novena Promesa slice, including
+GPT Image provenance and the rule against claiming unexecuted builds, is in
+[Horror/BL Release Handoff](docs/HORROR_BL_RELEASE_HANDOFF.md).
 First-run directories and cleanup policy are documented in
 [First-Run App Data Policy](docs/FIRST_RUN_APP_DATA_POLICY.md). Runtime
 diagnostic folders, log caps, and failed-launch troubleshooting are documented
@@ -276,6 +279,26 @@ in [Diagnostics And Logs](docs/DIAGNOSTICS.md).
 8. Inspect Runtime Log, Event Trace, and Runtime State in the Playtest screen. Browser mode shows honest unavailable states for native-only surfaces.
    The Runtime Log tab displays the local diagnostics folder even before the
    first native log exists.
+
+### Browser Runtime Visual-Novel Contract
+
+`GameBundleV1.dialogue` can carry renderer-neutral `VisualNovelContentV1`.
+`ExplorationSimulation.beginVisualNovelScene(sceneId, nodeId?)` starts an authored scene
+explicitly; the runtime does not auto-start the first scene because exploration
+events, puzzles, and chase gates must remain authoritative. While a scene is
+active, Enter/interact advances or confirms, arrow/WASD movement selects a
+choice, and Escape/cancel closes the scene and restores exploration input.
+
+Dialogue lines, filtered choices, numeric variables, boolean flags/switches,
+approved portrait assets, and ending presentation are reflected in the Phaser
+DOM overlay and React playtest overlay. A compiler/materializer that wants this
+path must inject the validated VN payload into `bundle.dialogue` and call
+`beginVisualNovelScene` directly or author the `vn.start` plugin command with a
+scene ID and optional node ID. `PortableSaveV2.visualNovel` is an optional,
+independently versioned resume document, so older V2 saves remain valid while
+active dialogue/choice/ending state can resume. Audio and transition cues are
+one-shot renderer work: Phaser consumes only packaged manifest keys and falls
+back to silence/no effect when a local asset or capability is unavailable.
 
 ## Optional AI Editor Tooling
 

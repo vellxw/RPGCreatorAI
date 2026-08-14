@@ -40,9 +40,9 @@ function Wait-HttpReady {
         if (Test-HttpReady) {
             return $true
         }
-        if ($devProcess -and $devProcess.HasExited) {
-            return $false
-        }
+        # npm.cmd may hand off to Vite and exit while the child server is
+        # still starting. Keep polling the HTTP endpoint instead of treating
+        # the wrapper process exit as a failed launch.
         Start-Sleep -Milliseconds 500
     }
     return $false
@@ -86,7 +86,8 @@ function Stop-HarnessProcessTree {
 function Invoke-PwCli {
     param([string[]]$Arguments)
     $commandLabel = "playwright-cli $($Arguments -join ' ')"
-    $output = & $script:npxPath '--yes' '--package' '@playwright/cli' 'playwright-cli' "-s=$script:session" @Arguments 2>&1
+    $sessionArgument = '-s=' + [string]$script:session
+    $output = & $script:npxPath '--yes' '--package' '@playwright/cli' 'playwright-cli' $sessionArgument @Arguments 2>&1
     $exitCode = $LASTEXITCODE
     $text = ($output | Out-String).TrimEnd()
     Add-TranscriptBlock -Label $commandLabel -Body $text
@@ -140,7 +141,8 @@ Set-Content -LiteralPath $transcriptPath -Value @(
     "Session: $session"
 ) -Encoding utf8
 
-$npx = Get-Command npx -ErrorAction SilentlyContinue
+$npx = Get-Command npx.cmd -ErrorAction SilentlyContinue
+if (-not $npx) { $npx = Get-Command npx -ErrorAction SilentlyContinue }
 if (-not $npx) {
     Write-HarnessSkip 'npx was not found; install Node.js/npm or run in an environment with npx available.'
 }
@@ -149,16 +151,17 @@ $script:session = $session
 
 try {
     if (-not (Test-HttpReady)) {
-        $npm = Get-Command npm -ErrorAction SilentlyContinue
-        if (-not $npm) {
-            Write-HarnessSkip 'npm was not found and the editor dev server is not already running.'
+        $node = Get-Command node.exe -ErrorAction SilentlyContinue
+        $viteCli = Join-Path $repoRoot 'node_modules\vite\bin\vite.js'
+        if (-not $node -or -not (Test-Path -LiteralPath $viteCli)) {
+            Write-HarnessSkip 'Node.js/Vite was not found and the editor dev server is not already running.'
         }
 
         $devOut = Join-Path $artifactRoot 'vite-dev.stdout.txt'
         $devErr = Join-Path $artifactRoot 'vite-dev.stderr.txt'
         $devProcess = Start-Process `
-            -FilePath $npm.Source `
-            -ArgumentList @('run', 'dev', '--', '--host=127.0.0.1', '--port=3000') `
+            -FilePath $node.Source `
+            -ArgumentList @($viteCli, '--host=127.0.0.1', '--port=3000') `
             -WorkingDirectory $repoRoot `
             -RedirectStandardOutput $devOut `
             -RedirectStandardError $devErr `
@@ -185,15 +188,17 @@ try {
 
     $startupSnapshot = Invoke-PwCli -Arguments @('snapshot')
     Assert-SmokeText -Text $startupSnapshot -Expected @(
-        'Start a project',
-        'Browser mode cannot open folders',
-        'Import Project Bundle',
-        'Create Browser Project',
-        'Use My First RPG'
+        'Welcome to RPGCreatorAI',
+        'Pick a starter path',
+        'Open the bundled sample (My First RPG)',
+        'Use this starter path'
     )
     Set-Content -LiteralPath (Join-Path $artifactRoot '01-startup.snapshot.txt') -Value $startupSnapshot -Encoding utf8
     Save-HarnessScreenshot -Name '01-startup.png'
 
+    Invoke-PwCli -Arguments @('click', "input[data-testid='first-run-path-radio-bundled-sample']") | Out-Null
+    Invoke-PwCli -Arguments @('click', "button[data-testid='first-run-confirm']") | Out-Null
+    Start-Sleep -Milliseconds 500
     Invoke-PwCli -Arguments @('click', "button:has-text('Use My First RPG')") | Out-Null
     Start-Sleep -Milliseconds 500
 
@@ -208,14 +213,14 @@ try {
     Assert-SmokeText -Text $validateSnapshot -Expected @('Validation passed')
     Set-Content -LiteralPath (Join-Path $artifactRoot '03-validate.snapshot.txt') -Value $validateSnapshot -Encoding utf8
 
-    Invoke-PwCli -Arguments @('click', "button:has-text('Save')") | Out-Null
+    Invoke-PwCli -Arguments @('click', "button[title='Validate and save project data']") | Out-Null
     Start-Sleep -Milliseconds 250
     $saveSnapshot = Invoke-PwCli -Arguments @('snapshot')
     Assert-SmokeText -Text $saveSnapshot -Expected @('Saved via BrowserMemoryAdapter')
     Set-Content -LiteralPath (Join-Path $artifactRoot '04-save.snapshot.txt') -Value $saveSnapshot -Encoding utf8
 
     foreach ($workspace in @('Events', 'Database', 'Assets', 'Playtest', 'Settings')) {
-        Invoke-PwCli -Arguments @('click', "button:has-text('$workspace')") | Out-Null
+        Invoke-PwCli -Arguments @('click', "nav button:has-text('$workspace')") | Out-Null
         Start-Sleep -Milliseconds 300
         $snapshot = Invoke-PwCli -Arguments @('snapshot')
         Assert-SmokeText -Text $snapshot -Expected @($workspace)

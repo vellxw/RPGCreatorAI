@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.chapter-1",
+  "genre": ["psychological-horror", "body-horror", "adult-bl-romance"],
+  "durationMinutes": { "min": 15, "max": 30 },
+  "maps": ["facility_lobby", "archive_sublevel", "service_corridor"],
+  "characters": ["damian", "elian"],
+  "variables": {
+    "bond": { "min": 0, "max": 4, "initial": 0 },
+    "lucidity": { "min": 0, "max": 100, "initial": 70 },
+    "evidence": { "min": 0, "max": 4, "initial": 0 }
+  },
+  "flags": ["archive_open", "heard_the_ninth", "promised_truth", "chase_survived"],
+  "choices": 4,
+  "puzzles": ["archive_power_sequence"],
+  "chases": ["service_corridor_escape"],
+  "endings": ["the_kept_promise", "the_ninth_witness"],
+  "checkpointBeforeFinalChoice": true
+}

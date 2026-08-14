@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "horror-bl.chapter-1.imagegen.g2.2026-08-14",
+  "templateId": "horror-bl",
+  "chapterId": "la-novena-promesa.chapter-1.vertical-slice",
+  "execution": {
+    "mode": "built-in",
+    "tool": "image_gen.imagegen",
+    "provider": "OpenAI built-in image generation",
+    "model": null,
+    "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+    "generatedInThisSession": true
+  },
+  "rightsAndReview": {
+    "originalPromptedWork": true,
+    "realPersonReferenceUsed": false,
+    "thirdPartyVisualReferenceUsed": false,
+    "referenceBasis": "Only fictional, project-generated assets from the same retained pipeline were used as identity or style references.",
+    "licenseStatus": "reviewed-for-project-packaging",
+    "commercialUseStatus": "subject-to-applicable-openai-terms-and-law",
+    "redistributionStatus": "conditional",
+    "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+    "decidedAt": "2026-08-14T06:14:21.0909207Z",
+    "note": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law."
+  },
+  "assets": [
+    {
+      "assetId": "seed.damian.full-body",
+      "kind": "character-seed",
+      "reviewState": "frozen",
+      "pipelineState": "frozen",
+      "releaseEligible": true,
+      "sourceMasterPath": "assets/source/generated/character-damian-fullbody-seed-v1-chroma.png",
+      "runtimeCandidatePath": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+      "builtInArtifactName": "exec-e5999aad-8c5c-4eb6-99c0-4dd78f471b2d.png",
+      "generatedAt": "2026-08-14T06:00:09.3692860Z",
+      "mediaType": "image/png",
+      "width": 1024,
+      "height": 1536,
+      "hasAlpha": true,
+      "sizeBytes": 922124,
+      "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3",
+      "sourceMaster": {
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": false,
+        "sizeBytes": 1686812,
+        "sha256": "64bfc54e60cf5ec51e09df94e1e3b15fec5c52f3d416c8e61a15a7d357bd0fb9"
+      },
+      "normalization": {
+        "operation": "remove-chroma-key",
+        "tool": "imagegen/scripts/remove_chroma_key.py",
+        "runtime": "shared Codex primary Python runtime with Pillow 12.3.0",
+        "keyColor": "#03f807",
+        "autoKey": "border",
+        "softMatte": true,
+        "transparentThreshold": 12,
+        "opaqueThreshold": 220,
+        "despill": true,
+        "transparentPixels": 1159345,
+        "partiallyTransparentPixels": 6950,
+        "alphaExtrema": [0, 255],
+        "alphaBoundingBox": [262, 41, 754, 1457],
+        "transparentCorners": [0, 0, 0, 0]
+      },
+      "referenceImages": [
+        {
+          "assetId": "portrait.damian",
+          "role": "fictional identity and costume reference",
+          "path": "assets/generated/runtime/portraits/damian.png",
+          "sha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304"
+        }
+      ],
+      "prompt": "Use case: identity-preserve\nAsset type: canonical full-body character seed for a 2D top-down horror RPG animation pipeline\nInput images: Image 1 is the approved identity and costume reference for Damián Ferreyra; preserve his recognizable adult face, short tousled black hair, dark brown eyes, beard stubble, skin tone, off-white archivist shirt, and charcoal undershirt.\nPrimary request: Create one original full-body standing seed of the same Damián Ferreyra, clearly a 35-year-old Argentine adult night archivist, ready to be used as the master reference for later idle, walk, and interact sprites.\nSubject: coherent realistic adult proportions; practical dark slate work trousers with visible belt, worn brown-black work boots, sleeves rolled to the forearms; both complete arms, hands, legs, feet, neck, head, and hair fully visible and naturally connected.\nStyle/medium: premium dark Anime HD game character illustration with painterly texture and clean, stable readable linework, matching Image 1 exactly in visual language and identity.\nComposition/framing: single character only, straight-on neutral standing pose, head-to-toe centered, arms held slightly away from torso, feet shoulder-width apart and aligned on the same baseline, symmetrical readable silhouette, generous padding on every edge. No perspective distortion and no cropped anatomy.\nScene/backdrop: perfectly flat solid #00ff00 chroma-key background for local background removal.\nLighting/mood: neutral soft frontal studio light on the character only; preserve subtle graphite-and-amber shading but no colored spill from the backdrop.\nConstraints: preserve identity and outfit from Image 1; background must be one uniform #00ff00 color with no shadows, gradients, texture, reflections, floor plane, or lighting variation; do not use #00ff00 anywhere in the subject; no cast shadow, contact shadow, reflection, weapon, prop, text, letters, logos, signature, watermark, UI, blood, gore, sexual content, or childlike features.\nAvoid: extra limbs, hidden hands, cropped feet, duplicate character, dynamic pose, foreshortening, loose coat tails, translucent elements, smoke, hair crossing the outer silhouette excessively, photorealism, chibi, fantasy armor."
+    },
+    {
+      "assetId": "background.facility-lobby",
+      "kind": "background",
+      "reviewState": "frozen",
+      "pipelineState": "frozen",
+      "releaseEligible": true,
+      "sourceMasterPath": "assets/source/generated/background-facility-lobby-v1.png",
+      "runtimeCandidatePath": "assets/generated/runtime/backgrounds/facility-lobby-v1.png",
+      "builtInArtifactName": "exec-1523477e-53f2-4c4c-a16d-f49f6409b298.png",
+      "generatedAt": "2026-08-14T06:08:13.0529389Z",
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "hasAlpha": false,
+      "sizeBytes": 2041582,
+      "sha256": "31bd655743e88d3eab275ba77588c888833cb09ad4000f61f3cc2b097a91062e",
+      "sourceMaster": {
+        "width": 1672,
+        "height": 941,
+        "sizeBytes": 2061179,
+        "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+      },
+      "normalization": {
+        "operation": "center-crop",
+        "tool": "Pillow 12.3.0",
+        "sourceRect": [4, 2, 1668, 938],
+        "targetAspectRatio": "16:9"
+      },
+      "referenceImages": [],
+      "prompt": "Use case: stylized-concept\nAsset type: 16:9 fixed-room exploration background for a 2D top-down psychological-horror RPG\nPrimary request: Create the empty “Vestíbulo de Santa Ágata,” the abandoned entrance lobby of a sealed Argentine clinical-memory facility at night.\nScene/backdrop: rain lashes tall reinforced windows along one wall; incomplete fluorescent tubes; a broad reception counter covered with damp anonymous forms; wall-mounted intake terminal; emergency cable leading toward a closed freight lift; stained ceramic-and-concrete surfaces; subtle clinical neglect. No readable writing.\nSubject: the room itself, designed as a navigable game space with a large clear central floor, obvious reception interaction zone, visible lift destination, and safe readable paths.\nStyle/medium: premium dark Anime HD environment painting with painterly texture, crisp architectural silhouettes, grounded materials, and restrained detail; visually consistent with a serious RPG Maker-style horror game.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down view with near-orthographic fixed-room perspective, entire playable room visible, stable geometry, level horizon, no fisheye, no cutaway labels. Keep the middle floor comparatively uncluttered for player sprites and interaction markers.\nLighting/mood: motivated broken fluorescent pools, cold surgical-teal reflections from wet glass, warning-amber emergency accents, deep but readable graphite corners, restrained bloom, oppressive rain-soaked stillness.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, warning amber #E4A24A, tiny restrained blood-crimson #A62F45 accents, bone #F1E8D6 highlights.\nConstraints: empty environment; no people, creatures, bodies, gore, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, map markers, or remote-world scenery; maintain clear floor contrast so dark character sprites remain readable.\nAvoid: photorealism, fantasy architecture, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, duplicate doors, impossible stairs, bright daylight, generic hotel lobby."
+    },
+    {
+      "assetId": "background.archive-sublevel",
+      "kind": "background",
+      "reviewState": "frozen",
+      "pipelineState": "frozen",
+      "releaseEligible": true,
+      "sourceMasterPath": "assets/source/generated/background-archive-sublevel-v1.png",
+      "runtimeCandidatePath": "assets/generated/runtime/backgrounds/archive-sublevel-v1.png",
+      "builtInArtifactName": "exec-a3642986-00f9-440a-bf51-5e31f5f61a44.png",
+      "generatedAt": "2026-08-14T06:09:24.6554439Z",
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "hasAlpha": false,
+      "sizeBytes": 2082722,
+      "sha256": "1c44ec66e4d95b9e8b94051a2d0f48da16bb105b8e6cf632d8f48bf304337c97",
+      "sourceMaster": {
+        "width": 1672,
+        "height": 941,
+        "sizeBytes": 2105550,
+        "sha256": "283e89514b66c0175ee6c4d4d48955ada60b299601e875099404ed186a1abd23"
+      },
+      "normalization": {
+        "operation": "center-crop",
+        "tool": "Pillow 12.3.0",
+        "sourceRect": [4, 2, 1668, 938],
+        "targetAspectRatio": "16:9"
+      },
+      "referenceImages": [
+        {
+          "assetId": "background.facility-lobby",
+          "role": "project-owned style, camera, palette, and readability reference",
+          "path": "assets/source/generated/background-facility-lobby-v1.png",
+          "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+        }
+      ],
+      "prompt": "Use case: style-transfer\nAsset type: 16:9 fixed-room exploration background for a 2D top-down psychological-horror RPG\nInput images: Image 1 is only the approved visual-style, camera, palette, material, and readability reference for this same game; do not copy its room layout or objects.\nPrimary request: Create the empty “Archivo Subnivel D,” a subterranean clinical-memory records archive beneath Santa Ágata.\nScene/backdrop: tall mobile archive shelves and cold metal evidence cabinets form readable aisles; condensation beads on pipes and walls; sealed translucent evidence bags subtly bulge as if breathing; a maintenance binder station, a locked consent drawer, a prominent power console with three unlabeled physical controls, an elevator entry, and a sterile door toward the service corridor. No readable writing.\nSubject: the archive room itself, designed as a navigable game space with a broad clear central route, obvious side aisles, visible console interaction zone, and two distinct exit points.\nStyle/medium: preserve Image 1’s premium dark Anime HD environment painting, painterly texture, crisp architectural silhouettes, grounded materials, restrained detail, and fixed-room RPG readability.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down near-orthographic fixed-room view matching Image 1’s camera height and lens; entire playable room visible; stable geometry; no fisheye. Keep traversal paths uncluttered for player sprites.\nLighting/mood: sparse cold fluorescent pools, surgical-teal reflections on steel and condensation, one restrained warning-amber console glow, deep but readable graphite shadows; claustrophobic archival stillness.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, warning amber #E4A24A, tiny restrained blood-crimson #A62F45 thread accents, bone #F1E8D6 highlights.\nConstraints: empty environment; no people, creatures, bodies, gore splatter, organs, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, or map markers; no reuse of Image 1’s reception counter/windows/lobby geometry; maintain clear floor contrast.\nAvoid: photorealism, library wood aesthetic, fantasy archive, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, endless impossible shelves, bright daylight."
+    },
+    {
+      "assetId": "background.service-corridor",
+      "kind": "background",
+      "reviewState": "frozen",
+      "pipelineState": "frozen",
+      "releaseEligible": true,
+      "sourceMasterPath": "assets/source/generated/background-service-corridor-v1.png",
+      "runtimeCandidatePath": "assets/generated/runtime/backgrounds/service-corridor-v1.png",
+      "builtInArtifactName": "exec-c3f45ed4-324f-4366-adfd-ac1488fc83d0.png",
+      "generatedAt": "2026-08-14T06:11:01.1071780Z",
+      "mediaType": "image/png",
+      "width": 1664,
+      "height": 936,
+      "hasAlpha": false,
+      "sizeBytes": 1864946,
+      "sha256": "9be0963d60138ad7535a843bb8ce6e1669fd060a00d8dc4f3759dc9bf3ab3ca8",
+      "sourceMaster": {
+        "width": 1672,
+        "height": 941,
+        "sizeBytes": 1880122,
+        "sha256": "1587e152fc75d2fd9b29c91a1f718551e8c692b34419b4f5f764ee1844ae0ab8"
+      },
+      "normalization": {
+        "operation": "center-crop",
+        "tool": "Pillow 12.3.0",
+        "sourceRect": [4, 2, 1668, 938],
+        "targetAspectRatio": "16:9"
+      },
+      "referenceImages": [
+        {
+          "assetId": "background.facility-lobby",
+          "role": "project-owned style and camera reference",
+          "path": "assets/source/generated/background-facility-lobby-v1.png",
+          "sha256": "51500e8d998beb8da5187a866856f056fdb77fb6782194941d6e841efb0ca4df"
+        },
+        {
+          "assetId": "background.archive-sublevel",
+          "role": "project-owned style and material reference",
+          "path": "assets/source/generated/background-archive-sublevel-v1.png",
+          "sha256": "283e89514b66c0175ee6c4d4d48955ada60b299601e875099404ed186a1abd23"
+        }
+      ],
+      "prompt": "Use case: style-transfer\nAsset type: 16:9 fixed-room chase background for a 2D top-down psychological-horror RPG\nInput images: Images 1 and 2 are only approved visual-style, camera, palette, material, scale, and traversal-readability references for this same game; do not copy either room layout or their signature objects.\nPrimary request: Create the empty “Corredor de Servicio Nueve,” a long sealed service and autopsy corridor inside the Santa Ágata clinical-memory facility.\nScene/backdrop: a broad horizontal industrial corridor with nine repeating but visibly distinct sealed autopsy doors, low steam drifting from floor vents, exposed pipes, intermittent alarm fixtures with no readable symbols, a tissue-sample inspection alcove with a dark mirror panel, one archive door at the entry end, and a heavy incinerator safety threshold at the far end. Surgical thread traces appear sparingly on one wall and floor, suggesting the chase route without forming text.\nSubject: the corridor itself, built for a 45-second pursuit; one continuous clear traversal lane, readable cover/light pools, obvious start and destination, no obstacles that fully block movement.\nStyle/medium: preserve the references’ premium dark Anime HD environment painting, painterly texture, crisp architectural silhouettes, grounded wet materials, restrained detail, and fixed-room RPG readability.\nComposition/framing: exact-feeling 16:9 wide landscape, high three-quarter top-down near-orthographic fixed-room view matching the references’ camera and lens; show the full usable corridor segment, strong horizontal motion path, stable geometry, no fisheye, enough floor around the route for player and threat sprites.\nLighting/mood: alternating cold surgical-teal fluorescent pools and dark intervals; small restrained blood-crimson alarm points; warning-amber glow at the incinerator threshold; steam remains thin and never hides collision boundaries; escalating clinical dread.\nColor palette: wet graphite #11151D, surgical teal #5AC8D8, blood crimson #A62F45, warning amber #E4A24A, bone #F1E8D6.\nConstraints: empty environment; no people, creatures, bodies, gore splatter, organs, weapons, UI, text, letters, numbers, logos, signatures, watermark, border, visible tile grid, or map markers; do not reuse the lobby windows/reception desk or archive shelving; maintain clear floor contrast for dark sprites.\nAvoid: photorealism, medieval dungeon, subway tunnel, cyberpunk neon overload, Dutch angle, extreme perspective, clutter blocking traversal, opaque fog, duplicate impossible doors, bright daylight."
+    }
+  ]
+}

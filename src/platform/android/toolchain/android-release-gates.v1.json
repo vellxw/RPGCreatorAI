@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.android.g1-g5",
+  "target": "android-player",
+  "gates": {
+    "G1": {
+      "name": "playable-character",
+      "playerId": "damian",
+      "animationSetId": "damian",
+      "directions": ["down", "left", "right", "up"],
+      "requiredActions": ["idle", "walk", "interact"],
+      "assetIdTemplate": "sprite.damian.{action}.{direction}"
+    },
+    "G2": {
+      "name": "environment-backgrounds",
+      "mapBackgrounds": {
+        "facility_lobby": "background.facility-lobby",
+        "archive_sublevel": "background.archive-sublevel",
+        "service_corridor": "background.service-corridor"
+      }
+    },
+    "G3": {
+      "name": "vn-save-audio",
+      "minimumVisualNovelScenes": 1,
+      "saveSchemaVersion": 2,
+      "requiredAudioAssetIds": [
+        "audio.ambience.facility-lobby",
+        "audio.ambience.archive-sublevel",
+        "audio.ambience.service-corridor",
+        "audio.stinger.ninth-witness",
+        "audio.ui.confirm",
+        "audio.ui.cancel",
+        "audio.footstep.concrete",
+        "audio.ending.memory-release"
+      ]
+    },
+    "G4": {
+      "name": "editor-ai-acceptance",
+      "requiredEvidencePath": "release-input/editor-acceptance-evidence.v1.json",
+      "evidenceSchema": "src/platform/android/toolchain/editor-acceptance-evidence.schema.json",
+      "approvedStatuses": ["approved", "frozen"]
+    },
+    "G5": {
+      "name": "offline-release-inputs",
+      "requiredMapIds": ["facility_lobby", "archive_sublevel", "service_corridor"],
+      "toolchainContract": "src/platform/android/toolchain/android-toolchain.v1.json",
+      "releaseRequest": "release-input/android-release-request.v1.json",
+      "stagingInventory": "package-files.sha256.json",
+      "stagedBundle": "app/src/main/assets/www/data/game-bundle.v1.json",
+      "packageAllowlist": "app/src/main/assets/www/data/package-allowlist.json"
+    }
+  }
+}

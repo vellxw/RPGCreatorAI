@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "runtimeId": "rpgcreatorai-phaser-android",
+  "entryDocument": "index.html",
+  "gameBundlePath": "data/game-bundle.v1.json",
+  "viteBase": "./",
+  "assetBaseUrl": "/assets/www/",
+  "assetPathMode": "game-bundle-project-relative"
+}

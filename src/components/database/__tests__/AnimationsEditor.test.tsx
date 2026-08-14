@@ -277,6 +277,10 @@ describe('AnimationsEditor', () => {
 
     click(view.container, 'Import spritesheet');
     expect(view.container.querySelector('[aria-label="Spritesheet metadata preview"]')).not.toBeNull();
+    expect(view.container.querySelector('[aria-label="AnimationPackage v1 validation"]')?.textContent)
+      .toContain('Valid for import');
+    expect(view.container.querySelector('[aria-label="AnimationPackage v1 manifest preview"]')?.textContent)
+      .toContain('256x64');
     changeText(input(view.container, 'Spritesheet set ID'), 'hero_run');
     changeText(input(view.container, 'Spritesheet name'), 'Hero Run Sheet');
     changeText(input(view.container, 'Spritesheet action'), 'run');
@@ -338,6 +342,33 @@ describe('AnimationsEditor', () => {
 
     expect(spritesheetImporter).not.toHaveBeenCalled();
     expect(view.container.textContent).toContain('Frame count must be a positive integer.');
+
+    view.unmount();
+  });
+
+  it('shows AnimationPackage v1 QA errors and blocks an invalid anchor', async () => {
+    const spritesheetImporter: SpritesheetImportRunner = vi.fn();
+    const view = render(
+      <AnimationsEditor
+        value={database}
+        assets={[]}
+        spritesheetImporter={spritesheetImporter}
+        onAssetImported={vi.fn()}
+        onChange={vi.fn()}
+      />,
+    );
+
+    click(view.container, 'Import spritesheet');
+    changeText(input(view.container, 'Spritesheet anchor X'), '65');
+
+    const validation = view.container.querySelector('[aria-label="AnimationPackage v1 validation"]');
+    expect(validation?.textContent).toContain('Invalid');
+    expect(validation?.textContent).toContain('Clip anchor must contain finite x and y values.');
+
+    await clickAsync(view.container, 'Accept spritesheet import');
+
+    expect(spritesheetImporter).not.toHaveBeenCalled();
+    expect(view.container.textContent).toContain('AnimationPackage v1 $.clips[0].anchor');
 
     view.unmount();
   });

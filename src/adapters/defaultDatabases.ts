@@ -224,9 +224,17 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
         ? Object.fromEntries(
             Object.entries(input.system.audio).filter(
               ([, value]) => typeof value === 'string',
+          ) as Array<[string, string]>,
+        )
+        : base.system.audio;
+    const systemAudioAssetIds =
+      input.system.audioAssetIds && typeof input.system.audioAssetIds === 'object'
+        ? Object.fromEntries(
+            Object.entries(input.system.audioAssetIds).filter(
+              ([, value]) => typeof value === 'string',
             ) as Array<[string, string]>,
           )
-        : base.system.audio;
+        : undefined;
     merged.system = {
       startingParty: Array.isArray(input.system.startingParty)
         ? [...input.system.startingParty]
@@ -235,6 +243,7 @@ export function mergeDatabases(input: Partial<DatabaseEntries> | undefined): Dat
         typeof input.system.startingGold === 'number' ? input.system.startingGold : base.system.startingGold,
       defaultBgm: input.system.defaultBgm,
       audio: systemAudio ? { ...systemAudio } : undefined,
+      audioAssetIds: systemAudioAssetIds ? { ...systemAudioAssetIds } : undefined,
       windowTint: input.system.windowTint,
       battleBackground: input.system.battleBackground,
       playerAnimationSet: input.system.playerAnimationSet,

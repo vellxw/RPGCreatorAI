@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpgcreator.ai/schemas/android-release-manifest.v1.json",
+  "title": "RPGCreatorAI Android release manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "generatedAt",
+    "status",
+    "application",
+    "source",
+    "inputs",
+    "toolchain",
+    "gates",
+    "staging",
+    "artifact",
+    "qa",
+    "blockers"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["blocked", "candidate", "release"] },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicationId", "versionCode", "versionName", "title"],
+      "properties": {
+        "applicationId": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)+$" },
+        "versionCode": { "type": "integer", "minimum": 1 },
+        "versionName": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gitHead", "worktreeClean"],
+      "properties": {
+        "gitHead": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+            { "type": "null" }
+          ]
+        },
+        "worktreeClean": { "type": ["boolean", "null"] }
+      }
+    },
+    "inputs": { "$ref": "#/$defs/hashedInputs" },
+    "toolchain": { "$ref": "#/$defs/toolchainEvidence" },
+    "gates": { "$ref": "#/$defs/statusEvidence" },
+    "staging": { "$ref": "#/$defs/hashEvidence" },
+    "artifact": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "bytes", "sha256", "variant"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "bytes": { "type": "integer", "minimum": 1 },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "variant": { "enum": ["debug", "release"] }
+          }
+        }
+      ]
+    },
+    "qa": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signature", "signingCertificateSha256", "offlineDevice"],
+      "properties": {
+        "signature": { "enum": ["missing", "verified"] },
+        "signingCertificateSha256": {
+          "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        },
+        "offlineDevice": { "enum": ["missing", "passed"] },
+        "evidencePath": { "type": ["string", "null"] },
+        "evidenceSha256": {
+          "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hashEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "statusEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "status"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "status": { "enum": ["ready", "blocked"] }
+      }
+    },
+    "toolchainEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "status", "java", "androidSdk", "gradleVersion", "androidGradlePluginVersion"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "status": { "enum": ["ready", "blocked"] },
+        "java": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["vendor", "runtimeVersion", "javaHomeSha256"],
+          "properties": {
+            "vendor": { "type": ["string", "null"] },
+            "runtimeVersion": { "type": ["string", "null"] },
+            "javaHomeSha256": {
+              "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+            }
+          }
+        },
+        "androidSdk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sdkRootSha256", "packageRevisions"],
+          "properties": {
+            "sdkRootSha256": {
+              "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+            },
+            "packageRevisions": {
+              "type": "object",
+              "additionalProperties": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "gradleVersion": { "type": "string", "minLength": 1 },
+        "androidGradlePluginVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "hashedInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["releaseRequest", "gameBundle", "assetManifest", "gameRelease"],
+      "properties": {
+        "releaseRequest": { "$ref": "#/$defs/hashEvidence" },
+        "gameBundle": { "$ref": "#/$defs/hashEvidence" },
+        "gameRelease": { "$ref": "#/$defs/hashEvidence" },
+        "assetManifest": { "$ref": "#/$defs/hashEvidence" },
+        "assetAllowlist": { "$ref": "#/$defs/hashEvidence" },
+        "assetProvenance": { "$ref": "#/$defs/hashEvidence" },
+        "assetApprovalGate": { "$ref": "#/$defs/hashEvidence" },
+        "editorAcceptanceEvidence": { "$ref": "#/$defs/hashEvidence" }
+      }
+    }
+  }
+}

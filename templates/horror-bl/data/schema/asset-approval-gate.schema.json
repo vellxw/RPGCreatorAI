@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpgcreatorai.local/schemas/horror-bl/asset-approval-gate.v1.json",
+  "title": "Horror/BL chapter asset approval gate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "templateId",
+    "chapterId",
+    "releaseReady",
+    "allowlistPath",
+    "provenancePath",
+    "requiredSlots",
+    "approvedAssetIds",
+    "blockers"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "templateId": { "const": "horror-bl" },
+    "chapterId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "releaseReady": { "type": "boolean" },
+    "allowlistPath": { "type": "string", "pattern": "^[a-zA-Z0-9._/-]+$" },
+    "provenancePath": { "type": "string", "pattern": "^[a-zA-Z0-9._/-]+$" },
+    "requiredSlots": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/slot" }
+    },
+    "approvedAssetIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/portableId" }
+    },
+    "supplementalAudio": {
+      "$ref": "#/$defs/technicalSupplemental"
+    },
+    "supplementalAnimation": {
+      "$ref": "#/$defs/technicalSupplemental"
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "releaseReady": { "const": true } } },
+      "then": {
+        "properties": {
+          "approvedAssetIds": { "minItems": 7, "maxItems": 7 },
+          "blockers": { "maxItems": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "blockers": { "minItems": 1 }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "portableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "technicalSupplemental": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schemaVersion", "technicalReview", "humanAcceptance", "assets"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "technicalReview": { "type": "object" },
+        "humanAcceptance": { "type": "object" },
+        "assets": { "type": "array" }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureOnly",
+        "repositoryPath",
+        "sha256",
+        "sizeBytes",
+        "catalogAssetId",
+        "licenseStatus"
+      ],
+      "properties": {
+        "fixtureOnly": { "const": true },
+        "repositoryPath": { "type": "string", "pattern": "^[a-zA-Z0-9._/-]+$" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "catalogAssetId": { "$ref": "#/$defs/portableId" },
+        "licenseStatus": { "const": "unconfirmed" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "runtimePath",
+        "source",
+        "sha256",
+        "sizeBytes",
+        "mediaType",
+        "width",
+        "height",
+        "licenseNote",
+        "reviewer",
+        "decidedAt"
+      ],
+      "properties": {
+        "assetId": { "$ref": "#/$defs/portableId" },
+        "runtimePath": { "type": "string", "pattern": "^assets/[a-zA-Z0-9._/-]+$" },
+        "source": { "enum": ["local", "imported", "generated"] },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "mediaType": { "const": "image/png" },
+        "width": { "type": "integer", "minimum": 1, "maximum": 8192 },
+        "height": { "type": "integer", "minimum": 1, "maximum": 8192 },
+        "licenseNote": { "type": "string", "minLength": 1 },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "decidedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slotId",
+        "expectedKind",
+        "reviewState",
+        "releaseEligible",
+        "candidate",
+        "approval",
+        "blockers"
+      ],
+      "properties": {
+        "slotId": { "$ref": "#/$defs/portableId" },
+        "expectedKind": { "enum": ["portrait", "threat", "character-seed", "background"] },
+        "reviewState": { "enum": ["candidate", "approved", "frozen"] },
+        "releaseEligible": { "type": "boolean" },
+        "candidate": {
+          "oneOf": [
+            { "$ref": "#/$defs/candidate" },
+            { "type": "null" }
+          ]
+        },
+        "approval": {
+          "oneOf": [
+            { "$ref": "#/$defs/approval" },
+            { "type": "null" }
+          ]
+        },
+        "blockers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "reviewState": { "const": "candidate" } } },
+          "then": {
+            "properties": {
+              "releaseEligible": { "const": false },
+              "candidate": { "$ref": "#/$defs/candidate" },
+              "approval": { "type": "null" },
+              "blockers": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "reviewState": { "enum": ["approved", "frozen"] } } },
+          "then": {
+            "properties": {
+              "releaseEligible": { "const": true },
+              "candidate": {
+                "oneOf": [
+                  { "$ref": "#/$defs/candidate" },
+                  { "type": "null" }
+                ]
+              },
+              "approval": { "$ref": "#/$defs/approval" },
+              "blockers": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

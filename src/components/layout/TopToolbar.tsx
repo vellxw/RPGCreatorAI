@@ -9,6 +9,7 @@ import {
   Upload,
   FolderOpen,
   Clock,
+  PackageCheck,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useEditor } from '../../stores/editorStore';
@@ -16,6 +17,7 @@ import { useProjectStore } from '../../stores/projectStore';
 import {
   performSave,
   performExport,
+  performRuntimeBundleExport,
   performImport,
   performOpenProject,
   performOpenRecent,
@@ -196,6 +198,25 @@ export function TopToolbar() {
     showStatus('Exported project bundle');
   };
 
+  const handleRuntimeBundleExport = () => {
+    const result = performRuntimeBundleExport(projectState);
+    if (!result.ok) {
+      setSaveFeedback({
+        tone: 'danger',
+        title: `Runtime export blocked by ${result.errors.length} compiler error${result.errors.length === 1 ? '' : 's'}`,
+        detail: result.errors[0]?.message ?? 'Review the project and asset paths before exporting.',
+      });
+      return;
+    }
+    setSaveFeedback({
+      tone: result.warnings.length > 0 ? 'warning' : 'success',
+      title: 'GameBundle v1 exported',
+      detail: result.warnings.length > 0
+        ? `${result.warnings.length} runtime warning${result.warnings.length === 1 ? '' : 's'} should be reviewed.`
+        : 'The renderer-neutral runtime payload is ready for Phaser or another runtime host.',
+    });
+  };
+
   const handleImportClick = () => fileInputRef.current?.click();
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,6 +334,9 @@ export function TopToolbar() {
         </Button>
         <Button variant="primary" icon={<Download size={14} />} onClick={handleExport}>
           Export
+        </Button>
+        <Button icon={<PackageCheck size={14} />} onClick={handleRuntimeBundleExport}>
+          GameBundle
         </Button>
         <Button icon={<Upload size={14} />} onClick={handleImportClick}>
           Import

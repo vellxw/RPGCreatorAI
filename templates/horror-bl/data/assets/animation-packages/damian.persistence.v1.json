@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "packageSchemaVersion": 1,
+  "packageId": "actor.damian",
+  "animationSetId": "damian",
+  "packagePath": "data/assets/animation-packages/damian.animation-package.v1.json",
+  "manifestPath": "data/assets/animation-packages/damian.persistence.v1.json",
+  "source": {
+    "path": "assets/source/generated/animation/damian-v2/damian-animation-master-v2.png",
+    "sha256": "ae83a589a250fb77536061ffcbf4780fe1f566cb2a2e34233b210adef9d18af0",
+    "provenance": "data/assets/animation-packages/damian.provenance.v1.json"
+  },
+  "strips": [
+    {
+      "clipId": "idle.down",
+      "assetId": "sprite.damian.idle.down",
+      "path": "assets/generated/runtime/sprites/damian_idle_down.png",
+      "sha256": "412a6e6c3e4b18b91386804fda45face3a88473678cbdfade0e660583c0149ec",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "idle",
+      "direction": "down",
+      "fps": 6,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "idle.left",
+      "assetId": "sprite.damian.idle.left",
+      "path": "assets/generated/runtime/sprites/damian_idle_left.png",
+      "sha256": "d52fd1a93f4a71b671b4b2bda1e71f4d4a1635f78e2a935dd380631ca3b1b8f6",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "idle",
+      "direction": "left",
+      "fps": 6,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "idle.right",
+      "assetId": "sprite.damian.idle.right",
+      "path": "assets/generated/runtime/sprites/damian_idle_right.png",
+      "sha256": "ecf50e8fc0e1e8f6e77b6eb7f6849cae875a72171d75c58c894a9beca9203532",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "idle",
+      "direction": "right",
+      "fps": 6,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "idle.up",
+      "assetId": "sprite.damian.idle.up",
+      "path": "assets/generated/runtime/sprites/damian_idle_up.png",
+      "sha256": "af568462fea6adf5b83d8c24aee3bcf7ea888dd05a439a6c3221010b1b19c812",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "idle",
+      "direction": "up",
+      "fps": 6,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "walk.down",
+      "assetId": "sprite.damian.walk.down",
+      "path": "assets/generated/runtime/sprites/damian_walk_down.png",
+      "sha256": "b6b60020913e6548b75b0b421c1538087d9366d4d222212f6719c640129fdcfe",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "walk",
+      "direction": "down",
+      "fps": 8,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "walk.left",
+      "assetId": "sprite.damian.walk.left",
+      "path": "assets/generated/runtime/sprites/damian_walk_left.png",
+      "sha256": "c7d1b98fc7a45708af7ccbb2399c8252a43704fbc59ac4e88325d35542e12088",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "walk",
+      "direction": "left",
+      "fps": 8,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "walk.right",
+      "assetId": "sprite.damian.walk.right",
+      "path": "assets/generated/runtime/sprites/damian_walk_right.png",
+      "sha256": "d3a2d9bc06e97dee0a412a155e935237d02eab9806cbac67729787709db2aba2",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "walk",
+      "direction": "right",
+      "fps": 8,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "walk.up",
+      "assetId": "sprite.damian.walk.up",
+      "path": "assets/generated/runtime/sprites/damian_walk_up.png",
+      "sha256": "0f39472c3ea36f62a4cae19866a65c5907d00e8544c1c2664ae96b1deb8dfb1d",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "walk",
+      "direction": "up",
+      "fps": 8,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "interact.down",
+      "assetId": "sprite.damian.interact.down",
+      "path": "assets/generated/runtime/sprites/damian_interact_down.png",
+      "sha256": "3ae58179202963ce76ce3b2729a08fe63d9d40d7d72495ad6b48e448f2947461",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "interact",
+      "direction": "down",
+      "fps": 8,
+      "loop": false,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "interact.left",
+      "assetId": "sprite.damian.interact.left",
+      "path": "assets/generated/runtime/sprites/damian_interact_left.png",
+      "sha256": "1daf6af9d14bd91626dbb38283fd003464f1f9329fe8b623855f983dc9ff0f00",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "interact",
+      "direction": "left",
+      "fps": 8,
+      "loop": false,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "interact.right",
+      "assetId": "sprite.damian.interact.right",
+      "path": "assets/generated/runtime/sprites/damian_interact_right.png",
+      "sha256": "b3bfed25f7166e28658d380912764d43827e72c068b7f8852cb42f4ac49276c9",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "interact",
+      "direction": "right",
+      "fps": 8,
+      "loop": false,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    },
+    {
+      "clipId": "interact.up",
+      "assetId": "sprite.damian.interact.up",
+      "path": "assets/generated/runtime/sprites/damian_interact_up.png",
+      "sha256": "2ea57b01492fdba638641e6bcc5767bd28162cd1df4e6416dab6db2d651d6711",
+      "source": "generated",
+      "width": 1024,
+      "height": 384,
+      "frameWidth": 256,
+      "frameHeight": 384,
+      "frameCount": 4,
+      "provenance": "data/assets/animation-packages/damian.provenance.v1.json",
+      "reviewStatus": "frozen",
+      "normalization": {
+        "sharedScale": 0.397838,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        },
+        "hasAlpha": true
+      },
+      "action": "interact",
+      "direction": "up",
+      "fps": 8,
+      "loop": false,
+      "anchor": {
+        "x": 128,
+        "y": 376
+      }
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpgcreatorai.local/schemas/foundation-manifest.schema.json",
+  "title": "RPGCreatorAI Project Foundation Manifest",
+  "description": "Optional project-local index for the canonical Markdown foundation documents. This is not the runtime project.json schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectTitle",
+    "documents",
+    "styleAuthority",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "projectTitle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["concept", "prototype", "production", "release-candidate", "released", "archived"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readme", "gameDesign", "gameStyle", "technical", "assets"],
+      "properties": {
+        "readme": { "$ref": "#/$defs/projectPath" },
+        "gameDesign": { "$ref": "#/$defs/projectPath" },
+        "gameStyle": { "$ref": "#/$defs/projectPath" },
+        "technical": { "$ref": "#/$defs/projectPath" },
+        "assets": { "$ref": "#/$defs/projectPath" }
+      }
+    },
+    "styleAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectSource", "engineSource"],
+      "properties": {
+        "projectSource": { "$ref": "#/$defs/projectPath" },
+        "engineSource": {
+          "const": "docs/GAME_VISUAL_DESIGN.md"
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assetRegister", "assetCatalog", "generationHistory", "containsSecrets"],
+      "properties": {
+        "assetRegister": { "$ref": "#/$defs/projectPath" },
+        "assetCatalog": {
+          "const": "data/assets/catalog.json"
+        },
+        "generationHistory": {
+          "const": "data/project.json#generationHistory"
+        },
+        "containsSecrets": {
+          "const": false
+        },
+        "releaseReviewStatus": {
+          "type": "string",
+          "enum": ["not-reviewed", "in-review", "approved", "blocked"]
+        }
+      }
+    },
+    "openDecisions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "projectPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    }
+  }
+}
+

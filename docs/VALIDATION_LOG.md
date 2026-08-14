@@ -9127,3 +9127,51 @@ New artifacts (committed alongside this log entry):
 - `scripts/dev/linear-batch-close.mjs` - idempotent batch closer with rate-limit backoff and verify-on-empty
 
 Zero Linear MCP failures remain. Zero live paid provider calls were made during this entire Linear closure run. Every close was driven by the offline mock adapter in the local repo.
+
+## 2026-08-14 — Horror/BL chapter asset release gate
+
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/validate-horror-bl-asset-gate.ps1`
+  — PASS; the candidate/approval contract is internally valid,
+  `releaseReady` is explicitly `false`, all three repository fixture paths
+  exist, and their declared byte sizes and SHA-256 hashes match.
+- `cmd /c scripts\dev\validate-horror-bl-asset-gate.bat`
+  — PASS; the restricted-policy Windows wrapper returns exit code `0` for a
+  valid blocked contract.
+- `cmd /c scripts\dev\validate-horror-bl-asset-gate.bat -RequireReleaseReady`
+  — EXPECTED BLOCK; returned exit code `3`, proving release automation remains
+  fail-closed until `portrait.damian`, `portrait.elian`, and
+  `threat.ninth-witness` are approved/frozen with matching allowlist,
+  provenance, and runtime bytes.
+- JSON parse validation for the asset manifest, allowlist, provenance, review
+  gate, gate schema, and Windows release-input plan — PASS (6/6 documents).
+
+No image was promoted and no license was inferred. The three local images are
+recorded only as `fixtureOnly: true` candidates with `licenseStatus:
+unconfirmed`; release allowlist and provenance remain intentionally empty.
+
+## 2026-08-14 — Android M9 toolchain, debug APK y smoke offline
+
+- `scripts/dev/verify-android-toolchain.ps1` — PASS; JDK 17.0.20,
+  SDK/platform 36, Build Tools 35.0.0, platform-tools 37.0.1 y wrapper Gradle
+  8.14.3 completo quedaron `ready`. Reporte:
+  `output/android-toolchain-readiness.v1.json`.
+- `scripts/dev/prepare-android-gradle-wrapper.ps1 -Generate -Force` — PASS;
+  properties byte a byte contra el fixture e inventario SHA-256 generado.
+- `output/android-webview/gradlew.bat --no-daemon --offline assembleDebug` —
+  PASS; APK debug de 17,090,587 bytes, SHA-256
+  `6b8d3cf7d61a28afa116c08b8f2994b42082d38cc6bd0fc74dd32a3aa1e2b1ba`.
+- `apksigner verify --verbose` y `aapt2 dump badging/permissions` — PASS;
+  package `ai.rpgcreator.player`, compile/target SDK 36, min SDK 24, sin
+  permisos de red.
+- AVD `rpgcreatorai-api36` API 36: instalación ADB, lanzamiento de
+  `MainActivity`, render del capítulo y taps direccionales/A — PASS; sin
+  `FATAL EXCEPTION`/`AndroidRuntime`. Evidencia:
+  `docs/ANDROID_EMULATOR_SMOKE_REPORT.md` y
+  `output/android-emulator-smoke-lint-clean.png`.
+- `output/android-webview/gradlew.bat --no-daemon --offline lintDebug` — PASS;
+  cero errores de lint. Quedaron sólo avisos informativos del manifest por
+  entradas `tools:node="remove"` que preservan el fail-closed de permisos.
+
+El manifiesto Android conserva `status: blocked` porque G4 requiere aceptación
+humana por hash y el APK probado es debug; no se inventó una firma release ni
+una aprobación de assets.

@@ -5,6 +5,12 @@ import {
   importSpritesheetAsset,
   type SpritesheetImportRunner,
 } from '../../adapters/spritesheetImport';
+import {
+  ANIMATION_PACKAGE_VERSION,
+  validateAnimationPackage,
+  type AnimationPackageQaReport,
+  type AnimationPackageV1,
+} from '../../animation/animationPackage';
 import type { SpriteSheetGenerationRunner } from '../../providers/spriteSheetGenerationWorkflow';
 import type {
   AnimationClipData,
@@ -112,7 +118,7 @@ function defaultSpritesheetDraft(index: number): SpritesheetDraft {
   };
 }
 
-function validateSpritesheetDraft(draft: SpritesheetDraft): string | null {
+function validateSpritesheetDraftBasics(draft: SpritesheetDraft): string | null {
   if (!draft.setId.trim()) return 'Animation set ID is required.';
   if (!draft.name.trim()) return 'Spritesheet name is required.';
   if (!draft.action.trim()) return 'Action is required.';
@@ -132,10 +138,66 @@ function validateSpritesheetDraft(draft: SpritesheetDraft): string | null {
   return null;
 }
 
+function buildDraftAnimationPackage(draft: SpritesheetDraft): AnimationPackageV1 {
+  const packageId = slugId(draft.setId, 'spritesheet');
+  return {
+    schemaVersion: ANIMATION_PACKAGE_VERSION,
+    id: packageId,
+    source: {
+      path: `assets/imported/${packageId}.png`,
+      // The desktop importer replaces this authoring placeholder with the file digest.
+      sha256: '0'.repeat(64),
+      width: draft.frameWidth * draft.frameCount,
+      height: draft.frameHeight,
+      layout: 'grid',
+    },
+    grid: {
+      columns: draft.frameCount,
+      rows: 1,
+      cellWidth: draft.frameWidth,
+      cellHeight: draft.frameHeight,
+    },
+    clips: [{
+      id: `${slugId(draft.action, 'idle')}.${draft.direction}`,
+      action: slugId(draft.action, 'idle'),
+      direction: draft.direction,
+      frameIndices: Array.from({ length: draft.frameCount }, (_, index) => index),
+      fps: draft.fps,
+      loop: draft.loop,
+      anchor: { x: draft.anchorX, y: draft.anchorY },
+    }],
+  };
+}
+
+function inspectSpritesheetDraft(draft: SpritesheetDraft): {
+  packageData: AnimationPackageV1 | null;
+  report: AnimationPackageQaReport | null;
+  error: string | null;
+} {
+  const basicError = validateSpritesheetDraftBasics(draft);
+  if (basicError) return { packageData: null, report: null, error: basicError };
+
+  const packageData = buildDraftAnimationPackage(draft);
+  const report = validateAnimationPackage(packageData);
+  const error = report.issues.find(issue => issue.severity === 'error');
+  return {
+    packageData,
+    report,
+    error: error ? `AnimationPackage v1 ${error.path}: ${error.message}` : null,
+  };
+}
+
+function validateSpritesheetDraft(draft: SpritesheetDraft): string | null {
+  return inspectSpritesheetDraft(draft).error;
+}
+
 function SpritesheetMetadataPreview({ draft }: { draft: SpritesheetDraft }) {
   const frames = Math.max(1, Math.min(12, Math.trunc(draft.frameCount || 1)));
+  const inspection = useMemo(() => inspectSpritesheetDraft(draft), [draft]);
+  const manifest = inspection.packageData;
+  const report = inspection.report;
   return (
-    <div className="rounded border border-gray-200 bg-white p-3">
+    <div className="space-y-3 rounded border border-gray-200 bg-white p-3">
       <div
         aria-label="Spritesheet metadata preview"
         role="img"
@@ -160,9 +222,43 @@ function SpritesheetMetadataPreview({ draft }: { draft: SpritesheetDraft }) {
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-gray-500">
+      <p className="text-[11px] text-gray-500">
         {draft.action}/{draft.direction} · {draft.frameWidth}x{draft.frameHeight} · {draft.frameCount} frames @ {draft.fps} fps
       </p>
+      <div
+        aria-label="AnimationPackage v1 validation"
+        className={`rounded border px-3 py-2 text-[11px] ${
+          inspection.error
+            ? 'border-red-200 bg-red-50 text-red-700'
+            : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-semibold">AnimationPackage v1</span>
+          <span>{inspection.error ? 'Invalid' : 'Valid for import'}</span>
+        </div>
+        {inspection.error ? (
+          <p className="mt-1">{inspection.error}</p>
+        ) : report ? (
+          <p className="mt-1">
+            {report.summary.clipCount} clip · {report.summary.frameCount} frames · {report.summary.errors} errors · {report.summary.warnings} warnings
+          </p>
+        ) : null}
+      </div>
+      {manifest && (
+        <dl aria-label="AnimationPackage v1 manifest preview" className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] text-gray-600">
+          <dt className="font-medium text-gray-500">Package</dt>
+          <dd className="truncate font-mono">{manifest.id}</dd>
+          <dt className="font-medium text-gray-500">Source</dt>
+          <dd>{manifest.source.width}x{manifest.source.height} grid</dd>
+          <dt className="font-medium text-gray-500">Grid</dt>
+          <dd>{manifest.grid.columns}x{manifest.grid.rows} · {manifest.grid.cellWidth}x{manifest.grid.cellHeight} cells</dd>
+          <dt className="font-medium text-gray-500">Clip</dt>
+          <dd className="truncate font-mono">{manifest.clips[0]?.id}</dd>
+          <dt className="font-medium text-gray-500">Anchor</dt>
+          <dd>{manifest.clips[0]?.anchor?.x}, {manifest.clips[0]?.anchor?.y} px</dd>
+        </dl>
+      )}
     </div>
   );
 }

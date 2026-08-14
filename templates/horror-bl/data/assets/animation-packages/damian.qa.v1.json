@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 1,
+  "id": "actor.damian.animation.qa.v2",
+  "status": "generated-verified-human-pending",
+  "coverage": {
+    "actions": [
+      "idle",
+      "walk",
+      "interact"
+    ],
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "clips": 12,
+    "frames": 48
+  },
+  "geometry": {
+    "frameWidth": 256,
+    "frameHeight": 384,
+    "sharedScale": 0.397838,
+    "anchor": {
+      "x": 128,
+      "y": 376
+    }
+  },
+  "frames": [
+    {
+      "clipId": "idle.down",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 91,
+        "y": 183,
+        "width": 74,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.down",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 90,
+        "y": 183,
+        "width": 75,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.down",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 91,
+        "y": 183,
+        "width": 74,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.down",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 91,
+        "y": 183,
+        "width": 74,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.left",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 106,
+        "y": 181,
+        "width": 44,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.left",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 105,
+        "y": 181,
+        "width": 46,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.left",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 105,
+        "y": 181,
+        "width": 46,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.left",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 106,
+        "y": 181,
+        "width": 45,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.right",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 104,
+        "y": 183,
+        "width": 49,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.right",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 102,
+        "y": 183,
+        "width": 51,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.right",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 103,
+        "y": 183,
+        "width": 50,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.right",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 103,
+        "y": 183,
+        "width": 50,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.up",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 184,
+        "width": 66,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.up",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 185,
+        "width": 66,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.up",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 185,
+        "width": 66,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "idle.up",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 185,
+        "width": 66,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.down",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 90,
+        "y": 181,
+        "width": 76,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.down",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 90,
+        "y": 181,
+        "width": 75,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.down",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 91,
+        "y": 181,
+        "width": 74,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.down",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 90,
+        "y": 181,
+        "width": 75,
+        "height": 195
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.left",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 82,
+        "y": 184,
+        "width": 92,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.left",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 78,
+        "y": 184,
+        "width": 101,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.left",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 80,
+        "y": 183,
+        "width": 95,
+        "height": 193
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.left",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 76,
+        "y": 184,
+        "width": 103,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.right",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 80,
+        "y": 186,
+        "width": 95,
+        "height": 190
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.right",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 79,
+        "y": 186,
+        "width": 98,
+        "height": 190
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.right",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 78,
+        "y": 185,
+        "width": 101,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.right",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 74,
+        "y": 185,
+        "width": 107,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.up",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 185,
+        "width": 66,
+        "height": 191
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.up",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 94,
+        "y": 184,
+        "width": 67,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.up",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 94,
+        "y": 182,
+        "width": 69,
+        "height": 194
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "walk.up",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 95,
+        "y": 184,
+        "width": 66,
+        "height": 192
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.down",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 70,
+        "y": 38,
+        "width": 117,
+        "height": 338
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.down",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 70,
+        "y": 39,
+        "width": 115,
+        "height": 337
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.down",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 72,
+        "y": 39,
+        "width": 113,
+        "height": 337
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.down",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 70,
+        "y": 38,
+        "width": 117,
+        "height": 338
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.left",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 88,
+        "y": 8,
+        "width": 79,
+        "height": 368
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.left",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 64,
+        "y": 8,
+        "width": 127,
+        "height": 368
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.left",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 62,
+        "y": 8,
+        "width": 132,
+        "height": 368
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.left",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 88,
+        "y": 8,
+        "width": 79,
+        "height": 368
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.right",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 96,
+        "y": 101,
+        "width": 64,
+        "height": 275
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.right",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 67,
+        "y": 100,
+        "width": 122,
+        "height": 276
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.right",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 68,
+        "y": 101,
+        "width": 121,
+        "height": 275
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.right",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 96,
+        "y": 100,
+        "width": 64,
+        "height": 276
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.up",
+      "frame": 1,
+      "normalizedBounds": {
+        "x": 74,
+        "y": 69,
+        "width": 107,
+        "height": 307
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.up",
+      "frame": 2,
+      "normalizedBounds": {
+        "x": 66,
+        "y": 70,
+        "width": 123,
+        "height": 306
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.up",
+      "frame": 3,
+      "normalizedBounds": {
+        "x": 74,
+        "y": 69,
+        "width": 108,
+        "height": 307
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    },
+    {
+      "clipId": "interact.up",
+      "frame": 4,
+      "normalizedBounds": {
+        "x": 74,
+        "y": 70,
+        "width": 107,
+        "height": 306
+      },
+      "completeAnatomyVisualReview": "passed-agent-review"
+    }
+  ],
+  "humanAcceptance": {
+    "state": "pending",
+    "evidence": "not-recorded"
+  }
+}

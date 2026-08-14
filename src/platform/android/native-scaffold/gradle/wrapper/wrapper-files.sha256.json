@@ -1,0 +1,36 @@
+{
+    "schemaVersion":  1,
+    "gradleVersion":  "8.14.3",
+    "distributionUrl":  "https://services.gradle.org/distributions/gradle-8.14.3-bin.zip",
+    "distributionSha256Sum":  "bd71102213493060956ec229d946beee57158dbd89d0e62b91bca0fa2c5f3531",
+    "fixtureSha256":  "05fcb55a155233ee632da57149d1ba3cd39a001701ae00e0c20782fbaf6c378b",
+    "generatedWith":  {
+                          "javaMajor":  17,
+                          "javaReleaseFileSha256":  "8daa64b69534c11c991450abbdf7b0ddab73ba0f91a9f79053a98f7020ecc4ea",
+                          "gradleLauncherFileName":  "gradle.bat",
+                          "gradleLauncherSha256":  "04098e504f1a10b4d45ee5047ab3872e21d0168c79e9cae2ae2e7b8033d9b1a0"
+                      },
+    "inventorySelfExcluded":  true,
+    "files":  [
+                  {
+                      "path":  "gradlew",
+                      "bytes":  8733,
+                      "sha256":  "b187b4c52e749f5760afdd6fadc31b2a98ad35fb249bf0dff03b72650f320409"
+                  },
+                  {
+                      "path":  "gradlew.bat",
+                      "bytes":  2937,
+                      "sha256":  "1d297e00bd21de3ace22b4d7f2de1f9dfa858883d66bbf7c1ccbecccec8f4f3b"
+                  },
+                  {
+                      "path":  "gradle/wrapper/gradle-wrapper.jar",
+                      "bytes":  43764,
+                      "sha256":  "7d3a4ac4de1c32b59bc6a4eb8ecb8e612ccd0cf1ae1e99f66902da64df296172"
+                  },
+                  {
+                      "path":  "gradle/wrapper/gradle-wrapper.properties",
+                      "bytes":  340,
+                      "sha256":  "05fcb55a155233ee632da57149d1ba3cd39a001701ae00e0c20782fbaf6c378b"
+                  }
+              ]
+}

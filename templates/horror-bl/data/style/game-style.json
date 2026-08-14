@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.dark-anime-hd",
+  "artMode": "anime-hd-dark",
+  "camera": { "exploration": "top-down-fixed-room", "vn": "illustrated-panels" },
+  "viewport": { "width": 960, "height": 540, "tileSize": 48 },
+  "palette": {
+    "background": "#11151D",
+    "accent": "#5AC8D8",
+    "warning": "#E4A24A",
+    "danger": "#A62F45",
+    "text": "#F1E8D6"
+  },
+  "animation": { "directions": ["down", "left", "right", "up"], "walkFps": 8, "anchor": "ground-contact" },
+  "gore": { "default": "reduced", "modes": ["full", "reduced", "off"] },
+  "accessibility": { "reducedMotion": true, "subtitles": true, "highContrastDialogue": true }
+}

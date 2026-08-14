@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "intake_recording",
+      "name": "Ingreso sin paciente",
+      "description": "El expediente D-09 fue abierto nueve minutos antes de que Elian ingresara a la clínica.",
+      "type": "evidence"
+    },
+    {
+      "id": "maintenance_log",
+      "name": "Orden de energía",
+      "description": "El circuito seguro exige norte, memoria y D-09; la secuencia contradice el diagrama oficial.",
+      "type": "evidence"
+    },
+    {
+      "id": "d09_consent_form",
+      "name": "Consentimiento incompleto",
+      "description": "La firma de Elian fue copiada después de la clausura y Damián figura como testigo sin haber firmado.",
+      "type": "evidence"
+    },
+    {
+      "id": "mirror_tissue_sample",
+      "name": "Tejido sin donante",
+      "description": "La criatura no contiene ADN humano completo: está hecha de recuerdos materializados, no de los pacientes.",
+      "type": "evidence"
+    }
+  ]
+}

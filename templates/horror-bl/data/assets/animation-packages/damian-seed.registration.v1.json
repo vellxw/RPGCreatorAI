@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "packageId": "actor.damian",
+  "animationSetId": "actor.damian",
+  "registrationPath": "data/assets/animation-packages/damian-seed.registration.v1.json",
+  "status": "seed-ready-awaiting-strips",
+  "seed": {
+    "assetId": "seed.damian.full-body",
+    "path": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+    "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3",
+    "width": 1024,
+    "height": 1536,
+    "provenance": "assets/source/generated/generation-session-2026-08-14-g2.v1.json",
+    "source": "generated",
+    "reviewStatus": "frozen"
+  },
+  "blockers": [
+    {
+      "code": "normalized-strips-required",
+      "message": "Approved horizontal strips with exact frame geometry, hashes, and provenance are required before catalog or AnimationSet persistence."
+    }
+  ]
+}

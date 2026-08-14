@@ -18,6 +18,7 @@ import { validateProject } from '../validation/validateProject';
 import { RuntimeLogPanel } from '../components/playtest/RuntimeLogPanel';
 import { EventTracePanel } from '../components/playtest/EventTracePanel';
 import { RuntimeStatePanel } from '../components/playtest/RuntimeStatePanel';
+import { PhaserPlaytestSurface } from '../components/playtest/PhaserPlaytestSurface';
 import {
   RuntimeLaunchFeedback,
   type RuntimeLaunchFeedbackState,
@@ -34,8 +35,13 @@ import {
   movementSpeedToTilesPerSecond,
   type TileFluidMotion,
 } from '../playtest/tileFluidMotion';
-import { buildPlaytestLaunchPlan, pickLaunchValidationError } from '../playtest/playtestLaunchRequest';
+import {
+  buildPlaytestLaunchPlan,
+  buildPlaytestProjectState,
+  pickLaunchValidationError,
+} from '../playtest/playtestLaunchRequest';
 import { playtestModeLabel } from '../playtest/playtestMode';
+import { createPhaserPlaytestSession } from '../playtest/phaserPlaytestAdapter';
 import type { AnimationSetDisplayData, Direction, GameEvent, MapData } from '../types/project';
 import type { RuntimeLaunchAdapter, RuntimeStatus } from '../adapters/types';
 
@@ -549,12 +555,7 @@ function RuntimeBridgePanel({
       });
       return;
     }
-    const fullProjectState = {
-      project: projectState.project,
-      maps: projectState.maps,
-      items: projectState.items,
-      databases: projectState.databases,
-    };
+    const fullProjectState = buildPlaytestProjectState(projectState);
     const launchPlan = buildPlaytestLaunchPlan(editorState, fullProjectState);
     if (launchPlan.blocker || !launchPlan.request) {
       setFeedback({
@@ -576,6 +577,7 @@ function RuntimeBridgePanel({
       maps: fullProjectState.maps,
       items: fullProjectState.items,
       databases: fullProjectState.databases,
+      assets: fullProjectState.assets,
     });
     projectDispatch({ type: 'VALIDATE' });
     if (validation.errors.length > 0) {
@@ -954,6 +956,7 @@ function LogsPanel({
 
 export function PlaytestScreen() {
   const project = useProject();
+  const { state: editorState } = useEditor();
   const runtimeAdapter = useMemo(() => getRuntimeLaunchAdapter(), []);
   const playtestSessionAdapter = useMemo(() => getPlaytestSessionAdapter(), []);
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatus>(runtimeAdapter.getStatus());
@@ -1106,6 +1109,7 @@ export function PlaytestScreen() {
         />
         <RuntimeStateInspector state={state} />
       </div>
+      <EmbeddedPhaserPanel project={project} editorState={editorState} />
       <RuntimeBridgePanel
         adapter={runtimeAdapter}
         sessionAdapter={playtestSessionAdapter}
@@ -1114,5 +1118,63 @@ export function PlaytestScreen() {
       />
       <LogsPanel logs={logs} runtimeAdapter={runtimeAdapter} runtimeStatus={runtimeStatus} />
     </div>
+  );
+}
+
+function EmbeddedPhaserPanel({
+  project,
+  editorState,
+}: {
+  project: ReturnType<typeof useProject>;
+  editorState: ReturnType<typeof useEditor>['state'];
+}) {
+  const [enabled, setEnabled] = useState(false);
+  const fullProjectState = useMemo(() => ({
+    project: project.project,
+    maps: project.maps,
+    items: project.items,
+    databases: project.databases,
+    assets: project.assets,
+  }), [project.assets, project.databases, project.items, project.maps, project.project]);
+  const result = useMemo(
+    () => createPhaserPlaytestSession(fullProjectState, editorState),
+    [editorState, fullProjectState],
+  );
+
+  return (
+    <section className="border-t border-gray-200 bg-slate-50 px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-[13px] font-semibold text-gray-800">Embedded Phaser runtime</h2>
+          <p className="text-[11px] text-gray-500">
+            Runs the compiled GameBundle in-editor. Native playtest remains available below.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="rounded border border-indigo-200 bg-white px-3 py-1.5 text-[11px] font-medium text-indigo-700 hover:bg-indigo-50"
+          onClick={() => setEnabled(value => !value)}
+          disabled={!result.ok}
+        >
+          {enabled ? 'Stop Phaser preview' : 'Run Phaser preview'}
+        </button>
+      </div>
+      {!result.ok && (
+        <p className="mt-2 text-[11px] text-amber-700" role="status">
+          {result.errors[0]?.message ?? 'Compile the project before opening the embedded preview.'}
+        </p>
+      )}
+      {result.ok && enabled && (
+        <div className="mt-3 max-w-[960px]">
+          <PhaserPlaytestSurface
+            simulation={result.session.simulation}
+            assetManifest={result.session.assetManifest}
+            width={result.session.viewport.width}
+            height={result.session.viewport.height}
+            emptyState={<p className="text-sm text-slate-300">Choose a valid playtest target to start.</p>}
+          />
+        </div>
+      )}
+    </section>
   );
 }

@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
+import { RuntimeMediaAccessibilityPanel } from '../components/settings/RuntimeMediaAccessibilityPanel';
 import { AIRequestQueuePanel } from '../components/ai/AIRequestQueuePanel';
 import { CreatorModeSelector } from '../components/ai/CreatorModeSelector';
 import { PerPipelineModelDefaults } from '../components/ai/PerPipelineModelDefaults';
@@ -341,19 +342,33 @@ export function SettingsScreen({
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Settings2 size={18} className="text-indigo-600" />
-              <h2 className="text-[18px] font-bold text-gray-800">Provider Settings</h2>
+              <h2 className="text-[18px] font-bold text-gray-800">
+                Settings <span className="font-semibold text-gray-500">· Provider Settings</span>
+              </h2>
             </div>
             <p className="max-w-2xl text-[12px] leading-5 text-gray-600">
-              Providers are optional editor tooling. Maps, database, assets, and playtest stay available with no providers configured.
+              Providers are optional. Configure playtest comfort, runtime media behavior, and optional AI tooling from one local-first workspace.
             </p>
             <p className="mt-1 max-w-2xl text-[12px] leading-5 text-gray-600">
-              Provider-backed actions can send selected prompts and project context only when you run them.
+              Provider-backed actions can send selected prompts and project context only when you run them. Runtime preferences stay on this device.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="info" dot>Editor-only</Badge>
-            <Badge variant="muted">Runtime independent</Badge>
+            <Badge variant="info" dot>Local-first</Badge>
+            <Badge variant="muted">Per-device preferences</Badge>
           </div>
+        </div>
+
+        <RuntimeMediaAccessibilityPanel />
+
+        <div className="flex flex-wrap items-end justify-between gap-3 pt-1">
+          <div>
+            <h3 className="text-[14px] font-semibold text-gray-900">AI tools & providers</h3>
+            <p className="mt-1 text-[11px] leading-4 text-gray-500">
+              Optional editor services remain separate from the native runtime and local authoring tools.
+            </p>
+          </div>
+          <Badge variant="muted">Editor-only</Badge>
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
@@ -403,6 +418,7 @@ export function SettingsScreen({
                 <p className="text-[13px] font-semibold text-gray-800">No providers configured</p>
                 <p className="mt-1 text-[12px] text-gray-500">
                   Local authoring remains active; provider-backed commands stay hidden until a configured capability is available.
+                  Maps, database, assets, and playtest stay available.
                 </p>
               </div>
             ) : (

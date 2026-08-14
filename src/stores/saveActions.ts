@@ -8,8 +8,14 @@ import {
   getFileSystemAdapter,
   isDesktopShell,
 } from '../adapters/adapterFactory';
-import { exportToFile, importFromFile } from '../adapters/JsonImportExportAdapter';
-import { createNewProjectState } from '../adapters/projectTemplates';
+import {
+  exportRuntimeBundleToFile,
+  exportToFile,
+  importFromFile,
+  type RuntimeBundleExportPreparation,
+} from '../adapters/JsonImportExportAdapter';
+import { createProjectStateFromTemplate } from '../adapters/projectTemplates';
+import type { ProjectTemplateId } from '../adapters/types';
 import type { FullProjectState } from '../adapters/types';
 
 export interface SaveOutcome {
@@ -109,6 +115,18 @@ export async function performExport(state: ProjectStoreState): Promise<void> {
   exportToFile(fullState);
 }
 
+export function performRuntimeBundleExport(
+  state: ProjectStoreState,
+): RuntimeBundleExportPreparation {
+  return exportRuntimeBundleToFile({
+    project: state.project,
+    maps: state.maps,
+    items: state.items,
+    databases: state.databases,
+    assets: state.assets,
+  });
+}
+
 export async function performImport(
   file: File,
   dispatch: Dispatch<ProjectAction>,
@@ -203,9 +221,9 @@ export async function performOpenProject(
 
 export async function performCreateProject(
   dispatch: Dispatch<ProjectAction>,
-  options: { title?: string } = {},
+  options: { title?: string; templateId?: ProjectTemplateId } = {},
 ): Promise<CreateProjectOutcome> {
-  const state = createNewProjectState(options.title);
+  const state = createProjectStateFromTemplate(options.templateId ?? 'blank', options.title);
 
   if (!isDesktopShell() || !window.rpgBridge) {
     dispatch({ type: 'LOAD_PROJECT', payload: state });

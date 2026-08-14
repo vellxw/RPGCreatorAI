@@ -8,6 +8,7 @@ import type {
   ProjectData,
   ValidationMessage,
 } from '../types/project';
+import type { VisualNovelContentV1 } from '../dialogue/contracts';
 
 export interface AdapterCapabilities {
   canReadFiles: boolean;
@@ -73,21 +74,28 @@ export interface TilesetImportResult {
 }
 
 export interface FullProjectState {
+  /** Optional authoring template marker; never grants runtime capabilities. */
+  templateId?: ProjectTemplateId;
   project: ProjectData;
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
   assets?: AssetCatalogData;
+  dialogue?: VisualNovelContentV1;
 }
 
+export type ProjectTemplateId = 'blank' | 'horror-bl';
+
 export interface ExportBundle {
-  schemaVersion: number;
+  schemaVersion: 2;
   exportedAt: string;
+  templateId?: ProjectTemplateId;
   project: ProjectData;
   maps: Record<string, MapData>;
   items: ItemDatabase;
   databases: DatabaseEntries;
   assets?: AssetCatalogData;
+  dialogue?: VisualNovelContentV1;
 }
 
 export interface ProjectDataAdapter {

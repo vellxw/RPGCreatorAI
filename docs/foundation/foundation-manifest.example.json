@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "projectTitle": "Lanterns of Bruma",
+  "status": "concept",
+  "updatedAt": "2026-08-13T00:00:00Z",
+  "documents": {
+    "readme": "README.md",
+    "gameDesign": "GAME_DESIGN.md",
+    "gameStyle": "GAME_STYLE.md",
+    "technical": "TECHNICAL.md",
+    "assets": "ASSETS.md"
+  },
+  "styleAuthority": {
+    "projectSource": "GAME_STYLE.md",
+    "engineSource": "docs/GAME_VISUAL_DESIGN.md"
+  },
+  "provenance": {
+    "assetRegister": "ASSETS.md",
+    "assetCatalog": "data/assets/catalog.json",
+    "generationHistory": "data/project.json#generationHistory",
+    "containsSecrets": false,
+    "releaseReviewStatus": "not-reviewed"
+  },
+  "openDecisions": [
+    "Confirm the final portrait pipeline and its commercial-use terms."
+  ]
+}

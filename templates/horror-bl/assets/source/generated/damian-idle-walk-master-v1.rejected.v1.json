@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "assetId": "candidate.damian.idle-walk-master-v1",
+  "status": "rejected",
+  "reviewStatus": "blocked",
+  "sourceMasterPath": "assets/source/generated/damian-idle-walk-master-v1-rejected-chroma.png",
+  "sourceMaster": {
+    "mediaType": "image/png",
+    "width": 1024,
+    "height": 1536,
+    "sizeBytes": 1694217,
+    "sha256": "d50806b1c890ca8a3ec94dd01f6803bcbfdb2ce57a3ef6760745143fb627157e",
+    "background": "flat #00ff00 chroma key; not normalized to alpha because the candidate was rejected"
+  },
+  "provenance": {
+    "tool": "image_gen.imagegen",
+    "providerId": "openai-built-in-image-generation",
+    "model": null,
+    "modelDisclosure": "The built-in tool did not expose a model identifier in its result; no model name is inferred.",
+    "operation": "image.edit",
+    "generatedAt": "2026-08-14T06:39:46.0952438Z",
+    "inputAsset": {
+      "assetId": "seed.damian.full-body",
+      "path": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+      "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3"
+    },
+    "builtInArtifactName": "exec-4a23ad23-460d-4d80-9537-b7624cba8cf2.png",
+    "prompt": "Use case: precise-object-edit\\nAsset type: one production master spritesheet for a 2D top-down game.\\nInput Image 1: this is the previous Damián master sheet. Repair its grid while preserving the same Damián identity, painterly game-sprite rendering, outfit, palette, full-body framing, clean #00ff00 background and per-cell scale.\\nPrimary request: output ONE complete strict 4 columns × 8 rows sheet, with 32 fully distinct poses. Correct the omission: it MUST have all eight rows in this exact order from top to bottom: 1 idle down/front, 2 idle left, 3 idle right, 4 idle up/back, 5 walk down/front, 6 walk left, 7 walk right, 8 walk up/back. Four sequential frames per row.\\nCritical repair invariant: include a clearly readable SEVENTH ROW for WALK FACING RIGHT. It must be the true opposite direction to row six (his face and body point right), with four genuinely different progressing gait poses; it must not be a mirrored/reused/copy-pasted row or cloned frames. All four walking rows must alternate leg and arm positions in a real cycle. Every idle row must have four subtle but visibly distinct breathing/weight-shift frames.\\nComposition: retain only the characters on a perfectly flat solid #00ff00 chroma key background. No grid lines, labels, text, borders, shadows, scenery or UI. Every cell has exactly one complete head-to-toe Damián at equal scale and bottom-center anchor. Do not crop bodies.\\nConstraints: same character every cell; rows 1 and 5 front-facing, rows 2 and 6 left-facing, rows 3 and 7 right-facing, rows 4 and 8 back-facing with no face. Never duplicate frames, omit a row, reuse a pose, or make only seven rows. No props, logos or watermarks.",
+    "previousDiscardedAttempt": {
+      "builtInArtifactName": "exec-102ba31c-c16c-45ba-9ce5-d8bf9630236f.png",
+      "sha256": "not-retained-in-project",
+      "reason": "also rendered only seven rows and omitted walk/right"
+    }
+  },
+  "qualityGate": {
+    "requiredGrid": { "columns": 4, "rows": 8, "frameCount": 32 },
+    "observedGrid": { "columns": 4, "rows": 7, "frameCount": 28 },
+    "missingRequiredRow": "walk/right",
+    "result": "failed",
+    "reason": "The source image does not contain all idle and walk directions. No horizontal strips, animation package, catalog entry, or runtime manifest was created from this rejected master."
+  }
+}

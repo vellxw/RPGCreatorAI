@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "variables": [
+    {
+      "id": "bond",
+      "name": "Vínculo",
+      "initial": 1,
+      "min": 0,
+      "max": 4,
+      "description": "Confianza mutua entre Damián y Elian."
+    },
+    {
+      "id": "lucidity",
+      "name": "Lucidez",
+      "initial": 70,
+      "min": 0,
+      "max": 100,
+      "description": "Capacidad de Damián para distinguir recuerdos implantados de hechos verificables."
+    },
+    {
+      "id": "evidence",
+      "name": "Evidencia",
+      "initial": 0,
+      "min": 0,
+      "max": 5,
+      "description": "Hechos corroborados que permiten desafiar la versión de la clínica."
+    }
+  ]
+}

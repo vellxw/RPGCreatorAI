@@ -110,7 +110,7 @@ fn runtime_not_found_message() -> String {
     "rpg_creator_runtime executable not found. Build it first with scripts/dev/verify-runtime.bat or set RPG_RUNTIME_EXE.".to_string()
 }
 
-fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
+fn locate_runtime_executable() -> Option<PathBuf> {
     let exe_name = if cfg!(windows) {
         "rpg_creator_runtime.exe"
     } else {
@@ -125,9 +125,11 @@ fn locate_runtime_executable(project_root: Option<&str>) -> Option<PathBuf> {
         }
     }
 
-    // 2. Inside the project root's build/
-    if let Some(root) = project_root {
-        let p = PathBuf::from(root).join("build").join(exe_name);
+    // 2. The repository that this shell was built from (development builds).
+    // CARGO_MANIFEST_DIR is fixed at compile time, so an imported project cannot
+    // redirect executable resolution to its own build/ directory.
+    if let Some(repository_root) = Path::new(env!("CARGO_MANIFEST_DIR")).parent() {
+        let p = repository_root.join("build").join(exe_name);
         if p.is_file() {
             return Some(p);
         }
@@ -173,10 +175,12 @@ fn runtime_status_from_state(state: &AppState) -> RuntimeStatus {
 }
 
 fn runtime_availability_for_status(
-    executable_search_root: Option<&str>,
+    _executable_search_root: Option<&str>,
     status: RuntimeStatus,
 ) -> RuntimeAvailabilityInfo {
-    let executable = locate_runtime_executable(executable_search_root);
+    // Keep the IPC argument for renderer compatibility, but never use a
+    // renderer/project-provided path to select executable code.
+    let executable = locate_runtime_executable();
     let executable_path = executable
         .as_ref()
         .map(|path| path.to_string_lossy().to_string());
@@ -357,8 +361,11 @@ pub fn runtime_launch(
         }
     }
 
-    let search_root = executable_search_root.as_deref().unwrap_or(&project_root);
-    let exe = match locate_runtime_executable(Some(search_root)) {
+    // executable_search_root remains in the command signature for backwards
+    // compatibility. It is intentionally ignored: project data may choose the
+    // runtime working directory, but never the executable that is launched.
+    let _ = executable_search_root;
+    let exe = match locate_runtime_executable() {
         Some(p) => p,
         None => {
             return Ok(RuntimeLaunchResult {
@@ -513,11 +520,10 @@ mod tests {
     fn locate_returns_none_when_nothing_present() {
         let _guard = runtime_env_lock().lock().unwrap();
         let previous = std::env::var_os("RPG_RUNTIME_EXE");
-        // Hide the env override and use a guaranteed-empty project root.
-        let tmp = tempfile::TempDir::new().unwrap();
+        // Hide the env override. Installation/repository candidates may still
+        // contain a built runtime on this machine.
         std::env::remove_var("RPG_RUNTIME_EXE");
-        let root_str = tmp.path().to_string_lossy().to_string();
-        let result = locate_runtime_executable(Some(&root_str));
+        let result = locate_runtime_executable();
         // We cannot assert None unconditionally because LOCALAPPDATA could
         // contain a built runtime on this machine. Just assert it does not panic.
         let _ = result;
@@ -537,10 +543,34 @@ mod tests {
         std::fs::write(&exe, b"not a real exe").unwrap();
         std::env::set_var("RPG_RUNTIME_EXE", &exe);
 
-        let result = locate_runtime_executable(None);
+        let result = locate_runtime_executable();
         assert_eq!(result.as_deref(), Some(exe.as_path()));
 
         restore_runtime_env(previous);
+    }
+
+    #[test]
+    fn availability_does_not_select_a_runtime_from_an_imported_project() {
+        let _guard = runtime_env_lock().lock().unwrap();
+        let previous = std::env::var_os("RPG_RUNTIME_EXE");
+        let project = tempfile::TempDir::new().unwrap();
+        let project_exe = project.path().join("build").join(if cfg!(windows) {
+            "rpg_creator_runtime.exe"
+        } else {
+            "rpg_creator_runtime"
+        });
+        std::fs::create_dir_all(project_exe.parent().unwrap()).unwrap();
+        std::fs::write(&project_exe, b"untrusted project executable").unwrap();
+        std::env::remove_var("RPG_RUNTIME_EXE");
+
+        let project_root = project.path().to_string_lossy().to_string();
+        let result = runtime_availability_for_status(Some(&project_root), RuntimeStatus::Ready);
+
+        restore_runtime_env(previous);
+        assert_ne!(
+            result.executable_path.as_deref(),
+            Some(project_exe.to_string_lossy().as_ref())
+        );
     }
 
     #[test]
@@ -586,14 +616,29 @@ mod tests {
         } else {
             std::env::remove_var("LOCALAPPDATA");
         }
-        assert!(!result.available);
         assert_eq!(result.status, RuntimeStatus::Ready);
-        assert!(result.executable_path.is_none());
-        assert!(result
-            .error
-            .as_deref()
-            .unwrap()
-            .contains("rpg_creator_runtime executable not found"));
+        if result.available {
+            // A trusted repository or installed runtime may exist on the
+            // developer machine. The important invariant is that the
+            // imported project's build directory was never selected.
+            let project_exe = root.path().join("build").join(if cfg!(windows) {
+                "rpg_creator_runtime.exe"
+            } else {
+                "rpg_creator_runtime"
+            });
+            let project_exe_string = project_exe.to_string_lossy().to_string();
+            assert_ne!(
+                result.executable_path.as_deref(),
+                Some(project_exe_string.as_str())
+            );
+        } else {
+            assert!(result.executable_path.is_none());
+            assert!(result
+                .error
+                .as_deref()
+                .unwrap()
+                .contains("rpg_creator_runtime executable not found"));
+        }
     }
 
     #[test]

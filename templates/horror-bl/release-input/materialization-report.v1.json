@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "blueprintId": "la-novena-promesa.chapter-1.vertical-slice",
+  "mapIds": [
+    "facility_lobby",
+    "archive_sublevel",
+    "service_corridor"
+  ],
+  "dialogueIncluded": true,
+  "blueprint": {
+    "sha256": "95f6ccbd452c6f843505f88daed5fa60ccf8fea8c1303d348fd0cd7d96314473"
+  },
+  "project": {
+    "sha256": "34ddc4d299088f8fde816c969e5c2d7b98a4fbdfe283329e4984010d3f6816bd"
+  },
+  "assets": {
+    "manifest": {
+      "sha256": "58b0d99d00eb3427ea517175ed3493395f79a7d40532c52531195e829d2e75ab"
+    },
+    "allowlist": [
+      "portrait.damian",
+      "portrait.elian",
+      "threat.ninth-witness",
+      "seed.damian.full-body",
+      "background.facility-lobby",
+      "background.archive-sublevel",
+      "background.service-corridor",
+      "sprite.damian.idle.down",
+      "sprite.damian.idle.left",
+      "sprite.damian.idle.right",
+      "sprite.damian.idle.up",
+      "sprite.damian.walk.down",
+      "sprite.damian.walk.left",
+      "sprite.damian.walk.right",
+      "sprite.damian.walk.up",
+      "sprite.damian.interact.down",
+      "sprite.damian.interact.left",
+      "sprite.damian.interact.right",
+      "sprite.damian.interact.up",
+      "audio.ambience.facility-lobby",
+      "audio.ambience.archive-sublevel",
+      "audio.ambience.service-corridor",
+      "audio.stinger.ninth-witness",
+      "audio.ui.confirm",
+      "audio.ui.cancel",
+      "audio.footstep.concrete",
+      "audio.ending.memory-release"
+    ]
+  },
+  "gameBundle": {
+    "sha256": "76e6275477ff2c51f9a74461fd30458857342f5b6abf02c12d378c56f3597358"
+  },
+  "offlineOnly": true,
+  "externalReferencesAllowed": false
+}

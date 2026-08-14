@@ -1,0 +1,199 @@
+{
+  "format": "rpgcreatorai.release-checklist",
+  "schemaVersion": 1,
+  "id": "rpgcreatorai.windows-portable.v1",
+  "target": "windows-portable",
+  "validator": {
+    "module": "src/export/windowsPortableRelease.ts",
+    "export": "validateWindowsPortableRelease",
+    "cli": "scripts/dev/validate-windows-portable-release.ts",
+    "cliBootstrap": "scripts/dev/run-windows-portable-validator.mjs",
+    "exporter": "scripts/dev/export-windows-portable.ps1",
+    "blockingSeverity": "error",
+    "successExpression": "result.ok === true && result.errors.length === 0"
+  },
+  "inputs": [
+    {
+      "id": "manifest",
+      "required": true,
+      "description": "WindowsPortableReleaseManifestV1 and exhaustive extracted-file inventory."
+    },
+    {
+      "id": "nativeData",
+      "required": true,
+      "description": "Parsed data/project.json plus exactly its referenced data/maps and data/database JSON shards."
+    },
+    {
+      "id": "gameBundle",
+      "required": true,
+      "description": "Compiled GameBundle v1; never raw editor/project state."
+    },
+    {
+      "id": "provenance",
+      "required": true,
+      "description": "Release-safe asset provenance sidecar v1."
+    },
+    {
+      "id": "compilerWarnings",
+      "required": true,
+      "description": "Warnings from the exact successful GameBundle compilation used for this release."
+    }
+  ],
+  "canonicalPaths": {
+    "nativeProject": "data/project.json",
+    "gameBundle": "data/game-bundle.v1.json",
+    "assetProvenance": "data/asset-provenance.v1.json",
+    "assetRoot": "assets/"
+  },
+  "releaseDecision": {
+    "allowWhen": "all checks have zero error issues",
+    "denyWhen": "any check has one or more error issues",
+    "mutationPolicy": "fail-closed; validator does not redact or repair release inputs"
+  },
+  "checks": [
+    {
+      "id": "WP-001-contract-schema",
+      "severity": "error",
+      "scope": "manifest",
+      "assertion": "Release manifest is JSON-safe, uses schemaVersion 1, and contains only declared contract fields."
+    },
+    {
+      "id": "WP-002-target-platform",
+      "severity": "error",
+      "scope": "manifest.artifact",
+      "assertion": "Target is windows-portable, artifact is a portable directory or zip, and architecture is x64 or arm64."
+    },
+    {
+      "id": "WP-003-game-bundle-schema",
+      "severity": "error",
+      "scope": "gameBundle",
+      "assertion": "Input is a compiled GameBundle v1 with project, maps, items, databases, and only runtime asset fields."
+    },
+    {
+      "id": "WP-004-game-bundle-json",
+      "severity": "error",
+      "scope": "gameBundle",
+      "assertion": "GameBundle contains no circular, undefined, executable, or non-finite JSON values."
+    },
+    {
+      "id": "WP-005-compiler-secret-redaction",
+      "severity": "error",
+      "scope": "compilerWarnings",
+      "assertion": "Compiler warning evidence is present and contains no secret-redacted warning; a release must fail instead of silently shipping a redacted build."
+    },
+    {
+      "id": "WP-006-native-project-schema",
+      "severity": "error",
+      "scope": "nativeData[data/project.json]",
+      "assertion": "The native project is schema v1, has a valid start map, and declares only map/database references understood by the native runtime."
+    },
+    {
+      "id": "WP-010-asset-allowlist",
+      "severity": "error",
+      "scope": "manifest.assetAllowlist",
+      "assertion": "Asset ids are explicit, canonical, non-blank, and unique case-insensitively."
+    },
+    {
+      "id": "WP-011-bundle-assets-allowlisted",
+      "severity": "error",
+      "scope": "manifest.assetAllowlist + gameBundle.assets",
+      "assertion": "GameBundle assets and the explicit allowlist are an exact one-to-one set."
+    },
+    {
+      "id": "WP-012-asset-runtime-compatibility",
+      "severity": "error",
+      "scope": "gameBundle.assets",
+      "assertion": "Every bundled asset is marked runtimeCompatible true."
+    },
+    {
+      "id": "WP-013-asset-files",
+      "severity": "error",
+      "scope": "manifest.files",
+      "assertion": "Every allowlisted asset has exactly one asset-role file and no non-allowlisted file is shipped below assets/."
+    },
+    {
+      "id": "WP-014-asset-paths",
+      "severity": "error",
+      "scope": "gameBundle.assets + manifest.files",
+      "assertion": "Asset paths are canonical Windows-safe relative paths below assets/ and agree across bundle and file inventory."
+    },
+    {
+      "id": "WP-015-native-data-allowlist",
+      "severity": "error",
+      "scope": "manifest.nativeDataAllowlist + nativeData + manifest.files",
+      "assertion": "data/project.json, referenced maps, and recognized database shards form one deterministic exact allowlist with no missing, duplicate, extra, traversing, or mis-typed entry."
+    },
+    {
+      "id": "WP-020-provenance-coverage",
+      "severity": "error",
+      "scope": "provenance",
+      "assertion": "Every and only allowlisted asset has one sidecar record with non-blank origin and user-confirmed license note."
+    },
+    {
+      "id": "WP-021-provenance-consistency",
+      "severity": "error",
+      "scope": "provenance.assets",
+      "assertion": "Provenance assetId, runtimePath, and source match the corresponding GameBundle asset."
+    },
+    {
+      "id": "WP-022-generated-provenance",
+      "severity": "error",
+      "scope": "provenance.assets[].generated",
+      "assertion": "Generated assets record provider, model, operation, timestamp, and output SHA-256 matching the shipped bytes; raw prompts/responses are not allowed."
+    },
+    {
+      "id": "WP-030-sensitive-property-names",
+      "severity": "error",
+      "scope": "manifest + gameBundle + provenance",
+      "assertion": "No recursively nested property name matches the shared portable-sensitive-key policy."
+    },
+    {
+      "id": "WP-031-secret-value-patterns",
+      "severity": "error",
+      "scope": "manifest + gameBundle + provenance + compilerWarnings",
+      "assertion": "No string matches centralized redaction behavior or common OpenAI, Google, GitHub, Slack, AWS, bearer, or private-key credential patterns."
+    },
+    {
+      "id": "WP-032-external-runtime-references",
+      "severity": "error",
+      "scope": "manifest + gameBundle",
+      "assertion": "Runtime-loadable fields cannot reference network, file, content, data, or other external URI schemes."
+    },
+    {
+      "id": "WP-040-release-file-inventory",
+      "severity": "error",
+      "scope": "manifest.files",
+      "assertion": "Extracted-tree inventory is exhaustive, uses known roles, declared fields only, and unique case-insensitive paths."
+    },
+    {
+      "id": "WP-041-required-runtime-files",
+      "severity": "error",
+      "scope": "manifest.artifact + manifest.files",
+      "assertion": "Colocated launcher/runtime executables, canonical native project and every referenced map/database shard, GameBundle and provenance sidecars, README, and license are present with correct roles."
+    },
+    {
+      "id": "WP-042-windows-path-safety",
+      "severity": "error",
+      "scope": "all release paths",
+      "assertion": "Paths are forward-slash canonical, project-relative, traversal/ADS free, and avoid Windows device names and trailing dots/spaces."
+    },
+    {
+      "id": "WP-043-file-integrity",
+      "severity": "error",
+      "scope": "manifest.files",
+      "assertion": "Every shipped file has a positive safe byte size and lower-case SHA-256."
+    },
+    {
+      "id": "WP-044-forbidden-release-content",
+      "severity": "error",
+      "scope": "manifest.files",
+      "assertion": "Release contains no source trees, tests, caches, backups, saves/logs, credential stores, signing material, debug symbols, source maps, temp files, or build intermediates."
+    },
+    {
+      "id": "WP-045-release-size-limits",
+      "severity": "error",
+      "scope": "manifest.files",
+      "assertion": "Release inventory, individual files, asset catalogs, provenance, and compiler evidence stay within bounded structural and byte limits."
+    }
+  ]
+}

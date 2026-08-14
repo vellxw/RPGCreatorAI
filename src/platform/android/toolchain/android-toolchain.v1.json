@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "rpgcreatorai.android-player.toolchain",
+  "canonicalProjectRoot": "src/platform/android/native-scaffold",
+  "java": {
+    "requiredMajor": 17,
+    "requireJavaHome": true,
+    "releaseManifestMustRecord": ["vendor", "runtimeVersion", "javaHomeSha256"]
+  },
+  "androidSdk": {
+    "rootEnvironmentVariables": ["ANDROID_SDK_ROOT", "ANDROID_HOME"],
+    "compileSdk": 36,
+    "targetSdk": 36,
+    "minSdk": 24,
+    "packages": [
+      "platforms;android-36",
+      "build-tools;35.0.0",
+      "platform-tools"
+    ],
+    "requiredFiles": [
+      "platforms/android-36/android.jar",
+      "build-tools/35.0.0/aapt2.exe",
+      "build-tools/35.0.0/apksigner.bat",
+      "platform-tools/adb.exe"
+    ],
+    "releaseManifestMustRecord": ["sdkRootSha256", "packageRevisions"]
+  },
+  "gradle": {
+    "version": "8.14.3",
+    "distributionType": "bin",
+    "distributionUrl": "https://services.gradle.org/distributions/gradle-8.14.3-bin.zip",
+    "distributionSha256Sum": "bd71102213493060956ec229d946beee57158dbd89d0e62b91bca0fa2c5f3531",
+    "wrapperPropertiesFixture": "src/platform/android/toolchain/gradle-wrapper.properties.fixture",
+    "requiredWrapperFiles": [
+      "gradlew",
+      "gradlew.bat",
+      "gradle/wrapper/gradle-wrapper.jar",
+      "gradle/wrapper/gradle-wrapper.properties"
+    ],
+    "wrapperInventory": "gradle/wrapper/wrapper-files.sha256.json"
+  },
+  "androidGradlePlugin": {
+    "version": "8.13.0"
+  },
+  "runtimePolicy": {
+    "internetPermissionAllowed": false,
+    "cleartextTrafficAllowed": false,
+    "externalAssetUrlsAllowed": false,
+    "assetBaseUrl": "/assets/www/"
+  }
+}

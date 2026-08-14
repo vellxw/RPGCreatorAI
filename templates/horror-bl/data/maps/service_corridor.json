@@ -1,0 +1,310 @@
+{
+  "schemaVersion": 1,
+  "id": "service_corridor",
+  "name": "Corredor de Servicio Nueve",
+  "displayName": "Corredor de Servicio Nueve",
+  "width": 28,
+  "height": 10,
+  "tileSize": 48,
+  "layers": [
+    {
+      "name": "ground",
+      "type": "visual",
+      "role": "ground",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+      ]
+    },
+    {
+      "name": "collision",
+      "type": "collision",
+      "role": "collision",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9
+      ]
+    },
+    {
+      "name": "region",
+      "type": "region",
+      "role": "region",
+      "visible": true,
+      "locked": false,
+      "tiles": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "archive_door",
+      "type": "transfer",
+      "x": 1,
+      "y": 5,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [
+        { "type": "transferMap", "mapId": "archive_sublevel", "x": 19, "y": 6, "direction": "left" }
+      ]
+    },
+    {
+      "id": "corridor_threshold",
+      "type": "trigger",
+      "x": 1,
+      "y": 1,
+      "solid": false,
+      "trigger": "autorun",
+      "commands": [],
+      "pages": [
+        {
+          "id": "threshold_reveal",
+          "name": "Revelación del umbral",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "autorun",
+          "commands": [
+            { "type": "showText", "speaker": "Elian Varela", "text": "No sé si soy el que salió o el que te esperó. Sé que ahora puedo elegir caminar con vos." },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "threshold_revealed",
+          "name": "Umbral revelado",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "interact",
+          "commands": []
+        }
+      ]
+    },
+    {
+      "id": "mirror_sample",
+      "type": "object",
+      "x": 7,
+      "y": 2,
+      "solid": true,
+      "trigger": "interact",
+      "commands": [],
+      "pages": [
+        {
+          "id": "uncollected_sample",
+          "name": "Muestra sin registrar",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "La criatura no contiene ADN humano completo: está hecha de recuerdos materializados, no de los pacientes." },
+            { "type": "addItem", "itemId": "mirror_tissue_sample", "amount": 1 },
+            { "type": "controlVariable", "variableId": "evidence", "op": "add", "value": 1 },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "recorded_sample",
+          "name": "Muestra documentada",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": false },
+          "priority": "sameAsCharacters",
+          "trigger": "interact",
+          "commands": [
+            { "type": "showText", "text": "La criatura no contiene ADN humano completo: está hecha de recuerdos materializados, no de los pacientes." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chase_trigger",
+      "type": "trigger",
+      "x": 13,
+      "y": 5,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [],
+      "pages": [
+        {
+          "id": "unresolved_chase",
+          "name": "Persecución pendiente",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "touch",
+          "commands": [
+            { "type": "showText", "text": "La entidad abandona el disfraz y persigue a la pareja por el corredor de servicio." },
+            { "type": "showText", "text": "Alcanzá la compuerta del incinerador y mantené a Elian dentro del cono de luz." },
+            { "type": "controlSwitch", "switchId": "chase_survived", "value": true },
+            {
+              "type": "showChoices",
+              "prompt": "¿Qué verdad ofrece Damián?",
+              "choices": [
+                {
+                  "label": "Admitir que huyó porque la clínica le mostró una vida feliz fabricada con Elian.",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "bond", "op": "add", "value": 1 },
+                    { "type": "controlSwitch", "switchId": "promised_truth", "value": true }
+                  ]
+                },
+                {
+                  "label": "Decir que sólo intentaba protegerlo.",
+                  "commands": [
+                    { "type": "controlVariable", "variableId": "bond", "op": "add", "value": -1 },
+                    { "type": "controlVariable", "variableId": "lucidity", "op": "add", "value": 5 }
+                  ]
+                }
+              ]
+            },
+            { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+          ]
+        },
+        {
+          "id": "survived_chase",
+          "name": "Persecución superada",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "interact",
+          "commands": []
+        }
+      ]
+    },
+    {
+      "id": "incinerator_threshold",
+      "type": "trigger",
+      "x": 26,
+      "y": 5,
+      "solid": false,
+      "trigger": "touch",
+      "commands": [],
+      "pages": [
+        {
+          "id": "default_ending",
+          "name": "Final agridulce disponible",
+          "conditions": {},
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "touch",
+          "commands": [
+            { "type": "showText", "speaker": "Damián Ferreyra", "text": "No te prometo que voy a recordarte bien. Te prometo preguntarte quién sos cada vez que haga falta." },
+            { "type": "showText", "speaker": "Elian Varela", "text": "Eso sí es una promesa que puedo aceptar." },
+            {
+              "type": "showChoices",
+              "prompt": "¿Cómo termina la novena promesa?",
+              "choices": [
+                {
+                  "label": "Cerrar la puerta y dejar que una sola memoria cargue con las demás.",
+                  "commands": [
+                    { "type": "showText", "text": "El noveno testigo" },
+                    { "type": "showText", "text": "La puerta se cierra y una versión de Elian queda dentro. Afuera, el sobreviviente no recuerda haber enviado el mensaje inicial." },
+                    { "type": "showText", "text": "Cada espejo de la ciudad comienza a reflejar un corredor distinto de Santa Ágata." },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hopeful_ending_available",
+          "name": "Ambos finales disponibles",
+          "conditions": {
+            "switches": { "promised_truth": true },
+            "variables": [
+              { "variableId": "bond", "op": "gte", "value": 3 },
+              { "variableId": "evidence", "op": "gte", "value": 2 }
+            ]
+          },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "touch",
+          "commands": [
+            { "type": "showText", "speaker": "Damián Ferreyra", "text": "No te prometo que voy a recordarte bien. Te prometo preguntarte quién sos cada vez que haga falta." },
+            { "type": "showText", "speaker": "Elian Varela", "text": "Eso sí es una promesa que puedo aceptar." },
+            {
+              "type": "showChoices",
+              "prompt": "¿Cómo termina la novena promesa?",
+              "choices": [
+                {
+                  "label": "Cruzar juntos y sostener la memoria entre los dos.",
+                  "commands": [
+                    { "type": "showText", "text": "La promesa conservada" },
+                    { "type": "showText", "text": "Damián y Elian salen juntos. Ninguno reclama ser la versión original; acuerdan construir recuerdos que ambos puedan cuestionar." },
+                    { "type": "showText", "text": "En el teléfono de Damián aparece una décima llamada con su propia voz." },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                },
+                {
+                  "label": "Cerrar la puerta y dejar que una sola memoria cargue con las demás.",
+                  "commands": [
+                    { "type": "showText", "text": "El noveno testigo" },
+                    { "type": "showText", "text": "La puerta se cierra y una versión de Elian queda dentro. Afuera, el sobreviviente no recuerda haber enviado el mensaje inicial." },
+                    { "type": "showText", "text": "Cada espejo de la ciudad comienza a reflejar un corredor distinto de Santa Ágata." },
+                    { "type": "controlSelfSwitch", "switchId": "A", "value": true }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ending_seen",
+          "name": "Final completado",
+          "conditions": { "selfSwitches": { "A": true } },
+          "graphic": {},
+          "movement": { "type": "fixed", "speed": "normal" },
+          "options": { "walking": false, "stepping": false, "directionFix": true, "through": true },
+          "priority": "belowCharacters",
+          "trigger": "interact",
+          "commands": []
+        }
+      ]
+    }
+  ]
+}

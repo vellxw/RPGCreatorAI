@@ -1,0 +1,507 @@
+{
+  "schemaVersion": 1,
+  "templateId": "horror-bl",
+  "chapterId": "la-novena-promesa.chapter-1.vertical-slice",
+  "releaseReady": true,
+  "allowlistPath": "templates/horror-bl/release-input/asset-allowlist.json",
+  "provenancePath": "templates/horror-bl/release-input/asset-provenance.v1.json",
+  "requiredSlots": [
+    {
+      "slotId": "portrait.damian",
+      "expectedKind": "portrait",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": {
+        "fixtureOnly": true,
+        "repositoryPath": "assets/generated/web/player_adventurer.png",
+        "sha256": "d0d6a7ffc37492f823944486d1e84acee66311e2c86397f8e6e7ad1bd45e578d",
+        "sizeBytes": 5084,
+        "catalogAssetId": "player_adventurer_sheet",
+        "licenseStatus": "unconfirmed"
+      },
+      "approval": {
+        "assetId": "portrait.damian",
+        "runtimePath": "assets/generated/runtime/portraits/damian.png",
+        "source": "generated",
+        "sha256": "f4058bc626339285ca6c22c249dac32af92d24d3821ac859fd5f65d38be9e304",
+        "sizeBytes": 2258645,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "licenseNote": "Original AI-generated output created for this project with OpenAI built-in image generation, without input images or real-person/third-party visual references. No standalone copyright license or unrestricted public-redistribution right is asserted here; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "portrait.elian",
+      "expectedKind": "portrait",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": {
+        "fixtureOnly": true,
+        "repositoryPath": "assets/generated/web/npc_shopkeeper.png",
+        "sha256": "bd983acb4f768153f25a7ac0e324c62184dcdb85242df3e741f60b3207b042c8",
+        "sizeBytes": 4747,
+        "catalogAssetId": "shopkeeper_portrait",
+        "licenseStatus": "unconfirmed"
+      },
+      "approval": {
+        "assetId": "portrait.elian",
+        "runtimePath": "assets/generated/runtime/portraits/elian.png",
+        "source": "generated",
+        "sha256": "b7e5e7a5410bd293b6a8fced8fa768f9f6210c611bae7a2a27571a8cb6128245",
+        "sizeBytes": 2079660,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "licenseNote": "Original AI-generated output created for this project with OpenAI built-in image generation, without input images or real-person/third-party visual references. No standalone copyright license or unrestricted public-redistribution right is asserted here; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "threat.ninth-witness",
+      "expectedKind": "threat",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": {
+        "fixtureOnly": true,
+        "repositoryPath": "assets/generated/web/enemy_slime.png",
+        "sha256": "8abd1801461c327ab642efe3e8f06baf1b67a723d5a918dbc881eb82e0dae573",
+        "sizeBytes": 7126,
+        "catalogAssetId": "enemy_slime",
+        "licenseStatus": "unconfirmed"
+      },
+      "approval": {
+        "assetId": "threat.ninth-witness",
+        "runtimePath": "assets/generated/runtime/sprites/ninth-witness.png",
+        "source": "generated",
+        "sha256": "b3a4b1cdbb0158623c8fb995a4d526dd960ab75241b563e1b6783fa03b164a64",
+        "sizeBytes": 1934611,
+        "mediaType": "image/png",
+        "width": 1254,
+        "height": 1254,
+        "licenseNote": "Original AI-generated output created for this project with OpenAI built-in image generation, without input images or real-person/third-party visual references. No standalone copyright license or unrestricted public-redistribution right is asserted here; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T04:59:46.6799630Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "seed.damian.full-body",
+      "expectedKind": "character-seed",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": null,
+      "approval": {
+        "assetId": "seed.damian.full-body",
+        "runtimePath": "assets/generated/runtime/characters/damian-fullbody-seed-v1.png",
+        "source": "generated",
+        "sha256": "b3b44f3b5b8958ec18f9d95637bc00e4843b5032a2a48bb7052a433afb862dc3",
+        "sizeBytes": 922124,
+        "mediaType": "image/png",
+        "width": 1024,
+        "height": 1536,
+        "licenseNote": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T06:14:21.0909207Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "background.facility-lobby",
+      "expectedKind": "background",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": null,
+      "approval": {
+        "assetId": "background.facility-lobby",
+        "runtimePath": "assets/generated/runtime/backgrounds/facility-lobby-v1.png",
+        "source": "generated",
+        "sha256": "31bd655743e88d3eab275ba77588c888833cb09ad4000f61f3cc2b097a91062e",
+        "sizeBytes": 2041582,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "licenseNote": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T06:14:21.0909207Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "background.archive-sublevel",
+      "expectedKind": "background",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": null,
+      "approval": {
+        "assetId": "background.archive-sublevel",
+        "runtimePath": "assets/generated/runtime/backgrounds/archive-sublevel-v1.png",
+        "source": "generated",
+        "sha256": "1c44ec66e4d95b9e8b94051a2d0f48da16bb105b8e6cf632d8f48bf304337c97",
+        "sizeBytes": 2082722,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "licenseNote": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T06:14:21.0909207Z"
+      },
+      "blockers": []
+    },
+    {
+      "slotId": "background.service-corridor",
+      "expectedKind": "background",
+      "reviewState": "frozen",
+      "releaseEligible": true,
+      "candidate": null,
+      "approval": {
+        "assetId": "background.service-corridor",
+        "runtimePath": "assets/generated/runtime/backgrounds/service-corridor-v1.png",
+        "source": "generated",
+        "sha256": "9be0963d60138ad7535a843bb8ce6e1669fd060a00d8dc4f3759dc9bf3ab3ca8",
+        "sizeBytes": 1864946,
+        "mediaType": "image/png",
+        "width": 1664,
+        "height": 936,
+        "licenseNote": "No standalone copyright license or unrestricted public-redistribution right is asserted. The retained prompts, references, masters, normalized bytes, and hashes support project-local packaging; external distribution remains subject to applicable OpenAI terms and law.",
+        "reviewer": "Codex automated visual and technical review (delegated by project creator)",
+        "decidedAt": "2026-08-14T06:14:21.0909207Z"
+      },
+      "blockers": []
+    }
+  ],
+  "approvedAssetIds": [
+    "portrait.damian",
+    "portrait.elian",
+    "threat.ninth-witness",
+    "seed.damian.full-body",
+    "background.facility-lobby",
+    "background.archive-sublevel",
+    "background.service-corridor"
+  ],
+  "supplementalAudio": {
+    "schemaVersion": 1,
+    "scope": "Technical integrity evidence for deterministic procedural WAVs. This section does not modify the seven visual requiredSlots or visual releaseReady derivation.",
+    "technicalReview": {
+      "state": "generated-verified",
+      "reviewer": "Codex automated technical verification (not human acceptance)",
+      "verificationScript": "scripts/dev/validate-horror-bl-audio.mjs",
+      "generatorScript": "scripts/dev/generate-horror-bl-audio.mjs"
+    },
+    "humanAcceptance": {
+      "state": "accepted",
+      "evidence": "release-input/editor-acceptance-evidence.v1.json",
+      "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+      "reviewer": "Codex (delegado explícitamente por el creador)",
+      "reviewedAt": "2026-08-14T12:02:55.844Z"
+    },
+    "assets": [
+      {
+        "assetId": "audio.ambience.facility-lobby",
+        "runtimePath": "assets/audio/horror-bl/ambience-facility-lobby.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 12000,
+        "sizeBytes": 529244,
+        "sha256": "9e523150c7915b15255dc9ffaa8de9823d697e4f37b8c4bc1c39f4476b2407b2"
+      },
+      {
+        "assetId": "audio.ambience.archive-sublevel",
+        "runtimePath": "assets/audio/horror-bl/ambience-archive-sublevel.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 12000,
+        "sizeBytes": 529244,
+        "sha256": "a4409ec0b7a3043e8c587b95310f5ef1a83300cb356d8b73961a3ad8bf9590ff"
+      },
+      {
+        "assetId": "audio.ambience.service-corridor",
+        "runtimePath": "assets/audio/horror-bl/ambience-service-corridor.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 12000,
+        "sizeBytes": 529244,
+        "sha256": "a838d85ee789e9b3eaae9f1d93274fc7b93b5c5bdaeeab5c080e1a32821857e3"
+      },
+      {
+        "assetId": "audio.stinger.ninth-witness",
+        "runtimePath": "assets/audio/horror-bl/ninth-witness-stinger.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 1800,
+        "sizeBytes": 79424,
+        "sha256": "98b615ae2e41f82f66b6629db2bfc612991da7b90c9170085b5e4e7042347ac6"
+      },
+      {
+        "assetId": "audio.ui.confirm",
+        "runtimePath": "assets/audio/horror-bl/ui-confirm.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 180,
+        "sizeBytes": 7982,
+        "sha256": "4b397c7011b04a76b88f3c82fb584f8726d343170e3069ea86bf18c8f78c0ef8"
+      },
+      {
+        "assetId": "audio.ui.cancel",
+        "runtimePath": "assets/audio/horror-bl/ui-cancel.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 210,
+        "sizeBytes": 9306,
+        "sha256": "e6349368de9d985deb30bfe2c0b8002aff269ce785b47dcd410036c32ca24863"
+      },
+      {
+        "assetId": "audio.footstep.concrete",
+        "runtimePath": "assets/audio/horror-bl/footstep-concrete.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 240,
+        "sizeBytes": 10628,
+        "sha256": "2d8100369c8e779d94dca4ac3e74d952cba4ff771a201b766603c00091028c31"
+      },
+      {
+        "assetId": "audio.ending.memory-release",
+        "runtimePath": "assets/audio/horror-bl/ending-memory-release.wav",
+        "mediaType": "audio/wav",
+        "durationMs": 4200,
+        "sizeBytes": 185264,
+        "sha256": "380d3b735a573c5554ee60d8939ea09e45c4e2bc7d874c49a65b1a4a493df69a"
+      }
+    ]
+  },
+  "blockers": [],
+  "supplementalAnimation": {
+    "schemaVersion": 1,
+    "scope": "Technical integrity evidence for generated Damián AnimationPackage v1 strips. This section does not modify the seven visual requiredSlots or visual releaseReady derivation.",
+    "package": "data/assets/animation-packages/damian.animation-package.v1.json",
+    "technicalReview": {
+      "state": "generated-verified",
+      "reviewer": "Codex automated technical sprite review (not human acceptance)",
+      "verificationScript": "scripts/dev/validate-damian-animation-v2.mjs",
+      "qaReport": "data/assets/animation-packages/damian.qa.v1.json"
+    },
+    "humanAcceptance": {
+      "state": "accepted",
+      "evidence": "release-input/editor-acceptance-evidence.v1.json",
+      "evidenceSha256": "fce6b49a4bd12f0a9387a77e38de3f0db22c6f463fc13eb0c5a6e5fc0fe4d102",
+      "reviewer": "Codex (delegado explícitamente por el creador)",
+      "reviewedAt": "2026-08-14T12:02:55.844Z"
+    },
+    "assets": [
+      {
+        "assetId": "sprite.damian.idle.down",
+        "runtimePath": "assets/generated/runtime/sprites/damian_idle_down.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 110374,
+        "sha256": "412a6e6c3e4b18b91386804fda45face3a88473678cbdfade0e660583c0149ec",
+        "action": "idle",
+        "direction": "down",
+        "animationSetId": "damian",
+        "fps": 6,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.idle.left",
+        "runtimePath": "assets/generated/runtime/sprites/damian_idle_left.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 72502,
+        "sha256": "d52fd1a93f4a71b671b4b2bda1e71f4d4a1635f78e2a935dd380631ca3b1b8f6",
+        "action": "idle",
+        "direction": "left",
+        "animationSetId": "damian",
+        "fps": 6,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.idle.right",
+        "runtimePath": "assets/generated/runtime/sprites/damian_idle_right.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 78900,
+        "sha256": "ecf50e8fc0e1e8f6e77b6eb7f6849cae875a72171d75c58c894a9beca9203532",
+        "action": "idle",
+        "direction": "right",
+        "animationSetId": "damian",
+        "fps": 6,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.idle.up",
+        "runtimePath": "assets/generated/runtime/sprites/damian_idle_up.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 97949,
+        "sha256": "af568462fea6adf5b83d8c24aee3bcf7ea888dd05a439a6c3221010b1b19c812",
+        "action": "idle",
+        "direction": "up",
+        "animationSetId": "damian",
+        "fps": 6,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.walk.down",
+        "runtimePath": "assets/generated/runtime/sprites/damian_walk_down.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 100601,
+        "sha256": "b6b60020913e6548b75b0b421c1538087d9366d4d222212f6719c640129fdcfe",
+        "action": "walk",
+        "direction": "down",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.walk.left",
+        "runtimePath": "assets/generated/runtime/sprites/damian_walk_left.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 96077,
+        "sha256": "c7d1b98fc7a45708af7ccbb2399c8252a43704fbc59ac4e88325d35542e12088",
+        "action": "walk",
+        "direction": "left",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.walk.right",
+        "runtimePath": "assets/generated/runtime/sprites/damian_walk_right.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 96046,
+        "sha256": "d3a2d9bc06e97dee0a412a155e935237d02eab9806cbac67729787709db2aba2",
+        "action": "walk",
+        "direction": "right",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.walk.up",
+        "runtimePath": "assets/generated/runtime/sprites/damian_walk_up.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 91356,
+        "sha256": "0f39472c3ea36f62a4cae19866a65c5907d00e8544c1c2664ae96b1deb8dfb1d",
+        "action": "walk",
+        "direction": "up",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.interact.down",
+        "runtimePath": "assets/generated/runtime/sprites/damian_interact_down.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 264064,
+        "sha256": "3ae58179202963ce76ce3b2729a08fe63d9d40d7d72495ad6b48e448f2947461",
+        "action": "interact",
+        "direction": "down",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.interact.left",
+        "runtimePath": "assets/generated/runtime/sprites/damian_interact_left.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 206197,
+        "sha256": "1daf6af9d14bd91626dbb38283fd003464f1f9329fe8b623855f983dc9ff0f00",
+        "action": "interact",
+        "direction": "left",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.interact.right",
+        "runtimePath": "assets/generated/runtime/sprites/damian_interact_right.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 137917,
+        "sha256": "b3bfed25f7166e28658d380912764d43827e72c068b7f8852cb42f4ac49276c9",
+        "action": "interact",
+        "direction": "right",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      },
+      {
+        "assetId": "sprite.damian.interact.up",
+        "runtimePath": "assets/generated/runtime/sprites/damian_interact_up.png",
+        "mediaType": "image/png",
+        "frameWidth": 256,
+        "frameHeight": 384,
+        "frameCount": 4,
+        "sizeBytes": 211420,
+        "sha256": "2ea57b01492fdba638641e6bcc5767bd28162cd1df4e6416dab6db2d651d6711",
+        "action": "interact",
+        "direction": "up",
+        "animationSetId": "damian",
+        "fps": 8,
+        "anchor": {
+          "x": 128,
+          "y": 376
+        }
+      }
+    ]
+  }
+}

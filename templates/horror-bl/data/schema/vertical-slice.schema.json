@@ -1,0 +1,490 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpgcreatorai.local/schemas/horror-bl/vertical-slice.schema.json",
+  "title": "RPGCreatorAI Horror/BL Vertical Slice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "title",
+    "language",
+    "audience",
+    "durationMinutes",
+    "contentWarnings",
+    "playerCharacterId",
+    "startMapId",
+    "entryBeatId",
+    "state",
+    "characters",
+    "threats",
+    "maps",
+    "checkpoints",
+    "evidence",
+    "puzzles",
+    "chases",
+    "storyBeats",
+    "endings",
+    "assetPolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "$ref": "#/$defs/id" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "language": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
+    "audience": { "const": "adults-only" },
+    "durationMinutes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 1 },
+        "max": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "contentWarnings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "playerCharacterId": { "$ref": "#/$defs/id" },
+    "startMapId": { "$ref": "#/$defs/id" },
+    "entryBeatId": { "$ref": "#/$defs/id" },
+    "state": { "$ref": "#/$defs/state" },
+    "characters": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/character" }
+    },
+    "threats": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/threat" }
+    },
+    "maps": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/map" }
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/checkpoint" }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "puzzles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/puzzle" }
+    },
+    "chases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/chase" }
+    },
+    "storyBeats": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/storyBeat" }
+    },
+    "endings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/ending" }
+    },
+    "assetPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtimeAssetIdsOnly", "remoteUrlsAllowed", "thirdPartyAssetsIncluded", "requiredReviewStatus"],
+      "properties": {
+        "runtimeAssetIdsOnly": { "const": true },
+        "remoteUrlsAllowed": { "const": false },
+        "thirdPartyAssetsIncluded": { "const": false },
+        "requiredReviewStatus": { "enum": ["approved", "frozen"] }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variableId": {
+      "enum": ["bond", "lucidity", "evidence"]
+    },
+    "effect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "target", "value"],
+          "properties": {
+            "op": { "const": "add" },
+            "target": { "$ref": "#/$defs/variableId" },
+            "value": { "type": "integer" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "target", "value"],
+          "properties": {
+            "op": { "const": "setFlag" },
+            "target": { "$ref": "#/$defs/id" },
+            "value": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "op", "value"],
+      "properties": {
+        "target": { "$ref": "#/$defs/id" },
+        "op": { "enum": ["gte", "lte", "eq"] },
+        "value": { "type": ["integer", "boolean"] }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variables", "flags", "clampNumericEffects"],
+      "properties": {
+        "variables": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "min", "max", "initial", "description"],
+            "properties": {
+              "id": { "$ref": "#/$defs/variableId" },
+              "label": { "$ref": "#/$defs/nonEmptyString" },
+              "min": { "type": "integer" },
+              "max": { "type": "integer" },
+              "initial": { "type": "integer" },
+              "description": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "flags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "initial"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "initial": { "type": "boolean" }
+            }
+          }
+        },
+        "clampNumericEffects": { "const": true }
+      }
+    },
+    "character": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "age",
+        "adultConfirmed",
+        "pronouns",
+        "role",
+        "playable",
+        "occupation",
+        "goal",
+        "wound",
+        "romanceBoundary",
+        "portraitSlot"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "age": { "type": "integer", "minimum": 18 },
+        "adultConfirmed": { "const": true },
+        "pronouns": { "$ref": "#/$defs/nonEmptyString" },
+        "role": { "enum": ["protagonist", "love-interest", "supporting"] },
+        "playable": { "type": "boolean" },
+        "occupation": { "$ref": "#/$defs/nonEmptyString" },
+        "goal": { "$ref": "#/$defs/nonEmptyString" },
+        "wound": { "$ref": "#/$defs/nonEmptyString" },
+        "romanceBoundary": { "$ref": "#/$defs/nonEmptyString" },
+        "portraitSlot": { "$ref": "#/$defs/id" }
+      }
+    },
+    "threat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "kind", "description", "telegraphs", "contactEffect", "assetSlot"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "$ref": "#/$defs/id" },
+        "description": { "$ref": "#/$defs/nonEmptyString" },
+        "telegraphs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "contactEffect": { "$ref": "#/$defs/effect" },
+        "assetSlot": { "$ref": "#/$defs/id" }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["toMapId", "exitId", "entryId"],
+      "properties": {
+        "toMapId": { "$ref": "#/$defs/id" },
+        "exitId": { "$ref": "#/$defs/id" },
+        "entryId": { "$ref": "#/$defs/id" },
+        "lockedByFlag": { "$ref": "#/$defs/id" }
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["evidence", "choice", "puzzle", "chase", "transfer"] },
+        "evidenceId": { "$ref": "#/$defs/id" },
+        "beatId": { "$ref": "#/$defs/id" },
+        "systemId": { "$ref": "#/$defs/id" },
+        "targetMapId": { "$ref": "#/$defs/id" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "evidence" } } },
+          "then": { "required": ["evidenceId"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "choice" } } },
+          "then": { "required": ["beatId"] }
+        },
+        {
+          "if": { "properties": { "kind": { "enum": ["puzzle", "chase"] } } },
+          "then": { "required": ["systemId"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "transfer" } } },
+          "then": { "required": ["targetMapId"] }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "width", "height", "tileSize", "mood", "connections", "interactions", "backgroundSlot"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "width": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "height": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "tileSize": { "type": "integer", "minimum": 8, "maximum": 256 },
+        "mood": { "$ref": "#/$defs/nonEmptyString" },
+        "connections": { "type": "array", "items": { "$ref": "#/$defs/connection" } },
+        "interactions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/interaction" } },
+        "backgroundSlot": { "$ref": "#/$defs/id" }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mapId", "beatId", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "beatId": { "$ref": "#/$defs/id" },
+        "reason": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mapId", "interactionId", "title", "revelation", "effects"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "interactionId": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "revelation": { "$ref": "#/$defs/nonEmptyString" },
+        "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/effect" } }
+      }
+    },
+    "puzzle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mapId", "prompt", "sequence", "clueEvidenceIds", "maxAttempts", "wrongAttemptEffects", "successEffects", "assistedBypass", "successBeatId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "prompt": { "$ref": "#/$defs/nonEmptyString" },
+        "sequence": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "clueEvidenceIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "maxAttempts": { "type": "integer", "minimum": 1 },
+        "wrongAttemptEffects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "successEffects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/effect" } },
+        "assistedBypass": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "effects"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } }
+          }
+        },
+        "successBeatId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "chase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mapId", "threatId", "checkpointId", "durationSeconds", "objective", "maxHits", "hitEffects", "successEffects", "failureMode", "successBeatId", "accessibility"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "threatId": { "$ref": "#/$defs/id" },
+        "checkpointId": { "$ref": "#/$defs/id" },
+        "durationSeconds": { "type": "integer", "minimum": 1 },
+        "objective": { "$ref": "#/$defs/nonEmptyString" },
+        "maxHits": { "type": "integer", "minimum": 1 },
+        "hitEffects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "successEffects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "failureMode": { "const": "checkpoint-restart" },
+        "successBeatId": { "$ref": "#/$defs/id" },
+        "accessibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reducedMotionTimingScale", "cameraShake", "flashingLights", "threatTelegraphText"],
+          "properties": {
+            "reducedMotionTimingScale": { "type": "number", "minimum": 1 },
+            "cameraShake": { "type": "boolean" },
+            "flashingLights": { "type": "boolean" },
+            "threatTelegraphText": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["speakerId", "text"],
+      "properties": {
+        "speakerId": { "$ref": "#/$defs/id" },
+        "text": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "choiceOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "effects"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "text": { "$ref": "#/$defs/nonEmptyString" },
+        "conditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } },
+        "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+        "nextBeatId": { "$ref": "#/$defs/id" },
+        "endingId": { "$ref": "#/$defs/id" }
+      },
+      "oneOf": [
+        { "required": ["nextBeatId"], "not": { "required": ["endingId"] } },
+        { "required": ["endingId"], "not": { "required": ["nextBeatId"] } }
+      ]
+    },
+    "dialogueBeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "mapId", "summary", "lines", "nextBeatId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "dialogue" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/line" } },
+        "nextBeatId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "explorationBeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "mapId", "summary", "objective", "requiredInteractionIds", "nextBeatId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "exploration" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "objective": { "$ref": "#/$defs/nonEmptyString" },
+        "requiredInteractionIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/id" } },
+        "nextBeatId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "choiceBeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "mapId", "summary", "prompt", "options"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "choice" },
+        "mapId": { "$ref": "#/$defs/id" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "checkpointId": { "$ref": "#/$defs/id" },
+        "prompt": { "$ref": "#/$defs/nonEmptyString" },
+        "options": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/choiceOption" } }
+      }
+    },
+    "systemBeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "mapId", "summary", "systemId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "enum": ["puzzle", "chase"] },
+        "mapId": { "$ref": "#/$defs/id" },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "systemId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "storyBeat": {
+      "oneOf": [
+        { "$ref": "#/$defs/dialogueBeat" },
+        { "$ref": "#/$defs/explorationBeat" },
+        { "$ref": "#/$defs/choiceBeat" },
+        { "$ref": "#/$defs/systemBeat" }
+      ]
+    },
+    "ending": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "kind", "requirements", "resolution", "chapterTwoHook"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "enum": ["hopeful", "bittersweet", "tragic", "secret"] },
+        "requirements": { "type": "array", "items": { "$ref": "#/$defs/condition" } },
+        "resolution": { "$ref": "#/$defs/nonEmptyString" },
+        "chapterTwoHook": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.chapter-1.game-bundle-materialization",
+  "blueprintId": "la-novena-promesa.chapter-1.vertical-slice",
+  "source": "data/content/vertical-slice.json",
+  "compiler": {
+    "entrypoint": "src/templates/horrorBlGameBundle.ts#materializeHorrorBlGameBundle",
+    "gameBundleSchemaVersion": 1,
+    "deterministic": true,
+    "performsIo": false
+  },
+  "output": "release-input/game-bundle.v1.json",
+  "expected": {
+    "mapIds": [
+      "facility_lobby",
+      "archive_sublevel",
+      "service_corridor"
+    ],
+    "startMapId": "facility_lobby",
+    "minimumMapCount": 3
+  },
+  "assets": {
+    "allowlist": [],
+    "status": "pending-approved-runtime-assets",
+    "requiredSlots": [
+      "portrait.damian",
+      "portrait.elian",
+      "threat.ninth-witness",
+      "background.facility-lobby",
+      "background.archive-sublevel",
+      "background.service-corridor"
+    ]
+  },
+  "security": {
+    "networkAllowed": false,
+    "remoteUrlsAllowed": false,
+    "providerCredentialsIncluded": false,
+    "runtimeRequiresAi": false
+  }
+}

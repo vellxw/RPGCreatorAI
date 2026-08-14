@@ -10,6 +10,7 @@ import {
   ProjectStartupScreen,
   type StartupPendingAction,
 } from './components/project/ProjectStartupScreen';
+import type { ProjectTemplateId } from './adapters/types';
 import { useFirstRun } from './firstRun/firstRunStore';
 import { FirstRunGate } from './components/onboarding/FirstRunGate';
 import {
@@ -26,7 +27,6 @@ import {
   editorReducer,
   initialEditorState,
 } from './stores/editorStore';
-import { defaultProviderConfigs } from './stores/providerStore';
 import {
   getProjectDataAdapter,
   getRuntimeLaunchAdapter,
@@ -42,6 +42,8 @@ import {
   performOpenProject,
 } from './stores/saveActions';
 import { findDuplicatePlacement, isEditableTarget } from './utils/eventEditing';
+import { prepareCandidateProjectCommit } from './aiCandidates/candidateProjectCommit';
+import type { Candidate } from './aiCandidates/candidateTypes';
 import {
   projectStartupRecovery,
   recentProjectStartupRecovery,
@@ -273,13 +275,13 @@ export default function App() {
     }
   };
 
-  const handleStartupCreate = async (title: string) => {
+  const handleStartupCreate = async (title: string, templateId: ProjectTemplateId = 'blank') => {
     if (startupPendingAction) return;
     setStartupPendingAction('create');
     setStartupRecovery(null);
     setStartupStatus(null);
     try {
-      const outcome = await performCreateProject(projectDispatch, { title });
+      const outcome = await performCreateProject(projectDispatch, { title, templateId });
       if (outcome.cancelled) return;
       if (!outcome.success) {
         setStartupRecovery(projectStartupRecovery('Create', outcome.error));
@@ -340,6 +342,9 @@ export default function App() {
               }}
               onOpenProject={handleStartupOpen}
               onCreateProject={handleStartupCreate}
+              onCreateProjectTemplate={(title, templateId) => {
+                void handleStartupCreate(title, templateId);
+              }}
               onImportProject={handleStartupImport}
             />
           </FirstRunGate>
@@ -347,6 +352,24 @@ export default function App() {
       </ProjectContext.Provider>
     );
   }
+
+  const selectedAIMap = projectState.maps[editorState.selectedMapId] ?? null;
+  const canonicalCandidateCommits = (projectState.project.generationHistory?.records ?? [])
+    .filter(record => record.reviewState === 'accepted')
+    .map(record => ({
+      historyRecordId: record.id,
+      committedAt: record.acceptanceHistory.at(-1)?.reviewedAt ?? record.createdAt,
+    }));
+  const handleApplyCandidate = (candidate: Candidate) => {
+    const prepared = prepareCandidateProjectCommit(
+      projectState,
+      candidate,
+      editorState.activeProjectId,
+    );
+    if (!prepared.ok) return prepared;
+    projectDispatch(prepared.action);
+    return prepared.result;
+  };
 
   const screens: Record<typeof editorState.activeScreen, React.ReactNode> = {
     editor: <MainEditorScreen />,
@@ -361,8 +384,20 @@ export default function App() {
         }
       >
         <AIStudioBoundary
-          providers={defaultProviderConfigs}
           projectId={editorState.activeProjectId}
+          projectTitle={projectState.project.title}
+          mapCount={Object.keys(projectState.maps).length}
+          eventCount={Object.values(projectState.maps).reduce((count, map) => count + map.events.length, 0)}
+          validationStatus={projectState.errors.length > 0 ? 'errors' : projectState.warnings.length > 0 ? 'warnings' : 'valid'}
+          selectedMap={selectedAIMap ? {
+            id: selectedAIMap.id,
+            name: selectedAIMap.name,
+            width: selectedAIMap.width,
+            height: selectedAIMap.height,
+            tilesetId: selectedAIMap.tilesetId ?? null,
+          } : null}
+          onApplyCandidate={handleApplyCandidate}
+          canonicalCommits={canonicalCandidateCommits}
         />
       </Suspense>
     ),

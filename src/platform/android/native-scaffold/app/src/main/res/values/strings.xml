@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">RPGCreatorAI Player</string>
+    <string name="webview_starting_title">Abriendo el capítulo</string>
+    <string name="webview_starting_message">El juego está cargando sus archivos locales. No necesita conexión a Internet.</string>
+    <string name="webview_unavailable_title">Android WebView no está disponible</string>
+    <string name="webview_unavailable_message">El componente del sistema que muestra el juego está deshabilitado, desactualizado o dañado. Habilitá o actualizá Android System WebView o Chrome y volvé a intentar.</string>
+    <string name="webview_asset_error_title">No se pudo abrir el capítulo</string>
+    <string name="webview_asset_error_message">Los archivos locales del juego no se pudieron validar o cargar. Reintentá una vez; si continúa, reinstalá esta versión.</string>
+    <string name="webview_timeout_title">El capítulo tardó demasiado en abrir</string>
+    <string name="webview_timeout_message">La pantalla inicial local no llegó a mostrarse. Reintentá o cerrá la aplicación.</string>
+    <string name="renderer_recovering_title">Recuperando el juego</string>
+    <string name="renderer_recovering_message">Android detuvo el proceso gráfico. Reabriendo el capítulo (intento %1$d de %2$d)…</string>
+    <string name="renderer_failed_title">El motor gráfico se detuvo varias veces</string>
+    <string name="renderer_failed_message">La recuperación automática se detuvo para evitar un bucle de cierres. Podés reintentar manualmente o cerrar la aplicación.</string>
+    <string name="action_retry">Reintentar</string>
+    <string name="action_close">Cerrar</string>
+</resources>

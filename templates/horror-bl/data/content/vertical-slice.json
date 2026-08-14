@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa.chapter-1.vertical-slice",
+  "title": "La Novena Promesa — Capítulo I",
+  "language": "es-AR",
+  "audience": "adults-only",
+  "durationMinutes": {
+    "min": 20,
+    "max": 35
+  },
+  "contentWarnings": [
+    "horror corporal estilizado",
+    "sangre y cadáveres",
+    "manipulación médica",
+    "encierro y persecución",
+    "duelo y dependencia afectiva"
+  ],
+  "playerCharacterId": "damian",
+  "startMapId": "facility_lobby",
+  "entryBeatId": "arrival_message",
+  "state": {
+    "variables": [
+      {
+        "id": "bond",
+        "label": "Vínculo",
+        "min": 0,
+        "max": 4,
+        "initial": 1,
+        "description": "Confianza mutua entre Damián y Elian."
+      },
+      {
+        "id": "lucidity",
+        "label": "Lucidez",
+        "min": 0,
+        "max": 100,
+        "initial": 70,
+        "description": "Capacidad de Damián para distinguir recuerdos implantados de hechos verificables."
+      },
+      {
+        "id": "evidence",
+        "label": "Evidencia",
+        "min": 0,
+        "max": 5,
+        "initial": 0,
+        "description": "Hechos corroborados que permiten desafiar la versión de la clínica."
+      }
+    ],
+    "flags": [
+      { "id": "archive_open", "initial": false },
+      { "id": "heard_the_ninth", "initial": false },
+      { "id": "promised_truth", "initial": false },
+      { "id": "chase_survived", "initial": false },
+      { "id": "showed_photo", "initial": false },
+      { "id": "used_emergency_bypass", "initial": false }
+    ],
+    "clampNumericEffects": true
+  },
+  "characters": [
+    {
+      "id": "damian",
+      "name": "Damián Ferreyra",
+      "age": 35,
+      "adultConfirmed": true,
+      "pronouns": "él",
+      "role": "protagonist",
+      "playable": true,
+      "occupation": "archivista nocturno",
+      "goal": "averiguar quién reactivó el expediente D-09 y sacar a Elian con vida",
+      "wound": "abandonó a Elian después de la clausura y convirtió la culpa en amnesia voluntaria",
+      "romanceBoundary": "puede elegir cercanía u honestidad, nunca posesión ni coerción",
+      "portraitSlot": "portrait.damian"
+    },
+    {
+      "id": "elian",
+      "name": "Elian Varela",
+      "age": 39,
+      "adultConfirmed": true,
+      "pronouns": "él",
+      "role": "love-interest",
+      "playable": false,
+      "occupation": "ex enfermero de memoria clínica",
+      "goal": "recuperar la parte de sí mismo retenida en el archivo sin volver a ser un experimento",
+      "wound": "recuerda nueve versiones incompatibles de la noche en que Damián se fue",
+      "romanceBoundary": "su afecto nunca anula el derecho de Damián a negarse o alejarse",
+      "portraitSlot": "portrait.elian"
+    }
+  ],
+  "threats": [
+    {
+      "id": "the_ninth_witness",
+      "name": "El Noveno Testigo",
+      "kind": "memory-entity",
+      "description": "Una memoria clínica colectiva que imita voces conocidas y recompone cuerpos a partir de registros incompletos.",
+      "telegraphs": [
+        "las luces se apagan en grupos de nueve",
+        "una voz querida repite la última palabra de Damián",
+        "hilos quirúrgicos aparecen sobre la ruta segura"
+      ],
+      "contactEffect": { "op": "add", "target": "lucidity", "value": -10 },
+      "assetSlot": "threat.ninth-witness"
+    }
+  ],
+  "maps": [
+    {
+      "id": "facility_lobby",
+      "name": "Vestíbulo de Santa Ágata",
+      "width": 20,
+      "height": 12,
+      "tileSize": 48,
+      "mood": "lluvia contra vidrio armado, tubos fluorescentes incompletos y un mostrador cubierto de formularios húmedos",
+      "connections": [
+        { "toMapId": "archive_sublevel", "exitId": "freight_lift", "entryId": "archive_lift" }
+      ],
+      "interactions": [
+        { "id": "reception_terminal", "kind": "evidence", "evidenceId": "intake_recording" },
+        { "id": "rain_streaked_photo", "kind": "choice", "beatId": "lobby_photo_choice" },
+        { "id": "freight_lift", "kind": "transfer", "targetMapId": "archive_sublevel" }
+      ],
+      "backgroundSlot": "background.facility-lobby"
+    },
+    {
+      "id": "archive_sublevel",
+      "name": "Archivo Subnivel D",
+      "width": 22,
+      "height": 12,
+      "tileSize": 48,
+      "mood": "estanterías móviles, condensación fría y bolsas de evidencia que respiran cuando nadie las mira",
+      "connections": [
+        { "toMapId": "facility_lobby", "exitId": "archive_lift", "entryId": "freight_lift" },
+        { "toMapId": "service_corridor", "exitId": "sterile_door", "entryId": "archive_door", "lockedByFlag": "archive_open" }
+      ],
+      "interactions": [
+        { "id": "maintenance_binder", "kind": "evidence", "evidenceId": "maintenance_log" },
+        { "id": "consent_drawer", "kind": "evidence", "evidenceId": "d09_consent_form" },
+        { "id": "power_console", "kind": "puzzle", "systemId": "archive_power_sequence" },
+        { "id": "sterile_door", "kind": "transfer", "targetMapId": "service_corridor" }
+      ],
+      "backgroundSlot": "background.archive-sublevel"
+    },
+    {
+      "id": "service_corridor",
+      "name": "Corredor de Servicio Nueve",
+      "width": 28,
+      "height": 10,
+      "tileSize": 48,
+      "mood": "puertas de autopsia, vapor bajo y alarmas que pronuncian nombres en lugar de códigos",
+      "connections": [
+        { "toMapId": "archive_sublevel", "exitId": "archive_door", "entryId": "sterile_door" }
+      ],
+      "interactions": [
+        { "id": "mirror_sample", "kind": "evidence", "evidenceId": "mirror_tissue_sample" },
+        { "id": "chase_trigger", "kind": "chase", "systemId": "service_corridor_escape" },
+        { "id": "incinerator_threshold", "kind": "choice", "beatId": "final_choice" }
+      ],
+      "backgroundSlot": "background.service-corridor"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "before_corridor_chase",
+      "mapId": "service_corridor",
+      "beatId": "corridor_chase",
+      "reason": "Reintentar la persecución sin repetir el puzzle."
+    },
+    {
+      "id": "before_final_choice",
+      "mapId": "service_corridor",
+      "beatId": "final_choice",
+      "reason": "Revisar evidencia y explorar ambos finales sin rehacer el capítulo."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "intake_recording",
+      "mapId": "facility_lobby",
+      "interactionId": "reception_terminal",
+      "title": "Ingreso sin paciente",
+      "revelation": "El expediente D-09 fue abierto nueve minutos antes de que Elian ingresara a la clínica.",
+      "effects": [{ "op": "add", "target": "evidence", "value": 1 }]
+    },
+    {
+      "id": "maintenance_log",
+      "mapId": "archive_sublevel",
+      "interactionId": "maintenance_binder",
+      "title": "Orden de energía",
+      "revelation": "El circuito seguro exige norte, memoria y D-09; la secuencia contradice el diagrama oficial.",
+      "effects": [{ "op": "add", "target": "evidence", "value": 1 }]
+    },
+    {
+      "id": "d09_consent_form",
+      "mapId": "archive_sublevel",
+      "interactionId": "consent_drawer",
+      "title": "Consentimiento incompleto",
+      "revelation": "La firma de Elian fue copiada después de la clausura y Damián figura como testigo sin haber firmado.",
+      "effects": [{ "op": "add", "target": "evidence", "value": 1 }]
+    },
+    {
+      "id": "mirror_tissue_sample",
+      "mapId": "service_corridor",
+      "interactionId": "mirror_sample",
+      "title": "Tejido sin donante",
+      "revelation": "La criatura no contiene ADN humano completo: está hecha de recuerdos materializados, no de los pacientes.",
+      "effects": [{ "op": "add", "target": "evidence", "value": 1 }]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "archive_power_sequence",
+      "mapId": "archive_sublevel",
+      "prompt": "Restablecé la energía sin alimentar el banco de recuerdos.",
+      "sequence": ["north_breaker", "memory_bus", "d09_relay"],
+      "clueEvidenceIds": ["maintenance_log", "d09_consent_form"],
+      "maxAttempts": 3,
+      "wrongAttemptEffects": [{ "op": "add", "target": "lucidity", "value": -8 }],
+      "successEffects": [
+        { "op": "add", "target": "evidence", "value": 1 },
+        { "op": "setFlag", "target": "archive_open", "value": true }
+      ],
+      "assistedBypass": {
+        "enabled": true,
+        "effects": [
+          { "op": "add", "target": "lucidity", "value": -15 },
+          { "op": "setFlag", "target": "archive_open", "value": true },
+          { "op": "setFlag", "target": "used_emergency_bypass", "value": true }
+        ]
+      },
+      "successBeatId": "archive_revelation"
+    }
+  ],
+  "chases": [
+    {
+      "id": "service_corridor_escape",
+      "mapId": "service_corridor",
+      "threatId": "the_ninth_witness",
+      "checkpointId": "before_corridor_chase",
+      "durationSeconds": 45,
+      "objective": "Alcanzá la compuerta del incinerador y mantené a Elian dentro del cono de luz.",
+      "maxHits": 3,
+      "hitEffects": [{ "op": "add", "target": "lucidity", "value": -10 }],
+      "successEffects": [{ "op": "setFlag", "target": "chase_survived", "value": true }],
+      "failureMode": "checkpoint-restart",
+      "successBeatId": "post_chase_confession",
+      "accessibility": {
+        "reducedMotionTimingScale": 1.35,
+        "cameraShake": false,
+        "flashingLights": false,
+        "threatTelegraphText": true
+      }
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "arrival_message",
+      "type": "dialogue",
+      "mapId": "facility_lobby",
+      "summary": "Damián entra por un mensaje enviado desde el número de Elian, desconectado desde hace nueve años.",
+      "lines": [
+        { "speakerId": "damian", "text": "Si sos vos, decime algo que la clínica no pueda recordar por nosotros." },
+        { "speakerId": "elian", "text": "La novena promesa no fue quedarnos. Fue volver cuando pudiéramos elegir." }
+      ],
+      "nextBeatId": "lobby_photo_choice"
+    },
+    {
+      "id": "lobby_photo_choice",
+      "type": "choice",
+      "mapId": "facility_lobby",
+      "summary": "Una fotografía muestra a ambos antes de la clausura, pero la fecha fue alterada.",
+      "prompt": "¿Qué hace Damián con la fotografía?",
+      "options": [
+        {
+          "id": "show_photo",
+          "text": "Mostrársela a Elian y admitir que todavía la conservaba.",
+          "effects": [
+            { "op": "add", "target": "bond", "value": 1 },
+            { "op": "add", "target": "evidence", "value": 1 },
+            { "op": "setFlag", "target": "showed_photo", "value": true }
+          ],
+          "nextBeatId": "lobby_search"
+        },
+        {
+          "id": "hide_photo",
+          "text": "Guardarla y concentrarse en encontrar una salida.",
+          "effects": [
+            { "op": "add", "target": "bond", "value": -1 },
+            { "op": "add", "target": "lucidity", "value": 5 }
+          ],
+          "nextBeatId": "lobby_search"
+        }
+      ]
+    },
+    {
+      "id": "lobby_search",
+      "type": "exploration",
+      "mapId": "facility_lobby",
+      "summary": "El jugador aprende a inspeccionar, registra la primera evidencia y activa el ascensor de carga.",
+      "objective": "Inspeccioná el mostrador y seguí el cable de emergencia hasta el ascensor.",
+      "requiredInteractionIds": ["reception_terminal", "freight_lift"],
+      "nextBeatId": "archive_door"
+    },
+    {
+      "id": "archive_door",
+      "type": "puzzle",
+      "mapId": "archive_sublevel",
+      "summary": "La consola ofrece energía a cambio de reproducir un recuerdo que ninguno reconoce como propio.",
+      "systemId": "archive_power_sequence"
+    },
+    {
+      "id": "archive_revelation",
+      "type": "dialogue",
+      "mapId": "archive_sublevel",
+      "summary": "El archivo revela que Elian salió de la clínica; quien pidió ayuda fue una copia de su memoria.",
+      "lines": [
+        { "speakerId": "elian", "text": "Yo recuerdo salir. También recuerdo quedarme en esa camilla. Las dos cosas duelen igual." },
+        { "speakerId": "damian", "text": "Entonces no voy a decidir cuál de los dos merece existir." }
+      ],
+      "nextBeatId": "shortcut_choice"
+    },
+    {
+      "id": "shortcut_choice",
+      "type": "choice",
+      "mapId": "archive_sublevel",
+      "summary": "El Noveno Testigo abre una ruta directa y habla con la voz de Damián.",
+      "prompt": "¿Aceptás que la entidad guíe el camino?",
+      "options": [
+        {
+          "id": "accept_shortcut",
+          "text": "Escuchar la voz y atravesar el recuerdo.",
+          "effects": [
+            { "op": "add", "target": "lucidity", "value": -25 },
+            { "op": "setFlag", "target": "heard_the_ninth", "value": true }
+          ],
+          "nextBeatId": "corridor_threshold"
+        },
+        {
+          "id": "refuse_shortcut",
+          "text": "Seguir las marcas físicas de mantenimiento.",
+          "effects": [
+            { "op": "add", "target": "lucidity", "value": 5 },
+            { "op": "add", "target": "evidence", "value": 1 }
+          ],
+          "nextBeatId": "corridor_threshold"
+        }
+      ]
+    },
+    {
+      "id": "corridor_threshold",
+      "type": "dialogue",
+      "mapId": "service_corridor",
+      "summary": "Damián ve al Elian real al otro lado de una puerta mientras la copia que lo acompañó empieza a deshilacharse.",
+      "lines": [
+        { "speakerId": "elian", "text": "No sé si soy el que salió o el que te esperó. Sé que ahora puedo elegir caminar con vos." }
+      ],
+      "nextBeatId": "corridor_chase"
+    },
+    {
+      "id": "corridor_chase",
+      "type": "chase",
+      "mapId": "service_corridor",
+      "summary": "La entidad abandona el disfraz y persigue a la pareja por el corredor de servicio.",
+      "systemId": "service_corridor_escape"
+    },
+    {
+      "id": "post_chase_confession",
+      "type": "choice",
+      "mapId": "service_corridor",
+      "summary": "Heridos pero a salvo, Elian exige saber por qué Damián lo abandonó.",
+      "prompt": "¿Qué verdad ofrece Damián?",
+      "options": [
+        {
+          "id": "tell_truth",
+          "text": "Admitir que huyó porque la clínica le mostró una vida feliz fabricada con Elian.",
+          "effects": [
+            { "op": "add", "target": "bond", "value": 1 },
+            { "op": "setFlag", "target": "promised_truth", "value": true }
+          ],
+          "nextBeatId": "final_threshold"
+        },
+        {
+          "id": "deflect_truth",
+          "text": "Decir que sólo intentaba protegerlo.",
+          "effects": [
+            { "op": "add", "target": "bond", "value": -1 },
+            { "op": "add", "target": "lucidity", "value": 5 }
+          ],
+          "nextBeatId": "final_threshold"
+        }
+      ]
+    },
+    {
+      "id": "final_threshold",
+      "type": "dialogue",
+      "mapId": "service_corridor",
+      "summary": "La evidencia prueba que destruir el archivo liberará las memorias, pero una de ellas deberá quedarse para mantener abierta la salida.",
+      "lines": [
+        { "speakerId": "damian", "text": "No te prometo que voy a recordarte bien. Te prometo preguntarte quién sos cada vez que haga falta." },
+        { "speakerId": "elian", "text": "Eso sí es una promesa que puedo aceptar." }
+      ],
+      "nextBeatId": "final_choice"
+    },
+    {
+      "id": "final_choice",
+      "type": "choice",
+      "mapId": "service_corridor",
+      "summary": "Damián decide si comparte la carga del archivo con Elian o sella la puerta con la copia adentro.",
+      "checkpointId": "before_final_choice",
+      "prompt": "¿Cómo termina la novena promesa?",
+      "options": [
+        {
+          "id": "keep_promise_together",
+          "text": "Cruzar juntos y sostener la memoria entre los dos.",
+          "conditions": [
+            { "target": "bond", "op": "gte", "value": 3 },
+            { "target": "evidence", "op": "gte", "value": 2 },
+            { "target": "promised_truth", "op": "eq", "value": true }
+          ],
+          "effects": [],
+          "endingId": "the_kept_promise"
+        },
+        {
+          "id": "seal_ninth_witness",
+          "text": "Cerrar la puerta y dejar que una sola memoria cargue con las demás.",
+          "effects": [],
+          "endingId": "the_ninth_witness"
+        }
+      ]
+    }
+  ],
+  "endings": [
+    {
+      "id": "the_kept_promise",
+      "title": "La promesa conservada",
+      "kind": "hopeful",
+      "requirements": [
+        { "target": "bond", "op": "gte", "value": 3 },
+        { "target": "evidence", "op": "gte", "value": 2 },
+        { "target": "promised_truth", "op": "eq", "value": true }
+      ],
+      "resolution": "Damián y Elian salen juntos. Ninguno reclama ser la versión original; acuerdan construir recuerdos que ambos puedan cuestionar.",
+      "chapterTwoHook": "En el teléfono de Damián aparece una décima llamada con su propia voz."
+    },
+    {
+      "id": "the_ninth_witness",
+      "title": "El noveno testigo",
+      "kind": "bittersweet",
+      "requirements": [],
+      "resolution": "La puerta se cierra y una versión de Elian queda dentro. Afuera, el sobreviviente no recuerda haber enviado el mensaje inicial.",
+      "chapterTwoHook": "Cada espejo de la ciudad comienza a reflejar un corredor distinto de Santa Ágata."
+    }
+  ],
+  "assetPolicy": {
+    "runtimeAssetIdsOnly": true,
+    "remoteUrlsAllowed": false,
+    "thirdPartyAssetsIncluded": false,
+    "requiredReviewStatus": "approved"
+  }
+}

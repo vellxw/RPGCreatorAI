@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "la-novena-promesa-chapter-1-windows-portable",
+  "product": {
+    "name": "La Novena Promesa",
+    "version": "1.0.0",
+    "architecture": "x64"
+  },
+  "runtime": {
+    "executable": "build/rpg_creator_runtime.exe",
+    "expectedPeMachine": "0x8664",
+    "workingDirectoryContract": "portable-root",
+    "consumes": "data/project.json",
+    "consumesGameBundle": false,
+    "launcherStrategy": "copy the same native runtime bytes as both La-Novena-Promesa.exe and rpg_creator_runtime.exe"
+  },
+  "template": {
+    "root": "templates/horror-bl",
+    "blueprint": "templates/horror-bl/data/content/vertical-slice.json",
+    "assetManifest": "templates/horror-bl/data/assets/assets-manifest.json",
+    "declaredRuntimeTarget": "phaser-gamebundle",
+    "currentProjectFactory": "src/adapters/projectTemplates.ts#createProjectStateFromTemplate",
+    "currentFactoryScope": "visual-profile scaffold only; it does not materialize the three-map chapter"
+  },
+  "requiredProjectArtifacts": [
+    "data/project.json",
+    "data/maps/facility_lobby.json",
+    "data/maps/archive_sublevel.json",
+    "data/maps/service_corridor.json",
+    "data/database/items.json"
+  ],
+  "requiredGateArtifacts": [
+    "release-input/game-bundle.v1.json",
+    "release-input/asset-allowlist.json",
+    "release-input/asset-provenance.v1.json",
+    "release-input/asset-approval-gate.v1.json",
+    "release-input/compiler-warnings.json",
+    "release-input/materialization-report.v1.json"
+  ],
+  "requiredBlueprintMapIds": [
+    "facility_lobby",
+    "archive_sublevel",
+    "service_corridor"
+  ],
+  "requiredAssetSlots": [
+    "portrait.damian",
+    "portrait.elian",
+    "threat.ninth-witness",
+    "seed.damian.full-body",
+    "background.facility-lobby",
+    "background.archive-sublevel",
+    "background.service-corridor"
+  ],
+  "exporterCapability": {
+    "script": "scripts/dev/export-windows-portable.ps1",
+    "gameBundleAndAssetCopy": true,
+    "nativeProjectShardCopy": true,
+    "requiredBeforeHeavyExport": "implemented: derive the exact native shard allowlist from data/project.json and validate it before copying"
+  },
+  "knownBlockers": [],
+  "historicalBlockers": [
+    {
+      "id": "RLS-001-native-project-tree",
+      "kind": "artifact",
+      "message": "The native runtime requires a materialized data/project.json tree; the template currently contains only design-time content JSON."
+    },
+    {
+      "id": "RLS-002-gamebundle-materialization",
+      "kind": "artifact",
+      "message": "No GameBundle compiled from facility_lobby, archive_sublevel, and service_corridor exists."
+    },
+    {
+      "id": "RLS-003-approved-assets",
+      "kind": "artifact",
+      "message": "The three required character/threat slots have hash-pinned fixture candidates, but no chapter-specific approved runtime files or confirmed license notes. The asset gate therefore remains releaseReady=false."
+    },
+    {
+      "id": "RLS-004-release-evidence",
+      "kind": "artifact",
+      "message": "The explicit asset allowlist and provenance sidecar exist but are intentionally empty until approval; compiler warnings and the final materialization report remain required."
+    }
+  ]
+}

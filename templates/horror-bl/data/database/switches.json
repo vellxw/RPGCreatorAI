@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "switches": [
+    { "id": "archive_open", "name": "Archivo abierto", "initial": false },
+    { "id": "heard_the_ninth", "name": "Escuchó al Noveno Testigo", "initial": false },
+    { "id": "promised_truth", "name": "Prometió decir la verdad", "initial": false },
+    { "id": "chase_survived", "name": "Sobrevivió a la persecución", "initial": false },
+    { "id": "showed_photo", "name": "Mostró la fotografía", "initial": false },
+    { "id": "used_emergency_bypass", "name": "Usó el puente de emergencia", "initial": false }
+  ]
+}
